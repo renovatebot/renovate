@@ -1,24 +1,18 @@
 import { logger } from '../../../logger';
-import {
-  RepoContents,
-  getRepoContents,
-} from '../../../platform/gitea/gitea-helper';
+import { getRepoContents } from '../../../modules/platform/gitea/gitea-helper';
+import type { RepoContents } from '../../../modules/platform/gitea/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fromBase64 } from '../../../util/string';
 import type { Preset, PresetConfig } from '../types';
-import {
-  PRESET_DEP_NOT_FOUND,
-  PRESET_INVALID_JSON,
-  fetchPreset,
-} from '../util';
+import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 
-export const Endpoint = 'https://gitea.com/api/v1/';
+export const Endpoint = 'https://gitea.com/';
 
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string,
-  tag?: string
+  tag?: string | null
 ): Promise<Preset> {
   let res: RepoContents;
   try {
@@ -30,28 +24,21 @@ export async function fetchJSONFile(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(
-      { statusCode: err.statusCode, repo, fileName },
-      `Failed to retrieve ${fileName} from repo`
-    );
+    logger.debug(`Preset file ${fileName} not found in ${repo}`);
     throw new Error(PRESET_DEP_NOT_FOUND);
   }
-  try {
-    const content = fromBase64(res.content);
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error(PRESET_INVALID_JSON);
-  }
+
+  // TODO: null check #7154
+  return parsePreset(fromBase64(res.content!));
 }
 
 export function getPresetFromEndpoint(
   repo: string,
   filePreset: string,
-  presetPath: string,
+  presetPath?: string,
   endpoint = Endpoint,
   tag?: string
-): Promise<Preset> {
+): Promise<Preset | undefined> {
   return fetchPreset({
     repo,
     filePreset,
@@ -66,7 +53,7 @@ export function getPreset({
   repo,
   presetName = 'default',
   presetPath,
-  tag = null,
-}: PresetConfig): Promise<Preset> {
+  tag = undefined,
+}: PresetConfig): Promise<Preset | undefined> {
   return getPresetFromEndpoint(repo, presetName, presetPath, Endpoint, tag);
 }

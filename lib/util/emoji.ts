@@ -20,7 +20,6 @@ const hexCodesByShort = new Map<string, string>();
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
     const table: Record<string, string | string[]> = JSON.parse(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
     );
     for (const [hex, val] of Object.entries(table)) {
@@ -34,8 +33,8 @@ function lazyInitMappings(): void {
   }
 }
 
-export function setEmojiConfig(_config: RenovateConfig): void {
-  unicodeEmoji = !!_config.unicodeEmoji;
+export function setEmojiConfig(config: RenovateConfig): void {
+  unicodeEmoji = !!config.unicodeEmoji;
 }
 
 const shortCodeRegex = regEx(SHORTCODE_REGEX.source, 'g');
@@ -94,9 +93,13 @@ export function unemojify(text: string): string {
 
 function stripEmoji(emoji: string): string {
   const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
-  const codePoint = fromHexcodeToCodepoint(hexCode);
-  const result = fromCodepointToUnicode(codePoint);
-  return result;
+  // `hexCode` could be empty if `emoji` is a modifier character that isn't
+  // modifying anything
+  if (hexCode) {
+    const codePoint = fromHexcodeToCodepoint(hexCode);
+    return fromCodepointToUnicode(codePoint);
+  }
+  return '';
 }
 
 export function stripEmojis(input: string): string {

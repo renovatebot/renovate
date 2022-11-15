@@ -1,7 +1,8 @@
 import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
-import type { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
+import type { Release } from '../../../../modules/datasource';
+import type { VersioningApi } from '../../../../modules/versioning';
 import { getElapsedDays } from '../../../../util/date';
 import {
   getMergeConfidenceLevel,
@@ -9,7 +10,6 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import { applyPackageRules } from '../../../../util/package-rules';
-import type { VersioningApi } from '../../../../versioning';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
 
@@ -26,7 +26,7 @@ export async function filterInternalChecks(
   sortedReleases: Release[]
 ): Promise<InternalChecksResult> {
   const { currentVersion, datasource, depName, internalChecksFilter } = config;
-  let release: Release;
+  let release: Release | undefined = undefined;
   let pendingChecks = false;
   let pendingReleases: Release[] = [];
   if (internalChecksFilter === 'none') {
@@ -41,12 +41,13 @@ export async function filterInternalChecks(
       releaseConfig.updateType = getUpdateType(
         releaseConfig,
         versioning,
-        currentVersion,
+        // TODO #7154
+        currentVersion!,
         candidateRelease.version
       );
       releaseConfig = mergeChildConfig(
         releaseConfig,
-        releaseConfig[releaseConfig.updateType]
+        releaseConfig[releaseConfig.updateType]!
       );
       // Apply packageRules in case any apply to updateType
       releaseConfig = applyPackageRules(releaseConfig);
@@ -69,15 +70,18 @@ export async function filterInternalChecks(
           continue;
         }
       }
-      if (isActiveConfidenceLevel(minimumConfidence)) {
+
+      // TODO #7154
+      if (isActiveConfidenceLevel(minimumConfidence!)) {
         const confidenceLevel = await getMergeConfidenceLevel(
-          datasource,
-          depName,
-          currentVersion,
+          datasource!,
+          depName!,
+          currentVersion!,
           newVersion,
-          updateType
+          updateType!
         );
-        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence)) {
+        // TODO #7154
+        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.debug(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
@@ -106,5 +110,7 @@ export async function filterInternalChecks(
       }
     }
   }
-  return { release, pendingChecks, pendingReleases };
+
+  // TODO #7154
+  return { release: release!, pendingChecks, pendingReleases };
 }

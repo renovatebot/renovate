@@ -1,9 +1,8 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
-
-import { ProgrammingLanguage } from '../../../constants';
 import { flattenUpdates } from './flatten';
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -14,7 +13,8 @@ beforeEach(() => {
 describe('workers/repository/updates/flatten', () => {
   describe('flattenUpdates()', () => {
     it('flattens', async () => {
-      config.lockFileMaintenance.enabled = true;
+      // TODO #7154
+      config.lockFileMaintenance!.enabled = true;
       config.packageRules = [
         {
           matchUpdateTypes: ['minor'],
@@ -98,7 +98,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'amd64/node',
-                language: ProgrammingLanguage.Docker,
+                language: 'docker',
                 sourceUrl: 'https://github.com/nodejs/node',
                 updates: [{ newValue: '10.0.1' }],
               },
@@ -109,7 +109,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'calico/node',
-                language: ProgrammingLanguage.Docker,
+                language: 'docker',
                 sourceUrl: 'https://calico.com',
                 updates: [{ newValue: '3.2.0', updateType: 'minor' }],
               },

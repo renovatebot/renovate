@@ -1,0 +1,43 @@
+name: Run linters
+
+on: [push]
+
+jobs:
+  shell_lint:
+    name: Shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shell lint
+        uses: actions/bin/shellcheck@master
+        run: ./entrypoint.sh
+  docker_lint:
+    name: Docker lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker lint
+        uses: docker://replicated/dockerfilelint
+        run: Dockerfile
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build
+        uses: actions/docker/cli@master
+        run: build -t conventional-commits .
+  node_6_test:
+    name: Node 6 Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Node 6 test
+        uses: docker://node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896
+  container-job:
+    runs-on: ubuntu-latest
+    container: node:16-bullseye
+    services:
+      redis:
+        image: redis:5
+      postgres: postgres:10
+  container-job-with-image-keyword:
+    runs-on: ubuntu-latest
+    container:
+      image: node:16-bullseye

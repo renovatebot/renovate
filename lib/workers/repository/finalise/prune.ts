@@ -2,9 +2,8 @@ import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
-import { ensureComment } from '../../../platform/comment';
-import { PrState } from '../../../types';
+import { platform } from '../../../modules/platform';
+import { ensureComment } from '../../../modules/platform/comment';
 import {
   deleteBranch,
   getBranchList,
@@ -23,7 +22,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PrState.Open,
+        state: 'open',
       });
       const branchIsModified = await isBranchModified(branchName);
       if (pr) {
@@ -33,13 +32,22 @@ async function cleanUpBranches(
             'Branch is modified - skipping PR autoclosing'
           );
           if (GlobalConfig.get('dryRun')) {
-            logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
+            logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
           } else {
+            if (!pr.title.endsWith('- abandoned')) {
+              const newPrTitle = pr.title + ' - abandoned';
+              await platform.updatePr({
+                number: pr.number,
+                prTitle: newPrTitle,
+                state: 'open',
+              });
+            }
+
             await ensureComment({
               number: pr.number,
               topic: 'Autoclosing Skipped',
               content:
-                'This PR has been flagged for autoclosing, however it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
+                'This PR has been flagged for autoclosing. However, it is being skipped due to the branch being already modified. Please close/delete it manually or report a bug if you think this is in error.',
             });
           }
         } else if (GlobalConfig.get('dryRun')) {
@@ -59,10 +67,12 @@ async function cleanUpBranches(
           await platform.updatePr({
             number: pr.number,
             prTitle: newPrTitle,
-            state: PrState.Closed,
+            state: 'closed',
           });
           await deleteBranch(branchName);
         }
+      } else if (branchIsModified) {
+        logger.debug('Orphan Branch is modified - skipping branch deletion');
       } else if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
@@ -88,17 +98,19 @@ async function cleanUpBranches(
 
 export async function pruneStaleBranches(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[] | null | undefined
 ): Promise<void> {
   logger.debug('Removing any stale branches');
   logger.trace({ config }, `pruneStaleBranches`);
-  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
+  // TODO: types (#7154)
+  logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded!}`);
   if (!branchList) {
     logger.debug('No branchList');
     return;
   }
+  // TODO: types (#7154)
   let renovateBranches = getBranchList().filter((branchName) =>
-    branchName.startsWith(config.branchPrefix)
+    branchName.startsWith(config.branchPrefix!)
   );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
@@ -111,7 +123,8 @@ export async function pruneStaleBranches(
     },
     'Branch lists'
   );
-  const lockFileBranch = `${config.branchPrefix}lock-file-maintenance`;
+  // TODO: types (#7154)
+  const lockFileBranch = `${config.branchPrefix!}lock-file-maintenance`;
   renovateBranches = renovateBranches.filter(
     (branch) => branch !== lockFileBranch
   );

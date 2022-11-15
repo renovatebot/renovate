@@ -2,13 +2,13 @@ import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import type { Pr } from '../../platform';
-import { PrState } from '../../types';
+import type { Pr } from '../../modules/platform';
 import { raiseConfigWarningIssue } from './error-config';
 
-jest.mock('../../platform');
+jest.mock('../../modules/platform');
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -19,6 +19,7 @@ describe('workers/repository/error-config', () => {
     beforeEach(() => {
       GlobalConfig.reset();
     });
+
     it('creates issues', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -27,15 +28,17 @@ describe('workers/repository/error-config', () => {
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('creates issues (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       platform.ensureIssue.mockResolvedValueOnce('created');
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('handles onboarding', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -43,11 +46,12 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PrState.Open,
+        state: 'open',
       });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });
+
     it('handles onboarding (dryRun)', async () => {
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
@@ -55,9 +59,24 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PrState.Open,
+        state: 'open',
       });
-      GlobalConfig.set({ dryRun: true });
+      GlobalConfig.set({ dryRun: 'full' });
+      const res = await raiseConfigWarningIssue(config, error);
+      expect(res).toBeUndefined();
+    });
+
+    it('disable issue creation on config failure', async () => {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'package.json';
+      error.validationMessage = 'some-message';
+      // config.suppressNotifications = ['deprecationWarningIssues']
+      config.suppressNotifications = ['configErrorIssue'];
+      platform.getBranchPr.mockResolvedValueOnce({
+        ...mock<Pr>(),
+        number: 1,
+        state: '!open',
+      });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
     });

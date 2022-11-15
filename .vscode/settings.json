@@ -8,11 +8,15 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "[md]": {
+    "editor.wordBasedSuggestions": false
+  },
   "files.associations": {
     "Dockerfile.*": "dockerfile",
     ".releaserc": "json"
   },
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
-  "jest.jestCommandLine": "yarn jest"
+  "jest.jestCommandLine": "yarn jest",
+  "npm.packageManager": "yarn"
 }

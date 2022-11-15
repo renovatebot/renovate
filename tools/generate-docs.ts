@@ -4,7 +4,6 @@ import { getProblems, logger } from '../lib/logger';
 import { generateConfig } from './docs/config';
 import { generateDatasources } from './docs/datasources';
 import { generateManagers } from './docs/manager';
-import { generateModules } from './docs/modules';
 import { generatePlatforms } from './docs/platforms';
 import { generatePresets } from './docs/presets';
 import { generateSchema } from './docs/schema';
@@ -36,14 +35,11 @@ process.on('unhandledRejection', (err) => {
       return;
     }
 
-    logger.info('* modules');
-    await generateModules(dist);
-
     logger.info('* platforms');
     await generatePlatforms(dist);
 
-    // versionigs
-    logger.info('* versionigs');
+    // versionings
+    logger.info('* versionings');
     await generateVersioning(dist);
 
     // datasources

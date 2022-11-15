@@ -10,6 +10,7 @@ describe('logger/config-serializer', () => {
       prBody: '[Template]',
     });
   });
+
   it('suppresses content', () => {
     const config = {
       content: {},

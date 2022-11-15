@@ -29,6 +29,7 @@ export interface RequestStats {
   url: string;
   duration: number;
   queueDuration: number;
+  statusCode: number;
 }
 
 export type OutgoingHttpHeaders = Record<string, string | string[] | undefined>;
@@ -59,15 +60,15 @@ export interface HttpOptions {
   noAuth?: boolean;
 
   throwHttpErrors?: boolean;
-  useCache?: boolean;
-}
 
-export interface HttpPostOptions extends HttpOptions {
-  body: unknown;
+  token?: string;
+  useCache?: boolean;
+
+  onSchemaError?: 'warn' | 'throw';
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: Record<string, unknown>;
+  json?: HttpOptions['body'];
   responseType?: 'json' | 'buffer';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }

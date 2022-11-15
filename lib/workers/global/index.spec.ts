@@ -1,11 +1,11 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import { fs, logger, mocked } from '../../../test/util';
+import * as _fs from 'fs-extra';
+import { logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
-import { PlatformId } from '../../constants';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
-import { DockerDatasource } from '../../datasource/docker';
-import * as _platform from '../../platform';
+import { DockerDatasource } from '../../modules/datasource/docker';
+import * as _platform from '../../modules/platform';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
 import * as _limits from './limits';
@@ -14,6 +14,9 @@ import * as globalWorker from '.';
 jest.mock('../repository');
 jest.mock('../../util/fs');
 jest.mock('../../config/presets');
+
+jest.mock('fs-extra');
+const fs = mocked(_fs);
 
 // imports are readonly
 const repositoryWorker = _repositoryWorker;
@@ -111,6 +114,7 @@ describe('workers/global/index', () => {
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
   });
+
   it('exits with non-zero when errors are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -126,6 +130,7 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.not.toBe(0);
   });
+
   it('exits with zero when warnings are logged', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
@@ -141,21 +146,23 @@ describe('workers/global/index', () => {
     ]);
     await expect(globalWorker.start()).resolves.toBe(0);
   });
+
   describe('processes platforms', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['a'],
-        platform: PlatformId.Github,
+        platform: 'github',
         endpoint: 'https://github.com/',
       });
       await globalWorker.start();
       expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
+
     it('gitlab', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
-        platform: PlatformId.Gitlab,
+        platform: 'gitlab',
         endpoint: 'https://my.gitlab.com/',
       });
       await globalWorker.start();
@@ -168,11 +175,10 @@ describe('workers/global/index', () => {
     it('successfully write file', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({
         repositories: ['myOrg/myRepo'],
-        platform: PlatformId.Github,
+        platform: 'github',
         endpoint: 'https://github.com/',
         writeDiscoveredRepos: '/tmp/renovate-output.json',
       });
-      fs.writeFile.mockReturnValueOnce(null);
 
       expect(await globalWorker.start()).toBe(0);
       expect(fs.writeFile).toHaveBeenCalledTimes(1);

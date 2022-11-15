@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/cocoapods/artifacts returns null for invalid local directory 1`] = `[]`;
+
+exports[`modules/manager/cocoapods/artifacts returns null if no Podfile.lock found 1`] = `[]`;
+
+exports[`modules/manager/cocoapods/artifacts returns null if no updatedDeps were provided 1`] = `[]`;
+
+exports[`modules/manager/cocoapods/artifacts returns null if unchanged 1`] = `
+[
+  {
+    "cmd": "pod install",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cocoapods/artifacts returns null if updatedDeps is empty 1`] = `[]`;
+
+exports[`modules/manager/cocoapods/artifacts returns pod exec error 1`] = `
+[
+  {
+    "cmd": "pod install",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cocoapods/artifacts returns updated Podfile 1`] = `
+[
+  {
+    "cmd": "docker pull renovate/ruby:2.7.4",
+    "options": {
+      "encoding": "utf-8",
+    },
+  },
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && gem install cocoapods-acknowledgements && pod install"",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
+        "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`modules/manager/cocoapods/artifacts returns updated Podfile and Pods files 1`] = `
+[
+  {
+    "cmd": "docker pull renovate/ruby:2.7.4",
+    "options": {
+      "encoding": "utf-8",
+    },
+  },
+  {
+    "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:2.7.4 bash -l -c "install-tool cocoapods 3.1.0 && pod install"",
+    "options": {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": {
+        "BUILDPACK_CACHE_DIR": "/tmp/cache/containerbase",
+        "CONTAINERBASE_CACHE_DIR": "/tmp/cache/containerbase",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;

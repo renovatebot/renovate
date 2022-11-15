@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/cake/index extracts 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "1.1.1",
+      "datasource": "nuget",
+      "depName": "Foo.Foo",
+    },
+    {
+      "currentValue": "6.6.6",
+      "datasource": "nuget",
+      "depName": "Bim.Bim",
+    },
+    {
+      "currentValue": "2.2.2",
+      "datasource": "nuget",
+      "depName": "Bar.Bar",
+      "registryUrls": [
+        "https://example.com",
+      ],
+    },
+    {
+      "currentValue": "3.3.3",
+      "datasource": "nuget",
+      "depName": "Baz.Baz",
+      "skipReason": "unsupported-url",
+    },
+    {
+      "currentValue": "1.0.3",
+      "datasource": "nuget",
+      "depName": "Cake.7zip",
+    },
+    {
+      "currentValue": "1.0.0",
+      "datasource": "nuget",
+      "depName": "Cake.asciidoctorj",
+    },
+  ],
+}
+`;

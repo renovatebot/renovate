@@ -43,4 +43,6 @@ export type SkipReason =
   | 'unversioned-reference'
   | 'version-placeholder'
   | 'is-pinned'
-  | 'missing-depname';
+  | 'missing-depname'
+  | 'recursive-placeholder'
+  | 'github-token-required';

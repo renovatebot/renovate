@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls for GitLab 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "5.7.0",
+    },
+    {
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
+      "version": "5.6.1",
+    },
+  ],
+  "sourceUrl": "https://gitlab-nope",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle failed parsing of sourceUrls for other 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "5.7.0",
+    },
+    {
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
+      "version": "5.6.1",
+    },
+  ],
+  "sourceUrl": "https://nope-nope-nope",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle manualChangelogUrls 1`] = `
+{
+  "changelogUrl": "https://github.com/django/django/tree/master/docs/releases",
+  "releases": [
+    {
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
+      "version": "2.0.0",
+    },
+    {
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
+      "version": "2.0.0.dev1",
+    },
+    {
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
+      "version": "2.1.0",
+    },
+    {
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
+      "version": "2.2.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/django/django",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle manualSourceUrls 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
+      "version": "2.0.0",
+    },
+    {
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
+      "version": "2.0.0.dev1",
+    },
+    {
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
+      "version": "2.1.0",
+    },
+    {
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
+      "version": "2.2.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/mkdocs/mkdocs",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle non-url 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "5.7.0",
+    },
+    {
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
+      "version": "5.6.1",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/metadata Should handle parsing of sourceUrls correctly 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
+      "version": "2.0.0",
+    },
+    {
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
+      "version": "2.0.0.dev1",
+    },
+    {
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
+      "version": "2.1.0",
+    },
+    {
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
+      "version": "2.2.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/carltongibson/django-filter",
+}
+`;
+
+exports[`modules/datasource/metadata Should handle parsing of sourceUrls correctly for GitLab also 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2020-02-14T13:12:00.000Z",
+      "version": "5.7.0",
+    },
+    {
+      "releaseTimestamp": "2020-02-14T10:04:00.000Z",
+      "version": "5.6.1",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/meno/dropzone",
+}
+`;
+
+exports[`modules/datasource/metadata Should massage github sourceUrls 1`] = `
+{
+  "releases": [
+    {
+      "releaseTimestamp": "2018-07-13T10:14:17.000Z",
+      "version": "2.0.0",
+    },
+    {
+      "releaseTimestamp": "2017-10-24T10:09:16.000Z",
+      "version": "2.0.0.dev1",
+    },
+    {
+      "releaseTimestamp": "2019-01-20T19:59:28.000Z",
+      "version": "2.1.0",
+    },
+    {
+      "releaseTimestamp": "2019-07-16T18:29:00.000Z",
+      "version": "2.2.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/some/repo",
+}
+`;

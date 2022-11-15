@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/go/releases-direct getReleases support bitbucket tags 1`] = `
+{
+  "registryUrl": "https://bitbucket.org",
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://bitbucket.org/golang/text",
+}
+`;
+
+exports[`modules/datasource/go/releases-direct getReleases support git 1`] = `
+{
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": undefined,
+}
+`;
+
+exports[`modules/datasource/go/releases-direct getReleases support gitlab 1`] = `
+{
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/golang/text",
+}
+`;
+
+exports[`modules/datasource/go/releases-direct getReleases support gitlab subgroups 1`] = `
+{
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/group/subgroup/repo",
+}
+`;
+
+exports[`modules/datasource/go/releases-direct getReleases support self hosted gitlab private repositories 1`] = `
+{
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v2.0.0",
+      "releaseTimestamp": undefined,
+      "version": "v2.0.0",
+    },
+  ],
+  "sourceUrl": "https://my.custom.domain/golang/myrepo",
+}
+`;

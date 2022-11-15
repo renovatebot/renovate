@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];
@@ -33,8 +33,9 @@ export function getConfigDesc(
   config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>
 ): string {
-  const configFile = configFileNames.includes(config.onboardingConfigFileName)
-    ? config.onboardingConfigFileName
+  // TODO: type (#7154)
+  const configFile = configFileNames.includes(config.onboardingConfigFileName!)
+    ? config.onboardingConfigFileName!
     : defaultConfigFile;
   logger.debug('getConfigDesc()');
   logger.trace({ config });
@@ -43,7 +44,7 @@ export function getConfigDesc(
     logger.debug('No config description found');
     return '';
   }
-  logger.debug({ length: descriptionArr.length }, 'Found description array');
+  logger.debug(`Found description array with length:${descriptionArr.length}`);
   let desc = `\n### Configuration Summary\n\nBased on the default config's presets, Renovate will:\n\n`;
   desc += `  - Start dependency updates only once this onboarding PR is merged\n`;
   descriptionArr.forEach((d) => {

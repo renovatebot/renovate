@@ -1,0 +1,13 @@
+This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.
+
+## Ignored or Blocked
+
+These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.
+
+ - [ ] <!-- recreate-branch=branchName1 -->pr1
+ - [ ] <!-- recreate-branch=branchName2 -->pr2 (`dep2`, `dep3`)
+
+## Detected dependencies
+
+None detected
+

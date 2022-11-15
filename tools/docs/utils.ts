@@ -61,7 +61,7 @@ export async function formatDescription(
   type: string,
   name: string
 ): Promise<string> {
-  const content = await readFile(`lib/${type}/${name}/readme.md`);
+  const content = await readFile(`lib/modules/${type}/${name}/readme.md`);
   if (!content) {
     return '';
   }

@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/gitlab-releases/index getReleases returns releases from custom registry 1`] = `
+{
+  "registryUrl": "https://gitlab.company.com",
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "registryUrl": "https://gitlab.company.com",
+      "releaseTimestamp": "2021-01-01T00:00:00.000Z",
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v1.1.0",
+      "registryUrl": "https://gitlab.company.com",
+      "releaseTimestamp": "2021-03-01T00:00:00.000Z",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.company.com/some/dep2",
+}
+`;
+
+exports[`modules/datasource/gitlab-releases/index getReleases returns releases from default registry 1`] = `
+{
+  "registryUrl": "https://gitlab.com",
+  "releases": [
+    {
+      "gitRef": "v1.0.0",
+      "registryUrl": "https://gitlab.com",
+      "releaseTimestamp": "2021-01-01T00:00:00.000Z",
+      "version": "v1.0.0",
+    },
+    {
+      "gitRef": "v1.1.0",
+      "registryUrl": "https://gitlab.com",
+      "releaseTimestamp": "2021-03-01T00:00:00.000Z",
+      "version": "v1.1.0",
+    },
+  ],
+  "sourceUrl": "https://gitlab.com/some/dep2",
+}
+`;

@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { logger } from '../logger';
 
 // Return true if the match string is found at index in content
@@ -19,15 +18,10 @@ export function replaceAt(
 ): string {
   logger.trace(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
-    content.substr(0, index) +
+    content.substring(0, index) +
     newString +
-    content.substr(index + oldString.length)
+    content.substring(index + oldString.length)
   );
-}
-
-// Return true if the input is non-empty and not whitespace string
-export function nonEmptyStringAndNotWhitespace(input: unknown): boolean {
-  return is.nonEmptyString(input) && !is.emptyStringOrWhitespace(input);
 }
 
 /**
@@ -42,4 +36,12 @@ export function toBase64(input: string): string {
  */
 export function fromBase64(input: string): string {
   return Buffer.from(input, 'base64').toString();
+}
+
+export function uniqueStrings(
+  element: string,
+  index: number,
+  elements: string[]
+): boolean {
+  return elements.indexOf(element) === index;
 }

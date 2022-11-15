@@ -1,17 +1,17 @@
-import { BitBucketTagsDatasource } from '../datasource/bitbucket-tags';
-import { GithubReleasesDatasource } from '../datasource/github-releases';
-import { GithubTagsDatasource } from '../datasource/github-tags';
-import { GitlabPackagesDatasource } from '../datasource/gitlab-packages';
-import { GitlabReleasesDatasource } from '../datasource/gitlab-releases';
-import { GitlabTagsDatasource } from '../datasource/gitlab-tags';
-import { PodDatasource } from '../datasource/pod';
-import { id as GITHUB_CHANGELOG_ID } from '../workers/pr/changelog/github';
-import { id as GITLAB_CHANGELOG_ID } from '../workers/pr/changelog/gitlab';
+import { BitBucketTagsDatasource } from '../modules/datasource/bitbucket-tags';
+import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
+import { GithubTagsDatasource } from '../modules/datasource/github-tags';
+import { GitlabPackagesDatasource } from '../modules/datasource/gitlab-packages';
+import { GitlabReleasesDatasource } from '../modules/datasource/gitlab-releases';
+import { GitlabTagsDatasource } from '../modules/datasource/gitlab-tags';
+import { HermitDatasource } from '../modules/datasource/hermit';
+import { PodDatasource } from '../modules/datasource/pod';
+import { id as GITHUB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/github';
+import { id as GITLAB_CHANGELOG_ID } from '../workers/repository/update/pr/changelog/gitlab';
 import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PlatformId,
 } from './platforms';
 
 describe('constants/platform', () => {
@@ -28,11 +28,11 @@ describe('constants/platform', () => {
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GITLAB_CHANGELOG_ID)
     ).toBeTrue();
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeTrue();
+    expect(GITLAB_API_USING_HOST_TYPES.includes('gitlab')).toBeTrue();
   });
 
   it('should be not part of the GITLAB_API_USING_HOST_TYPES ', () => {
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeFalse();
+    expect(GITLAB_API_USING_HOST_TYPES.includes('github')).toBeFalse();
   });
 
   it('should be part of the GITHUB_API_USING_HOST_TYPES ', () => {
@@ -44,21 +44,22 @@ describe('constants/platform', () => {
     ).toBeTrue();
     expect(GITHUB_API_USING_HOST_TYPES.includes(PodDatasource.id)).toBeTrue();
     expect(
+      GITHUB_API_USING_HOST_TYPES.includes(HermitDatasource.id)
+    ).toBeTrue();
+    expect(
       GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID)
     ).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes('github')).toBeTrue();
   });
 
   it('should be not part of the GITHUB_API_USING_HOST_TYPES ', () => {
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeFalse();
+    expect(GITHUB_API_USING_HOST_TYPES.includes('gitlab')).toBeFalse();
   });
 
   it('should be part of the BITBUCKET_API_USING_HOST_TYPES ', () => {
     expect(
       BITBUCKET_API_USING_HOST_TYPES.includes(BitBucketTagsDatasource.id)
     ).toBeTrue();
-    expect(
-      BITBUCKET_API_USING_HOST_TYPES.includes(PlatformId.Bitbucket)
-    ).toBeTrue();
+    expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
   });
 });

@@ -1,11 +1,11 @@
 import crypto from 'crypto';
-import { readFileSync } from 'fs';
-import { expect } from '@jest/globals';
+import { expect, jest } from '@jest/globals';
+import type { Plugin } from 'pretty-format';
 import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { platform as _platform } from '../lib/platform';
+import { Platform, platform as _platform } from '../lib/modules/platform';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
@@ -15,8 +15,8 @@ import * as _hostRules from '../lib/util/host-rules';
  * Simple wrapper for getting mocked version of a module
  * @param module module which is mocked by `jest.mock`
  */
-export function mocked<T>(module: T): jest.Mocked<T> {
-  return module as jest.Mocked<T>;
+export function mocked<T extends object>(module: T): jest.MockedObject<T> {
+  return module as jest.MockedObject<T>;
 }
 
 /**
@@ -33,25 +33,27 @@ export function mockedFunction<T extends (...args: any[]) => any>(
  * Simply wrapper to create partial mocks.
  * @param obj Object to cast to final type
  */
-export function partial<T>(obj: Partial<T>): T {
-  return obj as T;
+export function partial<T>(obj: Partial<T>): T;
+export function partial<T>(obj: Partial<T>[]): T[];
+export function partial(obj: unknown): unknown {
+  return obj;
 }
 
 export const fs = mocked(_fs);
 export const git = mocked(_git);
-export const platform = mocked(_platform);
+
+// TODO: fix types, jest / typescript is using wrong overload (#7154)
+export const platform = mocked(partial<Required<Platform>>(_platform));
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 export const logger = mocked(_logger);
 
 export type { RenovateConfig };
 
-export const defaultConfig = getConfig();
-
 export { getConfig };
 
 function getCallerFileName(): string | null {
-  let result = null;
+  let result: string | null = null;
 
   const prepareStackTrace = Error.prepareStackTrace;
   const stackTraceLimit = Error.stackTraceLimit;
@@ -64,7 +66,7 @@ function getCallerFileName(): string | null {
 
     const stack = err.stack as unknown as NodeJS.CallSite[];
 
-    let currentFile = null;
+    let currentFile: string | null = null;
     for (const frame of stack) {
       const fileName = frame.getFileName();
       if (!currentFile) {
@@ -85,29 +87,8 @@ function getCallerFileName(): string | null {
 }
 
 export function getFixturePath(fixtureFile: string, fixtureRoot = '.'): string {
-  const callerDir = upath.dirname(getCallerFileName());
+  const callerDir = upath.dirname(getCallerFileName()!);
   return upath.join(callerDir, fixtureRoot, '__fixtures__', fixtureFile);
-}
-
-export function loadBinaryFixture(
-  fixtureFile: string,
-  fixtureRoot = '.'
-): Buffer {
-  const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
-  return readFileSync(fixtureAbsFile);
-}
-
-export function loadFixture(fixtureFile: string, fixtureRoot = '.'): string {
-  const fixtureAbsFile = getFixturePath(fixtureFile, fixtureRoot);
-  return readFileSync(fixtureAbsFile, { encoding: 'utf8' });
-}
-
-export function loadJsonFixture<T = any>(
-  fixtureFile: string,
-  fixtureRoot = '.'
-): T {
-  const rawFixture = loadFixture(fixtureFile, fixtureRoot);
-  return JSON.parse(rawFixture) as T;
 }
 
 /**
@@ -120,7 +101,7 @@ export function loadJsonFixture<T = any>(
 export const replacingSerializer = (
   search: string,
   replacement: string
-): jest.SnapshotSerializerPlugin => ({
+): Plugin => ({
   test: (value) => typeof value === 'string' && value.includes(search),
   serialize: (val, config, indent, depth, refs, printer) => {
     const replaced = (val as string).replace(search, replacement);
@@ -136,7 +117,7 @@ function toHash(buf: Buffer): string {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
-const bufferSerializer: jest.SnapshotSerializerPlugin = {
+const bufferSerializer: Plugin = {
   test: (value) => Buffer.isBuffer(value),
   serialize: (val, config, indent, depth, refs, printer) => {
     const replaced = toHash(val);

@@ -2,8 +2,11 @@ import type {
   RenovateConfig,
   ValidationMessage,
 } from '../../../../config/types';
-import type { Release } from '../../../../datasource/types';
-import type { LookupUpdate, RangeConfig } from '../../../../manager/types';
+import type { Release } from '../../../../modules/datasource/types';
+import type {
+  LookupUpdate,
+  RangeConfig,
+} from '../../../../modules/manager/types';
 import type { SkipReason } from '../../../../types';
 
 export interface FilterConfig {
@@ -41,6 +44,9 @@ export interface LookupUpdateConfig
   datasource: string;
   depName: string;
   minimumConfidence?: string;
+  extractedConstraints?: Record<string, string>;
+  replacementName?: string;
+  replacementVersion?: string;
 }
 
 export interface UpdateResult {
@@ -49,10 +55,10 @@ export interface UpdateResult {
   dependencyUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | null;
   currentVersion?: string;
   isSingleVersion?: boolean;
-  skipReason: SkipReason;
+  skipReason?: SkipReason;
   releases: Release[];
   fixedVersion?: string;
   updates: LookupUpdate[];

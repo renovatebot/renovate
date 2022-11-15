@@ -19,11 +19,12 @@ Renovate can manage the Node.js version in the following files:
 - The [`engines`](https://docs.npmjs.com/files/package.json#engines) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`volta`](https://docs.volta.sh/guide/understanding#managing-your-project) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`.nvmrc`](https://github.com/creationix/nvm#nvmrc) file for the [Node Version Manager](https://github.com/creationix/nvm)
+- The [`.node-version`](https://github.com/nodenv/nodenv#choosing-the-node-version) file for the [nodenv](https://github.com/nodenv/nodenv) environment manager
 - The [`node_js`](https://docs.travis-ci.com/user/languages/javascript-with-nodejs/#Specifying-Node.js-versions) field in [`.travis.yml`](https://docs.travis-ci.com/user/customizing-the-build/)
 
 ## Configuring which version of npm Renovate uses
 
-When `binarySource=docker`, such as in the hosted WhiteSource Renovate App, Renovate will choose and install an `npm` version dynamically.
+When `binarySource=docker`, such as in the hosted Mend Renovate App, Renovate will choose and install an `npm` version dynamically.
 
 To control which version or constraint is installed, you should use the `engines.npm` property in your `package.json` file.
 Renovate bot will then use that version constraint for npm when it creates a pull request.
@@ -37,3 +38,5 @@ For example, if you want to use at least npm `8.1.0` and also allow newer versio
   }
 }
 ```
+
+Alternatively, the npm version can also be configured via the [`constraints` option](https://docs.renovatebot.com/configuration-options/#constraints).

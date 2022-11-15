@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../../../config/types';
-import { CommitMessage } from '../../model/commit-message';
+import type { CommitMessage } from '../../model/commit-message';
+import { CommitMessageFactory } from '../../model/commit-message-factory';
 
 export class OnboardingCommitMessageFactory {
   private readonly config: RenovateConfig;
@@ -12,30 +13,16 @@ export class OnboardingCommitMessageFactory {
   }
 
   create(): CommitMessage {
-    const {
-      commitMessagePrefix,
-      onboardingCommitMessage,
-      semanticCommitScope,
-      semanticCommitType,
-    } = this.config;
-    const commitMessage = new CommitMessage();
-
-    if (commitMessagePrefix) {
-      commitMessage.setCustomPrefix(commitMessagePrefix);
-    } else if (this.areSemanticCommitsEnabled()) {
-      commitMessage.setSemanticPrefix(semanticCommitType, semanticCommitScope);
-    }
+    const { onboardingCommitMessage } = this.config;
+    const commitMessageFactory = new CommitMessageFactory(this.config);
+    const commitMessage = commitMessageFactory.create();
 
     if (onboardingCommitMessage) {
-      commitMessage.setMessage(onboardingCommitMessage);
+      commitMessage.subject = onboardingCommitMessage;
     } else {
-      commitMessage.setMessage(`add ${this.configFile}`);
+      commitMessage.subject = `add ${this.configFile}`;
     }
 
     return commitMessage;
-  }
-
-  private areSemanticCommitsEnabled(): boolean {
-    return this.config.semanticCommits === 'enabled';
   }
 }

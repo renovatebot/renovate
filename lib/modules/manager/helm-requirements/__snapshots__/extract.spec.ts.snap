@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/helm-requirements/extract extractPackageFile() ensure that currentValue is string 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "0.9",
+      "depName": "redis",
+      "registryUrls": [
+        "@placeholder",
+      ],
+      "skipReason": "placeholder-url",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helm-requirements/extract extractPackageFile() parses simple requirements.yaml correctly 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "registryUrls": [
+        "https://charts.helm.sh/stable/",
+      ],
+    },
+    {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "registryUrls": [
+        "https://charts.helm.sh/stable/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helm-requirements/extract extractPackageFile() resolves aliased registry urls 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "registryUrls": [
+        "https://my-registry.gcr.io/",
+      ],
+    },
+    {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": [
+        "https://registry.example.com/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helm-requirements/extract extractPackageFile() skips invalid registry urls 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "registryUrls": [
+        "@placeholder",
+      ],
+      "skipReason": "placeholder-url",
+    },
+    {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "registryUrls": [
+        "nope",
+      ],
+      "skipReason": "invalid-url",
+    },
+    {
+      "currentValue": "0.8.1",
+      "depName": "broken",
+      "skipReason": "no-repository",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helm-requirements/extract extractPackageFile() skips local dependencies 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "0.9.0",
+      "depName": "redis",
+      "registryUrls": [
+        "https://charts.helm.sh/stable/",
+      ],
+    },
+    {
+      "currentValue": "0.8.1",
+      "depName": "postgresql",
+      "registryUrls": [
+        "file:///some/local/path/",
+      ],
+      "skipReason": "local-dependency",
+    },
+  ],
+}
+`;

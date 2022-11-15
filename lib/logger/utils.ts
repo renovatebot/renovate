@@ -39,7 +39,7 @@ export class ProblemStream extends Stream {
     this._problems = [];
   }
 }
-const templateFields = ['prBody'];
+
 const contentFields = [
   'content',
   'contents',
@@ -85,6 +85,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
           err.name === 'TimeoutError' ? undefined : clone(err.response.body),
         headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
+        retryCount: err.response.retryCount,
       };
     }
   }
@@ -103,7 +104,7 @@ export function sanitizeValue(
   seen = new WeakMap<NestedValue, unknown>()
 ): any {
   if (is.string(value)) {
-    return sanitize(value);
+    return sanitize(sanitizeUrls(value));
   }
 
   if (is.date(value)) {
@@ -148,8 +149,6 @@ export function sanitizeValue(
         curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';
-      } else if (templateFields.includes(key)) {
-        curValue = '[Template]';
       } else if (key === 'secrets') {
         curValue = {};
         Object.keys(val).forEach((secretKey) => {
@@ -242,4 +241,14 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
   });
   logger.fatal(`${logLevelToCheck} is not a valid log level. terminating...`);
   process.exit(1);
+}
+
+// Can't use `util/regex` because of circular reference to logger
+const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
+const urlCredRe = /\/\/[^@]+@/g;
+
+export function sanitizeUrls(text: string): string {
+  return text.replace(urlRe, (url) => {
+    return url.replace(urlCredRe, '//**redacted**@');
+  });
 }

@@ -14,6 +14,7 @@ describe('workers/repository/onboarding/branch/config', () => {
   beforeAll(() => {
     GlobalConfig.set({
       localDir: '',
+      platform: 'github',
     });
   });
 
@@ -39,6 +40,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       );
     });
   });
+
   describe('getOnboardingConfig', () => {
     it('handles finding an organization preset', async () => {
       mockedPresets.getPreset.mockResolvedValueOnce({ enabled: true });
@@ -49,6 +51,7 @@ describe('workers/repository/onboarding/branch/config', () => {
         extends: ['local>some/renovate-config'],
       });
     });
+
     it('handles finding an organization dot platform preset', async () => {
       mockedPresets.getPreset.mockRejectedValueOnce(
         new Error(PRESET_DEP_NOT_FOUND)
@@ -61,6 +64,7 @@ describe('workers/repository/onboarding/branch/config', () => {
         extends: ['local>some/.github:renovate-config'],
       });
     });
+
     it('handles not finding an organization preset', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error(PRESET_DEP_NOT_FOUND)
@@ -69,6 +73,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
       expect(onboardingConfig).toEqual(config.onboardingConfig);
     });
+
     it('ignores an unknown error', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error('unknown error for test')
@@ -77,6 +82,7 @@ describe('workers/repository/onboarding/branch/config', () => {
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
       expect(onboardingConfig).toEqual(config.onboardingConfig);
     });
+
     it('ignores unsupported platform', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error(`Unsupported platform 'dummy' for local preset.`)

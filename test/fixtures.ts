@@ -1,10 +1,12 @@
 import type fs from 'fs';
-import type { PathLike } from 'fs';
+import type { PathLike, Stats } from 'fs';
+import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
-const realFs = jest.requireActual<typeof fs>('fs');
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+const realFs = jest.requireActual('fs') as typeof fs;
 
 /**
  * Class to work with in-memory file-system
@@ -23,6 +25,35 @@ export class Fixtures {
         encoding: 'utf-8',
       }
     );
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder as `Buffer`
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getBinary(name: string, fixturesRoot = '.'): Buffer {
+    return realFs.readFileSync(
+      upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name)
+    );
+  }
+
+  /**
+   * Returns content from fixture file from __fixtures__ folder and parses as JSON
+   * @param name name of the fixture file
+   * @param [fixturesRoot] - Where to find the fixtures, uses the current test folder by default
+   * @returns
+   */
+  static getJson<T = any>(name: string, fixturesRoot = '.'): T {
+    return JSON.parse(
+      realFs.readFileSync(
+        upath.resolve(Fixtures.getPathToFixtures(fixturesRoot), name),
+        {
+          encoding: 'utf-8',
+        }
+      )
+    ) as T;
   }
 
   /**
@@ -60,11 +91,12 @@ export class Fixtures {
   static fsExtra(): any {
     return {
       ...memfs,
-      pathExists: jest.fn().mockImplementation(pathExists),
-      remove: jest.fn().mockImplementation(memfs.promises.rm),
-      readFile: jest.fn().mockImplementation(memfs.promises.readFile),
-      writeFile: jest.fn().mockImplementation(memfs.promises.writeFile),
-      outputFile: jest.fn().mockImplementation(outputFile),
+      pathExists: jest.fn(pathExists),
+      remove: jest.fn(memfs.promises.rm),
+      readFile: jest.fn(memfs.promises.readFile),
+      writeFile: jest.fn(memfs.promises.writeFile),
+      outputFile: jest.fn(outputFile),
+      stat: jest.fn(stat),
     };
   }
 
@@ -98,4 +130,9 @@ async function pathExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function stat(path: string): Promise<Stats> {
+  // memfs type mismatch
+  return (await memfs.promises.stat(path)) as Stats;
 }

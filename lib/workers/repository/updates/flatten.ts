@@ -4,8 +4,8 @@ import {
   mergeChildConfig,
 } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
-import { getDefaultConfig } from '../../../datasource';
-import { get } from '../../../manager';
+import { getDefaultConfig } from '../../../modules/datasource';
+import { get } from '../../../modules/manager';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -13,7 +13,7 @@ import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchName } from './branch-name';
 
 const upper = (str: string): string =>
-  str.charAt(0).toUpperCase() + str.substr(1);
+  str.charAt(0).toUpperCase() + str.substring(1);
 
 function sanitizeDepName(depName: string): string {
   return depName
@@ -101,7 +101,7 @@ export async function flattenUpdates(
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
             if (updateConfig.updateTypes) {
-              updateConfig.updateTypes.forEach((updateType) => {
+              updateConfig.updateTypes.forEach((updateType: string) => {
                 updateConfig[`is${upper(updateType)}`] = true;
               });
             }
@@ -157,7 +157,11 @@ export async function flattenUpdates(
       }
       if (get(manager, 'updateLockedDependency')) {
         for (const lockFile of packageFileConfig.lockFiles || []) {
-          const remediations = config.remediations?.[lockFile];
+          const lockfileRemediations = config.remediations as Record<
+            string,
+            Record<string, any>[]
+          >;
+          const remediations = lockfileRemediations?.[lockFile];
           if (remediations) {
             for (const remediation of remediations) {
               let updateConfig = mergeChildConfig(

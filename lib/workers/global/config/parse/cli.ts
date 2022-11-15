@@ -2,7 +2,9 @@ import { Command } from 'commander';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
+import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
+import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 
 export function getCliName(option: ParseConfigOptions): string {
@@ -16,61 +18,25 @@ export function getCliName(option: ParseConfigOptions): string {
 export function getConfig(input: string[]): AllConfig {
   // massage migrated configuration keys
   const argv = input
-    .map(
-      (a) =>
-        a
-          .replace('--endpoints=', '--host-rules=')
-          .replace('--expose-env=true', '--trust-level=high')
-          .replace('--expose-env', '--trust-level=high')
-          .replace('--renovate-fork', '--include-forks')
-          .replace('"platform":"', '"hostType":"')
-          .replace('"endpoint":"', '"matchHost":"')
-          .replace('"host":"', '"matchHost":"')
-          .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
-          .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+    .map((a) =>
+      a
+        .replace('--endpoints=', '--host-rules=')
+        .replace('--expose-env=true', '--trust-level=high')
+        .replace('--expose-env', '--trust-level=high')
+        .replace('--renovate-fork', '--include-forks')
+        .replace('"platform":"', '"hostType":"')
+        .replace('"endpoint":"', '"matchHost":"')
+        .replace('"host":"', '"matchHost":"')
+        .replace('--azure-auto-complete', '--platform-automerge') // migrate: azureAutoComplete
+        .replace('--git-lab-automerge', '--platform-automerge') // migrate: gitLabAutomerge
+        .replace(/^--dry-run$/, '--dry-run=true')
+        .replace(/^--require-config$/, '--require-config=true')
+        .replace('--aliases', '--registry-aliases')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
 
   const config: Record<string, any> = {};
-
-  const coersions: Record<string, (arg: string) => unknown> = {
-    boolean: (val: string): boolean => {
-      if (val === 'true' || val === '') {
-        return true;
-      }
-      if (val === 'false') {
-        return false;
-      }
-      throw new Error(
-        "Invalid boolean value: expected 'true' or 'false', but got '" +
-          val +
-          "'"
-      );
-    },
-    array: (val: string): string[] => {
-      if (val === '') {
-        return [];
-      }
-      try {
-        return JSON.parse(val);
-      } catch (err) {
-        return val.split(',').map((el) => el.trim());
-      }
-    },
-    object: (val: string): any => {
-      if (val === '') {
-        return {};
-      }
-      try {
-        return JSON.parse(val);
-      } catch (err) {
-        throw new Error("Invalid JSON value: '" + val + "'");
-      }
-    },
-    string: (val: string): string => val,
-    integer: parseInt,
-  };
 
   let program = new Command().arguments('[repositories...]');
 
@@ -114,6 +80,34 @@ export function getConfig(input: string[]): AllConfig {
         if (option.cli !== false) {
           if (opts[option.name] !== undefined) {
             config[option.name] = opts[option.name];
+            if (option.name === 'dryRun') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config dryRun property has been changed to full'
+                );
+                config[option.name] = 'full';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config dryRun property has been changed to null'
+                );
+                config[option.name] = null;
+              } else if (config[option.name] === 'null') {
+                config[option.name] = null;
+              }
+            }
+            if (option.name === 'requireConfig') {
+              if (config[option.name] === 'true') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to required'
+                );
+                config[option.name] = 'required';
+              } else if (config[option.name] === 'false') {
+                logger.warn(
+                  'cli config requireConfig property has been changed to optional'
+                );
+                config[option.name] = 'optional';
+              }
+            }
           }
         }
       }

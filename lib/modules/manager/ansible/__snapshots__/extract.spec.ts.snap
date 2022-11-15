@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
+[
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "busybox",
+    "replaceString": "busybox",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "redis",
+    "replaceString": "redis",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "someuser/appimage",
+    "replaceString": "someuser/appimage",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "14.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "replaceString": "ubuntu:14.04",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "someuser/anotherappimage",
+    "replaceString": "someuser/anotherappimage",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "busybox",
+    "replaceString": "busybox",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "latest",
+    "datasource": "docker",
+    "depName": "postgres",
+    "replaceString": "postgres:latest",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "14.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "replaceString": "ubuntu:14.04",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "14.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "replaceString": "ubuntu:14.04",
+    "versioning": "docker",
+  },
+]
+`;
+
+exports[`modules/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
+[
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "11.5.1",
+    "datasource": "docker",
+    "depName": "sameersbn/gitlab",
+    "replaceString": "sameersbn/gitlab:11.5.1",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "10",
+    "datasource": "docker",
+    "depName": "sameersbn/postgresql",
+    "replaceString": "sameersbn/postgresql:10",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "4.0.9-1",
+    "datasource": "docker",
+    "depName": "sameersbn/redis",
+    "replaceString": "sameersbn/redis:4.0.9-1",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "2.6.2",
+    "datasource": "docker",
+    "depName": "registry",
+    "replaceString": "registry:2.6.2",
+    "versioning": "docker",
+  },
+]
+`;

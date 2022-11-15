@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>=14.15.4`
+- Node.js `^16.13.0 || >= 18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
 - Java between `8` and `12`
@@ -38,7 +38,7 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 #### Windows
 
 Follow these steps to set up your development environment on Windows 10.
-If you already installed a component, skip the corresponding step.
+If you already installed a part, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
 - Install [Node.js LTS](https://nodejs.org/en/download/)
@@ -64,6 +64,21 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+
+#### Local Docker
+
+If, for some reason, you can't run the relevant versions on your local machine, you can run everything from a Docker image.
+To build the correct docker image:
+
+```
+docker build -f .devcontainer/Dockerfile -t renovatebot_local .
+```
+
+Then you can run Yarn directly from Docker, for instance:
+
+```
+docker run -it --rm -v "$PWD":/usr/src/app -w /usr/src/app renovatebot_local yarn install
+```
 
 ## Fork and Clone
 
@@ -125,13 +140,13 @@ Refactor PRs should ideally not change or remove tests (adding tests is OK).
 ### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
+You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/repository/update/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
-The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
+The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not have full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
@@ -152,7 +167,7 @@ If you're only working on the documentation files, you can use the `yarn doc-fix
 
 First of all, never commit to the `main` branch of your fork - always use a "feature" branch like `feat/1234-add-yarn-parsing`.
 
-Make sure your fork is up to date with the Renovate `main` branch, check this each time before you create a new branch.
+Make sure your fork is up-to-date with the Renovate `main` branch, check this each time before you create a new branch.
 To do this, see these GitHub guides:
 
 [Configuring a remote for a fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/)
@@ -164,7 +179,7 @@ To do this, see these GitHub guides:
 ### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-However, by default Renovate skips over repositories that are forked.
+But by default Renovate skips over repositories that are forked.
 To override this default, you need to specify the setting `includeForks` as `true`.
 
 Tell Renovate to run on your forked repository by doing one of the following:
@@ -191,7 +206,7 @@ We want stay backwards-compatible as much as possible, as well as make the code 
 So most new functionality should be controllable via configuration options.
 
 Create your new configuration option in the `lib/config/options/index.ts` file.
-Also create documentation for the option in the `website/docs/configuration-options.md` file.
+Also create documentation for the option in the `docs/usage/configuration-options.md` file.
 
 ## Debugging
 

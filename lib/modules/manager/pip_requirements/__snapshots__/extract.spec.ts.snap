@@ -1,0 +1,327 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+    },
+    {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+    },
+    {
+      "currentValue": undefined,
+      "datasource": "pypi",
+      "depName": "sphinx",
+    },
+    {
+      "currentValue": "==1.9",
+      "currentVersion": "1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+    },
+  ],
+  "registryUrls": [
+    "http://example.com/private-pypi/",
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
+[
+  {
+    "currentValue": "==1",
+    "currentVersion": "1",
+    "datasource": "pypi",
+    "depName": "Django",
+  },
+  {
+    "currentValue": "==0.6.27",
+    "currentVersion": "0.6.27",
+    "datasource": "pypi",
+    "depName": "distribute",
+  },
+  {
+    "currentValue": "==0.2",
+    "currentVersion": "0.2",
+    "datasource": "pypi",
+    "depName": "dj-database-url",
+  },
+  {
+    "currentValue": "==2.4.5",
+    "currentVersion": "2.4.5",
+    "datasource": "pypi",
+    "depName": "psycopg2",
+  },
+  {
+    "currentValue": "==0.1.2",
+    "currentVersion": "0.1.2",
+    "datasource": "pypi",
+    "depName": "wsgiref",
+  },
+]
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
+[
+  {
+    "currentValue": "==1.11.23",
+    "currentVersion": "1.11.23",
+    "datasource": "pypi",
+    "depName": "Django",
+  },
+  {
+    "currentValue": "==0.6.27",
+    "currentVersion": "0.6.27",
+    "datasource": "pypi",
+    "depName": "distribute",
+    "skipReason": "ignored",
+  },
+  {
+    "currentValue": "==0.2",
+    "currentVersion": "0.2",
+    "datasource": "pypi",
+    "depName": "dj-database-url",
+  },
+  {
+    "currentValue": "==2.4.5",
+    "currentVersion": "2.4.5",
+    "datasource": "pypi",
+    "depName": "psycopg2",
+  },
+  {
+    "currentValue": "==0.1.2",
+    "currentVersion": "0.1.2",
+    "datasource": "pypi",
+    "depName": "wsgiref",
+  },
+]
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
+{
+  "additionalRegistryUrls": [
+    "http://example.com/private-pypi/",
+  ],
+  "deps": [
+    {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+    {
+      "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+    },
+    {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+    },
+    {
+      "currentValue": "==1.9",
+      "currentVersion": "1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+    },
+  ],
+  "registryUrls": [
+    "https://artifactory.company.com/artifactory/api/pypi/python/simple",
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
+{
+  "additionalRegistryUrls": [
+    "http://example.com/private-pypi/",
+  ],
+  "deps": [
+    {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+    {
+      "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+    },
+    {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+    },
+    {
+      "currentValue": "==1.9",
+      "currentVersion": "1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
+{
+  "additionalRegistryUrls": [
+    "http://example.com/private-pypi/",
+  ],
+  "deps": [
+    {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+    {
+      "currentValue": "==0.3.1",
+      "currentVersion": "0.3.1",
+      "datasource": "pypi",
+      "depName": "some-package",
+    },
+    {
+      "currentValue": "==1.0.0",
+      "currentVersion": "1.0.0",
+      "datasource": "pypi",
+      "depName": "some-other-package",
+    },
+    {
+      "currentValue": "==1.9",
+      "currentVersion": "1.9",
+      "datasource": "pypi",
+      "depName": "not_semver",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+  ],
+  "registryUrls": [
+    "https://artifactory.company.com/artifactory/api/pypi/python/simple",
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "==2.0.12",
+      "currentVersion": "2.0.12",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==4.1.1",
+      "currentVersion": "4.1.1",
+      "datasource": "pypi",
+      "depName": "celery",
+    },
+    {
+      "currentValue": "== 3.2.1",
+      "currentVersion": "3.2.1",
+      "datasource": "pypi",
+      "depName": "foo",
+    },
+  ],
+  "registryUrls": [
+    "https://artifactory.company.com/artifactory/api/pypi/python/simple",
+  ],
+}
+`;
+
+exports[`modules/manager/pip_requirements/extract extractPackageFile() should handle hashes 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "==1.9.1",
+      "currentVersion": "1.9.1",
+      "datasource": "pypi",
+      "depName": "Django",
+    },
+    {
+      "currentValue": "==0.22.1",
+      "currentVersion": "0.22.1",
+      "datasource": "pypi",
+      "depName": "bgg",
+    },
+    {
+      "currentValue": "==2016.1.8",
+      "currentVersion": "2016.1.8",
+      "datasource": "pypi",
+      "depName": "html2text",
+    },
+  ],
+}
+`;

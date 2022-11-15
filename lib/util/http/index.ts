@@ -1,22 +1,24 @@
-import crypto from 'crypto';
 import merge from 'deepmerge';
-import got, { Options, RequestError, Response } from 'got';
+import got, { Options, RequestError } from 'got';
+import hasha from 'hasha';
+import { infer as Infer, ZodSchema } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { match } from '../schema';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
 import { applyHostRules } from './host-rules';
 import { getQueue } from './queue';
+import { getThrottle } from './throttle';
 import type {
   GotJSONOptions,
   GotOptions,
   HttpOptions,
-  HttpPostOptions,
   HttpResponse,
   InternalHttpOptions,
   RequestStats,
@@ -25,6 +27,14 @@ import type {
 import './legacy';
 
 export { RequestError as HttpError };
+
+type JsonArgs<T extends HttpOptions> = {
+  url: string;
+  httpOptions?: T;
+  schema?: ZodSchema | undefined;
+};
+
+type Task<T> = () => Promise<HttpResponse<T>>;
 
 function cloneResponse<T extends Buffer | string | any>(
   response: HttpResponse<T>
@@ -55,30 +65,53 @@ function applyDefaultHeaders(options: Options): void {
 // `Buffer` in the latter case.
 // We don't declare overload signatures because it's immediately wrapped by
 // `request`.
-async function gotRoutine<T>(
+async function gotTask<T>(
   url: string,
   options: GotOptions,
-  requestStats: Partial<RequestStats>
-): Promise<Response<T>> {
+  requestStats: Omit<RequestStats, 'duration' | 'statusCode'>
+): Promise<HttpResponse<T>> {
   logger.trace({ url, options }, 'got request');
 
-  // Cheat the TS compiler using `as` to pick a specific overload.
-  // Otherwise it doesn't typecheck.
-  const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
-  const duration =
-    resp.timings.phases.total ?? /* istanbul ignore next: can't be tested */ 0;
+  let duration = 0;
+  let statusCode = 0;
 
-  const httpRequests = memCache.get('http-requests') || [];
-  httpRequests.push({ ...requestStats, duration });
-  memCache.set('http-requests', httpRequests);
+  try {
+    // Cheat the TS compiler using `as` to pick a specific overload.
+    // Otherwise it doesn't typecheck.
+    const resp = await got<T>(url, { ...options, hooks } as GotJSONOptions);
+    statusCode = resp.statusCode;
+    duration =
+      resp.timings.phases.total ??
+      /* istanbul ignore next: can't be tested */ 0;
+    return resp;
+  } catch (error) {
+    if (error instanceof RequestError) {
+      statusCode =
+        error.response?.statusCode ??
+        /* istanbul ignore next: can't be tested */ -1;
+      duration =
+        error.timings?.phases.total ??
+        /* istanbul ignore next: can't be tested */ -1;
+      const method = options.method?.toUpperCase() ?? 'GET';
+      const code = error.code ?? 'UNKNOWN';
+      const retryCount = error.request?.retryCount ?? -1;
+      logger.debug(
+        `${method} ${url} = (code=${code}, statusCode=${statusCode} retryCount=${retryCount}, duration=${duration})`
+      );
+    }
 
-  return resp;
+    throw error;
+  } finally {
+    const httpRequests = memCache.get<RequestStats[]>('http-requests') || [];
+    httpRequests.push({ ...requestStats, duration, statusCode });
+    memCache.set('http-requests', httpRequests);
+  }
 }
 
-export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
+export class Http<Opts extends HttpOptions = HttpOptions> {
   private options?: GotOptions;
 
-  constructor(private hostType: string, options: HttpOptions = {}) {
+  constructor(protected hostType: string, options: HttpOptions = {}) {
     this.options = merge<GotOptions>(options, { context: { hostType } });
   }
 
@@ -111,23 +144,21 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
 
-    const cacheKey = crypto
-      .createHash('md5')
-      .update(
-        'got-' +
-          JSON.stringify({
-            url,
-            headers: options.headers,
-            method: options.method,
-          })
-      )
-      .digest('hex');
-
-    let resPromise;
+    // use sha512: https://www.npmjs.com/package/hasha#algorithm
+    const cacheKey = hasha([
+      'got-',
+      JSON.stringify({
+        url,
+        headers: options.headers,
+        method: options.method,
+      }),
+    ]);
+    let resPromise: Promise<HttpResponse<T>> | null = null;
 
     // Cache GET requests unless useCache=false
     if (
@@ -140,18 +171,29 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // istanbul ignore else: no cache tests
     if (!resPromise) {
       const startTime = Date.now();
-      const queueTask = (): Promise<Response<T>> => {
+      const httpTask: Task<T> = () => {
         const queueDuration = Date.now() - startTime;
-        return gotRoutine(url, options, {
-          method: options.method,
+        return gotTask(url, options, {
+          method: options.method ?? 'get',
           url,
           queueDuration,
         });
       };
+
+      const throttle = getThrottle(url);
+      const throttledTask: Task<T> = throttle
+        ? () => throttle.add<HttpResponse<T>>(httpTask)
+        : httpTask;
+
       const queue = getQueue(url);
-      resPromise = queue?.add(queueTask) ?? queueTask();
-      if (options.method === 'get') {
-        memCache.set(cacheKey, resPromise); // always set if it's a get
+      const queuedTask: Task<T> = queue
+        ? () => queue.add<HttpResponse<T>>(throttledTask)
+        : throttledTask;
+
+      resPromise = queuedTask();
+
+      if (options.method === 'get' || options.method === 'head') {
+        memCache.set(cacheKey, resPromise); // always set if it's a get or a head
       }
     }
 
@@ -194,64 +236,164 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   }
 
   private async requestJson<T = unknown>(
-    url: string,
-    options: InternalHttpOptions
+    method: InternalHttpOptions['method'],
+    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts>
   ): Promise<HttpResponse<T>> {
-    const { body, ...jsonOptions } = options;
-    if (body) {
-      jsonOptions.json = body;
-    }
-    const res = await this.request<T>(url, {
-      ...jsonOptions,
+    const { body, onSchemaError, ...httpOptions } = { ...requestOptions };
+    const opts: InternalHttpOptions = {
+      ...httpOptions,
+      method,
       responseType: 'json',
-    });
+    };
+    if (body) {
+      opts.json = body;
+    }
+    const res = await this.request<T>(url, opts);
+
+    if (schema) {
+      match(schema, res.body, onSchemaError);
+    }
+
     return { ...res, body: res.body };
   }
 
+  private resolveArgs(
+    arg1: string,
+    arg2: Opts | ZodSchema | undefined,
+    arg3: ZodSchema | undefined
+  ): JsonArgs<Opts> {
+    const res: JsonArgs<Opts> = { url: arg1 };
+
+    if (arg2 instanceof ZodSchema) {
+      res.schema = arg2;
+    } else if (arg2) {
+      res.httpOptions = arg2;
+    }
+
+    if (arg3) {
+      res.schema = arg3;
+    }
+
+    return res;
+  }
+
+  getJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  getJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  getJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   getJson<T = unknown>(
-    url: string,
-    options?: GetOptions
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('get', args);
   }
 
+  headJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  headJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  headJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   headJson<T = unknown>(
-    url: string,
-    options?: GetOptions
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'head' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('head', args);
   }
 
+  postJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  postJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  postJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   postJson<T = unknown>(
-    url: string,
-    options?: PostOptions
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'post' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('post', args);
   }
 
+  putJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  putJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  putJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   putJson<T = unknown>(
-    url: string,
-    options?: PostOptions
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'put' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('put', args);
   }
 
+  patchJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  patchJson<T>(
+    url: string,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  patchJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
   patchJson<T = unknown>(
-    url: string,
-    options?: PostOptions
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'patch' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('patch', args);
   }
 
-  deleteJson<T = unknown>(
+  deleteJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
+  deleteJson<T>(
     url: string,
-    options?: PostOptions
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  deleteJson<T>(
+    url: string,
+    options: Opts,
+    schema: ZodSchema<T>
+  ): Promise<HttpResponse<Infer<typeof schema>>>;
+  deleteJson<T = unknown>(
+    arg1: string,
+    arg2?: Opts | ZodSchema,
+    arg3?: ZodSchema
   ): Promise<HttpResponse<T>> {
-    return this.requestJson<T>(url, { ...options, method: 'delete' });
+    const args = this.resolveArgs(arg1, arg2, arg3);
+    return this.requestJson<T>('delete', args);
   }
 
   stream(url: string, options?: HttpOptions): NodeJS.ReadableStream {
-    const combinedOptions: any = {
+    // TODO: fix types (#7154)
+    let combinedOptions: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
@@ -265,6 +407,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
 
     applyDefaultHeaders(combinedOptions);
+    combinedOptions = applyHostRules(resolvedUrl, combinedOptions);
+    if (combinedOptions.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
+    combinedOptions = applyAuthorization(combinedOptions);
+
     return got.stream(resolvedUrl, combinedOptions);
   }
 }

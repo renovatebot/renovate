@@ -1,0 +1,192 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/maven/index falls back to next registry url 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://repo.maven.apache.org/maven2",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index ignores unsupported protocols 1`] = `
+[
+  {
+    "version": "0.0.1",
+  },
+  {
+    "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+    "version": "1.0.0",
+  },
+  {
+    "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+    "version": "1.0.3-SNAPSHOT",
+  },
+  {
+    "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+    "version": "2.0.0",
+  },
+]
+`;
+
+exports[`modules/datasource/maven/index removes authentication header after redirect 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://frontend_for_private_s3_repository/maven2",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "version": "1.0.0",
+    },
+    {
+      "version": "1.0.1",
+    },
+    {
+      "version": "1.0.2",
+    },
+    {
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "version": "1.0.4-SNAPSHOT",
+    },
+    {
+      "version": "1.0.5-SNAPSHOT",
+    },
+    {
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index returns releases 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://repo.maven.apache.org/maven2",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index returns releases from custom repository 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://custom.registry.renovatebot.com",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index skips registry with invalid XML 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://repo.maven.apache.org/maven2",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/maven/index skips registry with invalid metadata structure 1`] = `
+{
+  "display": "org.example:package",
+  "group": "org.example",
+  "homepage": "https://package.example.org/about",
+  "name": "package",
+  "registryUrl": "https://repo.maven.apache.org/maven2",
+  "releases": [
+    {
+      "version": "0.0.1",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T01:00:03.000Z",
+      "version": "1.0.3-SNAPSHOT",
+    },
+    {
+      "releaseTimestamp": "2020-01-01T02:00:00.000Z",
+      "version": "2.0.0",
+    },
+  ],
+}
+`;

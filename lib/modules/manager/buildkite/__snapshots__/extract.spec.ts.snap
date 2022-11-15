@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/buildkite/extract extractPackageFile() adds skipReason 1`] = `
+[
+  {
+    "currentValue": "v1.3.2.5",
+    "depName": "namespace/docker-compose",
+    "skipReason": "invalid-version",
+  },
+  {
+    "currentValue": "v1.3.2",
+    "depName": "github.com/buildkite/plugin-docker-compose",
+    "skipReason": "invalid-dependency-specification",
+  },
+]
+`;
+
+exports[`modules/manager/buildkite/extract extractPackageFile() extracts arrays of plugins 1`] = `
+[
+  {
+    "currentValue": "v2.0.1",
+    "datasource": "github-tags",
+    "depName": "docker-login",
+    "packageName": "buildkite-plugins/docker-login-buildkite-plugin",
+    "skipReason": undefined,
+  },
+  {
+    "currentValue": "v2.5.1",
+    "datasource": "github-tags",
+    "depName": "docker-compose",
+    "packageName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
+  },
+  {
+    "currentValue": "v2.0.1",
+    "datasource": "github-tags",
+    "depName": "docker-login",
+    "packageName": "buildkite-plugins/docker-login-buildkite-plugin",
+    "skipReason": undefined,
+  },
+  {
+    "currentValue": "v2.5.1",
+    "datasource": "github-tags",
+    "depName": "docker-compose",
+    "packageName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
+  },
+]
+`;
+
+exports[`modules/manager/buildkite/extract extractPackageFile() extracts git-based plugins 1`] = `
+[
+  {
+    "currentValue": "v3.2.7",
+    "datasource": "github-tags",
+    "depName": "some-org/some-plugin",
+    "registryUrls": [
+      "https://github.company.com",
+    ],
+  },
+  {
+    "currentValue": "v0.0.1",
+    "datasource": "github-tags",
+    "depName": "some-third-org/some-third-plugin",
+    "registryUrls": [
+      "https://github.company.com",
+    ],
+  },
+]
+`;
+
+exports[`modules/manager/buildkite/extract extractPackageFile() extracts multiple plugins in same file 1`] = `
+[
+  {
+    "currentValue": "v1.3.2",
+    "datasource": "github-tags",
+    "depName": "docker-compose",
+    "packageName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
+  },
+  {
+    "currentValue": "v1.3.2",
+    "datasource": "github-tags",
+    "depName": "docker-compose",
+    "packageName": "buildkite-plugins/docker-compose-buildkite-plugin",
+    "skipReason": undefined,
+  },
+]
+`;
+
+exports[`modules/manager/buildkite/extract extractPackageFile() extracts simple single plugin 1`] = `
+[
+  {
+    "currentValue": "v2.0.0",
+    "datasource": "github-tags",
+    "depName": "abc/detect-clowns",
+    "packageName": "abc/detect-clowns-buildkite-plugin",
+    "skipReason": undefined,
+  },
+]
+`;

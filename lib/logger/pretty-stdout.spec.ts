@@ -14,15 +14,18 @@ describe('logger/pretty-stdout', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getMeta(null as any)).toBeEmptyString();
     });
+
     it('returns empty string if empty rec', () => {
       expect(prettyStdout.getMeta({} as any)).toBeEmptyString();
     });
+
     it('returns empty string if no meta fields', () => {
       const rec = {
         foo: 'bar',
       };
       expect(prettyStdout.getMeta(rec as any)).toBeEmptyString();
     });
+
     it('supports single meta', () => {
       const rec = {
         foo: 'bar',
@@ -32,6 +35,7 @@ describe('logger/pretty-stdout', () => {
         chalk.gray(' (repository=a/b)')
       );
     });
+
     it('supports multi meta', () => {
       const rec = {
         foo: 'bar',
@@ -44,13 +48,16 @@ describe('logger/pretty-stdout', () => {
       );
     });
   });
+
   describe('getDetails(rec)', () => {
     it('returns empty string if null rec', () => {
       expect(prettyStdout.getDetails(null as any)).toBeEmptyString();
     });
+
     it('returns empty string if empty rec', () => {
       expect(prettyStdout.getDetails({} as any)).toBeEmptyString();
     });
+
     it('returns empty string if all are meta fields', () => {
       const rec = {
         branch: 'bar',
@@ -58,6 +65,7 @@ describe('logger/pretty-stdout', () => {
       };
       expect(prettyStdout.getDetails(rec as any)).toBeEmptyString();
     });
+
     it('supports a config', () => {
       const rec = {
         v: 0,
@@ -71,13 +79,16 @@ describe('logger/pretty-stdout', () => {
       );
     });
   });
+
   describe('formatRecord(rec)', () => {
     beforeEach(() => {
       process.env.FORCE_COLOR = '1';
     });
+
     afterEach(() => {
       delete process.env.FORCE_COLOR;
     });
+
     it('formats record', () => {
       const rec: BunyanRecord = {
         level: 10,

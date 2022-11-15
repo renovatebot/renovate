@@ -1,10 +1,15 @@
-import { getDatasourceList } from '../../../../datasource';
 import { logger } from '../../../../logger';
+import { getDatasourceList } from '../../../../modules/datasource';
 import type { HostRule } from '../../../../types';
+
+type AuthField = 'token' | 'username' | 'password';
+
+function isAuthField(x: unknown): x is AuthField {
+  return x === 'token' || x === 'username' || x === 'password';
+}
 
 export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
   const datasources = new Set(getDatasourceList());
-  const fields = ['token', 'username', 'password'];
 
   const hostRules: HostRule[] = [];
 
@@ -17,11 +22,11 @@ export function hostRulesFromEnv(env: NodeJS.ProcessEnv): HostRule[] {
     }
     // Double underscore __ is used in place of hyphen -
     const splitEnv = envName.toLowerCase().replace(/__/g, '-').split('_');
-    const hostType = splitEnv.shift();
+    const hostType = splitEnv.shift()!;
     if (datasources.has(hostType)) {
-      const suffix = splitEnv.pop();
-      if (fields.includes(suffix)) {
-        let matchHost: string;
+      const suffix = splitEnv.pop()!;
+      if (isAuthField(suffix)) {
+        let matchHost: string | undefined = undefined;
         const rule: HostRule = {};
         rule[suffix] = env[envName];
         if (splitEnv.length === 0) {

@@ -8,6 +8,20 @@ description: Java versions support in Renovate
 Renovate can update Gradle and Maven dependencies.
 This includes libraries and plugins as well as the Gradle Wrapper.
 
+## LTS releases
+
+The `config:base` preset includes the `workarounds:javaLTSVersions` preset.
+The workaround limits Renovate to upgrade to LTS versions of the Java runtime only.
+
+If you want Renovate to offer all `major` Java updates then add `workarounds:javaLTSVersions` to the `ignorePreset` array:
+
+```json
+{
+  "extends": ["config:base"],
+  "ignorePresets": ["workarounds:javaLTSVersions"]
+}
+```
+
 ## Gradle
 
 Renovate detects versions that are specified in a string `'group:artifact:version'` and those specified in a map `(group:groupName, name:ArtifactName, version:Version)`.
@@ -29,7 +43,8 @@ Renovate does not support:
 - Gradle versions older than version 5.0
 - Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML
 - Catalogs with version ranges
-- Catalogs using the `required`, `strictly`, `preferred`, `reject`, and `rejectAll` version declarations
+- Catalogs versions using `reject`, and `rejectAll` constraints
+- Catalogs versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
 - Catalogs outside the `gradle` folder whose names do not end in `.versions.toml`
 
@@ -53,7 +68,7 @@ As Renovate takes the `distributionUrl` defined inside the `gradle-wrapper.prope
 
 This can be used for hosting the official distributions with a proxy server, an offline mirror or even providing a custom distribution of the Gradle Wrapper, e.g. to provide a company-wide base configuration for all Gradle projects.
 
-However, the `gradle-version` datasource is used to determine available versions.
+But the `gradle-version` datasource is used to determine available versions.
 In case the available versions at the defined source differ from those available from Gradle or the [default datasource](https://services.gradle.org/versions/all) cannot be reached, e.g. due to network restrictions, the datasource may be reconfigured via a `packageRule`:
 
 ```json
@@ -86,12 +101,6 @@ Renovate will also parse `settings.xml` files in the following locations:
 Any repository URLs found within will be added as `registryUrls` to extracted dependencies.
 
 ## Custom registry support, and authentication
-
-Unless using `deepExtract`, Renovate does not make use of authentication credentials available to Gradle.
-
-<!-- prettier-ignore -->
-!!! warning
-    The `deepExtract` configuration option is deprecated, and will be removed in a future Renovate release.
 
 The manager for Gradle makes use of the `maven` datasource.
 Renovate can be configured to access additional repositories and access repositories authenticated.

@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
+[
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": undefined,
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "4",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node:4",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "6",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node:6",
+    "versioning": "docker",
+  },
+  {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "8.9.0",
+    "datasource": "docker",
+    "depName": "node",
+    "depType": "docker",
+    "replaceString": "node:8.9.0",
+    "versioning": "docker",
+  },
+]
+`;

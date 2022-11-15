@@ -1,0 +1,5 @@
+git+ssh://git@github.com/rwxd/python-pip-setup-test.git@v1.1.0
+git+ssh://git@github.com/rwxd/test_package@1.0.0
+git+ssh://git@gitlab.company.com/rwxd/python-package.git@abcde
+git+https://peter@github.com/rwxd/python-pip-setup-test.git@v0.9.0
+git+https://github.com/rwxd/python-pip-setup-test.git@v0.9.0

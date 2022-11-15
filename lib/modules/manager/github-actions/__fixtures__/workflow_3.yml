@@ -1,0 +1,20 @@
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto merge
+        uses: "pascalgn/automerge-action@v0.13.1"
+
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          MERGE_METHOD: squash
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # renovate: tag=v2.3.5 # Comment that Renovate bot has moved Comment that Renovate bot will remove later on
+      - uses: actions/checkout@v1 # Comment that Renovate bot will remove later on
+      - uses: "actions/checkout@v1.1.2" # Comment that Renovate bot will remove later on
+
+      - name: Run a one-line script
+        run: echo Hello, world!

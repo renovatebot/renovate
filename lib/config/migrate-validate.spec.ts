@@ -2,6 +2,7 @@ import { RenovateConfig, getConfig } from '../../test/util';
 import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
@@ -16,6 +17,7 @@ describe('config/migrate-validate', () => {
         warnings: [],
       });
     });
+
     it('handles migration', async () => {
       const input: RenovateConfig = { automerge: 'none' as any };
       const res = await migrateAndValidate(config, input);
@@ -25,6 +27,7 @@ describe('config/migrate-validate', () => {
         warnings: [],
       });
     });
+
     it('handles invalid', async () => {
       const input: RenovateConfig = { foo: 'none' };
       const res = await migrateAndValidate(config, input);

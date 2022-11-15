@@ -1,5 +1,5 @@
 name: Bug report
-description: You've found a bug with Renovate.
+description: Confirmed bugs only. If in doubt, create a Discussion instead.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: markdown
@@ -14,7 +14,7 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
-        - 'WhiteSource Renovate hosted app on github.com'
+        - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted'
     validations:
       required: true
@@ -29,7 +29,7 @@ body:
   - type: dropdown
     id: platform-select
     attributes:
-      label: Please select which platform you are using if self-hosting.
+      label: If you're self-hosting Renovate, select which platform you are using.
       options:
         - 'Azure DevOps (dev.azure.com)'
         - 'Azure DevOps Server'
@@ -47,6 +47,14 @@ body:
     id: platform-version-if-selfhosting
     attributes:
       label: If you're self-hosting Renovate, tell us what version of the platform you run.
+      description: |
+        This field is for the version number of your _platform_, so one of these:
+          - GitHub (.com and Enterprise Server)
+          - GitLab (.com and CE/EE)
+          - Bitbucket Cloud
+          - Bitbucket Server
+          - Azure DevOps
+          - Gitea
     validations:
       required: false
 
@@ -64,7 +72,7 @@ body:
     id: describe-bug
     attributes:
       label: Describe the bug
-      description: 'Do not report any security concerns here. Email [renovate-disclosure@whitesourcesoftware.com](mailto:renovate-disclosure@whitesourcesoftware.com) instead.'
+      description: 'Do not report any security concerns here. Email [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io) instead.'
     validations:
       required: true
 
@@ -75,13 +83,15 @@ body:
       description: |
         Try not to raise a bug report unless you've looked at the logs first.
         If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
-        If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
-        Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
+        If you are using the Renovate App, log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
+        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
+        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
+        Try to highlight the important logs into the issue itself.
       value: |
         <details><summary>Logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste the relevant log(s) here, between the starting and ending backticks
         ```
 
         </details>

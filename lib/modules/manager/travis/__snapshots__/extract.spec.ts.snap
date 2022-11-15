@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/travis/extract extractPackageFile() returns results 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "6",
+      "datasource": "github-tags",
+      "depName": "node",
+      "packageName": "nodejs/node",
+    },
+    {
+      "currentValue": "8",
+      "datasource": "github-tags",
+      "depName": "node",
+      "packageName": "nodejs/node",
+    },
+  ],
+}
+`;

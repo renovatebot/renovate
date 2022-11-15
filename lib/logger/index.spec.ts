@@ -23,16 +23,20 @@ describe('logger/index', () => {
   it('inits', () => {
     expect(logger).toBeDefined();
   });
+
   it('sets and gets context', () => {
     setContext('123test');
     expect(getContext()).toBe('123test');
   });
+
   it('supports logging with metadata', () => {
     expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
   });
+
   it('supports logging with only metadata', () => {
     expect(() => logger.debug({ some: 'meta' })).not.toThrow();
   });
+
   it('supports logging without metadata', () => {
     expect(() => logger.debug('some meta')).not.toThrow();
   });
@@ -61,7 +65,7 @@ describe('logger/index', () => {
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
-    expect(getProblems()).toMatchSnapshot([
+    expect(getProblems()).toMatchObject([
       { msg: 'some meta' },
       { some: 'meta', password: '***********' },
       { some: 'meta', msg: 'message' },
@@ -156,13 +160,14 @@ describe('logger/index', () => {
       constructor(public field: string) {}
     }
 
+    const prBody = 'test';
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
       npmToken: 'token',
       buffer: Buffer.from('test'),
       content: 'test',
-      prBody: 'test',
+      prBody,
       secrets: {
         foo: 'barsecret',
       },
@@ -177,7 +182,7 @@ describe('logger/index', () => {
     expect(logged.npmToken).not.toBe('token');
     expect(logged.buffer).toBe('[content]');
     expect(logged.content).toBe('[content]');
-    expect(logged.prBody).toBe('[Template]');
+    expect(logged.prBody).toBe(prBody);
     expect(logged.secrets.foo).toBe('***********');
     expect(logged.someFn).toBe('[function]');
     expect(logged.someObject.field).toBe('**redacted**');

@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/go/index getDigest support bitbucket digest 1`] = `"123"`;

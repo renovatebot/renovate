@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/meteor/extract extractPackageFile() returns results 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "0.2.0",
+      "datasource": "npm",
+      "depName": "xml2js",
+    },
+    {
+      "currentValue": "0.6.0",
+      "datasource": "npm",
+      "depName": "xml-crypto",
+    },
+    {
+      "currentValue": "0.1.19",
+      "datasource": "npm",
+      "depName": "xmldom",
+    },
+    {
+      "currentValue": "2.7.10",
+      "datasource": "npm",
+      "depName": "connect",
+    },
+    {
+      "currentValue": "2.6.4",
+      "datasource": "npm",
+      "depName": "xmlbuilder",
+    },
+    {
+      "currentValue": "0.2.0",
+      "datasource": "npm",
+      "depName": "querystring",
+    },
+  ],
+}
+`;

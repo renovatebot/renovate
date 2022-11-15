@@ -1,8 +1,7 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { Pr, platform } from '../../../platform';
-import { PrState } from '../../../types';
+import { Pr, platform } from '../../../modules/platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
 import type { BranchConfig } from '../../types';
@@ -19,8 +18,8 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          pr.sourceBranch.startsWith(config.branchPrefix) &&
-          DateTime.fromISO(pr.createdAt) > currentHourStart
+          pr.sourceBranch.startsWith(config.branchPrefix!) &&
+          DateTime.fromISO(pr.createdAt!) > currentHourStart
       );
       const prsRemaining = Math.max(
         0,
@@ -54,12 +53,17 @@ export async function getConcurrentPrsRemaining(
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&
-            pr.state === PrState.Open
+            pr.state === 'open'
           ) {
             openPrs.push(pr);
           }
         } catch (err) {
-          // no-op
+          // istanbul ignore if
+          if (err instanceof ExternalHostError) {
+            throw err;
+          } else {
+            // no-op
+          }
         }
       }
       logger.debug(`${openPrs.length} PRs are currently open`);
@@ -115,6 +119,7 @@ export function getConcurrentBranchesRemaining(
 
       return concurrentRemaining;
     } catch (err) {
+      // TODO: #7154 should never throw
       logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }

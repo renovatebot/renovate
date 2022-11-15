@@ -1,0 +1,134 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/helmfile/extract extractPackageFile() parses multidoc yaml 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "depName": "manifests",
+      "skipReason": "local-chart",
+    },
+    {
+      "currentValue": "7.4.3",
+      "depName": "rabbitmq",
+      "registryUrls": [
+        "https://charts.bitnami.com/bitnami",
+      ],
+    },
+    {
+      "currentValue": "13.7",
+      "depName": "kube-prometheus-stack",
+      "registryUrls": [
+        "https://prometheus-community.github.io/helm-charts",
+      ],
+    },
+    {
+      "depName": "invalid",
+      "skipReason": "invalid-name",
+    },
+    {
+      "depName": "external-dns",
+      "skipReason": "invalid-version",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip chart that does not have specified version 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "depName": "example",
+      "skipReason": "invalid-version",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with special character in the name 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "1.0.0",
+      "depName": "example/example",
+      "registryUrls": [
+        "https://kiwigrid.github.io",
+      ],
+      "skipReason": "unsupported-chart-type",
+    },
+    {
+      "currentValue": "1.0.0",
+      "depName": "example?example",
+      "registryUrls": [
+        "https://kiwigrid.github.io",
+      ],
+      "skipReason": "unsupported-chart-type",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip chart with unknown repository 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": [],
+      "skipReason": "unknown-registry",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip if repository details are not specified 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": [],
+      "skipReason": "unknown-registry",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip local charts 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "depName": "example",
+      "skipReason": "local-chart",
+    },
+  ],
+}
+`;
+
+exports[`modules/manager/helmfile/extract extractPackageFile() skip templetized release with invalid characters 1`] = `
+{
+  "datasource": "helm",
+  "deps": [
+    {
+      "currentValue": "1.0.0",
+      "depName": "!!!!--!",
+      "registryUrls": [
+        "https://charts.helm.sh/stable",
+      ],
+      "skipReason": "unsupported-chart-type",
+    },
+    {
+      "currentValue": "1.0.0",
+      "depName": "example",
+      "registryUrls": [
+        "https://charts.helm.sh/stable",
+      ],
+    },
+  ],
+}
+`;

@@ -1,0 +1,4 @@
+steps:
+  - plugins:
+      - ? ssh://git@github.company.com/some-org/some-plugin.git#v3.2.7
+        : enforce_peer_deps: false

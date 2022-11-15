@@ -1,0 +1,322 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines 1`] = `
+[
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "2.5.0",
+        "datasource": "docker",
+        "depName": "ruby",
+        "depType": "image",
+        "replaceString": "ruby:2.5.0",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "latest",
+        "datasource": "docker",
+        "depName": "hadolint/hadolint",
+        "depType": "image",
+        "replaceString": "hadolint/hadolint:latest",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "latest",
+        "datasource": "docker",
+        "depName": "docker",
+        "depType": "image",
+        "replaceString": "docker:latest",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "dind",
+        "datasource": "docker",
+        "depName": "docker",
+        "depType": "service-image",
+        "replaceString": "docker:dind",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "latest",
+        "datasource": "docker",
+        "depName": "docker",
+        "depType": "image",
+        "replaceString": "docker:latest",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "dind",
+        "datasource": "docker",
+        "depName": "docker",
+        "depType": "service-image",
+        "replaceString": "docker:dind",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.15",
+        "datasource": "docker",
+        "depName": "image-name-test",
+        "depType": "image-name",
+        "replaceString": "image-name-test:1.15",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.15",
+        "datasource": "docker",
+        "depName": "image-name-test",
+        "depType": "image-name",
+        "replaceString": "image-name-test:1.15",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.yaml",
+  },
+]
+`;
+
+exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple image lines with comments 1`] = `
+[
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "10.4.11",
+        "datasource": "docker",
+        "depName": "mariadb",
+        "depType": "service-image",
+        "replaceString": "mariadb:10.4.11",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image",
+        "depType": "service-image",
+        "replaceString": "other/image:1.0.0",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.1.yaml",
+  },
+]
+`;
+
+exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple included image lines 1`] = `
+[
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "10.4.11",
+        "datasource": "docker",
+        "depName": "mariadb",
+        "depType": "service-image",
+        "replaceString": "mariadb:10.4.11",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image",
+        "depType": "service-image",
+        "replaceString": "other/image:1.0.0",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.3.yaml",
+  },
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "12",
+        "datasource": "docker",
+        "depName": "node",
+        "depType": "image",
+        "replaceString": "node:12",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/include.1.yml",
+  },
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "3.11",
+        "datasource": "docker",
+        "depName": "alpine",
+        "depType": "image",
+        "replaceString": "alpine:3.11",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/include.yml",
+  },
+]
+`;
+
+exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts multiple named services 1`] = `
+[
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image1",
+        "depType": "service-image",
+        "replaceString": "other/image1:1.0.0",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image2",
+        "depType": "service-image",
+        "replaceString": "other/image2:1.0.0",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": "sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778",
+        "currentValue": "12.3-1",
+        "datasource": "docker",
+        "depName": "mooseagency/postgresql",
+        "depType": "service-image",
+        "replaceString": "mooseagency/postgresql:12.3-1@sha256:a5a65569456f221ee1f8a0b3b4e2d440eb5830772d9440c9b30b1dbfd454c778",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "10.4.11",
+        "datasource": "docker",
+        "depName": "mariadb",
+        "depType": "service-image",
+        "replaceString": "mariadb:10.4.11",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "11.7",
+        "datasource": "docker",
+        "depName": "postgres",
+        "depType": "service-image",
+        "replaceString": "postgres:11.7",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "latest",
+        "datasource": "docker",
+        "depName": "redis",
+        "depType": "service-image",
+        "replaceString": "redis:latest",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "latest",
+        "datasource": "docker",
+        "depName": "registry.example.com/myimage",
+        "depType": "service-image",
+        "replaceString": "registry.example.com/myimage:latest",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": "sha256:0ecb2ad60",
+        "currentValue": undefined,
+        "datasource": "docker",
+        "depName": "myimage",
+        "depType": "service-image",
+        "replaceString": "myimage@sha256:0ecb2ad60",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "7-jre8",
+        "datasource": "docker",
+        "depName": "tomcat",
+        "depType": "service-image",
+        "replaceString": "tomcat:7-jre8",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.6.yaml",
+  },
+]
+`;
+
+exports[`modules/manager/gitlabci/extract extractAllPackageFiles() extracts named services 1`] = `
+[
+  {
+    "deps": [
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "19.70.8-slim",
+        "datasource": "docker",
+        "depName": "renovate/renovate",
+        "depType": "image-name",
+        "replaceString": "renovate/renovate:19.70.8-slim",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "10.4.11",
+        "datasource": "docker",
+        "depName": "mariadb",
+        "depType": "service-image",
+        "replaceString": "mariadb:10.4.11",
+      },
+      {
+        "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+        "currentDigest": undefined,
+        "currentValue": "1.0.0",
+        "datasource": "docker",
+        "depName": "other/image",
+        "depType": "service-image",
+        "replaceString": "other/image:1.0.0",
+      },
+    ],
+    "packageFile": "lib/modules/manager/gitlabci/__fixtures__/gitlab-ci.5.yaml",
+  },
+]
+`;

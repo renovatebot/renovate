@@ -1,0 +1,1812 @@
+{
+  "name": "shared_preferences",
+  "latest": {
+    "version": "0.5.8",
+    "pubspec": {
+      "name": "shared_preferences",
+      "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+      "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+      "repository": "https://github.com/flutter/plugins",
+      "version": "0.5.8",
+      "flutter": {
+        "plugin": {
+          "platforms": {
+            "android": {
+              "package": "io.flutter.plugins.sharedpreferences",
+              "pluginClass": "SharedPreferencesPlugin"
+            },
+            "ios": {
+              "pluginClass": "FLTSharedPreferencesPlugin"
+            },
+            "linux": {
+              "default_package": "shared_preferences_linux"
+            },
+            "macos": {
+              "default_package": "shared_preferences_macos"
+            },
+            "web": {
+              "default_package": "shared_preferences_web"
+            }
+          }
+        }
+      },
+      "dependencies": {
+        "meta": "^1.0.4",
+        "flutter": {
+          "sdk": "flutter"
+        },
+        "shared_preferences_platform_interface": "^1.0.0",
+        "shared_preferences_linux": "^0.0.2",
+        "shared_preferences_macos": "^0.0.1",
+        "shared_preferences_web": "^0.1.2"
+      },
+      "dev_dependencies": {
+        "flutter_test": {
+          "sdk": "flutter"
+        },
+        "flutter_driver": {
+          "sdk": "flutter"
+        },
+        "test": "any",
+        "e2e": "^0.2.0",
+        "pedantic": "^1.8.0"
+      },
+      "environment": {
+        "sdk": ">=2.1.0 <3.0.0",
+        "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+      }
+    },
+    "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.8.tar.gz",
+    "published": "2020-07-08T04:36:43.412063Z"
+  },
+  "versions": [
+    {
+      "version": "0.1.1",
+      "pubspec": {
+        "version": "0.1.1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs",
+        "homepage": "https://github.com/flutter/plugins"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.1.1.tar.gz",
+      "published": "2017-05-09T18:25:24.268386Z"
+    },
+    {
+      "version": "0.1.2",
+      "retracted": true,
+      "pubspec": {
+        "version": "0.1.2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs",
+        "homepage": "https://github.com/flutter/plugins"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.1.1.tar.gz",
+      "published": "2017-05-09T18:25:24.268386Z"
+    },
+    {
+      "version": "0.2.0",
+      "pubspec": {
+        "version": "0.2.0",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs",
+        "homepage": "https://github.com/flutter/plugins"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.0.tar.gz",
+      "published": "2017-05-11T10:45:03.041329Z"
+    },
+    {
+      "version": "0.2.0+1",
+      "pubspec": {
+        "version": "0.2.0+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.0%2B1.tar.gz",
+      "published": "2017-05-17T07:37:42.515247Z"
+    },
+    {
+      "version": "0.2.3",
+      "pubspec": {
+        "version": "0.2.3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.shared_preferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences"
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.3.tar.gz",
+      "published": "2017-06-03T14:12:51.183087Z"
+    },
+    {
+      "version": "0.2.4",
+      "pubspec": {
+        "version": "0.2.4",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "^0.12.20",
+          "mockito": "^2.0.2"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.4.tar.gz",
+      "published": "2017-06-05T19:33:50.975143Z"
+    },
+    {
+      "version": "0.2.4+1",
+      "pubspec": {
+        "version": "0.2.4+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "^0.12.20",
+          "mockito": "^2.0.2"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.4%2B1.tar.gz",
+      "published": "2017-06-05T19:59:16.090470Z"
+    },
+    {
+      "version": "0.2.5",
+      "pubspec": {
+        "version": "0.2.5",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "0.12.21",
+          "mockito": "^2.0.2"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.2.5.tar.gz",
+      "published": "2017-08-30T17:09:33.914520Z"
+    },
+    {
+      "version": "0.3.0",
+      "pubspec": {
+        "version": "0.3.0",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "A Flutter plugin for reading and writing simple key-value pairs.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.3.0.tar.gz",
+      "published": "2017-12-20T15:38:21.917159Z"
+    },
+    {
+      "version": "0.3.1",
+      "pubspec": {
+        "version": "0.3.1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.3.1.tar.gz",
+      "published": "2018-01-12T15:09:05.976855Z"
+    },
+    {
+      "version": "0.3.2",
+      "pubspec": {
+        "version": "0.3.2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.3.2.tar.gz",
+      "published": "2018-02-05T20:57:27.104550Z"
+    },
+    {
+      "version": "0.3.3",
+      "pubspec": {
+        "version": "0.3.3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=1.8.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.3.3.tar.gz",
+      "published": "2018-02-28T15:41:47.772896Z"
+    },
+    {
+      "version": "0.4.0",
+      "pubspec": {
+        "version": "0.4.0",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.4.0.tar.gz",
+      "published": "2018-03-09T16:12:39.663265Z"
+    },
+    {
+      "version": "0.4.1",
+      "pubspec": {
+        "version": "0.4.1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.4.1.tar.gz",
+      "published": "2018-04-09T08:43:11.818712Z"
+    },
+    {
+      "version": "0.4.2",
+      "pubspec": {
+        "version": "0.4.2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.4.2.tar.gz",
+      "published": "2018-06-01T19:14:21.586501Z"
+    },
+    {
+      "version": "0.4.3",
+      "pubspec": {
+        "version": "0.4.3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.4.3.tar.gz",
+      "published": "2018-10-01T19:17:45.554499Z"
+    },
+    {
+      "version": "0.5.0",
+      "pubspec": {
+        "version": "0.5.0",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.0.tar.gz",
+      "published": "2019-01-24T23:22:56.870865Z"
+    },
+    {
+      "version": "0.5.1+1",
+      "pubspec": {
+        "version": "0.5.1+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.1%2B1.tar.gz",
+      "published": "2019-02-08T02:03:10.911637Z"
+    },
+    {
+      "version": "0.5.1+2",
+      "pubspec": {
+        "version": "0.5.1+2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.1%2B2.tar.gz",
+      "published": "2019-03-15T15:44:55.382574Z"
+    },
+    {
+      "version": "0.5.2",
+      "pubspec": {
+        "version": "0.5.2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.2.tar.gz",
+      "published": "2019-04-09T15:32:00.113895Z"
+    },
+    {
+      "version": "0.5.2+1",
+      "pubspec": {
+        "version": "0.5.2+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.2%2B1.tar.gz",
+      "published": "2019-05-22T16:11:30.917473Z"
+    },
+    {
+      "version": "0.5.2+2",
+      "pubspec": {
+        "version": "0.5.2+2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.2%2B2.tar.gz",
+      "published": "2019-05-30T00:37:40.912286Z"
+    },
+    {
+      "version": "0.5.3",
+      "pubspec": {
+        "version": "0.5.3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=0.1.4 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3.tar.gz",
+      "published": "2019-05-31T22:52:25.471528Z"
+    },
+    {
+      "version": "0.5.3+1",
+      "pubspec": {
+        "version": "0.5.3+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.5.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3%2B1.tar.gz",
+      "published": "2019-06-04T00:34:04.927415Z"
+    },
+    {
+      "version": "0.5.3+2",
+      "pubspec": {
+        "version": "0.5.3+2",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.5.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3%2B2.tar.gz",
+      "published": "2019-07-08T01:27:57.932893Z"
+    },
+    {
+      "version": "0.5.3+3",
+      "pubspec": {
+        "version": "0.5.3+3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.5.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3%2B3.tar.gz",
+      "published": "2019-07-16T01:25:26.525388Z"
+    },
+    {
+      "version": "0.5.3+4",
+      "pubspec": {
+        "version": "0.5.3+4",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.5.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3%2B4.tar.gz",
+      "published": "2019-07-16T12:32:40.229319Z"
+    },
+    {
+      "version": "0.5.3+5",
+      "pubspec": {
+        "version": "0.5.3+5",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.5.0 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.3%2B5.tar.gz",
+      "published": "2019-10-16T22:49:22.744714Z"
+    },
+    {
+      "version": "0.5.4",
+      "pubspec": {
+        "version": "0.5.4",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "e2e": "^0.2.0",
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4.tar.gz",
+      "published": "2019-10-22T00:00:44.785447Z"
+    },
+    {
+      "version": "0.5.4+1",
+      "pubspec": {
+        "version": "0.5.4+1",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "e2e": "^0.2.0",
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B1.tar.gz",
+      "published": "2019-10-25T22:47:57.255730Z"
+    },
+    {
+      "version": "0.5.4+3",
+      "pubspec": {
+        "version": "0.5.4+3",
+        "name": "shared_preferences",
+        "dependencies": {
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "meta": "^1.0.4"
+        },
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "pluginClass": "SharedPreferencesPlugin",
+            "iosPrefix": "FLT"
+          }
+        },
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        },
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "dev_dependencies": {
+          "e2e": "^0.2.0",
+          "test": "any",
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          }
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B3.tar.gz",
+      "published": "2019-10-28T22:44:38.107455Z"
+    },
+    {
+      "version": "0.5.4+5",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "version": "0.5.4+5",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "iosPrefix": "FLT",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B5.tar.gz",
+      "published": "2019-11-13T01:12:51.650387Z"
+    },
+    {
+      "version": "0.5.4+6",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
+        "version": "0.5.4+6",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "iosPrefix": "FLT",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          }
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B6.tar.gz",
+      "published": "2019-11-25T22:46:39.167123Z"
+    },
+    {
+      "version": "0.5.4+8",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "author": "Flutter Team <flutter-dev@googlegroups.com>",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.4+8",
+        "flutter": {
+          "plugin": {
+            "androidPackage": "io.flutter.plugins.sharedpreferences",
+            "iosPrefix": "FLT",
+            "pluginClass": "SharedPreferencesPlugin"
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.6.7 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B8.tar.gz",
+      "published": "2019-12-03T22:28:49.437659Z"
+    },
+    {
+      "version": "0.5.4+9",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.4+9",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.10.0 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.4%2B9.tar.gz",
+      "published": "2019-12-10T04:45:58.964761Z"
+    },
+    {
+      "version": "0.5.5",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.5",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.8 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.5.tar.gz",
+      "published": "2019-12-10T21:43:54.946008Z"
+    },
+    {
+      "version": "0.5.6",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.6",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.4 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.6.tar.gz",
+      "published": "2019-12-11T00:12:47.456859Z"
+    },
+    {
+      "version": "0.5.6+1",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.6+1",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.4 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.6%2B1.tar.gz",
+      "published": "2020-01-23T21:53:34.756279Z"
+    },
+    {
+      "version": "0.5.6+2",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.6+2",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.4 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.6%2B2.tar.gz",
+      "published": "2020-02-20T23:57:05.213425Z"
+    },
+    {
+      "version": "0.5.6+3",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.6+3",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.4 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.6%2B3.tar.gz",
+      "published": "2020-03-10T17:55:26.669980Z"
+    },
+    {
+      "version": "0.5.7",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.7",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.7.tar.gz",
+      "published": "2020-04-21T04:36:13.482589Z"
+    },
+    {
+      "version": "0.5.7+1",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.7+1",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.0.0-dev.28.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.7%2B1.tar.gz",
+      "published": "2020-05-06T02:25:58.787589Z"
+    },
+    {
+      "version": "0.5.7+2",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.7+2",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.1.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.7%2B2.tar.gz",
+      "published": "2020-05-12T03:51:13.065917Z"
+    },
+    {
+      "version": "0.5.7+3",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.7+3",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.1.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.7%2B3.tar.gz",
+      "published": "2020-05-21T19:52:19.756281Z"
+    },
+    {
+      "version": "0.5.8",
+      "pubspec": {
+        "name": "shared_preferences",
+        "description": "Flutter plugin for reading and writing simple key-value pairs. Wraps NSUserDefaults on iOS and SharedPreferences on Android.",
+        "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
+        "version": "0.5.8",
+        "flutter": {
+          "plugin": {
+            "platforms": {
+              "android": {
+                "package": "io.flutter.plugins.sharedpreferences",
+                "pluginClass": "SharedPreferencesPlugin"
+              },
+              "ios": {
+                "pluginClass": "FLTSharedPreferencesPlugin"
+              },
+              "linux": {
+                "default_package": "shared_preferences_linux"
+              },
+              "macos": {
+                "default_package": "shared_preferences_macos"
+              },
+              "web": {
+                "default_package": "shared_preferences_web"
+              }
+            }
+          }
+        },
+        "dependencies": {
+          "meta": "^1.0.4",
+          "flutter": {
+            "sdk": "flutter"
+          },
+          "shared_preferences_platform_interface": "^1.0.0",
+          "shared_preferences_linux": "^0.0.2",
+          "shared_preferences_macos": "^0.0.1",
+          "shared_preferences_web": "^0.1.2"
+        },
+        "dev_dependencies": {
+          "flutter_test": {
+            "sdk": "flutter"
+          },
+          "flutter_driver": {
+            "sdk": "flutter"
+          },
+          "test": "any",
+          "e2e": "^0.2.0",
+          "pedantic": "^1.8.0"
+        },
+        "environment": {
+          "sdk": ">=2.1.0 <3.0.0",
+          "flutter": ">=1.12.13+hotfix.5 <2.0.0"
+        }
+      },
+      "archive_url": "https://pub.dartlang.org/packages/shared_preferences/versions/0.5.8.tar.gz",
+      "published": "2020-07-08T04:36:43.412063Z"
+    }
+  ]
+}

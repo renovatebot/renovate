@@ -26,7 +26,7 @@ export interface LocalConfig extends StorageConfig {
   branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   ignoredAuthors: string[];
-  gitAuthorName?: string;
+  gitAuthorName?: string | null;
   gitAuthorEmail?: string;
 
   writeGitDone?: boolean;
@@ -46,12 +46,14 @@ export interface FileAddition {
   /**
    * File contents
    */
-  contents: string | Buffer;
+  contents: string | Buffer | null;
 
   /**
    * The executable bit
    */
   isExecutable?: boolean;
+
+  isSymlink?: boolean;
 }
 
 export interface FileDeletion {
@@ -77,20 +79,6 @@ export interface CommitFilesConfig {
 }
 
 export type BranchName = string;
-export type TargetBranchName = BranchName;
-export type SourceBranchName = BranchName;
-
-export type GitConflictsCache = Record<TargetBranchName, TargetBranchConflicts>;
-
-export interface TargetBranchConflicts {
-  targetBranchSha: CommitSha;
-  sourceBranches: Record<SourceBranchName, SourceBranchConflict>;
-}
-
-export interface SourceBranchConflict {
-  sourceBranchSha: CommitSha;
-  isConflicted: boolean;
-}
 
 export interface CommitResult {
   parentCommitSha: string;

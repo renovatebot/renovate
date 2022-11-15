@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/artifactory/index getReleases parses real data (files): without slash at the end 1`] = `
+{
+  "registryUrl": "https://jfrog.company.com/artifactory",
+  "releases": [
+    {
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
+      "version": "1.0.2",
+    },
+    {
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
+      "version": "1.0.3",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/artifactory/index getReleases parses real data (folders): with slash at the end 1`] = `
+{
+  "registryUrl": "https://jfrog.company.com/artifactory",
+  "releases": [
+    {
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
+      "version": "1.0.2",
+    },
+    {
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
+      "version": "1.0.3",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/artifactory/index getReleases parses real data (merge strategy with 2 registries) 1`] = `
+{
+  "releases": [
+    {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "releaseTimestamp": "2021-07-21T20:08:00.000Z",
+      "version": "1.0.0",
+    },
+    {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "releaseTimestamp": "2021-08-23T20:03:00.000Z",
+      "version": "1.0.1",
+    },
+    {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "releaseTimestamp": "2021-07-21T20:09:00.000Z",
+      "version": "1.0.2",
+    },
+    {
+      "registryUrl": "https://jfrog.company.com/artifactory",
+      "releaseTimestamp": "2021-02-06T09:54:00.000Z",
+      "version": "1.0.3",
+    },
+    {
+      "registryUrl": "https://jfrog.company.com/artifactory/production",
+      "version": "1.3.0",
+    },
+  ],
+}
+`;

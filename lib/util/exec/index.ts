@@ -3,10 +3,11 @@ import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { TEMPORARY_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { generateInstallCommands, isDynamicInstall } from './buildpack';
 import { rawExec } from './common';
+import { generateInstallCommands, isDynamicInstall } from './containerbase';
 import { generateDockerCommand, removeDockerContainer } from './docker';
 import { getChildProcessEnv } from './env';
+import { getHermitEnvs, isHermit } from './hermit';
 import type {
   DockerOptions,
   ExecOptions,
@@ -52,7 +53,7 @@ function dockerEnvVars(extraEnv: ExtraEnv, childEnv: ExtraEnv): string[] {
   return extraEnvKeys.filter((key) => is.nonEmptyString(childEnv[key]));
 }
 
-function getCwd({ cwd, cwdFile }: ExecOptions): string {
+function getCwd({ cwd, cwdFile }: ExecOptions): string | undefined {
   const defaultCwd = GlobalConfig.get('localDir');
   const paramCwd = cwdFile
     ? upath.join(defaultCwd, upath.dirname(cwdFile))
@@ -100,17 +101,32 @@ async function prepareRawExec(
   opts: ExecOptions = {}
 ): Promise<RawExecArguments> {
   const { docker } = opts;
-  const { customEnvVariables } = GlobalConfig.get();
+  const { customEnvVariables, containerbaseDir, binarySource } =
+    GlobalConfig.get();
+
+  if (binarySource === 'docker' || binarySource === 'install') {
+    logger.debug(`Setting CONTAINERBASE_CACHE_DIR to ${containerbaseDir!}`);
+    opts.env ??= {};
+    opts.env.BUILDPACK_CACHE_DIR = containerbaseDir;
+    opts.env.CONTAINERBASE_CACHE_DIR = containerbaseDir;
+  }
 
   const rawOptions = getRawExecOptions(opts);
 
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug({ image: docker.image }, 'Using docker to execute');
-    const extraEnv = { ...opts.extraEnv, ...customEnvVariables };
+    logger.debug(`Using docker to execute image: ${docker.image}`);
+    const extraEnv = {
+      ...opts.extraEnv,
+      ...customEnvVariables,
+    };
     const childEnv = getChildEnv(opts);
-    const envVars = dockerEnvVars(extraEnv, childEnv);
+    const envVars = [
+      ...dockerEnvVars(extraEnv, childEnv),
+      'BUILDPACK_CACHE_DIR',
+      'CONTAINERBASE_CACHE_DIR',
+    ];
     const cwd = getCwd(opts);
     const dockerOptions: DockerOptions = { ...docker, cwd, envVars };
     const preCommands = [
@@ -124,11 +140,22 @@ async function prepareRawExec(
     );
     rawCommands = [dockerCommand];
   } else if (isDynamicInstall(opts.toolConstraints)) {
-    logger.debug('Using buildpack dynamic installs');
+    logger.debug('Using containerbase dynamic installs');
     rawCommands = [
       ...(await generateInstallCommands(opts.toolConstraints)),
+      ...(opts.preCommands ?? []),
       ...rawCommands,
     ];
+  } else if (isHermit()) {
+    const hermitEnvVars = await getHermitEnvs(rawOptions);
+    logger.debug(
+      { hermitEnvVars },
+      'merging hermit environment variables into the execution options'
+    );
+    rawOptions.env = {
+      ...rawOptions.env,
+      ...hermitEnvVars,
+    };
   }
 
   return { rawCommands, rawOptions };
@@ -139,7 +166,8 @@ export async function exec(
   opts: ExecOptions = {}
 ): Promise<ExecResult> {
   const { docker } = opts;
-  const dockerChildPrefix = GlobalConfig.get('dockerChildPrefix');
+  const dockerChildPrefix =
+    GlobalConfig.get('dockerChildPrefix') ?? 'renovate_';
 
   const { rawCommands, rawOptions } = await prepareRawExec(cmd, opts);
   const useDocker = isDocker(docker);
@@ -150,7 +178,7 @@ export async function exec(
     if (useDocker) {
       await removeDockerContainer(docker.image, dockerChildPrefix);
     }
-    logger.debug({ command: rawCmd }, 'Executing command');
+    logger.trace({ command: rawCmd }, 'Executing command');
     logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);

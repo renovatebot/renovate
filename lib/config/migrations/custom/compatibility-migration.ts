@@ -7,7 +7,7 @@ export class CompatibilityMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.object(value)) {
-      this.setSafely('constraints', value);
+      this.setSafely('constraints', value as Record<string, string>);
     }
   }
 }

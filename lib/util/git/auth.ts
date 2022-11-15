@@ -1,9 +1,9 @@
-import gitUrlParse from 'git-url-parse';
-import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
+import { detectPlatform } from '../common';
 import { regEx } from '../regex';
 import type { AuthenticationRule } from './types';
+import { parseGitUrl } from './url';
 
 /**
  * Add authorization to a Git Url and returns a new environment variables object
@@ -16,7 +16,8 @@ export function getGitAuthenticatedEnvironmentVariables(
 ): NodeJS.ProcessEnv {
   if (!token) {
     logger.warn(
-      `Could not create environment variable for ${matchHost} as token was empty`
+      // TODO: types (#7154)
+      `Could not create environment variable for ${matchHost!} as token was empty`
     );
     return { ...environmentVariables };
   }
@@ -65,11 +66,15 @@ export function getGitAuthenticatedEnvironmentVariables(
 
 function getAuthenticationRulesWithToken(
   url: string,
-  hostType: string | undefined,
+  hostType: string | undefined | null,
   authToken: string
 ): AuthenticationRule[] {
   let token = authToken;
-  if (hostType === PlatformId.Gitlab) {
+  let type = hostType;
+  if (!type) {
+    type = detectPlatform(url);
+  }
+  if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
   return getAuthenticationRules(url, token);
@@ -85,7 +90,8 @@ export function getAuthenticationRules(
 ): AuthenticationRule[] {
   const authenticationRules = [];
   const hasUser = token.split(':').length > 1;
-  const insteadUrl = gitUrlParse(gitUrl);
+  const insteadUrl = parseGitUrl(gitUrl);
+
   const url = { ...insteadUrl };
   const protocol = regEx(/^https?$/).test(url.protocol)
     ? url.protocol

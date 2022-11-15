@@ -1,0 +1,274 @@
+{
+  "dockerfile": [
+    {
+      "packageFile": "Dockerfile",
+      "deps": [
+        {
+          "depName": "ubuntu",
+          "currentValue": "20.04",
+          "replaceString": "ubuntu:20.04",
+          "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+          "datasource": "docker",
+          "versioning": "ubuntu",
+          "depType": "final",
+          "depIndex": 0,
+          "updates": [
+            {
+              "bucket": "major",
+              "newVersion": "jammy",
+              "newValue": "22.04",
+              "newMajor": 22,
+              "newMinor": 4,
+              "updateType": "major",
+              "branchName": "renovate/ubuntu-22.x"
+            }
+          ],
+          "warnings": [],
+          "currentVersion": "20.04",
+          "isSingleVersion": true,
+          "fixedVersion": "20.04"
+        }
+      ]
+    }
+  ],
+  "npm": [
+    {
+      "packageFile": "package.json",
+      "deps": [
+        {
+          "depType": "dependencies",
+          "depName": "cookie-parser",
+          "currentValue": "^1.4.5",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 0,
+          "updates": [],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/expressjs/cookie-parser",
+          "currentVersion": "1.4.6"
+        },
+        {
+          "depType": "dependencies",
+          "depName": "express",
+          "currentValue": "~4.17.1",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 1,
+          "updates": [
+            {
+              "bucket": "non-major",
+              "newVersion": "4.18.1",
+              "newValue": "~4.18.0",
+              "releaseTimestamp": "2022-04-29T19:33:40.441Z",
+              "newMajor": 4,
+              "newMinor": 18,
+              "updateType": "minor",
+              "isRange": true,
+              "branchName": "renovate/express-4.x"
+            }
+          ],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/expressjs/express",
+          "homepage": "http://expressjs.com/",
+          "currentVersion": "4.17.3",
+          "isSingleVersion": false
+        },
+        {
+          "depType": "dependencies",
+          "depName": "express-handlebars",
+          "currentValue": ">=5.3.4",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 2,
+          "updates": [],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/express-handlebars/express-handlebars",
+          "currentVersion": "6.0.5"
+        },
+        {
+          "depType": "dependencies",
+          "depName": "geoip-lite",
+          "currentValue": "1.4.*",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 3,
+          "updates": [],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/geoip-lite/node-geoip",
+          "currentVersion": "1.4.5"
+        },
+        {
+          "depType": "dependencies",
+          "depName": "nodemailer",
+          "currentValue": "6.7.0",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 4,
+          "updates": [
+            {
+              "bucket": "non-major",
+              "newVersion": "6.7.4",
+              "newValue": "6.7.4",
+              "releaseTimestamp": "2022-04-28T21:51:54.336Z",
+              "newMajor": 6,
+              "newMinor": 7,
+              "updateType": "patch",
+              "branchName": "renovate/nodemailer-6.x"
+            }
+          ],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/nodemailer/nodemailer",
+          "homepage": "https://nodemailer.com/",
+          "currentVersion": "6.7.0",
+          "isSingleVersion": true,
+          "fixedVersion": "6.7.0"
+        },
+        {
+          "depType": "dependencies",
+          "depName": "redis",
+          "currentValue": "3.1.2-3.4.0",
+          "datasource": "npm",
+          "prettyDepType": "dependency",
+          "depIndex": 5,
+          "updates": [
+            {
+              "bucket": "rollback",
+              "newMajor": 3,
+              "newValue": "3.1.1",
+              "newVersion": "3.1.1",
+              "updateType": "rollback",
+              "branchName": "renovate/redis-rollback"
+            },
+            {
+              "bucket": "non-major",
+              "newVersion": "3.1.2",
+              "newValue": "3.1.2",
+              "releaseTimestamp": "2021-04-20T22:26:05.946Z",
+              "newMajor": 3,
+              "newMinor": 1,
+              "updateType": "patch",
+              "branchName": "renovate/redis-3.x"
+            },
+            {
+              "bucket": "major",
+              "newVersion": "4.1.0",
+              "newValue": "4.1.0",
+              "releaseTimestamp": "2022-05-02T16:04:07.111Z",
+              "newMajor": 4,
+              "newMinor": 1,
+              "updateType": "major",
+              "branchName": "renovate/redis-4.x"
+            }
+          ],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/redis/node-redis",
+          "currentVersion": "3.1.2-3.4.0",
+          "isSingleVersion": true,
+          "fixedVersion": "3.1.2-3.4.0"
+        },
+        {
+          "depType": "devDependencies",
+          "depName": "dotenv",
+          "currentValue": "10.0.0",
+          "datasource": "npm",
+          "prettyDepType": "devDependency",
+          "depIndex": 6,
+          "updates": [
+            {
+              "bucket": "major",
+              "newVersion": "16.0.0",
+              "newValue": "16.0.0",
+              "releaseTimestamp": "2022-02-02T21:26:07.108Z",
+              "newMajor": 16,
+              "newMinor": 0,
+              "updateType": "major",
+              "branchName": "renovate/dotenv-16.x"
+            }
+          ],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/motdotla/dotenv",
+          "currentVersion": "10.0.0",
+          "isSingleVersion": true,
+          "fixedVersion": "10.0.0"
+        },
+        {
+          "depType": "devDependencies",
+          "depName": "nodemon",
+          "currentValue": "2.0.14",
+          "datasource": "npm",
+          "prettyDepType": "devDependency",
+          "depIndex": 7,
+          "updates": [
+            {
+              "bucket": "non-major",
+              "newVersion": "2.0.16",
+              "newValue": "2.0.16",
+              "releaseTimestamp": "2022-04-29T10:09:23.199Z",
+              "newMajor": 2,
+              "newMinor": 0,
+              "updateType": "patch",
+              "branchName": "renovate/nodemon-2.x"
+            }
+          ],
+          "warnings": [],
+          "versioning": "npm",
+          "sourceUrl": "https://github.com/remy/nodemon",
+          "homepage": "https://nodemon.io",
+          "currentVersion": "2.0.14",
+          "isSingleVersion": true,
+          "fixedVersion": "2.0.14"
+        }
+      ],
+      "managerData": {
+        "yarnZeroInstall": false
+      },
+      "skipInstalls": true,
+      "constraints": {}
+    }
+  ],
+  "poetry": [
+    {
+      "packageFile": "pyproject.toml",
+      "deps": [
+        {
+          "depName": "six",
+          "depType": "dependencies",
+          "currentValue": "<=1.3.0",
+          "managerData": {
+            "nestedVersion": false
+          },
+          "datasource": "pypi",
+          "versioning": "pep440",
+          "depIndex": 0,
+          "updates": [
+            {
+              "bucket": "non-major",
+              "newVersion": "1.16.0",
+              "newValue": "<=1.16.0",
+              "releaseTimestamp": "2021-05-05T14:18:17.000Z",
+              "newMajor": 1,
+              "newMinor": 16,
+              "updateType": "minor",
+              "isRange": true,
+              "branchName": "renovate/six-1.x"
+            }
+          ],
+          "warnings": [],
+          "sourceUrl": "https://github.com/benjaminp/six",
+          "currentVersion": "1.3.0",
+          "isSingleVersion": false
+        }
+      ],
+      "constraints": {
+        "python": "^3.10"
+      }
+    }
+  ]
+}
