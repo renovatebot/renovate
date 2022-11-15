@@ -84,6 +84,7 @@ describe('modules/manager/mint/extract', () => {
     it('Mintfile Includes Commented Out', () => {
       const res = extractPackageFile(codeBlock`
         SwiftGen/SwiftGen@6.6.1
+
         yonaskolb/xcodegen
         #yonaskolb/xcodegen
         realm/SwiftLint@0.48.0 #commented out
