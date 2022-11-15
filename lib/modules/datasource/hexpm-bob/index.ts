@@ -55,20 +55,13 @@ export class HexpmBobDatasource extends Datasource {
         .map((line) => line.trim())
         .filter(is.nonEmptyString)
         .map((line) => {
-          const [version, gitRef, buildDate, newDigest] = line.split(' ');
+          const [version, gitRef, buildDate] = line.split(' ');
 
           return {
-            changelogUrl: this.changelogUrl(version, packageType),
-            downloadUrl: `${
-              registryUrl ?? defaultRegistryUrl
-            }/builds/${packageName}/${version}.tar.gz`,
             gitRef,
             isStable: this.isStable(version, packageType),
             releaseTimestamp: buildDate,
             version: this.cleanVersion(version, packageType),
-            newDigest,
-            constraints: this.constraints(version, packageType),
-            sourceUrl: this.sourceUrl(gitRef, packageType),
           };
         });
     } catch (err) {
@@ -102,16 +95,6 @@ export class HexpmBobDatasource extends Datasource {
   }
 
   // eslint-disable-next-line consistent-return
-  private sourceUrl(gitRef: string, packageType: PackageType): string {
-    switch (packageType) {
-      case 'elixir':
-        return `https://github.com/elixir-lang/elixir/tree/${gitRef}`;
-      case 'erlang':
-        return `https://github.com/erlang/otp/tree/${gitRef}`;
-    }
-  }
-
-  // eslint-disable-next-line consistent-return
   private isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
@@ -121,40 +104,6 @@ export class HexpmBobDatasource extends Datasource {
     }
   }
 
-  // eslint-disable-next-line consistent-return
-  private changelogUrl(
-    version: string,
-    packageType: PackageType
-  ): string | undefined {
-    if (this.isStable(version, packageType)) {
-      return undefined;
-    }
-
-    switch (packageType) {
-      case 'elixir':
-        return `https://github.com/elixir-lang/elixir/releases/tag/${version}`;
-      case 'erlang':
-        return `https://github.com/erlang/otp/releases/tag/${version}`;
-    }
-  }
-
-  private constraints(
-    version: string,
-    packageType: PackageType
-  ): Record<string, string[]> | undefined {
-    if (packageType !== 'elixir') {
-      return undefined;
-    }
-
-    const otpRequirement = version.match(/-otp-(?<otpVersion>\d+)$/);
-
-    if (!otpRequirement) {
-      return undefined;
-    }
-
-    return { erlang: [`^${otpRequirement.groups!.otpVersion}.0`] };
-  }
-
   private getPackageDetails(
     packageType: PackageType
   ): Omit<ReleaseResult, 'releases'> {
@@ -162,16 +111,14 @@ export class HexpmBobDatasource extends Datasource {
     switch (packageType) {
       case 'elixir':
         specificDetails = {
-          changelogUrl: 'https://github.com/elixir-lang/elixir/releases',
           homepage: 'https://elixir-lang.org/',
-          sourceUrl: 'https://github.com/elixir-lang/elixir',
+          sourceUrl: 'https://github.com/elixir-lang/elixir.git',
         };
         break;
       case 'erlang':
         specificDetails = {
-          changelogUrl: 'https://github.com/erlang/otp/releases',
           homepage: 'https://www.erlang.org/',
-          sourceUrl: 'https://github.com/erlang/otp',
+          sourceUrl: 'https://github.com/erlang/otp.git',
         };
         break;
     }
