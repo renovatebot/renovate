@@ -199,7 +199,6 @@ describe('modules/platform/gitea/index', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    jest.clearAllMocks();
     jest.mock('./gitea-helper');
     jest.mock('../../../util/git');
     jest.mock('../../../logger');
