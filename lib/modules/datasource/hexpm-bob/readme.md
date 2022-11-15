@@ -7,4 +7,4 @@ Supported values for `packageName`:
 
 Supported Operating Systems / Versions:
 
-See https://github.com/hexpm/bob#erlang-builds
+See <https://github.com/hexpm/bob#erlang-builds>
