@@ -86,17 +86,16 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierRank {
-  Dev = -1,
-  Default = 0,
-  RC,
-  Snapshot,
-  Final,
-  GA,
-  Release,
-  SP,
-}
+export const QualifierRank = {
+  Dev: -1,
+  Default: 0,
+  RC: 1,
+  Snapshot: 2,
+  Final: 3,
+  GA: 4,
+  Release: 5,
+  SP: 6,
+};
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();
