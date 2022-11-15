@@ -1957,33 +1957,8 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
-        artifactErrors: [{}],
-      } as PackageFilesResult);
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
-      git.branchExists.mockReturnValueOnce(true);
-      git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValueOnce('123test');
-      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
-      const res = await branchWorker.processBranch(config);
-      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
-      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
-      expect(res).toEqual({
-        branchExists: true,
-        commitSha: '123test',
-        prNo: undefined,
-        result: 'done',
-        updatesVerified: true,
-      });
-    });
-
     it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
-      git.branchExists.mockReturnValue(true);
+      git.branchExists.mockReturnValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(false);
       git.getBranchCommit.mockReturnValueOnce('123test');
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
@@ -2009,6 +1984,31 @@ describe('workers/repository/update/branch/index', () => {
       });
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+    });
+
+    it('continues branch, skips automerge if there are artifact errors', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+        updatesVerified: true,
+      });
     });
   });
 });
