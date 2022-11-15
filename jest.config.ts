@@ -232,6 +232,7 @@ const config: JestConfig = {
     '/__mocks__/',
   ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
+  resetMocks: true,
   setupFilesAfterEnv: [
     'jest-extended/all',
     'expect-more-jest',
