@@ -9,7 +9,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const versionPattern = regEx(/^(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$/);
+const versionPattern = regEx(/^(?<version>\d+(?:\.\d+)*)(?<prerelease>\w*)$/);
 const commitHashPattern = regEx(/^[a-f0-9]{7,40}$/);
 const numericPattern = regEx(/^[0-9]+$/);
 
