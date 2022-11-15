@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
+import { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
@@ -1313,12 +1313,12 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: PrState.Merged,
+            state: 'merged',
           },
         ]);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        state: PrState.NotOpen,
+        state: '!open',
       });
       expect(res).toBeDefined();
     });
@@ -1340,7 +1340,7 @@ describe('modules/platform/gitlab/index', () => {
       const res = await gitlab.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toBeDefined();
     });
@@ -1788,7 +1788,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'do something',
           description: 'a merge request',
-          state: PrState.Merged,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -1811,7 +1811,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'Draft: do something',
           description: 'a merge request',
-          state: PrState.Merged,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -1834,7 +1834,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'WIP: do something',
           description: 'a merge request',
-          state: PrState.Merged,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -1857,7 +1857,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'do something',
           description: 'a merge request',
-          state: PrState.Open,
+          state: 'open',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -1881,7 +1881,7 @@ describe('modules/platform/gitlab/index', () => {
           iid: 12345,
           title: 'do something',
           description: 'a merge request',
-          state: PrState.Open,
+          state: 'open',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 2,
           source_branch: 'some-branch',
@@ -1913,7 +1913,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: PrState.Open,
+            state: 'open',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
@@ -1935,7 +1935,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'Draft: foo',
-            state: PrState.Open,
+            state: 'open',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
@@ -1957,7 +1957,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'WIP: foo',
-            state: PrState.Open,
+            state: 'open',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
@@ -1979,7 +1979,7 @@ describe('modules/platform/gitlab/index', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: PrState.Open,
+            state: 'open',
           },
         ])
         .put('/api/v4/projects/undefined/merge_requests/1')
@@ -1989,7 +1989,7 @@ describe('modules/platform/gitlab/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: PrState.Closed,
+          state: 'closed',
         })
       ).toResolve();
     });
@@ -2072,7 +2072,7 @@ These updates have all been created already. Click a checkbox below to force a r
           iid: 12345,
           title: 'some change',
           description: 'a merge request',
-          state: PrState.Merged,
+          state: 'merged',
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',

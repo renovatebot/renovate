@@ -21,7 +21,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -664,7 +664,7 @@ export async function getPr(prNo: number): Promise<GhPr | null> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -693,7 +693,7 @@ export async function getPrList(): Promise<GhPr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -730,7 +730,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
   const openPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   if (openPr) {
     return openPr;
@@ -738,7 +738,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
   const autoclosedPr = await findPr({
     branchName,
-    state: PrState.Closed,
+    state: 'closed',
   });
   if (
     autoclosedPr?.title?.endsWith(' - autoclosed') &&
@@ -1637,7 +1637,7 @@ export async function mergePr({
   );
   const cachedPr = config.prList?.find(({ number }) => number === prNo);
   if (cachedPr) {
-    cachePr({ ...cachedPr, state: PrState.Merged });
+    cachePr({ ...cachedPr, state: 'merged' });
   }
   return true;
 }
