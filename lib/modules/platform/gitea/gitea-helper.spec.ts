@@ -184,7 +184,6 @@ describe('modules/platform/gitea/gitea-helper', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
     setBaseUrl(giteaApiHost);
   });
 

@@ -13,7 +13,6 @@ const config = partial<ExtractConfig>({
 describe('modules/manager/helmv3/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
 

@@ -14,7 +14,6 @@ jest.mock('../../../util/git');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     repoIsOnboarded: true,
     branchPrefix: `renovate/`,

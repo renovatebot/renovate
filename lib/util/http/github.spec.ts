@@ -55,7 +55,6 @@ describe('util/http/github', () => {
     delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
-    jest.resetAllMocks();
     repoCache = {};
     repositoryCache.getCache.mockReturnValue(repoCache);
   });

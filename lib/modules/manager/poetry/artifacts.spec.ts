@@ -54,7 +54,6 @@ describe('modules/manager/poetry/artifacts', () => {
 
   describe('updateArtifacts', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(adminConfig);
       docker.resetPrefetchedImages();

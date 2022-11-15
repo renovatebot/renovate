@@ -48,7 +48,6 @@ describe('modules/manager/nix/artifacts', () => {
   const hostRules = mocked(_hostRules);
 
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

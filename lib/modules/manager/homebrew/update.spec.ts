@@ -10,7 +10,6 @@ const baseUrl = 'https://github.com';
 
 describe('modules/manager/homebrew/update', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
   });
 

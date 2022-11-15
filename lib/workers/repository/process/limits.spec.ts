@@ -7,7 +7,6 @@ import * as limits from './limits';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({
     branchPrefix: 'foo/',
     onboardingBranch: 'bar/configure',

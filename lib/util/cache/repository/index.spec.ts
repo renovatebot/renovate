@@ -12,7 +12,6 @@ const fs = mocked(_fs);
 describe('util/cache/repository/index', () => {
   beforeEach(() => {
     resetCache();
-    jest.resetAllMocks();
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
   });
 

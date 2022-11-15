@@ -27,8 +27,6 @@ describe('util/http/gitlab', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
-
     hostRules.clear();
   });
 

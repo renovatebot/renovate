@@ -42,7 +42,6 @@ describe('util/exec/index', () => {
 
   beforeEach(() => {
     dockerModule.resetPrefetchedImages();
-    jest.resetAllMocks();
     jest.restoreAllMocks();
     jest.resetModules();
     processEnvOrig = process.env;

@@ -9,10 +9,6 @@ const indexYaml = Fixtures.get('index.yaml');
 
 describe('modules/datasource/helm/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null if packageName was not provided', async () => {
       expect(
         await getPkgReleases({

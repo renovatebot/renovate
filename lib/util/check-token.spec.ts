@@ -10,7 +10,6 @@ jest.mock('./host-rules');
 
 describe('util/check-token', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     memCache.reset();
     GlobalConfig.set({ githubTokenWarn: true });
   });

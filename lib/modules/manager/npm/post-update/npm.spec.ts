@@ -14,7 +14,6 @@ process.env.BUILDPACK = 'true';
 
 describe('modules/manager/npm/post-update/npm', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set({ localDir: '' });

@@ -22,10 +22,6 @@ const enterpriseGitPrecommitConfig = Fixtures.get(
 
 describe('modules/manager/pre-commit/extract', () => {
   describe('extractPackageFile()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null for invalid yaml file content', () => {
       const result = extractPackageFile('nothing here: [', filename);
       expect(result).toBeNull();

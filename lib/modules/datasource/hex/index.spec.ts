@@ -19,10 +19,6 @@ describe('modules/datasource/hex/index', () => {
     hostRules.find.mockReturnValue({});
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/packages/non_existent_package').reply(200);

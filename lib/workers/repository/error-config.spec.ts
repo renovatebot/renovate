@@ -14,7 +14,6 @@ jest.mock('../../modules/platform');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   // default values
   config = partial<RenovateConfig>({
     onboardingBranch: 'configure/renovate',

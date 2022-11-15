@@ -17,7 +17,6 @@ describe('workers/repository/extract/index', () => {
     const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
 
     beforeEach(() => {
-      jest.resetAllMocks();
       scm.getFileList.mockResolvedValue(fileList);
       config = getConfig();
     });

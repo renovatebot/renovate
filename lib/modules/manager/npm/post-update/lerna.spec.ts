@@ -37,7 +37,6 @@ describe('modules/manager/npm/post-update/lerna', () => {
 
   describe('generateLockFiles()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       jest.resetModules();
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
       GlobalConfig.set(globalConfig);

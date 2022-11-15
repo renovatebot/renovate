@@ -33,7 +33,6 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
 
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
     GlobalConfig.set(adminConfig);
   });

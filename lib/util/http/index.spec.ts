@@ -320,7 +320,6 @@ describe('util/http/index', () => {
       .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
 
     beforeEach(() => {
-      jest.resetAllMocks();
       memCache.init();
     });
 

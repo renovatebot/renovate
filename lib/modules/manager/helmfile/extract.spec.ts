@@ -12,7 +12,6 @@ describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       GlobalConfig.set({ localDir });
-      jest.resetAllMocks();
     });
 
     it('returns null if no releases', async () => {

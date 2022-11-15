@@ -77,7 +77,6 @@ const goEnv = {
 
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
 
     delete process.env.GOPATH;

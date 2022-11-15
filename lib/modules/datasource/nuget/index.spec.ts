@@ -95,10 +95,6 @@ const configV3Multiple = {
 
 describe('modules/datasource/nuget/index', () => {
   describe('parseRegistryUrl', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('extracts feed version from registry URL hash (v3)', () => {
       const parsed = parseRegistryUrl('https://my-registry#protocolVersion=3');
 
@@ -130,7 +126,6 @@ describe('modules/datasource/nuget/index', () => {
 
   describe('getReleases', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.hosts.mockReturnValue([]);
       hostRules.find.mockReturnValue({});
     });

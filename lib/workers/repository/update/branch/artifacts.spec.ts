@@ -8,7 +8,6 @@ describe('workers/repository/update/branch/artifacts', () => {
 
   beforeEach(() => {
     GlobalConfig.set({});
-    jest.resetAllMocks();
     config = {
       baseBranch: 'base-branch',
       manager: 'some-manager',

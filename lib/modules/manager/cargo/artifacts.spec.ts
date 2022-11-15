@@ -25,7 +25,6 @@ const adminConfig: RepoGlobalConfig = {
 
 describe('modules/manager/cargo/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

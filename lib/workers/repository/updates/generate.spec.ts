@@ -15,7 +15,6 @@ const {
 let requiredDefaultOptions = {};
 
 beforeEach(() => {
-  jest.resetAllMocks();
   requiredDefaultOptions = {
     commitMessage,
     commitMessagePrefix,

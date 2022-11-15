@@ -16,7 +16,6 @@ describe('workers/repository/update/branch/check-existing', () => {
         branchName: 'some-branch',
         prTitle: 'some-title',
       } satisfies BranchConfig;
-      jest.resetAllMocks();
     });
 
     it('returns false if recreating closed PRs', async () => {

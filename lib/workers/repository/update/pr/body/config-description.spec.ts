@@ -10,10 +10,6 @@ describe('workers/repository/update/pr/body/config-description', () => {
       upgrades: [],
     };
 
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('renders stopUpdating=true', () => {
       const res = getPrConfigDescription({
         ...config,

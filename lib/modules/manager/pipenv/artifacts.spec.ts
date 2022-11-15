@@ -46,7 +46,6 @@ describe('modules/manager/pipenv/artifacts', () => {
   let pipFileLock: any;
 
   beforeEach(() => {
-    jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

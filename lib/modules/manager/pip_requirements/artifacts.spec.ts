@@ -41,7 +41,6 @@ botocore==1.27.46 \
 
 describe('modules/manager/pip_requirements/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
     GlobalConfig.set(adminConfig);
   });

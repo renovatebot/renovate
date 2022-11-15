@@ -8,7 +8,6 @@ jest.mock('../../../util/git/semantic');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
   config.warnings = [];

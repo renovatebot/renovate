@@ -16,7 +16,6 @@ describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       memCache.clear();
-      jest.resetAllMocks();
     });
 
     it('returns null for missing pkg', async () => {

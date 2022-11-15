@@ -33,7 +33,6 @@ describe('workers/repository/config-migration/branch/index', () => {
       GlobalConfig.set({
         dryRun: null,
       });
-      jest.resetAllMocks();
       config = getConfig();
       config.branchPrefix = 'some/';
     });

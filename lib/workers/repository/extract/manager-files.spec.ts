@@ -16,7 +16,6 @@ describe('workers/repository/extract/manager-files', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 

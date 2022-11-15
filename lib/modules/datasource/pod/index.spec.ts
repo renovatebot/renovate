@@ -18,10 +18,6 @@ const cocoapodsHost = 'https://cdn.cocoapods.org';
 
 describe('modules/datasource/pod/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns null for invalid inputs', async () => {
       // FIXME: why get request?
       httpMock

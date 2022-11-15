@@ -7,7 +7,6 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 

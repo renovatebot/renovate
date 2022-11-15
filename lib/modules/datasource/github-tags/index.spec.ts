@@ -12,7 +12,6 @@ describe('modules/datasource/github-tags/index', () => {
   const github = new GithubTagsDatasource();
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.spyOn(hostRules, 'hosts').mockReturnValue([]);
     jest.spyOn(hostRules, 'find').mockReturnValue({
       token: 'some-token',

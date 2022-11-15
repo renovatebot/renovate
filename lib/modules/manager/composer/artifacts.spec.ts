@@ -43,7 +43,6 @@ const repoStatus = partial<StatusResult>({
 
 describe('modules/manager/composer/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     docker.resetPrefetchedImages();

@@ -23,7 +23,6 @@ const extract = mocked(_extractUpdate).extract;
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
 });
 

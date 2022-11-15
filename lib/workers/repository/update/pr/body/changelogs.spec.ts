@@ -6,10 +6,6 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/changelogs', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('returns empty string when there is no release notes', () => {
     const res = getChangelogs({
       manager: 'some-manager',

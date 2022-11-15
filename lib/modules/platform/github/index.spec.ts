@@ -33,7 +33,6 @@ const git: jest.Mocked<typeof _git> = mocked(_git);
 
 describe('modules/platform/github/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     github.resetConfigs();
 
     setBaseUrl(githubApiHost);

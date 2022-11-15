@@ -37,7 +37,6 @@ jest.mock('./error-config');
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = partial<RenovateConfig>({ branchList: [] });
 });
 

@@ -36,7 +36,6 @@ describe('modules/datasource/maven/s3', () => {
       matchHost: 'custom.registry.renovatebot.com',
       token: '123test',
     });
-    jest.resetAllMocks();
   });
 
   afterEach(() => {

@@ -70,13 +70,8 @@ describe('modules/datasource/go/index', () => {
 
   describe('getDigest', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     it('returns null for no go-source tag', async () => {

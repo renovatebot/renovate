@@ -36,7 +36,6 @@ const chartFileAlias = Fixtures.get('ChartAlias.yaml');
 
 describe('modules/manager/helmv3/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

@@ -13,7 +13,6 @@ describe('workers/repository/errors-warnings', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 
@@ -46,10 +45,6 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getDepWarningsPR()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns 2 pr warnings text dependencyDashboard true', () => {
       const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
@@ -152,10 +147,6 @@ describe('workers/repository/errors-warnings', () => {
   });
 
   describe('getDepWarningsDashboard()', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('returns dependency dashboard warning text', () => {
       const config: RenovateConfig = {};
       const packageFiles: Record<string, PackageFile[]> = {
@@ -227,7 +218,6 @@ describe('workers/repository/errors-warnings', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
-      jest.resetAllMocks();
       config = partial<RenovateConfig>();
     });
 

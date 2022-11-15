@@ -30,13 +30,8 @@ describe('modules/datasource/go/base', () => {
 
   describe('go-get requests', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
-    });
-
-    afterEach(() => {
-      jest.resetAllMocks();
     });
 
     describe('meta name=go-source', () => {

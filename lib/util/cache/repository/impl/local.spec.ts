@@ -34,7 +34,6 @@ async function createCacheRecord(
 
 describe('util/cache/repository/impl/local', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.set({ cacheDir: '/tmp/cache', platform: 'github' });
     fs.cachePathExists.mockResolvedValue(true);
   });

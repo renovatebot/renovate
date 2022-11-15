@@ -6,10 +6,6 @@ jest.mock('../../../../../util/template');
 const template = mocked(_template);
 
 describe('workers/repository/update/pr/body/footer', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('renders empty footer', () => {
     expect(
       getPrFooter({

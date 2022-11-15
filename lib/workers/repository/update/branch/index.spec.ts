@@ -141,7 +141,6 @@ describe('workers/repository/update/branch/index', () => {
       platform.ensureComment.mockClear();
       platform.ensureCommentRemoval.mockClear();
       commit.commitFilesToBranch.mockClear();
-      jest.resetAllMocks();
       GlobalConfig.reset();
     });
 

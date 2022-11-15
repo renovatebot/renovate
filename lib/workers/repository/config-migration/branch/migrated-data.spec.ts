@@ -26,7 +26,6 @@ const formattedMigratedData = Fixtures.getJson(
 describe('workers/repository/config-migration/branch/migrated-data', () => {
   describe('MigratedDataFactory.getAsync', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       mockedFunction(detectIndent).mockReturnValue({
         type: 'space',
         amount: 2,

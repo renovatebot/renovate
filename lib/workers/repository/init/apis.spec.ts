@@ -19,10 +19,6 @@ describe('workers/repository/init/apis', () => {
       delete config.forkProcessing;
     });
 
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
-
     it('runs', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',

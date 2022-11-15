@@ -18,10 +18,6 @@ import {
 jest.mock('../../../modules/datasource');
 
 describe('util/exec/docker/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('prefetchDockerImage', () => {
     beforeEach(() => {
       resetPrefetchedImages();

@@ -6,7 +6,6 @@ jest.mock('../../../util/fs');
 describe('modules/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       fs.readLocalFile = jest.fn();
     });
 
