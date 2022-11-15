@@ -240,13 +240,14 @@ describe('modules/manager/github-actions/extract', () => {
             'actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0',
         },
         {
-          currentDigest: '1e204e',
+          currentDigestShort: '1e204e',
           currentValue: 'v2.1.0',
           replaceString: 'actions/checkout@1e204e # v2.1.0',
         },
         {
           currentValue: '01aecc#v2.1.0',
           replaceString: 'actions/checkout@01aecc#v2.1.0',
+          skipReason: 'invalid-version',
         },
         {
           currentDigest: '689fcce700ae7ffc576f2b029b51b2ffb66d3abd',
