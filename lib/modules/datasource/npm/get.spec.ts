@@ -15,7 +15,6 @@ const http = new Http('npm');
 
 describe('modules/datasource/npm/get', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
     hostRules.clear();
     setNpmrc();
   });

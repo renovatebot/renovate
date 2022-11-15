@@ -1,10 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type {
-  BranchStatus,
-  HostRule,
-  PrState,
-  VulnerabilityAlert,
-} from '../../types';
+import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -115,7 +110,7 @@ export interface UpdatePrConfig {
   platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
-  state?: PrState.Open | PrState.Closed;
+  state?: 'open' | 'closed';
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -136,7 +131,7 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
+  state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
 }
 export interface MergePRConfig {

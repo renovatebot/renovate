@@ -16,7 +16,6 @@ describe('workers/repository/config-migration/branch/create', () => {
   let migratedConfigData: MigratedData;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     config = getConfig();
     config.baseBranch = 'dev';
     config.defaultBranch = 'master';
