@@ -1,3 +1,4 @@
+import type { lexer } from 'good-enough-parser';
 import type { PackageDependency } from '../types';
 import type { TokenType } from './common';
 
@@ -113,3 +114,19 @@ export interface RichVersion {
 // references cannot themselves be references
 export type GradleVersionPointerTarget = string | RichVersion;
 export type GradleVersionCatalogVersion = string | VersionPointer | RichVersion;
+
+export interface Ctx {
+  readonly packageFile: string;
+  readonly fileContents: Record<string, string | null>;
+  recursionDepth: number;
+
+  globalVars: PackageVariables;
+  deps: PackageDependency<GradleManagerData>[];
+  depRegistryUrls: string[];
+
+  varTokens: lexer.Token[];
+  tmpTokenStore: Record<string, lexer.Token[]>;
+  tokenMap: Record<string, lexer.Token[]>;
+}
+
+export type NonEmptyArray<T> = T[] & { 0: T };
