@@ -15,10 +15,6 @@ describe('util/cache/package/decorator', () => {
     await packageCache.init({ cacheDir: os.tmpdir() });
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should cache string', async () => {
     class MyClass {
       @cache({ namespace: 'namespace', key: 'key' })
