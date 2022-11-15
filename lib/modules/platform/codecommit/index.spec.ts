@@ -10,7 +10,6 @@ import {
   GetRepositoryCommand,
   ListPullRequestsCommand,
   ListRepositoriesCommand,
-  // MergeBranchesBySquashCommand,
   PostCommentForPullRequestCommand,
   UpdatePullRequestDescriptionCommand,
   UpdatePullRequestStatusCommand,
@@ -24,7 +23,6 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { PrState } from '../../../types';
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
 import { CodeCommitPr, config } from './index';
@@ -270,7 +268,7 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toBeNull();
       expect(logger.logger.error).toHaveBeenCalledWith({ err }, 'findPr error');
@@ -296,7 +294,7 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toMatchObject({
         sourceBranch: 'refs/heads/sourceBranch',
@@ -327,7 +325,7 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.All,
+        state: 'all',
       });
       expect(res).toMatchObject({
         sourceBranch: 'refs/heads/sourceBranch',
@@ -345,7 +343,7 @@ describe('modules/platform/codecommit/index', () => {
       const prRes = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: PrState.NotOpen,
+          pullRequestStatus: '!open',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -358,7 +356,7 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.NotOpen,
+        state: '!open',
       });
       expect(res).toMatchObject({
         sourceBranch: 'refs/heads/sourceBranch',
@@ -376,7 +374,7 @@ describe('modules/platform/codecommit/index', () => {
       const prRes = {
         pullRequest: {
           title: 'someTitle',
-          pullRequestStatus: PrState.Closed,
+          pullRequestStatus: 'closed',
           pullRequestTargets: [
             {
               sourceReference: 'refs/heads/sourceBranch',
@@ -403,7 +401,7 @@ describe('modules/platform/codecommit/index', () => {
       const res = await codeCommit.findPr({
         branchName: 'sourceBranch',
         prTitle: 'someTitle',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toBeNull();
     });
@@ -679,7 +677,7 @@ describe('modules/platform/codecommit/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: PrState.Open,
+          state: 'open',
         })
       ).toResolve();
     });
@@ -704,7 +702,7 @@ describe('modules/platform/codecommit/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'new description',
-          state: PrState.Open,
+          state: 'open',
         })
       ).toResolve();
     });
@@ -728,7 +726,7 @@ describe('modules/platform/codecommit/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'new description',
-          state: PrState.Open,
+          state: 'open',
         })
       ).toResolve();
     });
@@ -744,7 +742,7 @@ describe('modules/platform/codecommit/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: PrState.Open,
+          state: 'open',
         })
       ).toResolve();
     });
@@ -758,7 +756,7 @@ describe('modules/platform/codecommit/index', () => {
           number: 1,
           prTitle: 'title',
           prBody: 'body',
-          state: PrState.Closed,
+          state: 'closed',
         })
       ).toResolve();
     });
