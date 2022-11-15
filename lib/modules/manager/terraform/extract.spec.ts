@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
@@ -12,10 +13,6 @@ const providers = Fixtures?.get('providers.tf');
 const docker = Fixtures?.get('docker.tf');
 const kubernetes = Fixtures?.get('kubernetes.tf');
 
-const tf2 = `module "relative" {
-  source = "../fe"
-}
-`;
 const helm = Fixtures?.get('helm.tf');
 const lockedVersion = Fixtures?.get('lockedVersion.tf');
 const lockedVersionLockfile = Fixtures?.get('rangeStrategy.hcl');
@@ -205,7 +202,12 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('returns null if only local deps', async () => {
-      expect(await extractPackageFile(tf2, '2.tf', {})).toBeNull();
+      const src = codeBlock`
+        module "relative" {
+          source = "../fe"
+        }
+      `;
+      expect(await extractPackageFile(src, '2.tf', {})).toBeNull();
     });
 
     it('extract helm releases', async () => {

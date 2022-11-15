@@ -59,7 +59,7 @@ async function handleNonOpenPr(config: BranchConfig, pr: Pr): Promise<void> {
         await deleteBranch(config.branchName);
       }
     }
-  } else if (pr.state === PrState.Merged) {
+  } else if (pr.state === 'merged') {
     logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }

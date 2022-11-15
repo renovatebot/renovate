@@ -39,7 +39,7 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
-import { Limit, isLimitReached } from '../../../global/limits';
+import { isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr } from '../pr';
@@ -140,7 +140,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.Branches) &&
+      isLimitReached('Branches') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -152,7 +152,7 @@ export async function processBranch(
       };
     }
     if (
-      isLimitReached(Limit.Commits) &&
+      isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -199,7 +199,7 @@ export async function processBranch(
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== PrState.Open) {
+        if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
@@ -223,7 +223,7 @@ export async function processBranch(
       } else if (branchIsModified) {
         const oldPr = await platform.findPr({
           branchName: config.branchName,
-          state: PrState.NotOpen,
+          state: '!open',
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
