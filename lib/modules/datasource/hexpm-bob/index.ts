@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -60,7 +61,7 @@ export class HexpmBobDatasource extends Datasource {
             changelogUrl: this.changelogUrl(version, packageType),
             downloadUrl: `${
               registryUrl ?? defaultRegistryUrl
-            }builds/${packageName}/${version}.tar.gz`,
+            }/builds/${packageName}/${version}.tar.gz`,
             gitRef,
             isStable: this.isStable(version, packageType),
             releaseTimestamp: buildDate,
