@@ -58,7 +58,6 @@ describe('util/cache/repository/impl/s3', () => {
 
   beforeEach(() => {
     GlobalConfig.set({ platform: 'github' });
-    jest.clearAllMocks();
     s3Mock.reset();
     s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);

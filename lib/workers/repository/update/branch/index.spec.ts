@@ -18,7 +18,6 @@ import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
 import type { Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { PrState } from '../../../../types';
 import * as _repoCache from '../../../../util/cache/repository';
 import * as _exec from '../../../../util/exec';
 import type { FileChange, StatusResult } from '../../../../util/git/types';
@@ -240,7 +239,7 @@ describe('workers/repository/update/branch/index', () => {
       config.updateNotScheduled = true;
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Open,
+        state: 'open',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
@@ -253,7 +252,7 @@ describe('workers/repository/update/branch/index', () => {
       config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PrState.Closed,
+        state: 'closed',
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -265,7 +264,7 @@ describe('workers/repository/update/branch/index', () => {
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PrState.Closed,
+        state: 'closed',
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -276,7 +275,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PrState.Closed,
+        state: 'closed',
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -287,7 +286,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PrState.Merged,
+        state: 'merged',
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -297,7 +296,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Merged,
+        state: 'merged',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -309,7 +308,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Open,
+        state: 'open',
         labels: ['rebase'],
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -330,7 +329,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: { hash: '' },
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -350,7 +349,7 @@ describe('workers/repository/update/branch/index', () => {
       });
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Open,
+        state: 'open',
         targetBranch: 'v6',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(false);
@@ -948,7 +947,7 @@ describe('workers/repository/update/branch/index', () => {
     it('closed pr (dry run)', async () => {
       git.branchExists.mockReturnValue(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
-        state: PrState.Closed,
+        state: 'closed',
       } as Pr);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(await branchWorker.processBranch(config)).toEqual({
@@ -965,7 +964,7 @@ describe('workers/repository/update/branch/index', () => {
         createdInVer: '1.0.2',
       });
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PrState.Open,
+        state: 'open',
       } as Pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
@@ -992,7 +991,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1031,7 +1030,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1077,7 +1076,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1116,7 +1115,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         labels: ['stop-updating'],
         bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
       } as Pr);
@@ -1141,7 +1140,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
-          state: PrState.Open,
+          state: 'open',
         })
       );
       const inconfig = {
@@ -1178,7 +1177,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'Update dependency',
-        state: PrState.Open,
+        state: 'open',
         labels: ['stop-updating'],
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
@@ -1218,7 +1217,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         labels: ['stop-updating'],
         bodyStruct: { hash: hashBody(`- [ ] <!-- rebase-check -->`) },
       } as Pr);
@@ -1264,7 +1263,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1356,7 +1355,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1439,7 +1438,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1527,7 +1526,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1682,7 +1681,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,
@@ -1831,7 +1830,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
-          state: PrState.Open,
+          state: 'open',
         })
       );
       const inconfig = {
@@ -1867,7 +1866,7 @@ describe('workers/repository/update/branch/index', () => {
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
           sourceBranch: 'old/some-branch',
-          state: PrState.Open,
+          state: 'open',
         })
       );
       config.reuseExistingBranch = true;
@@ -1903,7 +1902,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'pending!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- approve-all-pending-prs -->`),
           rebaseRequested: false,
@@ -1936,7 +1935,7 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'unlimited!',
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- create-all-rate-limited-prs -->`),
           rebaseRequested: false,

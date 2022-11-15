@@ -6,6 +6,7 @@ export interface NewValueConfig {
   rangeStrategy: RangeStrategy;
   currentVersion?: string;
   newVersion: string;
+  isReplacement?: boolean;
 }
 export interface VersioningApi {
   // validation
