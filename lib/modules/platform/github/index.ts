@@ -300,12 +300,10 @@ export async function createFork(
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
-    const organization = (await getForkOrgs(token))[0];
     forkedRepo = (
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
-          organization,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
