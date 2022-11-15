@@ -50,7 +50,6 @@ describe('config/presets/index', () => {
 
     beforeEach(() => {
       config = {};
-      jest.clearAllMocks();
       memCache.init();
     });
 
