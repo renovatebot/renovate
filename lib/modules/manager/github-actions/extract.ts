@@ -13,7 +13,8 @@ const actionRe = regEx(
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = regEx(/^(?:[a-f0-9]{6,7}|[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractWithRegex()');
@@ -60,6 +61,9 @@ function extractWithRegex(content: string): PackageDependency[] {
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigest = currentValue;
+      } else if (shaShortRe.test(currentValue)) {
+        dep.currentValue = tag;
+        dep.currentDigestShort = currentValue;
       } else {
         dep.currentValue = currentValue;
         if (!dockerVersioning.api.isValid(currentValue)) {
