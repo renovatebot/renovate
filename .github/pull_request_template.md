@@ -10,6 +10,7 @@
 
 <!-- Describe why you're making these changes if it's not already explained in a corresponding issue. -->
 <!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number -->
+<!-- If you're referencing and issue with this pull request, use a dash `-` at line start to see the issue title -->
 
 ## Documentation (please check one with an [x])
 
