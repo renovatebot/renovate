@@ -1983,7 +1983,7 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
-      git.branchExists.mockReturnValueOnce(true);
+      git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(false);
       git.getBranchCommit.mockReturnValueOnce('123test');
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
