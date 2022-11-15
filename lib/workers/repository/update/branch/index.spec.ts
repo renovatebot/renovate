@@ -35,7 +35,6 @@ import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
 import type { PackageFilesResult } from './get-updated';
-import { handlepr } from './handle-existing';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as branchWorker from '.';
@@ -255,7 +254,6 @@ describe('workers/repository/update/branch/index', () => {
         number: 13,
         state: 'closed',
       } as Pr);
-      await handlepr(config, partial<Pr>({ state: PrState.NotOpen })); // ensure default behaviour does nothing
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
       expect(git.deleteBranch).toHaveBeenCalledTimes(1);
@@ -289,7 +287,7 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if merged PR found', async () => {
       const pr = partial<Pr>({
         number: 13,
-        state: PrState.Merged,
+        state: 'merged',
       });
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
@@ -332,7 +330,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if edited PR found', async () => {
       const pr = partial<Pr>({
-        state: PrState.Open,
+        state: 'open',
       });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
@@ -342,7 +340,6 @@ describe('workers/repository/update/branch/index', () => {
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(pr);
-      await handlepr(config, partial<Pr>({ state: PrState.NotOpen })); // ensure default behaviour does nothing
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -360,13 +357,12 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if edited PR found without commenting', async () => {
       const pr = partial<Pr>({
-        state: PrState.Open,
+        state: 'open',
       });
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce(pr);
-      await handlepr(config, partial<Pr>({ state: PrState.NotOpen })); // ensure default behaviour does nothing
       const res = await branchWorker.processBranch({
         ...config,
         suppressNotifications: ['prEditedNotification'],
@@ -384,7 +380,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips branch if target branch changed', async () => {
       const pr = partial<Pr>({
-        state: PrState.Open,
+        state: 'open',
       });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
@@ -1010,7 +1006,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('branch pr no rebase (dry run)', async () => {
       const pr = partial<Pr>({
-        state: PrState.Open,
+        state: 'open',
         number: 1,
       });
       git.branchExists.mockReturnValue(true);
@@ -1032,7 +1028,7 @@ describe('workers/repository/update/branch/index', () => {
       const pr = partial<Pr>({
         title: 'rebase!',
         number: 1,
-        state: PrState.Open,
+        state: 'open',
         bodyStruct: {
           hash: hashBody(`- [x] <!-- rebase-check -->`),
           rebaseRequested: true,

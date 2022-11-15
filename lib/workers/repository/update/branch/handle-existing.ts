@@ -5,28 +5,16 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { PrState } from '../../../../types';
 import { emojify } from '../../../../util/emoji';
 import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
-export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
-  switch (pr.state) {
-    case PrState.Open:
-      await handleOpenPr(config, pr);
-      break;
-    case PrState.Closed:
-    case PrState.Merged:
-      await handleNonOpenPr(config, pr);
-      break;
-    default:
-      break;
-  }
-}
-
-async function handleNonOpenPr(config: BranchConfig, pr: Pr): Promise<void> {
-  if (pr.state === PrState.Closed) {
+export async function handleClosedPr(
+  config: BranchConfig,
+  pr: Pr
+): Promise<void> {
+  if (pr.state === 'closed') {
     let content;
     // TODO #7154
     const userStrings = config.userStrings!;
@@ -64,7 +52,7 @@ async function handleNonOpenPr(config: BranchConfig, pr: Pr): Promise<void> {
   }
 }
 
-export async function handleOpenPr(
+export async function handleModifiedPr(
   config: BranchConfig,
   pr: Pr
 ): Promise<void> {

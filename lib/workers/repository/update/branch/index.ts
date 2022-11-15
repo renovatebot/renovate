@@ -21,7 +21,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { BranchStatus, PrState } from '../../../../types';
+import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -50,7 +50,7 @@ import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
 import { getUpdatedPackageFiles } from './get-updated';
-import { handlepr } from './handle-existing';
+import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
@@ -118,7 +118,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      await handlepr(config, existingPr);
+      await handleClosedPr(config, existingPr);
       return {
         branchExists: false,
         prNo: existingPr.number,
@@ -211,7 +211,7 @@ export async function processBranch(
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
-          await handlepr(config, branchPr);
+          await handleModifiedPr(config, branchPr);
           if (!(dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
