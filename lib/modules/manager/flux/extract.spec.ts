@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -86,11 +87,12 @@ describe('modules/manager/flux/extract', () => {
 
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
----
-apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-`,
+        codeBlock`
+          ${Fixtures.get('release.yaml')}
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: HelmRepository
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -98,19 +100,20 @@ kind: HelmRepository
 
     it('ignores HelmRelease resources without a chart name', () => {
       const result = extractPackageFile(
-        `apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: sealed-secrets
-  namespace: kube-system
-spec:
-  chart:
-    spec:
-      sourceRef:
-        kind: HelmRepository
-        name: sealed-secrets
-      version: "2.0.2"
-`,
+        codeBlock`
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+          spec:
+            chart:
+              spec:
+                sourceRef:
+                  kind: HelmRepository
+                  name: sealed-secrets
+                version: "2.0.2"
+        `,
         'test.yaml'
       );
       expect(result).toBeNull();
@@ -118,24 +121,25 @@ spec:
 
     it('does not match HelmRelease resources without a namespace to HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
-        `apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-metadata:
-  name: sealed-secrets
-spec:
-  url: https://bitnami-labs.github.io/sealed-secrets
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-spec:
-  chart:
-    spec:
-      chart: sealed-secrets
-      sourceRef:
-        kind: HelmRepository
-        name: sealed-secrets
-      version: "2.0.2"
-`,
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: HelmRepository
+          metadata:
+            name: sealed-secrets
+          spec:
+            url: https://bitnami-labs.github.io/sealed-secrets
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          spec:
+            chart:
+              spec:
+                chart: sealed-secrets
+                sourceRef:
+                  kind: HelmRepository
+                  name: sealed-secrets
+                version: "2.0.2"
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -143,18 +147,19 @@ spec:
 
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('source.yaml')}
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-metadata:
-  name: sealed-secrets
-spec:
-  chart:
-    spec:
-      chart: sealed-secrets
-      version: "2.0.2"
-`,
+        codeBlock`
+          ${Fixtures.get('source.yaml')}
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          metadata:
+            name: sealed-secrets
+          spec:
+            chart:
+              spec:
+                chart: sealed-secrets
+                version: "2.0.2"
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -162,19 +167,20 @@ spec:
 
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('source.yaml')}
----
-apiVersion: helm.toolkit.fluxcd.io/v2beta1
-kind: HelmRelease
-spec:
-  chart:
-    spec:
-      chart: sealed-secrets
-      sourceRef:
-        kind: HelmRepository
-        name: sealed-secrets
-      version: "2.0.2"
-`,
+        codeBlock`
+          ${Fixtures.get('source.yaml')}
+          ---
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+          kind: HelmRelease
+          spec:
+            chart:
+              spec:
+                chart: sealed-secrets
+                sourceRef:
+                  kind: HelmRepository
+                  name: sealed-secrets
+                version: "2.0.2"
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -182,13 +188,14 @@ spec:
 
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
----
-apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-metadata:
-  name: test
-`,
+        codeBlock`
+          ${Fixtures.get('release.yaml')}
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: HelmRepository
+          metadata:
+            name: test
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -196,14 +203,15 @@ metadata:
 
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
-        `${Fixtures.get('release.yaml')}
----
-apiVersion: source.toolkit.fluxcd.io/v1beta1
-kind: HelmRepository
-metadata:
-  name: sealed-secrets
-  namespace: kube-system
-`,
+        codeBlock`
+          ${Fixtures.get('release.yaml')}
+          ---
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: HelmRepository
+          metadata:
+            name: sealed-secrets
+            namespace: kube-system
+        `,
         'test.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
@@ -211,8 +219,10 @@ metadata:
 
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
-        `kind: SomethingElse
-apiVersion: helm.toolkit.fluxcd.io/v2beta1`,
+        codeBlock`
+          kind: SomethingElse
+          apiVersion: helm.toolkit.fluxcd.io/v2beta1
+        `,
         'test.yaml'
       );
       expect(result).toBeNull();

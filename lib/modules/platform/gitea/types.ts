@@ -1,11 +1,9 @@
-import type { PrState } from '../../../types';
-
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
 }
 
-export type PRState = PrState.Open | PrState.Closed | PrState.All;
+export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
   | 'pending'
