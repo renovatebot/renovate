@@ -169,18 +169,18 @@ export async function initPlatform({
   const githubDS: HostRule[] = [];
   const gitHubRule: HostRule[] = [
     {
-      matchHost: '.pkg.github.com',
-    },
-    {
       matchHost: 'ghcr.io',
+      username: renovateUsername,
+      password: token,
     },
   ];
-  for (const rule of gitHubRule) {
-    (['token'] as 'token'[]).forEach((field) => {
-      if (token) {
-        rule[field] = token;
-      }
+  if (!platformConfig.isGhe) {
+    gitHubRule.push({
+      matchHost: '.pkg.github.com',
+      token,
     });
+  }
+  for (const rule of gitHubRule) {
     githubDS.push(rule);
     hostRules.add(rule);
   }
