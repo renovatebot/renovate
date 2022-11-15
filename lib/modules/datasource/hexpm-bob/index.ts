@@ -52,7 +52,7 @@ export class HexpmBobDatasource extends Datasource {
       result.releases = body
         .split('\n')
         .map((line) => line.trim())
-        .filter((line) => line !== '')
+        .filter(is.nonEmptyString)
         .map((line) => {
           const [version, gitRef, buildDate, newDigest] = line.split(' ');
 
@@ -63,7 +63,7 @@ export class HexpmBobDatasource extends Datasource {
             }builds/${packageName}/${version}.tar.gz`,
             gitRef,
             isStable: this.isStable(version, packageType),
-            releaseTimestamp: new Date(buildDate).getTime(),
+            releaseTimestamp: buildDate,
             version: this.cleanVersion(version, packageType),
             newDigest,
             constraints: this.constraints(version, packageType),
