@@ -45,18 +45,10 @@ export class DenoDatasource extends Datasource {
     const extractResult = regEx(
       '^(https:\\/\\/deno.land\\/)(?<rawPackageName>[^@\\s]+)'
     ).exec(packageName);
-    if (is.nullOrUndefined(extractResult)) {
-      logger.debug(
-        `Could not match package regex against packageName: "${packageName}"`
-      );
-      return null;
-    }
-
-    const rawPackageName = extractResult.groups?.rawPackageName;
-    // istanbul ignore if
+    const rawPackageName = extractResult?.groups?.rawPackageName;
     if (is.nullOrUndefined(rawPackageName)) {
       logger.debug(
-        `Could not extract rawPackageName from package regex: "${packageName}"`
+        `Could not extract rawPackageName from packageName: "${packageName}"`
       );
       return null;
     }
