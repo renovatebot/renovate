@@ -1966,9 +1966,9 @@ describe('workers/repository/update/branch/index', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      git.branchExists.mockReturnValue(true);
+      git.branchExists.mockReturnValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(true);
-      git.getBranchCommit.mockReturnValue('123test');
+      git.getBranchCommit.mockReturnValueOnce('123test');
       platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
       const res = await branchWorker.processBranch(config);
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
@@ -1983,9 +1983,9 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
-      git.branchExists.mockReturnValue(true);
+      git.branchExists.mockReturnValueOnce(true);
       git.isBranchModified.mockResolvedValueOnce(false);
-      git.getBranchCommit.mockReturnValue('123test');
+      git.getBranchCommit.mockReturnValueOnce('123test');
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [partial<FileChange>({})],
