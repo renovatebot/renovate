@@ -39,8 +39,8 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
-import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { isLimitReached } from '../../../global/limits';
+import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -362,7 +362,7 @@ export async function processBranch(
           }
         }
       }
-      // Don't create a branch if we know it will be status Process'pending'
+      // Don't create a branch if we know it will be status 'pending'
       if (
         !dependencyDashboardCheck &&
         !branchExists &&
@@ -566,7 +566,6 @@ export async function processBranch(
       return {
         branchExists: true,
         updatesVerified,
-        prNo: branchPr?.number,
         result: 'pending',
         commitSha,
       };
