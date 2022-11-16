@@ -16,6 +16,7 @@ export function getPrCache(branchName: string): PrCache | null {
   return null;
 }
 
+// store the time a PR was last updated
 export function setPrCache(branchName: string, fingerprint: string): void {
   logger.debug(`setPrCache()`);
   const cache = getCache();
