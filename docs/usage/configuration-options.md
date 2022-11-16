@@ -2654,6 +2654,7 @@ You can use the `registryAliases` object to set registry aliases.
 This feature works with the following managers:
 
 - [`ansible`](/modules/manager/ansible)
+- [`cargo`](/modules/manager/cargo)
 - [`docker-compose`](/modules/manager/docker-compose)
 - [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
