@@ -1,4 +1,4 @@
-// Api page size limit 50
+// API page size limit 50
 export const pageSize = 50;
 
 export const defaultRegistryUrl = 'https://repo.hex.pm';
