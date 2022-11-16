@@ -1,8 +1,6 @@
-import { TokenType } from './common';
 import type { VariableRegistry } from './types';
 import {
   getVars,
-  interpolateString,
   isDependencyString,
   parseDependencyString,
   reorderFiles,
@@ -74,34 +72,6 @@ describe('modules/manager/gradle/utils', () => {
     expect(parseDependencyString("foo:bar:1.2.3'")).toBeNull();
     expect(parseDependencyString('foo:bar:1.2.3"')).toBeNull();
     expect(parseDependencyString('-Xep:ParameterName:OFF')).toBeNull();
-  });
-
-  it('interpolateString', () => {
-    expect(interpolateString([], {})).toBeEmptyString();
-    expect(
-      interpolateString(
-        [
-          { type: TokenType.String, value: 'foo' },
-          { type: TokenType.Variable, value: 'bar' },
-          { type: TokenType.String, value: 'baz' },
-        ] as never,
-        {
-          bar: { value: 'BAR' },
-        } as never
-      )
-    ).toBe('fooBARbaz');
-    expect(
-      interpolateString(
-        [{ type: TokenType.Variable, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
-    expect(
-      interpolateString(
-        [{ type: TokenType.UnknownFragment, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
   });
 
   it('reorderFiles', () => {
