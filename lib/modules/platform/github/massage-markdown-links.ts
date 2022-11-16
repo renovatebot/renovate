@@ -12,9 +12,15 @@ interface UrlMatch {
 
 const urlRegex =
   /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-_a-z0-9]+\/[-_a-z0-9]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
+const reduceUrlRegex =
+  /(?:https?:)?(?:\/\/)?(?:www\.)?github\.com\/(?<org>[a-zA-Z1-9\-_.]*)\/(?<repo>[a-zA-Z1-9\-_.]*)\/([a-zA-Z1-9\-_.]*)\/(?<number>[\d]+)/g;
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
+}
+
+function reduceLink(input: string): string {
+  return input.replace(regEx(reduceUrlRegex), '$<org>/$<repo>#$<number>');
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
@@ -41,7 +47,11 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         const start = startOffset + (match.index ?? 0);
         const end = start + url.length;
         const newUrl = massageLink(url);
-        matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
+        matches.push({
+          start,
+          end,
+          replaceTo: `[${reduceLink(url)}](${newUrl})`,
+        });
       }
     } else if ('children' in tree) {
       tree.children.forEach((child: Content) => {
@@ -57,12 +67,18 @@ export function massageMarkdownLinks(content: string): string {
   try {
     const rightSpaces = content.replace(content.trimEnd(), '');
     const matches: UrlMatch[] = [];
-    remark().use(collectLinkPosition(content, matches)).processSync(content);
+    const newContent = content.replace(
+      regEx(/@&#8203;(?<name>[a-z1-9\-_.]*)/gi),
+      '[@$<name>](https://togithub.com/$<name>)'
+    );
+    remark()
+      .use(collectLinkPosition(newContent, matches))
+      .processSync(newContent);
     const result = matches.reduceRight((acc, { start, end, replaceTo }) => {
       const leftPart = acc.slice(0, start);
       const rightPart = acc.slice(end);
       return leftPart + replaceTo + rightPart;
-    }, content);
+    }, newContent);
     return result.trimEnd() + rightSpaces;
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, `Unable to massage markdown text`);
