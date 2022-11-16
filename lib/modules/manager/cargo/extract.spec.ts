@@ -6,6 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { writeLocalFile } from '../../../util/fs';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
+import { codeBlock } from 'common-tags';
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
 const cargo2toml = Fixtures.get('Cargo.2.toml');
@@ -113,7 +114,7 @@ describe('modules/manager/cargo/extract', () => {
     });
 
     it('extracts workspace dependencies', async () => {
-      const cargoToml = `
+      const cargoToml = codeBlock`
 [package]
 name = "renovate-test"
 version = "0.1.0"
