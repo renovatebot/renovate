@@ -557,10 +557,10 @@ export async function processBranch(
     // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
     if (
-      !branchPr &&
       !config.artifactErrors?.length && 
       !userRebaseRequested &&
       commitSha &&
+      !branchPr &&
       config.prCreation !== 'immediate'
     ) {
       logger.debug(`Branch status pending, current sha: ${commitSha}`);
