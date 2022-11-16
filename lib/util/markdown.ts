@@ -18,6 +18,11 @@ export function sanitizeMarkdown(markdown: string): string {
   const backTickRe = regEx(/&#x60;([^/]*?)&#x60;/g);
   res = res.replace(backTickRe, '`$1`');
   res = res.replace(regEx(/`#&#8203;(\d+)`/g), '`#$1`');
+  // change hyperlink for tagged names with togithub domain
+  res = res.replace(
+    regEx(/\s+@&#8203;(?<name>[^ ]+)/gi),
+    ' [@$<name>](https://togithub.com/$<name>)'
+  );
   res = res.replace(
     regEx(/(?<before>[^\n]\n)(?<title>#.*)/g),
     '$<before>\n$<title>'

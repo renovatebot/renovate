@@ -1,3 +1,4 @@
+import { sanitizeMarkdown } from '../../../util/markdown';
 import { massageMarkdownLinks } from './massage-markdown-links';
 
 describe('modules/platform/github/massage-markdown-links', () => {
@@ -90,11 +91,11 @@ describe('modules/platform/github/massage-markdown-links', () => {
 
   it('replace url contains disappear text inline', () => {
     const input = [
-      'pnpm rebuild accepts --store-dir by @&#8203;user in https://github.com/foo/bar/issues/1\n' +
-        'pnpm rebuild accepts --store-dir by @&#8203;UsEr in https://github.com/foo/bar/issues/2\n' +
-        'pnpm rebuild accepts --store-dir by @&#8203;user-name in https://github.com/foo/bar/issues/3',
+      'pnpm rebuild accepts --store-dir by @user in https://github.com/foo/bar/issues/1\n' +
+        'pnpm rebuild accepts --store-dir by @UsEr in https://github.com/foo/bar/issues/2\n' +
+        'pnpm rebuild accepts --store-dir by @user-name in https://github.com/foo/bar/issues/3',
     ].join('\n');
-    const res = massageMarkdownLinks(input);
+    const res = massageMarkdownLinks(sanitizeMarkdown(input));
     expect(res).toEqual(
       [
         'pnpm rebuild accepts --store-dir by [@user](https://togithub.com/user) in [foo/bar#1](https://togithub.com/foo/bar/issues/1)\n' +
