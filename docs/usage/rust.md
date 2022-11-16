@@ -19,7 +19,7 @@ Renovate supports upgrading dependencies in `Cargo.toml` files and their accompa
 
 Renovate updates Rust crates by default.
 
-## Private crate registries and private Git dependencies
+## Private git-based crate registries / private Git dependencies
 
 If any dependencies are hosted in private Git repositories, [Git Authentication for cargo](https://doc.rust-lang.org/cargo/appendix/git-authentication.html) must be set up.
 
@@ -27,3 +27,10 @@ If any dependencies are hosted on private crate registries (i.e., not on `crates
 Third-party crate registries usually provide instructions to achieve this.
 
 Both of these are currently only possible when running Renovate self-hosted.
+
+## Private sparse index registries
+
+If dependencies are available via a sparse index, then a `registryAlias` can be
+used to have Renovate accesss the dependencies via the sparse protocol. Use
+`HostRules` to provide authentication details if needed. Crates-io index access
+will still be via Renovates shared clone of the public git index.
