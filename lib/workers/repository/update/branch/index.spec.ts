@@ -1955,5 +1955,59 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
       });
     });
+
+    it('continues branch, skips automerge if there are artifact errors', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+        updatesVerified: true,
+      });
+    });
+
+    it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      platform.getBranchPr.mockResolvedValueOnce({
+        state: 'open',
+      } as Pr);
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      const inconfig = {
+        ...config,
+        prCreation: 'not-pending',
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: '123test',
+      });
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+    });
   });
 });
