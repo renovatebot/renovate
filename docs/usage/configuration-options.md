@@ -2653,15 +2653,15 @@ You can use the `registryAliases` object to set registry aliases.
 
 This feature works with the following managers:
 
-- [`helm-requirements`](/modules/manager/helm-requirements/)
-- [`helmv3`](/modules/manager/helmv3/)
-- [`helmfile`](/modules/manager/helmfile/)
-- [`gitlabci`](/modules/manager/gitlabci/)
-- [`dockerfile`](/modules/manager/dockerfile)
-- [`docker-compose`](/modules/manager/docker-compose)
-- [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
+- [`docker-compose`](/modules/manager/docker-compose)
+- [`dockerfile`](/modules/manager/dockerfile)
 - [`droneci`](/modules/manager/droneci)
+- [`gitlabci`](/modules/manager/gitlabci/)
+- [`helm-requirements`](/modules/manager/helm-requirements/)
+- [`helmfile`](/modules/manager/helmfile/)
+- [`helmv3`](/modules/manager/helmv3/)
+- [`kubernetes`](/modules/manager/kubernetes)
 
 ## registryUrls
 
