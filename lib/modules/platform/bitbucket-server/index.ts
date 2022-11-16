@@ -8,7 +8,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
