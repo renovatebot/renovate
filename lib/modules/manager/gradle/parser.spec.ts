@@ -1,12 +1,7 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
-import {
-  GOOGLE_REPO,
-  GRADLE_PLUGIN_PORTAL_REPO,
-  JCENTER_REPO,
-  MAVEN_REPO,
-} from './common';
 import { parseGradle, parseProps } from './parser';
+import { REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -140,11 +135,11 @@ describe('modules/manager/gradle/parser', () => {
     describe('predefined registries', () => {
       test.each`
         input                                          | output
-        ${'mavenCentral()'}                            | ${MAVEN_REPO}
-        ${'google()'}                                  | ${GOOGLE_REPO}
-        ${'google { content { includeGroup "foo" } }'} | ${GOOGLE_REPO}
-        ${'gradlePluginPortal()'}                      | ${GRADLE_PLUGIN_PORTAL_REPO}
-        ${'jcenter()'}                                 | ${JCENTER_REPO}
+        ${'mavenCentral()'}                            | ${REGISTRY_URLS.mavenCentral}
+        ${'google()'}                                  | ${REGISTRY_URLS.google}
+        ${'google { content { includeGroup "foo" } }'} | ${REGISTRY_URLS.google}
+        ${'gradlePluginPortal()'}                      | ${REGISTRY_URLS.gradlePluginPortal}
+        ${'jcenter()'}                                 | ${REGISTRY_URLS.jcenter}
       `('$input', ({ input, output }) => {
         const { urls } = parseGradle(input);
         expect(urls).toStrictEqual([output].filter(Boolean));
