@@ -144,7 +144,6 @@ tokio = { version = "1.21.1" }`;
           depName: 'serde',
           depType: 'dependencies',
           managerData: { nestedVersion: false },
-          target: 'dependencies',
         },
         {
           currentValue: '1.21.1',
@@ -154,7 +153,6 @@ tokio = { version = "1.21.1" }`;
           managerData: {
             nestedVersion: true,
           },
-          target: 'dependencies',
         },
       ]);
     });
