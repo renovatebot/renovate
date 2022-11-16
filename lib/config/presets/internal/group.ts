@@ -71,7 +71,6 @@ const staticGroups = {
       'group:rubyOnRails',
       'group:rubyOmniauth',
       'group:socketio',
-      'group:shedLock',
       'group:springAmqp',
       'group:springAndroid',
       'group:springBatch',
@@ -246,15 +245,6 @@ const staticGroups = {
       {
         matchPackagePrefixes: ['io.github.resilience4j:'],
         groupName: 'resilience4j',
-      },
-    ],
-  },
-  shedLock: {
-    description: 'Group Java ShedLock packages.',
-    packageRules: [
-      {
-        groupName: 'shedlock',
-        matchPackagePrefixes: ['net.javacrumbs.shedlock:'],
       },
     ],
   },
