@@ -9,7 +9,6 @@ import {
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { PlatformId } from '../../constants';
 import type {
   PackageDependency,
   PackageFile,
@@ -32,10 +31,9 @@ const getIssueSpy = platform.getIssue;
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
-  config.platform = PlatformId.Github;
+  config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });
@@ -67,10 +65,9 @@ function genRandPackageFile(
 async function dryRun(
   branches: BranchConfig[],
   platform: jest.MockedObject<Platform>,
-  ensureIssueClosingCalls = 0,
-  ensureIssueCalls = 0
+  ensureIssueClosingCalls: number,
+  ensureIssueCalls: number
 ) {
-  jest.clearAllMocks();
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
@@ -173,7 +170,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('do nothing if it has no dependencyDashboardApproval branches', async () => {
@@ -193,7 +190,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true', async () => {
@@ -208,7 +205,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
@@ -235,7 +232,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
@@ -252,7 +249,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
@@ -283,7 +280,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
@@ -365,7 +362,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {
@@ -402,7 +399,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
@@ -447,7 +444,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR closed / ignored', async () => {
@@ -482,7 +479,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in approval', async () => {
@@ -532,7 +529,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('contains logged problems', async () => {
@@ -764,7 +761,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ]);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     describe('checks detected dependencies section', () => {
@@ -793,7 +790,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -805,7 +802,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -817,7 +814,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('shows different combinations of version+digest for a given dependency', async () => {
@@ -828,7 +825,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -846,7 +843,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -857,7 +854,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -868,7 +865,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('truncates the body of a really big repo', async () => {
@@ -884,7 +881,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ).toBeTrue();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -919,7 +916,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 

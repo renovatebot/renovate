@@ -5,11 +5,10 @@ import { DebianVersioningApi } from '.';
 describe('modules/versioning/debian/index', () => {
   const dt = DateTime.fromISO('2022-04-20');
 
-  const spy = jest.spyOn(Settings, 'now');
   const debian = new DebianVersioningApi();
 
   beforeEach(() => {
-    spy.mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
   });
 
   afterEach(() => {
@@ -65,7 +64,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldoldstable'} | ${true}
     ${'experimental'} | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    spy.mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
     expect(debian.isValid(version)).toBe(expected);
   });
 
@@ -148,7 +147,7 @@ describe('modules/versioning/debian/index', () => {
     ${'oldstable'}    | ${true}
     ${'oldoldstable'} | ${true}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    spy.mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
     expect(debian.isStable(version)).toBe(expected);
   });
 
@@ -174,9 +173,9 @@ describe('modules/versioning/debian/index', () => {
   it('checks runtime date handling & refresh rolling release data', () => {
     const future = DateTime.now().toUTC().plus({ year: 3 }).valueOf();
     const past = DateTime.fromISO('2019-08-06', { zone: 'UTC' }).valueOf();
-    spy.mockReturnValue(past);
+    Settings.now = () => past.valueOf();
     expect(debian.isStable('buster')).toBeTrue();
-    spy.mockReturnValue(future);
+    Settings.now = () => future.valueOf();
     expect(debian.isStable('buster')).toBeFalse();
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
@@ -382,7 +381,7 @@ describe('modules/versioning/debian/index', () => {
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
-      spy.mockReturnValue(dt.valueOf());
+      Settings.now = () => dt.valueOf();
       expect(
         debian.getNewValue({
           currentValue,

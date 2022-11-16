@@ -9,7 +9,8 @@
 ## Context
 
 <!-- Describe why you're making these changes if it's not already explained in a corresponding issue. -->
-<!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number -->
+<!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number. -->
+<!-- If you're referencing an issue with this pull request, put it in a Markdown list like this: - #issue_number. -->
 
 ## Documentation (please check one with an [x])
 

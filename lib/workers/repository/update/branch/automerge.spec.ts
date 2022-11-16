@@ -17,10 +17,6 @@ describe('workers/repository/update/branch/automerge', () => {
       GlobalConfig.reset();
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns false if not configured for automerge', async () => {
       config.automerge = false;
       expect(await tryBranchAutomerge(config)).toBe('no automerge');
@@ -66,18 +62,28 @@ describe('workers/repository/update/branch/automerge', () => {
     it('returns false if automerge fails', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       git.mergeBranch.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
-      expect(await tryBranchAutomerge(config)).toBe('failed');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('failed');
+      expect(git.checkoutBranch).toHaveBeenCalled();
     });
 
     it('returns true if automerge succeeds', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
+      config.baseBranch = 'test-branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      expect(await tryBranchAutomerge(config)).toBe('automerged');
+
+      const res = await tryBranchAutomerge(config);
+
+      expect(res).toBe('automerged');
+      expect(git.checkoutBranch).toHaveBeenCalledWith('test-branch');
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {

@@ -63,6 +63,7 @@ const staticGroups = {
       'group:jekyllEcosystem',
       'group:jestPlusTSJest',
       'group:jestPlusTypes',
+      'group:jwtFramework',
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
@@ -681,6 +682,16 @@ const staticGroups = {
         matchPackageNames: ['@types/jest'],
         matchUpdateTypes: nonPinUpdateTypes,
         groupName: 'jest monorepo',
+      },
+    ],
+  },
+  jwtFramework: {
+    description: 'Group JWT Framework packages together.',
+    packageRules: [
+      {
+        matchDatasources: ['packagist'],
+        matchPackagePrefixes: ['web-token/'],
+        groupName: 'JWT Framework packages',
       },
     ],
   },

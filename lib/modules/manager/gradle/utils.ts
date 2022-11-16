@@ -1,11 +1,9 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
-import { TokenType } from './common';
 import type {
   GradleManagerData,
   PackageVariables,
-  Token,
   VariableRegistry,
 } from './types';
 
@@ -26,11 +24,17 @@ export function versionLikeSubstring(
 
 export function isDependencyString(input: string): boolean {
   const split = input?.split(':');
-  if (split?.length !== 3) {
+  if (split?.length !== 3 && split?.length !== 4) {
     return false;
   }
   // eslint-disable-next-line prefer-const
-  let [tempGroupId, tempArtifactId, tempVersionPart] = split;
+  let [tempGroupId, tempArtifactId, tempVersionPart, optionalClassifier] =
+    split;
+
+  if (optionalClassifier && !artifactRegex.test(optionalClassifier)) {
+    return false;
+  }
+
   if (
     tempVersionPart !== versionLikeSubstring(tempVersionPart) &&
     tempVersionPart.includes('@')
@@ -75,30 +79,6 @@ export function parseDependencyString(
     currentValue,
     dataType,
   };
-}
-
-export function interpolateString(
-  childTokens: Token[],
-  variables: PackageVariables
-): string | null {
-  const resolvedSubstrings: string[] = [];
-  for (const childToken of childTokens) {
-    const type = childToken.type;
-    if (type === TokenType.String) {
-      resolvedSubstrings.push(childToken.value);
-    } else if (type === TokenType.Variable) {
-      const varName = childToken.value;
-      const varData = variables[varName];
-      if (varData) {
-        resolvedSubstrings.push(varData.value);
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-  return resolvedSubstrings.join('');
 }
 
 const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');

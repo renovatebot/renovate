@@ -8,10 +8,16 @@ jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   // TODO: fix types, jest is using wrong overload (#7154)
-  fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
-    const content = files?.[fileName];
-    return Promise.resolve(content ?? '');
-  });
+  fs.getFileContentMap.mockImplementation(
+    (fileNames: string[]): Promise<any> => {
+      const fileContentMap: Record<string, string | null> = {};
+      for (const fileName of fileNames) {
+        fileContentMap[fileName] = files?.[fileName];
+      }
+
+      return Promise.resolve(fileContentMap);
+    }
+  );
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
@@ -45,7 +51,9 @@ describe('modules/manager/gradle/extract', () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
 
-    jest.spyOn(parser, 'parseGradle').mockRejectedValueOnce(err);
+    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
+      throw err;
+    });
     await extractAllPackageFiles({} as ExtractConfig, [filename]);
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
@@ -65,7 +73,7 @@ describe('modules/manager/gradle/extract', () => {
       'gradle.properties',
     ]);
 
-    expect(res).toMatchSnapshot([
+    expect(res).toMatchObject([
       {
         packageFile: 'gradle.properties',
         deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
@@ -105,7 +113,8 @@ describe('modules/manager/gradle/extract', () => {
   it('works with file-ext-var', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
-      'build.gradle': 'url "https://example.com"; "foo:bar:$baz@zip"',
+      'build.gradle':
+        'repositories { maven { url "https://example.com" } }; "foo:bar:$baz@zip"',
       'settings.gradle': null as never, // TODO: #7154
     });
 
@@ -171,10 +180,10 @@ describe('modules/manager/gradle/extract', () => {
   it('deduplicates registry urls', async () => {
     const fsMock = {
       'build.gradle': [
-        'url "https://repo.maven.apache.org/maven2"',
-        'url "https://repo.maven.apache.org/maven2"',
-        'url "https://example.com"',
-        'url "https://example.com"',
+        'repositories { maven { url "https://repo.maven.apache.org/maven2" } }',
+        'repositories { maven { url "https://repo.maven.apache.org/maven2" } }',
+        'repositories { maven { url "https://example.com" } }',
+        'repositories { maven { url "https://example.com" } }',
         'id "foo.bar" version "1.2.3"',
         '"foo:bar:1.2.3"',
       ].join(';\n'),
@@ -640,7 +649,7 @@ describe('modules/manager/gradle/extract', () => {
     const res = await extractAllPackageFiles({} as ExtractConfig, [
       'gradleX/libs1.gradle',
       'gradle/libs2.gradle',
-      // 'gradle/libs3.gradle', is intentionally not listed here
+      'gradle/libs3.gradle',
       'gradleX/gradleX/libs4.gradle',
       'build.gradle',
       'gradle.properties',
@@ -659,6 +668,16 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'com.google.protobuf:protobuf-java',
             currentValue: '3.18.2',
             managerData: { packageFile: 'gradle/libs2.gradle' },
+          },
+        ],
+      },
+      {
+        packageFile: 'gradle/libs3.gradle',
+        deps: [
+          {
+            depName: 'com.google.guava:guava',
+            currentValue: '30.1-jre',
+            managerData: { packageFile: 'gradle/libs3.gradle' },
           },
         ],
       },
@@ -684,16 +703,6 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.slf4j:slf4j-api',
             currentValue: '1.7.30',
             managerData: { packageFile: 'gradleX/gradleX/libs4.gradle' },
-          },
-        ],
-      },
-      {
-        packageFile: 'gradle/libs3.gradle',
-        deps: [
-          {
-            depName: 'com.google.guava:guava',
-            currentValue: '30.1-jre',
-            managerData: { packageFile: 'gradle/libs3.gradle' },
           },
         ],
       },

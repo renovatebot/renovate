@@ -10,13 +10,11 @@ import { Datasource } from '../datasource';
 import { massageGithubUrl } from '../metadata';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-// eslint-disable-next-line typescript-enum/no-enum, typescript-enum/no-const-enum
-const enum URLFormatOptions {
-  WithShardWithSpec,
-  WithShardWithoutSpec,
-  WithSpecsWithoutShard,
-  WithoutSpecsWithoutShard,
-}
+type URLFormatOptions =
+  | 'withShardWithSpec'
+  | 'withShardWithoutSpec'
+  | 'withSpecsWithoutShard'
+  | 'withoutSpecsWithoutShard';
 
 function shardParts(packageName: string): string[] {
   return crypto
@@ -28,7 +26,7 @@ function shardParts(packageName: string): string[] {
 }
 
 const githubRegex = regEx(
-  /(?<hostURL>(^https:\/\/[a-zA-z0-9-.]+))\/(?<account>[^/]+)\/(?<repo>[^/]+?)(\.git|\/.*)?$/
+  /(?<hostURL>^https:\/\/[a-zA-Z0-9-.]+)\/(?<account>[^/]+)\/(?<repo>[^/]+?)(?:\.git|\/.*)?$/
 );
 
 function releasesGithubUrl(
@@ -144,7 +142,7 @@ export class PodDatasource extends Datasource {
     opts: { hostURL: string; account: string; repo: string },
     useShard = true,
     useSpecs = true,
-    urlFormatOptions = URLFormatOptions.WithShardWithSpec
+    urlFormatOptions: URLFormatOptions = 'withShardWithSpec'
   ): Promise<ReleaseResult | null> {
     const url = releasesGithubUrl(packageName, { ...opts, useShard, useSpecs });
     const resp = await this.requestGithub<{ name: string }[]>(url, packageName);
@@ -153,33 +151,33 @@ export class PodDatasource extends Datasource {
       return { releases };
     }
 
-    // iterating through enum to support different url formats
+    // support different url formats
     switch (urlFormatOptions) {
-      case URLFormatOptions.WithShardWithSpec:
+      case 'withShardWithSpec':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           true,
           false,
-          URLFormatOptions.WithShardWithoutSpec
+          'withShardWithoutSpec'
         );
-      case URLFormatOptions.WithShardWithoutSpec:
+      case 'withShardWithoutSpec':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           false,
           true,
-          URLFormatOptions.WithSpecsWithoutShard
+          'withSpecsWithoutShard'
         );
-      case URLFormatOptions.WithSpecsWithoutShard:
+      case 'withSpecsWithoutShard':
         return this.getReleasesFromGithub(
           packageName,
           opts,
           false,
           false,
-          URLFormatOptions.WithoutSpecsWithoutShard
+          'withoutSpecsWithoutShard'
         );
-      case URLFormatOptions.WithoutSpecsWithoutShard:
+      case 'withoutSpecsWithoutShard':
       default:
         return null;
     }

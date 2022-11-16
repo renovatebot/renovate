@@ -14,6 +14,8 @@ export const presets: Record<string, Preset> = {
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
+      'workarounds:javaLTSVersions',
+      'workarounds:disableMavenParentRoot',
     ],
     ignoreDeps: [],
   },
@@ -115,6 +117,39 @@ export const presets: Record<string, Preset> = {
           'registry.access.redhat.com/rhel-minimal',
         ],
         versioning: 'redhat',
+      },
+    ],
+  },
+  javaLTSVersions: {
+    description: 'Limit Java runtime versions to LTS releases',
+    packageRules: [
+      {
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker', 'adoptium-java'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
+        versioning:
+          'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
+        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
+      },
+    ],
+  },
+  disableMavenParentRoot: {
+    description:
+      'Avoid version fetching for Maven packages detected as project root.',
+    packageRules: [
+      {
+        matchManagers: ['maven'],
+        matchDepTypes: ['parent-root'],
+        enabled: false,
       },
     ],
   },

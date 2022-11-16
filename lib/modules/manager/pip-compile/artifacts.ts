@@ -52,6 +52,7 @@ const allowedPipArguments = [
   '--allow-unsafe',
   '--generate-hashes',
   '--no-emit-index-url',
+  '--strip-extras',
 ];
 
 export function constructPipCompileCmd(
@@ -62,7 +63,7 @@ export function constructPipCompileCmd(
   const headers = constraintLineRegex.exec(content);
   const args = ['pip-compile'];
   if (headers?.groups) {
-    logger.debug({ header: headers[0] }, 'Found pip-compile header');
+    logger.debug(`Found pip-compile header: ${headers[0]}`);
     for (const argument of split(headers.groups.arguments)) {
       if (allowedPipArguments.includes(argument)) {
         args.push(argument);
@@ -76,6 +77,11 @@ export function constructPipCompileCmd(
           );
         }
         args.push(`--output-file=${file}`);
+      } else if (argument.startsWith('--resolver=')) {
+        const value = extractResolver(argument);
+        if (value) {
+          args.push(`--resolver=${value}`);
+        }
       } else if (argument.startsWith('--')) {
         logger.trace(
           { argument },
@@ -135,7 +141,7 @@ export async function updateArtifacts({
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
     };
-    logger.debug({ cmd }, 'pip-compile command');
+    logger.trace({ cmd }, 'pip-compile command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
     if (!status?.modified.includes(outputFileName)) {
@@ -166,4 +172,17 @@ export async function updateArtifacts({
       },
     ];
   }
+}
+
+export function extractResolver(argument: string): string | null {
+  const value = argument.replace('--resolver=', '');
+  if (['backtracking', 'legacy'].includes(value)) {
+    return value;
+  }
+
+  logger.warn(
+    { argument },
+    'pip-compile was previously executed with an unexpected `--resolver` value'
+  );
+  return null;
 }

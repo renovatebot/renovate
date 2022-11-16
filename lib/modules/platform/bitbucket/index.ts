@@ -1,10 +1,9 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -35,6 +34,7 @@ import * as comments from './comments';
 import * as utils from './utils';
 import {
   Account,
+  EffectiveReviewer,
   PrResponse,
   RepoInfoBody,
   mergeBodyTransformer,
@@ -157,7 +157,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PlatformId.Bitbucket,
+    hostType: 'bitbucket',
     url: defaults.endpoint,
   });
   config = {
@@ -231,7 +231,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -251,7 +251,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -259,7 +259,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   // TODO: types (#7154)
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -333,7 +333,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -487,7 +487,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 export async function ensureIssue({
@@ -501,7 +501,7 @@ export async function ensureIssue({
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.debug({ title }, 'Failed to ensure Issue');
+    logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }
   try {
@@ -738,12 +738,12 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<Account>>(
-        `/2.0/repositories/${config.repository}/default-reviewers`
+      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;
-    reviewers = reviewersResponse.values.map((reviewer: Account) => ({
-      uuid: reviewer.uuid,
+    reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
+      uuid: reviewer.user.uuid,
     }));
   }
 
@@ -853,7 +853,7 @@ export async function updatePr({
     }
   }
 
-  if (state === PrState.Closed && pr) {
+  if (state === 'closed' && pr) {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`
     );

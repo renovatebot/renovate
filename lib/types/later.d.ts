@@ -95,7 +95,7 @@ declare module '@breejs/later' {
 
     /*
      * Custom Time Periods and Modifiers
-     * For acces to custom time periods created as extension to the later static type
+     * For access to custom time periods created as extension to the later static type
      * and modifiers created on the later modifier static type.
      */
     [timeperiodAndModifierName: string]: number[] | undefined;
@@ -117,7 +117,7 @@ declare module '@breejs/later' {
      */
     parse: {
       /**
-       * Create schedule data by paring a human readable string.
+       * Create schedule data by parsing a human readable string.
        *
        * @param [input] - A string value to parse.
        */

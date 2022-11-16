@@ -76,11 +76,10 @@ export async function downloadHttpProtocol(
     } else if (isNotFoundError(err)) {
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
-      logger.debug({ failedUrl }, `Cannot connect to host`);
+      logger.debug(`Cannot connect to host ${failedUrl}`);
     } else if (isPermissionsIssue(err)) {
       logger.debug(
-        { failedUrl },
-        'Dependency lookup unauthorized. Please add authentication with a hostRule'
+        `Dependency lookup unauthorized. Please add authentication with a hostRule for ${failedUrl}`
       );
     } else if (isTemporalError(err)) {
       logger.debug({ failedUrl, err }, 'Temporary error');
@@ -88,9 +87,9 @@ export async function downloadHttpProtocol(
         throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
-      logger.debug({ failedUrl }, 'Connection refused to maven registry');
+      logger.debug(`Connection refused to maven registry ${failedUrl}`);
     } else if (isUnsupportedHostError(err)) {
-      logger.debug({ failedUrl }, 'Unsupported host');
+      logger.debug(`Unsupported host ${failedUrl} `);
     } else {
       logger.info({ failedUrl, err }, 'Unknown HTTP download error');
     }
@@ -261,7 +260,7 @@ export async function downloadMavenXml(
       rawContent = (await downloadS3Protocol(pkgUrl)) ?? undefined;
       break;
     default:
-      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
+      logger.debug(`Unsupported Maven protocol url:${pkgUrl.toString()}`);
       return {};
   }
 
