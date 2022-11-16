@@ -22,7 +22,6 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { PrState } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -40,8 +39,8 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
-import { Limit, isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import { isLimitReached } from '../../../global/limits';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -142,7 +141,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.Branches) &&
+      isLimitReached('Branches') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -154,7 +153,7 @@ export async function processBranch(
       };
     }
     if (
-      isLimitReached(Limit.Commits) &&
+      isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -201,7 +200,7 @@ export async function processBranch(
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== PrState.Open) {
+        if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
@@ -249,7 +248,7 @@ export async function processBranch(
       } else if (branchIsModified) {
         const oldPr = await platform.findPr({
           branchName: config.branchName,
-          state: PrState.NotOpen,
+          state: '!open',
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
@@ -553,9 +552,11 @@ export async function processBranch(
     await setStability(config);
     await setConfidence(config);
 
-    // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    // new commit means status check are pretty sure pending but maybe not reported yet
+    // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
     if (
+      !branchPr &&
       !config.artifactErrors?.length &&
       !userRebaseRequested &&
       commitSha &&
@@ -572,7 +573,9 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || config.ignoreTests) {
+    // skip if we have a non-immediate pr and there is an existing PR,
+    // we want to update the PR and skip the Auto merge since status checks aren't done yet
+    if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -811,13 +814,17 @@ export async function processBranch(
         }
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
-        const prAutomergeResult = await checkAutoMerge(pr, config);
-        if (prAutomergeResult?.automerged) {
-          return {
-            branchExists,
-            result: 'automerged',
-            commitSha,
-          };
+        // skip automerge if there is a new commit since status checks aren't done yet
+        if (!commitSha || config.ignoreTests) {
+          logger.debug('checking auto-merge');
+          const prAutomergeResult = await checkAutoMerge(pr, config);
+          if (prAutomergeResult?.automerged) {
+            return {
+              branchExists,
+              result: 'automerged',
+              commitSha,
+            };
+          }
         }
       } else {
         logger.debug('PR is not configured for automerge');

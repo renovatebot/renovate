@@ -9,6 +9,7 @@ import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
+import { incLimitedValue, setMaxLimit } from '../../global/limits';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
@@ -120,13 +121,13 @@ export async function writeUpdates(
   );
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
-  setMaxLimit(Limit.PullRequests, prsRemaining);
+  setMaxLimit('PullRequests', prsRemaining);
 
   const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
     `Calculated maximum branches remaining this run: ${branchesRemaining}`
   );
-  setMaxLimit(Limit.Branches, branchesRemaining);
+  setMaxLimit('Branches', branchesRemaining);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
@@ -172,7 +173,7 @@ export async function writeUpdates(
       return 'automerged';
     }
     if (!branchExisted && branchExists(branch.branchName)) {
-      incLimitedValue(Limit.Branches);
+      incLimitedValue('Branches');
     }
   }
   removeMeta(['branch', 'baseBranch']);

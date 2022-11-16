@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -231,7 +231,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -259,7 +259,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   // TODO: types (#7154)
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -333,7 +333,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -853,7 +853,7 @@ export async function updatePr({
     }
   }
 
-  if (state === PrState.Closed && pr) {
+  if (state === 'closed' && pr) {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`
     );

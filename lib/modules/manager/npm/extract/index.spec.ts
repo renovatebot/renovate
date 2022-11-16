@@ -483,6 +483,50 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
+    it('extracts volta yarn higher than 1', async () => {
+      const pJson = {
+        main: 'index.js',
+        engines: {
+          node: '16.0.0',
+        },
+        volta: {
+          node: '16.0.0',
+          yarn: '3.2.4',
+        },
+      };
+      const pJsonStr = JSON.stringify(pJson);
+      const res = await npmExtract.extractPackageFile(
+        pJsonStr,
+        'package.json',
+        defaultConfig
+      );
+
+      expect(res).toMatchObject({
+        deps: [
+          {},
+          {
+            commitMessageTopic: 'Node.js',
+            currentValue: '16.0.0',
+            datasource: 'github-tags',
+            depName: 'node',
+            depType: 'volta',
+            packageName: 'nodejs/node',
+            prettyDepType: 'volta',
+            versioning: 'node',
+          },
+          {
+            commitMessageTopic: 'Yarn',
+            currentValue: '3.2.4',
+            datasource: 'npm',
+            depName: 'yarn',
+            depType: 'volta',
+            prettyDepType: 'volta',
+            packageName: '@yarnpkg/cli',
+          },
+        ],
+      });
+    });
+
     it('extracts non-npmjs', async () => {
       const pJson = {
         dependencies: {

@@ -5,7 +5,6 @@ import {
   git,
   platform,
 } from '../../../../test/util';
-import { PrState } from '../../../types';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 
@@ -63,7 +62,7 @@ describe('workers/repository/process/limits', () => {
         branchName
           ? Promise.resolve({
               sourceBranch: branchName,
-              state: PrState.Open,
+              state: 'open',
             } as never)
           : Promise.reject('some error')
       );

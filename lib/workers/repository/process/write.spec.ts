@@ -15,7 +15,7 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
-import { Limit, isLimitReached } from '../../global/limits';
+import { isLimitReached } from '../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
@@ -119,11 +119,11 @@ describe('workers/repository/process/write', () => {
       });
       git.branchExists.mockReturnValueOnce(false).mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
-      expect(isLimitReached(Limit.Branches)).toBeFalse();
+      expect(isLimitReached('Branches')).toBeFalse();
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranches = ['main', 'dev'];
       await writeUpdates(config, branches);
-      expect(isLimitReached(Limit.Branches)).toBeTrue();
+      expect(isLimitReached('Branches')).toBeTrue();
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'main',
         branch: branchName,

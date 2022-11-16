@@ -12,7 +12,6 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
@@ -232,7 +231,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -259,7 +258,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.NotOpen,
+        state: '!open',
       });
       expect(res).toMatchSnapshot();
     });
@@ -286,7 +285,7 @@ describe('modules/platform/azure/index', () => {
       const res = await azure.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PrState.Closed,
+        state: 'closed',
       });
       expect(res).toMatchSnapshot();
     });
@@ -843,7 +842,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        state: PrState.Closed,
+        state: 'closed',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -861,7 +860,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        state: PrState.Open,
+        state: 'open',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });

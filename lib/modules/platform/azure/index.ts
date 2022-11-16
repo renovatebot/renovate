@@ -16,7 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -295,7 +295,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -310,11 +310,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case PrState.All:
+      case 'all':
         // no more filter needed, we can go further...
         break;
-      case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
+      case '!open':
+        prsFiltered = prsFiltered.filter((item) => item.state !== 'open');
         break;
       default:
         prsFiltered = prsFiltered.filter((item) => item.state === state);
@@ -333,7 +333,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -503,13 +503,13 @@ export async function updatePr({
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
-  if (state === PrState.Open) {
+  if (state === 'open') {
     await azureApiGit.updatePullRequest(
       { status: PullRequestStatus.Active },
       config.repoId,
       prNo
     );
-  } else if (state === PrState.Closed) {
+  } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
 

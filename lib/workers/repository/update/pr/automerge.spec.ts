@@ -21,10 +21,6 @@ describe('workers/repository/update/pr/automerge', () => {
       pr = partial<Pr>({});
     });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('should not automerge if not configured', async () => {
       await prAutomerge.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);

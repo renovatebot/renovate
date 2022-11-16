@@ -16,7 +16,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -491,7 +491,7 @@ async function fetchPrList(): Promise<Pr[]> {
         number: pr.iid,
         sourceBranch: pr.source_branch,
         title: pr.title,
-        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        state: pr.state === 'opened' ? 'open' : pr.state,
         createdAt: pr.created_at,
       })
     );
@@ -625,7 +625,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
-    state: mr.state === 'opened' ? PrState.Open : mr.state,
+    state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
@@ -649,8 +649,8 @@ export async function updatePr({
     title = draftPrefix + title;
   }
   const newState = {
-    [PrState.Closed]: 'close',
-    [PrState.Open]: 'reopen',
+    ['closed']: 'close',
+    ['open']: 'reopen',
     // TODO: null check (#7154)
   }[state!];
   await gitlabApi.putJson(
@@ -716,7 +716,7 @@ export function massageMarkdown(input: string): string {
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -728,7 +728,7 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
   const prList = await getPrList();
@@ -749,7 +749,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
