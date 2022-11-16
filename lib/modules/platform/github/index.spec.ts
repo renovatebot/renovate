@@ -266,6 +266,7 @@ describe('modules/platform/github/index', () => {
     scope: httpMock.Scope,
     repository: string,
     forkExisted: boolean,
+    forkResult = 200,
     forkDefaulBranch = 'master'
   ): void {
     scope
@@ -293,7 +294,7 @@ describe('modules/platform/github/index', () => {
       // getForks
       .get(`/repos/${repository}/forks?per_page=100`)
       .reply(
-        200,
+        forkResult,
         forkExisted
           ? [
               {
@@ -335,8 +336,32 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, repo, false, 200, branch);
       scope.get('/user').reply(404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 404', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 500', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
@@ -378,7 +403,7 @@ describe('modules/platform/github/index', () => {
 
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      forkInitRepoMock(scope, 'some/repo', true, 200, 'not_master');
       scope.get('/user').reply(200, {
         login: 'forked',
       });
