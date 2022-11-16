@@ -4,6 +4,7 @@ import { getProblems, logger } from '../lib/logger';
 import { generateConfig } from './docs/config';
 import { generateDatasources } from './docs/datasources';
 import { generateManagers } from './docs/manager';
+import { generateManagerAsdfSupportedPlugins } from './docs/manager-asdf-supported-plugins';
 import { generatePlatforms } from './docs/platforms';
 import { generatePresets } from './docs/presets';
 import { generateSchema } from './docs/schema';
@@ -49,6 +50,10 @@ process.on('unhandledRejection', (err) => {
     // managers
     logger.info('* managers');
     await generateManagers(dist);
+
+    // managers/asdf supported plugins
+    logger.info('* managers/asdf/supported-plugins');
+    await generateManagerAsdfSupportedPlugins(dist);
 
     // presets
     logger.info('* presets');
