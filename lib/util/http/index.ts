@@ -144,7 +144,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
-      logger.debug({ url }, 'Host is disabled - rejecting request');
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);

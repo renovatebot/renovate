@@ -5,7 +5,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { BranchStatus, PrState } from '../../../types';
+import { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 
@@ -1263,7 +1263,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toMatchSnapshot();
         });
@@ -1283,7 +1283,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PrState.Closed,
+              state: 'closed',
             })
           ).toBeNull();
         });
@@ -1443,7 +1443,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Closed,
+              state: 'closed',
             })
           ).toResolve();
         });
@@ -1469,7 +1469,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toResolve();
         });
@@ -1558,7 +1558,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toResolve();
         });

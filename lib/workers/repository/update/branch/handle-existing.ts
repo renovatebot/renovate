@@ -2,13 +2,12 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { PrState } from '../../../../types';
 import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
 export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
-  if (pr.state === PrState.Closed) {
+  if (pr.state === 'closed') {
     let content;
     // TODO #7154
     const userStrings = config.userStrings!;
@@ -41,7 +40,7 @@ export async function handlepr(config: BranchConfig, pr: Pr): Promise<void> {
         await deleteBranch(config.branchName);
       }
     }
-  } else if (pr.state === PrState.Merged) {
-    logger.debug({ pr: pr.number }, 'Merged PR is blocking this branch');
+  } else if (pr.state === 'merged') {
+    logger.debug(`Merged PR with PrNo: ${pr.number} is blocking this branch`);
   }
 }
