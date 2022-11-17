@@ -2315,15 +2315,15 @@
   dependencies:
     graceful-fs "^4.2.6"
 
-"@pnpm/read-project-manifest@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-4.0.1.tgz#1eb6f9cb2e774587ebdabc7d2b3dafd24be8372c"
-  integrity sha512-+mf0hDMkqRi/nFikEHqNpm+MEYhB96e5QPucFTSMe049JEJ0Ux7vvWaEo2/cCLbedjrmA0tf3dagXNV228op+A==
+"@pnpm/read-project-manifest@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@pnpm/read-project-manifest/-/read-project-manifest-4.0.2.tgz#e4ad86bf80bd60fd0de9ff04001c9b31b6568073"
+  integrity sha512-Yj8dufvLOr4J91tPNWqrFODyQiKDlHoKdOMQfVLq8bYKlZHo2+6Gnm7bbqACz91CGGYY5Xsu4dL/CPVmBeW/iQ==
   dependencies:
     "@pnpm/error" "4.0.0"
     "@pnpm/graceful-fs" "2.0.0"
-    "@pnpm/types" "8.8.0"
-    "@pnpm/write-project-manifest" "4.0.1"
+    "@pnpm/types" "8.9.0"
+    "@pnpm/write-project-manifest" "4.0.2"
     detect-indent "^6.1.0"
     fast-deep-equal "^3.1.3"
     is-windows "^1.0.2"
@@ -2333,17 +2333,22 @@
     sort-keys "^4.2.0"
     strip-bom "^4.0.0"
 
-"@pnpm/types@8.8.0":
-  version "8.8.0"
-  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.8.0.tgz#44129e77527475a6a9aad3e51bdd68db530382ad"
-  integrity sha512-IKUpbWRHDB9C4Yy4UeBpeYhU7eIsLj50jF5HNRUkbJnM0CWHPLxX9TGCI+ov8pgGeTP1t1g0GPDHD6en9D8LxQ==
+"@pnpm/types@8.9.0":
+  version "8.9.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/types/-/types-8.9.0.tgz#9636d5f0642793432f72609b79458ca9be049b02"
+  integrity sha512-3MYHYm8epnciApn6w5Fzx6sepawmsNU7l6lvIq+ER22/DPSrr83YMhU/EQWnf4lORn2YyiXFj0FJSyJzEtIGmw==
 
-"@pnpm/write-project-manifest@4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-4.0.1.tgz#2993d18bbd1c3cc920dc50c0a16091e4591ddfc9"
-  integrity sha512-QG6t7EPhZB3pik7BA/Ngv6g95Ys5YNfD5nTpMXb7vSHU7PiBm9vL/vEctdOZKBGh6HBjKcGgdqV5RdGS/CAF6g==
+"@pnpm/util.lex-comparator@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@pnpm/util.lex-comparator/-/util.lex-comparator-1.0.0.tgz#6d17dad2f1a23e137fd38402b3a1419969e4d090"
+  integrity sha512-3aBQPHntVgk5AweBWZn+1I/fqZ9krK/w01197aYVkAJQGftb+BVWgEepxY5GChjSW12j52XX+CmfynYZ/p0DFQ==
+
+"@pnpm/write-project-manifest@4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@pnpm/write-project-manifest/-/write-project-manifest-4.0.2.tgz#9f39f0a364728b2d4c44e2c409bea83ef7b53644"
+  integrity sha512-6h/Vw9/MmsXahfbBWMTtmtvhfwgp6nEr2XaQaDBXg1JnfJ0CeHPleh7xBQDi8E0BDY1evld+5X8d8pIcdXCLDg==
   dependencies:
-    "@pnpm/types" "8.8.0"
+    "@pnpm/types" "8.9.0"
     json5 "^2.2.1"
     write-file-atomic "^4.0.2"
     write-yaml-file "^4.2.0"
@@ -5137,13 +5142,14 @@ fill-range@^7.0.1:
   dependencies:
     to-regex-range "^5.0.1"
 
-find-packages@10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-10.0.1.tgz#41b6a5aa149c382bf726126225dbccb3fd0680f9"
-  integrity sha512-v0IMSFBDZvfnEeqPTSodiKfJLcpCpP7wyIIzF/MYVHlPME64pKG0gQzOmmOVPzQkpgP5xZobPfEiAcibepumyA==
+find-packages@10.0.2:
+  version "10.0.2"
+  resolved "https://registry.yarnpkg.com/find-packages/-/find-packages-10.0.2.tgz#61c3ecb720654c67b137b39e869563b644ee956f"
+  integrity sha512-kMWxfvBlqK3/eftloc/Z00enq5V0Gwee50shSd3fN7Mr/IFrQsif2IJ2LAEm2T6fdValdLClEGEWkzyPLe3lYA==
   dependencies:
-    "@pnpm/read-project-manifest" "4.0.1"
-    "@pnpm/types" "8.8.0"
+    "@pnpm/read-project-manifest" "4.0.2"
+    "@pnpm/types" "8.9.0"
+    "@pnpm/util.lex-comparator" "1.0.0"
     fast-glob "^3.2.12"
     p-filter "^2.1.0"
 
