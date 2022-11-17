@@ -7,8 +7,10 @@ import {
   getFile,
   isBranchModified,
 } from '../../../../util/git';
+import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -22,9 +24,11 @@ export async function rebaseMigrationBranch(
     return null;
   }
   const configFileName = migratedConfigData.filename;
-  const contents = migratedConfigData.content;
+  let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
-  if (contents === existingContents) {
+  if (
+    jsonStripWhitespaces(contents) === jsonStripWhitespaces(existingContents)
+  ) {
     logger.debug('Migration branch is up to date');
     return null;
   }
@@ -42,6 +46,9 @@ export async function rebaseMigrationBranch(
   const commitMessage = commitMessageFactory.getCommitMessage();
 
   await checkoutBranch(config.defaultBranch!);
+  contents = await MigratedDataFactory.applyPrettierFormatting(
+    migratedConfigData
+  );
   return commitAndPush({
     branchName,
     files: [
@@ -54,4 +61,22 @@ export async function rebaseMigrationBranch(
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
   });
+}
+
+/**
+ * @param json a JSON string
+ * @return a minimal json string. i.e. does not contain any formatting/whitespaces
+ */
+function jsonStripWhitespaces(json: string | null): string | null {
+  if (!json) {
+    return null;
+  }
+  /**
+   * JSON.stringify(value, replacer, space):
+   * If "space" is anything other than a string or number —
+   * for example, is null or not provided — no white space is used.
+   *
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
+   */
+  return quickStringify(JSON.parse(json));
 }

@@ -18,6 +18,7 @@ describe('modules/versioning/docker/index', () => {
     ${'0z1b2c3'}                                   | ${true}
     ${'0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d'}  | ${true}
     ${'123098140293'}                              | ${true}
+    ${'01aecc#v2.1.0'}                             | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = docker.isValid(version);
     expect(!!res).toBe(expected);

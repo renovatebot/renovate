@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked } from '../../../../test/util';
@@ -22,25 +23,25 @@ process.env.BUILDPACK = 'true';
 const datasource = mocked(_datasource);
 const hostRules = mocked(_hostRules);
 
-const gomod1 = `module github.com/renovate-tests/gomod1
+const gomod1 = codeBlock`
+  module github.com/renovate-tests/gomod1
 
-require github.com/pkg/errors v0.7.0
-require github.com/aws/aws-sdk-go v1.15.21
-require github.com/davecgh/go-spew v1.0.0
-require golang.org/x/foo v1.0.0
-require github.com/rarkins/foo abcdef1
-require gopkg.in/russross/blackfriday.v1 v1.0.0
-require go.uber.org/zap v1.20.0
+  require github.com/pkg/errors v0.7.0
+  require github.com/aws/aws-sdk-go v1.15.21
+  require github.com/davecgh/go-spew v1.0.0
+  require golang.org/x/foo v1.0.0
+  require github.com/rarkins/foo abcdef1
+  require gopkg.in/russross/blackfriday.v1 v1.0.0
+  require go.uber.org/zap v1.20.0
 
-replace github.com/pkg/errors => ../errors
+  replace github.com/pkg/errors => ../errors
 
-replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
+  replace (golang.org/x/foo => github.com/pravesht/gocql v0.0.0)
 
-replace (
-  // TODO: this comment breaks renovatebot (>v0.11.1)
-  go.uber.org/zap => go.uber.org/zap v1.21.0
-)
-
+  replace (
+    // TODO: this comment breaks renovatebot (>v0.11.1)
+    go.uber.org/zap => go.uber.org/zap v1.21.0
+  )
 `;
 
 const adminConfig: RepoGlobalConfig = {
