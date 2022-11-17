@@ -268,7 +268,7 @@ for (const [name, value] of Object.entries(repoGroups)) {
 for (const [name, value] of Object.entries(orgGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrlPrefixess: is.array(value) ? value : [value],
+    matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
 
