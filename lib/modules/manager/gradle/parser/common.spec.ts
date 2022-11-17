@@ -1,4 +1,6 @@
-import type { Ctx } from '../types';
+import type { lexer } from 'good-enough-parser';
+import { partial } from '../../../../../test/util';
+import type { Ctx, PackageVariables } from '../types';
 import {
   cleanupTempVars,
   coalesceVariable,
@@ -11,7 +13,7 @@ import {
 
 describe('modules/manager/gradle/parser/common', () => {
   let ctx: Ctx;
-  const token = {} as never;
+  const token = partial<lexer.Token>({});
 
   beforeEach(() => {
     ctx = {
@@ -62,7 +64,9 @@ describe('modules/manager/gradle/parser/common', () => {
   it('stripReservedPrefixFromKeyTokens', () => {
     const tokenValues = ['rootProject', 'project', 'ext', 'extra', 'foo'];
 
-    ctx.varTokens.push(...tokenValues.map((value) => ({ value } as never)));
+    ctx.varTokens.push(
+      ...tokenValues.map((value) => partial<lexer.Token>({ value }))
+    );
     stripReservedPrefixFromKeyTokens(ctx);
     expect(ctx.varTokens).toStrictEqual([{ value: 'foo' }]);
   });
@@ -70,7 +74,9 @@ describe('modules/manager/gradle/parser/common', () => {
   it('coalesceVariable', () => {
     const tokenValues = ['foo', 'bar', 'baz', 'qux'];
 
-    ctx.varTokens.push(...tokenValues.map((value) => ({ value } as never)));
+    ctx.varTokens.push(
+      ...tokenValues.map((value) => partial<lexer.Token>({ value }))
+    );
     coalesceVariable(ctx);
     expect(ctx.varTokens).toStrictEqual([{ value: 'foo.bar.baz.qux' }]);
   });
@@ -79,26 +85,26 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(interpolateString([], {})).toBeEmptyString();
     expect(
       interpolateString(
-        [
+        partial<lexer.Token>([
           { type: 'string-value', value: 'foo' },
           { type: 'symbol', value: 'bar' },
           { type: 'string-value', value: 'baz' },
-        ] as never,
+        ]),
         {
-          bar: { value: 'BAR' },
-        } as never
+          bar: { key: '', value: 'BAR' },
+        }
       )
     ).toBe('fooBARbaz');
     expect(
       interpolateString(
-        [{ type: 'symbol', value: 'foo' }] as never,
-        {} as never
+        partial<lexer.Token>([{ type: 'symbol', value: 'foo' }]),
+        partial<PackageVariables>({})
       )
     ).toBeNull();
     expect(
       interpolateString(
-        [{ type: 'unknown', value: 'foo' }] as never,
-        {} as never
+        partial<lexer.Token>([{ type: '_', value: 'foo' }]),
+        partial<PackageVariables>({})
       )
     ).toBeNull();
   });
