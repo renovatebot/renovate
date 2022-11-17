@@ -16,7 +16,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';

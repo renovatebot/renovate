@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
