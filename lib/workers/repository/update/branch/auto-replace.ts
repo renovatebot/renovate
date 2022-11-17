@@ -1,4 +1,5 @@
 // TODO #7154
+import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -57,7 +58,7 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
-  if (newUpgrade.currentValue !== newValue) {
+  if (newValue && newUpgrade.currentValue !== newValue) {
     logger.debug(
       {
         manager,
@@ -163,10 +164,10 @@ export async function doAutoReplace(
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
-      if (currentValue) {
+      if (currentValue && newValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), 'g'),
-          newValue!
+          newValue
         );
       }
       if (currentDigest && newDigest) {
@@ -180,8 +181,11 @@ export async function doAutoReplace(
       { packageFile, depName },
       `Starting search at index ${searchIndex}`
     );
+    let newContent = existingContent;
+    let valueReplaced = !newValue;
+    let startIndex = searchIndex;
     // Iterate through the rest of the file
-    for (; searchIndex < existingContent.length; searchIndex += 1) {
+    for (; searchIndex < newContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
       if (matchAt(existingContent, searchIndex, replaceString!)) {
         logger.debug(
@@ -189,19 +193,18 @@ export async function doAutoReplace(
           `Found match at index ${searchIndex}`
         );
         // Now test if the result matches
-        const testContent = replaceAt(
-          existingContent,
+        newContent = replaceAt(
+          newContent,
           searchIndex,
           replaceString!,
           newString
         );
-        await writeLocalFile(upgrade.packageFile!, testContent);
-
-        if (await confirmIfDepUpdated(upgrade, testContent)) {
-          return testContent;
+        await writeLocalFile(upgrade.packageFile!, newContent);
+        if (await confirmIfDepUpdated(upgrade, newContent)) {
+          return newContent;
         }
-        // istanbul ignore next
         await writeLocalFile(upgrade.packageFile!, existingContent);
+        newContent = existingContent;
       }
     }
   } catch (err) /* istanbul ignore next */ {
