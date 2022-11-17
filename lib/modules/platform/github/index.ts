@@ -260,17 +260,26 @@ export async function listForks(
   token: string,
   repository: string
 ): Promise<GhRestRepo[]> {
-  // Get list of existing repos
-  const url = `repos/${repository}/forks?per_page=100`;
-  const repos = (
-    await githubApi.getJson<GhRestRepo[]>(url, {
-      token,
-      paginate: true,
-      pageLimit: 100,
-    })
-  ).body;
-  logger.debug(`Found ${repos.length} forked repo(s)`);
-  return repos;
+  try {
+    // Get list of existing repos
+    const url = `repos/${repository}/forks?per_page=100`;
+    const repos = (
+      await githubApi.getJson<GhRestRepo[]>(url, {
+        token,
+        paginate: true,
+        pageLimit: 100,
+      })
+    ).body;
+    logger.debug(`Found ${repos.length} forked repo(s)`);
+    return repos;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      logger.debug('Cannot list repo forks - it is likely private');
+    } else {
+      logger.debug({ err }, 'Unknown error listing repository forks');
+    }
+    throw new Error(REPOSITORY_CANNOT_FORK);
+  }
 }
 
 export async function findFork(
