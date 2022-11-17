@@ -152,12 +152,11 @@ export async function doAutoReplace(
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
-  const replaceWithoutReplaceString = Boolean(
+  const replaceWithoutReplaceString =
     is.string(newName) &&
-      newName !== depName &&
-      (is.undefined(upgrade.replaceString) ||
-        !upgrade.replaceString?.includes(depName!))
-  );
+    newName !== depName &&
+    (is.undefined(upgrade.replaceString) ||
+      !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex;

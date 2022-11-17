@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../../test/fixtures';
 import { getConfig } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
@@ -241,13 +242,14 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with ansible replacement', async () => {
-      const yml =
-        '- name: Container present\n' +
-        '  docker_container:\n' +
-        '    name: mycontainer\n' +
-        '    state: present\n' +
-        '    image: ubuntu:14.04\n' +
-        '    command: sleep infinity\n';
+      const yml = codeBlock`
+        - name: Container present
+          docker_container:
+            name: mycontainer
+            state: present
+            image: ubuntu:14.04
+            command: sleep infinity
+      `;
       upgrade.manager = 'ansible';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '14.04';
