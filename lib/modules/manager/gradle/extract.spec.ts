@@ -8,10 +8,16 @@ jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   // TODO: fix types, jest is using wrong overload (#7154)
-  fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
-    const content = files?.[fileName];
-    return Promise.resolve(content ?? '');
-  });
+  fs.getFileContentMap.mockImplementation(
+    (fileNames: string[]): Promise<any> => {
+      const fileContentMap: Record<string, string | null> = {};
+      for (const fileName of fileNames) {
+        fileContentMap[fileName] = files?.[fileName];
+      }
+
+      return Promise.resolve(fileContentMap);
+    }
+  );
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
@@ -45,7 +51,9 @@ describe('modules/manager/gradle/extract', () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
 
-    jest.spyOn(parser, 'parseGradle').mockRejectedValueOnce(err);
+    jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
+      throw err;
+    });
     await extractAllPackageFiles({} as ExtractConfig, [filename]);
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
@@ -641,7 +649,7 @@ describe('modules/manager/gradle/extract', () => {
     const res = await extractAllPackageFiles({} as ExtractConfig, [
       'gradleX/libs1.gradle',
       'gradle/libs2.gradle',
-      // 'gradle/libs3.gradle', is intentionally not listed here
+      'gradle/libs3.gradle',
       'gradleX/gradleX/libs4.gradle',
       'build.gradle',
       'gradle.properties',
@@ -660,6 +668,16 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'com.google.protobuf:protobuf-java',
             currentValue: '3.18.2',
             managerData: { packageFile: 'gradle/libs2.gradle' },
+          },
+        ],
+      },
+      {
+        packageFile: 'gradle/libs3.gradle',
+        deps: [
+          {
+            depName: 'com.google.guava:guava',
+            currentValue: '30.1-jre',
+            managerData: { packageFile: 'gradle/libs3.gradle' },
           },
         ],
       },
@@ -685,16 +703,6 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.slf4j:slf4j-api',
             currentValue: '1.7.30',
             managerData: { packageFile: 'gradleX/gradleX/libs4.gradle' },
-          },
-        ],
-      },
-      {
-        packageFile: 'gradle/libs3.gradle',
-        deps: [
-          {
-            depName: 'com.google.guava:guava',
-            currentValue: '30.1-jre',
-            managerData: { packageFile: 'gradle/libs3.gradle' },
           },
         ],
       },

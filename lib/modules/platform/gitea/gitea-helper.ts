@@ -1,4 +1,4 @@
-import { BranchStatus, PrState } from '../../../types';
+import { BranchStatus } from '../../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
 import { getQueryString } from '../../../util/url';
 import type {
@@ -141,7 +141,7 @@ export async function closePR(
 ): Promise<void> {
   await updatePR(repoPath, idx, {
     ...options,
-    state: PrState.Closed,
+    state: 'closed',
   });
 }
 
