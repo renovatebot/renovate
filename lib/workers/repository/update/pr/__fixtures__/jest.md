@@ -3,65 +3,65 @@
 ### Features
 
 * `[jest-util]` Add deletion to `process.env` as well
-  ([#5466](https://github.com/facebook/jest/pull/5466))
+  ([#5466](https://togithub.com/facebook/jest/pull/5466))
 * `[jest-util]` Add case-insensitive getters/setters to `process.env`
-  ([#5465](https://github.com/facebook/jest/pull/5465))
+  ([#5465](https://togithub.com/facebook/jest/pull/5465))
 * `[jest-mock]` Add util methods to create async functions.
-  ([#5318](https://github.com/facebook/jest/pull/5318))
+  ([#5318](https://togithub.com/facebook/jest/pull/5318))
 
 ### Fixes
 
 * `[jest-cli]` Add trailing slash when checking root folder
-  ([#5464](https://github.com/facebook/jest/pull/5464))
+  ([#5464](https://togithub.com/facebook/jest/pull/5464))
 * `[jest-cli]` Hide interactive mode if there are no failed snapshot tests
-  ([#5450](https://github.com/facebook/jest/pull/5450))
+  ([#5450](https://togithub.com/facebook/jest/pull/5450))
 * `[babel-jest]` Remove retainLines from babel-jest
-  ([#5326](https://github.com/facebook/jest/pull/5439))
+  ([#5326](https://togithub.com/facebook/jest/pull/5439))
 * `[jest-cli]` Glob patterns ignore non-`require`-able files (e.g. `README.md`)
-  ([#5199](https://github.com/facebook/jest/issues/5199))
+  ([#5199](https://togithub.com/facebook/jest/issues/5199))
 * `[jest-mock]` Add backticks support (\`\`) to `mock` a certain package via the
-  `__mocks__` folder. ([#5426](https://github.com/facebook/jest/pull/5426))
+  `__mocks__` folder. ([#5426](https://togithub.com/facebook/jest/pull/5426))
 * `[jest-message-util]` Prevent an `ENOENT` crash when the test file contained a
-  malformed source-map. ([#5405](https://github.com/facebook/jest/pull/5405)).
+  malformed source-map. ([#5405](https://togithub.com/facebook/jest/pull/5405)).
 * `[jest]` Add `import-local` to `jest` package.
-  ([#5353](https://github.com/facebook/jest/pull/5353))
+  ([#5353](https://togithub.com/facebook/jest/pull/5353))
 * `[expect]` Support class instances in `.toHaveProperty()` matcher.
-  ([#5367](https://github.com/facebook/jest/pull/5367))
+  ([#5367](https://togithub.com/facebook/jest/pull/5367))
 * `[jest-cli]` Fix npm update command for snapshot summary.
-  ([#5376](https://github.com/facebook/jest/pull/5376),
-  [5389](https://github.com/facebook/jest/pull/5389/))
+  ([#5376](https://togithub.com/facebook/jest/pull/5376),
+  [5389](https://togithub.com/facebook/jest/pull/5389/))
 * `[expect]` Make `rejects` and `resolves` synchronously validate its argument.
-  ([#5364](https://github.com/facebook/jest/pull/5364))
+  ([#5364](https://togithub.com/facebook/jest/pull/5364))
 * `[docs]` Add tutorial page for ES6 class mocks.
-  ([#5383](https://github.com/facebook/jest/pull/5383))
+  ([#5383](https://togithub.com/facebook/jest/pull/5383))
 * `[jest-resolve]` Search required modules in node_modules and then in custom
-  paths. ([#5403](https://github.com/facebook/jest/pull/5403))
+  paths. ([#5403](https://togithub.com/facebook/jest/pull/5403))
 * `[jest-resolve]` Get builtin modules from node core.
-  ([#5411](https://github.com/facebook/jest/pull/5411))
+  ([#5411](https://togithub.com/facebook/jest/pull/5411))
 * `[jest-resolve]` Detect and preserve absolute paths in `moduleDirectories`. Do
   not generate additional (invalid) paths by prepending each ancestor of `cwd`
   to the absolute path. Additionally, this fixes functionality in Windows OS.
-  ([#5398](https://github.com/facebook/jest/pull/5398))
+  ([#5398](https://togithub.com/facebook/jest/pull/5398))
 
 ### Chore & Maintenance
 
 * `[jest-util]` Implement watch plugins
-  ([#5399](https://github.com/facebook/jest/pull/5399))
+  ([#5399](https://togithub.com/facebook/jest/pull/5399))
 
 ## jest 22.1.4
 
 ### Fixes
 
 * `[jest-util]` Add "debug" method to "console" implementations
-  ([#5350](https://github.com/facebook/jest/pull/5350))
+  ([#5350](https://togithub.com/facebook/jest/pull/5350))
 * `[jest-resolve]` Add condition to avoid infinite loop when node module package
-  main is ".". ([#5344)](https://github.com/facebook/jest/pull/5344)
+  main is ".". ([#5344)](https://togithub.com/facebook/jest/pull/5344)
 
 ### Features
 
 * `[jest-cli]` `--changedSince`: allow selectively running tests for code
   changed since arbitrary revisions.
-  ([#5312](https://github.com/facebook/jest/pull/5312))
+  ([#5312](https://togithub.com/facebook/jest/pull/5312))
 
 ## jest 22.1.3
 
@@ -69,27 +69,27 @@
 
 * `[jest-cli]` Check if the file belongs to the checked project before adding it
   to the list, also checking that the file name is not explicitly blacklisted
-  ([#5341](https://github.com/facebook/jest/pull/5341))
+  ([#5341](https://togithub.com/facebook/jest/pull/5341))
 * `[jest-editor-support]` Add option to spawn command in shell
-  ([#5340](https://github.com/facebook/jest/pull/5340))
+  ([#5340](https://togithub.com/facebook/jest/pull/5340))
 
 ## jest 22.1.2
 
 ### Fixes
 
 * `[jest-cli]` Check if the file belongs to the checked project before adding it
-  to the list ([#5335](https://github.com/facebook/jest/pull/5335))
+  to the list ([#5335](https://togithub.com/facebook/jest/pull/5335))
 * `[jest-cli]` Fix `EISDIR` when a directory is passed as an argument to `jest`.
-  ([#5317](https://github.com/facebook/jest/pull/5317))
+  ([#5317](https://togithub.com/facebook/jest/pull/5317))
 * `[jest-config]` Added restoreMocks config option.
-  ([#5327](https://github.com/facebook/jest/pull/5327))
+  ([#5327](https://togithub.com/facebook/jest/pull/5327))
 
 ## jest 22.1.1
 
 ### Fixes
 
 * `[*]` Move from "process.exit" to "exit.
-  ([#5313](https://github.com/facebook/jest/pull/5313))
+  ([#5313](https://togithub.com/facebook/jest/pull/5313))
 
 ## jest 22.1.0
 
@@ -102,35 +102,35 @@
 ### Fixes
 
 * `[jest-cli]` Use `import-local` to support global Jest installations.
-  ([#5304](https://github.com/facebook/jest/pull/5304))
+  ([#5304](https://togithub.com/facebook/jest/pull/5304))
 * `[jest-runner]` Fix memory leak in coverage reporting
-  ([#5289](https://github.com/facebook/jest/pull/5289))
+  ([#5289](https://togithub.com/facebook/jest/pull/5289))
 * `[docs]` Update mention of the minimal version of node supported
-  ([#4947](https://github.com/facebook/jest/issues/4947))
+  ([#4947](https://togithub.com/facebook/jest/issues/4947))
 * `[jest-cli]` Fix missing newline in console message
-  ([#5308](https://github.com/facebook/jest/pull/5308))
+  ([#5308](https://togithub.com/facebook/jest/pull/5308))
 * `[jest-cli]` `--lastCommit` and `--changedFilesWithAncestor` now take effect
   even when `--onlyChanged` is not specified.
-  ([#5307](https://github.com/facebook/jest/pull/5307))
+  ([#5307](https://togithub.com/facebook/jest/pull/5307))
 
 ### Chore & Maintenance
 
 * `[filenames]` Standardize folder names under `integration-tests/`
-  ([#5298](https://github.com/facebook/jest/pull/5298))
+  ([#5298](https://togithub.com/facebook/jest/pull/5298))
 
 ## jest 22.0.6
 
 ### Fixes
 
 * `[jest-jasmine2]` Fix memory leak in snapshot reporting
-  ([#5279](https://github.com/facebook/jest/pull/5279))
+  ([#5279](https://togithub.com/facebook/jest/pull/5279))
 * `[jest-config]` Fix breaking change in `--testPathPattern`
-  ([#5269](https://github.com/facebook/jest/pull/5269))
+  ([#5269](https://togithub.com/facebook/jest/pull/5269))
 
 ### Fixes
 
 * `[docs]` Document caveat with mocks, Enzyme, snapshots and React 16
-  ([#5258](https://github.com/facebook/jest/issues/5258))
+  ([#5258](https://togithub.com/facebook/jest/issues/5258))
 
 ## jest 22.0.5
 
@@ -139,91 +139,91 @@
 * `[jest-leak-detector]` Removed the reference to `weak`. Now, parent projects
   must install it by hand for the module to work.
 * `[expect]` Fail test when the types of `stringContaining` and `stringMatching`
-  matchers do not match. ([#5069](https://github.com/facebook/jest/pull/5069))
+  matchers do not match. ([#5069](https://togithub.com/facebook/jest/pull/5069))
 * `[jest-cli]` Treat dumb terminals as noninteractive
-  ([#5237](https://github.com/facebook/jest/pull/5237))
+  ([#5237](https://togithub.com/facebook/jest/pull/5237))
 * `[jest-cli]` `jest --onlyChanged --changedFilesWithAncestor` now also works
-  with git. ([#5189](https://github.com/facebook/jest/pull/5189))
+  with git. ([#5189](https://togithub.com/facebook/jest/pull/5189))
 * `[jest-config]` fix unexpected condition to avoid infinite recursion in
-  Windows platform. ([#5161](https://github.com/facebook/jest/pull/5161))
+  Windows platform. ([#5161](https://togithub.com/facebook/jest/pull/5161))
 * `[jest-config]` Escape parentheses and other glob characters in `rootDir`
   before interpolating with `testMatch`.
-  ([#4838](https://github.com/facebook/jest/issues/4838))
+  ([#4838](https://togithub.com/facebook/jest/issues/4838))
 * `[jest-regex-util]` Fix breaking change in `--testPathPattern`
-  ([#5230](https://github.com/facebook/jest/pull/5230))
+  ([#5230](https://togithub.com/facebook/jest/pull/5230))
 * `[expect]` Do not override `Error` stack (with `Error.captureStackTrace`) for
-  custom matchers. ([#5162](https://github.com/facebook/jest/pull/5162))
+  custom matchers. ([#5162](https://togithub.com/facebook/jest/pull/5162))
 * `[pretty-format]` Pretty format for DOMStringMap and NamedNodeMap
-  ([#5233](https://github.com/facebook/jest/pull/5233))
+  ([#5233](https://togithub.com/facebook/jest/pull/5233))
 * `[jest-cli]` Use a better console-clearing string on Windows
-  ([#5251](https://github.com/facebook/jest/pull/5251))
+  ([#5251](https://togithub.com/facebook/jest/pull/5251))
 
 ### Features
 
 * `[jest-jasmine]` Allowed classes and functions as `describe` names.
-  ([#5154](https://github.com/facebook/jest/pull/5154))
+  ([#5154](https://togithub.com/facebook/jest/pull/5154))
 * `[jest-jasmine2]` Support generator functions as specs.
-  ([#5166](https://github.com/facebook/jest/pull/5166))
+  ([#5166](https://togithub.com/facebook/jest/pull/5166))
 * `[jest-jasmine2]` Allow `spyOn` with getters and setters.
-  ([#5107](https://github.com/facebook/jest/pull/5107))
+  ([#5107](https://togithub.com/facebook/jest/pull/5107))
 * `[jest-config]` Allow configuration objects inside `projects` array
-  ([#5176](https://github.com/facebook/jest/pull/5176))
+  ([#5176](https://togithub.com/facebook/jest/pull/5176))
 * `[expect]` Add support to `.toHaveProperty` matcher to accept the keyPath
   argument as an array of properties/indices.
-  ([#5220](https://github.com/facebook/jest/pull/5220))
+  ([#5220](https://togithub.com/facebook/jest/pull/5220))
 * `[docs]` Add documentation for .toHaveProperty matcher to accept the keyPath
   argument as an array of properties/indices.
-  ([#5220](https://github.com/facebook/jest/pull/5220))
+  ([#5220](https://togithub.com/facebook/jest/pull/5220))
 * `[jest-runner]` test environments are now passed a new `options` parameter.
   Currently this only has the `console` which is the test console that Jest will
-  expose to tests. ([#5223](https://github.com/facebook/jest/issues/5223))
+  expose to tests. ([#5223](https://togithub.com/facebook/jest/issues/5223))
 * `[jest-environment-jsdom]` pass the `options.console` to a custom instance of
   `virtualConsole` so jsdom is using the same console as the test.
-  ([#5223](https://github.com/facebook/jest/issues/5223))
+  ([#5223](https://togithub.com/facebook/jest/issues/5223))
 
 ### Chore & Maintenance
 
 * `[docs]` Describe the order of execution of describe and test blocks.
-  ([#5217](https://github.com/facebook/jest/pull/5217),
-  [#5238](https://github.com/facebook/jest/pull/5238))
+  ([#5217](https://togithub.com/facebook/jest/pull/5217),
+  [#5238](https://togithub.com/facebook/jest/pull/5238))
 * `[docs]` Add a note on `moduleNameMapper` ordering.
-  ([#5249](https://github.com/facebook/jest/pull/5249))
+  ([#5249](https://togithub.com/facebook/jest/pull/5249))
 
 ## jest 22.0.4
 
 ### Fixes
 
 * `[jest-cli]` New line before quitting watch mode.
-  ([#5158](https://github.com/facebook/jest/pull/5158))
+  ([#5158](https://togithub.com/facebook/jest/pull/5158))
 
 ### Features
 
 * `[babel-jest]` moduleFileExtensions not passed to babel transformer.
-  ([#5110](https://github.com/facebook/jest/pull/5110))
+  ([#5110](https://togithub.com/facebook/jest/pull/5110))
 
 ### Chore & Maintenance
 
 * `[*]` Tweaks to better support Node 4
-  ([#5142](https://github.com/facebook/jest/pull/5142))
+  ([#5142](https://togithub.com/facebook/jest/pull/5142))
 
 ## jest 22.0.2 && 22.0.3
 
 ### Chore & Maintenance
 
 * `[*]` Tweaks to better support Node 4
-  ([#5134](https://github.com/facebook/jest/pull/5134))
+  ([#5134](https://togithub.com/facebook/jest/pull/5134))
 
 ## jest 22.0.1
 
 ### Fixes
 
 * `[jest-runtime]` fix error for test files providing coverage.
-  ([#5117](https://github.com/facebook/jest/pull/5117))
+  ([#5117](https://togithub.com/facebook/jest/pull/5117))
 
 ### Features
 
 * `[jest-config]` Add `forceCoverageMatch` to allow collecting coverage from
-  ignored files. ([#5081](https://github.com/facebook/jest/pull/5081))
+  ignored files. ([#5081](https://togithub.com/facebook/jest/pull/5081))
 
 ## jest 22.0.0
 
@@ -232,744 +232,744 @@
 * `[jest-resolve]` Use `module.builtinModules` as `BUILTIN_MODULES` when it
   exists
 * `[jest-worker]` Remove `debug` and `inspect` flags from the arguments sent to
-  the child ([#5068](https://github.com/facebook/jest/pull/5068))
+  the child ([#5068](https://togithub.com/facebook/jest/pull/5068))
 * `[jest-config]` Use all `--testPathPattern` and `<regexForTestFiles>` args in
-  `testPathPattern` ([#5066](https://github.com/facebook/jest/pull/5066))
+  `testPathPattern` ([#5066](https://togithub.com/facebook/jest/pull/5066))
 * `[jest-cli]` Do not support `--watch` inside non-version-controlled
-  environments ([#5060](https://github.com/facebook/jest/pull/5060))
+  environments ([#5060](https://togithub.com/facebook/jest/pull/5060))
 * `[jest-config]` Escape Windows path separator in testPathPattern CLI arguments
-  ([#5054](https://github.com/facebook/jest/pull/5054)
+  ([#5054](https://togithub.com/facebook/jest/pull/5054)
 * `[jest-jasmine]` Register sourcemaps as node environment to improve
-  performance with jsdom ([#5045](https://github.com/facebook/jest/pull/5045))
+  performance with jsdom ([#5045](https://togithub.com/facebook/jest/pull/5045))
 * `[pretty-format]` Do not call toJSON recursively
-  ([#5044](https://github.com/facebook/jest/pull/5044))
+  ([#5044](https://togithub.com/facebook/jest/pull/5044))
 * `[pretty-format]` Fix errors when identity-obj-proxy mocks CSS Modules
-  ([#4935](https://github.com/facebook/jest/pull/4935))
+  ([#4935](https://togithub.com/facebook/jest/pull/4935))
 * `[babel-jest]` Fix support for namespaced babel version 7
-  ([#4918](https://github.com/facebook/jest/pull/4918))
+  ([#4918](https://togithub.com/facebook/jest/pull/4918))
 * `[expect]` fix .toThrow for promises
-  ([#4884](https://github.com/facebook/jest/pull/4884))
+  ([#4884](https://togithub.com/facebook/jest/pull/4884))
 * `[jest-docblock]` pragmas should preserve urls
-  ([#4837](https://github.com/facebook/jest/pull/4629))
+  ([#4837](https://togithub.com/facebook/jest/pull/4629))
 * `[jest-cli]` Check if `npm_lifecycle_script` calls Jest directly
-  ([#4629](https://github.com/facebook/jest/pull/4629))
+  ([#4629](https://togithub.com/facebook/jest/pull/4629))
 * `[jest-cli]` Fix --showConfig to show all configs
-  ([#4494](https://github.com/facebook/jest/pull/4494))
+  ([#4494](https://togithub.com/facebook/jest/pull/4494))
 * `[jest-cli]` Throw if `maxWorkers` doesn't have a value
-  ([#4591](https://github.com/facebook/jest/pull/4591))
+  ([#4591](https://togithub.com/facebook/jest/pull/4591))
 * `[jest-cli]` Use `fs.realpathSync.native` if available
-  ([#5031](https://github.com/facebook/jest/pull/5031))
+  ([#5031](https://togithub.com/facebook/jest/pull/5031))
 * `[jest-config]` Fix `--passWithNoTests`
-  ([#4639](https://github.com/facebook/jest/pull/4639))
+  ([#4639](https://togithub.com/facebook/jest/pull/4639))
 * `[jest-config]` Support `rootDir` tag in testEnvironment
-  ([#4579](https://github.com/facebook/jest/pull/4579))
+  ([#4579](https://togithub.com/facebook/jest/pull/4579))
 * `[jest-editor-support]` Fix `--showConfig` to support jest 20 and jest 21
-  ([#4575](https://github.com/facebook/jest/pull/4575))
+  ([#4575](https://togithub.com/facebook/jest/pull/4575))
 * `[jest-editor-support]` Fix editor support test for node 4
-  ([#4640](https://github.com/facebook/jest/pull/4640))
+  ([#4640](https://togithub.com/facebook/jest/pull/4640))
 * `[jest-mock]` Support mocking constructor in `mockImplementationOnce`
-  ([#4599](https://github.com/facebook/jest/pull/4599))
+  ([#4599](https://togithub.com/facebook/jest/pull/4599))
 * `[jest-runtime]` Fix manual user mocks not working with custom resolver
-  ([#4489](https://github.com/facebook/jest/pull/4489))
+  ([#4489](https://togithub.com/facebook/jest/pull/4489))
 * `[jest-util]` Fix `runOnlyPendingTimers` for `setTimeout` inside
-  `setImmediate` ([#4608](https://github.com/facebook/jest/pull/4608))
+  `setImmediate` ([#4608](https://togithub.com/facebook/jest/pull/4608))
 * `[jest-message-util]` Always remove node internals from stacktraces
-  ([#4695](https://github.com/facebook/jest/pull/4695))
+  ([#4695](https://togithub.com/facebook/jest/pull/4695))
 * `[jest-resolve]` changes method of determining builtin modules to include
-  missing builtins ([#4740](https://github.com/facebook/jest/pull/4740))
+  missing builtins ([#4740](https://togithub.com/facebook/jest/pull/4740))
 * `[pretty-format]` Prevent error in pretty-format for window in jsdom test env
-  ([#4750](https://github.com/facebook/jest/pull/4750))
+  ([#4750](https://togithub.com/facebook/jest/pull/4750))
 * `[jest-resolve]` Preserve module identity for symlinks
-  ([#4761](https://github.com/facebook/jest/pull/4761))
+  ([#4761](https://togithub.com/facebook/jest/pull/4761))
 * `[jest-config]` Include error message for `preset` json
-  ([#4766](https://github.com/facebook/jest/pull/4766))
+  ([#4766](https://togithub.com/facebook/jest/pull/4766))
 * `[pretty-format]` Throw `PrettyFormatPluginError` if a plugin halts with an
-  exception ([#4787](https://github.com/facebook/jest/pull/4787))
+  exception ([#4787](https://togithub.com/facebook/jest/pull/4787))
 * `[expect]` Keep the stack trace unchanged when `PrettyFormatPluginError` is
-  thrown by pretty-format ([#4787](https://github.com/facebook/jest/pull/4787))
+  thrown by pretty-format ([#4787](https://togithub.com/facebook/jest/pull/4787))
 * `[jest-environment-jsdom]` Fix asynchronous test will fail due to timeout
-  issue. ([#4669](https://github.com/facebook/jest/pull/4669))
+  issue. ([#4669](https://togithub.com/facebook/jest/pull/4669))
 * `[jest-cli]` Fix `--onlyChanged` path case sensitivity on Windows platform
-  ([#4730](https://github.com/facebook/jest/pull/4730))
+  ([#4730](https://togithub.com/facebook/jest/pull/4730))
 * `[jest-runtime]` Use realpath to match transformers
-  ([#5000](https://github.com/facebook/jest/pull/5000))
+  ([#5000](https://togithub.com/facebook/jest/pull/5000))
 * `[expect]` [**BREAKING**] Replace identity equality with Object.is in toBe
-  matcher ([#4917](https://github.com/facebook/jest/pull/4917))
+  matcher ([#4917](https://togithub.com/facebook/jest/pull/4917))
 
 ### Features
 
 * `[jest-message-util]` Add codeframe to test assertion failures
-  ([#5087](https://github.com/facebook/jest/pull/5087))
+  ([#5087](https://togithub.com/facebook/jest/pull/5087))
 * `[jest-config]` Add Global Setup/Teardown options
-  ([#4716](https://github.com/facebook/jest/pull/4716))
+  ([#4716](https://togithub.com/facebook/jest/pull/4716))
 * `[jest-config]` Add `testEnvironmentOptions` to apply to jsdom options or node
-  context. ([#5003](https://github.com/facebook/jest/pull/5003))
+  context. ([#5003](https://togithub.com/facebook/jest/pull/5003))
 * `[jest-jasmine2]` Update Timeout error message to `jest.timeout` and display
-  current timeout value ([#4990](https://github.com/facebook/jest/pull/4990))
+  current timeout value ([#4990](https://togithub.com/facebook/jest/pull/4990))
 * `[jest-runner]` Enable experimental detection of leaked contexts
-  ([#4895](https://github.com/facebook/jest/pull/4895))
+  ([#4895](https://togithub.com/facebook/jest/pull/4895))
 * `[jest-cli]` Add combined coverage threshold for directories.
-  ([#4885](https://github.com/facebook/jest/pull/4885))
+  ([#4885](https://togithub.com/facebook/jest/pull/4885))
 * `[jest-mock]` Add `timestamps` to mock state.
-  ([#4866](https://github.com/facebook/jest/pull/4866))
+  ([#4866](https://togithub.com/facebook/jest/pull/4866))
 * `[eslint-plugin-jest]` Add `prefer-to-have-length` lint rule.
-  ([#4771](https://github.com/facebook/jest/pull/4771))
+  ([#4771](https://togithub.com/facebook/jest/pull/4771))
 * `[jest-environment-jsdom]` [**BREAKING**] Upgrade to JSDOM@11
-  ([#4770](https://github.com/facebook/jest/pull/4770))
+  ([#4770](https://togithub.com/facebook/jest/pull/4770))
 * `[jest-environment-*]` [**BREAKING**] Add Async Test Environment APIs, dispose
-  is now teardown ([#4506](https://github.com/facebook/jest/pull/4506))
+  is now teardown ([#4506](https://togithub.com/facebook/jest/pull/4506))
 * `[jest-cli]` Add an option to clear the cache
-  ([#4430](https://github.com/facebook/jest/pull/4430))
+  ([#4430](https://togithub.com/facebook/jest/pull/4430))
 * `[babel-plugin-jest-hoist]` Improve error message, that the second argument of
   `jest.mock` must be an inline function
-  ([#4593](https://github.com/facebook/jest/pull/4593))
+  ([#4593](https://togithub.com/facebook/jest/pull/4593))
 * `[jest-snapshot]` [**BREAKING**] Concatenate name of test and snapshot
-  ([#4460](https://github.com/facebook/jest/pull/4460))
+  ([#4460](https://togithub.com/facebook/jest/pull/4460))
 * `[jest-cli]` [**BREAKING**] Fail if no tests are found
-  ([#3672](https://github.com/facebook/jest/pull/3672))
+  ([#3672](https://togithub.com/facebook/jest/pull/3672))
 * `[jest-diff]` Highlight only last of odd length leading spaces
-  ([#4558](https://github.com/facebook/jest/pull/4558))
+  ([#4558](https://togithub.com/facebook/jest/pull/4558))
 * `[jest-docblock]` Add `docblock.print()`
-  ([#4517](https://github.com/facebook/jest/pull/4517))
+  ([#4517](https://togithub.com/facebook/jest/pull/4517))
 * `[jest-docblock]` Add `strip`
-  ([#4571](https://github.com/facebook/jest/pull/4571))
+  ([#4571](https://togithub.com/facebook/jest/pull/4571))
 * `[jest-docblock]` Preserve leading whitespace in docblock comments
-  ([#4576](https://github.com/facebook/jest/pull/4576))
+  ([#4576](https://togithub.com/facebook/jest/pull/4576))
 * `[jest-docblock]` remove leading newlines from `parswWithComments().comments`
-  ([#4610](https://github.com/facebook/jest/pull/4610))
+  ([#4610](https://togithub.com/facebook/jest/pull/4610))
 * `[jest-editor-support]` Add Snapshots metadata
-  ([#4570](https://github.com/facebook/jest/pull/4570))
+  ([#4570](https://togithub.com/facebook/jest/pull/4570))
 * `[jest-editor-support]` Adds an 'any' to the typedef for
   `updateFileWithJestStatus`
-  ([#4636](https://github.com/facebook/jest/pull/4636))
+  ([#4636](https://togithub.com/facebook/jest/pull/4636))
 * `[jest-editor-support]` Better monorepo support
-  ([#4572](https://github.com/facebook/jest/pull/4572))
+  ([#4572](https://togithub.com/facebook/jest/pull/4572))
 * `[jest-environment-jsdom]` Add simple rAF polyfill in jsdom environment to
-  work with React 16 ([#4568](https://github.com/facebook/jest/pull/4568))
+  work with React 16 ([#4568](https://togithub.com/facebook/jest/pull/4568))
 * `[jest-environment-node]` Implement node Timer api
-  ([#4622](https://github.com/facebook/jest/pull/4622))
+  ([#4622](https://togithub.com/facebook/jest/pull/4622))
 * `[jest-jasmine2]` Add testPath to reporter callbacks
-  ([#4594](https://github.com/facebook/jest/pull/4594))
+  ([#4594](https://togithub.com/facebook/jest/pull/4594))
 * `[jest-mock]` Added support for naming mocked functions with
   `.mockName(value)` and `.mockGetName()`
-  ([#4586](https://github.com/facebook/jest/pull/4586))
+  ([#4586](https://togithub.com/facebook/jest/pull/4586))
 * `[jest-runtime]` Add `module.loaded`, and make `module.require` not enumerable
-  ([#4623](https://github.com/facebook/jest/pull/4623))
+  ([#4623](https://togithub.com/facebook/jest/pull/4623))
 * `[jest-runtime]` Add `module.parent`
-  ([#4614](https://github.com/facebook/jest/pull/4614))
+  ([#4614](https://togithub.com/facebook/jest/pull/4614))
 * `[jest-runtime]` Support sourcemaps in transformers
-  ([#3458](https://github.com/facebook/jest/pull/3458))
+  ([#3458](https://togithub.com/facebook/jest/pull/3458))
 * `[jest-snapshot]` [**BREAKING**] Add a serializer for `jest.fn` to allow a
-  snapshot of a jest mock ([#4668](https://github.com/facebook/jest/pull/4668))
+  snapshot of a jest mock ([#4668](https://togithub.com/facebook/jest/pull/4668))
 * `[jest-worker]` Initial version of parallel worker abstraction, say hello!
-  ([#4497](https://github.com/facebook/jest/pull/4497))
+  ([#4497](https://togithub.com/facebook/jest/pull/4497))
 * `[jest-jasmine2]` Add `testLocationInResults` flag to add location information
-  per spec to test results ([#4782](https://github.com/facebook/jest/pull/4782))
+  per spec to test results ([#4782](https://togithub.com/facebook/jest/pull/4782))
 * `[jest-environment-jsdom]` Update JSOM to 11.4, which includes built-in
   support for `requestAnimationFrame`
-  ([#4919](https://github.com/facebook/jest/pull/4919))
+  ([#4919](https://togithub.com/facebook/jest/pull/4919))
 * `[jest-cli]` Hide watch usage output when running on non-interactive
-  environments ([#4958](https://github.com/facebook/jest/pull/4958))
+  environments ([#4958](https://togithub.com/facebook/jest/pull/4958))
 * `[jest-snapshot]` Promises support for `toThrowErrorMatchingSnapshot`
-  ([#4946](https://github.com/facebook/jest/pull/4946))
+  ([#4946](https://togithub.com/facebook/jest/pull/4946))
 * `[jest-cli]` Explain which snapshots are obsolete
-  ([#5005](https://github.com/facebook/jest/pull/5005))
+  ([#5005](https://togithub.com/facebook/jest/pull/5005))
 
 ### Chore & Maintenance
 
 * `[docs]` Add guide of using with puppeteer
-  ([#5093](https://github.com/facebook/jest/pull/5093))
+  ([#5093](https://togithub.com/facebook/jest/pull/5093))
 * `[jest-util]` `jest-util` should not depend on `jest-mock`
-  ([#4992](https://github.com/facebook/jest/pull/4992))
+  ([#4992](https://togithub.com/facebook/jest/pull/4992))
 * `[*]` [**BREAKING**] Drop support for Node.js version 4
-  ([#4769](https://github.com/facebook/jest/pull/4769))
+  ([#4769](https://togithub.com/facebook/jest/pull/4769))
 * `[docs]` Wrap code comments at 80 characters
-  ([#4781](https://github.com/facebook/jest/pull/4781))
+  ([#4781](https://togithub.com/facebook/jest/pull/4781))
 * `[eslint-plugin-jest]` Removed from the Jest core repo, and moved to
-  <https://github.com/jest-community/eslint-plugin-jest>
-  ([#4867](https://github.com/facebook/jest/pull/4867))
+  <https://togithub.com/jest-community/eslint-plugin-jest>
+  ([#4867](https://togithub.com/facebook/jest/pull/4867))
 * `[babel-jest]` Explicitly bump istanbul to newer versions
-  ([#4616](https://github.com/facebook/jest/pull/4616))
+  ([#4616](https://togithub.com/facebook/jest/pull/4616))
 * `[expect]` Upgrade mocha and rollup for browser testing
-  ([#4642](https://github.com/facebook/jest/pull/4642))
+  ([#4642](https://togithub.com/facebook/jest/pull/4642))
 * `[docs]` Add info about `coveragePathIgnorePatterns`
-  ([#4602](https://github.com/facebook/jest/pull/4602))
+  ([#4602](https://togithub.com/facebook/jest/pull/4602))
 * `[docs]` Add Vuejs series of testing with Jest
-  ([#4648](https://github.com/facebook/jest/pull/4648))
+  ([#4648](https://togithub.com/facebook/jest/pull/4648))
 * `[docs]` Mention about optional `done` argument in test function
-  ([#4556](https://github.com/facebook/jest/pull/4556))
+  ([#4556](https://togithub.com/facebook/jest/pull/4556))
 * `[jest-cli]` Bump node-notifier version
-  ([#4609](https://github.com/facebook/jest/pull/4609))
+  ([#4609](https://togithub.com/facebook/jest/pull/4609))
 * `[jest-diff]` Simplify highlight for leading and trailing spaces
-  ([#4553](https://github.com/facebook/jest/pull/4553))
+  ([#4553](https://togithub.com/facebook/jest/pull/4553))
 * `[jest-get-type]` Add support for date
-  ([#4621](https://github.com/facebook/jest/pull/4621))
+  ([#4621](https://togithub.com/facebook/jest/pull/4621))
 * `[jest-matcher-utils]` Call `chalk.inverse` for trailing spaces
-  ([#4578](https://github.com/facebook/jest/pull/4578))
+  ([#4578](https://togithub.com/facebook/jest/pull/4578))
 * `[jest-runtime]` Add `.advanceTimersByTime`; keep `.runTimersToTime()` as an
   alias.
 * `[docs]` Include missing dependency in TestEnvironment sample code
 * `[docs]` Add clarification for hook execution order
 * `[docs]` Update `expect.anything()` sample code
-  ([#5007](https://github.com/facebook/jest/pull/5007))
+  ([#5007](https://togithub.com/facebook/jest/pull/5007))
 
 ## jest 21.2.1
 
 * Fix watchAll not running tests on save
-  ([#4550](https://github.com/facebook/jest/pull/4550))
+  ([#4550](https://togithub.com/facebook/jest/pull/4550))
 * Add missing escape sequences to ConvertAnsi plugin
-  ([#4544](https://github.com/facebook/jest/pull/4544))
+  ([#4544](https://togithub.com/facebook/jest/pull/4544))
 
 ## jest 21.2.0
 
 * 🃏 Change license from BSD+Patents to MIT.
 * Allow eslint-plugin to recognize more disabled tests
-  ([#4533](https://github.com/facebook/jest/pull/4533))
+  ([#4533](https://togithub.com/facebook/jest/pull/4533))
 * Add babel-plugin for object spread syntax to babel-preset-jest
-  ([#4519](https://github.com/facebook/jest/pull/4519))
+  ([#4519](https://togithub.com/facebook/jest/pull/4519))
 * Display outer element and trailing newline consistently in jest-diff
-  ([#4520](https://github.com/facebook/jest/pull/4520))
+  ([#4520](https://togithub.com/facebook/jest/pull/4520))
 * Do not modify stack trace of JestAssertionError
-  ([#4516](https://github.com/facebook/jest/pull/4516))
+  ([#4516](https://togithub.com/facebook/jest/pull/4516))
 * Print errors after test structure in verbose mode
-  ([#4504](https://github.com/facebook/jest/pull/4504))
+  ([#4504](https://togithub.com/facebook/jest/pull/4504))
 * Fix `--silent --verbose` problem
-  ([#4505](https://github.com/facebook/jest/pull/4505))
+  ([#4505](https://togithub.com/facebook/jest/pull/4505))
 * Fix: Reset local state of assertions when using hasAssertions
-  ([#4498](https://github.com/facebook/jest/pull/4498))
+  ([#4498](https://togithub.com/facebook/jest/pull/4498))
 * jest-resolve: Prevent default resolver failure when potential resolution
-  directory does not exist ([#4483](https://github.com/facebook/jest/pull/4483))
+  directory does not exist ([#4483](https://togithub.com/facebook/jest/pull/4483))
 
 ## jest 21.1.0
 
 * (minor) Use ES module exports
-  ([#4454](https://github.com/facebook/jest/pull/4454))
+  ([#4454](https://togithub.com/facebook/jest/pull/4454))
 * Allow chaining mockClear and mockReset
-  ([#4475](https://github.com/facebook/jest/pull/4475))
+  ([#4475](https://togithub.com/facebook/jest/pull/4475))
 * Call jest-diff and pretty-format more precisely in toHaveProperty matcher
-  ([#4445](https://github.com/facebook/jest/pull/4445))
+  ([#4445](https://togithub.com/facebook/jest/pull/4445))
 * Expose restoreAllMocks to object
-  ([#4463](https://github.com/facebook/jest/pull/4463))
+  ([#4463](https://togithub.com/facebook/jest/pull/4463))
 * Fix function name cleaning when making mock fn
-  ([#4464](https://github.com/facebook/jest/pull/4464))
+  ([#4464](https://togithub.com/facebook/jest/pull/4464))
 * Fix Map/Set equality checker
-  ([#4404](https://github.com/facebook/jest/pull/4404))
+  ([#4404](https://togithub.com/facebook/jest/pull/4404))
 * Make FUNCTION_NAME_RESERVED_PATTERN stateless
-  ([#4466](https://github.com/facebook/jest/pull/4466))
+  ([#4466](https://togithub.com/facebook/jest/pull/4466))
 
 ## jest 21.0.2
 
 * Take precedence of NODE_PATH when resolving node_modules directories
-  ([#4453](https://github.com/facebook/jest/pull/4453))
+  ([#4453](https://togithub.com/facebook/jest/pull/4453))
 * Fix race condition with --coverage and babel-jest identical file contents edge
-  case ([#4432](https://github.com/facebook/jest/pull/4432))
+  case ([#4432](https://togithub.com/facebook/jest/pull/4432))
 * Add extra parameter `--runTestsByPath`.
-  ([#4411](https://github.com/facebook/jest/pull/4411))
+  ([#4411](https://togithub.com/facebook/jest/pull/4411))
 * Upgrade all outdated deps
-  ([#4425](https://github.com/facebook/jest/pull/4425))
+  ([#4425](https://togithub.com/facebook/jest/pull/4425))
 
 ## jest 21.0.1
 
-* Remove obsolete error ([#4417](https://github.com/facebook/jest/pull/4417))
+* Remove obsolete error ([#4417](https://togithub.com/facebook/jest/pull/4417))
 
 ## jest 21.0.0
 
 * Add --changedFilesWithAncestor
-  ([#4070](https://github.com/facebook/jest/pull/4070))
-* Add --findRelatedFiles ([#4131](https://github.com/facebook/jest/pull/4131))
-* Add --onlyChanged tests ([#3977](https://github.com/facebook/jest/pull/3977))
+  ([#4070](https://togithub.com/facebook/jest/pull/4070))
+* Add --findRelatedFiles ([#4131](https://togithub.com/facebook/jest/pull/4131))
+* Add --onlyChanged tests ([#3977](https://togithub.com/facebook/jest/pull/3977))
 * Add `contextLines` option to jest-diff
-  ([#4152](https://github.com/facebook/jest/pull/4152))
+  ([#4152](https://togithub.com/facebook/jest/pull/4152))
 * Add alternative serialize API for pretty-format plugins
-  ([#4114](https://github.com/facebook/jest/pull/4114))
-* Add displayName to MPR ([#4327](https://github.com/facebook/jest/pull/4327))
+  ([#4114](https://togithub.com/facebook/jest/pull/4114))
+* Add displayName to MPR ([#4327](https://togithub.com/facebook/jest/pull/4327))
 * Add displayName to TestResult
-  ([#4408](https://github.com/facebook/jest/pull/4408))
+  ([#4408](https://togithub.com/facebook/jest/pull/4408))
 * Add es5 build of pretty-format
-  ([#4075](https://github.com/facebook/jest/pull/4075))
+  ([#4075](https://togithub.com/facebook/jest/pull/4075))
 * Add extra info to no tests for changed files message
-  ([#4188](https://github.com/facebook/jest/pull/4188))
+  ([#4188](https://togithub.com/facebook/jest/pull/4188))
 * Add fake chalk in browser builds in order to support IE10
-  ([#4367](https://github.com/facebook/jest/pull/4367))
-* Add jest.requireActual ([#4260](https://github.com/facebook/jest/pull/4260))
+  ([#4367](https://togithub.com/facebook/jest/pull/4367))
+* Add jest.requireActual ([#4260](https://togithub.com/facebook/jest/pull/4260))
 * Add maxWorkers to globalConfig
-  ([#4005](https://github.com/facebook/jest/pull/4005))
+  ([#4005](https://togithub.com/facebook/jest/pull/4005))
 * Add skipped tests support for jest-editor-support
-  ([#4346](https://github.com/facebook/jest/pull/4346))
+  ([#4346](https://togithub.com/facebook/jest/pull/4346))
 * Add source map support for better debugging experience
-  ([#3738](https://github.com/facebook/jest/pull/3738))
+  ([#3738](https://togithub.com/facebook/jest/pull/3738))
 * Add support for Error objects in toMatchObject
-  ([#4339](https://github.com/facebook/jest/pull/4339))
+  ([#4339](https://togithub.com/facebook/jest/pull/4339))
 * Add support for Immutable.Record in pretty-format
-  ([#3678](https://github.com/facebook/jest/pull/3678))
+  ([#3678](https://togithub.com/facebook/jest/pull/3678))
 * Add tests for extract_requires on export types
-  ([#4080](https://github.com/facebook/jest/pull/4080))
+  ([#4080](https://togithub.com/facebook/jest/pull/4080))
 * Add that toMatchObject can match arrays
-  ([#3994](https://github.com/facebook/jest/pull/3994))
+  ([#3994](https://togithub.com/facebook/jest/pull/3994))
 * Add watchPathIgnorePatterns to exclude paths to trigger test re-run in watch
-  mode ([#4331](https://github.com/facebook/jest/pull/4331))
+  mode ([#4331](https://togithub.com/facebook/jest/pull/4331))
 * Adding ancestorTitles property to JSON test output
-  ([#4293](https://github.com/facebook/jest/pull/4293))
+  ([#4293](https://togithub.com/facebook/jest/pull/4293))
 * Allow custom resolver to be used with[out] moduleNameMapper
-  ([#4174](https://github.com/facebook/jest/pull/4174))
+  ([#4174](https://togithub.com/facebook/jest/pull/4174))
 * Avoid parsing `.require(…)` method calls
-  ([#3777](https://github.com/facebook/jest/pull/3777))
+  ([#3777](https://togithub.com/facebook/jest/pull/3777))
 * Avoid unnecessary function declarations and call in pretty-format
-  ([#3962](https://github.com/facebook/jest/pull/3962))
+  ([#3962](https://togithub.com/facebook/jest/pull/3962))
 * Avoid writing to stdout in default reporter if --json is enabled. Fixes #3941
-  ([#3945](https://github.com/facebook/jest/pull/3945))
+  ([#3945](https://togithub.com/facebook/jest/pull/3945))
 * Better error handling for --config
-  ([#4230](https://github.com/facebook/jest/pull/4230))
+  ([#4230](https://togithub.com/facebook/jest/pull/4230))
 * Call consistent pretty-format plugins within Jest
-  ([#3800](https://github.com/facebook/jest/pull/3800))
+  ([#3800](https://togithub.com/facebook/jest/pull/3800))
 * Change babel-core to peerDependency for compatibility with Babel 7
-  ([#4162](https://github.com/facebook/jest/pull/4162))
+  ([#4162](https://togithub.com/facebook/jest/pull/4162))
 * Change Promise detection code in jest-circus to support non-global Promise
-  implementations ([#4375](https://github.com/facebook/jest/pull/4375))
+  implementations ([#4375](https://togithub.com/facebook/jest/pull/4375))
 * Changed files eager loading
-  ([#3979](https://github.com/facebook/jest/pull/3979))
+  ([#3979](https://togithub.com/facebook/jest/pull/3979))
 * Check whether we should output to stdout or stderr
-  ([#3953](https://github.com/facebook/jest/pull/3953))
+  ([#3953](https://togithub.com/facebook/jest/pull/3953))
 * Clarify what objects toContain and toContainEqual can be used on
-  ([#4307](https://github.com/facebook/jest/pull/4307))
+  ([#4307](https://togithub.com/facebook/jest/pull/4307))
 * Clean up resolve() logic. Provide useful names for variables and functions.
   Test that a directory exists before attempting to resolve files within it.
-  ([#4325](https://github.com/facebook/jest/pull/4325))
-* cleanupStackTrace ([#3696](https://github.com/facebook/jest/pull/3696))
+  ([#4325](https://togithub.com/facebook/jest/pull/4325))
+* cleanupStackTrace ([#3696](https://togithub.com/facebook/jest/pull/3696))
 * compare objects with Symbol keys
-  ([#3437](https://github.com/facebook/jest/pull/3437))
+  ([#3437](https://togithub.com/facebook/jest/pull/3437))
 * Complain if expect is passed multiple arguments
-  ([#4237](https://github.com/facebook/jest/pull/4237))
+  ([#4237](https://togithub.com/facebook/jest/pull/4237))
 * Completes nodeCrawl with empty roots
-  ([#3776](https://github.com/facebook/jest/pull/3776))
+  ([#3776](https://togithub.com/facebook/jest/pull/3776))
 * Consistent naming of files
-  ([#3798](https://github.com/facebook/jest/pull/3798))
+  ([#3798](https://togithub.com/facebook/jest/pull/3798))
 * Convert code base to ESM import
-  ([#3778](https://github.com/facebook/jest/pull/3778))
+  ([#3778](https://togithub.com/facebook/jest/pull/3778))
 * Correct summary message for flag --findRelatedTests.
-  ([#4309](https://github.com/facebook/jest/pull/4309))
+  ([#4309](https://togithub.com/facebook/jest/pull/4309))
 * Coverage thresholds can be set up for individual files
-  ([#4185](https://github.com/facebook/jest/pull/4185))
+  ([#4185](https://togithub.com/facebook/jest/pull/4185))
 * custom reporter error handling
-  ([#4051](https://github.com/facebook/jest/pull/4051))
+  ([#4051](https://togithub.com/facebook/jest/pull/4051))
 * Define separate type for pretty-format plugin Options
-  ([#3802](https://github.com/facebook/jest/pull/3802))
+  ([#3802](https://togithub.com/facebook/jest/pull/3802))
 * Delete confusing async keyword
-  ([#3679](https://github.com/facebook/jest/pull/3679))
+  ([#3679](https://togithub.com/facebook/jest/pull/3679))
 * Delete redundant branch in ReactElement and HTMLElement plugins
-  ([#3731](https://github.com/facebook/jest/pull/3731))
+  ([#3731](https://togithub.com/facebook/jest/pull/3731))
 * Don't format node assert errors when there's no 'assert' module
-  ([#4376](https://github.com/facebook/jest/pull/4376))
+  ([#4376](https://togithub.com/facebook/jest/pull/4376))
 * Don't print test summary in --silent
-  ([#4106](https://github.com/facebook/jest/pull/4106))
+  ([#4106](https://togithub.com/facebook/jest/pull/4106))
 * Don't try to build ghost packages
-  ([#3934](https://github.com/facebook/jest/pull/3934))
+  ([#3934](https://togithub.com/facebook/jest/pull/3934))
 * Escape double quotes in attribute values in HTMLElement plugin
-  ([#3797](https://github.com/facebook/jest/pull/3797))
+  ([#3797](https://togithub.com/facebook/jest/pull/3797))
 * Explain how to clear the cache
-  ([#4232](https://github.com/facebook/jest/pull/4232))
+  ([#4232](https://togithub.com/facebook/jest/pull/4232))
 * Factor out common code for collections in pretty-format
-  ([#4184](https://github.com/facebook/jest/pull/4184))
+  ([#4184](https://togithub.com/facebook/jest/pull/4184))
 * Factor out common code for markup in React plugins
-  ([#4171](https://github.com/facebook/jest/pull/4171))
-* Feature/internal resolve ([#4315](https://github.com/facebook/jest/pull/4315))
-* Fix --logHeapUsage ([#4176](https://github.com/facebook/jest/pull/4176))
+  ([#4171](https://togithub.com/facebook/jest/pull/4171))
+* Feature/internal resolve ([#4315](https://togithub.com/facebook/jest/pull/4315))
+* Fix --logHeapUsage ([#4176](https://togithub.com/facebook/jest/pull/4176))
 * Fix --showConfig to show all project configs
-  ([#4078](https://github.com/facebook/jest/pull/4078))
-* Fix --watchAll ([#4254](https://github.com/facebook/jest/pull/4254))
+  ([#4078](https://togithub.com/facebook/jest/pull/4078))
+* Fix --watchAll ([#4254](https://togithub.com/facebook/jest/pull/4254))
 * Fix bug when setTimeout is mocked
-  ([#3769](https://github.com/facebook/jest/pull/3769))
+  ([#3769](https://togithub.com/facebook/jest/pull/3769))
 * Fix changedFilesWithAncestor
-  ([#4193](https://github.com/facebook/jest/pull/4193))
+  ([#4193](https://togithub.com/facebook/jest/pull/4193))
 * Fix colors for expected/stored snapshot message
-  ([#3702](https://github.com/facebook/jest/pull/3702))
+  ([#3702](https://togithub.com/facebook/jest/pull/3702))
 * Fix concurrent test failure
-  ([#4159](https://github.com/facebook/jest/pull/4159))
+  ([#4159](https://togithub.com/facebook/jest/pull/4159))
 * Fix for 4286: Compare Maps and Sets by value rather than order
-  ([#4303](https://github.com/facebook/jest/pull/4303))
-* fix forceExit ([#4105](https://github.com/facebook/jest/pull/4105))
+  ([#4303](https://togithub.com/facebook/jest/pull/4303))
+* fix forceExit ([#4105](https://togithub.com/facebook/jest/pull/4105))
 * Fix grammar in React Native docs
-  ([#3838](https://github.com/facebook/jest/pull/3838))
+  ([#3838](https://togithub.com/facebook/jest/pull/3838))
 * Fix inconsistent name of complex values in pretty-format
-  ([#4001](https://github.com/facebook/jest/pull/4001))
+  ([#4001](https://togithub.com/facebook/jest/pull/4001))
 * Fix issue mocking bound method
-  ([#3805](https://github.com/facebook/jest/pull/3805))
-* Fix jest-circus ([#4290](https://github.com/facebook/jest/pull/4290))
+  ([#3805](https://togithub.com/facebook/jest/pull/3805))
+* Fix jest-circus ([#4290](https://togithub.com/facebook/jest/pull/4290))
 * Fix lint warning in master
-  ([#4132](https://github.com/facebook/jest/pull/4132))
-* Fix linting ([#3946](https://github.com/facebook/jest/pull/3946))
-* fix merge conflict ([#4144](https://github.com/facebook/jest/pull/4144))
-* Fix minor typo ([#3729](https://github.com/facebook/jest/pull/3729))
+  ([#4132](https://togithub.com/facebook/jest/pull/4132))
+* Fix linting ([#3946](https://togithub.com/facebook/jest/pull/3946))
+* fix merge conflict ([#4144](https://togithub.com/facebook/jest/pull/4144))
+* Fix minor typo ([#3729](https://togithub.com/facebook/jest/pull/3729))
 * fix missing console.log messages
-  ([#3895](https://github.com/facebook/jest/pull/3895))
-* fix mock return value ([#3933](https://github.com/facebook/jest/pull/3933))
+  ([#3895](https://togithub.com/facebook/jest/pull/3895))
+* fix mock return value ([#3933](https://togithub.com/facebook/jest/pull/3933))
 * Fix mocking for modules with folders on windows
-  ([#4238](https://github.com/facebook/jest/pull/4238))
+  ([#4238](https://togithub.com/facebook/jest/pull/4238))
 * Fix NODE_PATH resolving for relative paths
-  ([#3616](https://github.com/facebook/jest/pull/3616))
+  ([#3616](https://togithub.com/facebook/jest/pull/3616))
 * Fix options.moduleNameMapper override order with preset
-  ([#3565](https://github.com/facebook/jest/pull/3565)
-  ([#3689](https://github.com/facebook/jest/pull/3689))
+  ([#3565](https://togithub.com/facebook/jest/pull/3565)
+  ([#3689](https://togithub.com/facebook/jest/pull/3689))
 * Fix React PropTypes warning in tests for Immutable plugin
-  ([#4412](https://github.com/facebook/jest/pull/4412))
+  ([#4412](https://togithub.com/facebook/jest/pull/4412))
 * Fix regression in mockReturnValueOnce
-  ([#3857](https://github.com/facebook/jest/pull/3857))
+  ([#3857](https://togithub.com/facebook/jest/pull/3857))
 * Fix sample code of mock class constructors
-  ([#4115](https://github.com/facebook/jest/pull/4115))
+  ([#4115](https://togithub.com/facebook/jest/pull/4115))
 * Fix setup-test-framework-test
-  ([#3773](https://github.com/facebook/jest/pull/3773))
+  ([#3773](https://togithub.com/facebook/jest/pull/3773))
 * fix typescript jest test crash
-  ([#4363](https://github.com/facebook/jest/pull/4363))
-* Fix watch mode ([#4084](https://github.com/facebook/jest/pull/4084))
-* Fix Watchman on windows ([#4018](https://github.com/facebook/jest/pull/4018))
+  ([#4363](https://togithub.com/facebook/jest/pull/4363))
+* Fix watch mode ([#4084](https://togithub.com/facebook/jest/pull/4084))
+* Fix Watchman on windows ([#4018](https://togithub.com/facebook/jest/pull/4018))
 * Fix(babel): Handle ignored files in babel v7
-  ([#4393](https://github.com/facebook/jest/pull/4393))
+  ([#4393](https://togithub.com/facebook/jest/pull/4393))
 * Fix(babel): Support upcoming beta
-  ([#4403](https://github.com/facebook/jest/pull/4403))
-* Fixed object matcher ([#3799](https://github.com/facebook/jest/pull/3799))
+  ([#4403](https://togithub.com/facebook/jest/pull/4403))
+* Fixed object matcher ([#3799](https://togithub.com/facebook/jest/pull/3799))
 * Fixes #3820 use extractExpectedAssertionsErrors in jasmine setup
-* Flow upgrade ([#4355](https://github.com/facebook/jest/pull/4355))
+* Flow upgrade ([#4355](https://togithub.com/facebook/jest/pull/4355))
 * Force message in matchers to always be a function
-  ([#3972](https://github.com/facebook/jest/pull/3972))
+  ([#3972](https://togithub.com/facebook/jest/pull/3972))
 * Format `describe` and use `test` instead of `it` alias
-  ([#3792](https://github.com/facebook/jest/pull/3792))
+  ([#3792](https://togithub.com/facebook/jest/pull/3792))
 * global_config.js for multi-project runner
-  ([#4023](https://github.com/facebook/jest/pull/4023))
-* Handle async errors ([#4016](https://github.com/facebook/jest/pull/4016))
+  ([#4023](https://togithub.com/facebook/jest/pull/4023))
+* Handle async errors ([#4016](https://togithub.com/facebook/jest/pull/4016))
 * Hard-fail if hasteImpl is throwing an error during initialization.
-  ([#3812](https://github.com/facebook/jest/pull/3812))
+  ([#3812](https://togithub.com/facebook/jest/pull/3812))
 * Ignore import type for extract_requires
-  ([#4079](https://github.com/facebook/jest/pull/4079))
+  ([#4079](https://togithub.com/facebook/jest/pull/4079))
 * Ignore indentation of data structures in jest-diff
-  ([#3429](https://github.com/facebook/jest/pull/3429))
+  ([#3429](https://togithub.com/facebook/jest/pull/3429))
 * Implement 'jest.requireMock'
-  ([#4292](https://github.com/facebook/jest/pull/4292))
+  ([#4292](https://togithub.com/facebook/jest/pull/4292))
 * Improve Jest phabricator plugin
-  ([#4195](https://github.com/facebook/jest/pull/4195))
+  ([#4195](https://togithub.com/facebook/jest/pull/4195))
 * Improve Seq and remove newline from non-min empty in Immutable plugin
-  ([#4241](https://github.com/facebook/jest/pull/4241))
+  ([#4241](https://togithub.com/facebook/jest/pull/4241))
 * Improved the jest reporter with snapshot info per test.
-  ([#3660](https://github.com/facebook/jest/pull/3660))
+  ([#3660](https://togithub.com/facebook/jest/pull/3660))
 * Include fullName in formattedAssertion
-  ([#4273](https://github.com/facebook/jest/pull/4273))
+  ([#4273](https://togithub.com/facebook/jest/pull/4273))
 * Integrated with Yarn workspaces
-  ([#3906](https://github.com/facebook/jest/pull/3906))
-* jest --all ([#4020](https://github.com/facebook/jest/pull/4020))
+  ([#3906](https://togithub.com/facebook/jest/pull/3906))
+* jest --all ([#4020](https://togithub.com/facebook/jest/pull/4020))
 * jest-circus test failures
-  ([#3770](https://github.com/facebook/jest/pull/3770))
-* jest-circus Timeouts ([#3760](https://github.com/facebook/jest/pull/3760))
+  ([#3770](https://togithub.com/facebook/jest/pull/3770))
+* jest-circus Timeouts ([#3760](https://togithub.com/facebook/jest/pull/3760))
 * jest-haste-map: add test case for broken handling of ignore pattern
-  ([#4047](https://github.com/facebook/jest/pull/4047))
+  ([#4047](https://togithub.com/facebook/jest/pull/4047))
 * jest-haste-map: add test+fix for broken platform module support
-  ([#3885](https://github.com/facebook/jest/pull/3885))
+  ([#3885](https://togithub.com/facebook/jest/pull/3885))
 * jest-haste-map: deprecate functional ignorePattern and use it in cache key
-  ([#4063](https://github.com/facebook/jest/pull/4063))
+  ([#4063](https://togithub.com/facebook/jest/pull/4063))
 * jest-haste-map: mock 'fs' with more idiomatic jest.mock()
-  ([#4046](https://github.com/facebook/jest/pull/4046))
+  ([#4046](https://togithub.com/facebook/jest/pull/4046))
 * jest-haste-map: only file IO errors should be silently ignored
-  ([#3816](https://github.com/facebook/jest/pull/3816))
+  ([#3816](https://togithub.com/facebook/jest/pull/3816))
 * jest-haste-map: throw when trying to get a duplicated module
-  ([#3976](https://github.com/facebook/jest/pull/3976))
+  ([#3976](https://togithub.com/facebook/jest/pull/3976))
 * jest-haste-map: watchman crawler: normalize paths
-  ([#3887](https://github.com/facebook/jest/pull/3887))
+  ([#3887](https://togithub.com/facebook/jest/pull/3887))
 * jest-runtime: atomic cache write, and check validity of data
-  ([#4088](https://github.com/facebook/jest/pull/4088))
+  ([#4088](https://togithub.com/facebook/jest/pull/4088))
 * Join lines with newline in jest-diff
-  ([#4314](https://github.com/facebook/jest/pull/4314))
+  ([#4314](https://togithub.com/facebook/jest/pull/4314))
 * Keep ARGV only in CLI files
-  ([#4012](https://github.com/facebook/jest/pull/4012))
+  ([#4012](https://togithub.com/facebook/jest/pull/4012))
 * let transformers adjust cache key based on mapCoverage
-  ([#4187](https://github.com/facebook/jest/pull/4187))
-* Lift requires ([#3780](https://github.com/facebook/jest/pull/3780))
+  ([#4187](https://togithub.com/facebook/jest/pull/4187))
+* Lift requires ([#3780](https://togithub.com/facebook/jest/pull/3780))
 * Log stack when reporting errors in jest-runtime
-  ([#3833](https://github.com/facebook/jest/pull/3833))
+  ([#3833](https://togithub.com/facebook/jest/pull/3833))
 * Make --listTests return a new line separated list when not using --json
-  ([#4229](https://github.com/facebook/jest/pull/4229))
+  ([#4229](https://togithub.com/facebook/jest/pull/4229))
 * Make build script printing small-terminals-friendly
-  ([#3892](https://github.com/facebook/jest/pull/3892))
+  ([#3892](https://togithub.com/facebook/jest/pull/3892))
 * Make error messages more explicit for toBeCalledWith assertions
-  ([#3913](https://github.com/facebook/jest/pull/3913))
+  ([#3913](https://togithub.com/facebook/jest/pull/3913))
 * Make jest-matcher-utils use ESM exports
-  ([#4342](https://github.com/facebook/jest/pull/4342))
+  ([#4342](https://togithub.com/facebook/jest/pull/4342))
 * Make jest-runner a standalone package.
-  ([#4236](https://github.com/facebook/jest/pull/4236))
+  ([#4236](https://togithub.com/facebook/jest/pull/4236))
 * Make Jest’s Test Runner configurable.
-  ([#4240](https://github.com/facebook/jest/pull/4240))
+  ([#4240](https://togithub.com/facebook/jest/pull/4240))
 * Make listTests always print to console.log
-  ([#4391](https://github.com/facebook/jest/pull/4391))
+  ([#4391](https://togithub.com/facebook/jest/pull/4391))
 * Make providesModuleNodeModules ignore nested node_modules directories
 * Make sure function mocks match original arity
-  ([#4170](https://github.com/facebook/jest/pull/4170))
+  ([#4170](https://togithub.com/facebook/jest/pull/4170))
 * Make sure runAllTimers also clears all ticks
-  ([#3915](https://github.com/facebook/jest/pull/3915))
+  ([#3915](https://togithub.com/facebook/jest/pull/3915))
 * Make toBe matcher error message more helpful for objects and arrays
-  ([#4277](https://github.com/facebook/jest/pull/4277))
+  ([#4277](https://togithub.com/facebook/jest/pull/4277))
 * Make useRealTimers play well with timers: fake
-  ([#3858](https://github.com/facebook/jest/pull/3858))
+  ([#3858](https://togithub.com/facebook/jest/pull/3858))
 * Move getType from jest-matcher-utils to separate package
-  ([#3559](https://github.com/facebook/jest/pull/3559))
+  ([#3559](https://togithub.com/facebook/jest/pull/3559))
 * Multiroot jest-change-files
-  ([#3969](https://github.com/facebook/jest/pull/3969))
+  ([#3969](https://togithub.com/facebook/jest/pull/3969))
 * Output created snapshot when using --ci option
-  ([#3693](https://github.com/facebook/jest/pull/3693))
+  ([#3693](https://togithub.com/facebook/jest/pull/3693))
 * Point out you can use matchers in .toMatchObject
-  ([#3796](https://github.com/facebook/jest/pull/3796))
+  ([#3796](https://togithub.com/facebook/jest/pull/3796))
 * Prevent babelrc package import failure on relative current path
-  ([#3723](https://github.com/facebook/jest/pull/3723))
+  ([#3723](https://togithub.com/facebook/jest/pull/3723))
 * Print RDP details for windows builds
-  ([#4017](https://github.com/facebook/jest/pull/4017))
+  ([#4017](https://togithub.com/facebook/jest/pull/4017))
 * Provide better error checking for transformed content
-  ([#3807](https://github.com/facebook/jest/pull/3807))
+  ([#3807](https://togithub.com/facebook/jest/pull/3807))
 * Provide printText and printComment in markup.js for HTMLElement plugin
-  ([#4344](https://github.com/facebook/jest/pull/4344))
+  ([#4344](https://togithub.com/facebook/jest/pull/4344))
 * Provide regex visualization for testRegex
-  ([#3758](https://github.com/facebook/jest/pull/3758))
-* Refactor CLI ([#3862](https://github.com/facebook/jest/pull/3862))
+  ([#3758](https://togithub.com/facebook/jest/pull/3758))
+* Refactor CLI ([#3862](https://togithub.com/facebook/jest/pull/3862))
 * Refactor names and delimiters of complex values in pretty-format
-  ([#3986](https://github.com/facebook/jest/pull/3986))
+  ([#3986](https://togithub.com/facebook/jest/pull/3986))
 * Replace concat(Immutable) with Immutable as item of plugins array
-  ([#4207](https://github.com/facebook/jest/pull/4207))
+  ([#4207](https://togithub.com/facebook/jest/pull/4207))
 * Replace Jasmine with jest-circus
-  ([#3668](https://github.com/facebook/jest/pull/3668))
+  ([#3668](https://togithub.com/facebook/jest/pull/3668))
 * Replace match with test and omit redundant String conversion
-  ([#4311](https://github.com/facebook/jest/pull/4311))
+  ([#4311](https://togithub.com/facebook/jest/pull/4311))
 * Replace print with serialize in AsymmetricMatcher plugin
-  ([#4173](https://github.com/facebook/jest/pull/4173))
+  ([#4173](https://togithub.com/facebook/jest/pull/4173))
 * Replace print with serialize in ConvertAnsi plugin
-  ([#4225](https://github.com/facebook/jest/pull/4225))
+  ([#4225](https://togithub.com/facebook/jest/pull/4225))
 * Replace print with serialize in HTMLElement plugin
-  ([#4215](https://github.com/facebook/jest/pull/4215))
+  ([#4215](https://togithub.com/facebook/jest/pull/4215))
 * Replace print with serialize in Immutable plugins
-  ([#4189](https://github.com/facebook/jest/pull/4189))
+  ([#4189](https://togithub.com/facebook/jest/pull/4189))
 * Replace unchanging args with one config arg within pretty-format
-  ([#4076](https://github.com/facebook/jest/pull/4076))
+  ([#4076](https://togithub.com/facebook/jest/pull/4076))
 * Return UNDEFINED for undefined type in ReactElement plugin
-  ([#4360](https://github.com/facebook/jest/pull/4360))
+  ([#4360](https://togithub.com/facebook/jest/pull/4360))
 * Rewrite some read bumps in pretty-format
-  ([#4093](https://github.com/facebook/jest/pull/4093))
+  ([#4093](https://togithub.com/facebook/jest/pull/4093))
 * Run update method before installing JRE on Circle
-  ([#4318](https://github.com/facebook/jest/pull/4318))
+  ([#4318](https://togithub.com/facebook/jest/pull/4318))
 * Separated the snapshot summary creation from the printing to improve
-  testability. ([#4373](https://github.com/facebook/jest/pull/4373))
+  testability. ([#4373](https://togithub.com/facebook/jest/pull/4373))
 * Set coverageDirectory during normalize phase
-  ([#3966](https://github.com/facebook/jest/pull/3966))
+  ([#3966](https://togithub.com/facebook/jest/pull/3966))
 * Setup custom reporters after default reporters
-  ([#4053](https://github.com/facebook/jest/pull/4053))
-* Setup for Circle 2 ([#4149](https://github.com/facebook/jest/pull/4149))
-* Simplify readme ([#3790](https://github.com/facebook/jest/pull/3790))
+  ([#4053](https://togithub.com/facebook/jest/pull/4053))
+* Setup for Circle 2 ([#4149](https://togithub.com/facebook/jest/pull/4149))
+* Simplify readme ([#3790](https://togithub.com/facebook/jest/pull/3790))
 * Simplify snapshots definition
-  ([#3791](https://github.com/facebook/jest/pull/3791))
+  ([#3791](https://togithub.com/facebook/jest/pull/3791))
 * skipNodeResolution config option
-  ([#3987](https://github.com/facebook/jest/pull/3987))
+  ([#3987](https://togithub.com/facebook/jest/pull/3987))
 * Small fixes to toHaveProperty docs
-  ([#3878](https://github.com/facebook/jest/pull/3878))
+  ([#3878](https://togithub.com/facebook/jest/pull/3878))
 * Sort attributes by name in HTMLElement plugin
-  ([#3783](https://github.com/facebook/jest/pull/3783))
+  ([#3783](https://togithub.com/facebook/jest/pull/3783))
 * Specify watchPathIgnorePatterns will only be available in Jest 21+
-  ([#4398](https://github.com/facebook/jest/pull/4398))
+  ([#4398](https://togithub.com/facebook/jest/pull/4398))
 * Split TestRunner off of TestScheduler
-  ([#4233](https://github.com/facebook/jest/pull/4233))
+  ([#4233](https://togithub.com/facebook/jest/pull/4233))
 * Strict and explicit config resolution logic
-  ([#4122](https://github.com/facebook/jest/pull/4122))
+  ([#4122](https://togithub.com/facebook/jest/pull/4122))
 * Support maxDepth option in React plugins
-  ([#4208](https://github.com/facebook/jest/pull/4208))
+  ([#4208](https://togithub.com/facebook/jest/pull/4208))
 * Support SVG elements in HTMLElement plugin
-  ([#4335](https://github.com/facebook/jest/pull/4335))
+  ([#4335](https://togithub.com/facebook/jest/pull/4335))
 * Test empty Immutable collections with {min: false} option
-  ([#4121](https://github.com/facebook/jest/pull/4121))
+  ([#4121](https://togithub.com/facebook/jest/pull/4121))
 * test to debug travis failure in master
-  ([#4145](https://github.com/facebook/jest/pull/4145))
+  ([#4145](https://togithub.com/facebook/jest/pull/4145))
 * testPathPattern message test
-  ([#4006](https://github.com/facebook/jest/pull/4006))
+  ([#4006](https://togithub.com/facebook/jest/pull/4006))
 * Throw Error When Using Nested It Specs
-  ([#4039](https://github.com/facebook/jest/pull/4039))
+  ([#4039](https://togithub.com/facebook/jest/pull/4039))
 * Throw when moduleNameMapper points to inexistent module
-  ([#3567](https://github.com/facebook/jest/pull/3567))
+  ([#3567](https://togithub.com/facebook/jest/pull/3567))
 * Unified 'no tests found' message for non-verbose MPR
-  ([#4354](https://github.com/facebook/jest/pull/4354))
+  ([#4354](https://togithub.com/facebook/jest/pull/4354))
 * Update migration guide with jest-codemods transformers
-  ([#4306](https://github.com/facebook/jest/pull/4306))
+  ([#4306](https://togithub.com/facebook/jest/pull/4306))
 * Use "inputSourceMap" for coverage re-mapping.
-  ([#4009](https://github.com/facebook/jest/pull/4009))
+  ([#4009](https://togithub.com/facebook/jest/pull/4009))
 * Use "verbose" no test found message when there is only one project
-  ([#4378](https://github.com/facebook/jest/pull/4378))
+  ([#4378](https://togithub.com/facebook/jest/pull/4378))
 * Use babel transform to inline all requires
-  ([#4340](https://github.com/facebook/jest/pull/4340))
+  ([#4340](https://togithub.com/facebook/jest/pull/4340))
 * Use eslint plugins to run prettier
-  ([#3971](https://github.com/facebook/jest/pull/3971))
+  ([#3971](https://togithub.com/facebook/jest/pull/3971))
 * Use iterableEquality in spy matchers
-  ([#3651](https://github.com/facebook/jest/pull/3651))
+  ([#3651](https://togithub.com/facebook/jest/pull/3651))
 * Use modern HTML5 <!DOCTYPE>
-  ([#3937](https://github.com/facebook/jest/pull/3937))
+  ([#3937](https://togithub.com/facebook/jest/pull/3937))
 * Wrap `Error.captureStackTrace` in a try
-  ([#4035](https://github.com/facebook/jest/pull/4035))
+  ([#4035](https://togithub.com/facebook/jest/pull/4035))
 
 ## jest 20.0.4
 
 * Fix jest-haste-map's handling of duplicate module IDs.
-  ([#3647](https://github.com/facebook/jest/pull/3647))
+  ([#3647](https://togithub.com/facebook/jest/pull/3647))
 * Fix behavior of `enableAutomock()` when automock is set to false.
-  ([#3624](https://github.com/facebook/jest/pull/3624))
+  ([#3624](https://togithub.com/facebook/jest/pull/3624))
 * Fix progress bar in windows.
-  ([#3626](https://github.com/facebook/jest/pull/3626))
+  ([#3626](https://togithub.com/facebook/jest/pull/3626))
 
 ## jest 20.0.3
 
 * Fix reporters 'default' setting.
-  ([#3562](https://github.com/facebook/jest/pull/3562))
+  ([#3562](https://togithub.com/facebook/jest/pull/3562))
 * Fix to make Jest fail when the coverage threshold not met.
-  ([#3554](https://github.com/facebook/jest/pull/3554))
+  ([#3554](https://togithub.com/facebook/jest/pull/3554))
 
 ## jest 20.0.1
 
 * Add ansi-regex to pretty-format dependencies
-  ([#3498](https://github.com/facebook/jest/pull/3498))
+  ([#3498](https://togithub.com/facebook/jest/pull/3498))
 * Fix <rootDir> replacement in testMatch and moduleDirectories
-  ([#3538](https://github.com/facebook/jest/pull/3538))
+  ([#3538](https://togithub.com/facebook/jest/pull/3538))
 * Fix expect.hasAssertions() to throw when passed arguments
-  ([#3526](https://github.com/facebook/jest/pull/3526))
+  ([#3526](https://togithub.com/facebook/jest/pull/3526))
 * Fix stack traces without proper error messages
-  ([#3513](https://github.com/facebook/jest/pull/3513))
+  ([#3513](https://togithub.com/facebook/jest/pull/3513))
 * Fix support for custom extensions through haste packages
-  ([#3537](https://github.com/facebook/jest/pull/3537))
+  ([#3537](https://togithub.com/facebook/jest/pull/3537))
 * Fix test contexts between test functions
-  ([#3506](https://github.com/facebook/jest/pull/3506))
+  ([#3506](https://togithub.com/facebook/jest/pull/3506))
 
 ## jest 20.0.0
 
 * New `--projects` option to run one instance of Jest in multiple projects at
-  the same time. ([#3400](https://github.com/facebook/jest/pull/3400))
-* New multi project runner ([#3156](https://github.com/facebook/jest/pull/3156))
-* New --listTests flag. ([#3441](https://github.com/facebook/jest/pull/3441))
-* New --showConfig flag. ([#3296](https://github.com/facebook/jest/pull/3296))
+  the same time. ([#3400](https://togithub.com/facebook/jest/pull/3400))
+* New multi project runner ([#3156](https://togithub.com/facebook/jest/pull/3156))
+* New --listTests flag. ([#3441](https://togithub.com/facebook/jest/pull/3441))
+* New --showConfig flag. ([#3296](https://togithub.com/facebook/jest/pull/3296))
 * New promise support for all `expect` matchers through `.resolves` and
-  `.rejects`. ([#3068](https://github.com/facebook/jest/pull/3068))
+  `.rejects`. ([#3068](https://togithub.com/facebook/jest/pull/3068))
 * New `expect.hasAssertions()` function similar to `expect.assertions()`.
-  ([#3379](https://github.com/facebook/jest/pull/3379))
+  ([#3379](https://togithub.com/facebook/jest/pull/3379))
 * New `this.equals` function exposed to custom matchers.
-  ([#3469](https://github.com/facebook/jest/pull/3469))
+  ([#3469](https://togithub.com/facebook/jest/pull/3469))
 * New `valid-expect` lint rule in `eslint-plugin-jest`.
-  ([#3067](https://github.com/facebook/jest/pull/3067))
+  ([#3067](https://togithub.com/facebook/jest/pull/3067))
 * New HtmlElement pretty-format plugin.
-  ([#3230](https://github.com/facebook/jest/pull/3230))
+  ([#3230](https://togithub.com/facebook/jest/pull/3230))
 * New Immutable pretty-format plugins.
-  ([#2899](https://github.com/facebook/jest/pull/2899))
+  ([#2899](https://togithub.com/facebook/jest/pull/2899))
 * New test environment per file setting through `@jest-environment` in the
-  docblock. ([#2859](https://github.com/facebook/jest/pull/2859))
+  docblock. ([#2859](https://togithub.com/facebook/jest/pull/2859))
 * New feature that allows every configuration option to be set from the command
-  line. ([#3424](https://github.com/facebook/jest/pull/3424))
+  line. ([#3424](https://togithub.com/facebook/jest/pull/3424))
 * New feature to add custom reporters to Jest through `reporters` in the
-  configuration. ([#3349](https://github.com/facebook/jest/pull/3349))
+  configuration. ([#3349](https://togithub.com/facebook/jest/pull/3349))
 * New feature to add expected and actual values to AssertionError.
-  ([#3217](https://github.com/facebook/jest/pull/3217))
+  ([#3217](https://togithub.com/facebook/jest/pull/3217))
 * New feature to map code coverage from transformers.
-  ([#2290](https://github.com/facebook/jest/pull/2290))
+  ([#2290](https://togithub.com/facebook/jest/pull/2290))
 * New feature to run untested code coverage in parallel.
-  ([#3407](https://github.com/facebook/jest/pull/3407))
+  ([#3407](https://togithub.com/facebook/jest/pull/3407))
 * New option to define a custom resolver.
-  ([#2998](https://github.com/facebook/jest/pull/2998))
+  ([#2998](https://togithub.com/facebook/jest/pull/2998))
 * New printing support for text and comment nodes in html pretty-format.
-  ([#3355](https://github.com/facebook/jest/pull/3355))
-* New snapshot testing FAQ ([#3425](https://github.com/facebook/jest/pull/3425))
+  ([#3355](https://togithub.com/facebook/jest/pull/3355))
+* New snapshot testing FAQ ([#3425](https://togithub.com/facebook/jest/pull/3425))
 * New support for custom platforms on jest-haste-map.
-  ([#3162](https://github.com/facebook/jest/pull/3162))
+  ([#3162](https://togithub.com/facebook/jest/pull/3162))
 * New support for mocking native async methods.
-  ([#3209](https://github.com/facebook/jest/pull/3209))
+  ([#3209](https://togithub.com/facebook/jest/pull/3209))
 * New guide on how to use Jest with any JavaScript framework.
-  ([#3243](https://github.com/facebook/jest/pull/3243))
+  ([#3243](https://togithub.com/facebook/jest/pull/3243))
 * New translation system for the Jest website.
 * New collapsing watch mode usage prompt after first run.
-  ([#3078](https://github.com/facebook/jest/pull/3078))
+  ([#3078](https://togithub.com/facebook/jest/pull/3078))
 * Breaking Change: Forked Jasmine 2.5 into Jest's own test runner and rewrote
-  large parts of Jasmine. ([#3147](https://github.com/facebook/jest/pull/3147))
+  large parts of Jasmine. ([#3147](https://togithub.com/facebook/jest/pull/3147))
 * Breaking Change: Jest does not write new snapshots by default on CI.
-  ([#3456](https://github.com/facebook/jest/pull/3456))
+  ([#3456](https://togithub.com/facebook/jest/pull/3456))
 * Breaking Change: Moved the typescript parser from `jest-editor-support` into a
   separate `jest-test-typescript-parser` package.
-  ([#2973](https://github.com/facebook/jest/pull/2973))
+  ([#2973](https://togithub.com/facebook/jest/pull/2973))
 * Breaking Change: Replaced auto-loading of babel-polyfill with only
   regenerator-runtime, fixes a major memory leak.
-  ([#2755](https://github.com/facebook/jest/pull/2755))
+  ([#2755](https://togithub.com/facebook/jest/pull/2755))
 * Fixed `babel-jest` to look up the `babel` field in `package.json` as a
   fallback.
 * Fixed `jest-editor-support`'s parser to not crash on incomplete ASTs.
-  ([#3259](https://github.com/facebook/jest/pull/3259))
+  ([#3259](https://togithub.com/facebook/jest/pull/3259))
 * Fixed `jest-resolve` to use `is-builtin-module` instead of `resolve.isCore`.
-  ([#2997](https://github.com/facebook/jest/pull/2997))
+  ([#2997](https://togithub.com/facebook/jest/pull/2997))
 * Fixed `jest-snapshot` to normalize line endings in the `serialize` function.
-  ([#3002](https://github.com/facebook/jest/pull/3002))
+  ([#3002](https://togithub.com/facebook/jest/pull/3002))
 * Fixed behavior of `--silent` flag.
-  ([#3003](https://github.com/facebook/jest/pull/3003))
+  ([#3003](https://togithub.com/facebook/jest/pull/3003))
 * Fixed bug with watchers on macOS causing test to crash.
-  ([#2957](https://github.com/facebook/jest/pull/2957))
+  ([#2957](https://togithub.com/facebook/jest/pull/2957))
 * Fixed CLI `notify` option not taking precedence over config option.
-  ([#3340](https://github.com/facebook/jest/pull/3340))
+  ([#3340](https://togithub.com/facebook/jest/pull/3340))
 * Fixed detection of the npm client in SummaryReporter to support Yarn.
-  ([#3263](https://github.com/facebook/jest/pull/3263))
+  ([#3263](https://togithub.com/facebook/jest/pull/3263))
 * Fixed done.fail not passing arguments
-  ([#3241](https://github.com/facebook/jest/pull/3241))
+  ([#3241](https://togithub.com/facebook/jest/pull/3241))
 * Fixed fake timers to restore after resetting mocks.
-  ([#2467](https://github.com/facebook/jest/pull/2467))
+  ([#2467](https://togithub.com/facebook/jest/pull/2467))
 * Fixed handling of babylon's parser options in `jest-editor-support`.
-  ([#3344](https://github.com/facebook/jest/pull/3344))
+  ([#3344](https://togithub.com/facebook/jest/pull/3344))
 * Fixed Jest to properly cache transform results.
-  ([#3334](https://github.com/facebook/jest/pull/3334))
+  ([#3334](https://togithub.com/facebook/jest/pull/3334))
 * Fixed Jest to use human-readable colors for Jest's own snapshots.
-  ([#3119](https://github.com/facebook/jest/pull/3119))
+  ([#3119](https://togithub.com/facebook/jest/pull/3119))
 * Fixed jest-config to use UID for default cache folder.
-  ([#3380](https://github.com/facebook/jest/pull/3380)),
-  ([#3387](https://github.com/facebook/jest/pull/3387))
+  ([#3380](https://togithub.com/facebook/jest/pull/3380)),
+  ([#3387](https://togithub.com/facebook/jest/pull/3387))
 * Fixed jest-runtime to expose inner error when it fails to write to the cache.
-  ([#3373](https://github.com/facebook/jest/pull/3373))
+  ([#3373](https://togithub.com/facebook/jest/pull/3373))
 * Fixed lifecycle hooks to make afterAll hooks operate the same as afterEach.
-  ([#3275](https://github.com/facebook/jest/pull/3275))
+  ([#3275](https://togithub.com/facebook/jest/pull/3275))
 * Fixed pretty-format to run plugins before serializing nested basic values.
-  ([#3017](https://github.com/facebook/jest/pull/3017))
+  ([#3017](https://togithub.com/facebook/jest/pull/3017))
 * Fixed return value of mocks so they can explicitly be set to return
-  `undefined`. ([#3354](https://github.com/facebook/jest/pull/3354))
+  `undefined`. ([#3354](https://togithub.com/facebook/jest/pull/3354))
 * Fixed runner to run tests associated with snapshots when the snapshot changes.
-  ([#3025](https://github.com/facebook/jest/pull/3025))
+  ([#3025](https://togithub.com/facebook/jest/pull/3025))
 * Fixed snapshot serializer require, restructured pretty-format.
-  ([#3399](https://github.com/facebook/jest/pull/3399))
+  ([#3399](https://togithub.com/facebook/jest/pull/3399))
 * Fixed support for Babel 7 in babel-jest.
-  ([#3271](https://github.com/facebook/jest/pull/3271))
+  ([#3271](https://togithub.com/facebook/jest/pull/3271))
 * Fixed testMatch to find tests in .folders.
-  ([#3006](https://github.com/facebook/jest/pull/3006))
+  ([#3006](https://togithub.com/facebook/jest/pull/3006))
 * Fixed testNamePattern and testPathPattern to work better together.
-  ([#3327](https://github.com/facebook/jest/pull/3327))
+  ([#3327](https://togithub.com/facebook/jest/pull/3327))
 * Fixed to show reject reason when expecting resolve.
-  ([#3134](https://github.com/facebook/jest/pull/3134))
+  ([#3134](https://togithub.com/facebook/jest/pull/3134))
 * Fixed toHaveProperty() to use hasOwnProperty from Object
-  ([#3410](https://github.com/facebook/jest/pull/3410))
+  ([#3410](https://togithub.com/facebook/jest/pull/3410))
 * Fixed watch mode's screen clearing.
-  ([#2959](https://github.com/facebook/jest/pull/2959))
-  ([#3294](https://github.com/facebook/jest/pull/3294))
+  ([#2959](https://togithub.com/facebook/jest/pull/2959))
+  ([#3294](https://togithub.com/facebook/jest/pull/3294))
 * Improved and consolidated Jest's configuration file resolution.
-  ([#3472](https://github.com/facebook/jest/pull/3472))
+  ([#3472](https://togithub.com/facebook/jest/pull/3472))
 * Improved documentation throughout the Jest website.
 * Improved documentation to explicitly mention that snapshots must be reviewed.
-  ([#3203](https://github.com/facebook/jest/pull/3203))
+  ([#3203](https://togithub.com/facebook/jest/pull/3203))
 * Improved documentation to make it clear CRA users don't need to add
-  dependencies. ([#3312](https://github.com/facebook/jest/pull/3312))
+  dependencies. ([#3312](https://togithub.com/facebook/jest/pull/3312))
 * Improved eslint-plugin-jest's handling of `expect`.
-  ([#3306](https://github.com/facebook/jest/pull/3306))
+  ([#3306](https://togithub.com/facebook/jest/pull/3306))
 * Improved flow-coverage, eslint rules and test coverage within the Jest
   repository.
 * Improved printing of `expect.assertions` error.
-  ([#3033](https://github.com/facebook/jest/pull/3033))
+  ([#3033](https://togithub.com/facebook/jest/pull/3033))
 * Improved Windows test coverage of Jest.
 * Refactored configs & transform
-  ([#3376](https://github.com/facebook/jest/pull/3376))
+  ([#3376](https://togithub.com/facebook/jest/pull/3376))
 * Refactored reporters to pass individual Tests to reporters.
-  ([#3289](https://github.com/facebook/jest/pull/3289))
-* Refactored TestRunner ([#3166](https://github.com/facebook/jest/pull/3166))
+  ([#3289](https://togithub.com/facebook/jest/pull/3289))
+* Refactored TestRunner ([#3166](https://togithub.com/facebook/jest/pull/3166))
 * Refactored watch mode prompts.
-  ([#3290](https://github.com/facebook/jest/pull/3290))
+  ([#3290](https://togithub.com/facebook/jest/pull/3290))
 * Deleted `jest-file-exists`.
-  ([#3105](https://github.com/facebook/jest/pull/3105))
-* Removed `Config` type. ([#3366](https://github.com/facebook/jest/pull/3366))
+  ([#3105](https://togithub.com/facebook/jest/pull/3105))
+* Removed `Config` type. ([#3366](https://togithub.com/facebook/jest/pull/3366))
 * Removed all usage of `jest-file-exists`.
-  ([#3101](https://github.com/facebook/jest/pull/3101))
+  ([#3101](https://togithub.com/facebook/jest/pull/3101))
 * Adopted prettier on the Jest codebase.
 
 ## jest 19.0.1
@@ -1348,7 +1348,7 @@ See <https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html>
 ## jest-cli 12.0.0
 
 * Reimplemented `node-haste` as `jest-haste-map`:
-  <https://github.com/facebook/jest/pull/896>
+  <https://togithub.com/facebook/jest/pull/896>
 * Fixes for the upcoming release of nodejs 6.
 * Removed global mock caching which caused negative side-effects on test runs.
 * Updated Jasmine from 2.3.4 to 2.4.1.
@@ -1371,7 +1371,7 @@ See <https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html>
 
 * New implementation of node-haste and rewrite of internal module loading and
   resolution. Fixed both startup and runtime performance.
-  [#599](https://github.com/facebook/jest/pull/599)
+  [#599](https://togithub.com/facebook/jest/pull/599)
 * Jasmine 2 is now the default test runner. To keep using Jasmine 1, put
   `testRunner: "jasmine1"` into your configuration.
 * Added `jest-util`, `jest-mock`, `jest-jasmine1`, `jest-jasmine2`,
@@ -1452,8 +1452,8 @@ See <https://facebook.github.io/jest/blog/2016/12/15/2016-in-jest.html>
   automatically updated through an automated codemod:
 * Example: <http://astexplorer.net/#/zrybZ6UvRA>
 * Codemod:
-  <https://github.com/cpojer/js-codemod/blob/master/transforms/jest-update.js>
-* jscodeshift: <https://github.com/facebook/jscodeshift>
+  <https://togithub.com/cpojer/js-codemod/blob/master/transforms/jest-update.js>
+* jscodeshift: <https://togithub.com/facebook/jscodeshift>
 * Removed `navigator.onLine` and `mockSetReadOnlyProperty` from the global jsdom
   environment. Use `window.navigator.onLine = true;` in your test setup and
   `Object.defineProperty` instead.

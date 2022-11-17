@@ -46,5 +46,8 @@ export async function linkify(
     .use(github, { mentionStrong: false, ...options })
     .process(content);
   const result = output.toString();
-  return result.replace(regEx(/(?:to)?github\.com/gi), 'togithub.com');
+  return result.replace(
+    regEx(/https:\/\/github\.com/gi),
+    'https://togithub.com'
+  );
 }
