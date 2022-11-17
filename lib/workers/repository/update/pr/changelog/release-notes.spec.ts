@@ -333,7 +333,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
-        body: 'some body [#123](https://togithub.com/some/other-repository/issues/123), [#124](https://togithub.com/some/yet-other-repository/issues/124)\n',
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
         notesSourceUrl:
@@ -503,7 +503,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
-        body: 'some body [#123](https://togithub.com/some/other-repository/issues/123), [#124](https://togithub.com/some/yet-other-repository/issues/124)\n',
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
         notesSourceUrl:
@@ -539,7 +539,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
-        body: 'some body [#123](https://togithub.com/some/other-repository/issues/123), [#124](https://togithub.com/some/yet-other-repository/issues/124)\n',
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
         notesSourceUrl:
@@ -575,7 +575,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
-        body: 'some body [#123](https://togithub.com/some/other-repository/issues/123), [#124](https://togithub.com/some/yet-other-repository/issues/124)\n',
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
         notesSourceUrl:
@@ -610,7 +610,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {} as BranchUpgradeConfig
       );
       expect(res).toEqual({
-        body: 'some body [#123](https://togithub.com/some/other-repository/issues/123), [#124](https://togithub.com/some/yet-other-repository/issues/124)\n',
+        body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
         id: undefined,
         name: undefined,
         notesSourceUrl:
