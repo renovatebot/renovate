@@ -228,8 +228,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with terraform replacement', async () => {
-      const hcl =
-        'module "foo" {\nsource = "github.com/hashicorp/example?ref=v1.0.0"\n}';
+      const hcl = codeBlock`
+        module "foo" {
+          source = "github.com/hashicorp/example?ref=v1.0.0"
+        }
+      `;
       upgrade.manager = 'terraform';
       upgrade.updateType = 'replacement';
       upgrade.depName = 'github.com/hashicorp/example';
@@ -268,8 +271,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with ansible-galaxy roles replacement', async () => {
-      const yml =
-        'roles:\n' + '  - name: geerlingguy.java\n' + '    version: 1.9.6\n';
+      const yml = codeBlock`
+        roles
+          - name: geerlingguy.java
+            version: 1.9.6
+      `;
       upgrade.manager = 'ansible-galaxy';
       upgrade.depName = 'geerlingguy.java';
       upgrade.currentValue = '1.9.6';
@@ -287,11 +293,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with azure-pipeline image replacement', async () => {
-      const yml =
-        'resources:\n' +
-        '  containers:\n' +
-        '    - container: linux\n' +
-        '      image: ubuntu:16.04\n';
+      const yml = codeBlock`
+        resources:
+          containers:
+            - container: linux
+              image: ubuntu:16.04
+      `;
       upgrade.manager = 'azure-pipelines';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '16.04';
@@ -310,8 +317,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with batect image replacement', async () => {
-      const yml =
-        'containers:\n' + '  my-container:\n' + '    image: ubuntu:16.04\n';
+      const yml = codeBlock`
+        containers:
+          my-container:
+            image: ubuntu:16.04
+      `;
       upgrade.manager = 'batect';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '16.04';
@@ -349,11 +359,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with buildkite plugin replacement', async () => {
-      const yml =
-        'steps:\n' +
-        '  - command: test.sh\n' +
-        '    plugins:\n' +
-        '      - docker-compose#v3.10.0:\n';
+      const yml = codeBlock`
+        steps:
+          - command: test.sh
+            plugins:
+              - docker-compose#v3.10.0:
+      `;
       upgrade.manager = 'buildkite';
       upgrade.depName = 'docker-compose';
       upgrade.currentValue = 'v3.10.0';
@@ -371,8 +382,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with bundler gem replacement', async () => {
-      const gemfile =
-        "source 'https://rubygems.org'\n" + '\n' + "gem 'rails', '~>7.0'";
+      const gemfile = codeBlock`
+        source 'https://rubygems.org'
+
+        gem 'rails', '~>7.0'
+      `;
       upgrade.manager = 'bundler';
       upgrade.depName = 'rails';
       upgrade.currentValue = "'~>7.0'";
@@ -409,7 +423,10 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with cargo dependency replacement', async () => {
-      const cargo = '[dependencies]\n' + 'rand = "0.8.4"\n';
+      const cargo = codeBlock`
+        [dependencies]
+        rand = "0.8.4"
+      `;
       upgrade.manager = 'cargo';
       upgrade.depName = 'rand';
       upgrade.currentValue = '0.8.4';
@@ -427,10 +444,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with cloudbuild replacement', async () => {
-      const yml =
-        'steps:\n' +
-        '- name: gcr.io/cloud-builders/docker\n' +
-        '- name: ubuntu:16.04\n';
+      const yml = codeBlock`
+        steps:
+        - name: gcr.io/cloud-builders/docker
+        - name: ubuntu:16.04
+      `;
       upgrade.manager = 'cloudbuild';
       upgrade.depName = 'ubuntu';
       upgrade.replaceString = 'ubuntu:16.04';
@@ -467,12 +485,13 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with composer require replacement', async () => {
-      const json =
-        '{\n' +
-        '    "require": {\n' +
-        '        "psr/log": "3.0.0"\n' +
-        '    }\n' +
-        '}';
+      const json = codeBlock`
+      {
+          "require": {
+                  "psr/log": "3.0.0"
+          }
+      }
+      `;
       upgrade.manager = 'composer';
       upgrade.depName = 'psr/log';
       upgrade.currentValue = '3.0.0';
@@ -490,7 +509,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with edn deps replacement', async () => {
-      const edn = '{:deps\n' + ' {com.taoensso/timbre {:mvn/version "5.2.1"}}}';
+      const edn = codeBlock`
+      {:deps
+        {com.taoensso/timbre {:mvn/version "5.2.1"}}
+      }
+      `;
       upgrade.manager = 'deps-edn';
       upgrade.depName = 'com.taoensso/timbre';
       upgrade.currentValue = '5.2.1';
@@ -509,7 +532,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with docker-compose image replacement', async () => {
-      const yml = 'services:\n' + '  test:\n' + '    image: "ubuntu:16.04"\n';
+      const yml = codeBlock`
+        services:
+          test:
+            image: "ubuntu:16.04"
+      `;
       upgrade.manager = 'docker-compose';
       upgrade.depName = 'ubuntu';
       upgrade.replaceString = 'ubuntu:16.04';
@@ -569,7 +596,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with droneci image replacement', async () => {
-      const yml = 'steps:\n' + '- name: test\n' + '  image: ubuntu:16.04\n';
+      const yml = codeBlock`
+        steps:
+        - name: test
+          image: ubuntu:16.04
+      `;
       upgrade.manager = 'droneci';
       upgrade.depName = 'ubuntu';
       upgrade.replaceString = 'ubuntu:16.04';
@@ -607,11 +638,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with helm value image/repository replacement', async () => {
-      const yml =
-        'parser:\n' +
-        '  image:\n' +
-        '    repository: docker.io/securecodebox/parser-nmap\n' +
-        '    tag: 3.14.3\n';
+      const yml = codeBlock`
+        parser:
+          image:
+              repository: docker.io/securecodebox/parser-nmap
+              tag: 3.14.3
+      `;
       upgrade.manager = 'helm-values';
       upgrade.depName = 'docker.io/securecodebox/parser-nmap';
       upgrade.replaceString = '3.14.3';
@@ -648,14 +680,15 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with meteor npm.depends replacement', async () => {
-      const js =
-        'Package.describe({\n' +
-        "\t'name': 'test',\n" +
-        '});\n' +
-        '\n' +
-        'Npm.depends({\n' +
-        "\t'xml2js': '0.2.0'\n" +
-        '});';
+      const js = codeBlock`
+        Package.describe({
+          'name': 'test',
+        });
+
+        Npm.depends({
+          'xml2js': '0.2.0'
+        });'
+      `;
       upgrade.manager = 'meteor';
       upgrade.depName = 'xml2js';
       upgrade.currentValue = '0.2.0';
@@ -673,15 +706,16 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('checks for replaceWithoutReplaceString double update', async () => {
-      const js =
-        'Package.describe({\n' +
-        "\t'name': 'test',\n" +
-        '});\n' +
-        '\n' +
-        'Npm.depends({\n' +
-        "\t'xml2js': '0.2.0',\n" +
-        "\t'xml2js': '0.2.0'\n" +
-        '});';
+      const js = codeBlock`
+        Package.describe({
+          'name': 'test',
+        });
+
+        Npm.depends({
+          'xml2js': '0.2.0',
+          'xml2js': '0.2.0'
+        });
+      `;
       upgrade.manager = 'meteor';
       upgrade.depName = 'xml2js';
       upgrade.currentValue = '0.2.0';
@@ -692,41 +726,44 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'package.js';
       const res = await doAutoReplace(upgrade, js, reuseExistingBranch);
       expect(res).toBe(
-        'Package.describe({\n' +
-          "\t'name': 'test',\n" +
-          '});\n' +
-          '\n' +
-          'Npm.depends({\n' +
-          "\t'xml2js': '0.2.0',\n" +
-          "\t'connect': '2.7.10'\n" +
-          '});'
+        codeBlock`
+        Package.describe({
+          'name': 'test',
+        });
+
+        Npm.depends({
+          'xml2js': '0.2.0',
+          'connect': '2.7.10'
+        });
+      `
       );
     });
 
     it('updates with mix deps replacement', async () => {
-      const exs =
-        'defmodule MyProject.MixProject do\n' +
-        '  use Mix.Project\n' +
-        '\n' +
-        '  def project() do\n' +
-        '    [\n' +
-        '      app: :my_project,\n' +
-        '      version: "0.0.1",\n' +
-        '      elixir: "~> 1.0",\n' +
-        '      deps: deps(),\n' +
-        '    ]\n' +
-        '  end\n' +
-        '\n' +
-        '  def application() do\n' +
-        '    []\n' +
-        '  end\n' +
-        '\n' +
-        '  defp deps() do\n' +
-        '    [\n' +
-        '      {:postgrex, "~> 0.8.1"}\n' +
-        '    ]\n' +
-        '  end\n' +
-        'end';
+      const exs = codeBlock`
+        defmodule MyProject.MixProject do
+          use Mix.Project
+
+          def project() do
+            [
+              app: :my_project,
+              version: "0.0.1",
+              elixir: "~> 1.0",
+              deps: deps(),
+            ]
+          end
+
+          def application() do
+            []
+          end
+
+          defp deps() do
+            [
+              {:postgrex, "~> 0.8.1"}
+            ]
+          end
+        end
+      `;
       upgrade.manager = 'mix';
       upgrade.depName = 'postgrex';
       upgrade.currentValue = '~> 0.8.1';
@@ -744,16 +781,17 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with nuget tools replacement', async () => {
-      const json =
-        '{\n' +
-        '  "version": 1,\n' +
-        '  "isRoot": true,\n' +
-        '  "tools": {\n' +
-        '    "Microsoft.Extensions.Logging": {\n' +
-        '      "version": "7.0.0-preview.7.22375.6"\n' +
-        '    }\n' +
-        '  }\n' +
-        '}';
+      const json = codeBlock`
+        {
+          "version": 1,
+          "isRoot": true,
+          "tools": {
+            "Microsoft.Extensions.Logging": {
+              "version": "7.0.0-preview.7.22375.6"
+            }
+          }
+        }
+      `;
       upgrade.manager = 'nuget';
       upgrade.depName = 'Microsoft.Extensions.Logging';
       upgrade.currentValue = '7.0.0-preview.7.22375.6';
@@ -771,10 +809,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with pre-commit repo replacement', async () => {
-      const yml =
-        'repos:\n' +
-        '-   repo: https://github.com/pre-commit/pre-commit-hooks\n' +
-        '    rev: v4.3.0\n';
+      const yml = codeBlock`
+        repos:
+        -   repo: https://github.com/pre-commit/pre-commit-hooks
+            rev: v4.3.0
+      `;
       upgrade.manager = 'pre-commit';
       upgrade.depName = 'pre-commit/pre-commit-hooks';
       upgrade.currentValue = 'v4.3.0';
@@ -792,10 +831,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with terraform image replacement', async () => {
-      const tf =
-        'resource "docker_image" "image" {\n' +
-        '  name = "ubuntu:16.04"\n' +
-        '}\n';
+      const tf = codeBlock`
+        resource "docker_image" "image" {
+          name = "ubuntu:16.04"
+        }
+      `;
       upgrade.manager = 'terraform';
       upgrade.depName = 'ubuntu';
       upgrade.replaceString = 'ubuntu:16.04';
@@ -814,11 +854,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with terraform module replacement', async () => {
-      const tf =
-        'module "vpc" {\n' +
-        '  source  = "terraform-aws-modules/vpc/aws"\n' +
-        '  version = "3.14.2"\n' +
-        '}';
+      const tf = codeBlock`
+        module "vpc" {
+          source  = "terraform-aws-modules/vpc/aws"
+         version = "3.14.2"
+        }
+      `;
       upgrade.manager = 'terraform';
       upgrade.depName = 'terraform-aws-modules/vpc/aws';
       upgrade.currentValue = '3.14.2';
@@ -836,7 +877,10 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with setup-cfg replacement', async () => {
-      const tf = '[options]\n' + 'install_requires = sphinx ~=5.1.0\n';
+      const tf = codeBlock`
+        [options]
+        install_requires = sphinx ~=5.1.0
+      `;
       upgrade.manager = 'setup-cfg';
       upgrade.depName = 'sphinx';
       upgrade.currentValue = '~=5.1.0';
@@ -872,8 +916,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('updates with multiple same name replacement without replaceString', async () => {
-      const dockerfile =
-        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM ubuntu:18.04\n';
+      const dockerfile = codeBlock`
+        FROM ubuntu:16.04
+        FROM ubuntu:20.04
+        FROM ubuntu:18.04
+      `;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '18.04';
@@ -884,13 +931,20 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'Dockerfile';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
-        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM alpine:3.16\n'
+        codeBlock`
+          FROM ubuntu:16.04
+          FROM ubuntu:20.04
+          FROM alpine:3.16
+        `
       );
     });
 
     it('updates with multiple same name replacement without replaceString 2', async () => {
-      const dockerfile =
-        'FROM ubuntu:16.04\n' + 'FROM ubuntu:20.04\n' + 'FROM ubuntu:18.04\n';
+      const dockerfile = codeBlock`
+        FROM ubuntu:16.04
+        FROM ubuntu:20.04
+        FROM ubuntu:18.04
+      `;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '20.04';
@@ -901,15 +955,20 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'Dockerfile';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
-        'FROM ubuntu:16.04\n' + 'FROM alpine:3.16\n' + 'FROM ubuntu:18.04\n'
+        codeBlock`
+          FROM ubuntu:16.04
+          FROM alpine:3.16
+          FROM ubuntu:18.04
+        `
       );
     });
 
     it('updates with multiple same version replacement without replaceString', async () => {
-      const dockerfile =
-        'FROM notUbuntu:18.04\n' +
-        'FROM alsoNotUbuntu:18.04\n' +
-        'FROM ubuntu:18.04\n';
+      const dockerfile = codeBlock`
+        FROM notUbuntu:18.04
+        FROM alsoNotUbuntu:18.04
+        FROM ubuntu:18.04
+      `;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '18.04';
@@ -920,9 +979,11 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'Dockerfile';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
-        'FROM notUbuntu:18.04\n' +
-          'FROM alsoNotUbuntu:18.04\n' +
-          'FROM alpine:3.16\n'
+        codeBlock`
+          FROM notUbuntu:18.04
+          FROM alsoNotUbuntu:18.04
+          FROM alpine:3.16
+        `
       );
     });
   });
