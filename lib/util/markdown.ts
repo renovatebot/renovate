@@ -45,9 +45,5 @@ export async function linkify(
     .use({ settings: { bullet: '-' } })
     .use(github, { mentionStrong: false, ...options })
     .process(content);
-  const result = output.toString();
-  return result.replace(
-    regEx(/https:\/\/github\.com/gi),
-    'https://togithub.com'
-  );
+  return output.toString();
 }
