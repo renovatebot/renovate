@@ -1,5 +1,4 @@
 // TODO #7154
-import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -182,8 +181,6 @@ export async function doAutoReplace(
       `Starting search at index ${searchIndex}`
     );
     let newContent = existingContent;
-    let valueReplaced = !newValue;
-    let startIndex = searchIndex;
     // Iterate through the rest of the file
     for (; searchIndex < newContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
