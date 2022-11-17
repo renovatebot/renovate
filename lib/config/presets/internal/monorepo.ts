@@ -151,11 +151,9 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
-
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
-
   nswag: 'https://github.com/RicoSuter/NSwag',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   'opentelemetry-dotnet':
@@ -194,7 +192,6 @@ const repoGroups = {
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
-
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
