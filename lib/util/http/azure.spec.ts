@@ -18,12 +18,14 @@ describe('util/http/azure', () => {
     httpMock
       .scope(azureApiHost)
       .get('/some-org/some-project/some-path?$top=2')
-      .reply(200, {value: ['a', 'b']}, {'x-ms-continuationtoken': '1'})
+      .reply(200, { value: ['a', 'b'] }, { 'x-ms-continuationtoken': '1' })
       .get('/some-org/some-project/some-path?$top=2&continuationToken=1')
-      .reply(200, {value: ['c', 'd']}, {'x-ms-continuationtoken': '2'})
+      .reply(200, { value: ['c', 'd'] }, { 'x-ms-continuationtoken': '2' })
       .get('/some-org/some-project/some-path?$top=2&continuationToken=2')
-      .reply(200, {value: ['e']})
-    const res = await azureApi.getJsonPaginated('https://dev.azure.com/some-org/some-project/some-path?$top=2');
+      .reply(200, { value: ['e'] });
+    const res = await azureApi.getJsonPaginated(
+      'https://dev.azure.com/some-org/some-project/some-path?$top=2'
+    );
     expect(res.body.value).toHaveLength(5);
   });
 });

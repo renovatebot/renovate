@@ -86,7 +86,8 @@ describe('workers/repository/update/pr/changelog/azure', () => {
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
-          sourceUrl: 'https://dev.azure.com/some-org/some-project/_git/some-repo/',
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
           type: 'azure',
         },
         versions: [
@@ -101,7 +102,9 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     it('uses Azure tags', async () => {
       httpMock
         .scope(matchHost)
-        .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
+        .get(
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+        )
         .reply(200, {
           value: [
             { name: 'refs/tags/v5.2.0' },
@@ -110,11 +113,13 @@ describe('workers/repository/update/pr/changelog/azure', () => {
             { name: 'refs/tags/v5.6.0' },
             { name: 'refs/tags/v5.6.1' },
             { name: 'refs/tags/v5.7.0' },
-          ]
+          ],
         })
         .persist()
-        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
-        .reply(200, [])
+        .get(
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+        )
+        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -127,7 +132,8 @@ describe('workers/repository/update/pr/changelog/azure', () => {
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
-          sourceUrl: 'https://dev.azure.com/some-org/some-project/_git/some-repo/',
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
           type: 'azure',
         },
         versions: [
@@ -142,15 +148,19 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     it('handles empty Azure tags response', async () => {
       httpMock
         .scope(matchHost)
-        .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
+        .get(
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+        )
         .reply(200, {
-          value: []
+          value: [],
         })
         .persist()
-        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
+        .get(
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+        )
         .reply(200, {
-          value: []
-        })
+          value: [],
+        });
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -163,7 +173,8 @@ describe('workers/repository/update/pr/changelog/azure', () => {
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
-          sourceUrl: 'https://dev.azure.com/some-org/some-project/_git/some-repo/',
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
           type: 'azure',
         },
         versions: [
@@ -178,13 +189,17 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     it('uses Azure tags with error', async () => {
       httpMock
         .scope(matchHost)
-        .get('/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100')
+        .get(
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+        )
         .replyWithError('Unknown Azure DevOps Repo')
         .persist()
-        .get('/some-org//some-project/_apis/git/repositories/some-repo/items?path=/')
+        .get(
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+        )
         .reply(200, {
-          value: []
-        })
+          value: [],
+        });
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -197,7 +212,8 @@ describe('workers/repository/update/pr/changelog/azure', () => {
           depName: 'renovate',
           repository: 'some-repo',
           sourceDirectory: undefined,
-          sourceUrl: 'https://dev.azure.com/some-org/some-project/_git/some-repo/',
+          sourceUrl:
+            'https://dev.azure.com/some-org/some-project/_git/some-repo/',
           type: 'azure',
         },
         versions: [

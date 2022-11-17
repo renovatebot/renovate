@@ -1001,9 +1001,9 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         )
         .reply(200, {
           body: {
-            treeEntries: []
-          }
-        })
+            treeEntries: [],
+          },
+        });
       const res = await getReleaseNotesMd(
         {
           ...azureProject,

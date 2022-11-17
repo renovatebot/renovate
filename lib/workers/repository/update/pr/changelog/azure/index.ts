@@ -68,9 +68,7 @@ export async function getReleaseNotesMd(
   ).body.objectId;
 
   const tree: AzureTreeNode[] = (
-    await http.getJson<AzureTree>(
-      `${apiPrefix}trees/${sourceDirectoryId}`
-    )
+    await http.getJson<AzureTree>(`${apiPrefix}trees/${sourceDirectoryId}`)
   ).body.treeEntries;
   const allFiles = tree.filter((f) => f.gitObjectType === 'blob');
   let files: AzureTreeNode[] = [];
@@ -82,7 +80,9 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { relativePath: relativeChangelogFile } = files.shift()!;
-  const changelogFile = sourceDirectory ? `${sourceDirectory}/${relativeChangelogFile}` : `${relativeChangelogFile}`;
+  const changelogFile = sourceDirectory
+    ? `${sourceDirectory}/${relativeChangelogFile}`
+    : `${relativeChangelogFile}`;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

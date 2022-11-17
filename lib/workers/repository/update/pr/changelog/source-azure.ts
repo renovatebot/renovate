@@ -44,8 +44,8 @@ export async function getChangeLogJSON(
   const organization = pathname!.slice(1).split('/')[0];
   const projectName = pathname!.slice(1).split('/')[1];
   if (!organization || !projectName) {
-    logger.warn('invalid source url')
-    return null
+    logger.warn('invalid source url');
+    return null;
   }
   const baseUrl = `${protocol!}//${host!}/${organization}/${projectName}/`;
   const url = sourceUrl;
@@ -91,10 +91,14 @@ export async function getChangeLogJSON(
     if (!tags) {
       tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = regEx(`(?:^refs/tags/)?(?:${depName}|release)?[@-]?`, undefined, false);
+    const regex = regEx(
+      `(?:^refs/tags/)?(?:${depName}|release)?[@-]?`,
+      undefined,
+      false
+    );
     const tagName: string | undefined = tags
-    .filter((tag) => version.isVersion(tag.replace(regex, '')))
-    .find((tag) => version.equals(tag.replace(regex, ''), release.version));
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
     if (tagName) {
       return tagName;
     }
