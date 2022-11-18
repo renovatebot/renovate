@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 import { extractLocks, findLockFile, readLockFile } from './lockfile/util';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
@@ -71,11 +70,11 @@ export async function extractPackageFile(
         );
         let result: ExtractionResult | null = null;
         switch (tfDepType) {
-          case TerraformDependencyTypes.required_providers: {
+          case 'required_providers': {
             result = extractTerraformRequiredProviders(lineNumber, lines);
             break;
           }
-          case TerraformDependencyTypes.provider: {
+          case 'provider': {
             result = extractTerraformProvider(
               lineNumber,
               lines,
@@ -83,7 +82,7 @@ export async function extractPackageFile(
             );
             break;
           }
-          case TerraformDependencyTypes.module: {
+          case 'module': {
             result = extractTerraformModule(
               lineNumber,
               lines,
@@ -91,11 +90,11 @@ export async function extractPackageFile(
             );
             break;
           }
-          case TerraformDependencyTypes.resource: {
+          case 'resource': {
             result = extractTerraformResource(lineNumber, lines);
             break;
           }
-          case TerraformDependencyTypes.terraform_version: {
+          case 'terraform_version': {
             result = extractTerraformRequiredVersion(lineNumber, lines);
             break;
           }
@@ -131,19 +130,19 @@ export async function extractPackageFile(
 
   deps.forEach((dep) => {
     switch (dep.managerData?.terraformDependencyType) {
-      case TerraformDependencyTypes.required_providers:
+      case 'required_providers':
         analyzeTerraformRequiredProvider(dep, locks);
         break;
-      case TerraformDependencyTypes.provider:
+      case 'provider':
         analyzeTerraformProvider(dep, locks);
         break;
-      case TerraformDependencyTypes.module:
+      case 'module':
         analyseTerraformModule(dep);
         break;
-      case TerraformDependencyTypes.resource:
+      case 'resource':
         analyseTerraformResource(dep);
         break;
-      case TerraformDependencyTypes.terraform_version:
+      case 'terraform_version':
         analyseTerraformVersion(dep);
         break;
       /* istanbul ignore next */
