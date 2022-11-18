@@ -237,8 +237,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
-    LANG: 'C',
-    LC_ALL: 'C',
+    LANG: 'C.UTF-8',
+    LC_ALL: 'C.UTF-8',
   });
   gitInitialized = false;
   submodulesInitizialized = false;
