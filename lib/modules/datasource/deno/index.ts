@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import pMap from 'p-map';
 import { logger } from '../../../logger';
+import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
@@ -11,6 +12,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
   DenoAPIModuleResponse,
   DenoAPIModuleVersionResponse,
+  ReleaseMap,
 } from './types';
 import { createSourceURL, tagsToRecord } from './utils';
 
@@ -74,15 +76,46 @@ export class DenoDatasource extends Datasource {
     const { versions, tags } = (
       await this.http.getJson<DenoAPIModuleResponse>(moduleAPIURL)
     ).body;
+
+    const releasesCache =
+      (await packageCache.get<ReleaseMap>(
+        `datasource-${DenoDatasource.id}-details`,
+        moduleAPIURL
+      )) ?? {};
+    let cacheModified = false;
+
     // get details for the versions
     const releases = await pMap(
       versions,
-      (version) => {
+      async (version) => {
+        const cacheRelease = releasesCache[version];
+        // istanbul ignore if
+        if (cacheRelease) {
+          return cacheRelease;
+        }
+
         // https://apiland.deno.dev/v2/modules/postgres/v0.17.0
-        return this.getReleaseDetails(joinUrlParts(moduleAPIURL, version));
+        const release = await this.getReleaseDetails(
+          joinUrlParts(moduleAPIURL, version)
+        );
+
+        releasesCache[release.version] = release;
+        cacheModified = true;
+
+        return release;
       },
       { concurrency: 5 }
     );
+
+    if (cacheModified) {
+      // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
+      await packageCache.set(
+        `datasource-${DenoDatasource.id}-details`,
+        moduleAPIURL,
+        releasesCache,
+        10080
+      );
+    }
 
     return {
       releases,
@@ -90,11 +123,6 @@ export class DenoDatasource extends Datasource {
     };
   }
 
-  @cache({
-    namespace: `datasource-${DenoDatasource.id}-details`,
-    key: (moduleAPIVersionURL) => moduleAPIVersionURL,
-    ttlMinutes: 10080, // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
-  })
   async getReleaseDetails(moduleAPIVersionURL: string): Promise<Release> {
     const { version, uploaded_at, upload_options } = (
       await this.http.getJson<DenoAPIModuleVersionResponse>(moduleAPIVersionURL)

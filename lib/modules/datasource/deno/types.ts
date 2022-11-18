@@ -1,3 +1,5 @@
+import type { Release } from '../types';
+
 export interface DenoAPIModuleResponse {
   name: string;
   latest_version: string;
@@ -28,3 +30,5 @@ export interface DenoAPITags {
   kind: string; // e.g. popularity
   value: string; // e.g. top_5_percent
 }
+
+export type ReleaseMap = Record<string, Release>;
