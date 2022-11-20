@@ -9,17 +9,13 @@ import {
 import * as _comment from '../../../../modules/platform/comment';
 import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
-import { BranchStatus, PrState } from '../../../../types';
+import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _statusChecks from '../branch/status-checks';
 import * as _prBody from './body';
-import {
-  ChangeLogChange,
-  ChangeLogError,
-  ChangeLogRelease,
-} from './changelog/types';
+import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
 import { ensurePr } from '.';
 
@@ -54,7 +50,7 @@ describe('workers/repository/update/pr/index', () => {
       sourceBranch,
       title: prTitle,
       bodyStruct,
-      state: PrState.Open,
+      state: 'open',
     };
 
     const config: BranchConfig = {
@@ -68,7 +64,7 @@ describe('workers/repository/update/pr/index', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       GlobalConfig.reset();
-      prBody.getPrBody.mockResolvedValue(body);
+      prBody.getPrBody.mockReturnValue(body);
     });
 
     describe('Create', () => {
@@ -79,9 +75,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(limits.incLimitedValue).toHaveBeenCalledOnce();
-        expect(limits.incLimitedValue).toHaveBeenCalledWith(
-          limits.Limit.PullRequests
-        );
+        expect(limits.incLimitedValue).toHaveBeenCalledWith('PullRequests');
         expect(logger.logger.info).toHaveBeenCalledWith(
           { pr: pr.number, prTitle },
           'PR created'
@@ -635,7 +629,7 @@ describe('workers/repository/update/pr/index', () => {
           upgrades: [
             {
               ...dummyUpgrade,
-              logJSON: { error: ChangeLogError.MissingGithubToken },
+              logJSON: { error: 'MissingGithubToken' },
               prBodyNotes: [],
             },
           ],
