@@ -21,6 +21,7 @@ describe('util/fingerprint', () => {
   it('maintains deterministic order', () => {
     const res = fingerprint(obj);
     const res2 = fingerprint(obj2);
+    expect(res).not.toEqual(JSON.stringify(obj)); // shows that safeStringify changes the original order
     expect(res).toEqual(res2);
   });
 });

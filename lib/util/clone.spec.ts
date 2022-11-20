@@ -14,7 +14,11 @@ describe('util/clone', () => {
 
   it('maintains same order', () => {
     const res = clone(obj);
-    expect(Object.keys(res)).toEqual(Object.keys(obj));
+    expect(res).toMatchSnapshot(`{
+      name: 'object',
+      type: 'object',
+      isObject: true,
+    }`);
   });
 
   it('assigns "[Circular]" to circular references', () => {
