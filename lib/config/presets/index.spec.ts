@@ -861,7 +861,7 @@ describe('config/presets/index', () => {
           "description": [
             "opentelemetry-js monorepo",
           ],
-          "matchSourceUrlPrefixes": [
+          "matchSourceUrls": [
             "https://github.com/open-telemetry/opentelemetry-js",
           ],
         }
