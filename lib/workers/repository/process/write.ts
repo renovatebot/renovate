@@ -82,6 +82,7 @@ export function syncBranchState(
     logger.debug('syncBranchState(): update baseBranch name');
     branchState.baseBranch = baseBranch;
     delete branchState.isModified;
+    branchState.pristine = false;
   }
 
   // if base branch sha has changed invalidate cached isBehindBase state
@@ -92,6 +93,7 @@ export function syncBranchState(
 
     // update cached branchSha
     branchState.baseBranchSha = baseBranchSha;
+    branchState.pristine = false;
   }
 
   // if branch sha has changed invalidate all cached states
@@ -104,6 +106,7 @@ export function syncBranchState(
 
     // update cached branchSha
     branchState.sha = branchSha;
+    branchState.pristine = false;
   }
 
   return branchState;
