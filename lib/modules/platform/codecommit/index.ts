@@ -13,7 +13,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -582,7 +582,7 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
   );
-  return Promise.resolve(BranchStatus.yellow);
+  return Promise.resolve('yellow');
 }
 
 /* istanbul ignore next */

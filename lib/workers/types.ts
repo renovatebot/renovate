@@ -85,25 +85,23 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum BranchResult {
-  AlreadyExisted = 'already-existed',
-  Automerged = 'automerged',
-  Done = 'done',
-  Error = 'error',
-  NeedsApproval = 'needs-approval',
-  NeedsPrApproval = 'needs-pr-approval',
-  NotScheduled = 'not-scheduled',
-  NoWork = 'no-work',
-  Pending = 'pending',
-  PrCreated = 'pr-created',
-  PrEdited = 'pr-edited',
-  PrLimitReached = 'pr-limit-reached',
-  CommitLimitReached = 'commit-limit-reached',
-  BranchLimitReached = 'branch-limit-reached',
-  Rebase = 'rebase',
-  UpdateNotScheduled = 'update-not-scheduled',
-}
+export type BranchResult =
+  | 'already-existed'
+  | 'automerged'
+  | 'done'
+  | 'error'
+  | 'needs-approval'
+  | 'needs-pr-approval'
+  | 'not-scheduled'
+  | 'no-work'
+  | 'pending'
+  | 'pr-created'
+  | 'pr-edited'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
+  | 'branch-limit-reached'
+  | 'rebase'
+  | 'update-not-scheduled';
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
@@ -132,10 +130,10 @@ export interface BranchConfig
 export interface BranchMetadata {
   branchName: string;
   branchSha: string | null;
-  baseBranch: string | undefined;
-  baseBranchSha: string | null | undefined;
+  baseBranch?: string;
+  baseBranchSha?: string | null;
   automerge: boolean;
-  isModified: boolean | undefined;
+  isModified?: boolean;
 }
 
 export interface BaseBranchMetadata {
@@ -144,7 +142,7 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified: boolean | undefined;
+  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
   inactiveBranches: string[];

@@ -21,7 +21,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -880,18 +880,18 @@ export async function getBranchStatus(
   }
   if (checkRuns.length === 0) {
     if (commitStatus.state === 'success') {
-      return BranchStatus.green;
+      return 'green';
     }
     if (commitStatus.state === 'failure') {
-      return BranchStatus.red;
+      return 'red';
     }
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   if (
     commitStatus.state === 'failure' ||
     checkRuns.some((run) => run.conclusion === 'failure')
   ) {
-    return BranchStatus.red;
+    return 'red';
   }
   if (
     (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
@@ -899,9 +899,9 @@ export async function getBranchStatus(
       ['skipped', 'neutral', 'success'].includes(run.conclusion)
     )
   ) {
-    return BranchStatus.green;
+    return 'green';
   }
-  return BranchStatus.yellow;
+  return 'yellow';
 }
 
 async function getStatusCheck(
@@ -915,11 +915,14 @@ async function getStatusCheck(
   return (await githubApi.getJson<GhBranchStatus[]>(url, { useCache })).body;
 }
 
-const githubToRenovateStatusMapping = {
-  success: BranchStatus.green,
-  error: BranchStatus.red,
-  failure: BranchStatus.red,
-  pending: BranchStatus.yellow,
+interface GithubToRenovateStatusMapping {
+  [index: string]: BranchStatus;
+}
+const githubToRenovateStatusMapping: GithubToRenovateStatusMapping = {
+  success: 'green',
+  error: 'red',
+  failure: 'red',
+  pending: 'yellow',
 };
 
 export async function getBranchStatusCheck(
@@ -930,9 +933,7 @@ export async function getBranchStatusCheck(
     const res = await getStatusCheck(branchName);
     for (const check of res) {
       if (check.context === context) {
-        return (
-          githubToRenovateStatusMapping[check.state] || BranchStatus.yellow
-        );
+        return githubToRenovateStatusMapping[check.state] || 'yellow';
       }
     }
     return null;
