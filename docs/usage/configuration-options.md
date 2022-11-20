@@ -1923,19 +1923,6 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchSourceUrls": ["https://github.com/facebook/react"],
-      "groupName": "React"
-    }
-  ]
-}
-```
-
 Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json

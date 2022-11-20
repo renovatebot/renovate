@@ -235,8 +235,10 @@ const repoGroups = {
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 const orgGroups = {
-  hapijs: 'https://github.com/hapijs',
+  hapijs: 'https://github.com/hapijs/',
   lodash: 'https://github.com/lodash/',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
