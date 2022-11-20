@@ -334,7 +334,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -1414,6 +1414,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
@@ -2999,8 +3000,6 @@ You can configure `useBaseBranchConfig=merge` to instruct Renovate to merge the 
 
 The config file name in the base branch must be the same as in the default branch and cannot be `package.json`.
 This scenario may be useful for testing the config changes in base branches instantly.
-
-**Known Limitation**: Base branch config will override any other config that has been processed.
 
 ## userStrings
 

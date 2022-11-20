@@ -24,7 +24,7 @@ export function getRepoUrl(
     if (!repo.ssh_url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: repo.ssh_url }, `using SSH URL`);
+    logger.debug(`Using SSH URL: ${repo.ssh_url}`);
     return repo.ssh_url;
   }
 
@@ -52,7 +52,7 @@ export function getRepoUrl(
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
 
-  logger.debug({ url: repo.clone_url }, `using HTTP URL`);
+  logger.debug(`Using HTTP URL: ${repo.clone_url}`);
   const repoUrl = parseUrl(repo.clone_url);
   if (!repoUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);

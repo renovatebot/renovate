@@ -21,7 +21,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -260,17 +260,26 @@ export async function listForks(
   token: string,
   repository: string
 ): Promise<GhRestRepo[]> {
-  // Get list of existing repos
-  const url = `repos/${repository}/forks?per_page=100`;
-  const repos = (
-    await githubApi.getJson<GhRestRepo[]>(url, {
-      token,
-      paginate: true,
-      pageLimit: 100,
-    })
-  ).body;
-  logger.debug(`Found ${repos.length} forked repo(s)`);
-  return repos;
+  try {
+    // Get list of existing repos
+    const url = `repos/${repository}/forks?per_page=100`;
+    const repos = (
+      await githubApi.getJson<GhRestRepo[]>(url, {
+        token,
+        paginate: true,
+        pageLimit: 100,
+      })
+    ).body;
+    logger.debug(`Found ${repos.length} forked repo(s)`);
+    return repos;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      logger.debug('Cannot list repo forks - it is likely private');
+    } else {
+      logger.debug({ err }, 'Unknown error listing repository forks');
+    }
+    throw new Error(REPOSITORY_CANNOT_FORK);
+  }
 }
 
 export async function findFork(
@@ -300,12 +309,10 @@ export async function createFork(
 ): Promise<GhRestRepo> {
   let forkedRepo: GhRestRepo | undefined;
   try {
-    const organization = (await getForkOrgs(token))[0];
     forkedRepo = (
       await githubApi.postJson<GhRestRepo>(`repos/${repository}/forks`, {
         token,
         body: {
-          organization,
           name: config.parentRepo!.replace('/', '-_-'),
           default_branch_only: true, // no baseBranches support yet
         },
@@ -341,7 +348,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
+    logger.debug(`Overriding default GitHub endpoint with ${endpoint}`);
     platformConfig.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -666,7 +673,7 @@ export async function getPr(prNo: number): Promise<GhPr | null> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -695,7 +702,7 @@ export async function getPrList(): Promise<GhPr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<GhPr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -732,7 +739,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
   const openPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   if (openPr) {
     return openPr;
@@ -740,7 +747,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
 
   const autoclosedPr = await findPr({
     branchName,
-    state: PrState.Closed,
+    state: 'closed',
   });
   if (
     autoclosedPr?.title?.endsWith(' - autoclosed') &&
@@ -763,7 +770,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await githubApi.postJson(`repos/${config.repository}/git/refs`, {
         body: { ref: `refs/heads/${branchName}`, sha },
       });
-      logger.debug({ branchName, sha }, 'Recreated autoclosed branch');
+      logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
       logger.debug('Could not recreate autoclosed branch - skipping reopen');
       return null;
@@ -1089,7 +1096,7 @@ export async function ensureIssue({
     if (!issues.length) {
       issues = issueList.filter((i) => i.title === reuseTitle);
       if (issues.length) {
-        logger.debug({ reuseTitle, title }, 'Reusing issue title');
+        logger.debug(`Reusing issue title: "${reuseTitle}"`);
       }
     }
     if (issues.length) {
@@ -1182,7 +1189,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     if (issue.state === 'open' && issue.title === title) {
       // TODO #7154
       await closeIssue(issue.number!);
-      logger.debug({ number: issue.number }, 'Issue closed');
+      logger.debug(`Issue closed, issueNo: ${issue.number}`);
     }
   }
 }
@@ -1394,7 +1401,7 @@ export async function ensureCommentRemoval(
 
   try {
     if (commentId) {
-      logger.debug({ issueNo }, 'Removing comment');
+      logger.debug(`Removing comment from issueNo: ${issueNo}`);
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -1452,7 +1459,7 @@ async function tryPrAutomerge(
       return;
     }
 
-    logger.debug({ prNumber }, 'GitHub-native automerge: success');
+    logger.debug(`GitHub-native automerge: success...PrNo: ${prNumber}`);
   } catch (err) /* istanbul ignore next: missing test #7154 */ {
     logger.warn({ prNumber, err }, 'GitHub-native automerge: REST API error');
   }
@@ -1539,7 +1546,7 @@ export async function updatePr({
     );
     const result = coerceRestPr(ghPr);
     cachePr(result);
-    logger.debug({ pr: prNo }, 'PR updated');
+    logger.debug(`PR updated...prNo: ${prNo}`);
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
       throw err;
@@ -1639,7 +1646,7 @@ export async function mergePr({
   );
   const cachedPr = config.prList?.find(({ number }) => number === prNo);
   if (cachedPr) {
-    cachePr({ ...cachedPr, state: PrState.Merged });
+    cachePr({ ...cachedPr, state: 'merged' });
   }
   return true;
 }

@@ -22,7 +22,7 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { BranchStatus, PrState } from '../../../../types';
+import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -40,7 +40,7 @@ import {
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
-import { Limit, isLimitReached } from '../../../global/limits';
+import { isLimitReached } from '../../../global/limits';
 import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
@@ -142,7 +142,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.Branches) &&
+      isLimitReached('Branches') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -154,7 +154,7 @@ export async function processBranch(
       };
     }
     if (
-      isLimitReached(Limit.Commits) &&
+      isLimitReached('Commits') &&
       !dependencyDashboardCheck &&
       !config.isVulnerabilityAlert
     ) {
@@ -201,7 +201,7 @@ export async function processBranch(
       const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== PrState.Open) {
+        if (branchPr.state !== 'open') {
           logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
@@ -212,7 +212,7 @@ export async function processBranch(
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          logger.debug({ prNo: branchPr.number }, 'PR has been edited');
+          logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
@@ -249,7 +249,7 @@ export async function processBranch(
       } else if (branchIsModified) {
         const oldPr = await platform.findPr({
           branchName: config.branchName,
-          state: PrState.NotOpen,
+          state: '!open',
         });
         if (!oldPr) {
           logger.debug('Branch has been edited but found no PR - skipping');
@@ -561,7 +561,7 @@ export async function processBranch(
       commitSha &&
       config.prCreation !== 'immediate'
     ) {
-      logger.debug({ commitSha }, `Branch status pending`);
+      logger.debug(`Branch status pending, current sha: ${commitSha}`);
       return {
         branchExists: true,
         updatesVerified,
@@ -609,7 +609,9 @@ export async function processBranch(
         mergeStatus === 'branch status error' ||
         mergeStatus === 'failed'
       ) {
-        logger.debug({ mergeStatus }, 'Branch automerge not possible');
+        logger.debug(
+          `Branch automerge not possible, mergeStatus:${mergeStatus}`
+        );
         config.forcePr = true;
         config.branchAutomergeFailureMessage = mergeStatus;
       }
