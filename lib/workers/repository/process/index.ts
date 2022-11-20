@@ -56,15 +56,13 @@ async function getBaseBranchConfig(
       throw error;
     }
 
+    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+
     // istanbul ignore if
     if (config.printConfig) {
-      logger.info(
-        { config: baseBranchConfig },
-        'BaseBranchConfig overrides all configurations'
-      );
+      logger.info({ config: baseBranchConfig }, 'BaseBranchConfig');
     }
 
-    baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
   }
