@@ -3,7 +3,6 @@ import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PlatformId,
 } from '../../constants';
 import { logger } from '../../logger';
 import { hasProxy } from '../../proxy';
@@ -26,11 +25,11 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
   if (
     hostType &&
     GITHUB_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== PlatformId.Github
+    hostType !== 'github'
   ) {
     res = {
       ...hostRules.find({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         url,
       }),
       ...res,
@@ -41,11 +40,11 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
   if (
     hostType &&
     GITLAB_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== PlatformId.Gitlab
+    hostType !== 'gitlab'
   ) {
     res = {
       ...hostRules.find({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         url,
       }),
       ...res,
@@ -56,11 +55,11 @@ export function findMatchingRules(options: GotOptions, url: string): HostRule {
   if (
     hostType &&
     BITBUCKET_API_USING_HOST_TYPES.includes(hostType) &&
-    hostType !== PlatformId.Bitbucket
+    hostType !== 'bitbucket'
   ) {
     res = {
       ...hostRules.find({
-        hostType: PlatformId.Bitbucket,
+        hostType: 'bitbucket',
         url,
       }),
       ...res,

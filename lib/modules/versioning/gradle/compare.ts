@@ -86,17 +86,16 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierRank {
-  Dev = -1,
-  Default = 0,
-  RC,
-  Snapshot,
-  Final,
-  GA,
-  Release,
-  SP,
-}
+export const QualifierRank = {
+  Dev: -1,
+  Default: 0,
+  RC: 1,
+  Snapshot: 2,
+  Final: 3,
+  GA: 4,
+  Release: 5,
+  SP: 6,
+};
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();
@@ -223,11 +222,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum RangeBound {
-  Inclusive = 1,
-  Exclusive,
-}
+export type RangeBound = 'inclusive' | 'exclusive';
 
 interface MavenBasedRange {
   leftBound: RangeBound;
@@ -293,14 +288,9 @@ export function parseMavenBasedRange(input: string): MavenBasedRange | null {
       ) {
         return null;
       }
-      const leftBound =
-        leftBoundStr.trim() === '['
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+      const leftBound = leftBoundStr.trim() === '[' ? 'inclusive' : 'exclusive';
       const rightBound =
-        rightBoundStr.trim() === ']'
-          ? RangeBound.Inclusive
-          : RangeBound.Exclusive;
+        rightBoundStr.trim() === ']' ? 'inclusive' : 'exclusive';
       return {
         leftBound,
         leftBoundStr,

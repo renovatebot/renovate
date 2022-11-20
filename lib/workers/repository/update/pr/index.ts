@@ -21,17 +21,15 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
+import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 
@@ -237,7 +235,7 @@ export async function ensurePr(
             }
           }
         }
-      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+      } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
@@ -278,7 +276,7 @@ export async function ensurePr(
     }
   }
 
-  const prBody = await getPrBody(config, {
+  const prBody = getPrBody(config, {
     debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
   });
 
@@ -351,7 +349,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isLimitReached(Limit.PullRequests) &&
+          isLimitReached('PullRequests') &&
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
@@ -367,7 +365,7 @@ export async function ensurePr(
           draftPR: config.draftPR,
         });
 
-        incLimitedValue(Limit.PullRequests);
+        incLimitedValue('PullRequests');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');

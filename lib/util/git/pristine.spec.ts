@@ -1,12 +1,12 @@
-import { mocked, partial } from '../../../../test/util';
-import * as _repositoryCache from '../repository';
-import type { BranchCache, RepoCacheData } from '../repository/types';
+import { mocked, partial } from '../../../test/util';
+import * as _repositoryCache from '../cache/repository';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types';
 import { getCachedPristineResult } from './pristine';
 
-jest.mock('../repository');
+jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/pristine', () => {
+describe('util/git/pristine', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {

@@ -2,14 +2,13 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
@@ -69,7 +68,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.BitbucketServer,
+  hostType: 'bitbucket-server',
 };
 
 /* istanbul ignore next */
@@ -276,7 +275,7 @@ export async function getPr(
 // TODO: coverage (#9624)
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -312,7 +311,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
   }
@@ -324,7 +323,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
@@ -343,7 +342,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -894,8 +893,8 @@ export async function updatePr({
     const currentState = updatedPr.state;
     // TODO #7154
     const newState = {
-      [PrState.Open]: 'OPEN',
-      [PrState.Closed]: 'DECLINED',
+      ['open']: 'OPEN',
+      ['closed']: 'DECLINED',
     }[state!];
 
     if (
@@ -903,7 +902,7 @@ export async function updatePr({
       ['OPEN', 'DECLINED'].includes(currentState) &&
       currentState !== newState
     ) {
-      const command = state === PrState.Open ? 'reopen' : 'decline';
+      const command = state === 'open' ? 'reopen' : 'decline';
       const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
         version: number;
       }>(
@@ -967,7 +966,7 @@ export async function mergePr({
     }
   }
 
-  logger.debug({ pr: prNo }, 'PR merged');
+  logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
 }
 

@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -37,7 +36,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   // hard-coded logic to use authentication for github.com based on the githubToken for api.github.com
   const githubToken = find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com/',
   });
 
@@ -56,13 +55,12 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   const goGitAllowedHostType = new Set<string>([
     // All known git platforms
-    PlatformId.Azure,
-    PlatformId.Bitbucket,
-    PlatformId.BitbucketServer,
-    PlatformId.CodeCommit,
-    PlatformId.Gitea,
-    PlatformId.Github,
-    PlatformId.Gitlab,
+    'azure',
+    'bitbucket',
+    'bitbucket-server',
+    'gitea',
+    'github',
+    'gitlab',
   ]);
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables

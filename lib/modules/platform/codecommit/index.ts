@@ -192,8 +192,8 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
       state:
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
-          ? PrState.Open
-          : PrState.Closed,
+          ? 'open'
+          : 'closed',
       number: Number.parseInt(prId),
       title: prInfo.title!,
       body: prInfo.description!,
@@ -203,14 +203,14 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
 
   config.prList = fetchedPrs;
 
-  logger.debug({ length: fetchedPrs.length }, 'Retrieved Pull Requests');
+  logger.debug(`Retrieved Pull Requests, count: ${fetchedPrs.length}`);
   return fetchedPrs;
 }
 
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<CodeCommitPr | null> {
   let prsFiltered: CodeCommitPr[] = [];
   try {
@@ -225,13 +225,13 @@ export async function findPr({
     }
 
     switch (state) {
-      case PrState.All:
+      case 'all':
         break;
-      case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
+      case '!open':
+        prsFiltered = prsFiltered.filter((item) => item.state !== 'open');
         break;
       default:
-        prsFiltered = prsFiltered.filter((item) => item.state === PrState.Open);
+        prsFiltered = prsFiltered.filter((item) => item.state === 'open');
         break;
     }
   } catch (err) {
@@ -249,7 +249,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -267,12 +267,12 @@ export async function getPr(
   const prInfo = prRes.pullRequest;
   let prState: PrState;
   if (prInfo.pullRequestTargets![0].mergeMetadata?.isMerged) {
-    prState = PrState.Merged;
+    prState = 'merged';
   } else {
     prState =
       prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
-        ? PrState.Open
-        : PrState.Closed;
+        ? 'open'
+        : 'closed';
   }
 
   return {
@@ -387,7 +387,7 @@ export async function createPr({
 
   return {
     number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
-    state: PrState.Open,
+    state: 'open',
     title: prCreateRes.pullRequest.title,
     sourceBranch,
     targetBranch,
@@ -424,7 +424,7 @@ export async function updatePr({
   }
 
   const prStatusInput =
-    state === PrState.Closed
+    state === 'closed'
       ? PullRequestStatusEnum.CLOSED
       : PullRequestStatusEnum.OPEN;
   if (cachedPr?.state !== prStatusInput) {

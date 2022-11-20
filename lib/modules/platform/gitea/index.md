@@ -24,3 +24,9 @@ Either the account should have full name and email address set to allow Renovate
 ## Features awaiting implementation
 
 - none
+
+## Repo autodiscover sorting
+
+You can change the default server-side sort method and order for autodiscover API.
+Set those via [`RENOVATE_X_AUTODISCOVER_REPO_SORT`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_sort) and [`RENOVATE_X_AUTODISCOVER_REPO_ORDER`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_order).
+Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.

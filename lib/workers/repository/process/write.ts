@@ -2,12 +2,12 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
-import { setBranchNewCommit } from '../../../util/cache/branch';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
-import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
+import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
+import { incLimitedValue, setMaxLimit } from '../../global/limits';
 import {
   BranchConfig,
   BranchResult,
@@ -127,13 +127,13 @@ export async function writeUpdates(
   );
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug(`Calculated maximum PRs remaining this run: ${prsRemaining}`);
-  setMaxLimit(Limit.PullRequests, prsRemaining);
+  setMaxLimit('PullRequests', prsRemaining);
 
   const branchesRemaining = await getBranchesRemaining(config, branches);
   logger.debug(
     `Calculated maximum branches remaining this run: ${branchesRemaining}`
   );
-  setMaxLimit(Limit.Branches, branchesRemaining);
+  setMaxLimit('Branches', branchesRemaining);
 
   for (const branch of branches) {
     const { baseBranch, branchName } = branch;
@@ -179,7 +179,7 @@ export async function writeUpdates(
       return 'automerged';
     }
     if (!branchExisted && branchExists(branch.branchName)) {
-      incLimitedValue(Limit.Branches);
+      incLimitedValue('Branches');
     }
   }
   removeMeta(['branch', 'baseBranch']);

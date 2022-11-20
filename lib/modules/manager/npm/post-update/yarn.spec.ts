@@ -40,7 +40,6 @@ env.getChildProcessEnv.mockReturnValue(envMock.basic);
 describe('modules/manager/npm/post-update/yarn', () => {
   beforeEach(() => {
     delete process.env.BUILDPACK;
-    jest.clearAllMocks();
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     docker.resetPrefetchedImages();

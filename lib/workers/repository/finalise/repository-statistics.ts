@@ -1,7 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
-import { PrState } from '../../../types';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import type {
@@ -25,13 +24,13 @@ export function runRenovateRepoStats(
     }
     prStats.total += 1;
     switch (pr.state) {
-      case PrState.Merged:
+      case 'merged':
         prStats.merged += 1;
         break;
-      case PrState.Closed:
+      case 'closed':
         prStats.closed += 1;
         break;
-      case PrState.Open:
+      case 'open':
         prStats.open += 1;
         break;
       default:

@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import semver from 'semver';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -11,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -45,6 +44,8 @@ import type {
   PR,
   PRMergeMethod,
   Repo,
+  RepoSortMethod,
+  SortMethod,
 } from './types';
 import {
   getMergeMethod,
@@ -67,7 +68,7 @@ interface GiteaRepoConfig {
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
-  hostType: PlatformId.Gitea,
+  hostType: 'gitea',
   endpoint: 'https://gitea.com/',
   version: '0.0.0',
 };
@@ -135,7 +136,7 @@ function toRenovatePR(data: PR): Pr | null {
 }
 
 function matchesState(actual: string, expected: string): boolean {
-  if (expected === PrState.All) {
+  if (expected === 'all') {
     return true;
   }
   if (expected.startsWith('!')) {
@@ -345,6 +346,12 @@ const platform: Platform = {
       const repos = await helper.searchRepos({
         uid: botUserID,
         archived: false,
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT && {
+          sort: process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT as RepoSortMethod,
+        }),
+        ...(process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER && {
+          order: process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER as SortMethod,
+        }),
       });
       return repos.filter((r) => !r.mirror).map((r) => r.full_name);
     } catch (err) {
@@ -430,11 +437,7 @@ const platform: Platform = {
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(
-          config.repository,
-          { state: PrState.All },
-          { useCache: false }
-        )
+        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -474,7 +477,7 @@ const platform: Platform = {
   async findPr({
     branchName,
     prTitle: title,
-    state = PrState.All,
+    state = 'all',
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
@@ -572,7 +575,7 @@ const platform: Platform = {
         config.prList = null;
         const pr = await platform.findPr({
           branchName: sourceBranch,
-          state: PrState.Open,
+          state: 'open',
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
@@ -802,7 +805,7 @@ const platform: Platform = {
     const issueList = await platform.getIssueList();
     for (const issue of issueList) {
       if (issue.state === 'open' && issue.title === title) {
-        logger.debug({ number: issue.number }, 'Closing issue');
+        logger.debug(`Closing issue...issueNo: ${issue.number!}`);
         // TODO #7154
         await helper.closeIssue(config.repository, issue.number!);
       }
@@ -902,7 +905,7 @@ const platform: Platform = {
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
     logger.debug(`getBranchPr(${branchName})`);
-    const pr = await platform.findPr({ branchName, state: PrState.Open });
+    const pr = await platform.findPr({ branchName, state: 'open' });
     return pr ? platform.getPr(pr.number) : null;
   },
 

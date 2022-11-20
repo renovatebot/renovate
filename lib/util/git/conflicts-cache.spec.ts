@@ -1,12 +1,15 @@
-import { mocked, partial } from '../../../../test/util';
-import * as _repositoryCache from '../repository';
-import type { BranchCache, RepoCacheData } from '../repository/types';
-import { getCachedConflictResult, setCachedConflictResult } from './conflict';
+import { mocked, partial } from '../../../test/util';
+import * as _repositoryCache from '../cache/repository';
+import type { BranchCache, RepoCacheData } from '../cache/repository/types';
+import {
+  getCachedConflictResult,
+  setCachedConflictResult,
+} from './conflicts-cache';
 
-jest.mock('../repository');
+jest.mock('../cache/repository');
 const repositoryCache = mocked(_repositoryCache);
 
-describe('util/cache/branch/conflict', () => {
+describe('util/git/conflicts-cache', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
@@ -93,19 +96,6 @@ describe('util/cache/branch/conflict', () => {
       expect(
         getCachedConflictResult('foo', 'sha', 'bar', 'base_sha')
       ).toBeTrue();
-    });
-
-    it('deletes old cache', () => {
-      repoCache.gitConflicts = {
-        foo: {
-          targetBranchSha: '111',
-          sourceBranches: {
-            bar: { sourceBranchSha: '222', isConflicted: true },
-          },
-        },
-      };
-      getCachedConflictResult('foo', '111', 'bar', '222');
-      expect(repoCache.gitConflicts).toBeUndefined();
     });
   });
 

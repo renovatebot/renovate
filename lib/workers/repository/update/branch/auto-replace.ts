@@ -32,7 +32,8 @@ export async function confirmIfDepUpdated(
     );
     // istanbul ignore if
     if (!newExtract) {
-      logger.debug({ manager, packageFile }, 'Could not extract package file');
+      // TODO: fix types (#7154)
+      logger.debug(`Could not extract ${packageFile!}`);
       return false;
     }
     newUpgrade = newExtract.deps[depIndex!];
@@ -40,7 +41,7 @@ export async function confirmIfDepUpdated(
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
   if (!newUpgrade!) {
-    logger.debug({ manager, packageFile }, 'No newUpgrade');
+    logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
   }
 
@@ -56,7 +57,7 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
-  if (newUpgrade.currentValue !== newValue) {
+  if (newValue && newUpgrade.currentValue !== newValue) {
     logger.debug(
       {
         manager,
@@ -124,7 +125,8 @@ async function checkExistingBranch(
     );
     return null;
   }
-  logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+  // TODO: fix types (#7154)
+  logger.debug(`Branch dep ${depName!} in ${packageFile!} is already updated`);
   return existingContent;
 }
 
@@ -161,10 +163,10 @@ export async function doAutoReplace(
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
-      if (currentValue) {
+      if (currentValue && newValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), 'g'),
-          newValue!
+          newValue
         );
       }
       if (currentDigest && newDigest) {
@@ -178,8 +180,9 @@ export async function doAutoReplace(
       { packageFile, depName },
       `Starting search at index ${searchIndex}`
     );
+    let newContent = existingContent;
     // Iterate through the rest of the file
-    for (; searchIndex < existingContent.length; searchIndex += 1) {
+    for (; searchIndex < newContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
       if (matchAt(existingContent, searchIndex, replaceString!)) {
         logger.debug(
@@ -187,19 +190,18 @@ export async function doAutoReplace(
           `Found match at index ${searchIndex}`
         );
         // Now test if the result matches
-        const testContent = replaceAt(
-          existingContent,
+        newContent = replaceAt(
+          newContent,
           searchIndex,
           replaceString!,
           newString
         );
-        await writeLocalFile(upgrade.packageFile!, testContent);
-
-        if (await confirmIfDepUpdated(upgrade, testContent)) {
-          return testContent;
+        await writeLocalFile(upgrade.packageFile!, newContent);
+        if (await confirmIfDepUpdated(upgrade, newContent)) {
+          return newContent;
         }
-        // istanbul ignore next
         await writeLocalFile(upgrade.packageFile!, existingContent);
+        newContent = existingContent;
       }
     }
   } catch (err) /* istanbul ignore next */ {

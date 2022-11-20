@@ -2,7 +2,6 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { getCachedPristineResult } from '../../util/cache/branch';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -14,6 +13,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
+import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(
