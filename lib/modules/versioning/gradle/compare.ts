@@ -94,7 +94,7 @@ export const QualifierRank = {
   GA: 4,
   Release: 5,
   SP: 6,
-};
+} as const;
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();
