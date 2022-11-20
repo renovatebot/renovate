@@ -8,11 +8,7 @@ import { fingerprint } from '../../../util/fingerprint';
 import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { incLimitedValue, setMaxLimit } from '../../global/limits';
-import {
-  BranchConfig,
-  BranchResult,
-  UpgradeFingerprintConfig,
-} from '../../types';
+import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
 import { processBranch } from '../update/branch';
 import { upgradeFingerprintFields } from './fingerprint-fields';
 import { getBranchesRemaining, getPrsRemaining } from './limits';
@@ -172,7 +168,7 @@ export async function writeUpdates(
       setBranchNewCommit(branchName, baseBranch, res.commitSha);
     }
     if (
-      branch.result === BranchResult.Automerged &&
+      branch.result === 'automerged' &&
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop processing other branches because base branch has been changed

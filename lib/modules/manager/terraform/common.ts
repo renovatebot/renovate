@@ -1,15 +1,10 @@
-// FIXME #12556
-/* eslint-disable @typescript-eslint/naming-convention */
-
-// eslint-disable-next-line typescript-enum/no-enum
-export enum TerraformDependencyTypes {
-  unknown = 'unknown',
-  module = 'module',
-  provider = 'provider',
-  required_providers = 'required_providers',
-  resource = 'resource',
-  terraform_version = 'terraform_version',
-}
+export type TerraformDependencyTypes =
+  | 'unknown'
+  | 'module'
+  | 'provider'
+  | 'required_providers'
+  | 'resource'
+  | 'terraform_version';
 
 export const TerraformResourceTypes: Record<string, string[]> = {
   unknown: ['unknown'],
