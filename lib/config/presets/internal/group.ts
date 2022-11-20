@@ -669,7 +669,7 @@ const staticGroups = {
     description: 'Add `ts-jest` `major` update to Jest monorepo.',
     packageRules: [
       {
-        matchSourceUrlPrefixes: ['https://github.com/kulshekhar/ts-jest'],
+        matchSourceUrls: ['https://github.com/kulshekhar/ts-jest'],
         matchUpdateTypes: ['major'],
         groupName: 'jest monorepo',
       },

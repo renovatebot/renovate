@@ -1,7 +1,7 @@
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { BranchStatus } from '../../../../types';
+import type { BranchStatus } from '../../../../types';
 import {
   MergeConfidence,
   isActiveConfidenceLevel,
@@ -17,7 +17,7 @@ export async function resolveBranchStatus(
 
   if (ignoreTests) {
     logger.debug('Ignore tests. Return green');
-    return BranchStatus.green;
+    return 'green';
   }
 
   const status = await platform.getBranchStatus(branchName);
@@ -62,7 +62,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
   }
   const context = `renovate/stability-days`;
   const description =
-    config.stabilityStatus === BranchStatus.green
+    config.stabilityStatus === 'green'
       ? 'Updates have met stability days requirement'
       : 'Updates have not met stability days requirement';
   await setStatusCheck(
@@ -90,7 +90,7 @@ export async function setConfidence(config: ConfidenceConfig): Promise<void> {
   }
   const context = `renovate/merge-confidence`;
   const description =
-    config.confidenceStatus === BranchStatus.green
+    config.confidenceStatus === 'green'
       ? 'Updates have met Merge Confidence requirement'
       : 'Updates have not met Merge Confidence requirement';
   await setStatusCheck(
