@@ -16,8 +16,8 @@ describe('modules/manager/flux/extract', () => {
   describe('extractPackageFile()', () => {
     it('extracts multiple resources', () => {
       const result = extractPackageFile(
-        Fixtures.get('multidoc.yaml'),
-        'multidoc.yaml'
+        Fixtures.get('helm-release-and-helm-repository.yaml'),
+        'helm-release-and-helm-repository.yaml'
       );
       expect(result).toEqual({
         deps: [
@@ -33,7 +33,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
-        Fixtures.get('system.yaml'),
+        Fixtures.get('gotk-components.yaml'),
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
       expect(result).toEqual({
@@ -69,8 +69,8 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
-        Fixtures.get('release.yaml'),
-        'release.yaml'
+        Fixtures.get('helm-release.yaml'),
+        'helm-release.yaml'
       );
       expect(result?.deps[0].skipReason).toBe('unknown-registry');
     });
@@ -88,7 +88,7 @@ describe('modules/manager/flux/extract', () => {
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helm-release.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
@@ -148,7 +148,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('source.yaml')}
+          ${Fixtures.get('helm-repository.yaml')}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -168,7 +168,7 @@ describe('modules/manager/flux/extract', () => {
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('source.yaml')}
+          ${Fixtures.get('helm-repository.yaml')}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -189,7 +189,7 @@ describe('modules/manager/flux/extract', () => {
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helm-release.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
@@ -204,7 +204,7 @@ describe('modules/manager/flux/extract', () => {
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helm-release.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
@@ -250,8 +250,8 @@ describe('modules/manager/flux/extract', () => {
   describe('extractAllPackageFiles()', () => {
     it('extracts multiple files', async () => {
       const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/release.yaml',
-        'lib/modules/manager/flux/__fixtures__/source.yaml',
+        'lib/modules/manager/flux/__fixtures__/helm-release.yaml',
+        'lib/modules/manager/flux/__fixtures__/helm-repository.yaml',
       ]);
       expect(result).toEqual([
         {
@@ -263,7 +263,28 @@ describe('modules/manager/flux/extract', () => {
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
-          packageFile: 'lib/modules/manager/flux/__fixtures__/release.yaml',
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helm-release.yaml',
+        },
+      ]);
+    });
+
+    it('extracts version from OCIRepository', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/oci-repository.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: 'v1.8.1',
+              datasource: 'docker',
+              depName: 'kyverno',
+              registryUrls: ['ghcr.io/kyverno/manifests/kyverno'],
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/oci-repository.yaml',
         },
       ]);
     });

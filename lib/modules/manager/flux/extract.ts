@@ -2,6 +2,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -32,8 +33,9 @@ function readManifest(content: string, file: string): FluxManifest | null {
   const manifest: FluxManifest = {
     kind: 'resource',
     file,
-    releases: [],
-    repositories: [],
+    helmReleases: [],
+    helmRepositories: [],
+    ociRepositories: [],
   };
   let resources: FluxResource[];
   try {
@@ -51,7 +53,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
           resource.apiVersion?.startsWith('helm.toolkit.fluxcd.io/') &&
           resource.spec?.chart?.spec?.chart
         ) {
-          manifest.releases.push(resource);
+          manifest.helmReleases.push(resource);
         }
         break;
       case 'HelmRepository':
@@ -61,7 +63,18 @@ function readManifest(content: string, file: string): FluxManifest | null {
           resource.metadata.namespace &&
           resource.spec?.url
         ) {
-          manifest.repositories.push(resource);
+          manifest.helmRepositories.push(resource);
+        }
+        break;
+      case 'OCIRepository':
+        if (
+          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
+          resource.metadata?.name &&
+          resource.metadata.namespace &&
+          resource.spec.url &&
+          resource.spec.ref.tag
+        ) {
+          manifest.ociRepositories.push(resource);
         }
         break;
     }
@@ -78,7 +91,7 @@ function resolveManifest(
     (manifest) => manifest.kind === 'resource'
   ) as ResourceFluxManifest[];
   const repositories = resourceManifests.flatMap(
-    (manifest) => manifest.repositories
+    (manifest) => manifest.helmRepositories
   );
   let res: PackageDependency<FluxManagerData>[] | null = null;
   switch (manifest.kind) {
@@ -95,7 +108,7 @@ function resolveManifest(
       ];
       break;
     case 'resource':
-      res = manifest.releases.map((release) => {
+      res = manifest.helmReleases.map((release) => {
         const dep: PackageDependency<FluxManagerData> = {
           depName: release.spec.chart.spec.chart,
           currentValue: release.spec.chart.spec.version,
@@ -116,6 +129,17 @@ function resolveManifest(
           dep.skipReason = 'unknown-registry';
         }
 
+        return dep;
+      });
+      break;
+    case 'oci':
+      res = manifest.ociRepositories.map((release) => {
+        const registryURL = release.spec.url.replace('oci://', '');
+        const dep: PackageDependency<FluxManagerData> = {
+          depName: registryURL,
+          currentValue: release.spec.ref.tag,
+          datasource: DockerDatasource.id,
+        };
         return dep;
       });
       break;

@@ -37,7 +37,17 @@ export interface HelmRepository extends KubernetesResource {
   };
 }
 
-export type FluxResource = HelmRelease | HelmRepository;
+export interface OCIRepository extends KubernetesResource {
+  kind: 'OCIRepository';
+  spec: {
+    url: string;
+    ref: {
+      tag: string;
+    };
+  };
+}
+
+export type FluxResource = HelmRelease | HelmRepository | OCIRepository;
 
 export interface FluxFile {
   file: string;
@@ -45,8 +55,13 @@ export interface FluxFile {
 
 export interface ResourceFluxManifest extends FluxFile {
   kind: 'resource';
-  releases: HelmRelease[];
-  repositories: HelmRepository[];
+  helmReleases: HelmRelease[];
+  helmRepositories: HelmRepository[];
+}
+
+export interface OCIFluxManifest extends FluxFile {
+  kind: 'oci';
+  ociRepositories: OCIRepository[];
 }
 
 export interface SystemFluxManifest extends FluxFile {
@@ -55,4 +70,7 @@ export interface SystemFluxManifest extends FluxFile {
   components: string;
 }
 
-export type FluxManifest = ResourceFluxManifest | SystemFluxManifest;
+export type FluxManifest =
+  | ResourceFluxManifest
+  | OCIFluxManifest
+  | SystemFluxManifest;
