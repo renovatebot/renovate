@@ -131,10 +131,10 @@ export interface BranchConfig
 export interface BranchMetadata {
   branchName: string;
   branchSha: string | null;
-  baseBranch: string | undefined;
-  baseBranchSha: string | null | undefined;
+  baseBranch?: string;
+  baseBranchSha?: string | null;
   automerge: boolean;
-  isModified: boolean | undefined;
+  isModified?: boolean;
 }
 
 export interface BaseBranchMetadata {
@@ -143,7 +143,7 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified: boolean | undefined;
+  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
   inactiveBranches: string[];

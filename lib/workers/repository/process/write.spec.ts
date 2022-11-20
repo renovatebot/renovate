@@ -342,7 +342,6 @@ describe('workers/repository/process/write', () => {
       upgrades: [],
       automerge: false,
       prNo: null,
-      parentSha: null,
     };
 
     it('returns false if no cache', () => {
@@ -389,7 +388,7 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('when base branch name is different updates it and invalidates isModified value', () => {
+    it('when base branch name is different updates it and invalidates related cache', () => {
       const repoCacheObj: RepoCacheData = {
         branches: [
           {
@@ -398,10 +397,10 @@ describe('workers/repository/process/write', () => {
             sha: 'sha',
             baseBranchSha: 'base_sha',
             isModified: true,
+            pristine: false,
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -413,10 +412,10 @@ describe('workers/repository/process/write', () => {
         sha: 'sha',
         baseBranch: 'new_base_branch',
         baseBranchSha: 'base_sha',
+        pristine: false,
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -429,10 +428,10 @@ describe('workers/repository/process/write', () => {
             baseBranch: 'base_branch',
             baseBranchSha: 'base_sha',
             isBehindBase: true,
+            pristine: false,
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -445,9 +444,9 @@ describe('workers/repository/process/write', () => {
         baseBranch: 'base_branch',
         baseBranchSha: 'new_base_sha',
         upgrades: [],
+        pristine: false,
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -461,12 +460,12 @@ describe('workers/repository/process/write', () => {
             baseBranchSha: 'base_sha',
             isBehindBase: true,
             isModified: true,
+            pristine: true,
             isConflicted: true,
             branchFingerprint: '123',
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -479,9 +478,9 @@ describe('workers/repository/process/write', () => {
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
         upgrades: [],
+        pristine: false,
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -500,7 +499,7 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
+            pristine: true,
           },
         ],
       };
@@ -519,7 +518,7 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
+        pristine: true,
       });
     });
   });
