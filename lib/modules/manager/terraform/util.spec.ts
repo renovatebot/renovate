@@ -1,41 +1,32 @@
-import { TerraformDependencyTypes } from './common';
 import { getTerraformDependencyType } from './util';
 
 describe('modules/manager/terraform/util', () => {
   describe('getTerraformDependencyType()', () => {
-    it('returns TerraformDependencyTypes.module', () => {
-      expect(getTerraformDependencyType('module')).toBe(
-        TerraformDependencyTypes.module
-      );
+    it('returns module', () => {
+      expect(getTerraformDependencyType('module')).toBe('module');
     });
 
-    it('returns TerraformDependencyTypes.provider', () => {
-      expect(getTerraformDependencyType('provider')).toBe(
-        TerraformDependencyTypes.provider
-      );
+    it('returns provider', () => {
+      expect(getTerraformDependencyType('provider')).toBe('provider');
     });
 
-    it('returns TerraformDependencyTypes.unknown', () => {
-      expect(getTerraformDependencyType('unknown')).toBe(
-        TerraformDependencyTypes.unknown
-      );
+    it('returns unknown', () => {
+      expect(getTerraformDependencyType('unknown')).toBe('unknown');
     });
 
-    it('returns TerraformDependencyTypes.required_providers', () => {
+    it('returns required_providers', () => {
       expect(getTerraformDependencyType('required_providers')).toBe(
-        TerraformDependencyTypes.required_providers
+        'required_providers'
       );
     });
 
-    it('returns TerraformDependencyTypes.unknown on empty string', () => {
-      expect(getTerraformDependencyType('')).toBe(
-        TerraformDependencyTypes.unknown
-      );
+    it('returns unknown on empty string', () => {
+      expect(getTerraformDependencyType('')).toBe('unknown');
     });
 
-    it('returns TerraformDependencyTypes.unknown on string with random chars', () => {
+    it('returns unknown on string with random chars', () => {
       expect(getTerraformDependencyType('sdfsgdsfadfhfghfhgdfsdf')).toBe(
-        TerraformDependencyTypes.unknown
+        'unknown'
       );
     });
   });

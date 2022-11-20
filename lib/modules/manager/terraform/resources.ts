@@ -4,7 +4,7 @@ import { regEx } from '../../../util/regex';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes, TerraformResourceTypes } from './common';
+import { TerraformResourceTypes } from './common';
 import { extractTerraformKubernetesResource } from './extract/kubernetes';
 import { analyseTerraformVersion } from './required-version';
 import type { ExtractionResult, ResourceManagerData } from './types';
@@ -30,7 +30,7 @@ export function extractTerraformResource(
   const line = lines[lineNumber];
   const deps: PackageDependency<ResourceManagerData>[] = [];
   const managerData: ResourceManagerData = {
-    terraformDependencyType: TerraformDependencyTypes.resource,
+    terraformDependencyType: 'resource',
   };
   const dep: PackageDependency<ResourceManagerData> = {
     managerData,
