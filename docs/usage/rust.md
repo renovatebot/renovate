@@ -34,3 +34,41 @@ If dependencies are available via a sparse index, then a `registryAlias` can be
 used to have Renovate accesss the dependencies via the sparse protocol. Use
 `HostRules` to provide authentication details if needed. Crates-io index access
 will still be via Renovates shared clone of the public git index.
+
+For instance with a username and password:
+
+```
+"hostRules": [
+    {
+      "hostType": "cargo-git",
+      "matchHost": "https://INSTANCE.jfrog.io",
+      "username": "USERNAME",
+      "password": "PASSWORD"
+    },
+    {
+      "hostType": "cargo-http",
+      "matchHost": "https://INSTANCE.jfrog.io",
+      "authType": "Token-Only",
+      "token": "Basic username-and-password-base64-encoded"
+    }
+  ]
+```
+
+With a bearer token:
+
+```
+"hostRules": [
+    {
+      "hostType": "cargo-git",
+      "matchHost": "https://INSTANCE.jfrog.io",
+      "username": "TOKEN_NAME",
+      "password": "TOKEN_VALUE"
+    },
+    {
+      "hostType": "cargo-http",
+      "matchHost": "https://INSTANCE.jfrog.io",
+      "authType": "Token-Only",
+      "token": "Bearer TOKEN_VALUE"
+    }
+  ]
+```
