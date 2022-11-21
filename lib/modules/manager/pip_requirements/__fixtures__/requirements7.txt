@@ -10,3 +10,4 @@ foo [bar] == 3.2.1 # handles extra white space
 some-package==0.3.1
 some-other-package==1.0.0
 not_semver==1.9
+celery>=5.2.2 # not directly required, pinned by Snyk to avoid a vulnerability
