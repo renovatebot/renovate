@@ -79,10 +79,12 @@ describe('modules/datasource/rubygems/index', () => {
           throw new Error();
         });
 
-      const res = await getPkgReleases(newparams);
-      expect(res).toBeNull();
-
-      versionsdataSourceSpy.mockRestore();
+      try {
+        const res = await getPkgReleases(newparams);
+        expect(res).toBeNull();
+      } finally {
+        versionsdataSourceSpy.mockRestore();
+      }
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
