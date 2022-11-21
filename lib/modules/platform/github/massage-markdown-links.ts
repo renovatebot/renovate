@@ -13,12 +13,13 @@ interface UrlMatch {
 /*
 explaining the long regex
  http..github.com/ = (?:https?:\/\/)?(?:www\.)?(?:to)?github\.com\/
- org/repo/ = (?<org>[-_a-z\d]+)\/(?<repo>[-_a-z\d]+)\/
+ org/repo/ = (?<org>[-_\.a-z\d]+)\/(?<repo>[-_\.a-z\d]+)\/
  pull/14476 = (?:discussions|issues|pull)\/(?<number>\d+)
- #comment-123 = (?:#[-_a-z\d]+)?;
+ #comment-123 = (?:#[-_\.a-z\d]+)?
+
 */
 const urlRegex =
-  /(?:https?:\/\/)?(?:www\.)?(?:to)?github\.com\/(?<org>[-_a-z\d]+)\/(?<repo>[-_a-z\d]+)\/(?:discussions|issues|pull)\/(?<number>[\d]+(?:#[-_a-z\d]+)?)/i; // TODO #12872 (?<!re) after text not matching
+  /(?:https?:\/\/)?(?:www\.)?(?:to)?github\.com\/(?<org>[-_\.a-z\d]+)\/(?<repo>[-_\.a-z\d]+)\/(?:discussions|issues|pull)\/(?<number>\d+(?:#[-_\.a-z\d]+)?)/i; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
