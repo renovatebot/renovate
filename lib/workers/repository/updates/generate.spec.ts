@@ -1158,10 +1158,50 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.prTitle).toBe('PATCH: update dependency some-dep to 1.2.0');
+      expect(res.prTitle).toBe('PATCH: Update dependency some-dep to 1.2.0');
       expect(res.commitMessage).toBe(
-        'PATCH: update dependency some-dep to 1.2.0'
+        'PATCH: Update dependency some-dep to 1.2.0'
       );
     });
+
+    it('using emojy as prefix', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: '🆙',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          commitMessageAction: 'Update',
+          semanticCommits: 'enabled',
+          semanticCommitScope: null,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
+    });
+  });
+
+  it('allow uppercase for semantic commit', () => {
+    const branch: BranchUpgradeConfig[] = [
+      {
+        ...defaultConfig,
+        branchName: 'some-branch',
+        depName: 'some-dep',
+        manager: 'some-manager',
+        newValue: '1.2.0',
+        semanticCommits: 'enabled',
+        semanticCommitScope: 'TEST',
+      } as BranchUpgradeConfig,
+    ];
+    const res = generateBranchConfig(branch);
+    expect(res.prTitle).toBe(
+      'chore(TEST): update dependency some-dep to 1.2.0'
+    );
+    expect(res.commitMessage).toBe(
+      'chore(TEST): update dependency some-dep to 1.2.0'
+    );
   });
 });

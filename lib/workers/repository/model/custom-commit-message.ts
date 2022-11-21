@@ -8,6 +8,10 @@ export interface CustomCommitMessageJSON extends CommitMessageJSON {
 export class CustomCommitMessage extends CommitMessage {
   private _prefix = '';
 
+  static is(value: unknown): value is CustomCommitMessage {
+    return value instanceof CustomCommitMessage;
+  }
+
   get prefix(): string {
     return this._prefix;
   }

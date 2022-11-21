@@ -11,6 +11,7 @@ import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessageFactory } from '../model/commit-message-factory';
+import { CustomCommitMessage } from '../model/custom-commit-message';
 import { SemanticCommitMessage } from '../model/semantic-commit-message';
 
 function prettifyVersion(version: string): string {
@@ -201,7 +202,11 @@ export function generateBranchConfig(
       );
     }
 
-    delete upgrade.commitMessagePrefix;
+    if (CustomCommitMessage.is(commitMessage)) {
+      // Template of commit message already contains prefix
+      commitMessage.prefix = '';
+    }
+
     // Compile a few times in case there are nested templates
     commitMessage.subject = template.compile(
       upgrade.commitMessage ?? '',
