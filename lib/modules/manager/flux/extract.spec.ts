@@ -263,7 +263,7 @@ describe('modules/manager/flux/extract', () => {
       );
       expect(result?.deps[0].currentDigest).toBe('c93154b');
       expect(result?.deps[0].replaceString).toBe('c93154b');
-      expect(result?.deps[0].datasource).toBe(GitRefsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(GitRefsDatasource.id);
     });
 
     it('extracts GitRepository with a tag from github with ssh', () => {
@@ -282,7 +282,7 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml'
       );
       expect(result?.deps[0].currentValue).toBe('v11.35.9');
-      expect(result?.deps[0].datasource).toBe(GithubTagsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(GithubTagsDatasource.id);
     });
 
     it('extracts GitRepository with a tag from github', () => {
@@ -301,7 +301,7 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml'
       );
       expect(result?.deps[0].currentValue).toBe('v11.35.9');
-      expect(result?.deps[0].datasource).toBe(GithubTagsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(GithubTagsDatasource.id);
     });
 
     it('extracts GitRepository with a tag from gitlab', () => {
@@ -320,7 +320,7 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml'
       );
       expect(result?.deps[0].currentValue).toBe('1.2.3');
-      expect(result?.deps[0].datasource).toBe(GitlabTagsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(GitlabTagsDatasource.id);
     });
 
     it('extracts GitRepository with a tag from bitbucket', () => {
@@ -339,7 +339,7 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml'
       );
       expect(result?.deps[0].currentValue).toBe('2020.5.6+staging.ze');
-      expect(result?.deps[0].datasource).toBe(BitBucketTagsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(BitBucketTagsDatasource.id);
     });
 
     it('extracts GitRepository with a tag from an unkown domain', () => {
@@ -358,7 +358,7 @@ describe('modules/manager/flux/extract', () => {
         'test.yaml'
       );
       expect(result?.deps[0].currentValue).toBe('7.56.4_p1');
-      expect(result?.deps[0].datasource).toBe(GitTagsDatasource.id);
+      expect(result?.deps[0].datasource).toEqual(GitTagsDatasource.id);
     });
 
     it('ignores resources of an unknown kind', () => {
