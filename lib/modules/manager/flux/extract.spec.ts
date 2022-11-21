@@ -85,7 +85,16 @@ describe('modules/manager/flux/extract', () => {
         Fixtures.get('helmRelease.yaml'),
         'helmRelease.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: 'helm',
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRelease resources without an apiVersion', () => {
@@ -108,7 +117,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRelease resources without a chart name', () => {
@@ -155,7 +173,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('does not match HelmRelease resources without a sourceRef', () => {
@@ -175,7 +202,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('does not match HelmRelease resources without a namespace', () => {
@@ -196,7 +232,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRepository resources without a namespace', () => {
@@ -211,7 +256,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRepository resources without a URL', () => {
@@ -227,7 +281,16 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores GitRepository without a tag nor a commit', () => {
@@ -243,7 +306,11 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unversioned-reference');
+      expect(result).toEqual({
+        deps: [
+          { depName: 'renovate-repo', skipReason: 'unversioned-reference' },
+        ],
+      });
     });
 
     it('extracts GitRepository with a commit', () => {
@@ -261,9 +328,18 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentDigest).toBe('c93154b');
-      expect(result?.deps[0].replaceString).toBe('c93154b');
-      expect(result?.deps[0].datasource).toEqual(GitRefsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: 'c93154b',
+            datasource: GitRefsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://github.com/renovatebot/renovate',
+            replaceString: 'c93154b',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('extracts GitRepository with a tag from github with ssh', () => {
@@ -281,8 +357,17 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentValue).toBe('v11.35.9');
-      expect(result?.deps[0].datasource).toEqual(GithubTagsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v11.35.9',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('extracts GitRepository with a tag from github', () => {
@@ -300,8 +385,17 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentValue).toBe('v11.35.9');
-      expect(result?.deps[0].datasource).toEqual(GithubTagsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v11.35.9',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('extracts GitRepository with a tag from gitlab', () => {
@@ -319,8 +413,17 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentValue).toBe('1.2.3');
-      expect(result?.deps[0].datasource).toEqual(GitlabTagsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '1.2.3',
+            datasource: GitlabTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://gitlab.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('extracts GitRepository with a tag from bitbucket', () => {
@@ -338,8 +441,17 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentValue).toBe('2020.5.6+staging.ze');
-      expect(result?.deps[0].datasource).toEqual(BitBucketTagsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2020.5.6+staging.ze',
+            datasource: BitBucketTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://bitbucket.org/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('extracts GitRepository with a tag from an unkown domain', () => {
@@ -357,8 +469,17 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].currentValue).toBe('7.56.4_p1');
-      expect(result?.deps[0].datasource).toEqual(GitTagsDatasource.id);
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '7.56.4_p1',
+            datasource: GitTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://example.com/renovatebot/renovate',
+            sourceUrl: 'https://example.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('ignores resources of an unknown kind', () => {
