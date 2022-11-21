@@ -89,7 +89,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
     }
   );
 
-  it('replace url contains disappear text inline', () => {
+  it('replace @user with togithub.com link to user profile and replace foo/bar#1 with togithub.com link, ', () => {
     const input = [
       'pnpm rebuild accepts --store-dir by @user in https://github.com/foo/bar/issues/1\n' +
         'pnpm rebuild accepts --store-dir by @UsEr in https://github.com/foo/bar/issues/2\n' +
