@@ -4,9 +4,9 @@ import { extractPackageFile, supportedDatasources } from '.';
 describe('modules/manager/asdf/index', () => {
   describe('supportedDatasources', () => {
     const toolConfigs = [
-      ...Object.values(upgradeableTooling).filter(
-        (config): config is StaticTooling => 'datasource' in config
-      ),
+      ...Object.values(upgradeableTooling)
+        .map((definition) => definition.config)
+        .filter((config): config is StaticTooling => 'datasource' in config),
       ...extractPackageFile(`java adoptopenjdk-16.0.0+36
 java adoptopenjdk-jre-16.0.0+36
 scala 2.0.0
