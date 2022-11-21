@@ -6,7 +6,6 @@ import { VersionsDatasource, resetCache } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
-const contribsysComVersions = Fixtures.get('contribsys-com-versions.txt');
 const railsInfo = Fixtures.getJson('rails/info.json');
 const railsVersions = Fixtures.getJson('rails/versions.json');
 const railsDependencies = Fixtures.getBinary('dependencies-rails.dat');
@@ -109,6 +108,11 @@ describe('modules/datasource/rubygems/index', () => {
     });
 
     it('returns a dep for a package hit on an arbitrary registry that only supports old format endpoints', async () => {
+      const contribsysComVersions = `
+        created_at: 2022-06-15T17:10:25+00:00
+        ---
+        sidekiq-ent 0.7.10,1.0.0,1.0.1,1.2.4,2.0.0,2.1.2 4c0f62a49b15b4775b7fb6824ec34d45
+      `;
       const newparams = {
         ...params,
         packageName: 'sidekiq-ent',
@@ -120,7 +124,7 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, contribsysComVersions);
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
-      expect(res?.releases).toHaveLength(39);
+      expect(res?.releases).toHaveLength(6);
       expect(res).toMatchObject({
         registryUrl: 'https://enterprise.contribsys.com',
         releases: expect.arrayContaining([
