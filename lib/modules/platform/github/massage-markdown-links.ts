@@ -16,10 +16,10 @@ explaining the long regex
  org/repo/ = (?<org>[-_.\w\d]+)\/(?<repo>[-_.\w\d]+)\/
  pull/14476 = (?:discussions|issues|pull)\/(?<number>\d+)
  #comment-123 = (?:#[-_.\w\d]+)?
-
+ according to: https://github.com/dead-claudia/github-limits
 */
 const urlRegex =
-  /(?:https?:\/\/)?(?:www\.)?(?:to)?github\.com\/(?<org>[-_.\w\d]+)\/(?<repo>[-_.\w\d]+)\/(?:discussions|issues|pull)\/(?<number>\d+(?:#[-_.\w\d]+)?)/i; // TODO #12872 (?<!re) after text not matching
+  /(?:https?:\/\/)?(?:www\.)?(?:to)?github\.com\/(?<org>[-\w\d]+)\/(?<repo>[-_.\w\d]+)\/(?:discussions|issues|pull)\/(?<number>\d+(?:#[-_.\w\d]+)?)/i; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
