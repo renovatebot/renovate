@@ -108,40 +108,43 @@ function resolveManifest(
       ];
       break;
     case 'resource':
-      res = manifest.helmReleases.map((release) => {
-        const dep: PackageDependency<FluxManagerData> = {
-          depName: release.spec.chart.spec.chart,
-          currentValue: release.spec.chart.spec.version,
-          datasource: HelmDatasource.id,
-        };
+      if (manifest.helmReleases) {
+        res = manifest.helmReleases.map((release) => {
+          const dep: PackageDependency<FluxManagerData> = {
+            depName: release.spec.chart.spec.chart,
+            currentValue: release.spec.chart.spec.version,
+            datasource: HelmDatasource.id,
+          };
 
-        const matchingRepositories = repositories.filter(
-          (rep) =>
-            rep.kind === release.spec.chart.spec.sourceRef?.kind &&
-            rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
-            rep.metadata.namespace ===
-              (release.spec.chart.spec.sourceRef.namespace ??
-                release.metadata?.namespace)
-        );
-        if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
-        } else {
-          dep.skipReason = 'unknown-registry';
-        }
+          const matchingRepositories = repositories.filter(
+            (rep) =>
+              rep.kind === release.spec.chart.spec.sourceRef?.kind &&
+              rep.metadata.name === release.spec.chart.spec.sourceRef.name &&
+              rep.metadata.namespace ===
+                (release.spec.chart.spec.sourceRef.namespace ??
+                  release.metadata?.namespace)
+          );
+          if (matchingRepositories.length) {
+            dep.registryUrls = matchingRepositories.map(
+              (repo) => repo.spec.url
+            );
+          } else {
+            dep.skipReason = 'unknown-registry';
+          }
 
-        return dep;
-      });
-      break;
-    case 'oci':
-      res = manifest.ociRepositories.map((release) => {
-        const registryURL = release.spec.url.replace('oci://', '');
-        const dep: PackageDependency<FluxManagerData> = {
-          depName: registryURL,
-          currentValue: release.spec.ref.tag,
-          datasource: DockerDatasource.id,
-        };
-        return dep;
-      });
+          return dep;
+        });
+      } else if (manifest.ociRepositories) {
+        res = manifest.ociRepositories.map((release) => {
+          const registryURL = release.spec.url.replace('oci://', '');
+          const dep: PackageDependency<FluxManagerData> = {
+            depName: registryURL,
+            currentValue: release.spec.ref.tag,
+            datasource: DockerDatasource.id,
+          };
+          return dep;
+        });
+      }
       break;
   }
 
