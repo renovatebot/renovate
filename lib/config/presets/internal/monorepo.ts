@@ -101,7 +101,6 @@ const repoGroups = {
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
-  hapijs: 'https://github.com/hapijs',
   hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
@@ -117,7 +116,6 @@ const repoGroups = {
   kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
   linguijs: 'https://github.com/lingui/js-lingui',
-  lodash: 'https://github.com/lodash/',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
@@ -153,11 +151,9 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
-  ngrx: 'https://github.com/ngrx/',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
-  nrwl: 'https://github.com/nrwl/',
   nswag: 'https://github.com/RicoSuter/NSwag',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   'opentelemetry-dotnet':
@@ -196,7 +192,6 @@ const repoGroups = {
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
-  'semantic-release': 'https://github.com/semantic-release/',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
@@ -240,6 +235,16 @@ const repoGroups = {
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
+const orgGroups = {
+  hapijs: 'https://github.com/hapijs/',
+  lodash: 'https://github.com/lodash/',
+  ngrx: 'https://github.com/ngrx/',
+  nrwl: 'https://github.com/nrwl/',
+  'semantic-release': 'https://github.com/semantic-release/',
+};
+
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'apache-camel': '^org.apache.camel:',
@@ -258,9 +263,17 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
+    matchSourceUrls: is.array(value) ? value : [value],
+  };
+}
+
+for (const [name, value] of Object.entries(orgGroups)) {
+  presets[name] = {
+    description: `${name} monorepo`,
     matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
+
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,

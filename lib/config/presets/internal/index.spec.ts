@@ -21,7 +21,7 @@ describe('config/presets/internal/index', () => {
     );
   });
 
-  it('all default presets are present after sort', () => {
+  it('contains all default presets', () => {
     expect(internal.groups['default']).toMatchSnapshot();
   });
 

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/presets/internal/index all default presets are present after sort 1`] = `
+exports[`config/presets/internal/index contains all default presets 1`] = `
 {
   "assignAndReview": {
     "description": "Set \`{{arg0}}\` as assignee and reviewer of PRs.",
