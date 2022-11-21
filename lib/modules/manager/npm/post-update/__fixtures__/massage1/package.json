@@ -19,8 +19,8 @@
   },
   "devDependencies": {
     "@babel/core": "7.16.0",
-    "@storybook/addon-essentials": "6.3.8",
-    "@storybook/vue": "6.3.8",
+    "@storybook/addon-essentials": "6.5.13",
+    "@storybook/vue": "6.5.13",
     "@typescript-eslint/eslint-plugin": "4.18.0",
     "@typescript-eslint/parser": "4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
