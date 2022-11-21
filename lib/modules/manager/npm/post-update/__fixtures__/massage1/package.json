@@ -14,7 +14,7 @@
     "npm": ">=7.0.0"
   },
   "dependencies": {
-    "core-js": "3.6.5",
+    "core-js": "3.24.1",
     "vue": "2.6.11"
   },
   "devDependencies": {
