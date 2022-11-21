@@ -1,4 +1,5 @@
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -7,8 +8,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { systemManifestRegex } from './common';
 
-export { extractAllPackageFiles, extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
+export { extractAllPackageFiles, extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [systemManifestRegex],
@@ -22,4 +23,5 @@ export const supportedDatasources = [
   GitTagsDatasource.id,
   BitBucketTagsDatasource.id,
   HelmDatasource.id,
+  DockerDatasource.id,
 ];

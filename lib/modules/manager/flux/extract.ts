@@ -1,8 +1,10 @@
 import { loadAll } from 'js-yaml';
+import urlJoin from 'url-join';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -71,6 +73,14 @@ function readManifest(content: string, file: string): FluxManifest | null {
         }
         break;
       case 'GitRepository':
+        if (
+          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
+          resource.spec?.url
+        ) {
+          manifest.resources.push(resource);
+        }
+        break;
+      case 'OCIRepository':
         if (
           resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
           resource.spec?.url
@@ -153,9 +163,7 @@ function resolveResourceManifest(
     switch (resource.kind) {
       case 'HelmRelease': {
         const dep: PackageDependency<FluxManagerData> = {
-          depName: resource.spec.chart.spec.chart,
           currentValue: resource.spec.chart.spec.version,
-          datasource: HelmDatasource.id,
         };
 
         const matchingRepositories = helmRepositories.filter(
@@ -166,8 +174,34 @@ function resolveResourceManifest(
               (resource.spec.chart.spec.sourceRef.namespace ??
                 resource.metadata?.namespace)
         );
+
         if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          const repos = matchingRepositories.map(function (repo) {
+            if (
+              repo.spec.type === 'oci' &&
+              repo.spec.url.startsWith('oci://')
+            ) {
+              const parsedRegistryUrl = repo.spec.url.replace('oci://', '');
+              const registryUrl = urlJoin(
+                parsedRegistryUrl,
+                resource.spec.chart.spec.chart
+              );
+              return {
+                depName: registryUrl,
+                datasource: DockerDatasource.id,
+                registryUrls: registryUrl,
+              };
+            }
+            return {
+              depName: resource.spec.chart.spec.chart,
+              datasource: HelmDatasource.id,
+              registryUrls: repo.spec.url,
+            };
+          });
+
+          dep.depName = repos.map((repo) => repo.depName)[0];
+          dep.datasource = repos.map((repo) => repo.datasource)[0];
+          dep.registryUrls = repos.map((repo) => repo.registryUrls);
         } else {
           dep.skipReason = 'unknown-registry';
         }
@@ -191,6 +225,25 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           resolveGitRepositoryPerSourceTag(dep, resource.spec.url);
+        } else {
+          dep.skipReason = 'unversioned-reference';
+        }
+        deps.push(dep);
+        break;
+      }
+      case 'OCIRepository': {
+        const registryURL = resource.spec.url?.replace('oci://', '');
+        const dep: PackageDependency<FluxManagerData> = {
+          depName: registryURL,
+        };
+        if (resource.spec.ref?.digest) {
+          dep.currentDigest = resource.spec.ref.digest;
+          dep.registryUrls = [registryURL];
+          dep.datasource = DockerDatasource.id;
+        } else if (resource.spec.ref?.tag) {
+          dep.currentValue = resource.spec.ref.tag;
+          dep.registryUrls = [registryURL];
+          dep.datasource = DockerDatasource.id;
         } else {
           dep.skipReason = 'unversioned-reference';
         }

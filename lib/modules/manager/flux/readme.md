@@ -2,6 +2,7 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
 1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
+1. ['OCIRepository'](https://fluxcd.io/flux/components/source/ocirepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
@@ -9,7 +10,6 @@ This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 Extracts `helm` dependencies from `HelmRelease` resources.
 
 The `flux` manager only extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
-Renovate does not support OCI `HelmRepository` sources, those with `type: oci`.
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
@@ -25,6 +25,12 @@ Renovate updates `HelmRelease` resources coming from `GitRepository` by updating
 Renovate can update `git` references from `GitRepository` resources.
 
 The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
+
+### OCIRepository support
+
+Renovate can update `oci` references from `OCIRepository` resources.
+
+The `flux` manager only updates `OCIRepository` fields that have a `tag` or `digest` key.
 
 ### Flux system manifests support
 
