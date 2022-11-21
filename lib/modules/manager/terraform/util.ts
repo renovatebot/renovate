@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
+import type { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 
 export const keyValueExtractionRegex = regEx(
@@ -16,22 +16,22 @@ export function getTerraformDependencyType(
 ): TerraformDependencyTypes {
   switch (value) {
     case 'module': {
-      return TerraformDependencyTypes.module;
+      return 'module';
     }
     case 'provider': {
-      return TerraformDependencyTypes.provider;
+      return 'provider';
     }
     case 'required_providers': {
-      return TerraformDependencyTypes.required_providers;
+      return 'required_providers';
     }
     case 'resource': {
-      return TerraformDependencyTypes.resource;
+      return 'resource';
     }
     case 'terraform': {
-      return TerraformDependencyTypes.terraform_version;
+      return 'terraform_version';
     }
     default: {
-      return TerraformDependencyTypes.unknown;
+      return 'unknown';
     }
   }
 }

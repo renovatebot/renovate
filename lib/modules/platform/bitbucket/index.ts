@@ -1,10 +1,9 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -158,7 +157,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
-    hostType: PlatformId.Bitbucket,
+    hostType: 'bitbucket',
     url: defaults.endpoint,
   });
   config = {
@@ -232,7 +231,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -252,7 +251,7 @@ export async function getPrList(): Promise<Pr[]> {
     }
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
     config.prList = prs.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -260,7 +259,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   // TODO: types (#7154)
   // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
@@ -334,7 +333,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -361,28 +360,28 @@ export async function getBranchStatus(
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   const noOfFailures = statuses.filter(
     (status: { state: string }) =>
       status.state === 'FAILED' || status.state === 'STOPPED'
   ).length;
   if (noOfFailures) {
-    return BranchStatus.red;
+    return 'red';
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  return BranchStatus.green;
+  return 'green';
 }
 
 const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
-  SUCCESSFUL: BranchStatus.green,
-  INPROGRESS: BranchStatus.yellow,
-  FAILED: BranchStatus.red,
+  SUCCESSFUL: 'green',
+  INPROGRESS: 'yellow',
+  FAILED: 'red',
 };
 
 export async function getBranchStatusCheck(
@@ -502,7 +501,7 @@ export async function ensureIssue({
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
-    logger.debug({ title }, 'Failed to ensure Issue');
+    logger.debug(`Failed to ensure Issue with title:${title}`);
     return null;
   }
   try {
@@ -854,7 +853,7 @@ export async function updatePr({
     }
   }
 
-  if (state === PrState.Closed && pr) {
+  if (state === 'closed' && pr) {
     await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`
     );

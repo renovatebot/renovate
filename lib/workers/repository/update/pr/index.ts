@@ -16,22 +16,19 @@ import {
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
-import { Limit, incLimitedValue, isLimitReached } from '../../../global/limits';
+import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
   BranchConfig,
   BranchUpgradeConfig,
   PrBlockedBy,
 } from '../../../types';
 import { embedChangelogs } from '../../changelog';
-// import { embedChangelogs } from '../../changelog';
 import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
-import { ChangeLogError } from './changelog/types';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 
@@ -111,8 +108,8 @@ export async function ensurePr(
   ) {
     logger.debug(`Branch automerge is enabled`);
     if (
-      config.stabilityStatus !== BranchStatus.yellow &&
-      (await getBranchStatus()) === BranchStatus.yellow &&
+      config.stabilityStatus !== 'yellow' &&
+      (await getBranchStatus()) === 'yellow' &&
       is.number(config.prNotPendingHours)
     ) {
       logger.debug('Checking how long this branch has been pending');
@@ -127,7 +124,7 @@ export async function ensurePr(
         config.forcePr = true;
       }
     }
-    if (config.forcePr || (await getBranchStatus()) === BranchStatus.red) {
+    if (config.forcePr || (await getBranchStatus()) === 'red') {
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
@@ -136,7 +133,7 @@ export async function ensurePr(
   }
   if (config.prCreation === 'status-success') {
     logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) !== BranchStatus.green) {
+    if ((await getBranchStatus()) !== 'green') {
       logger.debug(`Branch status isn't green - not creating PR`);
       return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
     }
@@ -153,7 +150,7 @@ export async function ensurePr(
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) === BranchStatus.yellow) {
+    if ((await getBranchStatus()) === 'yellow') {
       logger.debug(`Branch status is yellow - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -163,8 +160,7 @@ export async function ensurePr(
       );
       if (
         !dependencyDashboardCheck &&
-        ((config.stabilityStatus &&
-          config.stabilityStatus !== BranchStatus.yellow) ||
+        ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
           (is.number(config.prNotPendingHours) &&
             elapsedHours < config.prNotPendingHours))
       ) {
@@ -237,7 +233,7 @@ export async function ensurePr(
             }
           }
         }
-      } else if (logJSON.error === ChangeLogError.MissingGithubToken) {
+      } else if (logJSON.error === 'MissingGithubToken') {
         upgrade.prBodyNotes ??= [];
         upgrade.prBodyNotes = [
           ...upgrade.prBodyNotes,
@@ -278,7 +274,7 @@ export async function ensurePr(
     }
   }
 
-  const prBody = await getPrBody(config, {
+  const prBody = getPrBody(config, {
     debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
   });
 
@@ -290,7 +286,7 @@ export async function ensurePr(
         !existingPr.hasReviewers &&
         config.automerge &&
         !config.assignAutomerge &&
-        (await getBranchStatus()) === BranchStatus.red
+        (await getBranchStatus()) === 'red'
       ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addParticipants(config, existingPr);
@@ -351,7 +347,7 @@ export async function ensurePr(
       try {
         if (
           !dependencyDashboardCheck &&
-          isLimitReached(Limit.PullRequests) &&
+          isLimitReached('PullRequests') &&
           !config.isVulnerabilityAlert
         ) {
           logger.debug('Skipping PR - limit reached');
@@ -367,7 +363,7 @@ export async function ensurePr(
           draftPR: config.draftPR,
         });
 
-        incLimitedValue(Limit.PullRequests);
+        incLimitedValue('PullRequests');
         logger.info({ pr: pr?.number, prTitle }, 'PR created');
       } catch (err) {
         logger.debug({ err }, 'Pull request creation error');
@@ -419,7 +415,7 @@ export async function ensurePr(
       if (
         config.automerge &&
         !config.assignAutomerge &&
-        (await getBranchStatus()) !== BranchStatus.red
+        (await getBranchStatus()) !== 'red'
       ) {
         logger.debug(
           `Skipping assignees and reviewers as automerge=${config.automerge}`

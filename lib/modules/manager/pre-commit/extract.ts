@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { find } from '../../../util/host-rules';
@@ -51,9 +50,9 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PlatformId.Gitea, GitlabTagsDatasource.id],
-    [PlatformId.Github, GithubTagsDatasource.id],
-    [PlatformId.Gitlab, GitlabTagsDatasource.id],
+    ['gitea', GitlabTagsDatasource.id],
+    ['github', GithubTagsDatasource.id],
+    ['gitlab', GitlabTagsDatasource.id],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
@@ -81,7 +80,7 @@ function extractDependency(
   skipReason?: SkipReason;
   currentValue?: string;
 } {
-  logger.debug({ tag }, 'Found version');
+  logger.debug(`Found version ${tag}`);
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo

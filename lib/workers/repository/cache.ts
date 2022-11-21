@@ -2,7 +2,6 @@
 
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { getCachedBranchParentShaResult } from '../../util/cache/branch';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
@@ -14,6 +13,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
+import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(
@@ -53,13 +53,12 @@ async function generateBranchCache(
   try {
     const sha = getBranchCommit(branchName) ?? null;
     const baseBranchSha = getBranchCommit(baseBranch);
+    const pristine = getCachedPristineResult(branchName);
     let prNo = null;
-    let parentSha = null;
     let isModified = false;
     let isBehindBase = false;
     let isConflicted = false;
     if (sha) {
-      parentSha = getCachedBranchParentShaResult(branchName, sha);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
@@ -82,7 +81,7 @@ async function generateBranchCache(
       isBehindBase,
       isConflicted,
       isModified,
-      parentSha,
+      pristine,
       prNo,
       sha,
       upgrades,

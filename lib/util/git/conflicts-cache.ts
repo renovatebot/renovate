@@ -1,5 +1,5 @@
-import { logger } from '../../../logger';
-import { getCache } from '../repository';
+import { logger } from '../../logger';
+import { getCache } from '../cache/repository';
 
 export function getCachedConflictResult(
   branchName: string,
@@ -8,10 +8,6 @@ export function getCachedConflictResult(
   baseBranchSha: string
 ): boolean | null {
   const cache = getCache();
-  if (cache.gitConflicts) {
-    delete cache.gitConflicts;
-  }
-
   const branch = cache?.branches?.find((br) => br.branchName === branchName);
   if (
     branch &&
