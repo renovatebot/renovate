@@ -7542,10 +7542,10 @@ node-gyp@^9.0.0, node-gyp@^9.1.0:
     tar "^6.1.2"
     which "^2.0.2"
 
-node-html-parser@6.1.1:
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.1.tgz#7f38f4427fafc242a22135d9db80c1455e837467"
-  integrity sha512-eYYblUeoMg0nR6cYGM4GRb1XncNa9FXEftuKAU1qyMIr6rXVtNyUKduvzZtkqFqSHVByq2lLjC7WO8tz7VDmnA==
+node-html-parser@6.1.3:
+  version "6.1.3"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.3.tgz#207d5c9b447113bb265871991c276c90c856f971"
+  integrity sha512-bYvL774OmSBRShzYv/8JU2a/eKbBXwi9jAtSHOT40gF3YVKwMLFeA08vZFMS4R7A/C+oZdiHKw0pmaVEEdtUqw==
   dependencies:
     css-select "^5.1.0"
     he "1.2.0"
