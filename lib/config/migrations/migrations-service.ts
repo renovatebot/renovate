@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
+import { MigrationByValueType } from './base/migration-by-value-type';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration';
@@ -144,14 +145,24 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = MigrationsService.#getMigration(migrations, key);
+      const migrationByPropertyName = MigrationsService.#getMigration(
+        migrations,
+        key
+      );
 
-      if (migration) {
-        migration.run(value, key);
+      if (migrationByPropertyName) {
+        migrationByPropertyName.run(value, key);
 
-        if (migration.deprecated) {
+        if (migrationByPropertyName.deprecated) {
           delete migratedConfig[key];
         }
+      } else {
+        const migrationByValueType = new MigrationByValueType(
+          key,
+          originalConfig,
+          migratedConfig
+        );
+        migrationByValueType.run(value);
       }
     }
 
