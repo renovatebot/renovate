@@ -10,4 +10,4 @@ export const AzurePrVote = {
   WaitingForAuthor: -5,
   ApprovedWithSuggestions: 5,
   Approved: 10,
-};
+} as const;

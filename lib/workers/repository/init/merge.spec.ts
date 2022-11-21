@@ -227,7 +227,7 @@ describe('workers/repository/init/merge', () => {
         automerge: true,
         packageRules: [
           {
-            matchSourceUrlPrefixes: ['https://github.com/facebook/react'],
+            matchSourceUrls: ['https://github.com/facebook/react'],
           },
         ],
       });

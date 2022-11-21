@@ -7,7 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -266,6 +266,7 @@ describe('modules/platform/github/index', () => {
     scope: httpMock.Scope,
     repository: string,
     forkExisted: boolean,
+    forkResult = 200,
     forkDefaulBranch = 'master'
   ): void {
     scope
@@ -293,7 +294,7 @@ describe('modules/platform/github/index', () => {
       // getForks
       .get(`/repos/${repository}/forks?per_page=100`)
       .reply(
-        200,
+        forkResult,
         forkExisted
           ? [
               {
@@ -335,8 +336,32 @@ describe('modules/platform/github/index', () => {
       const repo = 'some/repo';
       const branch = 'master';
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, repo, false, branch);
+      forkInitRepoMock(scope, repo, false, 200, branch);
       scope.get('/user').reply(404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 404', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 404);
+      await expect(
+        github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        })
+      ).rejects.toThrow(REPOSITORY_CANNOT_FORK);
+    });
+
+    it('throws when listing forks with 500', async () => {
+      const repo = 'some/repo';
+      const scope = httpMock.scope(githubApiHost);
+      forkInitRepoMock(scope, repo, false, 500);
       await expect(
         github.initRepo({
           repository: 'some/repo',
@@ -378,7 +403,7 @@ describe('modules/platform/github/index', () => {
 
     it('detects fork default branch mismatch', async () => {
       const scope = httpMock.scope(githubApiHost);
-      forkInitRepoMock(scope, 'some/repo', true, 'not_master');
+      forkInitRepoMock(scope, 'some/repo', true, 200, 'not_master');
       scope.get('/user').reply(200, {
         login: 'forked',
       });
@@ -967,7 +992,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should pass through failed', async () => {
@@ -983,7 +1008,7 @@ describe('modules/platform/github/index', () => {
 
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('defaults to pending', async () => {
@@ -998,7 +1023,7 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should fail if a check run has failed', async () => {
@@ -1030,7 +1055,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should succeed if no status and all passed check runs', async () => {
@@ -1068,7 +1093,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should fail if a check run is pending', async () => {
@@ -1099,7 +1124,7 @@ describe('modules/platform/github/index', () => {
         });
       await github.initRepo({ repository: 'some/repo' });
       const res = await github.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
   });
 
@@ -1130,7 +1155,7 @@ describe('modules/platform/github/index', () => {
         'renovate/future_branch',
         'context-2'
       );
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('returns null', async () => {
@@ -1180,7 +1205,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.yellow,
+          state: 'yellow',
           url: 'some-url',
         })
       ).toResolve();
@@ -1224,7 +1249,7 @@ describe('modules/platform/github/index', () => {
           branchName: 'some-branch',
           context: 'some-context',
           description: 'some-description',
-          state: BranchStatus.green,
+          state: 'green',
           url: 'some-url',
         })
       ).toResolve();

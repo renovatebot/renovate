@@ -22,7 +22,6 @@ import {
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
-import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
@@ -41,7 +40,7 @@ import {
 } from '../../../../util/merge-confidence';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
-import { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
+import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
 import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
@@ -124,7 +123,7 @@ export async function processBranch(
       return {
         branchExists: false,
         prNo: existingPr.number,
-        result: BranchResult.AlreadyExisted,
+        result: 'already-existed',
       };
     }
     // istanbul ignore if
@@ -136,7 +135,7 @@ export async function processBranch(
         return {
           branchExists,
           prNo: branchPr?.number,
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
         };
       }
     }
@@ -150,7 +149,7 @@ export async function processBranch(
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: BranchResult.BranchLimitReached,
+        result: 'branch-limit-reached',
       };
     }
     if (
@@ -162,7 +161,7 @@ export async function processBranch(
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: BranchResult.CommitLimitReached,
+        result: 'commit-limit-reached',
       };
     }
     if (
@@ -173,7 +172,7 @@ export async function processBranch(
       return {
         branchExists: false,
         prNo: branchPr?.number,
-        result: BranchResult.Pending,
+        result: 'pending',
       };
     }
     if (branchExists) {
@@ -192,7 +191,7 @@ export async function processBranch(
           return {
             branchExists: true,
             prNo: branchPr?.number,
-            result: BranchResult.NoWork,
+            result: 'no-work',
           };
         }
       }
@@ -242,7 +241,7 @@ export async function processBranch(
             return {
               branchExists,
               prNo: branchPr.number,
-              result: BranchResult.PrEdited,
+              result: 'pr-edited',
             };
           }
         }
@@ -255,7 +254,7 @@ export async function processBranch(
           logger.debug('Branch has been edited but found no PR - skipping');
           return {
             branchExists,
-            result: BranchResult.PrEdited,
+            result: 'pr-edited',
           };
         }
         const branchSha = getBranchCommit(config.branchName);
@@ -272,7 +271,7 @@ export async function processBranch(
           );
           return {
             branchExists,
-            result: BranchResult.PrEdited,
+            result: 'pr-edited',
           };
         }
       }
@@ -286,7 +285,7 @@ export async function processBranch(
         return {
           branchExists,
           prNo: branchPr?.number,
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
         };
       }
       if (config.updateNotScheduled === false && !config.rebaseRequested) {
@@ -294,7 +293,7 @@ export async function processBranch(
         return {
           branchExists,
           prNo: branchPr?.number,
-          result: BranchResult.UpdateNotScheduled,
+          result: 'update-not-scheduled',
         };
       }
       // istanbul ignore if
@@ -302,7 +301,7 @@ export async function processBranch(
         logger.debug('Skipping PR creation out of schedule');
         return {
           branchExists,
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
         };
       }
       logger.debug(
@@ -319,7 +318,7 @@ export async function processBranch(
     ) {
       // Only set a stability status check if one or more of the updates contain
       // both a stabilityDays setting and a releaseTimestamp
-      config.stabilityStatus = BranchStatus.green;
+      config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
         if (is.number(upgrade.stabilityDays) && upgrade.releaseTimestamp) {
@@ -333,7 +332,7 @@ export async function processBranch(
               },
               'Update has not passed stability days'
             );
-            config.stabilityStatus = BranchStatus.yellow;
+            config.stabilityStatus = 'yellow';
             continue;
           }
         }
@@ -352,22 +351,22 @@ export async function processBranch(
             updateType
           );
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
-            config.confidenceStatus = BranchStatus.green;
+            config.confidenceStatus = 'green';
           } else {
             logger.debug(
               { depName, confidence, minimumConfidence },
               'Update does not meet minimum confidence scores'
             );
-            config.confidenceStatus = BranchStatus.yellow;
+            config.confidenceStatus = 'yellow';
             continue;
           }
         }
       }
-      // Don't create a branch if we know it will be status ProcessBranchResult.Pending
+      // Don't create a branch if we know it will be status 'pending'
       if (
         !dependencyDashboardCheck &&
         !branchExists &&
-        config.stabilityStatus === BranchStatus.yellow &&
+        config.stabilityStatus === 'yellow' &&
         ['not-pending', 'status-success'].includes(config.prCreation!)
       ) {
         logger.debug(
@@ -376,7 +375,7 @@ export async function processBranch(
         return {
           branchExists,
           prNo: branchPr?.number,
-          result: BranchResult.Pending,
+          result: 'pending',
         };
       }
     }
@@ -407,7 +406,7 @@ export async function processBranch(
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       };
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
@@ -541,7 +540,7 @@ export async function processBranch(
       return {
         branchExists,
         prNo: branchPr?.number,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       };
     }
     if (commitSha) {
@@ -553,9 +552,11 @@ export async function processBranch(
     await setStability(config);
     await setConfidence(config);
 
-    // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
+    // new commit means status check are pretty sure pending but maybe not reported yet
+    // if PR has not been created + new commit + prCreation !== immediate skip
     // but do not break when there are artifact errors
     if (
+      !branchPr &&
       !config.artifactErrors?.length &&
       !userRebaseRequested &&
       commitSha &&
@@ -565,14 +566,15 @@ export async function processBranch(
       return {
         branchExists: true,
         updatesVerified,
-        prNo: branchPr?.number,
-        result: BranchResult.Pending,
+        result: 'pending',
         commitSha,
       };
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (branchExists || config.ignoreTests) {
+    // skip if we have a non-immediate pr and there is an existing PR,
+    // we want to update the PR and skip the Auto merge since status checks aren't done yet
+    if (!config.artifactErrors?.length && (!commitSha || config.ignoreTests)) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -582,7 +584,7 @@ export async function processBranch(
           await deleteBranchSilently(config.branchName);
         }
         logger.debug('Branch is automerged - returning');
-        return { branchExists: false, result: BranchResult.Automerged };
+        return { branchExists: false, result: 'automerged' };
       }
       if (mergeStatus === 'off schedule') {
         logger.debug(
@@ -590,7 +592,7 @@ export async function processBranch(
         );
         return {
           branchExists,
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           commitSha,
         };
       }
@@ -672,7 +674,7 @@ export async function processBranch(
         branchExists: true,
         updatesVerified,
         prNo: branchPr?.number,
-        result: BranchResult.Error,
+        result: 'error',
         commitSha,
       };
     } else if (
@@ -696,7 +698,7 @@ export async function processBranch(
     return {
       branchExists,
       prNo: branchPr?.number,
-      result: BranchResult.Error,
+      result: 'error',
       commitSha,
     };
   }
@@ -716,7 +718,7 @@ export async function processBranch(
         return {
           branchExists,
           prBlockedBy,
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           commitSha,
         };
       }
@@ -725,7 +727,7 @@ export async function processBranch(
         return {
           branchExists,
           prBlockedBy,
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           commitSha,
         };
       }
@@ -733,7 +735,7 @@ export async function processBranch(
         return {
           branchExists,
           prBlockedBy,
-          result: BranchResult.Pending,
+          result: 'pending',
           commitSha,
         };
       }
@@ -741,7 +743,7 @@ export async function processBranch(
         return {
           branchExists,
           prBlockedBy,
-          result: BranchResult.Done,
+          result: 'done',
           commitSha,
         };
       }
@@ -749,7 +751,7 @@ export async function processBranch(
         return {
           branchExists,
           prBlockedBy,
-          result: BranchResult.Error,
+          result: 'error',
           commitSha,
         };
       }
@@ -757,7 +759,7 @@ export async function processBranch(
       return {
         branchExists,
         prBlockedBy,
-        result: BranchResult.Error,
+        result: 'error',
         commitSha,
       };
     }
@@ -811,13 +813,17 @@ export async function processBranch(
         }
       } else if (config.automerge) {
         logger.debug('PR is configured for automerge');
-        const prAutomergeResult = await checkAutoMerge(pr, config);
-        if (prAutomergeResult?.automerged) {
-          return {
-            branchExists,
-            result: BranchResult.Automerged,
-            commitSha,
-          };
+        // skip automerge if there is a new commit since status checks aren't done yet
+        if (!commitSha || config.ignoreTests) {
+          logger.debug('checking auto-merge');
+          const prAutomergeResult = await checkAutoMerge(pr, config);
+          if (prAutomergeResult?.automerged) {
+            return {
+              branchExists,
+              result: 'automerged',
+              commitSha,
+            };
+          }
         }
       } else {
         logger.debug('PR is not configured for automerge');
@@ -839,7 +845,7 @@ export async function processBranch(
       branchExists: true,
       updatesVerified,
       prNo: branchPr?.number,
-      result: BranchResult.PrCreated,
+      result: 'pr-created',
       commitSha,
     };
   }
@@ -847,7 +853,7 @@ export async function processBranch(
     branchExists,
     updatesVerified,
     prNo: branchPr?.number,
-    result: BranchResult.Done,
+    result: 'done',
     commitSha,
   };
 }

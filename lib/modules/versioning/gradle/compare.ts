@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum TokenType {
-  Number = 1,
-  String,
-}
+export const TokenType = {
+  Number: 1,
+  String: 2,
+};
 
 type Token = {
-  type: TokenType;
+  type: number;
   val: string | number;
 };
 
@@ -95,7 +94,7 @@ export const QualifierRank = {
   GA: 4,
   Release: 5,
   SP: 6,
-};
+} as const;
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();
