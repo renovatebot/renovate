@@ -15,6 +15,9 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowCustomCrateRegistries
 
+Set to `true` to allow the use of "alternative registries" in Cargo without configuring `hostRules` and `registryAliases`.
+Not needed for "alternative registries" that support the sparse protocol.
+
 ## allowPlugins
 
 ## allowPostUpgradeCommandTemplating
