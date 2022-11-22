@@ -47,11 +47,7 @@ export async function updateArtifacts({
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
-    if (
-      !updatedDeps.some(
-        (dep) => dep.depName === 'org.apache.maven.wrapper:maven-wrapper'
-      )
-    ) {
+    if (!updatedDeps.some((dep) => dep.depName === 'maven-wrapper')) {
       logger.info(
         'Maven wrapper version not updated - skipping Artifacts update'
       );

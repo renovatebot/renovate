@@ -72,7 +72,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: {
         currentValue: '2.0.0',
         newValue: '3.3.1',
@@ -100,7 +100,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { currentValue: '3.3.1', newValue: '3.3.1' },
     });
 
@@ -122,7 +122,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
     expect(updatedDeps).toEqual([]);
@@ -135,7 +135,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const result = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { currentValue: '3.3.0', newValue: '3.3.1' },
     });
     expect(result).toEqual([
@@ -188,7 +188,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { newValue: '3.3.1' },
     });
     expect(updatedDeps).toBeNull();
@@ -201,7 +201,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
 
@@ -222,7 +222,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
-      updatedDeps: [{ depName: 'org.apache.maven.wrapper:maven-wrapper' }],
+      updatedDeps: [{ depName: 'maven-wrapper' }],
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
 
