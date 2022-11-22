@@ -39,7 +39,7 @@ Perhaps it should be possible in the future to integrate a platform which is not
   A new method which allows to register virtual branches (not really exists) including commitSHA and whether they have been "modified" from another user. (see isBranchModified below)
 
 - isBranchModified()
-  Checks if the last uploader was different to the renovate user and store this into "branchIsModified[branchname]". For Gerrit we rely on the above pre-registration in initRepo().
+  Checks if the last uploader was different to the Renovate user and store this into "branchIsModified[branchname]". For Gerrit we rely on the above pre-registration in `initRepo()`.
 
 - isBranchConflicted()
   This on tries to merge "origin/${branchName}" into baseBranch and check for conflicts. From initRepo() we fetch all open gerrit-changes to the local branch-name "origin/${branchName}" to let this work as expected.
