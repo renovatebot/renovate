@@ -21,7 +21,7 @@ export interface TektonBundle {
   params: TektonResolverParamsField[];
 }
 
-interface TektonResolverParamsField {
+export interface TektonResolverParamsField {
   name: string;
   value: string;
 }
