@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import { parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -56,7 +57,10 @@ export class RubyGemsDatasource extends Datasource {
         registryUrl,
       });
     } catch (error) {
-      if (error.message == `${registryUrl} is not supported`) {
+      if (
+        error.message == `${registryUrl} is not supported` &&
+        parseUrl(registryUrl)?.hostname !== 'rubygems.org'
+      ) {
         return this.internalRubyGemsDatasource.getReleases({
           packageName,
           registryUrl,

@@ -59,10 +59,6 @@ describe('modules/datasource/rubygems/index', () => {
         .scope('https://rubygems.org')
         .get('/versions')
         .reply(404, rubygemsOrgVersions);
-      httpMock
-        .scope('https://rubygems.org')
-        .get('/api/v1/gems/rails.json')
-        .reply(200);
       const res = await getPkgReleases(newparams);
       expect(res).toBeNull();
     });
