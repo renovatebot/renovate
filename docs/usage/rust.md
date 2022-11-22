@@ -33,12 +33,12 @@ Both of these are currently only possible when running Renovate self-hosted.
 If dependencies are available via a "sparse index", you may use
 `registryAliases` to let Renovate accesses the dependencies via the `sparse`
 protocol. If needed, set the authentication details with the `hostRules` config
-option. `crates.io` index access will still be via Renovates shared clone of the
-public Git index.
+option. `crates.io` index access will still be via Renovates shared clone of
+the public Git index.
 
 For instance with a username and password:
 
-```
+```json
 "hostRules": [
     {
       "hostType": "cargo-git",
@@ -57,7 +57,7 @@ For instance with a username and password:
 
 With a bearer token:
 
-```
+```json
 "hostRules": [
     {
       "hostType": "cargo-git",
