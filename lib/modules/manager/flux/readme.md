@@ -31,7 +31,7 @@ The `flux` manager only updates `GitRepository` fields that have a `tag` or `com
 
 Renovate can update `oci` references from `OCIRepository` resources.
 
-The `flux` manager only updates `OCIRepository` fields that have a `tag` or `digest` key.
+The `flux` manager only updates `OCIRepository` fields that have a `digest` or `tag` key. If both exist `digest` takes precedence.
 
 ### Flux system manifests support
 
