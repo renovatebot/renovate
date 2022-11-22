@@ -179,7 +179,7 @@ export async function exec(
       await removeDockerContainer(docker.image, dockerChildPrefix);
     }
     logger.debug({ command: rawCmd }, 'Executing command');
-    logger.debug({ commandOptions: rawOptions }, 'Command options');
+    logger.trace({ commandOptions: rawOptions }, 'Command options');
     try {
       res = await rawExec(rawCmd, rawOptions);
     } catch (err) {
