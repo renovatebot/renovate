@@ -23,6 +23,9 @@ export const GITLAB_API_USING_HOST_TYPES = [
   'gitlab-changelog',
 ];
 
-export const AZURE_API_USING_HOST_TYPES = ['PlatformId.Azure', 'azure-changelog'];
+export const AZURE_API_USING_HOST_TYPES = [
+  'PlatformId.Azure',
+  'azure-changelog',
+];
 
 export const BITBUCKET_API_USING_HOST_TYPES = ['bitbucket', 'bitbucket-tags'];
