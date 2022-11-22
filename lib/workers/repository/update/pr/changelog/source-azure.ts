@@ -1,5 +1,4 @@
 import URL from 'url';
-import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
@@ -12,7 +11,7 @@ import { getTags } from './azure';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
+import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
   endpoint: string,
@@ -50,7 +49,7 @@ export async function getChangeLogJSON(
   const baseUrl = `${protocol!}//${host!}/${organization}/${projectName}/`;
   const url = sourceUrl;
   const { token } = hostRules.find({
-    hostType: PlatformId.Azure,
+    hostType: 'azure',
     url,
   });
   // istanbul ignore if
@@ -60,7 +59,7 @@ export async function getChangeLogJSON(
         { manager, depName, sourceUrl },
         'No Azure DevOps token has been configured. Skipping release notes retrieval'
       );
-      return { error: ChangeLogError.MissingAzureToken };
+      return { error: 'MissingAzureToken' };
     }
     logger.debug(
       { manager, depName, sourceUrl },

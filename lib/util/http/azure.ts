@@ -1,11 +1,10 @@
-import { PlatformId } from '../../constants';
 import type { AzureBodyPaginated } from '../../types/platform/azure';
 import type { HttpOptions, HttpResponse } from './types';
 import { Http } from '.';
 
 export class AzureHttp extends Http<HttpOptions> {
   http: any;
-  constructor(type: string = PlatformId.Azure, options?: HttpOptions) {
+  constructor(type = 'azure', options?: HttpOptions) {
     super(type, options);
   }
 

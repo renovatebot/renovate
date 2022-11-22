@@ -24,7 +24,7 @@ export const GITLAB_API_USING_HOST_TYPES = [
 ];
 
 export const AZURE_API_USING_HOST_TYPES = [
-  'PlatformId.Azure',
+  'azure',
   'azure-changelog',
 ];
 

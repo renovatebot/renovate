@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../../../test/http-mock';
-import { PlatformId } from '../../../../../constants';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -39,7 +38,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Azure,
+        hostType: 'azure',
         matchHost,
         token: 'abc',
       });
