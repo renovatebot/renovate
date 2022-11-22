@@ -604,8 +604,6 @@ describe('modules/manager/flux/extract', () => {
         'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
         'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
         'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
-        'lib/modules/manager/flux/__fixtures__/ociHelmRelease.yaml',
-        'lib/modules/manager/flux/__fixtures__/ociHelmSource.yaml',
         'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
       ]);
 
