@@ -5,7 +5,6 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
-import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import type { Platform } from '../types';
 
@@ -1263,7 +1262,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toMatchSnapshot();
         });
@@ -1283,7 +1282,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PrState.Closed,
+              state: 'closed',
             })
           ).toBeNull();
         });
@@ -1443,7 +1442,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Closed,
+              state: 'closed',
             })
           ).toResolve();
         });
@@ -1469,7 +1468,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toResolve();
         });
@@ -1558,7 +1557,7 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              state: PrState.Open,
+              state: 'open',
             })
           ).toResolve();
         });
@@ -1750,9 +1749,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
-            BranchStatus.green
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
         });
 
         it('should be pending', async () => {
@@ -1767,9 +1764,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
-            BranchStatus.yellow
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
 
           scope
             .get(
@@ -1781,9 +1776,7 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
-            BranchStatus.yellow
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
         });
 
         it('should be failed', async () => {
@@ -1798,9 +1791,7 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
-            BranchStatus.red
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
 
           scope
             .get(
@@ -1808,9 +1799,7 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toEqual(
-            BranchStatus.red
-          );
+          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
         });
 
         it('throws repository-changed', async () => {
@@ -1842,7 +1831,7 @@ Followed by some information.
 
           expect(
             await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).toEqual(BranchStatus.green);
+          ).toBe('green');
         });
 
         it('should be pending', async () => {
@@ -1864,7 +1853,7 @@ Followed by some information.
 
           expect(
             await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).toEqual(BranchStatus.yellow);
+          ).toBe('yellow');
         });
 
         it('should be failure', async () => {
@@ -1886,7 +1875,7 @@ Followed by some information.
 
           expect(
             await bitbucket.getBranchStatusCheck('somebranch', 'context-2')
-          ).toEqual(BranchStatus.red);
+          ).toBe('red');
         });
 
         it('should be null', async () => {
@@ -1942,7 +1931,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-2',
               description: null as any,
-              state: BranchStatus.green,
+              state: 'green',
             })
           ).toResolve();
         });
@@ -1972,7 +1961,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-2',
               description: null as any,
-              state: BranchStatus.red,
+              state: 'red',
             })
           ).toResolve();
         });
@@ -2002,7 +1991,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-2',
               description: null as any,
-              state: BranchStatus.red,
+              state: 'red',
             })
           ).toResolve();
         });
@@ -2032,7 +2021,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-2',
               description: null as any,
-              state: BranchStatus.yellow,
+              state: 'yellow',
             })
           ).toResolve();
         });
@@ -2057,7 +2046,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-2',
               description: null as any,
-              state: BranchStatus.green,
+              state: 'green',
             })
           ).toResolve();
         });
@@ -2078,7 +2067,7 @@ Followed by some information.
               branchName: 'somebranch',
               context: 'context-1',
               description: null as any,
-              state: BranchStatus.green,
+              state: 'green',
             })
           ).toResolve();
         });

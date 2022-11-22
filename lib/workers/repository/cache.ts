@@ -13,7 +13,7 @@ import {
   isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
-import { getCachedBranchParentShaResult } from '../../util/git/parent-sha-cache';
+import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import { getPrCache } from './update/pr/set-pr-cache';
 
@@ -54,13 +54,12 @@ async function generateBranchCache(
   try {
     const sha = getBranchCommit(branchName) ?? null;
     const baseBranchSha = getBranchCommit(baseBranch);
+    const pristine = getCachedPristineResult(branchName);
     let prNo = null;
-    let parentSha = null;
     let isModified = false;
     let isBehindBase = false;
     let isConflicted = false;
     if (sha) {
-      parentSha = getCachedBranchParentShaResult(branchName, sha);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
@@ -84,7 +83,7 @@ async function generateBranchCache(
       isBehindBase,
       isConflicted,
       isModified,
-      parentSha,
+      pristine,
       prNo,
       sha,
       upgrades,
