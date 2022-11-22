@@ -1,7 +1,6 @@
 import { getConfig, partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { prAlreadyExisted } from './check-existing';
 
@@ -35,7 +34,7 @@ describe('workers/repository/update/branch/check-existing', () => {
       platform.findPr.mockResolvedValueOnce({ number: 12 } as never);
       platform.getPr.mockResolvedValueOnce({
         number: 12,
-        state: PrState.Closed,
+        state: 'closed',
       } as never);
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
       expect(platform.findPr).toHaveBeenCalledTimes(1);
@@ -48,7 +47,7 @@ describe('workers/repository/update/branch/check-existing', () => {
       platform.getPr.mockResolvedValueOnce(
         partial<Pr>({
           number: 12,
-          state: PrState.Closed,
+          state: 'closed',
         })
       );
       expect(await prAlreadyExisted(config)).toEqual({ number: 12 });
