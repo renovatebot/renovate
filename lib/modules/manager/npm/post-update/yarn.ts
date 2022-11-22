@@ -99,7 +99,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades),
+      await getNodeToolConstraint(config, upgrades, lockFileDir),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate

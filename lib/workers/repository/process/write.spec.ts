@@ -15,12 +15,13 @@ import type {
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
-import { Limit, isLimitReached } from '../../global/limits';
-import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../../types';
+import { isLimitReached } from '../../global/limits';
+import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import * as _branchWorker from '../update/branch';
 import * as _limits from './limits';
 import {
   canSkipBranchUpdateCheck,
+  generateBranchFingerprintConfig,
   syncBranchState,
   writeUpdates,
 } from './write';
@@ -85,19 +86,19 @@ describe('workers/repository/process/write', () => {
       git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.PrCreated,
+        result: 'pr-created',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.AlreadyExisted,
+        result: 'already-existed',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.Automerged,
+        result: 'automerged',
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: false,
-        result: BranchResult.Automerged,
+        result: 'automerged',
       });
       GlobalConfig.set({ dryRun: 'full' });
       const res = await writeUpdates(config, branches);
@@ -114,15 +115,15 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValueOnce({});
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.PrCreated,
+        result: 'pr-created',
       });
       git.branchExists.mockReturnValueOnce(false).mockReturnValueOnce(true);
       limits.getBranchesRemaining.mockResolvedValueOnce(1);
-      expect(isLimitReached(Limit.Branches)).toBeFalse();
+      expect(isLimitReached('Branches')).toBeFalse();
       GlobalConfig.set({ dryRun: 'full' });
       config.baseBranches = ['main', 'dev'];
       await writeUpdates(config, branches);
-      expect(isLimitReached(Limit.Branches)).toBeTrue();
+      expect(isLimitReached('Branches')).toBeTrue();
       expect(addMeta).toHaveBeenCalledWith({
         baseBranch: 'main',
         branch: branchName,
@@ -157,7 +158,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       });
       expect(await writeUpdates(config, branches)).toBe('done');
     });
@@ -185,7 +186,8 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.Done,
+        updatesVerified: true,
+        result: 'done',
         commitSha: 'some-value',
       });
       const branch = branches[0];
@@ -197,7 +199,7 @@ describe('workers/repository/process/write', () => {
         ),
       ].sort();
       const branchFingerprint = fingerprint({
-        branch,
+        branchFingerprintConfig: generateBranchFingerprintConfig(branch),
         managers,
       });
       expect(await writeUpdates(config, branches)).toBe('done');
@@ -241,7 +243,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.Done,
+        result: 'done',
       });
       git.branchExists.mockReturnValue(true);
       config.repositoryCache = 'enabled';
@@ -285,7 +287,7 @@ describe('workers/repository/process/write', () => {
       });
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.Done,
+        result: 'done',
       });
       expect(await writeUpdates(config, branches)).toBe('done');
       expect(branch.branchFingerprint).toBe(branchFingerprint);
@@ -308,7 +310,7 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
-        result: BranchResult.NoWork,
+        result: 'no-work',
       });
       git.getBranchCommit
         .mockReturnValueOnce('sha')
@@ -340,7 +342,6 @@ describe('workers/repository/process/write', () => {
       upgrades: [],
       automerge: false,
       prNo: null,
-      parentSha: null,
     };
 
     it('returns false if no cache', () => {
@@ -387,7 +388,7 @@ describe('workers/repository/process/write', () => {
       });
     });
 
-    it('when base branch name is different updates it and invalidates isModified value', () => {
+    it('when base branch name is different updates it and invalidates related cache', () => {
       const repoCacheObj: RepoCacheData = {
         branches: [
           {
@@ -396,10 +397,10 @@ describe('workers/repository/process/write', () => {
             sha: 'sha',
             baseBranchSha: 'base_sha',
             isModified: true,
+            pristine: false,
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -411,10 +412,10 @@ describe('workers/repository/process/write', () => {
         sha: 'sha',
         baseBranch: 'new_base_branch',
         baseBranchSha: 'base_sha',
+        pristine: false,
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -427,10 +428,10 @@ describe('workers/repository/process/write', () => {
             baseBranch: 'base_branch',
             baseBranchSha: 'base_sha',
             isBehindBase: true,
+            pristine: false,
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -443,9 +444,9 @@ describe('workers/repository/process/write', () => {
         baseBranch: 'base_branch',
         baseBranchSha: 'new_base_sha',
         upgrades: [],
+        pristine: false,
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -459,12 +460,12 @@ describe('workers/repository/process/write', () => {
             baseBranchSha: 'base_sha',
             isBehindBase: true,
             isModified: true,
+            pristine: true,
             isConflicted: true,
             branchFingerprint: '123',
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
           },
         ],
       };
@@ -477,9 +478,9 @@ describe('workers/repository/process/write', () => {
         baseBranch: 'base_branch',
         baseBranchSha: 'base_sha',
         upgrades: [],
+        pristine: false,
         automerge: false,
         prNo: null,
-        parentSha: null,
       });
     });
 
@@ -498,7 +499,7 @@ describe('workers/repository/process/write', () => {
             upgrades: [],
             automerge: false,
             prNo: null,
-            parentSha: null,
+            pristine: true,
           },
         ],
       };
@@ -517,7 +518,7 @@ describe('workers/repository/process/write', () => {
         upgrades: [],
         automerge: false,
         prNo: null,
-        parentSha: null,
+        pristine: true,
       });
     });
   });

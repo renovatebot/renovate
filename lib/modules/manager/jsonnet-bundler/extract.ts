@@ -20,7 +20,7 @@ export function extractPackageFile(
   try {
     jsonnetFile = JSON.parse(content) as JsonnetFile;
   } catch (err) {
-    logger.debug({ packageFile }, 'Invalid JSON');
+    logger.debug(`Invalid JSON ${packageFile}`);
     return null;
   }
 
@@ -44,7 +44,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   }
 
   const gitRemote = parseUrl(dependency.source.git.remote);
-  if (gitRemote === null) {
+  if (!gitRemote) {
     logger.debug({ dependency }, 'Invalid Git remote URL');
     return null;
   }

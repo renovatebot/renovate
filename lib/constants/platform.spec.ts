@@ -12,7 +12,6 @@ import {
   BITBUCKET_API_USING_HOST_TYPES,
   GITHUB_API_USING_HOST_TYPES,
   GITLAB_API_USING_HOST_TYPES,
-  PlatformId,
 } from './platforms';
 
 describe('constants/platform', () => {
@@ -29,11 +28,11 @@ describe('constants/platform', () => {
     expect(
       GITLAB_API_USING_HOST_TYPES.includes(GITLAB_CHANGELOG_ID)
     ).toBeTrue();
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeTrue();
+    expect(GITLAB_API_USING_HOST_TYPES.includes('gitlab')).toBeTrue();
   });
 
   it('should be not part of the GITLAB_API_USING_HOST_TYPES ', () => {
-    expect(GITLAB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeFalse();
+    expect(GITLAB_API_USING_HOST_TYPES.includes('github')).toBeFalse();
   });
 
   it('should be part of the GITHUB_API_USING_HOST_TYPES ', () => {
@@ -50,19 +49,17 @@ describe('constants/platform', () => {
     expect(
       GITHUB_API_USING_HOST_TYPES.includes(GITHUB_CHANGELOG_ID)
     ).toBeTrue();
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Github)).toBeTrue();
+    expect(GITHUB_API_USING_HOST_TYPES.includes('github')).toBeTrue();
   });
 
   it('should be not part of the GITHUB_API_USING_HOST_TYPES ', () => {
-    expect(GITHUB_API_USING_HOST_TYPES.includes(PlatformId.Gitlab)).toBeFalse();
+    expect(GITHUB_API_USING_HOST_TYPES.includes('gitlab')).toBeFalse();
   });
 
   it('should be part of the BITBUCKET_API_USING_HOST_TYPES ', () => {
     expect(
       BITBUCKET_API_USING_HOST_TYPES.includes(BitBucketTagsDatasource.id)
     ).toBeTrue();
-    expect(
-      BITBUCKET_API_USING_HOST_TYPES.includes(PlatformId.Bitbucket)
-    ).toBeTrue();
+    expect(BITBUCKET_API_USING_HOST_TYPES.includes('bitbucket')).toBeTrue();
   });
 });

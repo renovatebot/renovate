@@ -21,6 +21,10 @@ describe('config/presets/internal/index', () => {
     );
   });
 
+  it('contains all default presets', () => {
+    expect(internal.groups['default']).toMatchSnapshot();
+  });
+
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
     for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
       const preset = `${groupName}:${presetName}`;

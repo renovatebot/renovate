@@ -3,7 +3,6 @@ import { Fixtures } from '../../../test/fixtures';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';
 import { EditorConfig } from './editor-config';
-import { IndentationType } from './indentation-type';
 
 // use real fs to read wasm files for `@one-ini/wasm`
 jest.mock('fs', () => ({
@@ -48,15 +47,19 @@ describe('util/json-writer/editor-config', () => {
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
     expect(format.indentationSize).toBe(6);
-    expect(format.indentationType).toBe(IndentationType.Space);
+    expect(format.indentationType).toBe('space');
   });
 
-  // temporary ignoring error https://github.com/renovatebot/renovate/issues/18540
-  it('should temporary give undefined until its fixed on the library', async () => {
+  it('should return undefined in case of exception', async () => {
     expect.assertions(2);
     Fixtures.mock({
-      '.editorconfig': Fixtures.get('.customer_file'),
+      '.editorconfig': Fixtures.get('.global_editorconfig'),
     });
+    const editorconf = await import('editorconfig');
+    jest
+      .spyOn(editorconf, 'parse')
+      .mockImplementationOnce(new Error('something') as never);
+
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
     expect(format.indentationSize).toBeUndefined();
@@ -81,6 +84,6 @@ describe('util/json-writer/editor-config', () => {
     });
     const format = await EditorConfig.getCodeFormat(defaultConfigFile);
 
-    expect(format.indentationType).toBe(IndentationType.Tab);
+    expect(format.indentationType).toBe('tab');
   });
 });

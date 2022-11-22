@@ -1,17 +1,15 @@
 This manager parses [Flux](https://fluxcd.io/) YAML manifests and supports:
 
 1. [`HelmRelease`](https://fluxcd.io/docs/components/helm/helmreleases/) resources
+1. ['GitRepository'](https://fluxcd.io/flux/components/source/gitrepositories/) resources
 1. Flux [system](https://fluxcd.io/docs/installation) manifests
 
 ### HelmRelease support
 
 Extracts `helm` dependencies from `HelmRelease` resources.
 
-The `flux` manager will only extract `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` sources.
-The following configurations are currently unsupported:
-
-- OCI `HelmRepository` sources (those with `type: oci`)
-- `HelmRelease` resources linked to other kinds of sources like `GitRepository` or `Bucket`
+The `flux` manager only extracts `helm` dependencies for `HelmRelease` resources linked to `HelmRepository` or `GitRepository` sources.
+Renovate does not support OCI `HelmRepository` sources, those with `type: oci`.
 
 In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepository` resources, _both_ of the following conditions must be met:
 
@@ -19,6 +17,14 @@ In addition, for the `flux` manager to properly link `HelmRelease` and `HelmRepo
 2. The referenced `HelmRepository` resource must have its `metadata.namespace` property set
 
 Namespaces will not be inferred from the context (e.g. from the parent `Kustomization`).
+
+Renovate updates `HelmRelease` resources coming from `GitRepository` by updating the `GitRepository` resource.
+
+### GitRepository support
+
+Renovate can update `git` references from `GitRepository` resources.
+
+The `flux` manager only updates `GitRepository` fields that have a `tag` or `commit` key.
 
 ### Flux system manifests support
 
@@ -31,7 +37,7 @@ Updating system manifests requires that either:
 
 ### Non-configured fileMatch
 
-By default, the `flux` manager will only match `flux-system/gotk-components.yaml` (i.e. system manifest) files.
+By default, the `flux` manager will only match `flux-system/{.,**}/gotk-components.yaml` (i.e. system manifest) files.
 
 This is because there is no commonly accepted file/directory naming convention for Flux manifests and we don't want to check every single `*.yaml` file in repositories just in case some of them have Flux definitions.
 
