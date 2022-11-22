@@ -26,7 +26,7 @@ function massageLink(input: string): string {
 }
 
 function reduceLink(input: string): string {
-  return input.replace(regEx(urlRegex), '$<org>/$<repo>#$<number>');
+  return input.replace(regEx(urlRegex), '#$<number>');
 }
 
 function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
