@@ -60,7 +60,10 @@ async function getBaseBranchConfig(
 
     // istanbul ignore if
     if (config.printConfig) {
-      logger.info({ config: baseBranchConfig }, 'Base branch config after merge');
+      logger.info(
+        { config: baseBranchConfig },
+        'Base branch config after merge'
+      );
     }
 
     // baseBranches value should be based off the default branch
