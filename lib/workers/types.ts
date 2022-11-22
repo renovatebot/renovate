@@ -86,25 +86,23 @@ export type PrBlockedBy =
   | 'RateLimited'
   | 'Error';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum BranchResult {
-  AlreadyExisted = 'already-existed',
-  Automerged = 'automerged',
-  Done = 'done',
-  Error = 'error',
-  NeedsApproval = 'needs-approval',
-  NeedsPrApproval = 'needs-pr-approval',
-  NotScheduled = 'not-scheduled',
-  NoWork = 'no-work',
-  Pending = 'pending',
-  PrCreated = 'pr-created',
-  PrEdited = 'pr-edited',
-  PrLimitReached = 'pr-limit-reached',
-  CommitLimitReached = 'commit-limit-reached',
-  BranchLimitReached = 'branch-limit-reached',
-  Rebase = 'rebase',
-  UpdateNotScheduled = 'update-not-scheduled',
-}
+export type BranchResult =
+  | 'already-existed'
+  | 'automerged'
+  | 'done'
+  | 'error'
+  | 'needs-approval'
+  | 'needs-pr-approval'
+  | 'not-scheduled'
+  | 'no-work'
+  | 'pending'
+  | 'pr-created'
+  | 'pr-edited'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
+  | 'branch-limit-reached'
+  | 'rebase'
+  | 'update-not-scheduled';
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
@@ -112,7 +110,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
-  baseBranch?: string;
+  baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;
@@ -126,6 +124,29 @@ export interface BranchConfig
   prNo?: number;
   stopUpdating?: boolean;
   isConflicted?: boolean;
+  branchFingerprint?: string;
+  skipBranchUpdate?: boolean;
+}
+
+export interface BranchMetadata {
+  branchName: string;
+  branchSha: string | null;
+  baseBranch?: string;
+  baseBranchSha?: string | null;
+  automerge: boolean;
+  isModified?: boolean;
+}
+
+export interface BaseBranchMetadata {
+  branchName: string;
+  sha: string;
+}
+
+export interface BranchSummary {
+  cacheModified?: boolean;
+  baseBranches: BaseBranchMetadata[];
+  branches: BranchMetadata[];
+  inactiveBranches: string[];
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {
@@ -149,4 +170,22 @@ export interface SelectAllConfig extends RenovateConfig {
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardAllPending?: boolean;
   dependencyDashboardAllRateLimited?: boolean;
+}
+
+export interface UpgradeFingerprintConfig {
+  autoReplaceStringTemplate?: string;
+  currentDigest?: string;
+  currentValue?: string;
+  currentVersion?: string;
+  datasource?: string;
+  depName?: string;
+  lockFile?: string;
+  lockedVersion?: string;
+  manager?: string | null;
+  newName?: string;
+  newDigest?: string;
+  newValue?: string;
+  newVersion?: string;
+  packageFile?: string;
+  replaceString?: string;
 }

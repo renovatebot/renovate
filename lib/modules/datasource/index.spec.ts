@@ -8,7 +8,12 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { loadModules } from '../../util/modules';
 import datasources from './api';
 import { Datasource } from './datasource';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from './types';
+import type {
+  DatasourceApi,
+  DigestConfig,
+  GetReleasesConfig,
+  ReleaseResult,
+} from './types';
 import {
   getDatasourceList,
   getDatasources,
@@ -179,7 +184,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new DummyDatasource());
       expect(
         await getPkgReleases({
-          datasource: datasource,
+          datasource,
           depName: null as never, // #7154
         })
       ).toBeNull();
@@ -227,6 +232,27 @@ describe('modules/datasource/index', () => {
 
       expect(supportsDigests(datasource)).toBeTrue();
       expect(await getDigest({ datasource, depName })).toBe('123');
+    });
+
+    it('returns replacementName if defined', async () => {
+      class TestDatasource extends DummyDatasource {
+        override getDigest(
+          config: DigestConfig,
+          newValue?: string
+        ): Promise<string> {
+          return Promise.resolve(config.packageName);
+        }
+      }
+      datasources.set(datasource, new TestDatasource());
+
+      expect(
+        await getDigest({
+          datasource,
+          packageName: 'pkgName',
+          depName,
+          replacementName: 'replacement',
+        })
+      ).toBe('replacement');
     });
   });
 

@@ -3,10 +3,15 @@ import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
 import { pkg } from '../../expose.cjs';
+import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
+import { isCloned } from '../../util/git';
+import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
+import * as throttle from '../../util/http/throttle';
+import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -33,22 +38,29 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult | undefined;
   queue.clear();
+  throttle.clear();
   const localDir = GlobalConfig.get('localDir')!;
   try {
     await fs.ensureDir(localDir);
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const { branches, branchList, packageFiles } = await extractDependencies(
-      config
+    const { branches, branchList, packageFiles } = await instrument(
+      'extract',
+      () => extractDependencies(config)
     );
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
     ) {
-      await ensureOnboardingPr(config, packageFiles, branches);
+      await instrument('onboarding', () =>
+        ensureOnboardingPr(config, packageFiles, branches)
+      );
       addSplit('onboarding');
-      const res = await updateRepo(config, branches);
+
+      const res = await instrument('update', () =>
+        updateRepo(config, branches)
+      );
       setMeta({ repository: config.repository });
       addSplit('update');
       await setBranchCache(branches);
@@ -86,6 +98,10 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();
-  logger.info({ durationMs: splits.total }, 'Repository finished');
+  printDnsStats();
+  clearDnsCache();
+  schemaUtil.reportErrors();
+  const cloned = isCloned();
+  logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

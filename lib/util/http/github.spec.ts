@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
@@ -20,30 +21,30 @@ const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
-const graphqlQuery = `
-query(
-  $owner: String!,
-  $name: String!,
-  $count: Int,
-  $cursor: String
-) {
-  repository(owner: $name, name: $name) {
-    testItem (
-      orderBy: { field: UPDATED_AT, direction: DESC },
-      filterBy: { createdBy: "someone" },
-      first: $count,
-      after: $cursor,
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      nodes {
-        number state title body
+const graphqlQuery = codeBlock`
+  query(
+    $owner: String!,
+    $name: String!,
+    $count: Int,
+    $cursor: String
+  ) {
+    repository(owner: $name, name: $name) {
+      testItem (
+        orderBy: { field: UPDATED_AT, direction: DESC },
+        filterBy: { createdBy: "someone" },
+        first: $count,
+        after: $cursor,
+      ) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          number state title body
+        }
       }
     }
   }
-}
 `;
 
 describe('util/http/github', () => {
@@ -136,6 +137,83 @@ describe('util/http/github', () => {
         paginationField: 'the_field',
       });
       expect(res.body.the_field).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('paginates with auth and repo', async () => {
+      const url = '/some-url?per_page=2';
+      hostRules.add({
+        hostType: 'github',
+        token: 'test',
+        matchHost: 'github.com',
+      });
+      hostRules.add({
+        hostType: 'github',
+        token: 'abc',
+        matchHost: 'https://api.github.com/repos/some/repo',
+      });
+      httpMock
+        .scope(githubApiHost, {
+          reqheaders: {
+            authorization: 'token abc',
+            accept: 'application/vnd.github.v3+json',
+          },
+        })
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, {
+        paginate: true,
+        repository: 'some/repo',
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('paginates with auth and repo on GHE', async () => {
+      const url = '/api/v3/some-url?per_page=2';
+      hostRules.add({
+        hostType: 'github',
+        token: 'test',
+        matchHost: 'github.domain.com',
+      });
+      hostRules.add({
+        hostType: 'github',
+        token: 'abc',
+        matchHost: 'https://github.domain.com/api/v3/repos/some/repo',
+      });
+      httpMock
+        .scope('https://github.domain.com', {
+          reqheaders: {
+            authorization: 'token abc',
+            accept:
+              'application/vnd.github.antiope-preview+json, application/vnd.github.v3+json',
+          },
+        })
+        .get(url)
+        .reply(200, ['a', 'b'], {
+          link: `<${url}&page=2>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${url}&page=3>; rel="next", <${url}&page=3>; rel="last"`,
+        })
+        .get(`${url}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(url, {
+        paginate: true,
+        repository: 'some/repo',
+        baseUrl: 'https://github.domain.com',
+        headers: {
+          accept: 'application/vnd.github.antiope-preview+json',
+        },
+      });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
     it('attempts to paginate', async () => {

@@ -62,14 +62,14 @@ describe('modules/manager/gradle-wrapper/util', () => {
 
   describe('prepareGradleCommand', () => {
     it('works', async () => {
-      platform.mockReturnValueOnce('linux');
+      platform.mockReturnValue('linux');
       fs.statLocalFile.mockResolvedValue(
         partial<Stats>({
           isFile: () => true,
           mode: 0o550,
         })
       );
-      expect(await prepareGradleCommand()).toBe('./gradlew');
+      expect(await prepareGradleCommand('./gradlew')).toBe('./gradlew');
     });
 
     it('returns null', async () => {
@@ -78,7 +78,7 @@ describe('modules/manager/gradle-wrapper/util', () => {
           isFile: () => false,
         })
       );
-      expect(await prepareGradleCommand()).toBeNull();
+      expect(await prepareGradleCommand('./gradlew')).toBeNull();
     });
   });
 });

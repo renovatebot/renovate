@@ -10,6 +10,10 @@ export interface HostRuleSearchResult {
   enabled?: boolean;
   enableHttp2?: boolean;
   concurrentRequestLimit?: number;
+  maxRequestsPerSecond?: number;
+
+  dnsCache?: boolean;
+  keepalive?: boolean;
 }
 
 export interface HostRule extends HostRuleSearchResult {

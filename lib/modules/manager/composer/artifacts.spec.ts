@@ -3,7 +3,6 @@ import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { PlatformId } from '../../../constants';
 import * as docker from '../../../util/exec/docker';
 import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
@@ -16,6 +15,8 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
+
+process.env.BUILDPACK = 'true';
 
 const datasource = mocked(_datasource);
 
@@ -30,6 +31,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
 const repoStatus = partial<StatusResult>({
@@ -93,17 +95,27 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
+          },
+        },
+      },
+    ]);
   });
 
   it('uses hostRules to set COMPOSER_AUTH', async () => {
     hostRules.add({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'api.github.com',
       token: 'github-token',
     });
     hostRules.add({
-      hostType: PlatformId.Gitlab,
+      hostType: 'gitlab',
       matchHost: 'gitlab.com',
       token: 'gitlab-token',
     });
@@ -145,7 +157,19 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            COMPOSER_AUTH:
+              '{"github-oauth":{"github.com":"github-token"},"gitlab-token":{"gitlab.com":"gitlab-token"},"gitlab-domains":["gitlab.com"],"http-basic":{"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}},"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
+            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
+          },
+        },
+      },
+    ]);
   });
 
   it('returns updated composer.lock', async () => {
@@ -163,8 +187,21 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: '{}',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('supports vendor directory update', async () => {
@@ -190,14 +227,42 @@ describe('modules/manager/composer/artifacts', () => {
       newPackageFileContent: '{}',
       config,
     });
-    expect(res).not.toBeNull();
-    expect(res?.map(({ file }) => file)).toEqual([
-      { type: 'addition', path: 'composer.lock', contents: '{  }' },
-      { type: 'addition', path: foo, contents: 'Foo' },
-      { type: 'addition', path: bar, contents: 'Bar' },
-      { type: 'deletion', path: baz },
+    expect(res).toEqual([
+      {
+        file: {
+          contents: '{  }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'Foo',
+          path: 'vendor/foo/Foo.php',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          contents: 'Bar',
+          path: 'vendor/bar/Bar.php',
+          type: 'addition',
+        },
+      },
+      {
+        file: {
+          path: 'vendor/baz/Baz.php',
+          type: 'deletion',
+        },
+      },
     ]);
-    expect(execSnapshots).toMatchSnapshot();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('performs lockFileMaintenance', async () => {
@@ -218,8 +283,21 @@ describe('modules/manager/composer/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: '{  }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -252,9 +330,113 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-    expect(execSnapshots).toHaveLength(3);
+    ).toEqual([
+      {
+        file: {
+          contents: '{  }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'docker pull renovate/sidecar',
+        options: {
+          encoding: 'utf-8',
+        },
+      },
+      {
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+        options: {
+          encoding: 'utf-8',
+        },
+      },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e COMPOSER_CACHE_DIR ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool php 7.3' +
+          ' && ' +
+          'install-tool composer 1.10.17' +
+          ' && ' +
+          'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('supports install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+
+    const execSnapshots = mockExecAll();
+
+    fs.readLocalFile.mockResolvedValueOnce('{  }');
+
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '7.2.34' },
+        { version: '7.3' }, // composer versioning bug
+        { version: '7.3.29' },
+        { version: '7.4.22' },
+        { version: '8.0.6' },
+      ],
+    });
+
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { composer: '^1.10.0', php: '7.3' } },
+      })
+    ).toEqual([
+      {
+        file: {
+          contents: '{  }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool php 7.3',
+      },
+      {
+        cmd: 'install-tool composer 1.10.17',
+      },
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            COMPOSER_CACHE_DIR: '/tmp/renovate/cache/others/composer',
+          },
+        },
+      },
+    ]);
   });
 
   it('supports global mode', async () => {
@@ -273,11 +455,25 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: '{ }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
@@ -289,10 +485,19 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot([{ artifactError: { lockFile: 'composer.lock' } }]);
+    ).toEqual([
+      {
+        artifactError: {
+          lockFile: 'composer.lock',
+          stderr: 'not found',
+        },
+      },
+    ]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('catches unmet requirements errors', async () => {
+    const execSnapshots = mockExecAll();
     const stderr =
       'fooYour requirements could not be resolved to an installable set of packages.bar';
     fs.readLocalFile.mockResolvedValueOnce('{}');
@@ -306,12 +511,12 @@ describe('modules/manager/composer/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).toMatchSnapshot([
-      { artifactError: { lockFile: 'composer.lock', stderr } },
-    ]);
+    ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('throws for disk space', async () => {
+    const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
     fs.writeLocalFile.mockImplementationOnce(() => {
       throw new Error(
@@ -326,6 +531,7 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       })
     ).rejects.toThrow();
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('disables ignorePlatformReqs', async () => {
@@ -346,8 +552,21 @@ describe('modules/manager/composer/artifacts', () => {
           composerIgnorePlatformReqs: undefined,
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: '{ }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('adds all ignorePlatformReq items', async () => {
@@ -368,8 +587,21 @@ describe('modules/manager/composer/artifacts', () => {
           composerIgnorePlatformReqs: ['ext-posix', 'ext-sodium'],
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: '{ }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-req ext-posix --ignore-platform-req ext-sodium --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('installs before running the update when symfony flex is installed', async () => {
@@ -391,9 +623,25 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-    expect(execSnapshots).toHaveLength(2);
+    ).toEqual([
+      {
+        file: {
+          contents: '{ }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('installs before running the update when symfony flex is installed as dev', async () => {
@@ -415,9 +663,25 @@ describe('modules/manager/composer/artifacts', () => {
           ...config,
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
-    expect(execSnapshots).toHaveLength(2);
+    ).toEqual([
+      {
+        file: {
+          contents: '{ }',
+          path: 'composer.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+      },
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+      },
+    ]);
   });
 
   it('does not disable plugins when configured globally', async () => {
@@ -434,7 +698,12 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 
   it('disable plugins when configured locally', async () => {
@@ -454,6 +723,11 @@ describe('modules/manager/composer/artifacts', () => {
         },
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update foo bar --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
   });
 });

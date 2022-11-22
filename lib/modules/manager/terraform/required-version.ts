@@ -2,7 +2,6 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
@@ -31,7 +30,7 @@ export function extractTerraformRequiredVersion(
         currentValue: kvMatch.groups.value,
         lineNumber,
         managerData: {
-          terraformDependencyType: TerraformDependencyTypes.terraform_version,
+          terraformDependencyType: 'terraform_version',
         },
       };
       deps.push(dep);

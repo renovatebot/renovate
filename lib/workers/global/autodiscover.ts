@@ -30,30 +30,27 @@ export async function autodiscoverRepositories(
     );
     return config;
   }
+
   if (config.autodiscoverFilter) {
-    if (isConfigRegex(config.autodiscoverFilter)) {
-      const autodiscoveryPred = configRegexPredicate(config.autodiscoverFilter);
-      if (!autodiscoveryPred) {
-        throw new Error(
-          `Failed to parse regex pattern "${config.autodiscoverFilter}"`
-        );
-      }
-      discovered = discovered.filter(autodiscoveryPred);
-    } else {
-      discovered = discovered.filter(
-        minimatch.filter(config.autodiscoverFilter)
-      );
-    }
+    discovered = applyFilters(
+      discovered,
+      is.string(config.autodiscoverFilter)
+        ? [config.autodiscoverFilter]
+        : config.autodiscoverFilter
+    );
+
     if (!discovered.length) {
       // Soft fail (no error thrown) if no accessible repositories match the filter
       logger.debug('None of the discovered repositories matched the filter');
       return config;
     }
   }
+
   logger.info(
     { length: discovered.length, repositories: discovered },
     `Autodiscovered repositories`
   );
+
   // istanbul ignore if
   if (config.repositories?.length) {
     logger.debug(
@@ -79,4 +76,25 @@ export async function autodiscoverRepositories(
     }
   }
   return { ...config, repositories: discovered };
+}
+
+export function applyFilters(repos: string[], filters: string[]): string[] {
+  const matched = new Set<string>();
+
+  for (const filter of filters) {
+    let res: string[];
+    if (isConfigRegex(filter)) {
+      const autodiscoveryPred = configRegexPredicate(filter);
+      if (!autodiscoveryPred) {
+        throw new Error(`Failed to parse regex pattern "${filter}"`);
+      }
+      res = repos.filter(autodiscoveryPred);
+    } else {
+      res = repos.filter(minimatch.filter(filter));
+    }
+    for (const repository of res) {
+      matched.add(repository);
+    }
+  }
+  return [...matched];
 }

@@ -1,10 +1,10 @@
-import pMap from 'p-map';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import { localPathIsSymbolicLink, readLocalSymlink } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
+import * as p from '../../../util/promises';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { ReadContentResult } from './types';
 
@@ -15,8 +15,6 @@ export async function updateArtifacts(
   update: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
   const { packageFileName } = update;
-  logger.debug({ packageFileName }, `hermit.updateArtifacts()`);
-
   try {
     await updateHermitPackage(update);
   } catch (err) {
@@ -119,19 +117,18 @@ async function getUpdateResult(
   );
 
   // handle added files
-  const added = await pMap(
+  const added = await p.map(
     [...hermitChanges.created, ...hermitChanges.not_added],
     async (path: string): Promise<UpdateArtifactsResult> => {
       const contents = await getContent(path);
 
       return getAddResult(path, contents);
-    },
-    { concurrency: 5 }
+    }
   );
 
   const deleted = hermitChanges.deleted.map(getDeleteResult);
 
-  const modified = await pMap(
+  const modified = await p.map(
     hermitChanges.modified,
     async (path: string): Promise<UpdateArtifactsResult[]> => {
       const contents = await getContent(path);
@@ -139,11 +136,10 @@ async function getUpdateResult(
         getDeleteResult(path), // delete existing link
         getAddResult(path, contents), // add a new link
       ];
-    },
-    { concurrency: 5 }
+    }
   );
 
-  const renamed = await pMap(
+  const renamed = await p.map(
     hermitChanges.renamed,
     async (renamed): Promise<UpdateArtifactsResult[]> => {
       const from = renamed.from;
@@ -151,8 +147,7 @@ async function getUpdateResult(
       const toContents = await getContent(to);
 
       return [getDeleteResult(from), getAddResult(to, toContents)];
-    },
-    { concurrency: 5 }
+    }
   );
 
   return [
@@ -223,7 +218,7 @@ async function updateHermitPackage(update: UpdateArtifact): Promise<void> {
   logger.debug(
     {
       packageFile: update.packageFileName,
-      packagesToInstall: packagesToInstall,
+      packagesToInstall,
     },
     `performing updates`
   );

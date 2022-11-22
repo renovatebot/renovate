@@ -1,3 +1,7 @@
+export type FluxManagerData = {
+  components: string;
+};
+
 export interface KubernetesResource {
   apiVersion: string;
   metadata: {
@@ -33,7 +37,18 @@ export interface HelmRepository extends KubernetesResource {
   };
 }
 
-export type FluxResource = HelmRelease | HelmRepository;
+export interface GitRepository extends KubernetesResource {
+  kind: 'GitRepository';
+  spec: {
+    ref: {
+      tag?: string;
+      commit?: string;
+    };
+    url: string;
+  };
+}
+
+export type FluxResource = HelmRelease | HelmRepository | GitRepository;
 
 export interface FluxFile {
   file: string;
@@ -41,8 +56,7 @@ export interface FluxFile {
 
 export interface ResourceFluxManifest extends FluxFile {
   kind: 'resource';
-  releases: HelmRelease[];
-  repositories: HelmRepository[];
+  resources: FluxResource[];
 }
 
 export interface SystemFluxManifest extends FluxFile {

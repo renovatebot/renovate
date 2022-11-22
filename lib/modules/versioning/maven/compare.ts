@@ -166,16 +166,15 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierTypes {
-  Alpha = 1,
-  Beta,
-  Milestone,
-  RC,
-  Snapshot,
-  Release,
-  SP,
-}
+export const QualifierTypes = {
+  Alpha: 1,
+  Beta: 2,
+  Milestone: 3,
+  RC: 4,
+  Snapshot: 5,
+  Release: 6,
+  SP: 7,
+} as const;
 
 export function qualifierType(token: Token): number | null {
   const val = token.val;
@@ -368,7 +367,7 @@ function parseRange(rangeStr: string): Range[] | null {
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!ranges || !ranges.length) {
+  if (!ranges?.length) {
     return null;
   }
 

@@ -86,7 +86,7 @@ export class VersionsDatasource extends Datasource {
       const startTime = Date.now();
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
-      logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
+      logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
       this.registryCache.isSupported = true;
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof HttpError && err.response?.statusCode === 404) {

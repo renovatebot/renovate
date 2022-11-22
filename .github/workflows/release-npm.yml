@@ -18,7 +18,7 @@ on:
         required: false
 
 env:
-  NODE_VERSION: 14
+  NODE_VERSION: 16
   GIT_SHA: ${{ github.event.client_payload.sha }}
   NPM_VERSION: ${{ github.event.client_payload.version }}
   NPM_TAG: ${{ github.event.client_payload.tag }}
@@ -38,12 +38,12 @@ jobs:
             echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3.0.2
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # tag=v3.1.0
         with:
           ref: ${{ env.GIT_SHA }}
 
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3.4.1
+        uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516 # tag=v3.5.1
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: yarn

@@ -1,9 +1,7 @@
-// TODO #7154
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../modules/platform';
-import { PrState } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
 import type { BranchConfig } from '../../types';
@@ -55,12 +53,17 @@ export async function getConcurrentPrsRemaining(
           if (
             pr &&
             pr.sourceBranch !== config.onboardingBranch &&
-            pr.state === PrState.Open
+            pr.state === 'open'
           ) {
             openPrs.push(pr);
           }
         } catch (err) {
-          // no-op
+          // istanbul ignore if
+          if (err instanceof ExternalHostError) {
+            throw err;
+          } else {
+            // no-op
+          }
         }
       }
       logger.debug(`${openPrs.length} PRs are currently open`);

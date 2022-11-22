@@ -1,27 +1,27 @@
-import * as _AWS from '@aws-sdk/client-ecr';
+import {
+  ECRClient,
+  GetAuthorizationTokenCommand,
+  GetAuthorizationTokenCommandOutput,
+} from '@aws-sdk/client-ecr';
+import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { mocked, partial } from '../../../../test/util';
+import { logger, mocked } from '../../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   PAGE_NOT_FOUND_ERROR,
 } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { MediaType } from './types';
 import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
 
 const hostRules = mocked(_hostRules);
 
 const http = new Http(DockerDatasource.id);
 
-jest.mock('@aws-sdk/client-ecr');
 jest.mock('../../../util/host-rules');
 
-type ECR = _AWS.ECR;
-type GetAuthorizationTokenCommandOutput =
-  _AWS.GetAuthorizationTokenCommandOutput;
-const AWS = mocked(_AWS);
+const ecrMock = mockClient(ECRClient);
 
 const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
@@ -30,26 +30,16 @@ const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 function mockEcrAuthResolve(
   res: Partial<GetAuthorizationTokenCommandOutput> = {}
 ) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: () =>
-        Promise.resolve<GetAuthorizationTokenCommandOutput>(
-          partial<GetAuthorizationTokenCommandOutput>(res)
-        ),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).resolvesOnce(res);
 }
 
 function mockEcrAuthReject(msg: string) {
-  AWS.ECR.mockImplementationOnce(() =>
-    partial<ECR>({
-      getAuthorizationToken: jest.fn().mockRejectedValue(new Error(msg)),
-    })
-  );
+  ecrMock.on(GetAuthorizationTokenCommand).rejectsOnce(new Error(msg));
 }
 
 describe('modules/datasource/docker/index', () => {
   beforeEach(() => {
+    ecrMock.reset();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
@@ -277,7 +267,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/latest')
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
@@ -303,7 +293,7 @@ describe('modules/datasource/docker/index', () => {
         .twice()
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/some-new-value')
         .reply(200, undefined, {})
@@ -415,20 +405,21 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
       });
     });
 
@@ -453,21 +444,22 @@ describe('modules/datasource/docker/index', () => {
         authorizationData: [{ authorizationToken: 'test_token' }],
       });
 
-      await getDigest(
-        {
-          datasource: 'docker',
-          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
-        },
-        'some-tag'
-      );
+      expect(
+        await getDigest(
+          {
+            datasource: 'docker',
+            depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+          },
+          'some-tag'
+        )
+      ).toBe('some-digest');
 
-      expect(AWS.ECR).toHaveBeenCalledWith({
-        credentials: {
-          accessKeyId: 'some-username',
-          secretAccessKey: 'some-password',
-          sessionToken: 'some-session-token',
-        },
-        region: 'us-east-1',
+      const ecr = ecrMock.call(0).thisValue as ECRClient;
+      expect(await ecr.config.region()).toBe('us-east-1');
+      expect(await ecr.config.credentials()).toEqual({
+        accessKeyId: 'some-username',
+        secretAccessKey: 'some-password',
+        sessionToken: 'some-session-token',
       });
     });
 
@@ -545,13 +537,34 @@ describe('modules/datasource/docker/index', () => {
       expect(res).toBe('some-digest');
     });
 
+    it('supports token with no service', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",scope=""',
+        })
+        .head('/library/some-other-dep/manifests/8.0.0-alpine')
+        .reply(200, {}, { 'docker-content-digest': 'some-digest' });
+      httpMock
+        .scope(authUrl)
+        .get('/token?service=&scope=repository:library/some-other-dep:pull')
+        .reply(200, { access_token: 'test' });
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-other-dep' },
+        '8.0.0-alpine'
+      );
+      expect(res).toBe('some-digest');
+    });
+
     it('supports scoped names', async () => {
       httpMock
         .scope(baseUrl)
         .get('/')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-other-dep:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-other-dep:pull"',
         })
         .head('/library/some-other-dep/manifests/8.0.0-alpine')
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
@@ -580,6 +593,491 @@ describe('modules/datasource/docker/index', () => {
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('supports architecture-specific digest', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          manifests: [
+            {
+              digest:
+                'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              platform: {
+                architecture: 'arm',
+                os: 'linux',
+                variant: 'v6',
+              },
+            },
+            {
+              digest:
+                'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              platform: {
+                architecture: '386',
+                os: 'linux',
+              },
+            },
+            {
+              digest:
+                'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+            },
+          ],
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe(
+        'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176'
+      );
+    });
+
+    it('handles missing architecture-specific digest', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(5)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {});
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, {})
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          manifests: [
+            {
+              digest:
+                'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              platform: {
+                architecture: 'arm',
+                os: 'linux',
+                variant: 'v6',
+              },
+            },
+            {
+              digest:
+                'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              platform: {
+                architecture: '386',
+                os: 'linux',
+              },
+            },
+            {
+              digest:
+                'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+            },
+          ],
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture null`
+      );
+      expect(res).toBe(
+        'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
+      );
+    });
+
+    it('supports architecture-specific digest in OCI manifests with media type', async () => {
+      const currentDigest = 'some-image-digest';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(
+          200,
+          {
+            schemaVersion: 2,
+            mediaType: 'application/vnd.oci.image.index.v1+json',
+            manifests: [
+              {
+                digest: 'some-new-image-digest',
+                platform: {
+                  architecture: 'amd64',
+                },
+              },
+            ],
+          },
+          {
+            'content-type': 'text/plain',
+          }
+        );
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe('some-new-image-digest');
+    });
+
+    it('supports architecture-specific digest in OCI manifests without media type', async () => {
+      const currentDigest = 'some-image-digest';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(200, {
+          architecture: 'amd64',
+        });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          manifests: [
+            {
+              digest: 'some-new-image-digest',
+              platform: {
+                architecture: 'amd64',
+              },
+            },
+          ],
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Current digest ${currentDigest} relates to architecture amd64`
+      );
+      expect(res).toBe('some-new-image-digest');
+    });
+
+    it('handles error while retrieving manifest list for architecture-specific digest', async () => {
+      const currentDigest =
+        'sha256:81c09f6d42c2db8121bcd759565ea244cedc759f36a0f090ec7da9de4f7f8fe4';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(4)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(404, {});
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .twice()
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, {})
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          manifests: [
+            {
+              digest:
+                'sha256:c3fe2aac7e4f47270eeff0fdd35cb9bad674105eaa1663942645ca58399a2dbc',
+              platform: {
+                architecture: 'arm',
+                os: 'linux',
+                variant: 'v6',
+              },
+            },
+            {
+              digest:
+                'sha256:78fa4d63fec4e647f00908f24cda05af101aa9702700f613c7f82a96a267d801',
+              platform: {
+                architecture: '386',
+                os: 'linux',
+              },
+            },
+            {
+              digest:
+                'sha256:81093b981e72a54d488d5a60780006d82f7cc02d248d88ff71ff4137b0f51176',
+              platform: {
+                architecture: 'amd64',
+                os: 'linux',
+              },
+            },
+          ],
+        });
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+
+      expect(res).toBe(
+        'sha256:ee75deb1a41bb998e52a116707a6e22a91904cba0c1d6e6c76cf04923efff2d8'
+      );
+    });
+
+    it('handles error while retrieving image config blob', async () => {
+      const currentDigest = 'some-image-digest';
+
+      httpMock
+        .scope(authUrl)
+        .get(
+          '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
+        )
+        .times(3)
+        .reply(200, { token: 'some-token' });
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .times(3)
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
+        })
+        .head('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
+        .get('/library/some-dep/manifests/' + currentDigest)
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/library/some-dep/blobs/some-config-digest')
+        .reply(404, {});
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, '', {})
+        .head('/library/some-dep/manifests/some-new-value', undefined, {
+          badheaders: ['authorization'],
+        })
+        .reply(401);
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest,
+        },
+        'some-new-value'
+      );
+      expect(res).toBeNull();
+    });
+
+    it('returns null if digest refers to manifest list and new value invalid', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, { token: 'some-token' })
+        .head('/library/some-dep/manifests/some-digest')
+        .reply(404, {});
+      httpMock
+        .scope(baseUrl)
+        .get('/', undefined, { badheaders: ['authorization'] })
+        .reply(200, '', {})
+        .head('/library/some-dep/manifests/some-new-value', undefined, {
+          badheaders: ['authorization'],
+        })
+        .reply(401);
+
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: 'some-dep',
+          currentDigest: 'some-digest',
+        },
+        'some-new-value'
+      );
+      expect(res).toBeNull();
     });
   });
 
@@ -689,6 +1187,29 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
+    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
+      const tags = ['18.0.0'];
+      httpMock
+        .scope('https://org.jfrog.io/v2')
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, { tags }, {})
+        .get('/')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/manifests/18.0.0')
+        .reply(200, '', {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'org.jfrog.io/virtual-mirror/node',
+      });
+      expect(res?.releases).toHaveLength(1);
+    });
+
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
         .scope(amazonUrl)
@@ -709,6 +1230,58 @@ describe('modules/datasource/docker/index', () => {
         })
       ).toEqual({
         registryUrl: 'https://123456789.dkr.ecr.us-east-1.amazonaws.com',
+        releases: [],
+      });
+    });
+
+    it('uses lower tag limit for ECR Public deps', async () => {
+      httpMock
+        .scope('https://public.ecr.aws')
+        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
+        })
+        .get('/token?service=public.ecr.aws&scope=aws')
+        .reply(200, { token: 'test' });
+      httpMock
+        .scope('https://public.ecr.aws', {
+          reqheaders: {
+            authorization: 'Bearer test',
+          },
+        })
+        // The  tag limit parameter `n` needs to be limited to 1000 for ECR Public
+        // See https://docs.aws.amazon.com/AmazonECRPublic/latest/APIReference/API_DescribeRepositories.html#ecrpublic-DescribeRepositories-request-maxResults
+        .get('/v2/amazonlinux/amazonlinux/tags/list?n=1000')
+        .reply(200, { tags: ['some'] }, {});
+
+      httpMock
+        .scope('https://public.ecr.aws')
+        .get('/v2/')
+        .reply(401, '', {
+          'www-authenticate':
+            'Bearer realm="https://public.ecr.aws/token",service="public.ecr.aws",scope="aws"',
+        })
+        .get(
+          '/token?service=public.ecr.aws&scope=repository:amazonlinux/amazonlinux:pull'
+        )
+        .reply(200, { token: 'test' });
+      httpMock
+        .scope('https://public.ecr.aws', {
+          reqheaders: {
+            authorization: 'Bearer test',
+          },
+        })
+        .get('/v2/amazonlinux/amazonlinux/manifests/some')
+        .reply(200);
+
+      expect(
+        await getPkgReleases({
+          datasource: DockerDatasource.id,
+          depName: 'public.ecr.aws/amazonlinux/amazonlinux',
+        })
+      ).toEqual({
+        registryUrl: 'https://public.ecr.aws',
         releases: [],
       });
     });
@@ -742,7 +1315,7 @@ describe('modules/datasource/docker/index', () => {
           .get('/node/manifests/some')
           .reply(200, {
             schemaVersion: 2,
-            mediaType: MediaType.manifestV2,
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
             config: { digest: 'some-config-digest' },
           })
           .get('/')
@@ -989,7 +1562,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
         .reply(200, { tags }, {})
@@ -1017,7 +1590,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/node:pull"',
         })
         .get('/library/node/tags/list?n=10000')
         .reply(200, { tags }, {})
@@ -1084,7 +1657,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/my/node/tags/list?n=10000')
         .reply(401, '', {
           'www-authenticate':
-            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull  "',
+            'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:my/node:pull"',
         })
         .get('/my/node/tags/list?n=10000')
         .reply(200, { tags: ['1.0.0'] }, {})
@@ -1142,7 +1715,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1187,6 +1760,48 @@ describe('modules/datasource/docker/index', () => {
       });
     });
 
+    it('supports labels - handle missing config prop on blob response', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, {
+          tags: ['2-alpine'],
+        })
+        .get('/node/manifests/2-alpine')
+        .reply(200, {
+          schemaVersion: 2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {}); // DockerDatasource.getLabels() inner response
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'registry.company.com/node',
+      });
+      expect(res).toStrictEqual({
+        registryUrl: 'https://registry.company.com',
+        releases: [
+          {
+            version: '2-alpine',
+          },
+        ],
+      });
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        expect.anything(),
+        `manifest blob response body missing the "config" property`
+      );
+      expect(logger.logger.info).not.toHaveBeenCalledWith(
+        expect.anything(),
+        'Unknown error getting Docker labels'
+      );
+    });
+
     it('supports manifest lists', async () => {
       httpMock
         .scope('https://registry.company.com/v2')
@@ -1200,13 +1815,14 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/abc')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1241,7 +1857,8 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [],
         });
       const res = await getPkgReleases({
@@ -1266,7 +1883,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV1,
+          mediaType: 'application/vnd.docker.distribution.manifest.v1+json',
         });
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
@@ -1312,13 +1929,13 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestV1,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1358,7 +1975,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
@@ -1402,7 +2019,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [],
         });
       const res = await getPkgReleases({
@@ -1440,7 +2057,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1498,7 +2115,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/visualon/drone-git/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/visualon/drone-git/blobs/some-config-digest')

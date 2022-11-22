@@ -1,7 +1,6 @@
 // TODO #7154
 import URL from 'url';
 import { GlobalConfig } from '../../../../../config/global';
-import { PlatformId } from '../../../../../constants';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
@@ -10,10 +9,11 @@ import * as packageCache from '../../../../../util/cache/package';
 import * as hostRules from '../../../../../util/host-rules';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { slugifyUrl } from './common';
 import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './types';
+import type { ChangeLogRelease, ChangeLogResult } from './types';
 
 function getCachedTags(
   endpoint: string,
@@ -52,13 +52,13 @@ export async function getChangeLogJSON(
     ? 'https://api.github.com/'
     : sourceUrl;
   const { token } = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url,
   });
   // istanbul ignore if
   if (!token) {
     if (host!.endsWith('.github.com') || host === 'github.com') {
-      if (!GlobalConfig.get().githubTokenWarn) {
+      if (!GlobalConfig.get('githubTokenWarn')) {
         logger.debug(
           { manager, depName, sourceUrl },
           'GitHub token warning has been suppressed. Skipping release notes retrieval'
@@ -69,7 +69,7 @@ export async function getChangeLogJSON(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
       );
-      return { error: ChangeLogError.MissingGithubToken };
+      return { error: 'MissingGithubToken' };
     }
     logger.debug(
       { manager, depName, sourceUrl },
@@ -85,7 +85,7 @@ export async function getChangeLogJSON(
     .replace(regEx(/\/$/), '')
     .replace(regEx(/\.git$/), '');
   if (repository.split('/').length !== 2) {
-    logger.debug({ sourceUrl }, 'Invalid github URL found');
+    logger.debug(`Invalid github URL found: ${sourceUrl}`);
     return null;
   }
   const releases = config.releases ?? (await getInRangeReleases(config));
@@ -120,8 +120,9 @@ export async function getChangeLogJSON(
   }
 
   const cacheNamespace = 'changelog-github-release';
+
   function getCacheKey(prev: string, next: string): string {
-    return `${manager}:${depName}:${prev}:${next}`;
+    return `${slugifyUrl(sourceUrl)}:${depName}:${prev}:${next}`;
   }
 
   const changelogReleases: ChangeLogRelease[] = [];

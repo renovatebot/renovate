@@ -9,7 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { Limit, setMaxLimit } from './limits';
+import { setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
   const config: AllConfig = { ...input };
@@ -29,7 +29,15 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
   }
   await fs.ensureDir(config.cacheDir);
   if (config.binarySource === 'docker' || config.binarySource === 'install') {
-    await fs.ensureDir(upath.join(config.cacheDir, 'buildpack'));
+    if (config.containerbaseDir) {
+      logger.debug(
+        'Using configured containerbaseDir: ' + config.containerbaseDir
+      );
+    } else {
+      config.containerbaseDir = upath.join(config.cacheDir, 'containerbase');
+      logger.debug('Using containerbaseDir: ' + config.containerbaseDir);
+    }
+    await fs.ensureDir(config.containerbaseDir);
   }
   return config;
 }
@@ -37,7 +45,7 @@ async function setDirectories(input: AllConfig): Promise<AllConfig> {
 function limitCommitsPerRun(config: RenovateConfig): void {
   let limit = config.prCommitsPerRunLimit;
   limit = typeof limit === 'number' && limit > 0 ? limit : null;
-  setMaxLimit(Limit.Commits, limit);
+  setMaxLimit('Commits', limit);
 }
 
 async function checkVersions(): Promise<void> {

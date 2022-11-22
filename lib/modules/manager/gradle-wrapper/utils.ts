@@ -21,16 +21,18 @@ export function gradleWrapperFileName(): string {
   return './gradlew';
 }
 
-export async function prepareGradleCommand(): Promise<string | null> {
-  const gradlewFile = gradleWrapperFileName();
+export async function prepareGradleCommand(
+  gradlewFile: string
+): Promise<string | null> {
   const gradlewStat = await statLocalFile(gradlewFile);
   if (gradlewStat?.isFile() === true) {
     // if the file is not executable by others
-    if ((gradlewStat.mode & 0o1) === 0) {
+    if (os.platform() !== 'win32' && (gradlewStat.mode & 0o1) === 0) {
+      logger.warn('Gradle wrapper is missing the executable bit');
       // add the execution permission to the owner, group and others
       await chmodLocalFile(gradlewFile, gradlewStat.mode | 0o111);
     }
-    return gradlewFile;
+    return gradleWrapperFileName();
   }
   /* eslint-enable no-bitwise */
   return null;

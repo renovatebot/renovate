@@ -1,4 +1,3 @@
-// TODO #7154
 import is from '@sindresorhus/is';
 import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
@@ -9,34 +8,93 @@ import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
-import { BranchConfig, BranchResult, SelectAllConfig } from '../types';
+import type { BranchConfig, SelectAllConfig } from '../types';
 import { getDepWarningsDashboard } from './errors-warnings';
 import { PackageFiles } from './package-files';
 
 interface DependencyDashboard {
   dependencyDashboardChecks: Record<string, string>;
   dependencyDashboardRebaseAllOpen: boolean;
+  dependencyDashboardAllPending: boolean;
+  dependencyDashboardAllRateLimited: boolean;
+}
+
+const rateLimitedRe = regEx(
+  ' - \\[ \\] <!-- unlimit-branch=([^\\s]+) -->',
+  'g'
+);
+const pendingApprovalRe = regEx(
+  ' - \\[ \\] <!-- approve-branch=([^\\s]+) -->',
+  'g'
+);
+const generalBranchRe = regEx(' <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->');
+const markedBranchesRe = regEx(
+  ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->',
+  'g'
+);
+
+function checkOpenAllRateLimitedPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- create-all-rate-limited-prs -->');
+}
+
+function checkApproveAllPendingPR(issueBody: string): boolean {
+  return issueBody.includes(' - [x] <!-- approve-all-pending-prs -->');
 }
 
 function checkRebaseAll(issueBody: string): boolean {
   return issueBody.includes(' - [x] <!-- rebase-all-open-prs -->');
 }
 
-function getCheckedBranches(issueBody: string): Record<string, string> {
-  const checkMatch = /- \[x\] <!-- ([a-zA-Z]+)-branch=([^\s]+) -->/g;
-  const dependencyDashboardChecks: Record<string, string> = {};
-  for (const [, type, branchName] of issueBody.matchAll(regEx(checkMatch))) {
+function selectAllRelevantBranches(issueBody: string): string[] {
+  const checkedBranches = [];
+  if (checkOpenAllRateLimitedPR(issueBody)) {
+    for (const match of issueBody.matchAll(rateLimitedRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  if (checkApproveAllPendingPR(issueBody)) {
+    for (const match of issueBody.matchAll(pendingApprovalRe)) {
+      checkedBranches.push(match[0]);
+    }
+  }
+  return checkedBranches;
+}
+
+function getAllSelectedBranches(
+  issueBody: string,
+  dependencyDashboardChecks: Record<string, string>
+): Record<string, string> {
+  const allRelevantBranches = selectAllRelevantBranches(issueBody);
+  for (const branch of allRelevantBranches) {
+    const [, type, branchName] = generalBranchRe.exec(branch)!;
     dependencyDashboardChecks[branchName] = type;
   }
+  return dependencyDashboardChecks;
+}
+
+function getCheckedBranches(issueBody: string): Record<string, string> {
+  let dependencyDashboardChecks: Record<string, string> = {};
+  for (const [, type, branchName] of issueBody.matchAll(markedBranchesRe)) {
+    dependencyDashboardChecks[branchName] = type;
+  }
+  dependencyDashboardChecks = getAllSelectedBranches(
+    issueBody,
+    dependencyDashboardChecks
+  );
   return dependencyDashboardChecks;
 }
 
 function parseDashboardIssue(issueBody: string): DependencyDashboard {
   const dependencyDashboardChecks = getCheckedBranches(issueBody);
   const dependencyDashboardRebaseAllOpen = checkRebaseAll(issueBody);
+  const dependencyDashboardAllPending = checkApproveAllPendingPR(issueBody);
+  const dependencyDashboardAllRateLimited =
+    checkOpenAllRateLimitedPR(issueBody);
   return {
     dependencyDashboardChecks,
     dependencyDashboardRebaseAllOpen,
+    dependencyDashboardAllPending,
+    dependencyDashboardAllRateLimited,
   };
 }
 
@@ -113,7 +171,7 @@ export async function ensureDependencyDashboard(
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   const branches = allBranches.filter(
     (branch) =>
-      branch.result !== BranchResult.Automerged &&
+      branch.result !== 'automerged' &&
       !branch.upgrades?.every((upgrade) => upgrade.remediationNotPossible)
   );
   if (
@@ -167,7 +225,7 @@ export async function ensureDependencyDashboard(
   issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.result === BranchResult.NeedsApproval
+    (branch) => branch.result === 'needs-approval'
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -175,10 +233,15 @@ export async function ensureDependencyDashboard(
     for (const branch of pendingApprovals) {
       issueBody += getListItem(branch, 'approve');
     }
+    if (pendingApprovals.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- approve-all-pending-prs -->';
+      issueBody += '🔐 **Create all pending approval PRs at once** 🔐\n';
+    }
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.result === BranchResult.NotScheduled
+    (branch) => branch.result === 'not-scheduled'
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -191,22 +254,25 @@ export async function ensureDependencyDashboard(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.result === BranchResult.BranchLimitReached ||
-      branch.result === BranchResult.PrLimitReached ||
-      branch.result === BranchResult.CommitLimitReached
+      branch.result === 'branch-limit-reached' ||
+      branch.result === 'pr-limit-reached' ||
+      branch.result === 'commit-limit-reached'
   );
   if (rateLimited.length) {
-    issueBody += '## Rate Limited\n\n';
+    issueBody += '## Rate-Limited\n\n';
     issueBody +=
-      'These updates are currently rate limited. Click on a checkbox below to force their creation now.\n\n';
+      'These updates are currently rate-limited. Click on a checkbox below to force their creation now.\n\n';
     for (const branch of rateLimited) {
       issueBody += getListItem(branch, 'unlimit');
     }
+    if (rateLimited.length > 1) {
+      issueBody += ' - [ ] ';
+      issueBody += '<!-- create-all-rate-limited-prs -->';
+      issueBody += '🔐 **Create all rate-limited PRs at once** 🔐\n';
+    }
     issueBody += '\n';
   }
-  const errorList = branches.filter(
-    (branch) => branch.result === BranchResult.Error
-  );
+  const errorList = branches.filter((branch) => branch.result === 'error');
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
@@ -217,7 +283,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.result === BranchResult.NeedsPrApproval
+    (branch) => branch.result === 'needs-pr-approval'
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -228,9 +294,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const prEdited = branches.filter(
-    (branch) => branch.result === BranchResult.PrEdited
-  );
+  const prEdited = branches.filter((branch) => branch.result === 'pr-edited');
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.\n\n`;
@@ -239,9 +303,7 @@ export async function ensureDependencyDashboard(
     }
     issueBody += '\n';
   }
-  const prPending = branches.filter(
-    (branch) => branch.result === BranchResult.Pending
-  );
+  const prPending = branches.filter((branch) => branch.result === 'pending');
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
     issueBody += `These updates await pending status checks. To force their creation now, click the checkbox below.\n\n`;
@@ -269,17 +331,17 @@ export async function ensureDependencyDashboard(
   }
 
   const otherRes = [
-    BranchResult.Pending,
-    BranchResult.NeedsApproval,
-    BranchResult.NeedsPrApproval,
-    BranchResult.NotScheduled,
-    BranchResult.PrLimitReached,
-    BranchResult.CommitLimitReached,
-    BranchResult.BranchLimitReached,
-    BranchResult.AlreadyExisted,
-    BranchResult.Error,
-    BranchResult.Automerged,
-    BranchResult.PrEdited,
+    'pending',
+    'needs-approval',
+    'needs-pr-approval',
+    'not-scheduled',
+    'pr-limit-reached',
+    'commit-limit-reached',
+    'branch-limit-reached',
+    'already-existed',
+    'error',
+    'automerged',
+    'pr-edited',
   ];
   let inProgress = branches.filter(
     (branch) =>
@@ -317,7 +379,7 @@ export async function ensureDependencyDashboard(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.result === BranchResult.AlreadyExisted
+    (branch) => branch.result === 'already-existed'
   );
   if (alreadyExisted.length) {
     issueBody += '## Ignored or Blocked\n\n';
@@ -337,7 +399,6 @@ export async function ensureDependencyDashboard(
   // fit the detected dependencies section
   const footer = getFooter(config);
   issueBody += PackageFiles.getDashboardMarkdown(
-    config,
     GitHubMaxPrBodyLen - issueBody.length - footer.length
   );
 
