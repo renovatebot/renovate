@@ -33,7 +33,7 @@ _Important: The login should be allowed to give +2 for the Code-Review label._
 **Current Workarounds/Changes to git-based-commands:**
 
 They should be moved behind the Platform interface (optionally) to avoid such workarounds.
-Perhaps it should be possible in the future to integrate a platform which is not based on git.
+Perhaps it should be possible in the future to integrate a platform which is not based on Git.
 
 - registerBranch()
   A new method which allows to register virtual branches (not really exists) including commitSHA and whether they have been "modified" from another user. (see isBranchModified below)
