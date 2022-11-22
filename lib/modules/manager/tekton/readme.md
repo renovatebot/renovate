@@ -17,12 +17,13 @@ See the [docs](https://tekton.dev/docs/pipelines/resolution/) for the different 
 
 ### Using a Tekton Bundle reference
 
-There are two ways to use a Tekton Bundle reference:
+There are three ways to use a Tekton Bundle reference:
 
 1. Via the [Bundles Resolver](https://tekton.dev/docs/pipelines/bundle-resolver/)
-2. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
+2. Via the [`tektoncd/resolution` project](https://github.com/tektoncd/resolution)
+3. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
 
-Renovate's Tekton manager supports both methods.
+Renovate's Tekton manager supports all of them.
 
 ### Set your own `fileMatch` pattern
 
