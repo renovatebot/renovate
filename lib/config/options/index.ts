@@ -2428,7 +2428,7 @@ const options: RenovateOptions[] = [
   {
     name: 'gerritAutoApprove',
     description:
-      'If set to `true`, Renovate will automatically approved (Code-Review label = +2) their own changes.',
+      'If set to `true`, Renovate automatically approves it's own changes. This means Renovate assigns the Code-Review label = +2.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gerrit'],
