@@ -489,7 +489,7 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
-    it('ignores OCIRepository without a tag nor digest', () => {
+    it('ignores OCIRepository with no tag and no digest', () => {
       const result = extractPackageFile(
         codeBlock`
         apiVersion: source.toolkit.fluxcd.io/v1beta2
