@@ -207,9 +207,9 @@ function resolveResourceManifest(
         break;
       }
       case 'OCIRepository': {
-        const depName = resource.spec.url?.replace('oci://', '');
+        const containerRegistry = resource.spec.url?.replace('oci://', '');
         const dep: PackageDependency<FluxManagerData> = {
-          depName:,
+          depName: containerRegistry,
         };
         if (resource.spec.ref?.digest) {
           dep.currentDigest = resource.spec.ref.digest;

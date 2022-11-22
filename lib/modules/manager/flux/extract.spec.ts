@@ -45,7 +45,6 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
-            registryUrls: ['ghcr.io/kyverno/manifests/kyverno'],
           },
         ],
       });
@@ -533,7 +532,6 @@ describe('modules/manager/flux/extract', () => {
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
-            registryUrls: ['ghcr.io/kyverno/manifests/kyverno'],
           },
         ],
       });
@@ -561,7 +559,34 @@ describe('modules/manager/flux/extract', () => {
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
-            registryUrls: ['ghcr.io/kyverno/manifests/kyverno'],
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a digest and tag but prefers digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+            tag: v1.8.2
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
           },
         ],
       });
@@ -637,7 +662,6 @@ describe('modules/manager/flux/extract', () => {
               currentValue: 'v1.8.2',
               datasource: DockerDatasource.id,
               depName: 'ghcr.io/kyverno/manifests/kyverno',
-              registryUrls: ['ghcr.io/kyverno/manifests/kyverno'],
             },
           ],
           packageFile: 'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
