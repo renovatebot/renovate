@@ -1,0 +1,3 @@
+This datasource returns releases from a versioned AWS ARN. It currently supports Lambda Layer ARNs only.
+
+More details here ...
