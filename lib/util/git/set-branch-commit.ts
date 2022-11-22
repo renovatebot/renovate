@@ -32,6 +32,6 @@ export function setBranchNewCommit(
   branch.isBehindBase = false;
   branch.isConflicted = false;
   branch.isModified = false;
-  branch.parentSha = baseBranchSha;
+  branch.pristine = true;
   branch.sha = commitSha;
 }

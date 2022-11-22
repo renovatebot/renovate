@@ -1,6 +1,5 @@
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 import { analyzeTerraformProvider } from './providers';
 import type { ExtractionResult, TerraformManagerData } from './types';
@@ -49,7 +48,7 @@ export function extractTerraformRequiredProviders(
   do {
     const dep: PackageDependency<TerraformManagerData> = {
       managerData: {
-        terraformDependencyType: TerraformDependencyTypes.required_providers,
+        terraformDependencyType: 'required_providers',
       },
     };
 

@@ -46,7 +46,7 @@ export async function generateLockFile(
         image: 'sidecar',
       },
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades),
+        await getNodeToolConstraint(config, upgrades, lockFileDir),
         pnpmToolConstraint,
       ],
     };
