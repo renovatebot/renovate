@@ -6,7 +6,7 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch, getBranchCommit } from '../../../util/git';
+import { getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -63,7 +63,7 @@ function extractStats(
 }
 
 export function isCacheExtractValid(
-  baseBranchSha: string | null,
+  baseBranchSha: string,
   configHash: string,
   cachedExtract?: BaseBranchCache
 ): boolean {
@@ -98,7 +98,7 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (isCacheExtractValid(baseBranchSha, configHash, cachedExtract)) {
+  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
