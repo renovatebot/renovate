@@ -45,7 +45,7 @@ Perhaps it should be possible in the future to integrate a platform which is not
   This one tries to merge "origin/${branchName}" into baseBranch and check for conflicts. From `initRepo()` we fetch all open gerrit-changes to the local branch-name "origin/${branchName}" to let this work as expected.
 
 - isBranchBehindBase()
-  The Implementation now checks all branches (not remote only) but includes the `origin/` prefix in the match. This way the fake-branches checked out from initRepo() return the correct answer, and it should work for the other platforms too (because `remotes/origin/$branchname`).
+  The implementation now checks all branches (not remote only) but includes the `origin/` prefix in the match. This way the fake-branches checked out from `initRepo()` return the correct answer, and it should work for the other platforms too (because `remotes/origin/$branchname`).
 
 - deleteBranch()
   Fails always because remote branches are not exists in real. This should be no real problem.
