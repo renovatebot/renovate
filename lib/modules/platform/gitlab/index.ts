@@ -16,7 +16,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -382,16 +382,16 @@ async function getStatus(
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
-  pending: BranchStatus.yellow,
-  created: BranchStatus.yellow,
-  manual: BranchStatus.yellow,
-  running: BranchStatus.yellow,
-  waiting_for_resource: BranchStatus.yellow,
-  success: BranchStatus.green,
-  failed: BranchStatus.red,
-  canceled: BranchStatus.red,
-  skipped: BranchStatus.red,
-  scheduled: BranchStatus.yellow,
+  pending: 'yellow',
+  created: 'yellow',
+  manual: 'yellow',
+  running: 'yellow',
+  waiting_for_resource: 'yellow',
+  success: 'green',
+  failed: 'red',
+  canceled: 'red',
+  skipped: 'red',
+  scheduled: 'yellow',
 };
 
 // Returns the combined status for a branch.
@@ -411,7 +411,7 @@ export async function getBranchStatus(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses'
     );
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
@@ -426,13 +426,13 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  let status: BranchStatus = BranchStatus.green; // default to green
+  let status: BranchStatus = 'green'; // default to green
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
-      if (status !== BranchStatus.red) {
+      if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
           gitlabToRenovateStatusMapping[check.status];
@@ -441,9 +441,9 @@ export async function getBranchStatus(
             { check },
             'Could not map GitLab check.status to Renovate status'
           );
-          mappedStatus = BranchStatus.yellow;
+          mappedStatus = 'yellow';
         }
-        if (mappedStatus !== BranchStatus.green) {
+        if (mappedStatus !== 'green') {
           logger.trace({ check }, 'Found non-green check');
           status = mappedStatus;
         }
@@ -491,7 +491,7 @@ async function fetchPrList(): Promise<Pr[]> {
         number: pr.iid,
         sourceBranch: pr.source_branch,
         title: pr.title,
-        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        state: pr.state === 'opened' ? 'open' : pr.state,
         createdAt: pr.created_at,
       })
     );
@@ -625,7 +625,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     number: mr.iid,
     displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
-    state: mr.state === 'opened' ? PrState.Open : mr.state,
+    state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
     hasReviewers: !!mr.reviewers?.length,
@@ -649,8 +649,8 @@ export async function updatePr({
     title = draftPrefix + title;
   }
   const newState = {
-    [PrState.Closed]: 'close',
-    [PrState.Open]: 'reopen',
+    ['closed']: 'close',
+    ['open']: 'reopen',
     // TODO: null check (#7154)
   }[state!];
   await gitlabApi.putJson(
@@ -716,7 +716,7 @@ export function massageMarkdown(input: string): string {
 // Branch
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -728,7 +728,7 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle!}, ${state})`);
   const prList = await getPrList();
@@ -749,7 +749,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -763,7 +763,7 @@ export async function getBranchStatusCheck(
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return gitlabToRenovateStatusMapping[check.status] || BranchStatus.yellow;
+      return gitlabToRenovateStatusMapping[check.status] || 'yellow';
     }
   }
   return null;
@@ -782,9 +782,9 @@ export async function setBranchStatus({
   // TODO: types (#7154)
   const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
-  if (renovateState === BranchStatus.yellow) {
+  if (renovateState === 'yellow') {
     state = 'pending';
-  } else if (renovateState === BranchStatus.red) {
+  } else if (renovateState === 'red') {
     state = 'failed';
   }
   const options: any = {

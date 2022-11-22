@@ -3,7 +3,6 @@ import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import type { Pr } from '../../modules/platform';
-import { PrState } from '../../types';
 import { raiseConfigWarningIssue } from './error-config';
 
 jest.mock('../../modules/platform');
@@ -47,7 +46,7 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PrState.Open,
+        state: 'open',
       });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();
@@ -60,7 +59,7 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValue({
         ...mock<Pr>(),
         number: 1,
-        state: PrState.Open,
+        state: 'open',
       });
       GlobalConfig.set({ dryRun: 'full' });
       const res = await raiseConfigWarningIssue(config, error);
@@ -76,7 +75,7 @@ describe('workers/repository/error-config', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
         number: 1,
-        state: PrState.NotOpen,
+        state: '!open',
       });
       const res = await raiseConfigWarningIssue(config, error);
       expect(res).toBeUndefined();

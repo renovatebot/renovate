@@ -1,7 +1,6 @@
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 
 export async function setArtifactErrorStatus(
@@ -14,7 +13,7 @@ export async function setArtifactErrorStatus(
 
   const context = `renovate/artifacts`;
   const description = 'Artifact file update failure';
-  const state = BranchStatus.red;
+  const state = 'red';
   const existingState = await platform.getBranchStatusCheck(
     config.branchName,
     context
