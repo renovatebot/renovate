@@ -8,8 +8,8 @@ import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { systemManifestRegex } from './common';
 
-export { updateArtifacts } from './artifacts';
 export { extractAllPackageFiles, extractPackageFile } from './extract';
+export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   fileMatch: [systemManifestRegex],
