@@ -21,7 +21,7 @@ In this case the bot will automatically add the _Code-Review_ label with the val
 
 _Important: The login should be allowed to give +2 for the Code-Review label._
 
-**Additionally, the following two settings are mandatory. It will not work without these settings.**
+**Also, you must use the following two settings. It will not work without these settings.**
 
 ```
 {
