@@ -69,7 +69,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
   let imageRef: string | undefined;
   // Find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
-    for (const field of coerceArray(ref.resource)) {
+    for (const field of coerceArray(ref.params)) {
       if (field.name === 'bundle') {
         imageRef = field.value;
         break;
