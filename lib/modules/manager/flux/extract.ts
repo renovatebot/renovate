@@ -214,7 +214,6 @@ function resolveResourceManifest(
         if (resource.spec.ref?.digest) {
           dep.currentDigest = resource.spec.ref.digest;
           dep.datasource = DockerDatasource.id;
-          dep.registryUrls = [registryURL];
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           dep.datasource = DockerDatasource.id;
