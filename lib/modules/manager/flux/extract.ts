@@ -217,7 +217,6 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           dep.datasource = DockerDatasource.id;
-          dep.registryUrls = [registryURL];
         } else {
           dep.skipReason = 'unversioned-reference';
         }
