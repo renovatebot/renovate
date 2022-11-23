@@ -35,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'corepack',
     versioning: npmVersioningId,
   },
+  dotnet: {
+    datasource: 'dotnet',
+    depName: 'dotnet-sdk',
+    versioning: semverVersioningId,
+  },
   erlang: {
     datasource: 'github-releases',
     depName: 'containerbase/erlang-prebuild',

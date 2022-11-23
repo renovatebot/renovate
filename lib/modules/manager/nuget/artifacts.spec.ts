@@ -18,10 +18,10 @@ jest.mock('./util');
 const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-const realFs = jest.requireActual(
-  '../../../util/fs'
-) as typeof import('../../../util/fs');
+const realFs =
+  jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -83,7 +83,18 @@ describe('modules/manager/nuget/artifacts', () => {
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "dotnet restore 'path/with space/project.csproj' --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config",
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
   });
 
   it('updates lock file', async () => {
@@ -103,8 +114,27 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
   });
 
   it('does not update lock file when non-proj file is changed', async () => {
@@ -169,8 +199,27 @@ describe('modules/manager/nuget/artifacts', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
   });
 
   it('supports docker mode', async () => {
@@ -189,10 +238,104 @@ describe('modules/manager/nuget/artifacts', () => {
         packageFileName: 'project.csproj',
         updatedDeps: [{ depName: 'dep' }],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { dotnet: '7.0.100' } },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'docker pull renovate/sidecar',
+      },
+      {
+        cmd: 'docker ps --filter name=renovate_sidecar -aq',
+      },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e NUGET_PACKAGES ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool dotnet 7.0.100' +
+          ' && ' +
+          'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config' +
+          '"',
+        options: {
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('supports install mode', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.getFileContentMap
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'Current packages.lock.json',
+      })
+      .mockResolvedValueOnce({
+        'packages.lock.json': 'New packages.lock.json',
+      });
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: [{ depName: 'dep' }],
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { dotnet: '7.0.100' } },
+      })
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool dotnet 7.0.100',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
   });
 
   it('supports global mode', async () => {
@@ -213,11 +356,31 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            NUGET_PACKAGES:
+              '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+          },
+        },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
+    const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.getFileContentMap.mockResolvedValueOnce({
       'packages.lock.json': 'Current packages.lock.json',
@@ -240,6 +403,7 @@ describe('modules/manager/nuget/artifacts', () => {
         },
       },
     ]);
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('authenticates at registries', async () => {
@@ -277,8 +441,25 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd:
+          'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
+          '--name myRegistry --username some-username --password some-password --store-password-in-clear-text',
+      },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
   });
 
   it('strips protocol version from feed url', async () => {
@@ -305,7 +486,22 @@ describe('modules/manager/nuget/artifacts', () => {
         newPackageFileContent: '{}',
         config,
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: 'New packages.lock.json',
+          path: 'packages.lock.json',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config --name myRegistry',
+      },
+      {
+        cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
+      },
+    ]);
   });
 });

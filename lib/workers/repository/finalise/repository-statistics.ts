@@ -44,7 +44,7 @@ function branchCacheToMetadata({
   branchName,
   sha: branchSha,
   baseBranch,
-  parentSha: baseBranchSha,
+  baseBranchSha,
   automerge,
   isModified,
 }: BranchCache): BranchMetadata {
