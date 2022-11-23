@@ -21,6 +21,17 @@ import type {
   SystemFluxManifest,
 } from './types';
 
+export function splitTagParts(currentTag: string): PackageDependency {
+  const [currentDepTag, currentDigest] = currentTag.split('@');
+  const depTagSplit = currentDepTag.split(':');
+  const currentValue = depTagSplit.pop();
+  const dep: PackageDependency = {
+    currentValue,
+    currentDigest,
+  };
+  return dep;
+}
+
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
     const versionMatch = regEx(
@@ -214,8 +225,13 @@ function resolveResourceManifest(
           dep.currentDigest = resource.spec.ref.digest;
           dep.datasource = DockerDatasource.id;
         } else if (resource.spec.ref?.tag) {
-          dep.currentValue = resource.spec.ref.tag;
+          const containerTag = splitTagParts(resource.spec.ref?.tag);
+          dep.autoReplaceStringTemplate =
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+          dep.currentDigest = containerTag.currentDigest;
+          dep.currentValue = containerTag.currentValue;
           dep.datasource = DockerDatasource.id;
+          dep.replaceString = resource.spec.ref?.tag;
         } else {
           dep.skipReason = 'unversioned-reference';
         }

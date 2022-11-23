@@ -42,9 +42,13 @@ describe('modules/manager/flux/extract', () => {
             sourceUrl: 'https://github.com/renovatebot/renovate',
           },
           {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: 'v1.8.2',
           },
         ],
       });
@@ -529,9 +533,13 @@ describe('modules/manager/flux/extract', () => {
       expect(result).toEqual({
         deps: [
           {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
-            datasource: DockerDatasource.id,
+            currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'v1.8.2',
           },
         ],
       });
@@ -557,8 +565,40 @@ describe('modules/manager/flux/extract', () => {
           {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
-            datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag that contains a digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            tag: v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString:
+              'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
           },
         ],
       });
@@ -659,9 +699,13 @@ describe('modules/manager/flux/extract', () => {
         {
           deps: [
             {
+              autoReplaceStringTemplate:
+                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              currentDigest: undefined,
               currentValue: 'v1.8.2',
-              datasource: DockerDatasource.id,
               depName: 'ghcr.io/kyverno/manifests/kyverno',
+              datasource: DockerDatasource.id,
+              replaceString: 'v1.8.2',
             },
           ],
           packageFile: 'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
