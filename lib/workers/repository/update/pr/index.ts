@@ -103,7 +103,7 @@ export async function ensurePr(
     if (prCache) {
       logger.debug({ prCache }, 'Found existing Pr cache');
       const lastEditTime = prCache.lastEdited;
-      // validate pr cache and if okay skip pr body update and changelog fetching
+      // return if pr cache is valid and pr was last edited before a day 
       if (
         isCloned() === false &&
         prFingerprint === prCache.fingerprint &&
@@ -316,7 +316,6 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // no need to update PrCache here else we will never reach elapsedHours > 24
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
         return { type: 'with-pr', pr: existingPr };

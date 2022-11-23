@@ -706,13 +706,13 @@ describe('workers/repository/update/pr/index', () => {
       });
     });
 
-    describe('PrCache', () => {
+    describe('prCache', () => {
       const existingPr: Pr = {
         ...pr,
       };
       let cachedPr: PrCache | null = null;
 
-      it('no cache found', async () => {
+      it('creates new cache if not found', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
@@ -722,7 +722,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
-      it('invalid cache', async () => {
+      it('logs for invalid cache', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: 'fingerprint',
@@ -735,7 +735,7 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      it('cache valid but less than 24 hours', async () => {
+      it('logs when pr cache is valid pr was edited within 24 hours', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: fingerprint(config),
@@ -748,7 +748,7 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      it('fetches changelogs when cache valid and more than 24 hours', async () => {
+      it('skips fetching changelogs when cache is valid and pr was edited more than 24 hours ago', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: fingerprint(config),

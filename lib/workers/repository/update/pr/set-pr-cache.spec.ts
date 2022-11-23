@@ -25,12 +25,12 @@ describe('workers/repository/update/pr/set-pr-cache', () => {
   };
 
   describe('getPrCache()', () => {
-    it('return null for null cache', () => {
+    it('return null if cache is empty', () => {
       cache.getCache.mockReturnValue({});
       expect(getPrCache('branch_name')).toBeNull();
     });
 
-    it('return null if prCache is absent or null', () => {
+    it('return null if prCache is falsy', () => {
       cache.getCache.mockReturnValue(dummyCache);
       expect(getPrCache('branch_name')).toBeNull();
     });
@@ -65,7 +65,6 @@ describe('workers/repository/update/pr/set-pr-cache', () => {
         branches: [
           {
             ...branchCache,
-
             prCache: {
               fingerprint: 'fingerprint_hash',
               lastEdited: new Date('2020-01-01'),
