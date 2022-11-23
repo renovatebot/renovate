@@ -44,7 +44,7 @@ export interface BranchCache {
    */
   baseBranchSha: string | null;
   /**
-   * Hash of the manager fingerprints and the update branch config(filtered)
+   * Hash of the manager fingerprints and the filtered update branch config
    */
   branchFingerprint?: string;
   /**
