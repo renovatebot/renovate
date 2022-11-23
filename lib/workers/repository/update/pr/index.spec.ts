@@ -10,12 +10,16 @@ import * as _comment from '../../../../modules/platform/comment';
 import { getPrBodyStruct } from '../../../../modules/platform/pr-body';
 import type { Pr } from '../../../../modules/platform/types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import type { PrCache } from '../../../../util/cache/repository/types';
+import { fingerprint } from '../../../../util/fingerprint';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+import { embedChangelog } from '../../changelog';
 import * as _statusChecks from '../branch/status-checks';
 import * as _prBody from './body';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
+import * as _prCache from './set-pr-cache';
 import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
@@ -35,6 +39,9 @@ const participants = mocked(_participants);
 
 jest.mock('../../../../modules/platform/comment');
 const comment = mocked(_comment);
+
+jest.mock('./set-pr-cache');
+const prCache = mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
   describe('ensurePr', () => {
@@ -64,6 +71,7 @@ describe('workers/repository/update/pr/index', () => {
       jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
+      git.isCloned.mockReturnValueOnce(false);
     });
 
     describe('Create', () => {
@@ -79,6 +87,7 @@ describe('workers/repository/update/pr/index', () => {
           { pr: pr.number, prTitle },
           'PR created'
         );
+        expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
 
       it('aborts PR creation once limit is exceeded', async () => {
@@ -694,6 +703,65 @@ describe('workers/repository/update/pr/index', () => {
             { depType: 'test', hasReleaseNotes: false },
           ],
         });
+      });
+    });
+
+    describe('PrCache', () => {
+      const existingPr: Pr = {
+        ...pr,
+      };
+      let cachedPr: PrCache | null = null;
+
+      it('no cache found', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pr cache not found, creating new.'
+        );
+        expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('invalid cache', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          fingerprint: 'fingerprint',
+          lastEdited: new Date(),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pr fingerprints do not match'
+        );
+      });
+
+      it('cache valid but less than 24 hours', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          fingerprint: fingerprint(config),
+          lastEdited: new Date(),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pr fingerprints do not match'
+        );
+      });
+
+      it('fetches changelogs when cache valid and more than 24 hours', async () => {
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          fingerprint: fingerprint(config),
+          lastEdited: new Date(
+            new Date().getMilliseconds() - 25 * 60 * 60 * 1000
+          ),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'Pr fingerprints match, skiping fetching changelogs'
+        );
+        expect(embedChangelog).toHaveBeenCalledTimes(0);
       });
     });
   });
