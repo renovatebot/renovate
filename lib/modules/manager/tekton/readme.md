@@ -23,7 +23,7 @@ There are three ways to use a Tekton Bundle reference:
 1. Via the [`tektoncd/resolution` project](https://github.com/tektoncd/resolution)
 1. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
 
-Renovate's Tekton manager supports all of them.
+Renovate's Tekton manager supports all the methods listed above.
 
 ### Set your own `fileMatch` pattern
 
