@@ -3206,20 +3206,20 @@
     "@typescript-eslint/types" "5.43.0"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.2.5":
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.2.5.tgz#aef54ced8024d8fd4b49745bd72e5e83995ef92d"
-  integrity sha512-8Z4xRhLKHwq37+TmEwVNYmgJIU6uPa1rUYWOc/luFHS+6KTJyW1OkZU9Sfe6SkcTKIH3gYP9EAqxyczf4TBOKA==
+"@yarnpkg/core@3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.3.0.tgz#856cb38456389543f6f53dfdbd56b880ae9490b1"
+  integrity sha512-3fzbI038I42bArD8SJ8Riu7gwrJxKrCpj/13RVb7PBi1QP1wyxF/dUWIpqPyPqkuTOimL5ZvPcKnt4tc6SnRdw==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.8.0"
+    "@yarnpkg/fslib" "^2.9.0"
     "@yarnpkg/json-proxy" "^2.1.1"
     "@yarnpkg/libzip" "^2.2.4"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.2.4"
-    "@yarnpkg/shell" "^3.2.4"
+    "@yarnpkg/pnp" "^3.2.5"
+    "@yarnpkg/shell" "^3.2.5"
     camelcase "^5.3.1"
     chalk "^3.0.0"
     ci-info "^3.2.0"
@@ -3244,7 +3244,7 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.8.0", "@yarnpkg/fslib@^2.9.0":
+"@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.9.0.tgz#aaa338f624defbef29031617b8884c3d831760ea"
   integrity sha512-PIdwI2z1HFl6aUkketbgUJK3FGRVWVwH1vgHltNe+snJzjlKHMavyIR0fipkAJuHVcac+hzWI1/eMr90rVyMHw==
@@ -3276,7 +3276,7 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.2.4":
+"@yarnpkg/pnp@^3.2.5":
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.2.5.tgz#676d2eed81e8f48bcf00ea8646776a48d1a56454"
   integrity sha512-9TIy6BSJ0pu2Yj7KBG+CW4dnWijOdKZ8VO7yEC7fuL63I98oZHxuS9AcVSCNqNdrX8eZKxvSLtWgOaiGL0Eizw==
@@ -3284,7 +3284,7 @@
     "@types/node" "^13.7.0"
     "@yarnpkg/fslib" "^2.9.0"
 
-"@yarnpkg/shell@^3.2.4":
+"@yarnpkg/shell@^3.2.5":
   version "3.2.5"
   resolved "https://registry.yarnpkg.com/@yarnpkg/shell/-/shell-3.2.5.tgz#536c7d8e927c538db23fd6ae953ba0494d06a50d"
   integrity sha512-QLQNDgUatiXWs47ULRAyliFt4/gQbGwprvgBVRF9OJw0aNY1DO7rnmebB3wDg927uy4Oj1uKVRfGAGAgAVQHWg==
@@ -7494,10 +7494,10 @@ node-gyp@^9.0.0, node-gyp@^9.1.0:
     tar "^6.1.2"
     which "^2.0.2"
 
-node-html-parser@6.1.3:
-  version "6.1.3"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.3.tgz#207d5c9b447113bb265871991c276c90c856f971"
-  integrity sha512-bYvL774OmSBRShzYv/8JU2a/eKbBXwi9jAtSHOT40gF3YVKwMLFeA08vZFMS4R7A/C+oZdiHKw0pmaVEEdtUqw==
+node-html-parser@6.1.4:
+  version "6.1.4"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.4.tgz#763cd362497e427d51fc73dda3dcd8ac52ba85a3"
+  integrity sha512-3muP9Uy/Pz7bQa9TNYVQzWJhNZMqyCx7xJle8kz2/y1UgzAUyXXShc1IcPaJy6u07CE3K5rQcRwlvHzmlySRjg==
   dependencies:
     css-select "^5.1.0"
     he "1.2.0"
