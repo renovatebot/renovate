@@ -5,7 +5,6 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
 import { extractTerraformProvider } from './providers';
 import type { ExtractionResult } from './types';
 
@@ -31,7 +30,7 @@ export function extractTerraformModule(
   const result = extractTerraformProvider(startingLine, lines, moduleName);
   result.dependencies.forEach((dep) => {
     // TODO #7154
-    dep.managerData!.terraformDependencyType = TerraformDependencyTypes.module;
+    dep.managerData!.terraformDependencyType = 'module';
   });
   return result;
 }

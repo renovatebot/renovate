@@ -15,7 +15,6 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import * as memCache from '../../../../util/cache/memory';
 import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
@@ -243,7 +242,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         {
           ...mock<Pr>(),
           sourceBranch: 'renovate/something',
-          state: PrState.Open,
+          state: 'open',
         },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();

@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -136,7 +136,7 @@ function toRenovatePR(data: PR): Pr | null {
 }
 
 function matchesState(actual: string, expected: string): boolean {
-  if (expected === PrState.All) {
+  if (expected === 'all') {
     return true;
   }
   if (expected.startsWith('!')) {
@@ -405,10 +405,7 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    return (
-      helper.giteaToRenovateStatusMapping[ccs.worstStatus] ??
-      BranchStatus.yellow
-    );
+    return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
   async getBranchStatusCheck(
@@ -431,17 +428,13 @@ const platform: Platform = {
       { check: cs },
       'Could not map Gitea status value to Renovate status'
     );
-    return BranchStatus.yellow;
+    return 'yellow';
   },
 
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(
-          config.repository,
-          { state: PrState.All },
-          { useCache: false }
-        )
+        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(is.truthy);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -481,7 +474,7 @@ const platform: Platform = {
   async findPr({
     branchName,
     prTitle: title,
-    state = PrState.All,
+    state = 'all',
   }: FindPRConfig): Promise<Pr | null> {
     logger.debug(`findPr(${branchName}, ${title!}, ${state})`);
     const prList = await platform.getPrList();
@@ -579,7 +572,7 @@ const platform: Platform = {
         config.prList = null;
         const pr = await platform.findPr({
           branchName: sourceBranch,
-          state: PrState.Open,
+          state: 'open',
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
@@ -909,7 +902,7 @@ const platform: Platform = {
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
     logger.debug(`getBranchPr(${branchName})`);
-    const pr = await platform.findPr({ branchName, state: PrState.Open });
+    const pr = await platform.findPr({ branchName, state: 'open' });
     return pr ? platform.getPr(pr.number) : null;
   },
 

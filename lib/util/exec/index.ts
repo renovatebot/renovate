@@ -116,7 +116,7 @@ async function prepareRawExec(
   let rawCommands = typeof cmd === 'string' ? [cmd] : cmd;
 
   if (isDocker(docker)) {
-    logger.debug(`Using docker to execute image: ${docker.image}`);
+    logger.debug({ image: docker.image }, 'Using docker to execute');
     const extraEnv = {
       ...opts.extraEnv,
       ...customEnvVariables,

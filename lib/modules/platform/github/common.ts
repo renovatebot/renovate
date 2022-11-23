@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { PrState } from '../../../types';
 import * as schema from '../../../util/schema';
 import { getPrBodyStruct } from '../pr-body';
 import * as platformSchemas from '../schemas';
@@ -16,9 +15,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     sourceBranch: pr.head?.ref,
     title: pr.title,
     state:
-      pr.state === PrState.Closed && is.string(pr.merged_at)
-        ? PrState.Merged
-        : pr.state,
+      pr.state === 'closed' && is.string(pr.merged_at) ? 'merged' : pr.state,
     bodyStruct,
     updated_at: pr.updated_at,
     node_id: pr.node_id,
