@@ -21,7 +21,6 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { BranchStatus } from '../../../../types';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
