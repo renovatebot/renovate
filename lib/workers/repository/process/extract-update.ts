@@ -6,7 +6,7 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { getBranchCommit } from '../../../util/git';
+import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -113,6 +113,7 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
+    await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
     // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
