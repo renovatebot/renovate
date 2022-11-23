@@ -100,7 +100,7 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
 }
 
 function getBundleValue(
-  fields: TektonResolverParamsField[]
+  fields: TektonResolverParamsField[] | undefined
 ): string | undefined {
   for (const field of coerceArray(fields)) {
     if (field.name === 'bundle') {
