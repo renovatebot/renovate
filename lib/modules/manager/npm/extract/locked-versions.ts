@@ -66,6 +66,16 @@ export async function getLockedVersions(
         } else {
           packageFile.constraints!.npm = '<7';
         }
+      } else if (lockfileVersion === 2) {
+        debugger;
+        if (packageFile.constraints?.npm) {
+          // Add a <9 constraint if it's not already a fixed version
+          if (!semver.valid(packageFile.constraints.npm)) {
+            packageFile.constraints.npm += ' <9';
+          }
+        } else {
+          packageFile.constraints!.npm = '<9';
+        }
       }
       for (const dep of packageFile.deps) {
         // TODO: types (#7154)
