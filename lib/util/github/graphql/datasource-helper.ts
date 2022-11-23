@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import AggregateError from 'aggregate-error';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -9,8 +10,12 @@ import type {
 } from '../../http/github';
 import type { HttpResponse } from '../../http/types';
 import { getApiBaseUrl } from '../url';
+import { GithubGraphqlMemoryCacheAdapter } from './cache-adapters/memory-cache-adapter';
+import { GithubGraphqlPackageCacheAdapter } from './cache-adapters/package-cache-adapter';
+import { GithubGraphqlCacheReconciler } from './cache-reconciler';
 import type {
   GithubDatasourceItem,
+  GithubGraphqlCacheAdapter,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlPayload,
   GithubGraphqlRepoParams,
@@ -91,13 +96,12 @@ export class GithubGraphqlDatasourceHelper<
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
   }
 
-  private getFingerprint(): string {
-    return [
-      this.baseUrl,
-      this.repoOwner,
-      this.repoName,
-      this.datasourceAdapter.key,
-    ].join(':');
+  private getCacheNs(): string {
+    return this.datasourceAdapter.key;
+  }
+
+  private getCacheKey(): string {
+    return [this.baseUrl, this.repoOwner, this.repoName].join(':');
   }
 
   private getRawQueryOptions(): GithubHttpOptions {
@@ -222,14 +226,66 @@ export class GithubGraphqlDatasourceHelper<
     return res;
   }
 
-  private async doPaginatedQuery(): Promise<ResultItem[]> {
-    const resultItems: ResultItem[] = [];
+  private cacheAdapter: GithubGraphqlCacheAdapter<ResultItem> | undefined;
+  private getCacheAdapter(): GithubGraphqlCacheAdapter<ResultItem> {
+    if (this.cacheAdapter) {
+      return this.cacheAdapter;
+    }
 
+    const cacheNs = this.getCacheNs();
+    const cacheKey = this.getCacheKey();
+    if (this.isCacheable) {
+      this.cacheAdapter = new GithubGraphqlPackageCacheAdapter<ResultItem>(
+        cacheNs,
+        cacheKey
+      );
+    } else {
+      this.cacheAdapter = new GithubGraphqlMemoryCacheAdapter<ResultItem>(
+        cacheNs,
+        cacheKey
+      );
+    }
+
+    return this.cacheAdapter;
+  }
+
+  private cacheReconciler: GithubGraphqlCacheReconciler<ResultItem> | undefined;
+  private async getCacheReconciler(): Promise<
+    GithubGraphqlCacheReconciler<ResultItem>
+  > {
+    if (this.cacheReconciler) {
+      return this.cacheReconciler;
+    }
+
+    const cacheAdapter = this.getCacheAdapter();
+    const cachedItems = await cacheAdapter.get();
+    const reconciler = new GithubGraphqlCacheReconciler<ResultItem>(
+      cachedItems,
+      cacheAdapter.accessedAt
+    );
+    this.cacheReconciler = reconciler;
+    return this.cacheReconciler;
+  }
+
+  private async reconcilePage(items: ResultItem[]): Promise<boolean> {
+    const reconciler = await this.getCacheReconciler();
+    return reconciler.reconcilePage(items);
+  }
+
+  private async getReconciledItems(): Promise<ResultItem[]> {
+    const reconciler = await this.getCacheReconciler();
+    const items = reconciler.getItems();
+    await this.getCacheAdapter().set(items);
+    return Object.values(items);
+  }
+
+  private async doPaginatedQuery(): Promise<ResultItem[]> {
     let hasNextPage: boolean | undefined = true;
     let cursor: string | undefined;
     while (hasNextPage && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
+      const resultItems: ResultItem[] = [];
       for (const node of queryResult.nodes) {
         const item = this.datasourceAdapter.transform(node);
         // istanbul ignore if: will be tested later
@@ -239,6 +295,11 @@ export class GithubGraphqlDatasourceHelper<
         resultItems.push(item);
       }
 
+      const isReconciled = await this.reconcilePage(resultItems);
+      if (isReconciled) {
+        break;
+      }
+
       hasNextPage = queryResult?.pageInfo?.hasNextPage;
       cursor = queryResult?.pageInfo?.endCursor;
       if (hasNextPage && cursor) {
@@ -246,7 +307,7 @@ export class GithubGraphqlDatasourceHelper<
       }
     }
 
-    return resultItems;
+    return this.getReconciledItems();
   }
 
   /**
@@ -255,8 +316,7 @@ export class GithubGraphqlDatasourceHelper<
    * Instead, it ensures that same package release is not fetched twice.
    */
   private doConcurrentQuery(): Promise<ResultItem[]> {
-    const packageFingerprint = this.getFingerprint();
-    const cacheKey = `github-datasource-promises:${packageFingerprint}`;
+    const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
     const resultPromise =
       memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doPaginatedQuery();
     memCache.set(cacheKey, resultPromise);
