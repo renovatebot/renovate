@@ -188,7 +188,7 @@ export async function initPlatform({
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
-    hostRules: gitHubRule,
+    hostRules,
   };
 }
 
