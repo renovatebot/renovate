@@ -48,7 +48,7 @@ Perhaps it should be possible in the future to integrate a platform which is not
   The implementation now checks all branches (not remote only) but includes the `origin/` prefix in the match. This way the fake-branches checked out from `initRepo()` return the correct answer, and it should work for the other platforms too (because `remotes/origin/$branchname`).
 
 - deleteBranch()
-  Fails always because remote branches are not exists in real. This should be no real problem.
+  Because Gerrit doesn't use branches the `deleteBranch()` function always fails.
 
 ## TODOS
 
