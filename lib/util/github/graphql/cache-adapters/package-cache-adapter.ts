@@ -10,7 +10,7 @@ export class GithubGraphqlPackageCacheAdapter<
   }
 
   persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
-    const ttlMinutes = this.cacheTTLDays * 24 * 60;
+    const ttlMinutes = GithubGraphqlPackageCacheAdapter.cacheTTLDays * 24 * 60;
     return packageCache.set(this.cacheNs, this.cacheKey, record, ttlMinutes);
   }
 }

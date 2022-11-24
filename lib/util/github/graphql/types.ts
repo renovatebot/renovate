@@ -1,5 +1,3 @@
-import type { DateTime } from 'luxon';
-
 export interface GithubDatasourceItem {
   version: string;
   releaseTimestamp: string;
@@ -136,7 +134,6 @@ export interface GithubGraphqlCacheRecord<
 export interface GithubGraphqlCacheAdapter<
   GithubItem extends GithubDatasourceItem
 > {
-  readonly accessedAt: DateTime;
-  get(): Promise<Record<string, GithubItem>>;
-  set(_: Record<string, GithubItem>): Promise<void>;
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
 }

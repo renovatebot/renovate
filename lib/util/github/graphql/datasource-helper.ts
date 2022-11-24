@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import AggregateError from 'aggregate-error';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -12,7 +11,6 @@ import type { HttpResponse } from '../../http/types';
 import { getApiBaseUrl } from '../url';
 import { GithubGraphqlMemoryCacheAdapter } from './cache-adapters/memory-cache-adapter';
 import { GithubGraphqlPackageCacheAdapter } from './cache-adapters/package-cache-adapter';
-import { GithubGraphqlCacheReconciler } from './cache-reconciler';
 import type {
   GithubDatasourceItem,
   GithubGraphqlCacheAdapter,
@@ -249,36 +247,6 @@ export class GithubGraphqlDatasourceHelper<
     return this.cacheAdapter;
   }
 
-  private cacheReconciler: GithubGraphqlCacheReconciler<ResultItem> | undefined;
-  private async getCacheReconciler(): Promise<
-    GithubGraphqlCacheReconciler<ResultItem>
-  > {
-    if (this.cacheReconciler) {
-      return this.cacheReconciler;
-    }
-
-    const cacheAdapter = this.getCacheAdapter();
-    const cachedItems = await cacheAdapter.get();
-    const reconciler = new GithubGraphqlCacheReconciler<ResultItem>(
-      cachedItems,
-      cacheAdapter.accessedAt
-    );
-    this.cacheReconciler = reconciler;
-    return this.cacheReconciler;
-  }
-
-  private async reconcilePage(items: ResultItem[]): Promise<boolean> {
-    const reconciler = await this.getCacheReconciler();
-    return reconciler.reconcilePage(items);
-  }
-
-  private async getReconciledItems(): Promise<ResultItem[]> {
-    const reconciler = await this.getCacheReconciler();
-    const items = reconciler.getItems();
-    await this.getCacheAdapter().set(items);
-    return Object.values(items);
-  }
-
   private async doPaginatedQuery(): Promise<ResultItem[]> {
     let hasNextPage: boolean | undefined = true;
     let cursor: string | undefined;
@@ -295,8 +263,7 @@ export class GithubGraphqlDatasourceHelper<
         resultItems.push(item);
       }
 
-      const isReconciled = await this.reconcilePage(resultItems);
-      if (isReconciled) {
+      if (await this.getCacheAdapter().reconcile(resultItems)) {
         break;
       }
 
@@ -307,7 +274,7 @@ export class GithubGraphqlDatasourceHelper<
       }
     }
 
-    return this.getReconciledItems();
+    return this.getCacheAdapter().finalize();
   }
 
   /**
