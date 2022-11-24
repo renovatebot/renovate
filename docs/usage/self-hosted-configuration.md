@@ -159,6 +159,7 @@ Supported tools for dynamic install are:
 - `bundler`
 - `cargo`
 - `composer`
+- `dotnet`
 - `flux`
 - `gradle-wrapper`
 - `jb`
@@ -668,6 +669,11 @@ Set this to an S3 URI to enable S3 backed repository cache.
     AWS_SESSION_TOKEN
     AWS_REGION
 ```
+
+<!-- prettier-ignore -->
+!!! tip
+    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 ## requireConfig
 

@@ -9,6 +9,7 @@ describe('util/git/config', () => {
   it('uses "close" events, ignores "exit" events from child processes', () => {
     expect(simpleGitConfig()).toEqual({
       completion: { onClose: true, onExit: false },
+      config: ['core.quotePath=false'],
     });
   });
 
@@ -19,6 +20,7 @@ describe('util/git/config', () => {
       timeout: {
         block: 50000,
       },
+      config: ['core.quotePath=false'],
     });
   });
 });

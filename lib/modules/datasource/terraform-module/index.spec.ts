@@ -16,10 +16,6 @@ const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
 describe('modules/datasource/terraform-module/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns null for empty result', async () => {
       httpMock
         .scope(baseUrl)

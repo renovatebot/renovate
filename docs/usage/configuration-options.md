@@ -334,7 +334,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -1908,19 +1908,6 @@ The above will match only the root `package.json`, whereas the following would m
 
 ### matchSourceUrlPrefixes
 
-Here's an example of where you use this to group together all packages from the Vue monorepo:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-      "groupName": "Vue monorepo packages"
-    }
-  ]
-}
-```
-
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
@@ -1936,14 +1923,14 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls:
+Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/facebook/react"],
-      "groupName": "React"
+      "matchSourceUrls": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
     }
   ]
 }
