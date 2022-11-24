@@ -68,7 +68,7 @@ export async function rebaseMigrationBranch(
  * @param json a JSON string
  * @return a minimal json string. i.e. does not contain any formatting/whitespaces
  */
-function jsonStripWhitespaces(json: string | null): string | null {
+export function jsonStripWhitespaces(json: string | null): string | null {
   if (!json) {
     return null;
   }
@@ -79,5 +79,5 @@ function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON.parse(json));
+  return quickStringify(JSON.parse(json)) ?? null;
 }

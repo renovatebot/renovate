@@ -16,10 +16,27 @@ export type StaticTooling = Partial<PackageDependency> &
 
 export type DynamicTooling = (version: string) => StaticTooling | undefined;
 
-export const upgradeableTooling: Record<
-  string,
-  { config: StaticTooling | DynamicTooling; asdfPluginUrl: string }
-> = {
+export type ToolingConfig = StaticTooling | DynamicTooling;
+export interface ToolingDefinition {
+  config: ToolingConfig;
+  asdfPluginUrl: string;
+}
+
+const hugoDefinition: ToolingDefinition = {
+  // This plugin supports the names `hugo` & `gohugo`
+  asdfPluginUrl: 'https://github.com/NeoHsu/asdf-hugo',
+  config: (version) => ({
+    datasource: GithubReleasesDatasource.id,
+    packageName: 'gohugoio/hugo',
+    versioning: semverVersioning.id,
+    extractVersion: '^v(?<version>\\S+)',
+    // The asdf hugo plugin supports prefixing the version with
+    // `extended_`. Extended versions feature Sass support.
+    currentValue: version.replace(/^extended_/, ''),
+  }),
+};
+
+export const upgradeableTooling: Record<string, ToolingDefinition> = {
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
@@ -121,6 +138,7 @@ export const upgradeableTooling: Record<
       versioning: semverVersioning.id,
     },
   },
+  gohugo: hugoDefinition,
   golang: {
     asdfPluginUrl: 'https://github.com/kennyp/asdf-golang',
     config: {
@@ -157,15 +175,7 @@ export const upgradeableTooling: Record<
       extractVersion: '^v(?<version>\\S+)',
     },
   },
-  hugo: {
-    asdfPluginUrl: 'https://github.com/NeoHsu/asdf-hugo',
-    config: {
-      datasource: GithubReleasesDatasource.id,
-      packageName: 'gohugoio/hugo',
-      versioning: semverVersioning.id,
-      extractVersion: '^v(?<version>\\S+)',
-    },
-  },
+  hugo: hugoDefinition,
   idris: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-idris',
     config: {

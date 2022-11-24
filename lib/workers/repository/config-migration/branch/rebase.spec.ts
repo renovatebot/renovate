@@ -11,7 +11,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
-import { rebaseMigrationBranch } from './rebase';
+import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 
 jest.mock('../../../../util/git');
 
@@ -117,6 +117,15 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       await rebaseMigrationBranch(config, migratedConfigData);
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('jsonStripWhiteSpaces()', () => {
+    it('should strip white spaces from json', () => {
+      const formattedJson = JSON.stringify(formattedMigratedData, null, '  ');
+      const strippedJson = jsonStripWhitespaces(formattedJson);
+      // check if the white spaces were removed or not
+      expect(strippedJson).toBe(JSON.stringify(formattedMigratedData));
     });
   });
 });

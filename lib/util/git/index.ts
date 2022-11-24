@@ -45,7 +45,6 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -248,8 +247,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
-    LANG: 'C',
-    LC_ALL: 'C',
+    LANG: 'C.UTF-8',
+    LC_ALL: 'C.UTF-8',
   });
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -687,7 +686,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
-  deleteCachedBranchParentShaResult(branchName);
   return true;
 }
 

@@ -1913,19 +1913,6 @@ The above will match only the root `package.json`, whereas the following would m
 
 ### matchSourceUrlPrefixes
 
-Here's an example of where you use this to group together all packages from the Vue monorepo:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-      "groupName": "Vue monorepo packages"
-    }
-  ]
-}
-```
-
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
 ```json
@@ -1941,14 +1928,14 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls:
+Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/facebook/react"],
-      "groupName": "React"
+      "matchSourceUrls": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
     }
   ]
 }
