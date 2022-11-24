@@ -284,6 +284,12 @@ const qCustomRegistryUrl = q
   .handler(handleCustomRegistryUrl)
   .handler(cleanupTempVars);
 
+const qRegistryUrls = q.alt<Ctx>(
+  q.sym<Ctx>('publishing').tree(),
+  qPredefinedRegistries,
+  qCustomRegistryUrl
+);
+
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
   .alt(
@@ -427,8 +433,7 @@ export function parseGradle(
       qGroovyMapNotationDependencies,
       qKotlinMapNotationDependencies,
       qPlugins,
-      qPredefinedRegistries,
-      qCustomRegistryUrl,
+      qRegistryUrls,
       qVersionCatalogDependencies,
       qLongFormDep,
       qApplyFrom
