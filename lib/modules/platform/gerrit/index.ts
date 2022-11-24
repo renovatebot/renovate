@@ -2,8 +2,7 @@ import { atob } from 'buffer';
 import JSON5 from 'json5';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { VulnerabilityAlert } from '../../../types';
-import { BranchStatus } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
 import { GerritHttp, setBaseUrl } from '../../../util/http/gerrit';
@@ -441,15 +440,15 @@ export async function getBranchStatus(
       changes.filter((change) => change.submittable === true).length ===
       changes.length;
     if (allSubmittable) {
-      return BranchStatus.green;
+      return 'green';
     }
     const hasProblems =
       changes.filter((change) => change.problems.length > 0).length > 0;
     if (hasProblems) {
-      return BranchStatus.red;
+      return 'red';
     }
   }
-  return BranchStatus.yellow; //TODO: after create a new change it's not visible thru rest-api for some time..(eventual consistency)
+  return 'yellow'; //TODO: after create a new change it's not visible thru rest-api for some time..(eventual consistency)
 }
 
 /**

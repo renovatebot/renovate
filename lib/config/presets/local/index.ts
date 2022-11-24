@@ -10,6 +10,7 @@ const resolvers = {
   azure: local,
   bitbucket: local,
   'bitbucket-server': local,
+  gerrit: local,
   gitea,
   github,
   gitlab,

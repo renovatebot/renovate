@@ -1,7 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
-import { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import { repoFingerprint } from '../util';
 import { TAG_PULL_REQUEST_BODY } from './types';
@@ -679,7 +678,7 @@ describe('modules/platform/gerrit/index', () => {
 
       return expect(
         gerrit.getBranchStatus('renovate/dependency-1.x')
-      ).resolves.toBe(BranchStatus.yellow);
+      ).resolves.toBe('yellow');
     });
 
     it('getBranchStatus() - branchname/changes found, submittable and not hasProblems => green', () => {
@@ -697,7 +696,7 @@ describe('modules/platform/gerrit/index', () => {
 
       return expect(
         gerrit.getBranchStatus('renovate/dependency-1.x')
-      ).resolves.toBe(BranchStatus.green);
+      ).resolves.toBe('green');
     });
 
     it('getBranchStatus() - branchname/changes found and hasProblems => red', () => {
@@ -725,7 +724,7 @@ describe('modules/platform/gerrit/index', () => {
 
       return expect(
         gerrit.getBranchStatus('renovate/dependency-1.x')
-      ).resolves.toBe(BranchStatus.red);
+      ).resolves.toBe('red');
     });
   });
 
@@ -739,7 +738,7 @@ describe('modules/platform/gerrit/index', () => {
 
       return expect(
         gerrit.getBranchStatusCheck('renovate/dependency-1.x', 'ctx')
-      ).resolves.toBe(BranchStatus.yellow);
+      ).resolves.toBe('yellow');
     });
   });
 
@@ -749,7 +748,7 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.setBranchStatus({
           branchName: 'branch',
           context: 'ctx',
-          state: BranchStatus.red,
+          state: 'red',
           description: 'desc',
         })
       ).resolves.toBeUndefined();
