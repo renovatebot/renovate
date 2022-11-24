@@ -717,7 +717,7 @@ describe('workers/repository/update/pr/index', () => {
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pr cache not found, creating new.'
+          'Pr cache not found, creating new'
         );
         expect(prCache.setPrCache).toHaveBeenCalled();
       });
@@ -726,12 +726,12 @@ describe('workers/repository/update/pr/index', () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: 'fingerprint',
-          lastEdited: new Date(),
+          lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pr fingerprints do not match'
+          'Invaild cache, processing PR'
         );
       });
 
@@ -739,27 +739,27 @@ describe('workers/repository/update/pr/index', () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: fingerprint(config),
-          lastEdited: new Date(),
+          lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pr fingerprints do not match'
+          'Invaild cache, processing PR'
         );
       });
 
-      it('skips fetching changelogs when cache is valid and pr was edited more than 24 hours ago', async () => {
+      it('skips fetching changelogs', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: fingerprint(config),
           lastEdited: new Date(
             new Date().getMilliseconds() - 25 * 60 * 60 * 1000
-          ),
+          ).toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'Pr fingerprints match, skiping fetching changelogs'
+          'Cache is valid, skipping PR update'
         );
         expect(embedChangelog).toHaveBeenCalledTimes(0);
       });

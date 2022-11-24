@@ -27,7 +27,7 @@ export interface BranchUpgradeCache {
 
 export interface PrCache {
   fingerprint: string;
-  lastEdited: Date;
+  lastEdited: string;
 }
 
 export interface BranchCache {

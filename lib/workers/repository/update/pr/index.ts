@@ -103,18 +103,18 @@ export async function ensurePr(
     if (prCache) {
       logger.debug({ prCache }, 'Found existing Pr cache');
       const lastEditTime = prCache.lastEdited;
-      // return if pr cache is valid and pr was last edited before a day 
+      // return if pr cache is valid and pr was last edited before a day
       if (
         isCloned() === false &&
         prFingerprint === prCache.fingerprint &&
         getElapsedHours(lastEditTime) > 24
       ) {
-        logger.debug('Pr fingerprints match, skiping fetching changelogs');
+        logger.debug('Cache is valid, skipping PR update');
         return { type: 'with-pr', pr: existingPr };
       }
-      logger.debug('Pr fingerprints do not match');
+      logger.debug('Invaild cache, processing PR');
     } else {
-      logger.debug('Pr cache not found, creating new.');
+      logger.debug('Pr cache not found, creating new');
       setPrCache(branchName, prFingerprint);
     }
   }

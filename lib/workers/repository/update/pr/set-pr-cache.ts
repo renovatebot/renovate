@@ -31,6 +31,6 @@ export function setPrCache(branchName: string, fingerprint: string): void {
 
   branch.prCache = {
     fingerprint,
-    lastEdited: new Date(),
+    lastEdited: new Date().toISOString(),
   };
 }
