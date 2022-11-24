@@ -14,7 +14,7 @@ describe('util/github/graphql/tags-adapter', () => {
     ).toEqual({
       version: '1.2.3',
       gitRef: '1.2.3',
-      newDigest: 'abc123',
+      hash: 'abc123',
       releaseTimestamp: '2022-09-24',
     });
   });
@@ -32,7 +32,7 @@ describe('util/github/graphql/tags-adapter', () => {
     ).toEqual({
       version: '1.2.3',
       gitRef: '1.2.3',
-      newDigest: 'abc123',
+      hash: 'abc123',
       releaseTimestamp: '2022-09-24',
     });
   });
