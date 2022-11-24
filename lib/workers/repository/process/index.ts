@@ -43,6 +43,7 @@ async function getBaseBranchConfig(
         config.repository,
         baseBranch
       );
+      logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch (err) {
       logger.error(
         { configFileName, baseBranch },
