@@ -13,13 +13,7 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
-  "hostRules": [
-    {
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "renovate-bot",
-    },
-  ],
+  "hostRules": [],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -29,13 +23,7 @@ exports[`modules/platform/github/index initPlatform() should support custom endp
 {
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
-  "hostRules": [
-    {
-      "matchHost": "ghcr.io",
-      "password": "123test",
-      "username": "renovate-bot",
-    },
-  ],
+  "hostRules": [],
   "renovateUsername": "renovate-bot",
   "token": "123test",
 }
@@ -49,10 +37,10 @@ exports[`modules/platform/github/index initPlatform() should support default end
     {
       "matchHost": "ghcr.io",
       "password": "123test",
-      "username": "renovate-bot",
+      "username": "dummy",
     },
     {
-      "matchHost": ".pkg.github.com",
+      "matchHost": "pkg.github.com",
       "token": "123test",
     },
   ],
@@ -69,10 +57,10 @@ exports[`modules/platform/github/index initPlatform() should support default end
     {
       "matchHost": "ghcr.io",
       "password": "123test",
-      "username": "renovate-bot",
+      "username": "dummy",
     },
     {
-      "matchHost": ".pkg.github.com",
+      "matchHost": "pkg.github.com",
       "token": "123test",
     },
   ],
@@ -89,10 +77,10 @@ exports[`modules/platform/github/index initPlatform() should support default end
     {
       "matchHost": "ghcr.io",
       "password": "123test",
-      "username": "renovate-bot",
+      "username": "dummy",
     },
     {
-      "matchHost": ".pkg.github.com",
+      "matchHost": "pkg.github.com",
       "token": "123test",
     },
   ],
@@ -109,10 +97,10 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
     {
       "matchHost": "ghcr.io",
       "password": "123test",
-      "username": "renovate-bot",
+      "username": "dummy",
     },
     {
-      "matchHost": ".pkg.github.com",
+      "matchHost": "pkg.github.com",
       "token": "123test",
     },
   ],

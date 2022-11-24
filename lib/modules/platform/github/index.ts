@@ -170,14 +170,14 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const gitHubRule: HostRule[] = [];
+  const gitHubRules: HostRule[] = [];
   if (!platformConfig.isGhe) {
-    gitHubRule.push({
+    gitHubRules.push({
       matchHost: 'ghcr.io',
-      username: renovateUsername,
+      username: 'dummy',
       password: token,
     });
-    gitHubRule.push({
+    gitHubRules.push({
       matchHost: 'pkg.github.com',
       token,
     });
@@ -188,7 +188,7 @@ export async function initPlatform({
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
-    hostRules,
+    hostRules: gitHubRules,
   };
 }
 
