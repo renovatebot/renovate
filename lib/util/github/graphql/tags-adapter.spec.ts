@@ -7,7 +7,7 @@ describe('util/github/graphql/tags-adapter', () => {
         version: '1.2.3',
         target: {
           type: 'Commit',
-          newDigest: 'abc123',
+          oid: 'abc123',
           releaseTimestamp: '2022-09-24',
         },
       })
@@ -25,7 +25,7 @@ describe('util/github/graphql/tags-adapter', () => {
         version: '1.2.3',
         target: {
           type: 'Tag',
-          target: { newDigest: 'abc123' },
+          target: { oid: 'abc123' },
           tagger: { releaseTimestamp: '2022-09-24' },
         },
       })
