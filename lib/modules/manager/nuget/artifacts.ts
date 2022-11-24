@@ -69,9 +69,12 @@ async function runDotnetRestore(
 
   const execOptions: ExecOptions = {
     docker: {
-      image: 'dotnet',
+      image: 'sidecar',
     },
     extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
+    toolConstraints: [
+      { toolName: 'dotnet', constraint: config.constraints?.dotnet },
+    ],
   };
 
   const nugetConfigFile = join(nugetCacheDir, `nuget.config`);

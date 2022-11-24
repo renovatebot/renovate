@@ -1164,7 +1164,7 @@ describe('workers/repository/updates/generate', () => {
       );
     });
 
-    it('using emojy as prefix', () => {
+    it('using commitMessagePrefix without separator', () => {
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -1174,8 +1174,6 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           newValue: '1.2.0',
           commitMessageAction: 'Update',
-          semanticCommits: 'enabled',
-          semanticCommitScope: null,
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
