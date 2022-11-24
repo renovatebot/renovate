@@ -170,19 +170,19 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const gitHubRule: HostRule[] = [
-    {
+  const gitHubRule: HostRule[] = [];
+  if (!platformConfig.isGhe) {
+    gitHubRule.push({
       matchHost: 'ghcr.io',
       username: renovateUsername,
       password: token,
-    },
-  ];
-  if (!platformConfig.isGhe) {
+    });
     gitHubRule.push({
       matchHost: '.pkg.github.com',
       token,
     });
   }
+
   return {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
