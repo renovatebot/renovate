@@ -1,4 +1,3 @@
-import { sanitizeMarkdown } from '../../../util/markdown';
 import { massageMarkdownLinks } from './massage-markdown-links';
 
 describe('modules/platform/github/massage-markdown-links', () => {
@@ -79,6 +78,7 @@ describe('modules/platform/github/massage-markdown-links', () => {
     ${'[www.github.com/foo/bar/discussions/1](www.github.com/foo/bar/discussions/1)'}         | ${'[www.github.com/foo/bar/discussions/1](www.togithub.com/foo/bar/discussions/1)'}
     ${'[www.github.com/foo/bar/issues/1](www.github.com/foo/bar/issues/1)'}                   | ${'[www.github.com/foo/bar/issues/1](www.togithub.com/foo/bar/issues/1)'}
     ${'[www.github.com/foo/bar/pull/1](www.github.com/foo/bar/pull/1)'}                       | ${'[www.github.com/foo/bar/pull/1](www.togithub.com/foo/bar/pull/1)'}
+    ${'[www.github.com/foo/bar.foo/pull/1](www.github.com/foo/bar.foo/pull/1)'}               | ${'[www.github.com/foo/bar.foo/pull/1](www.togithub.com/foo/bar.foo/pull/1)'}
     ${'[https://github.com/foo/bar/discussions/1](https://github.com/foo/bar/discussions/1)'} | ${'[https://github.com/foo/bar/discussions/1](https://togithub.com/foo/bar/discussions/1)'}
     ${'[https://github.com/foo/bar/issues/1](https://github.com/foo/bar/issues/1)'}           | ${'[https://github.com/foo/bar/issues/1](https://togithub.com/foo/bar/issues/1)'}
     ${'[https://github.com/foo/bar/pull/1](https://github.com/foo/bar/pull/1)'}               | ${'[https://github.com/foo/bar/pull/1](https://togithub.com/foo/bar/pull/1)'}
@@ -88,20 +88,4 @@ describe('modules/platform/github/massage-markdown-links', () => {
       expect(massageMarkdownLinks(input)).toEqual(output);
     }
   );
-
-  it('replace @user with togithub.com link to user profile and replace foo/bar#1 with togithub.com link, ', () => {
-    const input = [
-      'pnpm rebuild accepts --store-dir by @user in https://github.com/foo/bar/issues/1\n' +
-        'pnpm rebuild accepts --store-dir by @UsEr in https://github.com/foo/bar/issues/2\n' +
-        'pnpm rebuild accepts --store-dir by @user-name in https://github.com/foo/bar/issues/3',
-    ].join('\n');
-    const res = massageMarkdownLinks(sanitizeMarkdown(input));
-    expect(res).toEqual(
-      [
-        'pnpm rebuild accepts --store-dir by [@user](https://togithub.com/user) in [foo/bar#1](https://togithub.com/foo/bar/issues/1)\n' +
-          'pnpm rebuild accepts --store-dir by [@UsEr](https://togithub.com/UsEr) in [foo/bar#2](https://togithub.com/foo/bar/issues/2)\n' +
-          'pnpm rebuild accepts --store-dir by [@user-name](https://togithub.com/user-name) in [foo/bar#3](https://togithub.com/foo/bar/issues/3)',
-      ].join('\n')
-    );
-  });
 });
