@@ -170,7 +170,6 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const githubDS: HostRule[] = [];
   const gitHubRule: HostRule[] = [
     {
       matchHost: 'ghcr.io',
@@ -184,16 +183,12 @@ export async function initPlatform({
       token,
     });
   }
-  for (const rule of gitHubRule) {
-    githubDS.push(rule);
-    hostRules.add(rule);
-  }
   return {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
-    hostRules: githubDS,
+    hostRules: gitHubRule,
   };
 }
 
