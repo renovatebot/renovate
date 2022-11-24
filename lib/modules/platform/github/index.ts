@@ -178,7 +178,7 @@ export async function initPlatform({
       password: token,
     });
     gitHubRule.push({
-      matchHost: '.pkg.github.com',
+      matchHost: 'pkg.github.com',
       token,
     });
   }
