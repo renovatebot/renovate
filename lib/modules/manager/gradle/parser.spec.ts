@@ -219,6 +219,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven { setUrl(base) }'}                                      | ${'https://foo.bar'}
         ${''}                       | ${'maven { setUrl(["https://foo.bar/baz"]) }'}                   | ${null}
         ${''}                       | ${'maven { setUrl("foo", "bar") }'}                              | ${null}
+        ${'base="https://foo.bar"'} | ${'publishing { repositories { maven("${base}/baz") } }'}        | ${null}
       `('$def | $input', ({ def, input, url }) => {
         const expected = [url].filter(Boolean);
         const { urls } = parseGradle([def, input].join('\n'));
