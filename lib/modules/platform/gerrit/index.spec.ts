@@ -13,6 +13,8 @@ const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
 jest.mock('../../../util/git');
 const git: jest.Mocked<typeof _git> = require('../../../util/git'); //TODO: understand/check why this not works inside beforeEach...
 
+const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
+
 describe('modules/platform/gerrit/index', () => {
   beforeEach(async () => {
     jest.resetModules();
@@ -57,7 +59,8 @@ describe('modules/platform/gerrit/index', () => {
           gerritRestResponse({
             repo1: { id: 'repo1', state: 'ACTIVE' },
             repo2: { id: 'repo2', state: 'ACTIVE' },
-          })
+          }),
+          jsonResultHeader
         );
       expect(await gerrit.getRepos()).toEqual(['repo1', 'repo2']);
     });
@@ -74,7 +77,8 @@ describe('modules/platform/gerrit/index', () => {
           id: 'repo1',
           name: 'test-repo',
           state: 'READ_ONLY',
-        })
+        }),
+        jsonResultHeader
       );
     await expect(gerrit.initRepo({ repository: 'test/repo' })).rejects.toThrow(
       REPOSITORY_ARCHIVED
@@ -94,14 +98,16 @@ describe('modules/platform/gerrit/index', () => {
             name: 'test-repo2',
             state: 'ACTIVE',
             labels: { 'Code-Review': {} },
-          })
+          }),
+          jsonResultHeader
         );
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/projects/test%2Frepo/branches/HEAD')
         .reply(
           200,
-          gerritRestResponse({ ref: 'sha-hash....', revision: 'main' })
+          gerritRestResponse({ ref: 'sha-hash....', revision: 'main' }),
+          jsonResultHeader
         );
       //mock Gerrit-Commit-Hook
       httpMock
@@ -117,7 +123,7 @@ describe('modules/platform/gerrit/index', () => {
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
         .twice()
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
@@ -135,18 +141,22 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('label:Code-Review=-2') ?? false)
-        .reply(200, gerritRestResponse([{ _number: 1 }, { _number: 2 }]));
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
+          jsonResultHeader
+        );
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .post(/\/a\/changes\/\d+\/abandon/)
         .times(2)
-        .reply(200, gerritRestResponse({}));
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
 
       await gerrit.initRepo({ repository: 'test/repo' });
       expect(scope.isDone()).toBe(true);
@@ -162,12 +172,16 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('label:Code-Review=-2') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([Fixtures.getJson('change-data.json')]));
+        .reply(
+          200,
+          gerritRestResponse([Fixtures.getJson('change-data.json')]),
+          jsonResultHeader
+        );
 
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
@@ -197,12 +211,12 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('label:Code-Review=-2') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([change]));
+        .reply(200, gerritRestResponse([change]), jsonResultHeader);
 
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
@@ -223,7 +237,7 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query(() => true)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       return expect(
         gerrit.findPr({ branchName: 'branch', state: 'open' })
       ).resolves.toBeNull();
@@ -234,7 +248,11 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query(() => true)
-        .reply(200, gerritRestResponse([{ _number: 1 }, { _number: 2 }]));
+        .reply(
+          200,
+          gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
+          jsonResultHeader
+        );
       return expect(
         gerrit.findPr({ branchName: 'branch', state: 'open' })
       ).resolves.toHaveProperty('number', 2);
@@ -247,7 +265,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
 
       return expect(gerrit.getPr(123456)).resolves.toEqual(
         mapGerritChangeToPr(input)
@@ -277,11 +295,11 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/message', /Change-Id: .../gi)
-        .reply(200, gerritRestResponse({}));
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
 
       await gerrit.updatePr({ number: 123456, prTitle: 'new title' });
       expect(scope.isDone()).toBeTrue();
@@ -292,7 +310,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/message', /Change-Id: .../gi)
@@ -307,19 +325,23 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       //get GerritChange with Labels included
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/detail')
-        .reply(200, gerritRestResponse({ labels: { 'Code-Review': {} } }));
+        .reply(
+          200,
+          gerritRestResponse({ labels: { 'Code-Review': {} } }),
+          jsonResultHeader
+        );
       const approveMock = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{labels:{'Code-Review':2}}"
+          JSON.stringify({ labels: { 'Code-Review': 2 } })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       await gerrit.updatePr({
         number: 123456,
@@ -336,11 +358,11 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon')
-        .reply(200, gerritRestResponse({}));
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
 
       await gerrit.updatePr({
         number: 123456,
@@ -355,7 +377,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/messages')
@@ -363,7 +385,8 @@ describe('modules/platform/gerrit/index', () => {
           200,
           gerritRestResponse([
             { tag: TAG_PULL_REQUEST_BODY, message: 'Last PR-Body' },
-          ])
+          ]),
+          jsonResultHeader
         );
 
       await gerrit.updatePr({
@@ -379,7 +402,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/messages')
@@ -387,15 +410,16 @@ describe('modules/platform/gerrit/index', () => {
           200,
           gerritRestResponse([
             { tag: TAG_PULL_REQUEST_BODY, message: 'Last PR-Body' },
-          ])
+          ]),
+          jsonResultHeader
         );
       const scope = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{message:'NEW PR-Body',tag:'pull-request'}"
+          JSON.stringify({ message: 'NEW PR-Body', tag: 'pull-request' })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       await gerrit.updatePr({
         number: 123456,
@@ -412,7 +436,7 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       return expect(
         gerrit.createPr({
           sourceBranch: 'source',
@@ -441,19 +465,20 @@ describe('modules/platform/gerrit/index', () => {
           200,
           gerritRestResponse([
             { tag: TAG_PULL_REQUEST_BODY, message: 'Last PR-Body' },
-          ])
+          ]),
+          jsonResultHeader
         );
       //get the change (final result)
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456')
-        .reply(200, gerritRestResponse(input));
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
       //search for change
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([input]));
+        .reply(200, gerritRestResponse([input]), jsonResultHeader);
     });
 
     it('createPr() - update body/title and WITHOUT approve', async () => {
@@ -461,9 +486,9 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{message:'body',tag:'pull-request'}"
+          JSON.stringify({ message: 'body', tag: 'pull-request' })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
@@ -487,16 +512,17 @@ describe('modules/platform/gerrit/index', () => {
           200,
           gerritRestResponse({
             labels: { 'Code-Review': { approved: { _account_id: 10000 } } },
-          })
+          }),
+          jsonResultHeader
         );
 
       const updatePrBodyMock = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{message:'body',tag:'pull-request'}"
+          JSON.stringify({ message: 'body', tag: 'pull-request' })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
@@ -516,22 +542,26 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/detail')
-        .reply(200, gerritRestResponse({ labels: { 'Code-Review': {} } }));
+        .reply(
+          200,
+          gerritRestResponse({ labels: { 'Code-Review': {} } }),
+          jsonResultHeader
+        );
 
       const updatePrBodyMock = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{message:'body',tag:'pull-request'}"
+          JSON.stringify({ message: 'body', tag: 'pull-request' })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
       const approveMock = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{labels:{'Code-Review':2}}"
+          JSON.stringify({ labels: { 'Code-Review': 2 } })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
@@ -554,7 +584,7 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       return expect(
         gerrit.getBranchPr('renovate/dependency-1.x')
@@ -566,7 +596,11 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('status:open') ?? false)
-        .reply(200, gerritRestResponse([Fixtures.getJson('change-data.json')]));
+        .reply(
+          200,
+          gerritRestResponse([Fixtures.getJson('change-data.json')]),
+          jsonResultHeader
+        );
 
       return expect(
         gerrit.getBranchPr('renovate/dependency-1.x')
@@ -580,7 +614,7 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('owner:self') ?? false)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       return expect(gerrit.getPrList()).resolves.toEqual([]);
     });
@@ -591,7 +625,11 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query((query) => query?.q?.includes('owner:self') ?? false)
-        .reply(200, gerritRestResponse([change, change, change]));
+        .reply(
+          200,
+          gerritRestResponse([change, change, change]),
+          jsonResultHeader
+        );
 
       return expect(gerrit.getPrList()).resolves.toHaveLength(3);
     });
@@ -611,7 +649,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/submit')
-        .reply(200, gerritRestResponse({ status: 'MERGED' }));
+        .reply(200, gerritRestResponse({ status: 'MERGED' }), jsonResultHeader);
 
       return expect(gerrit.mergePr({ id: 123456 })).resolves.toBeTrue();
     });
@@ -637,7 +675,7 @@ describe('modules/platform/gerrit/index', () => {
               'hashtag:sourceBranch-renovate/dependency-1.x'
             ) ?? false
         )
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       return expect(
         gerrit.getBranchStatus('renovate/dependency-1.x')
@@ -655,7 +693,7 @@ describe('modules/platform/gerrit/index', () => {
               'hashtag:sourceBranch-renovate/dependency-1.x'
             ) ?? false
         )
-        .reply(200, gerritRestResponse([change, change]));
+        .reply(200, gerritRestResponse([change, change]), jsonResultHeader);
 
       return expect(
         gerrit.getBranchStatus('renovate/dependency-1.x')
@@ -681,7 +719,8 @@ describe('modules/platform/gerrit/index', () => {
         )
         .reply(
           200,
-          gerritRestResponse([changeWithProblems, submittableChange])
+          gerritRestResponse([changeWithProblems, submittableChange]),
+          jsonResultHeader
         );
 
       return expect(
@@ -696,7 +735,7 @@ describe('modules/platform/gerrit/index', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
         .query(true)
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
 
       return expect(
         gerrit.getBranchStatusCheck('renovate/dependency-1.x', 'ctx')
@@ -721,9 +760,9 @@ describe('modules/platform/gerrit/index', () => {
     it('addReviewers() - add reviewers', () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .post('/a/changes/123456/reviewers', /{reviewer:'user\d'}/)
+        .post('/a/changes/123456/reviewers', /{"reviewer":"user\d"}/)
         .twice()
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse({}), jsonResultHeader);
 
       return expect(
         gerrit.addReviewers(123456, ['user1', 'user2'])
@@ -735,8 +774,8 @@ describe('modules/platform/gerrit/index', () => {
     it('addAssignees() - set assignee', () => {
       httpMock
         .scope(gerritEndpointUrl)
-        .put('/a/changes/123456/assignee', /{assignee:'user1'}/)
-        .reply(200, gerritRestResponse(''));
+        .put('/a/changes/123456/assignee', /{"assignee":"user1"}/)
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       return expect(
         gerrit.addAssignees(123456, ['user1', 'user2'])
@@ -749,14 +788,14 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/messages')
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{message:'My-Comment-Msg',tag:'myTopic'}"
+          JSON.stringify({ message: 'My-Comment-Msg', tag: 'myTopic' })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       return expect(
         gerrit.ensureComment({
@@ -773,7 +812,8 @@ describe('modules/platform/gerrit/index', () => {
         .get('/a/changes/123456/messages')
         .reply(
           200,
-          gerritRestResponse([{ message: 'My-Comment-Msg', tag: 'myTopic' }])
+          gerritRestResponse([{ message: 'My-Comment-Msg', tag: 'myTopic' }]),
+          jsonResultHeader
         );
 
       return expect(
@@ -793,7 +833,7 @@ describe('modules/platform/gerrit/index', () => {
         .get(
           '/a/projects/test%2Frepo/branches/main/files/renovate.json/content'
         )
-        .reply(200, gerritResponse(Buffer.from('{}').toString('base64')));
+        .reply(200, gerritFileResponse('{}'));
       return expect(
         gerrit.getRawFile('renovate.json', 'test/repo', 'main')
       ).resolves.toBe('{}');
@@ -808,7 +848,7 @@ describe('modules/platform/gerrit/index', () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/projects/repo/branches/master/files/renovate.json/content')
-        .reply(200, gerritResponse(Buffer.from('{}').toString('base64')));
+        .reply(200, gerritFileResponse('{}'));
       return expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
     });
 
@@ -819,7 +859,7 @@ describe('modules/platform/gerrit/index', () => {
         .get(
           '/a/projects/All-Projects/branches/HEAD/files/renovate.json/content'
         )
-        .reply(200, gerritResponse(Buffer.from('{}').toString('base64')));
+        .reply(200, gerritFileResponse('{}'));
       return expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
     });
   });
@@ -832,7 +872,7 @@ describe('modules/platform/gerrit/index', () => {
         .get(
           '/a/projects/test%2Frepo/branches/main/files/renovate.json/content'
         )
-        .reply(200, gerritResponse(Buffer.from('{}').toString('base64')));
+        .reply(200, gerritFileResponse('{}'));
       return expect(
         gerrit.getJsonFile('renovate.json', 'test/repo', 'main')
       ).resolves.toEqual({});
@@ -865,7 +905,7 @@ describe('modules/platform/gerrit/index', () => {
               query.q?.includes('branch:main')) ??
             false
         )
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       return expect(
         gerrit.commitFiles({
           branchName: 'renovate/dependency-1.x',
@@ -894,7 +934,7 @@ describe('modules/platform/gerrit/index', () => {
               query.q?.includes('branch:main')) ??
             false
         )
-        .reply(200, gerritRestResponse([]));
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
       const res = await gerrit.commitFiles({
         branchName: 'renovate/dependency-1.x',
         targetBranch: 'main',
@@ -936,7 +976,7 @@ describe('modules/platform/gerrit/index', () => {
               query.q?.includes('branch:main')) ??
             false
         )
-        .reply(200, gerritRestResponse([existingChange]));
+        .reply(200, gerritRestResponse([existingChange]), jsonResultHeader);
 
       const res = await gerrit.commitFiles({
         branchName: 'renovate/dependency-1.x',
@@ -978,18 +1018,22 @@ describe('modules/platform/gerrit/index', () => {
               query.q?.includes('branch:main')) ??
             false
         )
-        .reply(200, gerritRestResponse([existingChange]));
+        .reply(200, gerritRestResponse([existingChange]), jsonResultHeader);
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/detail')
-        .reply(200, gerritRestResponse({ labels: { 'Code-Review': {} } }));
+        .reply(
+          200,
+          gerritRestResponse({ labels: { 'Code-Review': {} } }),
+          jsonResultHeader
+        );
       const approveMock = httpMock
         .scope(gerritEndpointUrl)
         .post(
           '/a/changes/123456/revisions/current/review',
-          "{labels:{'Code-Review':2}}"
+          JSON.stringify({ labels: { 'Code-Review': 2 } })
         )
-        .reply(200, gerritRestResponse(''));
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
 
       const res = await gerrit.commitFiles({
         branchName: 'renovate/dependency-1.x',
@@ -1070,6 +1114,6 @@ function gerritRestResponse(body: any): any {
   return `)]}'\n${JSON.stringify(body)}`;
 }
 
-function gerritResponse(body: string): any {
-  return `)]}'\n${body}`;
+function gerritFileResponse(content: string): any {
+  return Buffer.from(content).toString('base64');
 }

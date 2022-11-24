@@ -23,10 +23,10 @@ _Important: The login should be allowed to give +2 for the Code-Review label._
 
 **Also, you must use the following two settings. It will not work without these settings.**
 
-```json
+```json5
 {
   platformCommit: true, //allow to reuse the Change-Id
-  gitNoVerify: ["push"], //allow-commit-hook to generate a Change-Id
+  gitNoVerify: ['push'], //allow-commit-hook to generate a Change-Id
 }
 ```
 

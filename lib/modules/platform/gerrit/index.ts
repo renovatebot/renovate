@@ -98,7 +98,7 @@ export function initPlatform({
  */
 export async function getRepos(): Promise<string[]> {
   logger.debug(`getRepos()`);
-  const res = await gerritHttp.getJson(
+  const res = await gerritHttp.getJson<string[]>(
     'a/projects/?type=CODE&state=ACTIVE',
     {}
   );

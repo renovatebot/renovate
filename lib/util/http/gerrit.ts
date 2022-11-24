@@ -1,5 +1,5 @@
+import is from '@sindresorhus/is';
 import JSON5 from 'json5';
-import { ZodSchema } from 'zod';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
 
@@ -19,7 +19,7 @@ export class GerritHttp extends Http {
     super('gerrit', options);
   }
 
-  protected override request<T>(
+  protected override async request<T>(
     path: string,
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
@@ -27,74 +27,24 @@ export class GerritHttp extends Http {
     const opts = {
       baseUrl,
       ...options,
+      responseType: undefined, //IMPORTANT: we need to remove "json" or it tries to parse the result immediately, which don't work cause the of the magicPrefix
     };
     opts.headers = {
       ...opts.headers,
     };
-    return super.request<T>(url, opts);
-  }
-
-  override get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
-    return super.get(url, options).then((res) => ({
-      ...res,
-      body: res.body.replaceAll(this.magicPrefix, ''),
-    }));
-  }
-
-  override getJson<T = any>(
-    url: string,
-    options?: HttpOptions | ZodSchema,
-    arg3?: ZodSchema
-  ): Promise<HttpResponse<T>> {
-    // istanbul ignore next
-    const httpOptions = options instanceof ZodSchema ? undefined : options;
-    return super.get(url, httpOptions).then((res) => ({
-      ...res,
-      body: JSON5.parse(res.body.replaceAll(this.magicPrefix, '')),
-    }));
-  }
-
-  //TODO: ugly and broken for ZodSchema usage
-  override async postJson<T = unknown>(
-    url: string,
-    options?: HttpOptions | ZodSchema
-  ): Promise<HttpResponse<T>> {
-    // istanbul ignore next
-    const body =
-      options instanceof ZodSchema ? undefined : JSON5.stringify(options?.body);
-    const res = await this.request<string>(url, {
-      ...options,
-      method: 'post',
-      body,
-      headers: {
-        ...(body && { 'Content-Type': 'application/json' }),
-      },
-    });
-    return {
-      ...res,
-      body: JSON5.parse(res.body.replaceAll(this.magicPrefix, '')),
-    };
-  }
-
-  //TODO: ugly and broken for ZodSchema usage
-  override async putJson<T = unknown>(
-    url: string,
-    options?: HttpOptions | ZodSchema
-  ): Promise<HttpResponse<T>> {
-    // istanbul ignore next
-    const body =
-      options instanceof ZodSchema ? undefined : JSON5.stringify(options?.body);
-    const res = await this.request<string>(url, {
-      ...options,
-      method: 'put',
-      body,
-      headers: {
-        ...(body && { 'Content-Type': 'application/json' }),
-      },
-    });
-    return {
-      ...res,
-      body: JSON5.parse(res.body.replaceAll(this.magicPrefix, '')),
-    };
+    const response = await super.request<T>(url, opts);
+    if (
+      response.headers['content-type']?.includes('application/json') &&
+      is.string(response.body)
+    ) {
+      const newBody = JSON5.parse(
+        response.body.replaceAll(this.magicPrefix, '')
+      );
+      return {
+        ...response,
+        body: newBody,
+      };
+    }
+    return response;
   }
 }

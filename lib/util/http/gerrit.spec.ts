@@ -15,23 +15,29 @@ describe('util/http/gerrit', () => {
 
   it('get', async () => {
     const body = 'body result';
-    httpMock.scope(baseUrl).get('/some-url').reply(200, gerritResult(body));
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url')
+      .reply(200, body, { 'content-type': 'text/plain;charset=utf-8' });
 
     const res = await api.get('some-url');
     expect(res.body).toEqual(body);
   });
 
-  it('getJson', () => {
+  it('getJson', async () => {
     const body = { key: 'value' };
     httpMock
       .scope(baseUrl)
       .get('/some-url')
       .matchHeader('a', 'b')
-      .reply(200, gerritResult(JSON.stringify(body)));
+      .reply(200, gerritResult(JSON.stringify(body)), {
+        'content-type': 'application/json;charset=utf-8',
+      });
 
-    return expect(
-      api.getJson('some-url', { headers: { a: 'b' } }).then((res) => res.body)
-    ).resolves.toEqual(body);
+    const res = await api
+      .getJson('some-url', { headers: { a: 'b' } })
+      .then((res) => res.body);
+    return expect(res).toEqual(body);
   });
 
   it('postJson', () => {
@@ -39,7 +45,9 @@ describe('util/http/gerrit', () => {
       .scope(baseUrl)
       .post('/some-url')
       .matchHeader('content-Type', 'application/json')
-      .reply(200, gerritResult('{"res":"success"}'));
+      .reply(200, gerritResult('{"res":"success"}'), {
+        'content-type': 'application/json;charset=utf-8',
+      });
 
     return expect(
       api
@@ -53,7 +61,9 @@ describe('util/http/gerrit', () => {
       .scope(baseUrl)
       .put('/some-url')
       .matchHeader('content-Type', 'application/json')
-      .reply(200, gerritResult('{"res":"success"}'));
+      .reply(200, gerritResult('{"res":"success"}'), {
+        'content-type': 'application/json;charset=utf-8',
+      });
 
     return expect(
       api.putJson('some-url', { body: { key: 'value' } }).then((r) => r.body)

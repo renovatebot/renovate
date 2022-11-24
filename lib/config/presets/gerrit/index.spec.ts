@@ -110,5 +110,5 @@ describe('config/presets/gerrit/index', () => {
 });
 
 function gerritFileResponse(body: string): any {
-  return `)]}'\n${Buffer.from(body).toString('base64')}`;
+  return Buffer.from(body).toString('base64');
 }
