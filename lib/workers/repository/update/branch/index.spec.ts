@@ -25,7 +25,6 @@ import * as _mergeConfidence from '../../../../util/merge-confidence';
 import * as _sanitize from '../../../../util/sanitize';
 import * as _limits from '../../../global/limits';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { BranchResult } from '../../../types';
 import { needsChangelogs } from '../../changelog';
 import * as _prWorker from '../pr';
 import type { ResultWithPr } from '../pr';
@@ -765,7 +764,7 @@ describe('workers/repository/update/branch/index', () => {
       };
       await expect(branchWorker.processBranch(inconfig)).resolves.toEqual({
         branchExists: true,
-        result: BranchResult.NotScheduled,
+        result: 'not-scheduled',
         commitSha: null,
       });
       expect(logger.debug).toHaveBeenCalledWith(
@@ -1793,7 +1792,7 @@ describe('workers/repository/update/branch/index', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
         await branchWorker.processBranch({ ...config, rebaseWhen: 'never' })
-      ).toMatchObject({ result: BranchResult.NoWork });
+      ).toMatchObject({ result: 'no-work' });
       expect(commit.commitFilesToBranch).not.toHaveBeenCalled();
     });
 
@@ -1813,7 +1812,7 @@ describe('workers/repository/update/branch/index', () => {
           rebaseWhen: 'never',
           dependencyDashboardChecks: { 'renovate/some-branch': 'other' },
         })
-      ).toMatchObject({ result: BranchResult.Done });
+      ).toMatchObject({ result: 'done' });
       expect(commit.commitFilesToBranch).toHaveBeenCalled();
     });
 
@@ -1954,6 +1953,60 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'done',
       });
+    });
+
+    it('continues branch, skips automerge if there are artifact errors', async () => {
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      platform.findPr.mockResolvedValueOnce({ sha: '123test' } as any);
+      const res = await branchWorker.processBranch(config);
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prAutomerge.checkAutoMerge).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        branchExists: true,
+        commitSha: '123test',
+        prNo: undefined,
+        result: 'done',
+        updatesVerified: true,
+      });
+    });
+
+    it('continues to update PR, if branch got updated, even when prCreation!==immediate', async () => {
+      git.branchExists.mockReturnValueOnce(true);
+      git.isBranchModified.mockResolvedValueOnce(false);
+      git.getBranchCommit.mockReturnValueOnce('123test');
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [partial<FileChange>({})],
+      } as WriteExistingFilesResult);
+      platform.getBranchPr.mockResolvedValueOnce({
+        state: 'open',
+      } as Pr);
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [{}],
+      } as PackageFilesResult);
+      const inconfig = {
+        ...config,
+        prCreation: 'not-pending',
+      } as BranchConfig;
+      expect(await branchWorker.processBranch(inconfig)).toEqual({
+        branchExists: true,
+        updatesVerified: true,
+        prNo: undefined,
+        result: 'done',
+        commitSha: '123test',
+      });
+      expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
   });
 });
