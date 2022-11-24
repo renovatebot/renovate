@@ -13,7 +13,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
   protected static readonly packageUnstableDays = 7;
   protected static readonly cacheTTLDays = 30;
 
-  public readonly now = DateTime.now();
+  private readonly now = DateTime.now();
 
   private createdAt = this.now;
   private refreshedAt = this.createdAt;
