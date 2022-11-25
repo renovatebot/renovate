@@ -51,7 +51,7 @@ export async function getTags(
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory?: string
+  sourceDirectory = "/"
 ): Promise<ChangeLogFile | null> {
   logger.trace('azure.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
@@ -61,9 +61,7 @@ export async function getReleaseNotesMd(
 
   const sourceDirectoryId: string = (
     await http.getJson<AzureItem>(
-      `${apiPrefix}items${
-        sourceDirectory ? `?path=${sourceDirectory}` : '?path=/'
-      }`
+      `${apiPrefix}items?path=${sourceDirectory}`
     )
   ).body.objectId;
 
@@ -80,9 +78,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { relativePath: relativeChangelogFile } = files.shift()!;
-  const changelogFile = sourceDirectory
-    ? `${sourceDirectory}/${relativeChangelogFile}`
-    : `${relativeChangelogFile}`;
+  const changelogFile = `${sourceDirectory}/${relativeChangelogFile}`;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
