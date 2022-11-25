@@ -29,14 +29,15 @@ Multi-platform and multi-language.
 
 ## Supported Platforms
 
-Renovate works on the following platforms:
+Renovate works on these platforms:
 
-- GitHub (.com and Enterprise Server)
-- GitLab (.com and CE/EE)
-- Bitbucket Cloud
-- Bitbucket Server
-- Azure DevOps
-- Gitea
+- [GitHub (.com and Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
+- [GitLab (.com and CE/EE)](https://docs.renovatebot.com/modules/platform/gitlab/)
+- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+- [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
+- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
 
 ## Who Uses Renovate?
 
