@@ -84,7 +84,6 @@ export class HexpmBobDatasource extends Datasource {
     return null;
   }
 
-  // eslint-disable-next-line consistent-return
   private cleanVersion(version: string, packageType: PackageType): string {
     switch (packageType) {
       case 'elixir':
@@ -94,7 +93,6 @@ export class HexpmBobDatasource extends Datasource {
     }
   }
 
-  // eslint-disable-next-line consistent-return
   private isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
