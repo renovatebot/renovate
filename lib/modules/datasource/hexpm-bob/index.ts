@@ -86,16 +86,12 @@ export class HexpmBobDatasource extends Datasource {
 
   // eslint-disable-next-line consistent-return
   private cleanVersion(version: string, packageType: PackageType): string {
-    if (packageType === 'elixir') {
-      return version.replace(/^v/, '');
+    switch (packageType) {
+      case 'elixir':
+        return version.replace(/^v/, '');
+      case 'erlang':
+        return version.replace(/^OTP-/, '');
     }
-    
-    if (packageType === 'erlang') {
-      return version.replace(/^OTP-/, '');
-    }
-    
-    // istanbul ignore next
-    return version;
   }
 
   // eslint-disable-next-line consistent-return
