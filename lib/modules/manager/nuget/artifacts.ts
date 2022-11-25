@@ -132,9 +132,10 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
-  ];
+  const packageFiles = await getDependentPackageFiles(
+    packageFileName,
+    isCentralManament
+  );
 
   if (!isCentralManament) {
     packageFiles.push(packageFileName);

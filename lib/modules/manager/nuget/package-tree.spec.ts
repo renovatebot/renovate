@@ -63,7 +63,7 @@ describe('modules/manager/nuget/package-tree', () => {
       ]);
     });
 
-    it('returns projects for two projects with one reference and central versions', async () => {
+    it('returns leaf project for two projects with one reference and central versions', async () => {
       git.getFileList.mockResolvedValue(['one/one.csproj', 'two/two.csproj']);
       Fixtures.mock({
         '/tmp/repo/one/one.csproj': Fixtures.get(
@@ -79,10 +79,10 @@ describe('modules/manager/nuget/package-tree', () => {
 
       expect(
         await getDependentPackageFiles('Directory.Packages.props', true)
-      ).toEqual(['one/one.csproj', 'two/two.csproj']);
+      ).toEqual(['two/two.csproj']);
     });
 
-    it('returns two projects for three projects with two linear references', async () => {
+    it('returns leaf projects for three projects with two linear references', async () => {
       git.getFileList.mockResolvedValue([
         'one/one.csproj',
         'two/two.csproj',
@@ -101,7 +101,6 @@ describe('modules/manager/nuget/package-tree', () => {
       });
 
       expect(await getDependentPackageFiles('one/one.csproj')).toEqual([
-        'two/two.csproj',
         'three/three.csproj',
       ]);
 
@@ -109,7 +108,9 @@ describe('modules/manager/nuget/package-tree', () => {
         'three/three.csproj',
       ]);
 
-      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([]);
+      expect(
+        await getDependentPackageFiles('three/three.csproj')
+      ).toBeEmptyArray();
     });
 
     it('returns two projects for three projects with two tree-like references', async () => {
@@ -135,8 +136,10 @@ describe('modules/manager/nuget/package-tree', () => {
         'three/three.csproj',
       ]);
 
-      expect(await getDependentPackageFiles('two/two.csproj')).toEqual([]);
-      expect(await getDependentPackageFiles('three/three.csproj')).toEqual([]);
+      expect(await getDependentPackageFiles('two/two.csproj')).toBeEmptyArray();
+      expect(
+        await getDependentPackageFiles('three/three.csproj')
+      ).toBeEmptyArray();
     });
 
     it('throws error on circular reference', async () => {
@@ -158,7 +161,7 @@ describe('modules/manager/nuget/package-tree', () => {
     it('skips on invalid xml file', async () => {
       git.getFileList.mockResolvedValue(['foo/bar.csproj']);
       Fixtures.mock({ '/tmp/repo/foo/bar.csproj': '<invalid' });
-      expect(await getDependentPackageFiles('foo/bar.csproj')).toEqual([]);
+      expect(await getDependentPackageFiles('foo/bar.csproj')).toBeEmptyArray();
     });
   });
 });

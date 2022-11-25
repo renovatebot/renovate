@@ -10,7 +10,7 @@ export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
 export const MSBUILD_CENTRAL_FILE = 'Packages.props';
 
 /**
- * Get all package files at any level of ancestry that depend on packageFileName
+ * Get all leaf package files of ancestry that depend on packageFileName.
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
@@ -68,7 +68,8 @@ export async function getDependentPackageFiles(
 
   const dependents = recursivelyGetDependentPackageFiles(
     packageFileName,
-    graph
+    graph,
+    packageFileName
   );
 
   // deduplicate
@@ -80,17 +81,20 @@ export async function getDependentPackageFiles(
  */
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
-  graph: ReturnType<typeof Graph>
+  graph: ReturnType<typeof Graph>,
+  rootPackageFilename: string
 ): string[] {
   const dependents = graph.adjacent(packageFileName);
 
   if (dependents.length === 0) {
-    return [];
+    return packageFileName === rootPackageFilename ? [] : [packageFileName];
   }
 
-  return dependents.concat(
-    dependents.map((d) => recursivelyGetDependentPackageFiles(d, graph)).flat()
-  );
+  return dependents
+    .map((d) =>
+      recursivelyGetDependentPackageFiles(d, graph, rootPackageFilename)
+    )
+    .flat();
 }
 
 /**
