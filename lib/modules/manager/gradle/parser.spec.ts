@@ -451,7 +451,7 @@ describe('modules/manager/gradle/parser', () => {
   describe('implicit gradle plugins', () => {
     test.each`
       def                | input                                           | output
-      ${'baz = "1.2.3"'} | ${'checkstyle { toolVersion = "${baz}" }'}      | ${{ depName: 'checkstyle', packageName: GRADLE_PLUGINS['checkstyle'], currentValue: '1.2.3', depType: 'devDependencies' }}
+      ${'baz = "1.2.3"'} | ${'checkstyle { toolVersion = "${baz}" }'}      | ${{ depName: 'checkstyle', packageName: GRADLE_PLUGINS['checkstyle'], currentValue: '1.2.3' }}
       ${''}              | ${'codenarc { toolVersion = "1.2.3" }'}         | ${{ depName: 'codenarc', packageName: GRADLE_PLUGINS['codenarc'], currentValue: '1.2.3' }}
       ${''}              | ${'detekt { toolVersion = "1.2.3" }'}           | ${{ depName: 'detekt', packageName: GRADLE_PLUGINS['detekt'], currentValue: '1.2.3' }}
       ${''}              | ${'findbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'findbugs', packageName: GRADLE_PLUGINS['findbugs'], currentValue: '1.2.3' }}
