@@ -71,7 +71,10 @@ async function runDotnetRestore(
     docker: {
       image: 'sidecar',
     },
-    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
+    extraEnv: {
+      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      MSBUILDDISABLENODEREUSE: '1',
+    },
     toolConstraints: [
       { toolName: 'dotnet', constraint: config.constraints?.dotnet },
     ],
