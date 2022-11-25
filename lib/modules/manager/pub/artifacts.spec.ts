@@ -91,6 +91,7 @@ describe('modules/manager/pub/artifacts', () => {
 
   it('returns updated dart pubspec.lock', async () => {
     const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('New pubspec.lock');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -101,7 +102,15 @@ describe('modules/manager/pub/artifacts', () => {
         newPackageFileContent: '',
         config,
       })
-    ).not.toBeNull();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'pubspec.lock',
+          contents: 'New pubspec.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'dart pub upgrade',
@@ -126,6 +135,7 @@ describe('modules/manager/pub/artifacts', () => {
 
   it('returns updated dart pubspec.lock for lockfile maintenance', async () => {
     const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('New pubspec.lock');
     expect(
@@ -135,7 +145,15 @@ describe('modules/manager/pub/artifacts', () => {
         newPackageFileContent: '',
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).not.toBeNull();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'pubspec.lock',
+          contents: 'New pubspec.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'dart pub upgrade',
@@ -160,6 +178,7 @@ describe('modules/manager/pub/artifacts', () => {
 
   it('returns updated flutter pubspec.lock', async () => {
     const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('New pubspec.lock');
     const updatedDeps = [{ depName: 'dep1' }];
@@ -170,7 +189,15 @@ describe('modules/manager/pub/artifacts', () => {
         newPackageFileContent: 'sdk: flutter',
         config,
       })
-    ).not.toBeNull();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'pubspec.lock',
+          contents: 'New pubspec.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'flutter pub upgrade',
@@ -195,6 +222,7 @@ describe('modules/manager/pub/artifacts', () => {
 
   it('returns updated flutter pubspec.lock for lockfile maintenance', async () => {
     const execSnapshots = mockExecAll();
+    fs.getSiblingFileName.mockReturnValueOnce('pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('Old pubspec.lock');
     fs.readLocalFile.mockResolvedValueOnce('New pubspec.lock');
     expect(
@@ -204,7 +232,15 @@ describe('modules/manager/pub/artifacts', () => {
         newPackageFileContent: 'sdk: flutter',
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).not.toBeNull();
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'pubspec.lock',
+          contents: 'New pubspec.lock',
+        },
+      },
+    ]);
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'flutter pub upgrade',
