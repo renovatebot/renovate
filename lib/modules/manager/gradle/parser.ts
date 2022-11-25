@@ -67,6 +67,24 @@ const qVariableAssignmentIdentifier = q
 const qVariableAccessIdentifier =
   qVariableAssignmentIdentifier.handler(coalesceVariable);
 
+// project.ext.getProperty(...)
+// extra.get(...)
+const qPropertyAccessIdentifier = q
+  .opt(q.sym<Ctx>(regEx(/^(?:rootProject|project)$/)).op('.'))
+  .alt(
+    q.opt(q.sym<Ctx>('ext').op('.')).sym(regEx(/^(?:property|getProperty)$/)),
+    q
+      .sym<Ctx>(regEx(/^(?:extra|ext)$/))
+      .op('.')
+      .sym('get')
+  )
+  .tree({
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
+  });
+
 // "foo${bar}baz"
 const qTemplateString = q
   .tree({
@@ -78,6 +96,11 @@ const qTemplateString = q
     },
     search: q.alt(
       qStringValue.handler((ctx) => {
+        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
+        ctx.varTokens = [];
+        return ctx;
+      }),
+      qPropertyAccessIdentifier.handler((ctx) => {
         ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
         ctx.varTokens = [];
         return ctx;
@@ -199,7 +222,7 @@ const qPlugins = q
   )
   .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
   .sym('version')
-  .alt(qTemplateString, qVariableAccessIdentifier)
+  .alt(qTemplateString, qPropertyAccessIdentifier, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handlePlugin)
   .handler(cleanupTempVars);
@@ -367,6 +390,7 @@ const qLongFormDep = q
 const qApplyFromFile = q
   .alt(
     qTemplateString, // apply from: 'foo.gradle'
+    qPropertyAccessIdentifier, // apply(from = property("foo"))
     q
       .alt(
         q
@@ -382,11 +406,19 @@ const qApplyFromFile = q
           .begin<Ctx>()
           .opt(
             q
-              .alt(qTemplateString, qVariableAccessIdentifier)
+              .alt(
+                qTemplateString,
+                qPropertyAccessIdentifier,
+                qVariableAccessIdentifier
+              )
               .op(',')
               .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
           )
-          .alt(qTemplateString, qVariableAccessIdentifier)
+          .alt(
+            qTemplateString,
+            qPropertyAccessIdentifier,
+            qVariableAccessIdentifier
+          )
           .end(),
       })
   )
