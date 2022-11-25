@@ -889,6 +889,36 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(res).toBeNull();
     });
 
+    it('handles files mismatch for Azure', async () => {
+      httpMock
+        .scope('https://dev.azure.com/')
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=/`
+        )
+        .reply(200, azureItemsResponse)
+        .get(
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+        )
+        .reply(200, {
+          treeEntries: [
+            { name: 'lib', gitObjectType: 'tree' },
+            { name: 'README.md', gitObjectType: 'blob' },
+          ],
+        });
+
+      const res = await getReleaseNotesMd(
+        {
+          ...azureProject,
+          repository: 'some-repo',
+        },
+        {
+          version: '2.0.0',
+          gitRef: '2.0.0',
+        } as ChangeLogRelease
+      );
+      expect(res).toBeNull();
+    });
+
     it('handles wrong format', async () => {
       httpMock
         .scope('https://api.github.com')
