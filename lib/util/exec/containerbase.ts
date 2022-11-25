@@ -116,6 +116,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
   },
+  rust: {
+    datasource: 'docker',
+    depName: 'rust',
+    versioning: 'docker',
+  },
   yarn: {
     datasource: 'npm',
     depName: 'yarn',
