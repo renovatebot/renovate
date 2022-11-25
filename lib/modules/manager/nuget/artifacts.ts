@@ -132,22 +132,19 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = await getDependentPackageFiles(
+  const deps = await getDependentPackageFiles(
     packageFileName,
     isCentralManament
   );
-
-  if (!isCentralManament) {
-    packageFiles.push(packageFileName);
-  }
+  const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
     `Found ${packageFiles.length} dependent package files`
   );
 
-  const lockFileNames = packageFiles.map((f) =>
-    getSiblingFileName(f, 'packages.lock.json')
+  const lockFileNames = deps.map((f) =>
+    getSiblingFileName(f.name, 'packages.lock.json')
   );
 
   const existingLockFileContentMap = await getFileContentMap(lockFileNames);
