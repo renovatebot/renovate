@@ -2,6 +2,12 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { GitRefsDatasource } from '../../datasource/git-refs';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
+import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
+import { HelmDatasource } from '../../datasource/helm';
 import type { ExtractConfig } from '../types';
 import { extractAllPackageFiles, extractPackageFile } from '.';
 
@@ -23,9 +29,16 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             currentValue: '1.7.0',
-            datasource: 'helm',
+            datasource: HelmDatasource.id,
             depName: 'external-dns',
             registryUrls: ['https://kubernetes-sigs.github.io/external-dns/'],
+          },
+          {
+            currentValue: 'v11.35.4',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
           },
         ],
       });
@@ -33,7 +46,7 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts version and components from system manifests', () => {
       const result = extractPackageFile(
-        Fixtures.get('system.yaml'),
+        Fixtures.get('flux-system/gotk-components.yaml'),
         'clusters/my-cluster/flux-system/gotk-components.yaml'
       );
       expect(result).toEqual({
@@ -69,10 +82,19 @@ describe('modules/manager/flux/extract', () => {
 
     it('extracts releases without repositories', () => {
       const result = extractPackageFile(
-        Fixtures.get('release.yaml'),
-        'release.yaml'
+        Fixtures.get('helmRelease.yaml'),
+        'helmRelease.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: 'helm',
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRelease resources without an apiVersion', () => {
@@ -88,14 +110,23 @@ describe('modules/manager/flux/extract', () => {
     it('ignores HelmRepository resources without metadata', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helmRelease.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRelease resources without a chart name', () => {
@@ -142,13 +173,22 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('does not match HelmRelease resources without a sourceRef', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('source.yaml')}
+          ${Fixtures.get('helmSource.yaml')}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -162,13 +202,22 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('does not match HelmRelease resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('source.yaml')}
+          ${Fixtures.get('helmSource.yaml')}
           ---
           apiVersion: helm.toolkit.fluxcd.io/v2beta1
           kind: HelmRelease
@@ -183,13 +232,22 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRepository resources without a namespace', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helmRelease.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
@@ -198,13 +256,22 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
     });
 
     it('ignores HelmRepository resources without a URL', () => {
       const result = extractPackageFile(
         codeBlock`
-          ${Fixtures.get('release.yaml')}
+          ${Fixtures.get('helmRelease.yaml')}
           ---
           apiVersion: source.toolkit.fluxcd.io/v1beta1
           kind: HelmRepository
@@ -214,7 +281,205 @@ describe('modules/manager/flux/extract', () => {
         `,
         'test.yaml'
       );
-      expect(result?.deps[0].skipReason).toBe('unknown-registry');
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2.0.2',
+            datasource: HelmDatasource.id,
+            depName: 'sealed-secrets',
+            skipReason: 'unknown-registry',
+          },
+        ],
+      });
+    });
+
+    it('ignores GitRepository without a tag nor a commit', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            url: https://github.com/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          { depName: 'renovate-repo', skipReason: 'unversioned-reference' },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a commit', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              commit: c93154b
+            url: https://github.com/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest: 'c93154b',
+            datasource: GitRefsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://github.com/renovatebot/renovate',
+            replaceString: 'c93154b',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a tag from github with ssh', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              tag: v11.35.9
+            url: git@github.com:renovatebot/renovate.git
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v11.35.9',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a tag from github', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              tag: v11.35.9
+            url: https://github.com/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: 'v11.35.9',
+            datasource: GithubTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a tag from gitlab', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              tag: 1.2.3
+            url: https://gitlab.com/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '1.2.3',
+            datasource: GitlabTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://gitlab.com/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a tag from bitbucket', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              tag: 2020.5.6+staging.ze
+            url: https://bitbucket.org/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '2020.5.6+staging.ze',
+            datasource: BitBucketTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'renovatebot/renovate',
+            sourceUrl: 'https://bitbucket.org/renovatebot/renovate',
+          },
+        ],
+      });
+    });
+
+    it('extracts GitRepository with a tag from an unkown domain', () => {
+      const result = extractPackageFile(
+        codeBlock`
+          apiVersion: source.toolkit.fluxcd.io/v1beta1
+          kind: GitRepository
+          metadata:
+            name: renovate-repo
+            namespace: renovate-system
+          spec:
+            ref:
+              tag: "7.56.4_p1"
+            url: https://example.com/renovatebot/renovate
+        `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentValue: '7.56.4_p1',
+            datasource: GitTagsDatasource.id,
+            depName: 'renovate-repo',
+            packageName: 'https://example.com/renovatebot/renovate',
+            sourceUrl: 'https://example.com/renovatebot/renovate',
+          },
+        ],
+      });
     });
 
     it('ignores resources of an unknown kind', () => {
@@ -250,20 +515,50 @@ describe('modules/manager/flux/extract', () => {
   describe('extractAllPackageFiles()', () => {
     it('extracts multiple files', async () => {
       const result = await extractAllPackageFiles(config, [
-        'lib/modules/manager/flux/__fixtures__/release.yaml',
-        'lib/modules/manager/flux/__fixtures__/source.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
+        'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
       ]);
+
       expect(result).toEqual([
         {
           deps: [
             {
               currentValue: '2.0.2',
-              datasource: 'helm',
+              datasource: HelmDatasource.id,
               depName: 'sealed-secrets',
               registryUrls: ['https://bitnami-labs.github.io/sealed-secrets'],
             },
           ],
-          packageFile: 'lib/modules/manager/flux/__fixtures__/release.yaml',
+          packageFile: 'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
+        },
+        {
+          deps: [
+            {
+              currentValue: 'v11.35.4',
+              datasource: GithubTagsDatasource.id,
+              depName: 'renovate-repo',
+              packageName: 'renovatebot/renovate',
+              sourceUrl: 'https://github.com/renovatebot/renovate',
+            },
+          ],
+          packageFile: 'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        },
+        {
+          deps: [
+            {
+              currentValue: 'v0.24.1',
+              datasource: 'github-releases',
+              depName: 'fluxcd/flux2',
+              managerData: {
+                components:
+                  'source-controller,kustomize-controller,helm-controller,notification-controller',
+              },
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
         },
       ]);
     });
