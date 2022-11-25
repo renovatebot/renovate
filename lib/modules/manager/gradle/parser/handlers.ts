@@ -9,6 +9,7 @@ import type { Ctx, GradleManagerData, VariableData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
   ANNOYING_METHODS,
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   interpolateString,
   loadFromTokenMap,
@@ -318,6 +319,47 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   ctx.deps.push(...matchResult.deps);
   ctx.globalVars = { ...ctx.globalVars, ...matchResult.vars };
   ctx.depRegistryUrls.push(...matchResult.urls);
+
+  return ctx;
+}
+
+export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
+  const pluginName = loadFromTokenMap(ctx, 'pluginName')[0].value;
+  const versionTokens = loadFromTokenMap(ctx, 'version');
+  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  if (!versionValue) {
+    return ctx;
+  }
+
+  const groupIdArtifactId =
+    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS];
+  const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
+  if (!dep) {
+    return ctx;
+  }
+
+  dep.depName = pluginName;
+  dep.packageName = groupIdArtifactId;
+  dep.managerData = {
+    fileReplacePosition: versionTokens[0].offset,
+    packageFile: ctx.packageFile,
+  };
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    const varData = ctx.globalVars[versionTokens[0].value];
+    if (varData) {
+      dep.currentValue = varData.value;
+      dep.managerData = {
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
+    }
+  }
+
+  ctx.deps.push(dep);
 
   return ctx;
 }
