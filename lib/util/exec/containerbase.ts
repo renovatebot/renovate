@@ -55,6 +55,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'fluxcd/flux2',
     versioning: semverVersioningId,
   },
+  golang: {
+    datasource: 'golang-version',
+    depName: 'golang',
+    versioning: npmVersioningId,
+  },
   helm: {
     datasource: 'github-releases',
     depName: 'helm/helm',
