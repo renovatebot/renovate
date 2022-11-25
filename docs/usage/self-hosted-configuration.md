@@ -161,6 +161,7 @@ Supported tools for dynamic install are:
 - `composer`
 - `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
