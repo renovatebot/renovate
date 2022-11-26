@@ -134,7 +134,7 @@ const repoGroups = {
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
-  'middy-lambda-middleware': 'https://github.com/middyjs/middy',
+  'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
