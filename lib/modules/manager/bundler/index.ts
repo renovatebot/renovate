@@ -1,13 +1,12 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { ProgrammingLanguage } from '../../../constants';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
 import * as rubyVersioning from '../../versioning/ruby';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
-import { getRangeStrategy } from './range';
 import { updateLockedDependency } from './update-locked';
 
-export const language = ProgrammingLanguage.Ruby;
+export const language: ProgrammingLanguage = 'ruby';
 export const supportsLockFileMaintenance = true;
 
 /*
@@ -18,7 +17,6 @@ export const supportsLockFileMaintenance = true;
 export {
   extractPackageFile, // Mandatory unless extractAllPackageFiles is used instead
   updateArtifacts, // Optional
-  getRangeStrategy, // Optional
   updateLockedDependency,
 };
 

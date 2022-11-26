@@ -206,7 +206,6 @@ export async function exec(
     const durationMs = Math.round(Date.now() - startTime);
     logger.debug(
       {
-        cmd: rawCmd,
         durationMs,
         stdout: res.stdout,
         stderr: res.stderr,

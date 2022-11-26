@@ -8,7 +8,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import * as nodeVersioning from '../../../versioning/node';
-import { isValid, isVersion } from '../../../versioning/npm';
+import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
   NpmLockFiles,
@@ -18,7 +18,6 @@ import type {
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
 
@@ -47,7 +46,7 @@ export async function extractPackageFile(
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
 
@@ -73,9 +72,6 @@ export async function extractPackageFile(
   } else {
     yarnWorkspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
-    ? 'library'
-    : 'app';
 
   const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
@@ -204,10 +200,9 @@ export async function extractPackageFile(
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
         constraints.yarn = dep.currentValue;
-        if (
-          dep.currentValue.startsWith('2') ||
-          dep.currentValue.startsWith('3')
-        ) {
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
@@ -239,6 +234,11 @@ export async function extractPackageFile(
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
+          dep.packageName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
       } else {
@@ -458,7 +458,6 @@ export async function extractPackageFile(
     deps,
     packageJsonName,
     packageFileVersion,
-    packageJsonType,
     npmrc,
     ...lockFiles,
     managerData: {
@@ -498,7 +497,7 @@ export async function extractAllPackageFiles(
         });
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.debug(`No content found in ${packageFile}`);
     }
   }
 

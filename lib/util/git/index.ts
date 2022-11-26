@@ -27,7 +27,7 @@ import { logger } from '../../logger';
 import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
-import { Limit, incLimitedValue } from '../../workers/global/limits';
+import { incLimitedValue } from '../../workers/global/limits';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -45,7 +45,6 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { getCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -237,8 +236,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
-    LANG: 'C',
-    LC_ALL: 'C',
+    LANG: 'C.UTF-8',
+    LC_ALL: 'C.UTF-8',
   });
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -299,11 +298,11 @@ export async function writeGitAuthor(): Promise<void> {
   config.writeGitDone = true;
   try {
     if (gitAuthorName) {
-      logger.debug({ gitAuthorName }, 'Setting git author name');
+      logger.debug(`Setting git author name: ${gitAuthorName}`);
       await git.addConfig('user.name', gitAuthorName);
     }
     if (gitAuthorEmail) {
-      logger.debug({ gitAuthorEmail }, 'Setting git author email');
+      logger.debug(`Setting git author email: ${gitAuthorEmail}`);
       await git.addConfig('user.email', gitAuthorEmail);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -488,29 +487,6 @@ export function branchExists(branchName: string): boolean {
 // Return the commit SHA for a branch
 export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
-}
-
-// Return the parent commit SHA for a branch
-export async function getBranchParentSha(
-  branchName: string
-): Promise<CommitSha | null> {
-  const branchSha = getBranchCommit(branchName);
-  let parentSha = getCachedBranchParentShaResult(branchName, branchSha);
-  if (parentSha !== null) {
-    logger.debug(
-      `branch.getBranchParentSha(): using cached result "${parentSha}"`
-    );
-    return parentSha;
-  }
-
-  try {
-    // TODO: branchSha can be null (#7154)
-    parentSha = await git.revparse([`${branchSha!}^`]);
-    return parentSha;
-  } catch (err) {
-    logger.debug({ err }, 'Error getting branch parent sha');
-    return null;
-  }
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -706,10 +682,10 @@ export async function isBranchConflicted(
   }
 
   const isConflicted = getCachedConflictResult(
-    baseBranch,
-    baseBranchSha,
     branch,
-    branchSha
+    branchSha,
+    baseBranch,
+    baseBranchSha
   );
   if (is.boolean(isConflicted)) {
     logger.debug(
@@ -754,7 +730,7 @@ export async function isBranchConflicted(
     }
   }
 
-  setCachedConflictResult(baseBranch, baseBranchSha, branch, branchSha, result);
+  setCachedConflictResult(branch, result);
   logger.debug(`branch.isConflicted(): ${result}`);
   return result;
 }
@@ -763,25 +739,25 @@ export async function deleteBranch(branchName: string): Promise<void> {
   await syncGit();
   try {
     await gitRetry(() => git.raw(['push', '--delete', 'origin', branchName]));
-    logger.debug({ branchName }, 'Deleted remote branch');
+    logger.debug(`Deleted remote branch: ${branchName}`);
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ branchName }, 'No remote branch to delete');
+    logger.debug(`No remote branch to delete with name: ${branchName}`);
   }
   try {
     await deleteLocalBranch(branchName);
     // istanbul ignore next
-    logger.debug({ branchName }, 'Deleted local branch');
+    logger.debug(`Deleted local branch: ${branchName}`);
   } catch (err) {
     const errChecked = checkForPlatformFailure(err);
     // istanbul ignore if
     if (errChecked) {
       throw errChecked;
     }
-    logger.debug({ branchName }, 'No local branch to delete');
+    logger.debug(`No local branch to delete with name: ${branchName}`);
   }
   delete config.branchCommits[branchName];
 }
@@ -804,7 +780,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
     status = await git.status();
     await gitRetry(() => git.merge(['--ff-only', branchName]));
     await gitRetry(() => git.push('origin', config.currentBranch));
-    incLimitedValue(Limit.Commits);
+    incLimitedValue('Commits');
   } catch (err) {
     logger.debug(
       {
@@ -982,7 +958,7 @@ export async function prepareCommit({
           ) {
             throw err;
           }
-          logger.debug({ fileName }, 'Cannot commit ignored file');
+          logger.debug(`Cannot commit ignored file: ${fileName}`);
           ignoredFiles.push(file.path);
         }
       }
@@ -1054,7 +1030,7 @@ export async function pushCommit({
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
-    incLimitedValue(Limit.Commits);
+    incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
     handleCommitError(files, branchName, err);

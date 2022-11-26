@@ -20,6 +20,14 @@ export interface Comment {
   body: string;
 }
 
+export interface GhRestRepo {
+  full_name: string;
+  default_branch: string;
+  owner: {
+    login: string;
+  };
+}
+
 export interface GhRestPr {
   head: {
     ref: string;
@@ -80,7 +88,6 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string | null;
-  forkMode?: boolean;
   forkToken?: string;
   prList: GhPr[] | null;
   issueList: any[] | null;
@@ -89,6 +96,7 @@ export interface LocalRepoConfig {
   repositoryOwner: string;
   repository: string | null;
   renovateUsername: string | undefined;
+  renovateForkUser: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;

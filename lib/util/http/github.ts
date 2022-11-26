@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
-import { PlatformId } from '../../constants';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -74,15 +73,15 @@ function handleGotError(
     err.code === 'ECONNRESET'
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (
     err.statusCode === 403 &&
@@ -99,7 +98,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
-    logger.debug({ path }, 'Endpoint needs paid GitHub plan');
+    logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
@@ -126,7 +125,7 @@ function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      return new ExternalHostError(err, PlatformId.Github);
+      return new ExternalHostError(err, 'github');
     }
     return new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -146,18 +145,13 @@ function handleGotError(
       return err;
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    return new ExternalHostError(err, PlatformId.Github);
+    return new ExternalHostError(err, 'github');
   }
   if (
     err.statusCode === 410 &&
     err.body?.message === 'Issues are disabled for this repo'
   ) {
     return err;
-  }
-  if (err.statusCode === 404) {
-    logger.debug({ url: path }, 'GitHub 404');
-  } else {
-    logger.debug({ err }, 'Unknown GitHub error');
   }
   return err;
 }
@@ -266,10 +260,7 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
 }
 
 export class GithubHttp extends Http<GithubHttpOptions> {
-  constructor(
-    hostType: string = PlatformId.Github,
-    options?: GithubHttpOptions
-  ) {
+  constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
   }
 

@@ -1,6 +1,6 @@
 import AggregateError from 'aggregate-error';
-import { TimeoutError } from 'got';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../cache/memory';
 import type {
   GithubGraphqlResponse,
@@ -30,13 +30,11 @@ function isUnknownGraphqlError(err: Error): boolean {
   return message.startsWith('Something went wrong while executing your query.');
 }
 
-function isTimeoutError(err: Error): err is TimeoutError {
-  return err instanceof TimeoutError;
-}
-
 function canBeSolvedByShrinking(err: Error): boolean {
   const errors: Error[] = err instanceof AggregateError ? [...err] : [err];
-  return errors.some((e) => isTimeoutError(e) || isUnknownGraphqlError(e));
+  return errors.some(
+    (e) => err instanceof ExternalHostError || isUnknownGraphqlError(e)
+  );
 }
 
 export class GithubGraphqlDatasourceHelper<
@@ -77,6 +75,8 @@ export class GithubGraphqlDatasourceHelper<
   private queryCount = 0;
 
   private cursor: string | null = null;
+
+  private isCacheable = false;
 
   constructor(
     packageConfig: GithubPackageConfig,
@@ -168,8 +168,11 @@ export class GithubGraphqlDatasourceHelper<
 
     this.queryCount += 1;
 
-    const isRepoPrivate = data.repository.isRepoPrivate;
-    const res = { ...data.repository.payload, isRepoPrivate };
+    if (!this.isCacheable && data.repository.isRepoPrivate === false) {
+      this.isCacheable = true;
+    }
+
+    const res = data.repository.payload;
     return [res, null];
   }
 
@@ -208,7 +211,11 @@ export class GithubGraphqlDatasourceHelper<
         if (!shrinkResult) {
           throw err;
         }
-        logger.debug({ err, size: this.itemsPerQuery }, 'Shrinking page size');
+        const { body, ...options } = this.getRawQueryOptions();
+        logger.debug(
+          { options, newSize: this.itemsPerQuery },
+          'Shrinking GitHub GraphQL page size after error'
+        );
       }
     }
 
@@ -223,11 +230,14 @@ export class GithubGraphqlDatasourceHelper<
     while (hasNextPage && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
-      const pageResultItems = queryResult.nodes
-        .map((item) => this.datasourceAdapter.transform(item))
-        .filter((item): item is ResultItem => item !== null);
-
-      resultItems.push(...pageResultItems);
+      for (const node of queryResult.nodes) {
+        const item = this.datasourceAdapter.transform(node);
+        // istanbul ignore if: will be tested later
+        if (!item) {
+          continue;
+        }
+        resultItems.push(item);
+      }
 
       hasNextPage = queryResult?.pageInfo?.hasNextPage;
       cursor = queryResult?.pageInfo?.endCursor;
@@ -241,9 +251,8 @@ export class GithubGraphqlDatasourceHelper<
 
   /**
    * This method intentionally was made not async, though it returns `Promise`.
-   *
-   * It helps us to avoid potential race conditions during concurrent fetching
-   * of the same package releases.
+   * This method doesn't make pages to be fetched concurrently.
+   * Instead, it ensures that same package release is not fetched twice.
    */
   private doConcurrentQuery(): Promise<ResultItem[]> {
     const packageFingerprint = this.getFingerprint();
@@ -254,7 +263,7 @@ export class GithubGraphqlDatasourceHelper<
     return resultPromise;
   }
 
-  private async getItems(): Promise<ResultItem[]> {
+  async getItems(): Promise<ResultItem[]> {
     const res = await this.doConcurrentQuery();
     return res;
   }

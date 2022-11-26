@@ -3,7 +3,7 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { HostRule, PrState } from '../../../types';
+import type { HostRule } from '../../../types';
 import type { GitProtocol } from '../../../types/git';
 import * as git from '../../../util/git';
 import { BitbucketServerHttp } from '../../../util/http/bitbucket-server';
@@ -20,9 +20,9 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
-  MERGED: PrState.Merged,
-  DECLINED: PrState.Closed,
-  OPEN: PrState.Open,
+  MERGED: 'merged',
+  DECLINED: 'closed',
+  OPEN: 'open',
 };
 
 export function prInfo(pr: BbsRestPr): BbsPr {
@@ -164,7 +164,7 @@ function generateUrlFromEndpoint(
     }scm`,
     repository,
   });
-  logger.debug({ url: generatedUrl }, `using generated endpoint URL`);
+  logger.debug(`Using generated endpoint URL: ${generatedUrl}`);
   return generatedUrl;
 }
 
@@ -192,7 +192,7 @@ export function getRepoGitUrl(
     if (sshUrl === undefined) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: sshUrl.href }, `using ssh URL`);
+    logger.debug(`Using ssh URL: ${sshUrl.href}`);
     return sshUrl.href;
   }
   let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');

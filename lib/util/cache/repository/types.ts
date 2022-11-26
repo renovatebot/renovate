@@ -4,7 +4,6 @@ import type {
 } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import type { GitConflictsCache } from '../../git/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -52,13 +51,17 @@ export interface BranchCache {
    */
   isBehindBase?: boolean;
   /**
+   * Whether the update branch is in conflict with base branch
+   */
+  isConflicted?: boolean;
+  /**
    * Whether a person not listed in gitIgnoredAuthors updated the branch.
    */
   isModified?: boolean;
   /**
-   * Parent commit of branch sha
+   *
    */
-  parentSha: string | null;
+  pristine?: boolean;
   /**
    * Pr nunber of PR created from this branch
    */
@@ -83,7 +86,6 @@ export interface RepoCacheData {
   platform?: {
     github?: Record<string, unknown>;
   };
-  gitConflicts?: GitConflictsCache;
   prComments?: Record<number, Record<string, string>>;
 }
 

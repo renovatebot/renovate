@@ -750,33 +750,33 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'FROM nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}${patch1}$patch2',
+            'FROM nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}${patch1}$patch2\n',
           currentDigest: undefined,
           currentValue: '1.20',
           datasource: 'docker',
           depName: 'nginx',
           depType: 'final',
-          replaceString: 'FROM nginx:1.20${patch1}$patch2',
+          replaceString: 'FROM nginx:1.20${patch1}$patch2\n',
         },
       ]);
     });
 
     it('handles FROM with version in ARG value', () => {
       const res = extractPackageFile(
-        'ARG\tVARIANT="1.60.0-bullseye"\nFROM\trust:${VARIANT}\n',
+        'ARG\tVARIANT="1.60.0-bullseye" \nFROM\trust:${VARIANT}\n',
         '',
         {}
       )?.deps;
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG	VARIANT="{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}"',
+            'ARG\tVARIANT="{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}" \n',
           currentDigest: undefined,
           currentValue: '1.60.0-bullseye',
           datasource: 'docker',
           depName: 'rust',
           depType: 'final',
-          replaceString: 'ARG	VARIANT="1.60.0-bullseye"',
+          replaceString: 'ARG\tVARIANT="1.60.0-bullseye" \n',
         },
       ]);
     });
@@ -790,12 +790,12 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}}',
+            'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}}\n',
           currentValue: 'xenial',
           datasource: 'docker',
           depName: 'ubuntu',
           depType: 'final',
-          replaceString: 'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}',
+          replaceString: 'ARG IMAGE_VERSION=${IMAGE_VERSION:-ubuntu:xenial}\n',
           versioning: 'ubuntu',
         },
       ]);
@@ -833,23 +833,23 @@ describe('modules/manager/dockerfile/extract', () => {
       expect(res).toEqual([
         {
           autoReplaceStringTemplate:
-            'ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            'ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
           currentDigest: undefined,
           currentValue: '1.19',
           datasource: 'docker',
           depName: 'nginx',
           depType: 'stage',
-          replaceString: 'ARG base=nginx:1.19',
+          replaceString: 'ARG base=nginx:1.19\n',
         },
         {
           autoReplaceStringTemplate:
-            'ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            'ARG base=nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
           currentDigest: undefined,
           currentValue: '1.20',
           datasource: 'docker',
           depName: 'nginx',
           depType: 'final',
-          replaceString: 'ARG base=nginx:1.20',
+          replaceString: 'ARG base=nginx:1.20\n',
         },
       ]);
     });
@@ -890,7 +890,7 @@ describe('modules/manager/dockerfile/extract', () => {
           autoReplaceStringTemplate:
             ' ARG \\\n' +
             '\t# multi-line arg\n' +
-            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
           currentDigest: undefined,
           currentValue: '3.15.4',
           datasource: 'docker',
@@ -899,7 +899,7 @@ describe('modules/manager/dockerfile/extract', () => {
           replaceString:
             ' ARG \\\n' +
             '\t# multi-line arg\n' +
-            '   ALPINE_VERSION=alpine:3.15.4',
+            '   ALPINE_VERSION=alpine:3.15.4\n',
         },
         {
           autoReplaceStringTemplate:
@@ -951,7 +951,7 @@ describe('modules/manager/dockerfile/extract', () => {
           autoReplaceStringTemplate:
             ' ARG `\n' +
             '\t# multi-line arg\n' +
-            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            '   ALPINE_VERSION=alpine:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}\n',
           currentDigest: undefined,
           currentValue: '3.15.4',
           datasource: 'docker',
@@ -960,7 +960,7 @@ describe('modules/manager/dockerfile/extract', () => {
           replaceString:
             ' ARG `\n' +
             '\t# multi-line arg\n' +
-            '   ALPINE_VERSION=alpine:3.15.4',
+            '   ALPINE_VERSION=alpine:3.15.4\n',
         },
         {
           autoReplaceStringTemplate:

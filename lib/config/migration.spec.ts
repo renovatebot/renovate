@@ -1,4 +1,3 @@
-import { PlatformId } from '../constants';
 import { GlobalConfig } from './global';
 import * as configMigration from './migration';
 import type {
@@ -16,7 +15,7 @@ describe('config/migration', () => {
       const config: TestRenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
-        platform: PlatformId.Github,
+        platform: 'github',
         hostRules: [
           {
             platform: 'docker',
@@ -550,7 +549,7 @@ describe('config/migration', () => {
             packagePatterns: ['^bar'],
             excludePackageNames: ['baz'],
             excludePackagePatterns: ['^baz'],
-            sourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            sourceUrlPrefixes: ['https://github.com/lodash'],
             updateTypes: ['major'],
           },
         ],
@@ -571,7 +570,7 @@ describe('config/migration', () => {
             matchPackageNames: ['foo'],
             matchPackagePatterns: ['^bar'],
             matchPaths: ['package.json'],
-            matchSourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            matchSourceUrlPrefixes: ['https://github.com/lodash'],
             matchUpdateTypes: ['major'],
           },
         ],
