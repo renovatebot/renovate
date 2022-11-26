@@ -36,6 +36,8 @@ const repoGroups = {
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-lambda-powertools-typescript':
+    'https://github.com/awslabs/aws-lambda-powertools-typescript',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -132,6 +134,7 @@ const repoGroups = {
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
+  'middy-lambda-middleware': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
