@@ -94,39 +94,5 @@ replace (
         ],
       });
     });
-
-    it('extracts digest updates for untagged releases', () => {
-      const goMod = `
-module github.com/omercnet/renovate-go-test
-
-go 1.19
-
-require github.com/omercnet/go-untagged v0.0.2-0.20221125140048-3917a80154e7
-
-`;
-      const res = extractPackageFile(goMod);
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: '1.19',
-            datasource: 'golang-version',
-            depName: 'go',
-            depType: 'golang',
-            managerData: { lineNumber: 3 },
-            rangeStrategy: 'replace',
-            versioning: 'npm',
-          },
-          {
-            currentDigest: '3917a80154e7',
-            currentValue: 'v0.0.2-0.20221125140048-3917a80154e7',
-            datasource: 'go',
-            depName: 'github.com/omercnet/go-untagged',
-            depType: 'require',
-            digestOneAndOnly: true,
-            managerData: { lineNumber: 5 },
-          },
-        ],
-      });
-    });
   });
 });

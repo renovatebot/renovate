@@ -59,9 +59,8 @@ export class GoDatasource extends Datasource {
       return null;
     }
 
-    // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
-    const tag =
-      value && !/^v\d+\.\d+\.\d+-0?\.?.*/.test(value) ? value : undefined;
+    // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
+    const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {

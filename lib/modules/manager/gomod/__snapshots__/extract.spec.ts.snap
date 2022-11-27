@@ -605,12 +605,10 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts multi-line 
     },
   },
   {
-    "currentDigest": "43d17e14b714",
     "currentValue": "v4.0.0-20180807092216-43d17e14b714",
     "datasource": "go",
     "depName": "gopkg.in/src-d/go-git.v4",
     "depType": "require",
-    "digestOneAndOnly": true,
     "managerData": {
       "lineNumber": 58,
       "multiLine": true,
