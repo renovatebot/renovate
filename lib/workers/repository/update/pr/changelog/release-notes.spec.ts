@@ -893,11 +893,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://dev.azure.com/')
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=/`
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0`
         )
         .reply(200, azureItemsResponse)
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`
         )
         .reply(200, {
           treeEntries: [

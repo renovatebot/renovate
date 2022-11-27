@@ -80,7 +80,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { relativePath: relativeChangelogFile } = files.shift()!;
-  const changelogFile = `${sourceDirectory}${relativeChangelogFile}`;
+  const changelogFile = `${sourceDirectory.replace(/\/?$/, '/')}${relativeChangelogFile}`;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(

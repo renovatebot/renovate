@@ -65,52 +65,52 @@ exports[`workers/repository/update/pr/changelog/azure getChangeLogJSON uses Azur
     {
       "changes": [],
       "compare": {
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.6.0&targetVersion=GTrefs/tags/v5.6.1",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.6.0&targetVersion=GTv5.6.1",
       },
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": {
         "notesSourceUrl": "",
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.6.0&targetVersion=GTrefs/tags/v5.6.1",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.6.0&targetVersion=GTv5.6.1",
       },
       "version": "5.6.1",
     },
     {
       "changes": [],
       "compare": {
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.5.0&targetVersion=GTrefs/tags/v5.6.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.5.0&targetVersion=GTv5.6.0",
       },
       "date": "2020-02-13T15:37:00.000Z",
       "gitRef": undefined,
       "releaseNotes": {
         "notesSourceUrl": "",
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.5.0&targetVersion=GTrefs/tags/v5.6.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.5.0&targetVersion=GTv5.6.0",
       },
       "version": "5.6.0",
     },
     {
       "changes": [],
       "compare": {
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.4.0&targetVersion=GTrefs/tags/v5.5.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.4.0&targetVersion=GTv5.5.0",
       },
       "date": undefined,
       "gitRef": "eba303e91c930292198b2fc57040145682162a1b",
       "releaseNotes": {
         "notesSourceUrl": "",
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.4.0&targetVersion=GTrefs/tags/v5.5.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.4.0&targetVersion=GTv5.5.0",
       },
       "version": "5.5.0",
     },
     {
       "changes": [],
       "compare": {
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.2.0&targetVersion=GTrefs/tags/v5.4.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.2.0&targetVersion=GTv5.4.0",
       },
       "date": "2018-08-24T14:23:00.000Z",
       "gitRef": undefined,
       "releaseNotes": {
         "notesSourceUrl": "",
-        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTrefs/tags/v5.2.0&targetVersion=GTrefs/tags/v5.4.0",
+        "url": "https://dev.azure.com/some-org/some-project/_git/some-repo/branchCompare?baseVersion=GTv5.2.0&targetVersion=GTv5.4.0",
       },
       "version": "5.4.0",
     },
