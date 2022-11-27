@@ -28,7 +28,7 @@ function getDep(
   } else {
     dep.skipReason = 'unsupported-version';
   }
-  const digestMatch = regEx(/v\d+\.\d+\.\d+-0?\.?\d{14}-([a-f0-9]{12})/).exec(
+  const digestMatch = regEx(/v\d+\.\d+\.\d+-(?:0\.)?\d{14}-([a-f0-9]{12})/).exec(
     currentValue
   );
   if (digestMatch) {
