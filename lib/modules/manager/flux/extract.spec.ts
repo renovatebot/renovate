@@ -565,6 +565,7 @@ describe('modules/manager/flux/extract', () => {
           {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'latest',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
           },
@@ -625,6 +626,7 @@ describe('modules/manager/flux/extract', () => {
           {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'latest',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
           },

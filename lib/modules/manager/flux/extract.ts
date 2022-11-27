@@ -10,6 +10,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { isSystemManifest } from './common';
 import type {
@@ -20,17 +21,6 @@ import type {
   ResourceFluxManifest,
   SystemFluxManifest,
 } from './types';
-
-export function splitTagParts(currentTag: string): PackageDependency {
-  const [currentDepTag, currentDigest] = currentTag.split('@');
-  const depTagSplit = currentDepTag.split(':');
-  const currentValue = depTagSplit.pop();
-  const dep: PackageDependency = {
-    currentValue,
-    currentDigest,
-  };
-  return dep;
-}
 
 function readManifest(content: string, file: string): FluxManifest | null {
   if (isSystemManifest(file)) {
@@ -218,14 +208,16 @@ function resolveResourceManifest(
         break;
       }
       case 'OCIRepository': {
+        const container = resource.spec.url?.replace('oci://', '');
         const dep: PackageDependency<FluxManagerData> = {
-          depName: resource.spec.url?.replace('oci://', ''),
+          depName: container,
         };
         if (resource.spec.ref?.digest) {
           dep.currentDigest = resource.spec.ref.digest;
+          dep.currentValue = 'latest';
           dep.datasource = DockerDatasource.id;
         } else if (resource.spec.ref?.tag) {
-          const containerTag = splitTagParts(resource.spec.ref?.tag);
+          const containerTag = getDep(container + ':' + resource.spec.ref?.tag);
           dep.autoReplaceStringTemplate =
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.currentDigest = containerTag.currentDigest;
