@@ -61,7 +61,7 @@ export class GoDatasource extends Datasource {
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     const tag =
-      value && !/^v\d+\.\d+\.\d+-0?\.?\d{14}-([a-f0-9]{12})/.test(value)
+      value && !/^v\d+\.\d+\.\d+-(?:0\.)?\d{14}-([a-f0-9]{12})/.test(value)
         ? value
         : undefined;
 
