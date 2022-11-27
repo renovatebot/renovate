@@ -6,9 +6,11 @@ import type { PackageDependency, PackageFile } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
+  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm
 );
-const commentMatchRegExp = regEx(/^\s*#/);
+const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
+const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
+const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
@@ -18,7 +20,7 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
   const contentArr = content
     .split(newlineRegex)
-    .filter((line) => !commentMatchRegExp.test(line));
+    .map((line) => line.replace(commentMatchRegExp, ''));
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';
@@ -28,26 +30,27 @@ export async function extractPackageFile(
       } while (!contentArr[lineNumber].includes('end'));
       let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       while (depMatchGroups) {
-        const { depName, datasource, currentValue, organization } =
-          depMatchGroups;
+        const { app, requirement, opts } = depMatchGroups;
+
+        const github = githubRegexp.exec(opts)?.groups?.value;
+        const organization = organizationRegexp.exec(opts)?.groups?.value;
+
+        const depName = app;
+        const packageName = organization
+          ? `${depName}:${organization}`
+          : depName;
+        const currentValue = requirement || github;
+        const datasource = github ? 'github' : HexDatasource.id;
 
         const dep: PackageDependency = {
           depName,
           currentValue,
+          datasource,
         };
 
-        dep.datasource = datasource || HexDatasource.id;
-
-        if (dep.datasource === HexDatasource.id) {
-          dep.currentValue = currentValue;
-          dep.packageName = depName;
-        }
-
-        if (organization) {
-          dep.packageName += ':' + organization;
-        }
-
-        if (dep.datasource !== HexDatasource.id) {
+        if (datasource === HexDatasource.id) {
+          dep.packageName = packageName;
+        } else {
           dep.skipReason = 'non-hex-dep-types';
         }
 

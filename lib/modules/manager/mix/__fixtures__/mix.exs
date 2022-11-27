@@ -24,6 +24,7 @@ defmodule MyProject.MixProject do
       {:ecto, ">2.1.0 or <=3.0.0"},
       {:cowboy, github: "ninenines/cowboy"},
       {:secret, "~> 1.0", organization: "acme"},
+      {:also_secret, "~> 1.0", only: [:dev, :test], organization: "acme", runtime: false},
       {:ex_doc, ">2.1.0 and <=3.0.0"},
       {:jason, ">= 1.0.0"},
       {:jason, "~> 1.0",

@@ -28,6 +28,12 @@ exports[`modules/manager/mix/extract extractPackageFile() extracts all dependenc
       "packageName": "secret:acme",
     },
     {
+      "currentValue": "~> 1.0",
+      "datasource": "hex",
+      "depName": "also_secret",
+      "packageName": "also_secret:acme",
+    },
+    {
       "currentValue": ">2.1.0 and <=3.0.0",
       "datasource": "hex",
       "depName": "ex_doc",

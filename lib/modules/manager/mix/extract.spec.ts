@@ -31,6 +31,12 @@ describe('modules/manager/mix/extract', () => {
             datasource: 'hex',
             packageName: 'secret:acme',
           },
+          {
+            depName: 'also_secret',
+            currentValue: '~> 1.0',
+            datasource: 'hex',
+            packageName: 'also_secret:acme',
+          },
           { depName: 'ex_doc', currentValue: '>2.1.0 and <=3.0.0' },
           { depName: 'jason', currentValue: '>= 1.0.0' },
           { depName: 'jason', currentValue: '~> 1.0' },
