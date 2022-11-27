@@ -21,7 +21,7 @@ export async function getTags(
   const urlEncodedRepo = encodeURIComponent(repository);
   const url = `${ensureTrailingSlash(
     endpoint
-  )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=100`;
+  )}git/repositories/${urlEncodedRepo}/refs?filter=tags&$top=100&api-version=7.0`;
   try {
     const res = await http.getJsonPaginated<AzureTag>(url);
     const tags = res.body.value;
@@ -51,7 +51,7 @@ export async function getTags(
 export async function getReleaseNotesMd(
   repository: string,
   apiBaseUrl: string,
-  sourceDirectory = "/"
+  sourceDirectory = '/'
 ): Promise<ChangeLogFile | null> {
   logger.trace('azure.getReleaseNotesMd()');
   const urlEncodedRepo = encodeURIComponent(repository);
@@ -61,12 +61,14 @@ export async function getReleaseNotesMd(
 
   const sourceDirectoryId: string = (
     await http.getJson<AzureItem>(
-      `${apiPrefix}items?path=${sourceDirectory}`
+      `${apiPrefix}items?path=${sourceDirectory}&api-version=7.0`
     )
   ).body.objectId;
 
   const tree: AzureTreeNode[] = (
-    await http.getJson<AzureTree>(`${apiPrefix}trees/${sourceDirectoryId}`)
+    await http.getJson<AzureTree>(
+      `${apiPrefix}trees/${sourceDirectoryId}?api-version=7.0`
+    )
   ).body.treeEntries;
   const allFiles = tree.filter((f) => f.gitObjectType === 'blob');
   let files: AzureTreeNode[] = [];
@@ -78,7 +80,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const { relativePath: relativeChangelogFile } = files.shift()!;
-  const changelogFile = `${sourceDirectory}/${relativeChangelogFile}`;
+  const changelogFile = `${sourceDirectory}${relativeChangelogFile}`;
   /* istanbul ignore if */
   if (files.length !== 0) {
     logger.debug(
@@ -87,7 +89,7 @@ export async function getReleaseNotesMd(
   }
 
   const fileRes = await http.get(
-    `${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=6.0`
+    `${apiPrefix}items?path=${changelogFile}&includeContent=true&api-version=7.0`
   );
   const changelogMd = fileRes.body + '\n#\n##';
   return { changelogFile, changelogMd };

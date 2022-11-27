@@ -102,7 +102,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       httpMock
         .scope(matchHost)
         .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100&api-version=7.0'
         )
         .reply(200, {
           value: [
@@ -116,7 +116,7 @@ describe('workers/repository/update/pr/changelog/azure', () => {
         })
         .persist()
         .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0'
         )
         .reply(200, []);
       expect(
@@ -148,14 +148,14 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       httpMock
         .scope(matchHost)
         .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100&api-version=7.0'
         )
         .reply(200, {
           value: [],
         })
         .persist()
         .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0'
         )
         .reply(200, {
           value: [],
@@ -189,12 +189,12 @@ describe('workers/repository/update/pr/changelog/azure', () => {
       httpMock
         .scope(matchHost)
         .get(
-          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100'
+          '/some-org/some-project/_apis/git/repositories/some-repo/refs?filter=tags&$top=100&api-version=7.0'
         )
         .replyWithError('Unknown Azure DevOps Repo')
         .persist()
         .get(
-          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/'
+          '/some-org//some-project/_apis/git/repositories/some-repo/items?path=/&api-version=7.0'
         )
         .reply(200, {
           value: [],

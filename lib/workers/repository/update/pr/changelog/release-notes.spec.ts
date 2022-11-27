@@ -1124,15 +1124,15 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://dev.azure.com/')
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}`
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}&api-version=7.0`
         )
         .reply(200, azureItemsResponse)
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`
         )
         .reply(200, azureTreeResponse)
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}/CHANGELOG.md&includeContent=true&api-version=6.0`
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}/CHANGELOG.md&includeContent=true&api-version=7.0`
         )
         .reply(200, adapterutilsChangelogMd);
       const res = await getReleaseNotesMd(
@@ -1158,11 +1158,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       httpMock
         .scope('https://dev.azure.com/')
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}`
+          `/some-org/some-project/_apis/git/repositories/some-repo/items?path=${sourceDirectory}&api-version=7.0`
         )
         .reply(200, azureItemsResponse)
         .get(
-          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc`
+          `/some-org/some-project/_apis/git/repositories/some-repo/trees/123abc?api-version=7.0`
         )
         .reply(200, {
           body: {

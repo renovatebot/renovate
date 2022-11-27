@@ -138,8 +138,12 @@ export async function getChangeLogJSON(
         };
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
+        const regex = regEx(`^refs/tags/`, undefined, false);
         if (prevHead && nextHead) {
-          release.compare.url = `${baseUrl}_git/${repository}/branchCompare?baseVersion=GT${prevHead}&targetVersion=GT${nextHead}`;
+          release.compare.url = `${baseUrl}_git/${repository}/branchCompare?baseVersion=GT${prevHead.replace(
+            regex,
+            ''
+          )}&targetVersion=GT${nextHead.replace(regex, '')}`;
         }
         const cacheMinutes = 55;
         await packageCache.set(
