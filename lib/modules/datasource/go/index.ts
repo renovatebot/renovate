@@ -24,6 +24,9 @@ export class GoDatasource extends Datasource {
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
+  static readonly pversionRegexp =
+    /v\d+\.\d+\.\d+-(?:(?:\w+\.)?0\.)?\d{14}-([a-f0-9]{12})/;
+
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#7154)
@@ -61,9 +64,7 @@ export class GoDatasource extends Datasource {
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
     const tag =
-      value && !/^v\d+\.\d+\.\d+-(?:0\.)?\d{14}-([a-f0-9]{12})/.test(value)
-        ? value
-        : undefined;
+      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
