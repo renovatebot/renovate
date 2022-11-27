@@ -78,18 +78,25 @@ describe('modules/manager/gradle/parser', () => {
         }
         `;
 
-        const output = {
-          'versions.spotbugs_annotations': '4.5.3',
-          'versions.core': '1.7.0',
-          'libraries.guava': 'com.google.guava:guava:31.1-jre',
-          'libraries.detekt': '1.18.1',
-        };
-
         const { vars } = parseGradle(input);
-        for (const [key, value] of Object.entries(output)) {
-          expect(vars).toContainKey(key);
-          expect(vars[key]).toMatchObject({ key, value });
-        }
+        expect(vars).toMatchObject({
+          'versions.spotbugs_annotations': {
+            key: 'versions.spotbugs_annotations',
+            value: '4.5.3',
+          },
+          'versions.core': {
+            key: 'versions.core',
+            value: '1.7.0',
+          },
+          'libraries.guava': {
+            key: 'libraries.guava',
+            value: 'com.google.guava:guava:31.1-jre',
+          },
+          'libraries.detekt': {
+            key: 'libraries.detekt',
+            value: '1.18.1',
+          },
+        });
       });
 
       it('nested map', () => {
@@ -111,20 +118,33 @@ describe('modules/manager/gradle/parser', () => {
           ]
         `;
 
-        const output = {
-          'versions.android.buildTools': '30.0.3',
-          'versions.kotlin': '1.4.30',
-          'versions.androidx.paging': '2.1.2',
-          'versions.androidx.kotlin.stdlib': '1.4.20',
-          'versions.androidx.kotlin.coroutines': '1.3.7',
-          'versions.espresso': '3.2.0',
-        };
-
         const { vars } = parseGradle(input);
-        for (const [key, value] of Object.entries(output)) {
-          expect(vars).toContainKey(key);
-          expect(vars[key]).toMatchObject({ key, value });
-        }
+        expect(vars).toMatchObject({
+          'versions.android.buildTools': {
+            key: 'versions.android.buildTools',
+            value: '30.0.3',
+          },
+          'versions.kotlin': {
+            key: 'versions.kotlin',
+            value: '1.4.30',
+          },
+          'versions.androidx.paging': {
+            key: 'versions.androidx.paging',
+            value: '2.1.2',
+          },
+          'versions.androidx.kotlin.stdlib': {
+            key: 'versions.androidx.kotlin.stdlib',
+            value: '1.4.20',
+          },
+          'versions.androidx.kotlin.coroutines': {
+            key: 'versions.androidx.kotlin.coroutines',
+            value: '1.3.7',
+          },
+          'versions.espresso': {
+            key: 'versions.espresso',
+            value: '3.2.0',
+          },
+        });
       });
 
       it('map with interpolated dependency strings', () => {
