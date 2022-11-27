@@ -7093,10 +7093,10 @@ mdurl@^1.0.1:
   resolved "https://registry.yarnpkg.com/mdurl/-/mdurl-1.0.1.tgz#fe85b2ec75a59037f2adfec100fd6c601761152e"
   integrity sha512-/sKlQJCBYVY9Ers9hqzKou4H6V5UWc/M59TH2dvkt+84itfnq7uFOMLpOiOS4ujvHP4etln18fmIxA5R5fll0g==
 
-memfs@3.4.11:
-  version "3.4.11"
-  resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.4.11.tgz#3a34837ade675825d805a2c135e88cefe5e53aaf"
-  integrity sha512-GvsCITGAyDCxxsJ+X6prJexFQEhOCJaIlUbsAvjzSI5o5O7j2dle3jWvz5Z5aOdpOxW6ol3vI1+0ut+641F1+w==
+memfs@3.4.12:
+  version "3.4.12"
+  resolved "https://registry.yarnpkg.com/memfs/-/memfs-3.4.12.tgz#d00f8ad8dab132dc277c659dc85bfd14b07d03bd"
+  integrity sha512-BcjuQn6vfqP+k100e0E9m61Hyqa//Brp+I3f0OBmN0ATHlFA8vx3Lt8z57R3u2bPqe3WGDBC+nF72fTH7isyEw==
   dependencies:
     fs-monkey "^1.0.3"
 
