@@ -12,6 +12,8 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
 
+process.env.BUILDPACK = 'true';
+
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig = {
@@ -179,7 +181,7 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
-  it('returns updated Cargo.lock with docker', async () => {
+  it('supports docker mode', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
@@ -196,10 +198,96 @@ describe('modules/manager/cargo/artifacts', () => {
         packageFileName: 'Cargo.toml',
         updatedDeps,
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { rust: '1.65.0' } },
       })
-    ).not.toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    ).toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      {},
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool rust 1.65.0' +
+          ' && ' +
+          'cargo update --manifest-path Cargo.toml --workspace' +
+          '"',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('supports install mode', async () => {
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { rust: '1.65.0' } },
+      })
+    ).toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'Cargo.lock',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool rust 1.65.0',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
+          },
+        },
+      },
+      {
+        cmd: 'cargo update --manifest-path Cargo.toml --workspace',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
+          },
+        },
+      },
+    ]);
   });
 
   it('catches errors', async () => {
