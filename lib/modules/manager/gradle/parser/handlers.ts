@@ -16,25 +16,33 @@ import {
 
 export function handleAssignment(ctx: Ctx): Ctx {
   const key = loadFromTokenMap(ctx, 'keyToken')[0].value;
-  const valToken = loadFromTokenMap(ctx, 'valToken')[0];
+  const valTokens = loadFromTokenMap(ctx, 'valToken');
 
-  const dep = parseDependencyString(valToken.value);
-  if (dep) {
-    dep.groupName = key;
-    dep.managerData = {
-      fileReplacePosition: valToken.offset + dep.depName!.length + 1,
+  if (valTokens.length > 1) {
+    // = template string with multiple variables
+    ctx.tokenMap.templateStringTokens = valTokens;
+    handleDepInterpolation(ctx);
+    delete ctx.tokenMap.templateStringTokens;
+  } else {
+    // = string value
+    const dep = parseDependencyString(valTokens[0].value);
+    if (dep) {
+      dep.groupName = key;
+      dep.managerData = {
+        fileReplacePosition: valTokens[0].offset + dep.depName!.length + 1,
+        packageFile: ctx.packageFile,
+      };
+      ctx.deps.push(dep);
+    }
+
+    const varData: VariableData = {
+      key,
+      value: valTokens[0].value,
+      fileReplacePosition: valTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-    ctx.deps.push(dep);
+    ctx.globalVars = { ...ctx.globalVars, [key]: varData };
   }
-
-  const varData: VariableData = {
-    key,
-    value: valToken.value,
-    fileReplacePosition: valToken.offset,
-    packageFile: ctx.packageFile,
-  };
-  ctx.globalVars = { ...ctx.globalVars, [key]: varData };
 
   return ctx;
 }
