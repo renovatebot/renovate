@@ -24,6 +24,7 @@ export class GoDatasource extends Datasource {
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
+  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp =
     /v\d+\.\d+\.\d+-(?:(?:\w+\.)?0\.)?\d{14}-([a-f0-9]{12})/;
 
