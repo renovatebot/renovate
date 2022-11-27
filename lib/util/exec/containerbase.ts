@@ -35,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'corepack',
     versioning: npmVersioningId,
   },
+  dotnet: {
+    datasource: 'dotnet',
+    depName: 'dotnet-sdk',
+    versioning: semverVersioningId,
+  },
   erlang: {
     datasource: 'github-releases',
     depName: 'containerbase/erlang-prebuild',
@@ -49,6 +54,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'fluxcd/flux2',
     versioning: semverVersioningId,
+  },
+  golang: {
+    datasource: 'golang-version',
+    depName: 'golang',
+    versioning: npmVersioningId,
   },
   helm: {
     datasource: 'github-releases',
@@ -105,6 +115,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
+  },
+  rust: {
+    datasource: 'docker',
+    depName: 'rust',
+    versioning: 'docker',
   },
   yarn: {
     datasource: 'npm',
