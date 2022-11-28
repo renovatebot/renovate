@@ -161,6 +161,7 @@ Supported tools for dynamic install are:
 - `composer`
 - `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
@@ -174,6 +175,7 @@ Supported tools for dynamic install are:
 - `pnpm`
 - `poetry`
 - `python`
+- `rust`
 - `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
@@ -630,7 +632,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example url: `redis://localhost`.
+Example URL: `redis://localhost`.
 
 ## repositories
 
