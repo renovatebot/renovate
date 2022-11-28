@@ -56,7 +56,7 @@ export function generateBranchName(update: RenovateConfig): void {
     update.groupSlug = slugify(update.groupSlug ?? update.groupName, {
       lower: true,
     });
-    if (update.updateType === 'major' && update.separateMajorMinor) {
+    if (update.updateType === 'major' && update.separateMajorMinor !== false) {
       if (update.separateMultipleMajor) {
         const newMajor = String(update.newMajor);
         update.groupSlug = `major-${newMajor}-${update.groupSlug}`;

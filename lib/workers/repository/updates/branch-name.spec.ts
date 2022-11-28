@@ -50,7 +50,6 @@ describe('workers/repository/updates/branch-name', () => {
         groupName: 'some group name',
         groupSlug: 'some group slug',
         updateType: 'major',
-        separateMajorMinor: true,
         separateMultipleMajor: false,
         newMajor: 2,
         group: {
