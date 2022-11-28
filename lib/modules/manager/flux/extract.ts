@@ -223,7 +223,7 @@ function resolveResourceManifest(
           dep.currentDigest = containerTag.currentDigest;
           dep.currentValue = containerTag.currentValue;
           dep.datasource = DockerDatasource.id;
-          dep.replaceString = resource.spec.ref?.tag;
+          dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';
         }
