@@ -228,9 +228,9 @@ export class PodDatasource extends Datasource {
     }
 
     let result: ReleaseResult | null = null;
-    const match = githubRegex.exec(baseUrl);
+    const massagedUrl = massageGithubUrl(baseUrl);
+    const match = githubRegex.exec(massagedUrl);
     if (match) {
-      baseUrl = massageGithubUrl(baseUrl);
       const { hostURL, account, repo } = match?.groups ?? {};
       const opts = { hostURL, account, repo };
       result = await this.getReleasesFromGithub(podName, opts);
