@@ -159,7 +159,9 @@ Supported tools for dynamic install are:
 - `bundler`
 - `cargo`
 - `composer`
+- `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
@@ -173,6 +175,7 @@ Supported tools for dynamic install are:
 - `pnpm`
 - `poetry`
 - `python`
+- `rust`
 - `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
