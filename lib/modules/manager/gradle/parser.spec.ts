@@ -206,17 +206,22 @@ describe('modules/manager/gradle/parser', () => {
       it('simple map', () => {
         const input =
           'val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")';
-        const output = {
-          'versions.foo1': 'bar1',
-          'versions.foo2': 'bar2',
-          'versions.foo3': 'bar3',
-        };
 
         const { vars } = parseGradle(input);
-        for (const [key, value] of Object.entries(output)) {
-          expect(vars).toContainKey(key);
-          expect(vars[key]).toMatchObject({ key, value });
-        }
+        expect(vars).toMatchObject({
+          'versions.foo1': {
+            key: 'versions.foo1',
+            value: 'bar1',
+          },
+          'versions.foo2': {
+            key: 'versions.foo2',
+            value: 'bar2',
+          },
+          'versions.foo3': {
+            key: 'versions.foo3',
+            value: 'bar3',
+          },
+        });
       });
 
       it('nested map', () => {
@@ -238,19 +243,29 @@ describe('modules/manager/gradle/parser', () => {
           )
         `;
 
-        const output = {
-          'deps.support.appCompat': 'com.android.support:appcompat-v7:26.0.2',
-          'deps.support.design': 'com.android.support:design:26.0.2',
-          'deps.support.junit.jupiter': '5.0.1',
-          'deps.support.junit.platform': '1.0.1',
-          'deps.picasso': 'com.squareup.picasso:picasso:2.5.2',
-        };
-
         const { vars } = parseGradle(input);
-        for (const [key, value] of Object.entries(output)) {
-          expect(vars).toContainKey(key);
-          expect(vars[key]).toMatchObject({ key, value });
-        }
+        expect(vars).toMatchObject({
+          'deps.support.appCompat': {
+            key: 'deps.support.appCompat',
+            value: 'com.android.support:appcompat-v7:26.0.2',
+          },
+          'deps.support.junit.jupiter': {
+            key: 'deps.support.junit.jupiter',
+            value: '5.0.1',
+          },
+          'deps.support.junit.platform': {
+            key: 'deps.support.junit.platform',
+            value: '1.0.1',
+          },
+          'deps.support.design': {
+            key: 'deps.support.design',
+            value: 'com.android.support:design:26.0.2',
+          },
+          'deps.picasso': {
+            key: 'deps.picasso',
+            value: 'com.squareup.picasso:picasso:2.5.2',
+          },
+        });
       });
 
       it('map with interpolated dependency strings', () => {
