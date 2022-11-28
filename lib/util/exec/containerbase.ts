@@ -119,7 +119,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   rust: {
     datasource: 'docker',
     depName: 'rust',
-    versioning: 'docker',
+    versioning: 'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
   },
   yarn: {
     datasource: 'npm',

@@ -94,6 +94,19 @@ describe('util/exec/containerbase', () => {
       expect(await resolveConstraint({ toolName: 'composer' })).toBe('2.0.14');
     });
 
+    it('supports rust docker tags', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '1' },
+          { version: '1.65' },
+          { version: '1.65.0' },
+          { version: '1.65.0-slim' },
+          { version: '1.65.0-buster' },
+        ],
+      });
+      expect(await resolveConstraint({ toolName: 'rust' })).toBe('1.65.0');
+    });
+
     it('throws for unknown tools', async () => {
       await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
         'Invalid tool to install: whoops'
