@@ -41,7 +41,7 @@ export function handleAssignment(ctx: Ctx): Ctx {
       fileReplacePosition: valTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-    ctx.globalVars = { ...ctx.globalVars, [key]: varData };
+    ctx.globalVars[key] = varData;
   }
 
   return ctx;
