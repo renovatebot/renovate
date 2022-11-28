@@ -48,7 +48,7 @@ describe('workers/repository/extract/index', () => {
 
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
+      config.customManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res)).toContain('regex');
     });

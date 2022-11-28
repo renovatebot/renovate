@@ -44,7 +44,7 @@ const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
 function isManagerPath(parentPath: string): boolean {
   return (
-    regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
+    regEx(/^customManagers\[[0-9]+]$/).test(parentPath) ||
     managerList.includes(parentPath)
   );
 }
@@ -401,7 +401,7 @@ export async function validateConfig(
                 }
               }
             }
-            if (key === 'regexManagers') {
+            if (key === 'customManagers') {
               const allowedKeys = [
                 'description',
                 'fileMatch',

@@ -2375,9 +2375,9 @@ For example we override it to `true` in the following cases where branch names a
 
 Typically you shouldn't need to modify this setting.
 
-## regexManagers
+## customManagers
 
-Use `regexManagers` entries to configure the `regex` manager in Renovate.
+Use `customManagers` entries to configure the `regex` manager in Renovate.
 
 You can define custom managers for cases such as:
 
@@ -2434,7 +2434,7 @@ renovate.json:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStringsStrategy": "any",
@@ -2475,7 +2475,7 @@ renovate.json:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["^example.json$"],
       "matchStringsStrategy": "recursive",
@@ -2533,7 +2533,7 @@ renovate.json:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["^main.yml$"],
       "matchStringsStrategy": "combination",
@@ -2626,7 +2626,7 @@ regex definition:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [

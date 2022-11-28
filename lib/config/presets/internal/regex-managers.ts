@@ -3,7 +3,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   dockerfileVersions: {
     description: 'Update `_VERSION` variables in Dockerfiles.',
-    regexManagers: [
+    customManagers: [
       {
         fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
         matchStrings: [

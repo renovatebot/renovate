@@ -12,7 +12,7 @@ A real world example for this specific datasource would be maintaining system pa
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [

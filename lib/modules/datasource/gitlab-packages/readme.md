@@ -16,7 +16,7 @@ This can be achieved by configuring a generic regex manager in `renovate.json` f
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": ["^versions.ini$"],
       "matchStrings": [

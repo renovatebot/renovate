@@ -59,7 +59,7 @@ Here's an example of using the regex manager:
 
 ```javascript
 module.exports = {
-  regexManagers: [
+  customManagers: [
     {
       fileMatch: ['.*'],
       matchStrings: [
@@ -76,7 +76,7 @@ Or as JSON:
 
 ```yaml
 {
-  'regexManagers':
+  'customManagers':
     [
       {
         'fileMatch': ['.*'],

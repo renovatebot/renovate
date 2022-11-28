@@ -156,7 +156,7 @@ export interface WorkerExtractConfig extends ExtractConfig {
   updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  regexManagers?: RegExManager[];
+  customManagers?: RegExManager[];
   enabledManagers?: string[];
   enabled?: boolean;
 }

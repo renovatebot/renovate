@@ -624,9 +624,9 @@ describe('config/migration', () => {
     expect(migratedConfig).toEqual({ extends: ['local>org/renovate-config'] });
   });
 
-  it('it migrates regexManagers', () => {
+  it('it migrates customManagers', () => {
     const config: RenovateConfig = {
-      regexManagers: [
+      customManagers: [
         {
           fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
           matchStrings: [

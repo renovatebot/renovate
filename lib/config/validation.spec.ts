@@ -311,7 +311,7 @@ describe('config/validation', () => {
 
     it('validates regEx for each fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['js', '***$}{]]['],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
@@ -331,7 +331,7 @@ describe('config/validation', () => {
 
     it('errors if no regexManager matchStrings', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: [],
           },
@@ -355,7 +355,7 @@ describe('config/validation', () => {
 
     it('errors if empty regexManager matchStrings', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['foo'],
             matchStrings: [],
@@ -387,7 +387,7 @@ describe('config/validation', () => {
 
     it('errors if no regexManager fileMatch', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
             datasourceTemplate: 'maven',
@@ -405,7 +405,7 @@ describe('config/validation', () => {
 
     it('validates regEx for each matchStrings', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
@@ -422,7 +422,7 @@ describe('config/validation', () => {
 
     it('passes if regexManager fields are present', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
@@ -444,7 +444,7 @@ describe('config/validation', () => {
 
     it('errors if extra regexManager fields are present', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
@@ -465,7 +465,7 @@ describe('config/validation', () => {
 
     it('errors if regexManager fields are missing', async () => {
       const config = {
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
@@ -595,7 +595,7 @@ describe('config/validation', () => {
             fileMatch: ['bar'],
           },
         },
-        regexManagers: [
+        customManagers: [
           {
             fileMatch: ['build.gradle'],
             matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],

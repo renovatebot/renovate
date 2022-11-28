@@ -238,7 +238,7 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
 exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
 [
   {
-    "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
+    "message": "Invalid regExp for customManagers[0].fileMatch: \`***$}{]][\`",
     "topic": "Configuration Error",
   },
 ]

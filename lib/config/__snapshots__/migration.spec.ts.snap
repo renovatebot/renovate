@@ -51,9 +51,9 @@ exports[`config/migration it migrates nested packageRules 1`] = `
 }
 `;
 
-exports[`config/migration it migrates regexManagers 1`] = `
+exports[`config/migration it migrates customManagers 1`] = `
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "fileMatch": [
         "(^|/|\\.)Dockerfile$",

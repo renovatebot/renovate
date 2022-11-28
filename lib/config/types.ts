@@ -240,7 +240,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
-  regexManagers?: RegExManager[];
+  customManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
@@ -346,7 +346,7 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
+  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'customManagers';
 
   // used by tests
   relatedOptions?: string[];
