@@ -1,5 +1,6 @@
 import { getConfig, git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
+import * as _bundler from '../../../../modules/manager/bundler';
 import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
@@ -9,6 +10,7 @@ import type { BranchConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
 
+const bundler = mocked(_bundler);
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
@@ -16,6 +18,7 @@ const npm = mocked(_npm);
 const terraform = mocked(_terraform);
 const autoReplace = mocked(_autoReplace);
 
+jest.mock('../../../../modules/manager/bundler');
 jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
@@ -500,6 +503,45 @@ describe('workers/repository/update/branch/get-updated', () => {
           },
         ],
       });
+    });
+
+    it('does not write non-changed artifacts when artifacts have actually been changed', async () => {
+      config.upgrades.push({
+        depName: 'flipper',
+        packageFile: 'Gemfile',
+        lockFiles: ['Gemfile.lock'],
+        branchName: '',
+        manager: 'bundler',
+        isLockfileUpdate: true,
+      });
+      config.upgrades.push({
+        depName: 'flipper-redis',
+        currentValue: "'~> 0.22.2'",
+        newVersion: '0.25.4',
+        packageFile: 'Gemfile',
+        lockFiles: ['Gemfile.lock'],
+        branchName: '',
+        manager: 'bundler',
+      });
+      const newContent = "gem 'flipper-redis', '~> 0.25.0'";
+      autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
+      bundler.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            type: 'addition',
+            path: 'Gemfile.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      bundler.updateLockedDependency.mockReturnValueOnce({
+        status: 'unsupported',
+      });
+      await getUpdatedPackageFiles(config);
+      expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+      expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+        expect.objectContaining({ newPackageFileContent: newContent })
+      );
     });
   });
 });
