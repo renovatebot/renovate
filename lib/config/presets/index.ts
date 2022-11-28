@@ -136,6 +136,7 @@ export function parsePreset(input: string): ParsedPreset {
   const presetsPackages = [
     'compatibility',
     'config',
+    'customManagers',
     'default',
     'docker',
     'group',
@@ -144,7 +145,6 @@ export function parsePreset(input: string): ParsedPreset {
     'npm',
     'packages',
     'preview',
-    'customManagers',
     'replacements',
     'schedule',
     'workarounds',
