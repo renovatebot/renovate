@@ -214,7 +214,6 @@ function resolveResourceManifest(
         };
         if (resource.spec.ref?.digest) {
           dep.currentDigest = resource.spec.ref.digest;
-          dep.currentValue = 'latest';
           dep.datasource = DockerDatasource.id;
         } else if (resource.spec.ref?.tag) {
           const containerTag = getDep(container + ':' + resource.spec.ref?.tag);
