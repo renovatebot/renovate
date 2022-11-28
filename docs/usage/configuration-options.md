@@ -1957,7 +1957,7 @@ For example to apply a special label for Major updates:
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary in order to look up release notes.
 
-Using this field we can specify the exact url to fetch release notes from.
+Using this field we can specify the exact URL to fetch release notes from.
 
 Example setting source URL for package "dummy":
 
