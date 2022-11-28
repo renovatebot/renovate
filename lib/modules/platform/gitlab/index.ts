@@ -1052,7 +1052,7 @@ async function getDiscussions(issueNo: number): Promise<GitlabDiscussion[]> {
   const discussions = (
     await gitlabApi.getJson<GitlabDiscussion[]>(url, { paginate: true })
   ).body;
-  logger.debug(`Found ${discussions.length} discussions`);
+  logger.trace(`Found ${discussions.length} discussions`);
   return discussions;
 }
 
