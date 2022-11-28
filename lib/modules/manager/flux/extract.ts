@@ -215,10 +215,16 @@ function resolveResourceManifest(
         if (resource.spec.ref?.digest) {
           dep.currentDigest = resource.spec.ref.digest;
           dep.datasource = DockerDatasource.id;
+          if (resource.spec.ref?.tag) {
+            logger.debug('A digest and tag was found, ignoring tag');
+          }
         } else if (resource.spec.ref?.tag) {
-          const containerTag = getDep(container + ':' + resource.spec.ref?.tag);
+          const containerTag = getDep(
+            `${container}:${resource.spec.ref.tag}`,
+            true
+          );
           dep.autoReplaceStringTemplate =
-            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.currentDigest = containerTag.currentDigest;
           dep.currentValue = containerTag.currentValue;
           dep.datasource = DockerDatasource.id;

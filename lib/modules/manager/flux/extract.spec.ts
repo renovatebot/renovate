@@ -43,7 +43,7 @@ describe('modules/manager/flux/extract', () => {
           },
           {
             autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
@@ -534,7 +534,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -565,7 +565,6 @@ describe('modules/manager/flux/extract', () => {
           {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
-            currentValue: 'latest',
             depName: 'ghcr.io/kyverno/manifests/kyverno',
             datasource: DockerDatasource.id,
           },
@@ -592,7 +591,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -626,7 +625,6 @@ describe('modules/manager/flux/extract', () => {
           {
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
-            currentValue: 'latest',
             datasource: DockerDatasource.id,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
           },
@@ -702,7 +700,7 @@ describe('modules/manager/flux/extract', () => {
           deps: [
             {
               autoReplaceStringTemplate:
-                '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+                '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
