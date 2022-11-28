@@ -52,21 +52,8 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const releasesIndex = await this.listVersions(url, packageName);
-        const releases = await p.map(releasesIndex, async (versionInfo) => {
-          const { version, releaseTimestamp } = versionInfo;
+        const releases = await this.getVersionsWithInfo(url, packageName);
 
-          if (releaseTimestamp) {
-            return { version, releaseTimestamp };
-          }
-
-          try {
-            return await this.versionInfo(url, packageName, version);
-          } catch (err) {
-            logger.trace({ err }, `Can't obtain data from ${url}`);
-            return { version };
-          }
-        });
         if (releases.length) {
           try {
             const datasource = await BaseGoDatasource.getDatasource(
@@ -238,6 +225,28 @@ export class GoProxyDatasource extends Datasource {
     }
 
     return result;
+  }
+
+  async getVersionsWithInfo(
+    baseUrl: string,
+    packageName: string
+  ): Promise<Release[]> {
+    const releasesIndex = await this.listVersions(baseUrl, packageName);
+    const releases = await p.map(releasesIndex, async (versionInfo) => {
+      const { version, releaseTimestamp } = versionInfo;
+
+      if (releaseTimestamp) {
+        return { version, releaseTimestamp };
+      }
+
+      try {
+        return await this.versionInfo(baseUrl, packageName, version);
+      } catch (err) {
+        logger.trace({ err }, `Can't obtain data from ${baseUrl}`);
+        return { version };
+      }
+    });
+    return releases;
   }
 
   static getCacheKey({ packageName }: GetReleasesConfig): string {
