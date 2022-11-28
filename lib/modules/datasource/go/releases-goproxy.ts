@@ -52,7 +52,37 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        const releases = await this.getVersionsWithInfo(url, packageName);
+        let releases: Release[] = [];
+        if (packageName.startsWith('gopkg.in/')) {
+          const versionSuffixRegex = regEx(/\.v(\d+)$/);
+          const versionSuffixMatch = packageName.match(versionSuffixRegex);
+          if (versionSuffixMatch === null || versionSuffixMatch.length < 2) {
+            releases = await this.getVersionsWithInfo(url, packageName);
+          } else {
+            const versionSuffix = Number(versionSuffixMatch[1]);
+            for (let i = 0; ; i++) {
+              try {
+                releases = releases.concat(
+                  await this.getVersionsWithInfo(
+                    url,
+                    packageName.replace(
+                      versionSuffixRegex,
+                      `.v${versionSuffix + i}`
+                    )
+                  )
+                );
+              } catch (err) {
+                const statusCode = err?.response?.statusCode;
+                if (i > 0 && (statusCode === 404 || statusCode === 410)) {
+                  break;
+                }
+                throw err;
+              }
+            }
+          }
+        } else {
+          releases = await this.getVersionsWithInfo(url, packageName);
+        }
 
         if (releases.length) {
           try {

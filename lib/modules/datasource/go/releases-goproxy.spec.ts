@@ -541,5 +541,77 @@ describe('modules/datasource/go/releases-goproxy', () => {
         ],
       });
     });
+
+    it('handles gopkg.in major releases', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/gopkg.in/yaml.v2`)
+        .get('/@v/list')
+        .reply(200, ['v2.3.0', 'v2.4.0', '  \n'].join('\n'))
+        .get('/@v/v2.3.0.info')
+        .reply(200, { Version: 'v2.3.0', Time: '2020-05-06T23:08:38Z' })
+        .get('/@v/v2.4.0.info')
+        .reply(200, { Version: 'v2.4.0', Time: '2020-11-17T15:46:20Z' });
+
+      httpMock
+        .scope(`${baseUrl}/gopkg.in/yaml.v3`)
+        .get('/@v/list')
+        .reply(200, ['v3.0.0', 'v3.0.1', '  \n'].join('\n'))
+        .get('/@v/v3.0.0.info')
+        .reply(200, { Version: 'v3.0.0', Time: '2022-05-21T10:33:21Z' })
+        .get('/@v/v3.0.1.info')
+        .reply(200, { Version: 'v3.0.1', Time: '2022-05-27T08:35:30Z' });
+
+      httpMock.scope(`${baseUrl}/gopkg.in/yaml.v4`).get('/@v/list').reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'gopkg.in/yaml.v2',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '2020-05-06T23:08:38Z', version: 'v2.3.0' },
+          { releaseTimestamp: '2020-11-17T15:46:20Z', version: 'v2.4.0' },
+          { releaseTimestamp: '2022-05-21T10:33:21Z', version: 'v3.0.0' },
+          { releaseTimestamp: '2022-05-27T08:35:30Z', version: 'v3.0.1' },
+        ],
+        sourceUrl: 'https://github.com/go-yaml/yaml',
+      });
+    });
+
+    it('handles gopkg.in without version suffix', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock
+        .scope(`${baseUrl}/gopkg.in/foo`)
+        .get('/@v/list')
+        .reply(200, ['v1.0.0', '  \n'].join('\n'))
+        .get('/@v/v1.0.0.info')
+        .reply(200, { Version: 'v1.0.0', Time: '1970-01-01T00:00:00Z' });
+
+      const res = await datasource.getReleases({
+        packageName: 'gopkg.in/foo',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { releaseTimestamp: '1970-01-01T00:00:00Z', version: 'v1.0.0' },
+        ],
+        sourceUrl: 'https://github.com/go-foo/foo',
+      });
+    });
+
+    it('handle errors with gopkg.in packages like any other', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock.scope(`${baseUrl}/gopkg.in/bar.v1`).get('/@v/list').reply(404);
+
+      const res = await datasource.getReleases({
+        packageName: 'gopkg.in/bar.v1',
+      });
+
+      expect(res).toBeNull();
+    });
   });
 });
