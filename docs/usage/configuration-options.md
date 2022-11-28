@@ -798,6 +798,7 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
+- Azure DevOps (.com)
 
 <!-- prettier-ignore -->
 !!! note
