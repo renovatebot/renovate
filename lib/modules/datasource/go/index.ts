@@ -26,7 +26,7 @@ export class GoDatasource extends Datasource {
 
   // Pseudo versions https://go.dev/ref/mod#pseudo-versions
   static readonly pversionRegexp =
-    /v\d+\.\d+\.\d+-(?:(?:\w+\.)?0\.)?\d{14}-([a-f0-9]{12})/;
+    regEx(/v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/);
 
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
