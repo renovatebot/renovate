@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import { parseGradle, parseProps } from './parser';
@@ -61,7 +62,7 @@ describe('modules/manager/gradle/parser', () => {
 
     describe('Groovy: multi var assignments', () => {
       it('simple map', () => {
-        const input = `
+        const input = codeBlock`
         ext {
           versions = [
             spotbugs_annotations  : '4.5.3',
@@ -100,7 +101,7 @@ describe('modules/manager/gradle/parser', () => {
       });
 
       it('nested map', () => {
-        const input = `
+        const input = codeBlock`
           project.ext.versions = [
             some: invalidsymbol,
             android: [
@@ -148,7 +149,7 @@ describe('modules/manager/gradle/parser', () => {
       });
 
       it('map with interpolated dependency strings', () => {
-        const input = `
+        const input = codeBlock`
           def slfj4Version = "2.0.0"
           libraries = [
             jcl: "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
@@ -219,7 +220,7 @@ describe('modules/manager/gradle/parser', () => {
       });
 
       it('nested map', () => {
-        const input = `
+        const input = codeBlock`
           ext["deps"] = mapOf(
             "support" to mapOf(
               "appCompat" to "com.android.support:appcompat-v7:26.0.2",
@@ -253,7 +254,7 @@ describe('modules/manager/gradle/parser', () => {
       });
 
       it('map with interpolated dependency strings', () => {
-        const input = `
+        const input = codeBlock`
           val slfj4Version = "2.0.0"
           libraries = mapOf(
             "jcl" to "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
