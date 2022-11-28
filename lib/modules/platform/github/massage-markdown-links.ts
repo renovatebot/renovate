@@ -10,8 +10,9 @@ interface UrlMatch {
   replaceTo: string;
 }
 
+//according to https://github.com/dead-claudia/github-limits
 const urlRegex =
-  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-\w\d]+\/[-_.\w\d]+\/(?:discussions|issues|pull)\/\d+(?:#[-_\w\d]+)?/i; // TODO #12872 (?<!re) after text not matching
+  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
