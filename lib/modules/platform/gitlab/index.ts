@@ -1047,7 +1047,7 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
 
 async function getDiscussions(issueNo: number): Promise<GitlabDiscussion[]> {
   // GET projects/:id/merge_requests/:merge_request_iid/discussions
-  logger.debug(`Getting discussions for #${issueNo}`);
+  logger.trace(`Getting discussions for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/discussions`;
   const discussions = (
     await gitlabApi.getJson<GitlabDiscussion[]>(url, { paginate: true })
