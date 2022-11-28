@@ -102,6 +102,7 @@ describe('util/exec/containerbase', () => {
           { version: '1.65.0' },
           { version: '1.65.0-slim' },
           { version: '1.65.0-buster' },
+          { version: '1.66' },
         ],
       });
       expect(await resolveConstraint({ toolName: 'rust' })).toBe('1.65.0');
