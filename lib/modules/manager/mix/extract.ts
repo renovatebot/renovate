@@ -35,15 +35,12 @@ export async function extractPackageFile(
         const github = githubRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
 
-        const depName = app;
-        const packageName = organization
-          ? `${depName}:${organization}`
-          : depName;
+        const packageName = organization ? `${app}:${organization}` : app;
         const currentValue = requirement || github;
         const datasource = github ? 'github' : HexDatasource.id;
 
         const dep: PackageDependency = {
-          depName,
+          depName: app,
           currentValue,
           datasource,
         };
