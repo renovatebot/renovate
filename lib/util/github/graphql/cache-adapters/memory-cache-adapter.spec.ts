@@ -29,7 +29,7 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
-    // Cache is valid
+    // At this moment, cache is valid
     let now = '2022-10-31 15:29:59';
     mockTime(now);
 
@@ -115,11 +115,10 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     const now = '2022-10-31 15:30';
     mockTime(now);
 
-    const [knownItem] = Object.values(oldItems).reverse();
     const page = [
+      ...Object.values(oldItems),
       { version: '4', releaseTimestamp: isoTs('2022-10-15 18:00') },
-      knownItem,
-    ];
+    ].reverse();
 
     const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
     const isPaginationDone = await adapter.reconcile(page);
@@ -150,7 +149,7 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     const now = '2022-10-31 15:30';
     mockTime(now);
 
-    const page = [items['2'], items['4'], items['6'], items['8']];
+    const page = [items['2'], items['4'], items['6'], items['8']].reverse();
 
     const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
     const isPaginationDone = await adapter.reconcile(page);

@@ -2,6 +2,10 @@ import * as memCache from '../../../cache/memory';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { AbstractGithubGraphqlCacheAdapter } from './abstract-cache-adapter';
 
+/**
+ * In-memory adapter meant to be used for private packages
+ * and for testing purposes.
+ */
 export class GithubGraphqlMemoryCacheAdapter<
   GithubItem extends GithubDatasourceItem
 > extends AbstractGithubGraphqlCacheAdapter<GithubItem> {

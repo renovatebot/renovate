@@ -2,6 +2,9 @@ import * as packageCache from '../../../cache/package';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { AbstractGithubGraphqlCacheAdapter } from './abstract-cache-adapter';
 
+/**
+ * Package cache adapter meant to be used for public packages.
+ */
 export class GithubGraphqlPackageCacheAdapter<
   GithubItem extends GithubDatasourceItem
 > extends AbstractGithubGraphqlCacheAdapter<GithubItem> {

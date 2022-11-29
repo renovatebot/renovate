@@ -79,7 +79,7 @@ export class GithubGraphqlDatasourceHelper<
 
   private cursor: string | null = null;
 
-  private isCacheable = false;
+  private isCacheable: boolean | null = null;
 
   constructor(
     packageConfig: GithubPackageConfig,
@@ -170,8 +170,10 @@ export class GithubGraphqlDatasourceHelper<
 
     this.queryCount += 1;
 
-    if (!this.isCacheable && data.repository.isRepoPrivate === false) {
-      this.isCacheable = true;
+    if (this.isCacheable === null) {
+      // For values other than explicit `false`,
+      // we assume that items can not be cached.
+      this.isCacheable = data.repository.isRepoPrivate === false;
     }
 
     const res = data.repository.payload;
@@ -229,28 +231,18 @@ export class GithubGraphqlDatasourceHelper<
     if (this.cacheAdapter) {
       return this.cacheAdapter;
     }
-
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    if (this.isCacheable) {
-      this.cacheAdapter = new GithubGraphqlPackageCacheAdapter<ResultItem>(
-        cacheNs,
-        cacheKey
-      );
-    } else {
-      this.cacheAdapter = new GithubGraphqlMemoryCacheAdapter<ResultItem>(
-        cacheNs,
-        cacheKey
-      );
-    }
-
+    this.cacheAdapter = this.isCacheable
+      ? new GithubGraphqlPackageCacheAdapter<ResultItem>(cacheNs, cacheKey)
+      : new GithubGraphqlMemoryCacheAdapter<ResultItem>(cacheNs, cacheKey);
     return this.cacheAdapter;
   }
 
   private async doPaginatedQuery(): Promise<ResultItem[]> {
     let hasNextPage = true;
     let isPaginationDone = false;
-    let cursor: string | undefined;
+    let nextCursor: string | undefined;
     while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
@@ -264,12 +256,17 @@ export class GithubGraphqlDatasourceHelper<
         resultItems.push(item);
       }
 
+      // It's important to call `getCacheAdapter()` after `doShrinkableQuery()`
+      // because `doShrinkableQuery()` may change `this.isCacheable`.
+      //
+      // Otherwise, cache items for public packages will never be persisted
+      // in long-term cache.
       isPaginationDone = await this.getCacheAdapter().reconcile(resultItems);
 
       hasNextPage = !!queryResult?.pageInfo?.hasNextPage;
-      cursor = queryResult?.pageInfo?.endCursor;
-      if (hasNextPage && cursor) {
-        this.cursor = cursor;
+      nextCursor = queryResult?.pageInfo?.endCursor;
+      if (hasNextPage && nextCursor) {
+        this.cursor = nextCursor;
       }
     }
 
