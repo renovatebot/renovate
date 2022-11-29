@@ -59,7 +59,7 @@ export class GoProxyDatasource extends Datasource {
           if (versionSuffixMatch === null || versionSuffixMatch.length < 2) {
             releases = await this.getVersionsWithInfo(url, packageName);
           } else {
-            const versionSuffix = Number(versionSuffixMatch[1]);
+            const versionSuffix = parseInt(versionSuffixMatch[1]);
             for (let i = 0; ; i++) {
               try {
                 releases = releases.concat(
