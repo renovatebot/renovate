@@ -1,41 +1,28 @@
-import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import type { HelmRelease, RepoSource } from './types';
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
-const githubUrl = regEx(
-  /^(?<url>https:\/\/[^/]+\/[^/]+\/(?<repo>[^/]+))(:?\/|\/tree\/[^/]+\/(?<path>.+))?$/
-);
-const gitlabUrl = regEx(
-  /^(?<url>https:\/\/[^/]+\/(?:[^-/][^/]*\/)+?(?<repo>[^-/][^/]*))(:?\/|(?:\/-)?\/tree\/[^/]+\/(?<path>.+))?$/
-);
 const githubRelease = regEx(
   /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
 );
 
 function splitRepoUrl(url: string): RepoSource | null {
-  const platform = detectPlatform(url);
-  if (platform === 'github') {
-    const githubUrlMatch = githubUrl.exec(url);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
-      };
-    }
+  const parsed = parseGitUrl(url);
+  if (!chartRepo.test(parsed.name)) {
+    return null;
   }
 
-  if (platform === 'gitlab') {
-    const gitlabUrlMatch = gitlabUrl.exec(url);
-    if (gitlabUrlMatch?.groups && chartRepo.test(gitlabUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: gitlabUrlMatch.groups.url,
-        sourceDirectory: gitlabUrlMatch.groups.path,
-      };
-    }
+  if (parsed.filepath === 'tree') {
+    return {
+      sourceUrl: parsed.toString(),
+      sourceDirectory: parsed.filepath,
+    };
   }
 
-  return null;
+  return {
+    sourceUrl: parsed.toString(),
+  };
 }
 
 export function findSourceUrl(release: HelmRelease): RepoSource {
