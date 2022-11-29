@@ -34,13 +34,10 @@ export interface TerraformProviderVersionsVersion {
   version: string;
 }
 
-export type TerraformProviderReleaseBackend = Record<
-  string,
-  {
-    name: string;
-    versions: VersionsReleaseBackend;
-  }
->;
+export type TerraformProviderReleaseBackend = {
+  name: string;
+  versions: VersionsReleaseBackend;
+};
 
 export type VersionsReleaseBackend = Record<string, VersionDetailResponse>;
 

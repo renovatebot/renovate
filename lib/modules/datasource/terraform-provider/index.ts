@@ -6,6 +6,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import * as hashicorpVersioning from '../../versioning/hashicorp';
 import { TerraformDatasource } from '../terraform-module/base';
 import type { ServiceDiscoveryResult } from '../terraform-module/types';
@@ -152,26 +153,28 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     return dep;
   }
 
-  // TODO: add long term cache (#9590)
   private async queryReleaseBackend(
     packageName: string,
     registryURL: string
   ): Promise<ReleaseResult | null> {
     const backendLookUpName = `terraform-provider-${packageName}`;
-    const backendURL = registryURL + `/index.json`;
+    const backendURL = joinUrlParts(
+      registryURL,
+      backendLookUpName,
+      `index.json`
+    );
     const res = (
       await this.http.getJson<TerraformProviderReleaseBackend>(backendURL)
     ).body;
 
-    if (!res[backendLookUpName]) {
-      return null;
-    }
-
     const dep: ReleaseResult = {
-      releases: Object.keys(res[backendLookUpName].versions).map((version) => ({
+      releases: Object.keys(res.versions).map((version) => ({
         version,
       })),
-      sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
+      sourceUrl: joinUrlParts(
+        'https://github.com/terraform-providers',
+        backendLookUpName
+      ),
     };
     return dep;
   }
