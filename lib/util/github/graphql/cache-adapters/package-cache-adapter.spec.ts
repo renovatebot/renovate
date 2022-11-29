@@ -4,16 +4,10 @@ import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlPackageCacheAdapter } from './package-cache-adapter';
 
-const makeTs = (input: string): string => {
-  const dt = DateTime.fromSQL(input);
-  if (!dt.isValid) {
-    new Error(`Invalid date: ${input}`);
-  }
-  return dt.toISO();
-};
+const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
 
 const mockTime = (input: string): void => {
-  jest.spyOn(DateTime, 'now').mockReturnValue(DateTime.fromISO(makeTs(input)));
+  jest.spyOn(DateTime, 'now').mockReturnValue(DateTime.fromISO(isoTs(input)));
 };
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
@@ -28,14 +22,14 @@ describe('util/github/graphql/cache-adapters/package-cache-adapter', () => {
 
   it('reconciles old cache record with new items', async () => {
     const oldItems = {
-      '1': { version: '1', releaseTimestamp: makeTs('2020-01-01 10:00') },
-      '2': { version: '2', releaseTimestamp: makeTs('2020-01-01 11:00') },
-      '3': { version: '3', releaseTimestamp: makeTs('2020-01-01 12:00') },
+      '1': { version: '1', releaseTimestamp: isoTs('2020-01-01 10:00') },
+      '2': { version: '2', releaseTimestamp: isoTs('2020-01-01 11:00') },
+      '3': { version: '3', releaseTimestamp: isoTs('2020-01-01 12:00') },
     };
     const cacheRecord: CacheRecord = {
       items: oldItems,
-      createdAt: makeTs('2022-10-15 12:00'),
-      updatedAt: makeTs('2022-10-15 12:00'),
+      createdAt: isoTs('2022-10-15 12:00'),
+      updatedAt: isoTs('2022-10-15 12:00'),
     };
     cacheGet.mockResolvedValueOnce(clone(cacheRecord));
 
@@ -44,7 +38,7 @@ describe('util/github/graphql/cache-adapters/package-cache-adapter', () => {
 
     const newItem = {
       version: '4',
-      releaseTimestamp: makeTs('2022-10-15 18:00'),
+      releaseTimestamp: isoTs('2022-10-15 18:00'),
     };
     const page = [newItem];
 
@@ -60,13 +54,13 @@ describe('util/github/graphql/cache-adapters/package-cache-adapter', () => {
         'bar',
         {
           items: {
-            '1': { version: '1', releaseTimestamp: makeTs('2020-01-01 10:00') },
-            '2': { version: '2', releaseTimestamp: makeTs('2020-01-01 11:00') },
-            '3': { version: '3', releaseTimestamp: makeTs('2020-01-01 12:00') },
-            '4': { version: '4', releaseTimestamp: makeTs('2022-10-15 18:00') },
+            '1': { version: '1', releaseTimestamp: isoTs('2020-01-01 10:00') },
+            '2': { version: '2', releaseTimestamp: isoTs('2020-01-01 11:00') },
+            '3': { version: '3', releaseTimestamp: isoTs('2020-01-01 12:00') },
+            '4': { version: '4', releaseTimestamp: isoTs('2022-10-15 18:00') },
           },
-          createdAt: makeTs('2022-10-15 12:00'),
-          updatedAt: makeTs('2022-10-30 12:00'),
+          createdAt: isoTs('2022-10-15 12:00'),
+          updatedAt: isoTs('2022-10-30 12:00'),
         },
         15 * 24 * 60,
       ],
