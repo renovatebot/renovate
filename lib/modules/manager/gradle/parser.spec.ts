@@ -379,6 +379,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'} | ${'kotlin("foo", version = baz)'}     | ${output}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", property("baz"))'}   | ${output}
         ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unknown-version' }}
+        ${''}              | ${'kotlin("foo", some)'}              | ${null}
         ${''}              | ${'kotlin(["foo", "1.2.3"])'}         | ${null}
         ${''}              | ${'kotlin("foo", "1.2.3", "4.5.6")'}  | ${null}
         ${''}              | ${'kotlin("foo", "1.2.3@@@")'}        | ${null}
