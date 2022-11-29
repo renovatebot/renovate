@@ -13,7 +13,7 @@ function splitRepoUrl(url: string): RepoSource | null {
     return null;
   }
 
-  if (parsed.filepath === 'tree') {
+  if (parsed.filepathtype === 'tree') {
     return {
       sourceUrl: parsed.toString(),
       sourceDirectory: parsed.filepath,
