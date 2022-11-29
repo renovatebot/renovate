@@ -89,6 +89,12 @@ entries:
     urls:
     - pgadmin4-1.7.2.tgz
     version: 1.7.2
+  private-chart-github:
+    - description: Some private chart from a self-hosted GitHub Enterprise server
+      home: https://github.example.com/some-org/charts/tree/master/private-chart
+      urls:
+        - https://charts.example.com/private-chart-1.2.3.tgz
+      version: 1.2.3
   dummy:
   - home:
     urls:

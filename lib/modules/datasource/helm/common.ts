@@ -1,21 +1,25 @@
+import { detectPlatform } from '../../../util/common';
 import { regEx } from '../../../util/regex';
 import type { HelmRelease, RepoSource } from './types';
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
 const githubUrl = regEx(
-  /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))(:?\/|\/tree\/[^/]+\/(?<path>.+))?$/
+  /^(?<url>https:\/\/[^/]+\/[^/]+\/(?<repo>[^/]+))(:?\/|\/tree\/[^/]+\/(?<path>.+))?$/
 );
 const githubRelease = regEx(
   /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
 );
 
 function splitRepoUrl(url: string): RepoSource | null {
-  const githubUrlMatch = githubUrl.exec(url);
-  if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-    return {
-      sourceUrl: githubUrlMatch.groups.url,
-      sourceDirectory: githubUrlMatch.groups.path,
-    };
+  const platform = detectPlatform(url);
+  if (platform === 'github') {
+    const githubUrlMatch = githubUrl.exec(url);
+    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+      return {
+        sourceUrl: githubUrlMatch.groups.url,
+        sourceDirectory: githubUrlMatch.groups.path,
+      };
+    }
   }
   return null;
 }
