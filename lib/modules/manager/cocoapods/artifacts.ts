@@ -69,7 +69,7 @@ export async function updateArtifacts({
   );
   const cocoapods = match?.groups?.cocoapodsVersion ?? null;
 
-  const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
+  const cmd = [...getPluginCommands(newPackageFileContent), 'pod install --allow-root'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
