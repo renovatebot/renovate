@@ -211,3 +211,12 @@ export interface Platform {
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
 }
+
+export interface PlatformScm {
+  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  deleteBranch(branchName: string): Promise<void>;
+}

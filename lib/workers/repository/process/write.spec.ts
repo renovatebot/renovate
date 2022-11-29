@@ -380,7 +380,9 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
-      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
+      return expect(
+        syncBranchState('branch_name', 'base_branch')
+      ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
         baseBranch: 'base_branch',
@@ -407,7 +409,9 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
-      expect(syncBranchState('branch_name', 'new_base_branch')).toEqual({
+      return expect(
+        syncBranchState('branch_name', 'new_base_branch')
+      ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
         baseBranch: 'new_base_branch',
@@ -438,7 +442,9 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('new_base_sha');
-      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
+      return expect(
+        syncBranchState('branch_name', 'base_branch')
+      ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
         baseBranch: 'base_branch',
@@ -472,7 +478,9 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('new_sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
-      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
+      return expect(
+        syncBranchState('branch_name', 'base_branch')
+      ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'new_sha',
         baseBranch: 'base_branch',
@@ -506,7 +514,9 @@ describe('workers/repository/process/write', () => {
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');
-      expect(syncBranchState('branch_name', 'base_branch')).toEqual({
+      return expect(
+        syncBranchState('branch_name', 'base_branch')
+      ).resolves.toEqual({
         branchName: 'branch_name',
         sha: 'sha',
         baseBranch: 'base_branch',

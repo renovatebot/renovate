@@ -17,12 +17,13 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../../util/fs';
-import { branchExists, getFile, getRepoStatus } from '../../../../util/git';
+import { getFile, getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
 import * as hostRules from '../../../../util/host-rules';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
+import { scm } from '../../../platform/scm';
 import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmDepType, NpmManagerData } from '../types';
@@ -501,7 +502,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    branchExists(config.branchName)
+    (await scm.branchExists(config.branchName))
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };

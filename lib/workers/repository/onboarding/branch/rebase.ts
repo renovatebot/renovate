@@ -3,11 +3,8 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  getFile,
-  isBranchBehindBase,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { getFile } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -22,7 +19,7 @@ export async function rebaseOnboardingBranch(
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
   // TODO #7154
-  if (await isBranchModified(config.onboardingBranch!)) {
+  if (await scm.isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
@@ -32,7 +29,10 @@ export async function rebaseOnboardingBranch(
   // TODO: fix types (#7154)
   if (
     contents === existingContents &&
-    !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
+    !(await scm.isBranchBehindBase(
+      config.onboardingBranch!,
+      config.defaultBranch!
+    ))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;

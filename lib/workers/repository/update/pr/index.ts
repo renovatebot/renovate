@@ -16,9 +16,10 @@ import {
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -382,7 +383,7 @@ export async function ensurePr(
             { branch: branchName },
             'Deleting branch due to server error'
           );
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
         return { type: 'without-pr', prBlockedBy: 'Error' };
       }

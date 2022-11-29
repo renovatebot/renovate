@@ -3,10 +3,11 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch, getBranchCommit } from '../../../util/git';
+import { checkoutBranch } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -66,7 +67,7 @@ export async function extract(
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
-  const baseBranchSha = getBranchCommit(baseBranch!);
+  const baseBranchSha = await scm.getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
