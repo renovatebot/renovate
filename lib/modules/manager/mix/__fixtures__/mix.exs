@@ -15,8 +15,7 @@ defmodule MyProject.MixProject do
   end
 
   defp deps() do
-    [
-      #{:broadway_dashboard, "~> 0.2.2"},
+    [ #{:broadway_dashboard, "~> 0.2.2"},
 #{:broadway_dashboard, "~> 0.2.2"},
 #   {:broadway_dashboard, "~> 0.2.2"},
       #    {:broadway_dashboard, "~> 0.2.2"},
