@@ -9,6 +9,17 @@ const githubRelease = regEx(
   /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
 );
 
+function splitRepoUrl(url: string): RepoSource | null {
+  const githubUrlMatch = githubUrl.exec(url);
+  if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
+    return {
+      sourceUrl: githubUrlMatch.groups.url,
+      sourceDirectory: githubUrlMatch.groups.path,
+    };
+  }
+  return null;
+}
+
 export function findSourceUrl(release: HelmRelease): RepoSource {
   // it's a github release :)
   const releaseMatch = githubRelease.exec(release.urls[0]);
@@ -17,12 +28,9 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   if (release.home) {
-    const githubUrlMatch = githubUrl.exec(release.home);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
-      };
+    const source = splitRepoUrl(release.home);
+    if (source) {
+      return source;
     }
   }
 
@@ -31,12 +39,9 @@ export function findSourceUrl(release: HelmRelease): RepoSource {
   }
 
   for (const url of release.sources) {
-    const githubUrlMatch = githubUrl.exec(url);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
-      };
+    const source = splitRepoUrl(url);
+    if (source) {
+      return source;
     }
   }
 
