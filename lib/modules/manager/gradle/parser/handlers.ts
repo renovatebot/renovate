@@ -110,6 +110,48 @@ export function handleDepInterpolation(ctx: Ctx): Ctx {
   return ctx;
 }
 
+export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
+  const moduleNameTokens = loadFromTokenMap(ctx, 'moduleName');
+  const versionTokens = loadFromTokenMap(ctx, 'version');
+
+  const moduleName = interpolateString(moduleNameTokens, ctx.globalVars);
+  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  if (!moduleName || !versionValue) {
+    return ctx;
+  }
+
+  const groupIdArtifactId = `org.jetbrains.kotlin:kotlin-${moduleName}`;
+  const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
+  if (!dep) {
+    return ctx;
+  }
+
+  dep.depName = moduleName;
+  dep.packageName = groupIdArtifactId;
+  dep.managerData = {
+    fileReplacePosition: versionTokens[0].offset,
+    packageFile: ctx.packageFile,
+  };
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    const varData = ctx.globalVars[versionTokens[0].value];
+    if (varData) {
+      dep.currentValue = varData.value;
+      dep.managerData = {
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
+    }
+  }
+
+  ctx.deps.push(dep);
+
+  return ctx;
+}
+
 export function handleLongFormDep(ctx: Ctx): Ctx {
   const groupIdTokens = loadFromTokenMap(ctx, 'groupId');
   const artifactIdTokens = loadFromTokenMap(ctx, 'artifactId');

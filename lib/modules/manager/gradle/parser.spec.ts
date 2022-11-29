@@ -362,6 +362,32 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('kotlin() short notation dependencies', () => {
+      const output = {
+        depName: 'foo',
+        packageName: 'org.jetbrains.kotlin:kotlin-foo',
+        currentValue: '1.2.3',
+      };
+
+      test.each`
+        def                | str                                   | output
+        ${''}              | ${'kotlin("foo", "1.2.3")'}           | ${output}
+        ${''}              | ${'kotlin("foo", version = "1.2.3")'} | ${output}
+        ${'some = "foo"'}  | ${'kotlin(some, version = "1.2.3")'}  | ${output}
+        ${'some = "foo"'}  | ${'kotlin("${some}", "1.2.3")'}       | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz)'}               | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", version = baz)'}     | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", property("baz"))'}   | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unknown-version' }}
+        ${''}              | ${'kotlin(["foo", "1.2.3"])'}         | ${null}
+        ${''}              | ${'kotlin("foo", "1.2.3", "4.5.6")'}  | ${null}
+        ${''}              | ${'kotlin("foo", "1.2.3@@@")'}        | ${null}
+      `('$def | $str', ({ def, str, output }) => {
+        const { deps } = parseGradle([def, str].join('\n'));
+        expect(deps).toMatchObject([output].filter(Boolean));
+      });
+    });
+
     describe('map notation dependencies', () => {
       test.each`
         def                | str                                                                               | output

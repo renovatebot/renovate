@@ -15,6 +15,7 @@ import {
   handleCustomRegistryUrl,
   handleDepInterpolation,
   handleDepSimpleString,
+  handleKotlinShortNotationDep,
   handleLibraryDep,
   handleLongFormDep,
   handlePlugin,
@@ -302,6 +303,31 @@ const qGroovyMapNotationDependencies = q
   .alt(qTemplateString, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleLongFormDep)
+  .handler(cleanupTempVars);
+
+// kotlin("bom", "1.7.21")
+const qKotlinShortNotationDependencies = q
+  .sym<Ctx>('kotlin')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'moduleName'))
+      .op(',')
+      .opt(q.sym<Ctx>('version').op('='))
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      )
+      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .end(),
+  })
+  .handler(handleKotlinShortNotationDep)
   .handler(cleanupTempVars);
 
 // (group = "foo", name = "bar", version = "1.2.3")
@@ -625,6 +651,7 @@ export function parseGradle(
       qDependenciesSimpleString,
       qDependenciesInterpolation,
       qGroovyMapNotationDependencies,
+      qKotlinShortNotationDependencies,
       qKotlinMapNotationDependencies,
       qPlugins,
       qRegistryUrls,
