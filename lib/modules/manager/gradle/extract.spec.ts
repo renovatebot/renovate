@@ -841,4 +841,77 @@ describe('modules/manager/gradle/extract', () => {
       },
     ]);
   });
+
+  it('gradle-consistent-versions plugin check enabled', async () => {
+    const buildFile = `
+      apply from: 'test.gradle'
+
+      repositories {
+          mavenCentral()
+      }
+
+      apply plugin: 'com.palantir.consistent-versions'
+
+      dependencies {
+        implementation "org.apache.lucene"
+      }
+    `;
+
+    const versionsProps = `org.apache.lucene:* = 1.2.3`;
+
+    const versionsLock = `
+org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
+org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
+    `;
+
+    mockFs({
+      'build.gradle': buildFile,
+      'versions.props': versionsProps,
+      'versions.lock': versionsLock,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'versions.props',
+      'versions.lock',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'versions.lock',
+      },
+      {
+        packageFile: 'versions.props',
+        deps: [
+          {
+            depName: 'org.apache.lucene:lucene-core',
+            depType: 'dependencies',
+            fileReplacePosition: 22,
+            groupName: 'org.apache.lucene:-',
+            lockedVersion: '1.2.3',
+            managerData: {
+              fileReplacePosition: 22,
+              packageFile: 'versions.props',
+            },
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+          {
+            depName: 'org.apache.lucene:lucene-codecs',
+            depType: 'dependencies',
+            fileReplacePosition: 22,
+            groupName: 'org.apache.lucene:-',
+            lockedVersion: '1.2.3',
+            managerData: {
+              fileReplacePosition: 22,
+              packageFile: 'versions.props',
+            },
+            registryUrls: ['https://repo.maven.apache.org/maven2'],
+          },
+        ],
+      },
+      {
+        packageFile: 'build.gradle',
+      },
+    ]);
+  });
 });

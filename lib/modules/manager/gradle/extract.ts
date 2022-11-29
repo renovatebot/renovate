@@ -4,6 +4,13 @@ import { getFileContentMap } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
+import {
+  VERSIONS_LOCK,
+  VERSIONS_PROPS,
+  isGcvPropsFile,
+  parseGcv,
+  usesGcv,
+} from './extract/consistentVersionsPlugin';
 import { parseGradle, parseProps } from './parser';
 import type {
   GradleManagerData,
@@ -53,6 +60,9 @@ export async function extractAllPackageFiles(
       deps: [],
     };
 
+    // Check if gradle-consistent-versions plugin is in use by repo
+    const usesConsistentVersionPlugin = usesGcv(reorderedFiles, fileContents);
+
     try {
       // TODO #7154
       const content = fileContents[packageFile]!;
@@ -70,6 +80,15 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
+      } else if (isGcvPropsFile(packageFile)) {
+        if (usesConsistentVersionPlugin && packageFile === VERSIONS_PROPS) {
+          // We use gradle-consistent-versions, and pass in both the versions file and the lock file
+          const updatesFromGcv = parseGcv(
+            fileContents[VERSIONS_PROPS]!,
+            fileContents[VERSIONS_LOCK]!
+          );
+          extractedDeps.push(...updatesFromGcv);
+        }
       } else {
         const vars = getVars(registry, dir);
         const {
