@@ -16,6 +16,7 @@ describe('modules/datasource/helm/common', () => {
       ${'coredns'}              | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
       ${'pgadmin4'}             | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
       ${'private-chart-github'} | ${{ sourceUrl: 'https://github.example.com/some-org/charts', sourceDirectory: 'private-chart' }}
+      ${'private-chart-gitlab'} | ${{ sourceUrl: 'https://gitlab.example.com/some/group/charts', sourceDirectory: 'private-chart' }}
       ${'dummy'}                | ${{}}
     `(
       '$input -> $output',

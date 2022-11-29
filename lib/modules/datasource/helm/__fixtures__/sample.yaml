@@ -95,6 +95,12 @@ entries:
       urls:
         - https://charts.example.com/private-chart-1.2.3.tgz
       version: 1.2.3
+  private-chart-gitlab:
+    - description: Some private chart from a self-hosted GitLab server
+      home: https://gitlab.example.com/some/group/charts/-/tree/master/private-chart
+      urls:
+        - https://charts.example.com/private-chart-1.2.3.tgz
+      version: 1.2.3
   dummy:
   - home:
     urls:

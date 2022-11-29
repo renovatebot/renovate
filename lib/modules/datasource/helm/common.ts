@@ -6,6 +6,9 @@ const chartRepo = regEx(/charts?|helm|helm-charts/i);
 const githubUrl = regEx(
   /^(?<url>https:\/\/[^/]+\/[^/]+\/(?<repo>[^/]+))(:?\/|\/tree\/[^/]+\/(?<path>.+))?$/
 );
+const gitlabUrl = regEx(
+  /^(?<url>https:\/\/[^/]+\/(?:[^-/][^/]*\/)+?(?<repo>[^-/][^/]*))(:?\/|(?:\/-)?\/tree\/[^/]+\/(?<path>.+))?$/
+);
 const githubRelease = regEx(
   /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
 );
@@ -21,6 +24,17 @@ function splitRepoUrl(url: string): RepoSource | null {
       };
     }
   }
+
+  if (platform === 'gitlab') {
+    const gitlabUrlMatch = gitlabUrl.exec(url);
+    if (gitlabUrlMatch?.groups && chartRepo.test(gitlabUrlMatch?.groups.repo)) {
+      return {
+        sourceUrl: gitlabUrlMatch.groups.url,
+        sourceDirectory: gitlabUrlMatch.groups.path,
+      };
+    }
+  }
+
   return null;
 }
 
