@@ -248,9 +248,10 @@ export class GithubGraphqlDatasourceHelper<
   }
 
   private async doPaginatedQuery(): Promise<ResultItem[]> {
-    let hasNextPage: boolean | undefined = true;
+    let hasNextPage = true;
+    let isPaginationDone = false;
     let cursor: string | undefined;
-    while (hasNextPage && !this.hasReachedQueryLimit()) {
+    while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
       const resultItems: ResultItem[] = [];
@@ -263,11 +264,9 @@ export class GithubGraphqlDatasourceHelper<
         resultItems.push(item);
       }
 
-      if (await this.getCacheAdapter().reconcile(resultItems)) {
-        break;
-      }
+      isPaginationDone = await this.getCacheAdapter().reconcile(resultItems);
 
-      hasNextPage = queryResult?.pageInfo?.hasNextPage;
+      hasNextPage = !!queryResult?.pageInfo?.hasNextPage;
       cursor = queryResult?.pageInfo?.endCursor;
       if (hasNextPage && cursor) {
         this.cursor = cursor;

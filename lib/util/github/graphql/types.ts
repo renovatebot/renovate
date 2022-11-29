@@ -128,7 +128,7 @@ export interface GithubGraphqlCacheRecord<
 > {
   items: Record<string, GithubItem>;
   createdAt: string;
-  refreshedAt: string;
+  updatedAt: string;
 }
 
 export interface GithubGraphqlCacheAdapter<

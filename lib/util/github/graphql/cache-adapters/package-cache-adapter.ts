@@ -9,8 +9,15 @@ export class GithubGraphqlPackageCacheAdapter<
     return packageCache.get(this.cacheNs, this.cacheKey);
   }
 
-  persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
-    const ttlMinutes = GithubGraphqlPackageCacheAdapter.cacheTTLDays * 24 * 60;
-    return packageCache.set(this.cacheNs, this.cacheKey, record, ttlMinutes);
+  async persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
+    const expiry = this.createdAt.plus({
+      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+    });
+    const { minutes: ttlMinutes } = expiry
+      .diff(this.now, ['minutes'])
+      .toObject();
+    if (ttlMinutes && ttlMinutes > 0) {
+      await packageCache.set(this.cacheNs, this.cacheKey, record, ttlMinutes);
+    }
   }
 }

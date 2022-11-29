@@ -10,12 +10,22 @@ export class GithubGraphqlMemoryCacheAdapter<
   }
 
   load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined> {
-    const res = memCache.get(this.fullKey());
+    const key = this.fullKey();
+    const res = memCache.get(key);
     return Promise.resolve(res);
   }
 
   persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
-    memCache.set(this.fullKey(), record);
+    const expiry = this.createdAt.plus({
+      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+    });
+    const { seconds: ttlSeconds } = expiry
+      .diff(this.now, ['seconds'])
+      .toObject();
+    if (ttlSeconds && ttlSeconds > 0) {
+      const key = this.fullKey();
+      memCache.set(key, record);
+    }
     return Promise.resolve();
   }
 }

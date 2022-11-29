@@ -13,28 +13,29 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
   protected static readonly packageUnstableDays = 7;
   protected static readonly cacheTTLDays = 30;
 
-  private readonly now = DateTime.now();
-
-  private createdAt = this.now;
-  private refreshedAt = this.createdAt;
-  private cachedItems: Record<string, GithubItem> | undefined;
+  protected readonly now = DateTime.now();
 
   private readonly reconciledVersions = new Set<string>();
+
+  /** Fields that will be persisted */
+  private items: Record<string, GithubItem> | undefined;
+  protected createdAt = this.now;
+  protected updatedAt = this.now;
 
   constructor(
     protected readonly cacheNs: string,
     protected readonly cacheKey: string
   ) {}
 
-  private async getCachedItems(): Promise<Record<string, GithubItem>> {
-    if (this.cachedItems) {
-      return this.cachedItems;
+  private async getItems(): Promise<Record<string, GithubItem>> {
+    if (this.items) {
+      return this.items;
     }
 
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
       createdAt: this.createdAt.toISO(),
-      refreshedAt: this.refreshedAt.toISO(),
+      updatedAt: this.updatedAt.toISO(),
     };
 
     const storedData = await this.load();
@@ -47,63 +48,52 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
     }
 
     this.createdAt = DateTime.fromISO(result.createdAt);
-    this.refreshedAt = DateTime.fromISO(result.refreshedAt);
-    this.cachedItems = result.items;
-    return this.cachedItems;
+    this.updatedAt = DateTime.fromISO(result.updatedAt);
+    this.items = result.items;
+    return this.items;
   }
 
-  private isPackageStabilized(item: GithubItem): boolean {
+  private isStabilized(item: GithubItem): boolean {
     const { packageUnstableDays } = AbstractGithubGraphqlCacheAdapter;
     const unstableDuration = { days: packageUnstableDays };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
 
   async reconcile(items: GithubItem[]): Promise<boolean> {
-    const cachedItems = await this.getCachedItems();
+    const cachedItems = await this.getItems();
 
-    let done = false;
+    let isPaginationDone = false;
     for (const item of items) {
       const { version } = item;
 
       const oldItem = cachedItems[version];
-      if (oldItem && this.isPackageStabilized(oldItem)) {
-        done = true;
+      if (oldItem && this.isStabilized(oldItem)) {
+        isPaginationDone = true;
       }
 
       cachedItems[version] = item;
       this.reconciledVersions.add(version);
     }
 
-    this.cachedItems = cachedItems;
-    return done;
+    this.items = cachedItems;
+    return isPaginationDone;
   }
 
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
-    const expiry = this.createdAt.plus(
-      AbstractGithubGraphqlCacheAdapter.cacheTTLDays
-    );
-    const { minutes: ttlMinutes } = expiry
-      .diff(this.now, ['minutes'])
-      .toObject();
-    if (ttlMinutes && ttlMinutes > 0) {
-      const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
-        items: cachedItems,
-        createdAt: this.createdAt.toISO(),
-        refreshedAt: this.now.toISO(),
-      };
-
-      await this.persist(cacheRecord);
-    }
+    const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
+      items: cachedItems,
+      createdAt: this.createdAt.toISO(),
+      updatedAt: this.now.toISO(),
+    };
+    await this.persist(cacheRecord);
   }
 
   async finalize(): Promise<GithubItem[]> {
-    const cachedItems = await this.getCachedItems();
+    const cachedItems = await this.getItems();
     const resultItems: Record<string, GithubItem> = {};
+
     for (const [version, item] of Object.entries(cachedItems)) {
-      if (
-        this.isPackageStabilized(item) ||
-        this.reconciledVersions.has(version)
-      ) {
+      if (this.isStabilized(item) || this.reconciledVersions.has(version)) {
         resultItems[version] = item;
       }
     }
