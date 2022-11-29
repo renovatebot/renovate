@@ -35,7 +35,7 @@ The `commitMessage` reflects the contents of the branch and is usually the same 
 `commitMessage` has a default value of `{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}`, with the intention that you only edit some of those subcomponents.
 
 You usually don't need to edit `commitMessagePrefix`, this option is used by Renovate if it needs to add a prefix to conform to the Semantic Commit convention.
-Do not touch this unless you know what you're doing.
+Avoid editing the commit mesage, unless you know what you're doing.
 
 `commitMessageAction` is usually just one word, e.g. 'Update', 'Pin', 'Refresh', etc.
 You're probably fine leaving this setting alone, though you can change it.
