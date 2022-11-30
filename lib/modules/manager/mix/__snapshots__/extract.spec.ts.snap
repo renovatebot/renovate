@@ -16,9 +16,10 @@ exports[`modules/manager/mix/extract extractPackageFile() extracts all dependenc
       "packageName": "ecto",
     },
     {
-      "currentValue": "ninenines/cowboy",
+      "currentValue": undefined,
       "datasource": "github",
       "depName": "cowboy",
+      "packageName": "cowboy",
       "skipReason": "non-hex-dep-types",
     },
     {

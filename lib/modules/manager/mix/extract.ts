@@ -11,6 +11,7 @@ const depMatchRegExp = regEx(
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
+const githubDataSourceId = 'github';
 
 export async function extractPackageFile(
   content: string,
@@ -31,22 +32,18 @@ export async function extractPackageFile(
       let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       while (depMatchGroups) {
         const { app, requirement, opts } = depMatchGroups;
-
         const github = githubRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
-
-        const currentValue = requirement || github;
-        const datasource = github ? 'github' : HexDatasource.id;
+        const datasource = github ? githubDataSourceId : HexDatasource.id;
 
         const dep: PackageDependency = {
           depName: app,
-          currentValue,
+          currentValue: requirement,
           datasource,
+          packageName: organization ? `${app}:${organization}` : app,
         };
 
-        if (datasource === HexDatasource.id) {
-          dep.packageName = organization ? `${app}:${organization}` : app;
-        } else {
+        if (datasource === githubDataSourceId) {
           dep.skipReason = 'non-hex-dep-types';
         }
 

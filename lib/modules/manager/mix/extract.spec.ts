@@ -21,8 +21,9 @@ describe('modules/manager/mix/extract', () => {
           { depName: 'ecto', currentValue: '>2.1.0 or <=3.0.0' },
           {
             depName: 'cowboy',
-            currentValue: 'ninenines/cowboy',
+            currentValue: undefined,
             datasource: 'github',
+            packageName: 'cowboy',
             skipReason: 'non-hex-dep-types',
           },
           {
