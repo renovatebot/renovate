@@ -28,11 +28,11 @@ import {
 import { isGradleBuildFile } from './utils';
 
 // .lockfile is gradle default lockfile, versions.lock is gradle-consistent-versions lockfile
-const isLockFile = function (fileName: string): boolean {
+function isLockFile(fileName: string): boolean {
   return ['.lockfile', VERSIONS_LOCK]
     .map((sfx) => fileName.endsWith(sfx))
     .some((v) => v);
-};
+}
 
 async function getUpdatedLockfiles(
   oldLockFileContentMap: Record<string, string | null>
