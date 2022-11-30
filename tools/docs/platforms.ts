@@ -20,8 +20,8 @@ export async function generatePlatforms(dist: string): Promise<void> {
 
   platformContent += '.\n';
 
-  const indexFileName = `docs/usage/modules/platform.md`;
+  const indexFileName = `docs/usage/modules/platform/index.md`;
   let indexContent = await readFile(indexFileName);
   indexContent = replaceContent(indexContent, platformContent);
-  await updateFile(`${dist}/modules/platform.md`, indexContent);
+  await updateFile(`${dist}/modules/platform/index.md`, indexContent);
 }

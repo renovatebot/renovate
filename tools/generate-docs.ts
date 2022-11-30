@@ -31,7 +31,7 @@ process.on('unhandledRejection', (err) => {
     }
 
     logger.info('* static');
-    r = shell.cp('-r', 'docs/usage/*', `${dist}/`);
+    r = shell.cp('-r', 'docs/usage/.', `${dist}`);
     if (r.code) {
       return;
     }

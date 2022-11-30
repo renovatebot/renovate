@@ -207,7 +207,7 @@ sidebar_label: ${displayName}
     languageText += allLanguages[language].map(getManagerLink).join(', ');
     languageText += '\n\n';
   }
-  let indexContent = await readFile(`docs/usage/modules/manager.md`);
+  let indexContent = await readFile(`docs/usage/modules/manager/index.md`);
   indexContent = replaceContent(indexContent, languageText);
-  await updateFile(`${dist}/modules/manager.md`, indexContent);
+  await updateFile(`${dist}/modules/manager/index.md`, indexContent);
 }
