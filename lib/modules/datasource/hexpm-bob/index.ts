@@ -78,7 +78,7 @@ export class HexpmBobDatasource extends Datasource {
     if (packageName === 'elixir') {
       return 'elixir';
     }
-    if (packageName.startsWith('otp/')) {
+    if (/^otp\/\w+-\d+\.\d+$/.test(packageName)) {
       return 'erlang';
     }
     return null;
