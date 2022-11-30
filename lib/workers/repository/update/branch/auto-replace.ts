@@ -159,7 +159,7 @@ export async function doAutoReplace(
       !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
-  let searchIndex;
+  let searchIndex: number;
   if (replaceWithoutReplaceString) {
     const depIndex = existingContent.indexOf(depName!);
     const valIndex = existingContent.indexOf(currentValue!);
