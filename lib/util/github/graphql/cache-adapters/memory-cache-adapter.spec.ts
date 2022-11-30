@@ -130,15 +130,16 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
   it('detects removed packages', async () => {
     const items = {
       // stabilized
-      '1': { version: '1', releaseTimestamp: isoTs('2022-10-23 10:00') }, // to be preserved
-      '2': { version: '2', releaseTimestamp: isoTs('2022-10-24 10:00') },
+      '0': { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') }, // to be preserved
+      '1': { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') }, // to be preserved
       // not stabilized
-      '3': { version: '3', releaseTimestamp: isoTs('2022-10-25 10:00') }, // to be deleted
-      '4': { version: '4', releaseTimestamp: isoTs('2022-10-26 10:00') },
-      '5': { version: '5', releaseTimestamp: isoTs('2022-10-27 10:00') }, // to be deleted
-      '6': { version: '6', releaseTimestamp: isoTs('2022-10-28 10:00') },
-      '7': { version: '7', releaseTimestamp: isoTs('2022-10-29 10:00') }, // to be deleted
-      '8': { version: '8', releaseTimestamp: isoTs('2022-10-30 10:00') },
+      '2': { version: '2', releaseTimestamp: isoTs('2022-10-02 10:00') },
+      '3': { version: '3', releaseTimestamp: isoTs('2022-10-03 10:00') }, // to be deleted
+      '4': { version: '4', releaseTimestamp: isoTs('2022-10-04 10:00') },
+      '5': { version: '5', releaseTimestamp: isoTs('2022-10-05 10:00') }, // to be deleted
+      '6': { version: '6', releaseTimestamp: isoTs('2022-10-06 10:00') },
+      '7': { version: '7', releaseTimestamp: isoTs('2022-10-07 10:00') }, // to be deleted
+      '8': { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
     };
     const cacheRecord: CacheRecord = {
       items,
@@ -150,27 +151,35 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     const now = '2022-10-31 15:30';
     mockTime(now);
 
-    const page = [items['2'], items['4'], items['6'], items['8']].reverse();
+    const page = [
+      items['1'],
+      items['2'],
+      items['4'],
+      items['6'],
+      items['8'],
+    ].reverse();
 
     const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
     const isPaginationDone = await adapter.reconcile(page);
     const res = await adapter.finalize();
 
     expect(res).toEqual([
-      { version: '1', releaseTimestamp: isoTs('2022-10-23 10:00') },
-      { version: '2', releaseTimestamp: isoTs('2022-10-24 10:00') },
-      { version: '4', releaseTimestamp: isoTs('2022-10-26 10:00') },
-      { version: '6', releaseTimestamp: isoTs('2022-10-28 10:00') },
-      { version: '8', releaseTimestamp: isoTs('2022-10-30 10:00') },
+      { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') },
+      { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') },
+      { version: '2', releaseTimestamp: isoTs('2022-10-02 10:00') },
+      { version: '4', releaseTimestamp: isoTs('2022-10-04 10:00') },
+      { version: '6', releaseTimestamp: isoTs('2022-10-06 10:00') },
+      { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
     ]);
     expect(isPaginationDone).toBe(true);
     expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
       items: {
-        '1': { version: '1', releaseTimestamp: isoTs('2022-10-23 10:00') },
-        '2': { version: '2', releaseTimestamp: isoTs('2022-10-24 10:00') },
-        '4': { version: '4', releaseTimestamp: isoTs('2022-10-26 10:00') },
-        '6': { version: '6', releaseTimestamp: isoTs('2022-10-28 10:00') },
-        '8': { version: '8', releaseTimestamp: isoTs('2022-10-30 10:00') },
+        '0': { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') },
+        '1': { version: '1', releaseTimestamp: isoTs('2022-10-01 10:00') },
+        '2': { version: '2', releaseTimestamp: isoTs('2022-10-02 10:00') },
+        '4': { version: '4', releaseTimestamp: isoTs('2022-10-04 10:00') },
+        '6': { version: '6', releaseTimestamp: isoTs('2022-10-06 10:00') },
+        '8': { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
       },
       createdAt: isoTs('2022-10-30 12:00'),
       updatedAt: isoTs('2022-10-31 15:30'),

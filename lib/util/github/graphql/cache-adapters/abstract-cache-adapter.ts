@@ -15,11 +15,6 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
 > implements GithubGraphqlCacheAdapter<GithubItem>
 {
   /**
-   * Time period during which a package can be evicted from cache.
-   */
-  protected static readonly packageUnstableDays = 7;
-
-  /**
    * Time period after which a cache record is considered expired.
    */
   protected static readonly cacheTTLDays = 30;
@@ -79,15 +74,12 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
   }
 
   /**
-   * If a package version was published less than `packageUnstableDays` ago,
-   * then it is considered unstable and can be evicted from cache.
-   *
-   * Otherwise, it is considered stabilized and will be persisted until
-   * cache record expires.
+   * If package release exists longer than this cache can exist,
+   * we assume it won't updated/removed on the Github side.
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheAdapter.packageUnstableDays,
+      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
