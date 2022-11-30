@@ -914,4 +914,30 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
       },
     ]);
   });
+
+  it('gradle-consistent-versions plugin ignores props and lock files if plugin not enabled', async () => {
+    const buildFile = `
+      apply from: 'test.gradle'
+
+      repositories {
+          mavenCentral()
+      }
+
+      dependencies {
+        implementation "org.apache.lucene"
+      }
+    `;
+
+    mockFs({
+      'build.gradle': buildFile,
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+    });
+
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'versions.props',
+    ]);
+
+    expect(res).toBeNull();
+  });
 });
