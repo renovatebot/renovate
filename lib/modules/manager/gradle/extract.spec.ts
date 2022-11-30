@@ -842,7 +842,7 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
-  it('gradle-consistent-versions plugin check enabled', async () => {
+  it('gradle-consistent-versions parse versions files', async () => {
     const buildFile = `
       apply from: 'test.gradle'
 

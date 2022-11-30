@@ -24,7 +24,7 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
   VERSIONS_LOCK,
   isGcvPropsFile,
-} from './extract/consistentVersionsPlugin';
+} from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
 
 // .lockfile is gradle default lockfile, versions.lock is gradle-consistent-versions lockfile

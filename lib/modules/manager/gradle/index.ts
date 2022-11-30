@@ -4,7 +4,7 @@ import * as gradleVersioning from '../../versioning/gradle';
 import {
   VERSIONS_LOCK,
   VERSIONS_PROPS,
-} from './extract/consistentVersionsPlugin';
+} from './extract/consistent-versions-plugin';
 
 export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';

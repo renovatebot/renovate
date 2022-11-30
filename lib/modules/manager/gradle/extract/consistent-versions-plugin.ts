@@ -105,9 +105,14 @@ export function parseGcv(
 // Private utility functions below
 //----------------------------------
 
-// Translate GCV's glob syntax to regex
+// Translate glob syntax to a regex that does the same
 function globToRegex(depName: string): RegExp {
-  return regEx(depName.replaceAll('.', '\\.').replaceAll('*', '[^:]*'));
+  return regEx(
+    depName
+      .replaceAll('*', '_WC_CHAR_')
+      .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
+      .replaceAll('_WC_CHAR_', '[^:]*')
+  );
 }
 
 // Translate the regex from versions.props into a group name used in branch names etc

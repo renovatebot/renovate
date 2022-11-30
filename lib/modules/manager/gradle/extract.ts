@@ -10,7 +10,7 @@ import {
   isGcvPropsFile,
   parseGcv,
   usesGcv,
-} from './extract/consistentVersionsPlugin';
+} from './extract/consistent-versions-plugin';
 import { parseGradle, parseProps } from './parser';
 import type {
   GradleManagerData,
