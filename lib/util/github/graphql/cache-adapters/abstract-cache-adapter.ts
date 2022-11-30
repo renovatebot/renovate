@@ -64,8 +64,9 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
 
     const storedData = await this.load();
     if (storedData) {
-      const { cacheTTLDays } = AbstractGithubGraphqlCacheAdapter;
-      const cacheTTLDuration = { days: cacheTTLDays };
+      const cacheTTLDuration = {
+        days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+      };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
       }
@@ -85,8 +86,9 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
    * cache record expires.
    */
   private isStabilized(item: GithubItem): boolean {
-    const { packageUnstableDays } = AbstractGithubGraphqlCacheAdapter;
-    const unstableDuration = { days: packageUnstableDays };
+    const unstableDuration = {
+      days: AbstractGithubGraphqlCacheAdapter.packageUnstableDays,
+    };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
 
@@ -152,5 +154,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
    * Loading and persisting data is delegated to the concrete adapter.
    */
   abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
-  abstract persist(_: GithubGraphqlCacheRecord<GithubItem>): Promise<void>;
+  abstract persist(
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+  ): Promise<void>;
 }

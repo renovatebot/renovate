@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import { DateTime, Settings } from 'luxon';
 import * as memCache from '../../../cache/memory';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
@@ -7,7 +7,8 @@ import { GithubGraphqlMemoryCacheAdapter } from './memory-cache-adapter';
 const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
 
 const mockTime = (input: string): void => {
-  jest.spyOn(DateTime, 'now').mockReturnValue(DateTime.fromISO(isoTs(input)));
+  const now = DateTime.fromISO(isoTs(input)).valueOf();
+  Settings.now = () => now;
 };
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;

@@ -19,7 +19,7 @@ export class GithubGraphqlMemoryCacheAdapter<
     return Promise.resolve(res);
   }
 
-  persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
+  persist(cacheRecord: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
     const expiry = this.createdAt.plus({
       days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
     });
@@ -28,7 +28,7 @@ export class GithubGraphqlMemoryCacheAdapter<
       .toObject();
     if (ttlSeconds && ttlSeconds > 0) {
       const key = this.fullKey();
-      memCache.set(key, record);
+      memCache.set(key, cacheRecord);
     }
     return Promise.resolve();
   }

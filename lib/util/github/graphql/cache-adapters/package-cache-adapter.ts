@@ -12,7 +12,9 @@ export class GithubGraphqlPackageCacheAdapter<
     return packageCache.get(this.cacheNs, this.cacheKey);
   }
 
-  async persist(record: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
+  async persist(
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+  ): Promise<void> {
     const expiry = this.createdAt.plus({
       days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
     });
@@ -20,7 +22,12 @@ export class GithubGraphqlPackageCacheAdapter<
       .diff(this.now, ['minutes'])
       .toObject();
     if (ttlMinutes && ttlMinutes > 0) {
-      await packageCache.set(this.cacheNs, this.cacheKey, record, ttlMinutes);
+      await packageCache.set(
+        this.cacheNs,
+        this.cacheKey,
+        cacheRecord,
+        ttlMinutes
+      );
     }
   }
 }

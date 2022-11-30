@@ -9,7 +9,6 @@ export function isDateExpired(
   initialTimestamp: string,
   duration: DurationLikeObject
 ): boolean {
-  const initialTime = DateTime.fromISO(initialTimestamp);
-  const expiryTime = initialTime.plus(duration);
+  const expiryTime = DateTime.fromISO(initialTimestamp).plus(duration);
   return currentTime >= expiryTime;
 }
