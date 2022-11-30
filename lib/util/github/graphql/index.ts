@@ -1,5 +1,5 @@
 import type { GithubHttp } from '../../http/github';
-import { GithubGraphqlDatasourceHelper } from './datasource-helper';
+import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher';
 import { adapter as releasesAdapter } from './releases-adapter';
 import { adapter as tagsAdapter } from './tags-adapter';
 import type {
@@ -12,7 +12,7 @@ export async function queryTags(
   config: GithubPackageConfig,
   http: GithubHttp
 ): Promise<GithubTagItem[]> {
-  const res = await GithubGraphqlDatasourceHelper.query(
+  const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
     tagsAdapter
@@ -24,7 +24,7 @@ export async function queryReleases(
   config: GithubPackageConfig,
   http: GithubHttp
 ): Promise<GithubReleaseItem[]> {
-  const res = await GithubGraphqlDatasourceHelper.query(
+  const res = await GithubGraphqlDatasourceFetcher.query(
     config,
     http,
     releasesAdapter

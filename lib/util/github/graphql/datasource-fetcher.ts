@@ -40,7 +40,7 @@ function canBeSolvedByShrinking(err: Error): boolean {
   );
 }
 
-export class GithubGraphqlDatasourceHelper<
+export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
   ResultItem extends GithubDatasourceItem
 > {
@@ -60,7 +60,7 @@ export class GithubGraphqlDatasourceHelper<
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>
   ): Promise<U[]> {
-    const instance = new GithubGraphqlDatasourceHelper<T, U>(
+    const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
       adapter

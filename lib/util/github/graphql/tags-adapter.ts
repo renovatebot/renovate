@@ -1,4 +1,4 @@
-import { GithubGraphqlDatasourceHelper } from './datasource-helper';
+import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher';
 import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlTag,
@@ -7,7 +7,7 @@ import type {
 
 const key = 'github-tags-datasource-v2';
 
-const query = GithubGraphqlDatasourceHelper.prepareQuery(`
+const query = GithubGraphqlDatasourceFetcher.prepareQuery(`
   refs(
     first: $count
     after: $cursor
