@@ -317,12 +317,12 @@ const qDependencySet = q
     search: q
       .begin<Ctx>()
       .sym('group')
-      .op(regEx(/^[:=]$/))
+      .alt(q.op(':'), q.op('='))
       .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
       .op(',')
       .sym('version')
-      .op(regEx(/^[:=]$/))
+      .alt(q.op(':'), q.op('='))
       .alt(qTemplateString, qVariableAccessIdentifier)
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
