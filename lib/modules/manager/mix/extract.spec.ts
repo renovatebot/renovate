@@ -15,34 +15,7 @@ describe('modules/manager/mix/extract', () => {
 
     it('extracts all dependencies', async () => {
       const res = await extractPackageFile(Fixtures.get('mix.exs'), 'mix.exs');
-      expect(res).toMatchSnapshot({
-        deps: [
-          { depName: 'postgrex', currentValue: '~> 0.8.1' },
-          { depName: 'ecto', currentValue: '>2.1.0 or <=3.0.0' },
-          {
-            depName: 'cowboy',
-            currentValue: undefined,
-            datasource: 'github',
-            packageName: 'cowboy',
-            skipReason: 'non-hex-dep-types',
-          },
-          {
-            depName: 'secret',
-            currentValue: '~> 1.0',
-            datasource: 'hex',
-            packageName: 'secret:acme',
-          },
-          {
-            depName: 'also_secret',
-            currentValue: '~> 1.0',
-            datasource: 'hex',
-            packageName: 'also_secret:acme',
-          },
-          { depName: 'ex_doc', currentValue: '>2.1.0 and <=3.0.0' },
-          { depName: 'jason', currentValue: '>= 1.0.0' },
-          { depName: 'jason', currentValue: '~> 1.0' },
-        ],
-      });
+      expect(res).toMatchSnapshot();
     });
   });
 });
