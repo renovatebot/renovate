@@ -2,7 +2,7 @@
 
 To specify which specific repository should be queried when looking up a package, the `packageName` has to have the repository identifier and the package name itself, separated by a slash. As an example, `alpine_3_12/gcc` would look for a binary or source package called `gcc` within the `alpine_3_12` repository.
 
-A [list of all supported repositories](https://repology.org/repositories/statistics) can be found on the Repology homepage. To determine the correct identifier, click on a repository of your choice and make note of the identifier in the URL: `https://repology.org/repository/<identifier>`
+A [list of all supported repositories](https://repology.org/repositories/statistics) can be found on the Repology homepage. To determine the correct identifier, select the repository of your choice and make note of the identifier in the URL: `https://repology.org/repository/<identifier>`
 
 As an example, the `Alpine Linux 3.12` repository points to `https://repology.org/repository/alpine_3_12` and therefor has the repository identifier `alpine_3_12`.
 

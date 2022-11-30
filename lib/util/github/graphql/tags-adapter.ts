@@ -23,13 +23,13 @@ const query = GithubGraphqlDatasourceHelper.prepareQuery(`
       target {
         type: __typename
         ... on Commit {
-          newDigest: oid
+          oid
           releaseTimestamp: committedDate
         }
         ... on Tag {
           target {
             ... on Commit {
-              newDigest: oid
+              oid
             }
           }
           tagger {
@@ -43,12 +43,12 @@ const query = GithubGraphqlDatasourceHelper.prepareQuery(`
 function transform(item: GithubGraphqlTag): GithubTagItem | null {
   const { version, target } = item;
   if (target.type === 'Commit') {
-    const { newDigest, releaseTimestamp } = target;
-    return { version, gitRef: version, newDigest, releaseTimestamp };
+    const { oid: hash, releaseTimestamp } = target;
+    return { version, gitRef: version, hash, releaseTimestamp };
   } else if (target.type === 'Tag') {
-    const { newDigest } = target.target;
+    const { oid: hash } = target.target;
     const { releaseTimestamp } = target.tagger;
-    return { version, gitRef: version, newDigest, releaseTimestamp };
+    return { version, gitRef: version, hash, releaseTimestamp };
   }
   return null;
 }
