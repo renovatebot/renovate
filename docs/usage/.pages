@@ -1,22 +1,12 @@
 nav:
   - Home: 'index.md'
-  - Getting Started:
-      - 'Use Cases': 'getting-started/use-cases.md'
-      - 'Running Renovate': 'getting-started/running.md'
-      - 'Self-Hosting Examples': 'examples/self-hosting.md'
-      - 'Installing & Onboarding': 'getting-started/installing-onboarding.md'
-      - 'Private Packages': 'getting-started/private-packages.md'
+  - ... | getting-started
   - Troubleshooting: 'troubleshooting.md'
   - Configuration:
       - 'Self-hosted': 'self-hosted-configuration.md'
       - 'Repository': 'configuration-options.md'
       - 'Presets': 'config-presets.md'
-  - Key Concepts:
-      - 'Presets': 'key-concepts/presets.md'
-      - 'Dependency Dashboard': 'key-concepts/dashboard.md'
-      - 'Pull Requests': 'key-concepts/pull-requests.md'
-      - 'Renovate Scheduling': 'key-concepts/scheduling.md'
-      - 'Automerge': 'key-concepts/automerge.md'
+  - ... | key-concepts
   - ... | modules
   - Language Support:
       - 'Bazel': 'bazel.md'
@@ -51,8 +41,7 @@ nav:
       - 'Schedule Presets': 'presets-schedule.md'
       - 'Workaround Presets': 'presets-workarounds.md'
   - All Other:
-      - User Stories:
-          - 'Swissquote': 'user-stories/swissquote.md'
+      - ... | user-stories
       - 'Security and Permissions': 'security-and-permissions.md'
       - 'Merge Confidence': 'merge-confidence.md'
       - 'Templates': 'templates.md'
