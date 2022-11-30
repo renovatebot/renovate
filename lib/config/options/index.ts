@@ -961,7 +961,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCategories',
     description:
-      'List of categories to match (e.g. `["python"]`). Valid only within a `packageRules` object.',
+      'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
