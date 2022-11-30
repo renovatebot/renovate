@@ -1,3 +1,8 @@
+export interface RegistryRepository {
+  registry: string;
+  repository: string;
+}
+
 export interface VersionDetailResponse {
   name: string;
   version: string;

@@ -93,6 +93,34 @@ describe('modules/datasource/terraform-provider/index', () => {
       });
     });
 
+    it('processes with registry in name', async () => {
+      httpMock
+        .scope('https://terraform.company.com/')
+        .get('/v1/providers/hashicorp/azurerm/versions')
+        .reply(200, azurermVersionsData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource: TerraformProviderDatasource.id,
+        depName: 'terraform.company.com/hashicorp/azurerm',
+        registryUrls: ['https://terraform.company.com'],
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://terraform.company.com',
+        releases: [
+          {
+            version: '2.49.0',
+          },
+          {
+            version: '3.0.0',
+          },
+          {
+            version: '3.0.1',
+          },
+        ],
+      });
+    });
+
     it('returns null for empty result from third party', async () => {
       httpMock
         .scope('https://registry.company.com')

@@ -12,6 +12,7 @@ import type { ServiceDiscoveryResult } from '../terraform-module/types';
 import { createSDBackendURL } from '../terraform-module/utils';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type {
+  RegistryRepository,
   TerraformBuild,
   TerraformProvider,
   TerraformProviderReleaseBackend,
@@ -61,27 +62,34 @@ export class TerraformProviderDatasource extends TerraformDatasource {
       `terraform-provider.getDependencies() packageName: ${packageName}`
     );
 
-    if (registryUrl === this.defaultRegistryUrls[1]) {
-      return await this.queryReleaseBackend(packageName, registryUrl);
-    }
-    const repository = TerraformProviderDatasource.getRepository({
-      packageName,
-    });
-    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
-      registryUrl
+    const { registry: registryUrlNormalized, repository } =
+      TerraformProviderDatasource.getRegistryRepository(
+        packageName,
+        registryUrl
+      );
+    logger.trace(
+      { registryUrlNormalized, terraformRepository: repository },
+      'terraform-module.getReleases()'
     );
 
-    if (registryUrl === this.defaultRegistryUrls[0]) {
+    if (registryUrlNormalized === this.defaultRegistryUrls[1]) {
+      return await this.queryReleaseBackend(packageName, registryUrlNormalized);
+    }
+    const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
+      registryUrlNormalized
+    );
+
+    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
-        registryUrl,
+        registryUrlNormalized,
         repository
       );
     }
 
     return await this.queryRegistryVersions(
       serviceDiscovery,
-      registryUrl,
+      registryUrlNormalized,
       repository
     );
   }
@@ -293,5 +301,28 @@ export class TerraformProviderDatasource extends TerraformDatasource {
         `${TerraformProviderDatasource.defaultRegistryUrls[1]}/${backendLookUpName}/${version}/index.json`
       )
     ).body;
+  }
+
+  private static getRegistryRepository(
+    packageName: string,
+    registryUrl = ''
+  ): RegistryRepository {
+    let registry: string;
+    const split = packageName.split('/');
+    if (split.length >= 3 && split[0].includes('.')) {
+      [registry] = split;
+      split.shift();
+    } else {
+      registry = registryUrl;
+    }
+    if (!regEx(/^https?:\/\//).test(registry)) {
+      registry = `https://${registry}`;
+    }
+
+    const repository = this.getRepository({ packageName: split.join('/') });
+    return {
+      registry,
+      repository,
+    };
   }
 }
