@@ -10,7 +10,7 @@ spec:
   tasks:
   - taskRef:
       resolver: bundles
-      resource:
+      params:
       - name: bundle
         value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
@@ -44,7 +44,7 @@ spec:
     spec:
       taskRef:
         resolver: bundles
-        resource:
+        params:
         - name: bundle
           value: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver
   - kind: PipelineRun
@@ -55,7 +55,7 @@ spec:
     spec:
       pipelineRef:
         resolver: bundles
-        resource:
+        params:
         - name: bundle
           value: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver
 ---
@@ -63,7 +63,7 @@ kind: TaskRun
 spec:
   taskRef:
     resolver: bundles
-    resource:
+    params:
     - name: bundle
       value: gcr.io/tekton-releases/catalog/upstream/task-run
 ---
@@ -71,7 +71,7 @@ kind: TaskRun
 spec:
   taskRef:
     resolver: bundles
-    resource:
+    params:
     - name: bundle
       value: gcr.io/tekton-releases/catalog/upstream/task-run-resolver
 ---
@@ -84,7 +84,7 @@ kind: PipelineRun
 spec:
   pipelineRef:
     resolver: bundles
-    resource:
+    params:
     - name: bundle
       value: gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver
 ---
@@ -105,7 +105,30 @@ spec:
   tasks:
   - taskRef:
       resolver: bundles
-      resource:
+      params:
       - name: bundle
         value: ""
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resolver: bundles
+      params:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
 ---
