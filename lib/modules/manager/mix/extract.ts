@@ -35,7 +35,6 @@ export async function extractPackageFile(
         const github = githubRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
 
-        const packageName = organization ? `${app}:${organization}` : app;
         const currentValue = requirement || github;
         const datasource = github ? 'github' : HexDatasource.id;
 
@@ -46,7 +45,7 @@ export async function extractPackageFile(
         };
 
         if (datasource === HexDatasource.id) {
-          dep.packageName = packageName;
+          dep.packageName = organization ? `${app}:${organization}` : app;
         } else {
           dep.skipReason = 'non-hex-dep-types';
         }
