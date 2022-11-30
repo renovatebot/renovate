@@ -589,6 +589,45 @@ const qVersionCatalogDependencies = q
   .handler(handleLibraryDep)
   .handler(cleanupTempVars);
 
+// alias("foo.bar").to("foo", "bar").version("1.2.3")
+const qVersionCatalogAliasDependencies = q
+  .sym<Ctx>('alias')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .join(qStringValue)
+      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .end(),
+  })
+  .op('.')
+  .sym('to')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .op(',')
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .end(),
+  })
+  .opt(qVersionCatalogVersion)
+  .handler(handleLibraryDep)
+  .handler(cleanupTempVars);
+
+const qVersionCatalogs = q.alt(
+  qVersionCatalogDependencies,
+  qVersionCatalogAliasDependencies
+);
+
 // someMethod("foo", "bar", "1.2.3")
 const qLongFormDep = q
   .opt<Ctx>(
@@ -698,7 +737,7 @@ export function parseGradle(
       qKotlinMapNotationDependencies,
       qPlugins,
       qRegistryUrls,
-      qVersionCatalogDependencies,
+      qVersionCatalogs,
       qLongFormDep,
       qApplyFrom
     ),
