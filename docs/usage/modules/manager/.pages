@@ -1,7 +1,8 @@
 title: Managers
 nav:
   - Introduction: index.md
-  - ...
+# TODO: add all managers ?
+#  - ...
 collapse_single_pages: true
 order: asc
 sort_type: natural
