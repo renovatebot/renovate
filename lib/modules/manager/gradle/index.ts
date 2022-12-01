@@ -20,8 +20,8 @@ export const defaultConfig = {
     '(^|\\/)gradle\\/.+\\.toml$',
     '\\.versions\\.toml$',
     // The two below is for gradle-consistent-versions plugin
-    `\\/${VERSIONS_PROPS}$`,
-    `\\/${VERSIONS_LOCK}$`,
+    `(^|\\/)${VERSIONS_PROPS}$`,
+    `(^|\\/)${VERSIONS_LOCK}$`,
   ],
   timeout: 600,
   versioning: gradleVersioning.id,
