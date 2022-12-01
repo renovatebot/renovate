@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
@@ -6,7 +7,6 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { writeLocalFile } from '../../../util/fs';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
-import { codeBlock } from 'common-tags';
 
 const cargo1toml = Fixtures.get('Cargo.1.toml');
 const cargo2toml = Fixtures.get('Cargo.2.toml');
