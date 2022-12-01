@@ -237,7 +237,7 @@
     "zod": "3.19.1"
   },
   "optionalDependencies": {
-    "re2": "1.17.7"
+    "re2": "1.17.8"
   },
   "devDependencies": {
     "@jest/globals": "29.3.1",
