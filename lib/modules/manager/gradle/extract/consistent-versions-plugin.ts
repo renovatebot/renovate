@@ -161,9 +161,11 @@ function parseLockFile(input: string): Map<string, string> {
 }
 
 /**
- * Parses `versions.props`
+ * Parses `versions.props`, this is CR/LF safe
+ * @param input the entire property file from file system
+ * @return two maps, first being exact matches, second regex matches
  */
-function parsePropsFile(
+export function parsePropsFile(
   input: string
 ): [Map<string, VersionWithPosition>, Map<string, VersionWithPosition>] {
   const propsLineRegex = regEx(
@@ -173,6 +175,7 @@ function parsePropsFile(
   const depVerRegexMap = new Map<string, VersionWithPosition>();
 
   let startOfLineIdx = 0;
+  const isCrLf = input.indexOf('\r\n') > 0;
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propsLineRegex.exec(line);
     if (lineMatch?.groups) {
@@ -191,7 +194,7 @@ function parsePropsFile(
         });
       }
     }
-    startOfLineIdx += line.length + 1;
+    startOfLineIdx += line.length + (isCrLf ? 2 : 1);
   }
   logger.trace(
     `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`

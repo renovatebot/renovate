@@ -2,7 +2,7 @@ import { stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
-import { usesGcv } from './extract/consistent-versions-plugin';
+import { parsePropsFile, usesGcv } from './extract/consistent-versions-plugin';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
@@ -872,7 +872,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.apache.lucene:lucene-core',
             depType: 'dependencies',
             fileReplacePosition: 22,
-            groupName: 'org.apache.lucene:-',
+            groupName: 'org.apache.lucene:*',
             lockedVersion: '1.2.3',
             managerData: {
               fileReplacePosition: 22,
@@ -884,7 +884,7 @@ describe('modules/manager/gradle/extract', () => {
             depName: 'org.apache.lucene:lucene-codecs',
             depType: 'dependencies',
             fileReplacePosition: 22,
-            groupName: 'org.apache.lucene:-',
+            groupName: 'org.apache.lucene:*',
             lockedVersion: '1.2.3',
             managerData: {
               fileReplacePosition: 22,
@@ -1055,5 +1055,16 @@ describe('modules/manager/gradle/extract', () => {
         deps: [],
       },
     ]);
+  });
+
+  it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
+    const crlfProps2ndLine = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`)[0].get(
+      'a.b:c.e'
+    );
+    const lfProps2ndLine =
+      parsePropsFile(`a.b:c.d=1\na.b:c.e=2`)[0].get('a.b:c.e');
+
+    expect(crlfProps2ndLine?.filePos).toBe(19);
+    expect(lfProps2ndLine?.filePos).toBe(18);
   });
 });
