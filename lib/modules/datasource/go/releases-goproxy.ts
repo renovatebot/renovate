@@ -62,15 +62,17 @@ export class GoProxyDatasource extends Datasource {
             const versionSuffix = parseInt(versionSuffixMatch[1]);
             for (let i = 0; ; i++) {
               try {
-                releases = releases.concat(
-                  await this.getVersionsWithInfo(
-                    url,
-                    packageName.replace(
-                      versionSuffixRegex,
-                      `.v${versionSuffix + i}`
-                    )
+                const result = await this.getVersionsWithInfo(
+                  url,
+                  packageName.replace(
+                    versionSuffixRegex,
+                    `.v${versionSuffix + i}`
                   )
                 );
+                if (result.length === 0) {
+                  break;
+                }
+                releases = releases.concat(result);
               } catch (err) {
                 const statusCode = err?.response?.statusCode;
                 if (i > 0 && (statusCode === 404 || statusCode === 410)) {

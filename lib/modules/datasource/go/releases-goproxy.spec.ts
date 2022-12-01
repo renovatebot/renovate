@@ -613,5 +613,17 @@ describe('modules/datasource/go/releases-goproxy', () => {
 
       expect(res).toBeNull();
     });
+
+    it('continues if gopkg.in package returns no releases', async () => {
+      process.env.GOPROXY = baseUrl;
+
+      httpMock.scope(`${baseUrl}/gopkg.in/bar.v1`).get('/@v/list').reply(200);
+
+      const res = await datasource.getReleases({
+        packageName: 'gopkg.in/bar.v1',
+      });
+
+      expect(res).toBeNull();
+    });
   });
 });
