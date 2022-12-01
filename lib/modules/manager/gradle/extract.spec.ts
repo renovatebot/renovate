@@ -941,4 +941,119 @@ describe('modules/manager/gradle/extract', () => {
     expect(usesGcv('mysub/versions.props', fsMock)).toBeTrue();
     expect(usesGcv('othersub/versions.props', fsMock)).toBeFalse();
   });
+
+  it('gradle-consistent-versions multi levels of glob', async () => {
+    const fsMock = {
+      'build.gradle': '(this file contains) com.palantir.consistent-versions',
+      'versions.props': stripIndent`
+        org.apache.* = 4
+        org.apache.lucene:* = 3
+        org.apache.lucene:a.* = 2
+        org.apache.lucene:a.b = 1
+      `,
+      'versions.lock': stripIndent`
+        org.apache.solr:x.y:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
+        org.apache.lucene:d:1 (10 constraints: 95be0c15)
+        org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+
+    // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
+    expect(res).toMatchObject([
+      {
+        packageFile: 'versions.lock',
+        datasource: 'maven',
+        deps: [],
+      },
+      {
+        packageFile: 'versions.props',
+        datasource: 'maven',
+        deps: [
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 91,
+            },
+            packageName: 'org.apache.lucene:a.b',
+            currentValue: '1',
+            currentVersion: '1',
+            lockedVersion: '1',
+            fileReplacePosition: 91,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 65,
+            },
+            depName: 'org.apache.lucene:a.c',
+            currentValue: '2',
+            currentVersion: '2',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:a.*',
+            fileReplacePosition: 65,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 65,
+            },
+            depName: 'org.apache.lucene:a.d',
+            currentValue: '2',
+            currentVersion: '2',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:a.*',
+            fileReplacePosition: 65,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 39,
+            },
+            depName: 'org.apache.lucene:d',
+            currentValue: '3',
+            currentVersion: '3',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:*',
+            fileReplacePosition: 39,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 39,
+            },
+            depName: 'org.apache.lucene:e.f',
+            currentValue: '3',
+            currentVersion: '3',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:*',
+            fileReplacePosition: 39,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+        ],
+      },
+      {
+        packageFile: 'build.gradle',
+        datasource: 'maven',
+        deps: [],
+      },
+    ]);
+  });
 });

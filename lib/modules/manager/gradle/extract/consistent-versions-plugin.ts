@@ -92,13 +92,16 @@ export function parseGcv(
         lockedVersion: lockFileMap.get(propDep),
       } as PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
+      // Remove from the lockfile map so the same exact lib will not be included in globbing
+      lockFileMap.delete(propDep);
     }
   }
 
-  // For each regular expression (group) dep in props file
-  for (const [propDepRegEx, propVerAndPos] of propsFileRegexMap) {
+  // For each regular expression dep in props file (starting with the longest glob string)...
+  for (const [propDepGlob, propVerAndPos] of propsFileRegexMap) {
+    const globRegex = globToRegex(propDepGlob);
     for (const [exactDep, exactVer] of lockFileMap) {
-      if (propDepRegEx.test(exactDep)) {
+      if (globRegex.test(exactDep)) {
         const newDep: Record<string, any> = {
           managerData: {
             packageFile: VERSIONS_PROPS,
@@ -108,9 +111,11 @@ export function parseGcv(
           currentValue: propVerAndPos.version,
           currentVersion: propVerAndPos.version,
           lockedVersion: exactVer,
-          groupName: regexToGroupString(propDepRegEx),
+          groupName: propDepGlob,
         } as PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
+        // Remove from the lockfile map so the same exact lib will not be included in globbing
+        lockFileMap.delete(exactDep);
       }
     }
   }
@@ -118,18 +123,14 @@ export function parseGcv(
 }
 
 // Translate glob syntax to a regex that does the same
+// Loosely borrowed mapping to regex from https://github.com/palantir/gradle-consistent-versions/blob/develop/src/main/java/com/palantir/gradle/versions/FuzzyPatternResolver.java
 function globToRegex(depName: string): RegExp {
   return regEx(
     depName
       .replaceAll('*', '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replaceAll('_WC_CHAR_', '[^:]*')
+      .replaceAll('_WC_CHAR_', '.*?')
   );
-}
-
-// Translate the regex from versions.props into a group name used in branch names etc
-function regexToGroupString(regExp: RegExp): string {
-  return regExp.source.replaceAll('[^:]*', '-').replaceAll('\\.', '.');
 }
 
 interface VersionWithPosition {
@@ -164,12 +165,12 @@ function parseLockFile(input: string): Map<string, string> {
  */
 function parsePropsFile(
   input: string
-): [Map<string, VersionWithPosition>, Map<RegExp, VersionWithPosition>] {
+): [Map<string, VersionWithPosition>, Map<string, VersionWithPosition>] {
   const propsLineRegex = regEx(
     `^(?<depName>[^:]+:[^=]+?) *= *(?<propsVersion>.*)$`
   );
   const depVerExactMap = new Map<string, VersionWithPosition>();
-  const depVerRegexMap = new Map<RegExp, VersionWithPosition>();
+  const depVerRegexMap = new Map<string, VersionWithPosition>();
 
   let startOfLineIdx = 0;
   for (const line of input.split(newlineRegex)) {
@@ -179,7 +180,7 @@ function parsePropsFile(
       const startPosInLine = line.lastIndexOf(propsVersion);
       const propVersionPos = startOfLineIdx + startPosInLine;
       if (depName.includes('*')) {
-        depVerRegexMap.set(globToRegex(depName), {
+        depVerRegexMap.set(depName, {
           version: propsVersion,
           filePos: propVersionPos,
         });
@@ -195,5 +196,5 @@ function parsePropsFile(
   logger.trace(
     `Found ${depVerExactMap.size} dependencies and ${depVerRegexMap.size} wildcard dependencies in ${VERSIONS_PROPS}.`
   );
-  return [depVerExactMap, depVerRegexMap];
+  return [depVerExactMap, new Map([...depVerRegexMap].sort().reverse())];
 }
