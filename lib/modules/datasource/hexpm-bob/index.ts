@@ -32,17 +32,14 @@ export class HexpmBobDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const packageType = this.getPackageType(packageName);
 
-    if (!packageType) {
-      return null;
-    }
 
     logger.trace(
-      { registryUrl: registryUrl ?? defaultRegistryUrl, packageName },
+      { registryUrl, packageName },
       `fetching hex.pm bob ${packageName} release`
     );
 
     const url = `${
-      registryUrl ?? defaultRegistryUrl
+      registryUrl!
     }/builds/${packageName}/builds.txt`;
 
     const result: ReleaseResult = {
