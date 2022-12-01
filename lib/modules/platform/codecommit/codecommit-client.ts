@@ -48,11 +48,11 @@ import {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
+import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
 import is from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
 
 let codeCommitClient: CodeCommitClient;
 
@@ -315,7 +315,9 @@ export function getCodeCommitUrl(
 
   const signer = new aws4.RequestSigner({
     service: 'codecommit',
-    host: `git-codecommit.${process.env.AWS_REGION}.amazonaws.com`,
+    host: `git-codecommit.${
+      process.env.AWS_REGION ?? 'us-east-1'
+    }.amazonaws.com`,
     method: 'GIT',
     path: `v1/repos/${repoName}`,
   });
@@ -337,5 +339,7 @@ export function getCodeCommitUrl(
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
   }
-  return `https://${username}:${token}@git-codecommit.${process.env.AWS_REGION}.amazonaws.com/v1/repos/${repoName}`;
+  return `https://${username}:${token}@git-codecommit.${
+    process.env.AWS_REGION ?? 'us-east-1'
+  }.amazonaws.com/v1/repos/${repoName}`;
 }

@@ -1,8 +1,4 @@
-import {
-  GetUserCommand,
-  GetUserCommandOutput,
-  IAMClient,
-} from '@aws-sdk/client-iam';
+import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { logger } from '../../../logger';
 
 let iam: IAMClient;
@@ -23,8 +19,7 @@ export async function getUserArn(): Promise<string> {
   const cmd = new GetUserCommand({});
   let res;
   try {
-    const userRes: GetUserCommandOutput = await iam.send(cmd);
-    logger.debug(`succssfully got user : ${userRes}`);
+    const userRes = await iam.send(cmd);
     res = userRes?.User?.Arn;
   } catch (err) {
     logger.debug('Failed to get IAM user info');

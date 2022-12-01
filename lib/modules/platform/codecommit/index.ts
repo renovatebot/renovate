@@ -59,8 +59,8 @@ export async function initPlatform({
   password,
   token: awsToken,
 }: PlatformParams): Promise<PlatformResult> {
-  let accessKeyId = username;
-  let secretAccessKey = password;
+  const accessKeyId = username;
+  const secretAccessKey = password;
   let region: string | undefined;
 
   if (accessKeyId) {
@@ -97,8 +97,11 @@ export async function initPlatform({
   const platformConfig: PlatformResult = {
     endpoint:
       endpoint ??
-      `https://git-codecommit.${process.env.AWS_REGION}.amazonaws.com/`,
+      `https://git-codecommit.${
+        process.env.AWS_REGION ?? 'us-east-1'
+      }.amazonaws.com/`,
   };
+  logger.info(`AWS_REGION: ${platformConfig.endpoint}`);
   return Promise.resolve(platformConfig);
 }
 
