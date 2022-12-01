@@ -237,13 +237,17 @@ export async function getFile(
 
 export async function listPullRequests(
   repositoryName: string,
-  authorArn: string
+  author: string | undefined
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
-    authorArn,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
+
+  if (author) {
+    input.authorArn = author;
+  }
+
   const cmd = new ListPullRequestsCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -299,13 +303,10 @@ export function getCodeCommitUrl(
 ): string {
   logger.debug('get code commit url');
   if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-    logger.debug('no env vars found');
     if (repoMetadata.cloneUrlHttp) {
-      logger.debug(`return the repometadata url: ${repoMetadata.cloneUrlHttp}`);
       return repoMetadata.cloneUrlHttp;
     }
-    logger.debug(`return the hardcoded url: ${repoMetadata.cloneUrlHttp}`);
-    //shouldn't reach here, as clone url is always available, but just in case
+    // shouldn't reach here, as clone url is always available, but just in case
     // istanbul ignore next
     return `https://git-codecommit.${
       process.env.AWS_REGION ?? 'us-east-1'

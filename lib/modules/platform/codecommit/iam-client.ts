@@ -27,8 +27,7 @@ export async function getUserArn(): Promise<string> {
     logger.debug(`succssfully got user : ${userRes}`);
     res = userRes?.User?.Arn;
   } catch (err) {
-    logger.warn('Failed to get IAM user info');
-    throw err;
+    logger.debug('Failed to get IAM user info');
   }
 
   return res ?? '';

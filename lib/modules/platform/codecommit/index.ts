@@ -90,7 +90,9 @@ export async function initPlatform({
   await client.listRepositories();
 
   initIamClient();
-  config.userArn = await getUserArn();
+  if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID) {
+    config.userArn = await getUserArn();
+  }
 
   const platformConfig: PlatformResult = {
     endpoint:
@@ -158,7 +160,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
 
   const listPrsResponse = await client.listPullRequests(
     config.repository!,
-    config.userArn!
+    config.userArn
   );
   const fetchedPrs: CodeCommitPr[] = [];
 
