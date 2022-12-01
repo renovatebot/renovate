@@ -5,7 +5,7 @@ import {
   githubRefMatchRegex,
 } from './modules';
 
-describe('modules/manager/terraform/modules', () => {
+describe('modules/manager/terraform/extractors/others/modules', () => {
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const groups = githubRefMatchRegex.exec(
