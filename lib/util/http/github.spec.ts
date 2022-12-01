@@ -155,7 +155,7 @@ describe('util/http/github', () => {
         .scope(githubApiHost, {
           reqheaders: {
             authorization: 'token abc',
-            accept: 'application/vnd.github.v3+json',
+            accept: 'application/json, application/vnd.github.v3+json',
           },
         })
         .get(url)

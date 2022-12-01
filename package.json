@@ -237,7 +237,7 @@
     "zod": "3.19.1"
   },
   "optionalDependencies": {
-    "re2": "1.17.7"
+    "re2": "1.17.8"
   },
   "devDependencies": {
     "@jest/globals": "29.3.1",
@@ -266,7 +266,7 @@
     "@types/js-yaml": "4.0.5",
     "@types/json-dup-key-validator": "1.0.0",
     "@types/linkify-markdown": "1.0.1",
-    "@types/lodash": "4.14.189",
+    "@types/lodash": "4.14.190",
     "@types/luxon": "3.1.0",
     "@types/markdown-it": "12.2.3",
     "@types/markdown-table": "2.0.0",
@@ -297,7 +297,7 @@
     "eslint-formatter-gha": "1.4.1",
     "eslint-import-resolver-typescript": "3.5.2",
     "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-jest": "27.1.5",
+    "eslint-plugin-jest": "27.1.6",
     "eslint-plugin-jest-formatting": "3.1.0",
     "eslint-plugin-promise": "6.1.1",
     "eslint-plugin-typescript-enum": "2.1.0",
