@@ -143,14 +143,14 @@ tokio = { version = "1.21.1" }`;
           currentValue: '1.0.146',
           datasource: 'crate',
           depName: 'serde',
-          depType: 'dependencies',
+          depType: 'workspace.dependencies',
           managerData: { nestedVersion: false },
         },
         {
           currentValue: '1.21.1',
           datasource: 'crate',
           depName: 'tokio',
-          depType: 'dependencies',
+          depType: 'workspace.dependencies',
           managerData: {
             nestedVersion: true,
           },

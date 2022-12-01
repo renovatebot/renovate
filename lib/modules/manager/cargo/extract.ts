@@ -15,7 +15,8 @@ function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
   cargoRegistries: CargoRegistries,
-  target?: string
+  target?: string,
+  depTypeOverride?: string
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const sectionContent = parsedContent[section];
@@ -87,6 +88,9 @@ function extractFromSection(
     }
     if (packageName) {
       dep.packageName = packageName;
+    }
+    if (depTypeOverride) {
+      dep.depType = depTypeOverride;
     }
     deps.push(dep);
   });
@@ -196,7 +200,9 @@ export async function extractPackageFile(
     workspaceDeps = extractFromSection(
       workspaceSection,
       'dependencies',
-      cargoRegistries
+      cargoRegistries,
+      undefined,
+      'workspace.dependencies'
     );
   }
 
