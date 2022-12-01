@@ -157,7 +157,8 @@ export class TerraformProviderDatasource extends TerraformDatasource {
     packageName: string,
     registryURL: string
   ): Promise<ReleaseResult | null> {
-    const backendLookUpName = `terraform-provider-${packageName}`;
+    const hashicorpPackage = packageName.replace('hashicorp/', '');
+    const backendLookUpName = `terraform-provider-${hashicorpPackage}`;
     const backendURL = joinUrlParts(
       registryURL,
       backendLookUpName,
