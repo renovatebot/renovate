@@ -113,16 +113,17 @@ export async function getManagersGitHubIssues(): Promise<
 export async function generateManagers(dist: string): Promise<void> {
   const managers = getManagers();
   const managerIssuesMap = await getManagersGitHubIssues();
-  const allLanguages: Record<string, string[]> = {};
+  const allCategories: Record<string, string[]> = {};
   for (const [manager, definition] of managers) {
-    const language = definition.language ?? 'other';
-    allLanguages[language] = allLanguages[language] || [];
-    allLanguages[language].push(manager);
     const { defaultConfig, supportedDatasources } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
 
-    const categories = definition.categories ?? [];
+    const categories = definition.categories ?? ['other'];
+    for (const category of categories) {
+      allCategories[category] ??= [];
+      allCategories[category].push(manager);
+    }
 
     let md = `---
 title: ${getTitle(manager, displayName)}
@@ -134,9 +135,9 @@ sidebar_label: ${displayName}
       for (let i = 0; i < categories.length; i++) {
         const category = categories[i];
         if (i < categories.length - 1) {
-          md += `${category}, `;
+          md += `\`${category}\`, `;
         } else {
-          md += `${category}`;
+          md += `\`${category}\``;
         }
       }
     }
@@ -216,16 +217,17 @@ sidebar_label: ${displayName}
 
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
   }
-  const languages = Object.keys(allLanguages).filter(
-    (language) => language !== 'other'
+
+  const categories = Object.keys(allCategories).filter(
+    (category) => category !== 'other'
   );
-  languages.sort();
-  languages.push('other');
+  categories.sort();
+  categories.push('other');
   let languageText = '\n';
 
-  for (const language of languages) {
-    languageText += `**${language}**: `;
-    languageText += allLanguages[language].map(getManagerLink).join(', ');
+  for (const category of categories) {
+    languageText += `**${category}**: `;
+    languageText += allCategories[category].map(getManagerLink).join(', ');
     languageText += '\n\n';
   }
   let indexContent = await readFile(`docs/usage/modules/manager/index.md`);
