@@ -42,11 +42,12 @@ export function runRenovateRepoStats(
 
 function branchCacheToMetadata({
   branchName,
-  sha: branchSha,
   baseBranch,
   baseBranchSha,
   automerge,
   isModified,
+  sha: branchSha,
+  pristine: isPristine,
 }: BranchCache): BranchMetadata {
   return {
     branchName,
@@ -55,6 +56,7 @@ function branchCacheToMetadata({
     baseBranchSha,
     automerge,
     isModified,
+    isPristine,
   };
 }
 
