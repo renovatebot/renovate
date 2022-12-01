@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -843,7 +844,7 @@ describe('modules/manager/gradle/extract', () => {
   });
 
   it('gradle-consistent-versions parse versions files', async () => {
-    const buildFile = `
+    const buildFile = codeBlock`
       apply from: 'test.gradle'
 
       repositories {
@@ -859,10 +860,10 @@ describe('modules/manager/gradle/extract', () => {
 
     const versionsProps = `org.apache.lucene:* = 1.2.3`;
 
-    const versionsLock = `
+    const versionsLock = codeBlock`
 org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
 org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
-    `;
+`;
 
     mockFs({
       'build.gradle': buildFile,
@@ -912,7 +913,7 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
   });
 
   it('gradle-consistent-versions plugin ignores props and lock files if plugin not enabled', async () => {
-    const buildFile = `
+    const buildFile = codeBlock`
       apply from: 'test.gradle'
 
       repositories {
