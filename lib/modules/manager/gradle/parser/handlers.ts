@@ -142,6 +142,9 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     }
   } else {
     // = string value
+    if (methodName?.[0]?.value === 'dependencySet') {
+      dep.groupName = `${groupId}:${version}`;
+    }
     dep.managerData = {
       fileReplacePosition: versionTokens[0].offset,
       packageFile: ctx.packageFile,
