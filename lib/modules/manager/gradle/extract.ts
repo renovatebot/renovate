@@ -53,15 +53,15 @@ export async function extractAllPackageFiles(
   const reorderedFiles = reorderFiles(packageFiles);
   const fileContents = await getFileContentMap(packageFiles, true);
 
+  // Check if gradle-consistent-versions plugin is in use by repo.
+  const usesConsistentVersionPlugin = usesGcv(reorderedFiles, fileContents);
+
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
       datasource,
       deps: [],
     };
-
-    // Check if gradle-consistent-versions plugin is in use by repo
-    const usesConsistentVersionPlugin = usesGcv(reorderedFiles, fileContents);
 
     try {
       // TODO #7154
