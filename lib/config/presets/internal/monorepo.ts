@@ -217,7 +217,7 @@ const repoGroups = {
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
-  'temporalio': 'https://github.com/temporalio/sdk-typescript',
+  'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
