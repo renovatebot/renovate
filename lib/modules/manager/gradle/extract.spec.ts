@@ -931,10 +931,10 @@ describe('modules/manager/gradle/extract', () => {
 
   it('gradle-consistent-versions plugin works for sub folders', () => {
     const fsMock = {
-      'mysub/build.kts': `(this file contains) 'com.palantir.consistent-versions'`,
+      'mysub/build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'mysub/versions.props': `org.apache.lucene:* = 1.2.3`,
       'mysub/versions.lock': `org.apache.lucene:lucene-core:1.2.3`,
-      'othersub/build.kts': `nothing here`,
+      'othersub/build.gradle.kts': `nothing here`,
     };
     mockFs(fsMock);
 

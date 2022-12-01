@@ -24,7 +24,7 @@ export function usesGcv(
   );
   const buildFileKts: string = fs.getSiblingFileName(
     versionsPropsFilename,
-    'build.kts'
+    'build.gradle.kts'
   );
   const versionsLockFile: string = fs.getSiblingFileName(
     versionsPropsFilename,
