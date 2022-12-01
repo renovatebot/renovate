@@ -5,7 +5,8 @@ import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { PackageType, datasource, defaultRegistryUrl } from './common';
+import { datasource, defaultRegistryUrl } from './common';
+import type { PackageType } from './types';
 
 export class HexpmBobDatasource extends Datasource {
   static readonly id = datasource;
@@ -105,22 +106,17 @@ export class HexpmBobDatasource extends Datasource {
   private getPackageDetails(
     packageType: PackageType
   ): Omit<ReleaseResult, 'releases'> {
-    let specificDetails: Partial<ReleaseResult>;
     switch (packageType) {
       case 'elixir':
-        specificDetails = {
+        return {
           homepage: 'https://elixir-lang.org/',
           sourceUrl: 'https://github.com/elixir-lang/elixir.git',
         };
-        break;
       case 'erlang':
-        specificDetails = {
+        return {
           homepage: 'https://www.erlang.org/',
           sourceUrl: 'https://github.com/erlang/otp.git',
         };
-        break;
     }
-
-    return { isPrivate: false, ...specificDetails };
   }
 }

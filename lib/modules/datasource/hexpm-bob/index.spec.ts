@@ -82,7 +82,6 @@ describe('modules/datasource/hexpm-bob/index', () => {
       });
       expect(res).toEqual({
         homepage: 'https://elixir-lang.org/',
-        isPrivate: false,
         registryUrl: 'https://repo.hex.pm',
         releases: [
           {
@@ -134,7 +133,6 @@ describe('modules/datasource/hexpm-bob/index', () => {
 
       expect(res).toEqual({
         homepage: 'https://www.erlang.org/',
-        isPrivate: false,
         registryUrl: 'https://repo.hex.pm',
         releases: [
           {
