@@ -133,8 +133,8 @@ function regexToGroupString(regExp: RegExp): string {
 }
 
 interface VersionWithPosition {
-  version?: string;
-  filePos?: number;
+  version: string;
+  filePos: number;
 }
 
 /**
