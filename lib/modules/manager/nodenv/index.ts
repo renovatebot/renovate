@@ -14,6 +14,6 @@ export const defaultConfig = {
   versioning: nodeVersioning.id,
 };
 
-export const categories: Category[] = ['javascript', 'node'];
+export const categories: Category[] = ['js', 'node'];
 
 export const supportedDatasources = [GithubTagsDatasource.id];

@@ -1745,6 +1745,9 @@ Use this field to restrict rules to a particular language or group. The categori
 }
 ```
 
+In the above example, this rule will not prevent Renovate from extracting Python dependencies, but it will stop them from being updated.
+If you wish to skip extraction altogether, you'd need to use a feature like `enabledManagers` instead.
+
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.

@@ -13,7 +13,7 @@ export type Category =
   | 'helm'
   | 'iac'
   | 'java'
-  | 'javascript'
+  | 'js'
   | 'kubernetes'
   | 'node'
   | 'php'

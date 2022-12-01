@@ -31,6 +31,6 @@ export const defaultConfig = {
   },
 };
 
-export const categories: Category[] = ['javascript'];
+export const categories: Category[] = ['js'];
 
 export const supportedDatasources = [GithubTagsDatasource.id, NpmDatasource.id];

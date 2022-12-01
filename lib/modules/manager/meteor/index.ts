@@ -9,6 +9,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)package\\.js$'],
 };
 
-export const categories: Category[] = ['javascript'];
+export const categories: Category[] = ['js'];
 
 export const supportedDatasources = [NpmDatasource.id];
