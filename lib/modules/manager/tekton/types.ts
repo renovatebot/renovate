@@ -17,10 +17,11 @@ interface TektonResourceSpec {
 export interface TektonBundle {
   bundle: string;
   resolver: string;
-  resource: TektonBundleResourceField[];
+  resource?: TektonResolverParamsField[];
+  params?: TektonResolverParamsField[];
 }
 
-interface TektonBundleResourceField {
+export interface TektonResolverParamsField {
   name: string;
   value: string;
 }
