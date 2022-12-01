@@ -218,7 +218,7 @@
     "parse-link-header": "2.0.0",
     "prettier": "2.8.0",
     "quick-lru": "5.1.1",
-    "redis": "4.5.0",
+    "redis": "4.5.1",
     "remark": "13.0.0",
     "remark-github": "10.1.0",
     "safe-stable-stringify": "2.4.1",
