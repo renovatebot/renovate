@@ -149,6 +149,11 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
+  /*
+    If replacement support for more managers is added,
+    please also update the list in docs/usage/configuration-options.md
+    at replacementName and replacementVersion
+  */
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
