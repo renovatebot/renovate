@@ -4,7 +4,6 @@ import {
   ListRepositoriesOutput,
   PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
-import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
 
 import {
@@ -49,7 +48,6 @@ interface Config {
   defaultBranch?: string;
   region?: string;
   prList?: CodeCommitPr[];
-  credentials?: Credentials;
   userArn?: string;
 }
 
@@ -65,48 +63,39 @@ export async function initPlatform({
   let secretAccessKey = password;
   let region: string | undefined;
 
-  if (!accessKeyId) {
-    accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  if (accessKeyId) {
+    process.env.AWS_ACCESS_KEY_ID = accessKeyId;
   }
-  if (!secretAccessKey) {
-    secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  if (secretAccessKey) {
+    process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
+  }
+  if (awsToken) {
+    process.env.AWS_SESSION_TOKEN = awsToken;
   }
 
   if (endpoint) {
     const regionReg = regEx(/.*codecommit\.(?<region>.+)\.amazonaws\.com/);
     const codeCommitMatch = regionReg.exec(endpoint);
     region = codeCommitMatch?.groups?.region;
-    if (!region) {
+    if (region) {
+      process.env.AWS_REGION = region;
+    } else {
       logger.warn("Can't parse region, make sure your endpoint is correct");
     }
-  } else {
-    region = process.env.AWS_REGION;
   }
-
-  if (!accessKeyId || !secretAccessKey || !region) {
-    throw new Error(
-      'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-    );
-  }
-
-  config.region = region;
-  const credentials: Credentials = {
-    accessKeyId,
-    secretAccessKey,
-    sessionToken: awsToken ?? process.env.AWS_SESSION_TOKEN,
-  };
-  config.credentials = credentials;
 
   // If any of the below fails, it will throw an exception stopping the program.
-  client.buildCodeCommitClient(region, credentials);
+  client.buildCodeCommitClient();
   // To check if we have permission to codecommit
   await client.listRepositories();
 
-  initIamClient(region, credentials);
+  initIamClient();
   config.userArn = await getUserArn();
 
   const platformConfig: PlatformResult = {
-    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com/`,
+    endpoint:
+      endpoint ??
+      `https://git-codecommit.${process.env.AWS_REGION}.amazonaws.com/`,
   };
   return Promise.resolve(platformConfig);
 }
@@ -127,7 +116,14 @@ export async function initRepo({
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
-  const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
+  if (!repo?.repositoryMetadata) {
+    logger.error({ repository }, 'Could not find repository');
+    throw new Error(REPOSITORY_NOT_FOUND);
+  }
+  logger.debug({ repositoryDetails: repo }, 'Repository details');
+  const metadata = repo.repositoryMetadata;
+
+  const url = getCodeCommitUrl(metadata, repository);
   try {
     await git.initRepo({
       url,
@@ -136,14 +132,6 @@ export async function initRepo({
     logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
-
-  if (!repo?.repositoryMetadata) {
-    logger.error({ repository }, 'Could not find repository');
-    throw new Error(REPOSITORY_NOT_FOUND);
-  }
-
-  logger.debug({ repositoryDetails: repo }, 'Repository details');
-  const metadata = repo.repositoryMetadata;
 
   if (!metadata.defaultBranch || !metadata.repositoryId) {
     logger.debug('Repo is empty');

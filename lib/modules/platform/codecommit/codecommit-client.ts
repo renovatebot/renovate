@@ -30,12 +30,6 @@ import {
   ListRepositoriesCommand,
   ListRepositoriesInput,
   ListRepositoriesOutput,
-  // MergeBranchesByFastForwardCommand,
-  // MergeBranchesByFastForwardInput,
-  // MergeBranchesByFastForwardOutput,
-  // MergeBranchesBySquashCommand,
-  // MergeBranchesBySquashInput,
-  // MergeBranchesBySquashOutput,
   PostCommentForPullRequestCommand,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
@@ -54,23 +48,17 @@ import {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
-import type { Credentials } from '@aws-sdk/types';
 import is from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
 
 let codeCommitClient: CodeCommitClient;
 
-export function buildCodeCommitClient(
-  region: string,
-  credentials: Credentials
-): void {
+export function buildCodeCommitClient(): void {
   if (!codeCommitClient) {
-    codeCommitClient = new CodeCommitClient({
-      region,
-      credentials,
-    });
+    codeCommitClient = new CodeCommitClient({});
   }
 
   // istanbul ignore if
@@ -306,19 +294,30 @@ export async function createPrApprovalRule(
 }
 
 export function getCodeCommitUrl(
-  region: string,
-  repoName: string,
-  credentials: Credentials
+  repoMetadata: RepositoryMetadata,
+  repoName: string
 ): string {
-  const signer = new aws4.RequestSigner(
-    {
-      service: 'codecommit',
-      host: `git-codecommit.${region}.amazonaws.com`,
-      method: 'GIT',
-      path: `v1/repos/${repoName}`,
-    },
-    credentials
-  );
+  logger.debug('get code commit url');
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    logger.debug('no env vars found');
+    if (repoMetadata.cloneUrlHttp) {
+      logger.debug(`return the repometadata url: ${repoMetadata.cloneUrlHttp}`);
+      return repoMetadata.cloneUrlHttp;
+    }
+    logger.debug(`return the hardcoded url: ${repoMetadata.cloneUrlHttp}`);
+    //shouldn't reach here, as clone url is always available, but just in case
+    // istanbul ignore next
+    return `https://git-codecommit.${
+      process.env.AWS_REGION ?? 'us-east-1'
+    }.amazonaws.com/v1/repos/${repoName}`;
+  }
+
+  const signer = new aws4.RequestSigner({
+    service: 'codecommit',
+    host: `git-codecommit.${process.env.AWS_REGION}.amazonaws.com`,
+    method: 'GIT',
+    path: `v1/repos/${repoName}`,
+  });
   const dateTime = signer.getDateTime();
 
   /* istanbul ignore if */
@@ -326,11 +325,10 @@ export function getCodeCommitUrl(
     throw new Error(REPOSITORY_UNINITIATED);
   }
 
-  const accessKeyId = credentials.accessKeyId;
   const token = `${dateTime}Z${signer.signature()}`;
 
-  let username = `${accessKeyId}${
-    credentials.sessionToken ? `%${credentials.sessionToken}` : ''
+  let username = `${process.env.AWS_ACCESS_KEY_ID}${
+    process.env.AWS_SESSION_TOKEN ? `%${process.env.AWS_SESSION_TOKEN}` : ''
   }`;
 
   // massaging username with the session token,
@@ -338,5 +336,5 @@ export function getCodeCommitUrl(
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
   }
-  return `https://${username}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
+  return `https://${username}:${token}@git-codecommit.${process.env.AWS_REGION}.amazonaws.com/v1/repos/${repoName}`;
 }
