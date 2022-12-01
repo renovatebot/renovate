@@ -30,7 +30,7 @@ export class HexpmBobDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const packageType = this.getPackageType(packageName);
+    const packageType = HexpmBobDatasource.getPackageType(packageName);
 
     if (!packageType) {
       return null;
@@ -45,7 +45,7 @@ export class HexpmBobDatasource extends Datasource {
 
     const result: ReleaseResult = {
       releases: [],
-      ...this.getPackageDetails(packageType),
+      ...HexpmBobDatasource.getPackageDetails(packageType),
     };
     try {
       const { body } = await this.http.get(url);
@@ -58,9 +58,9 @@ export class HexpmBobDatasource extends Datasource {
 
           return {
             gitRef,
-            isStable: this.isStable(version, packageType),
+            isStable: HexpmBobDatasource.isStable(version, packageType),
             releaseTimestamp: buildDate,
-            version: this.cleanVersion(version, packageType),
+            version: HexpmBobDatasource.cleanVersion(version, packageType),
           };
         });
     } catch (err) {
@@ -73,7 +73,7 @@ export class HexpmBobDatasource extends Datasource {
     return result.releases.length > 0 ? result : null;
   }
 
-  private getPackageType(packageName: string): PackageType | null {
+  private static getPackageType(packageName: string): PackageType | null {
     if (packageName === 'elixir') {
       return 'elixir';
     }
@@ -83,7 +83,10 @@ export class HexpmBobDatasource extends Datasource {
     return null;
   }
 
-  private cleanVersion(version: string, packageType: PackageType): string {
+  private static cleanVersion(
+    version: string,
+    packageType: PackageType
+  ): string {
     switch (packageType) {
       case 'elixir':
         return version.replace(/^v/, '');
@@ -92,7 +95,7 @@ export class HexpmBobDatasource extends Datasource {
     }
   }
 
-  private isStable(version: string, packageType: PackageType): boolean {
+  private static isStable(version: string, packageType: PackageType): boolean {
     switch (packageType) {
       case 'elixir':
         return version.match(/^v\d+\.\d+\.\d+($|-otp)/) !== null;
@@ -101,7 +104,7 @@ export class HexpmBobDatasource extends Datasource {
     }
   }
 
-  private getPackageDetails(
+  private static getPackageDetails(
     packageType: PackageType
   ): Omit<ReleaseResult, 'releases'> {
     switch (packageType) {
