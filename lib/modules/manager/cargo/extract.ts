@@ -64,7 +64,7 @@ function extractFromSection(
         skipReason = 'git-dependency';
       } else if (workspace) {
         currentValue = '';
-        skipReason = 'local-dependency';
+        skipReason = 'workspace-dependency';
       } else {
         currentValue = '';
         skipReason = 'invalid-dependency-specification';

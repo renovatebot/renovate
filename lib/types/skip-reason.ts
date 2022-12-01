@@ -45,4 +45,5 @@ export type SkipReason =
   | 'is-pinned'
   | 'missing-depname'
   | 'recursive-placeholder'
-  | 'github-token-required';
+  | 'github-token-required'
+  | 'workspace-dependency';
