@@ -46,4 +46,4 @@ export type SkipReason =
   | 'missing-depname'
   | 'recursive-placeholder'
   | 'github-token-required'
-  | 'workspace-dependency';
+  | 'inherited-dependency';

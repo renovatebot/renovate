@@ -170,7 +170,7 @@ tokio = { version = "1.21.1" }`;
           managerData: {
             nestedVersion: false,
           },
-          skipReason: 'workspace-dependency',
+          skipReason: 'inherited-dependency',
         },
       ]);
     });
