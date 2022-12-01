@@ -117,10 +117,6 @@ export function parseGcv(
   return extractedDeps;
 }
 
-//----------------------------------
-// Private utility functions below
-//----------------------------------
-
 // Translate glob syntax to a regex that does the same
 function globToRegex(depName: string): RegExp {
   return regEx(
