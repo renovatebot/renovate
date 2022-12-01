@@ -43,6 +43,7 @@ async function getBaseBranchConfig(
         config.repository,
         baseBranch
       );
+      logger.debug({ config: baseBranchConfig }, 'Base branch config raw');
     } catch (err) {
       logger.error(
         { configFileName, baseBranch },
@@ -57,6 +58,15 @@ async function getBaseBranchConfig(
     }
 
     baseBranchConfig = mergeChildConfig(config, baseBranchConfig);
+
+    // istanbul ignore if
+    if (config.printConfig) {
+      logger.info(
+        { config: baseBranchConfig },
+        'Base branch config after merge'
+      );
+    }
+
     // baseBranches value should be based off the default branch
     baseBranchConfig.baseBranches = config.baseBranches;
   }
