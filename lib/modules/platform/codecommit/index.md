@@ -5,7 +5,17 @@
     Experimental features might be changed or even removed at any time.
     Subscribe to [GitHub issue #2868](https://github.com/renovatebot/renovate/issues/2868) to be notified of any changes.
 
-## Authentication
+## Authentication as a role
+
+The IAM role does not have credentials, so you will need to set up git-credentials-helper on your environment,
+
+EC2/linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/)
+
+windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html)
+
+codebuild: [codebuild codecommit git integration](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html)
+
+## Authentication as a USER
 
 First, you must get an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
@@ -38,10 +48,46 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
   --token: AWS session token, if you have one
   ```
 
-## AWS IAM security policies
+## AWS IAM permission policy
 
-- Make sure to attach the [AWSCodeCommitFullAccess](https://docs.aws.amazon.com/codecommit/latest/userguide/security-iam-awsmanpol.html#managed-policies-full) policy to your IAM User
-- It is recommended to also attach the [IAMReadOnlyAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/security-iam-awsmanpol.html) policy to your IAM User
+Create a new policy for renovate with these permissions,
+Then attach it to the user/role.
+
+Add `"iam:GetUser",` to the `Action` array if you are using `Authentication as a USER` it will help reduce AWS requests
+Change the `Resource` to the resources you want to use
+
+The policy json:
+
+```Json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "RenovatePolicy",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:DeleteCommentContent",
+                "codecommit:UpdatePullRequestDescription",
+                "codecommit:GitPull",
+                "codecommit:ListPullRequests",
+                "codecommit:GetCommentsForPullRequest",
+                "codecommit:ListRepositories",
+                "codecommit:UpdatePullRequestTitle",
+                "codecommit:GetFile",
+                "codecommit:UpdateComment",
+                "codecommit:GetRepository",
+                "codecommit:DescribePullRequestEvents",
+                "codecommit:CreatePullRequest",
+                "codecommit:CreatePullRequestApprovalRule",
+                "codecommit:GitPush",
+                "codecommit:UpdatePullRequestStatus",
+                "codecommit:GetPullRequest"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 
 ## Running Renovate
 
