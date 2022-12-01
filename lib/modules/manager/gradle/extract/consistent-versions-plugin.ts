@@ -1,4 +1,5 @@
 import { logger } from '../../../../logger';
+import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
@@ -7,38 +8,50 @@ export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
 
 /**
- * Determines if Palantir Gradle consistent-versions is in use, https://github.com/palantir/gradle-consistent-versions.
+ * Determines if Palantir gradle-consistent-versions is in use, https://github.com/palantir/gradle-consistent-versions.
  * The plugin name must be in build file and both `versions.props` and `versions.lock` must exist.
  *
- * @param availableFiles list of gradle build files found in project
+ * @param versionsPropsFilename is the full file name path of `versions.props`
  * @param fileContents map with file contents of all files
  */
 export function usesGcv(
-  availableFiles: string[],
+  versionsPropsFilename: string,
   fileContents: Record<string, string | null>
 ): boolean {
-  if (
-    fileContents['build.gradle']?.includes(
-      'com.palantir.consistent-versions'
-    ) ||
-    fileContents['build.kts']?.includes('com.palantir.consistent-versions')
-  ) {
-    if (
-      availableFiles.includes(VERSIONS_PROPS) &&
-      availableFiles.includes(VERSIONS_LOCK)
-    ) {
-      logger.debug('This repo uses gradle-consistent-versions');
-      return true;
-    }
-  }
-  return false;
+  const buildFileGradle: string = fs.getSiblingFileName(
+    versionsPropsFilename,
+    'build.gradle'
+  );
+  const buildFileKts: string = fs.getSiblingFileName(
+    versionsPropsFilename,
+    'build.kts'
+  );
+  const versionsLockFile: string = fs.getSiblingFileName(
+    versionsPropsFilename,
+    VERSIONS_LOCK
+  );
+  const gcvPluginName = 'com.palantir.consistent-versions';
+  const versionsLockFileExists: boolean =
+    fileContents[versionsLockFile] !== undefined;
+  const pluginActivated: boolean =
+    (fileContents[buildFileGradle]?.includes(gcvPluginName) ?? false) ||
+    (fileContents[buildFileKts]?.includes(gcvPluginName) ?? false);
+
+  return versionsLockFileExists && pluginActivated;
 }
 
 /**
- * Confirms whether the provided file name is one of the two GCV files
+ * Confirms whether the provided file name is the props file
  */
 export function isGcvPropsFile(fileName: string): boolean {
-  return fileName === VERSIONS_PROPS || fileName === VERSIONS_LOCK;
+  return fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`);
+}
+
+/**
+ * Confirms whether the provided file name is the lock file
+ */
+export function isGcvLockFile(fileName: string): boolean {
+  return fileName === VERSIONS_LOCK || fileName.endsWith(`/${VERSIONS_LOCK}`);
 }
 
 /**
@@ -49,13 +62,16 @@ export function isGcvPropsFile(fileName: string): boolean {
  * - For each exact dep in props file, lookup the lock-version from lock file
  * - For each group/regex dep in props file, lookup the set of exact deps and versions in lock file
  *
- * @param propsFileContent text content of `versions.props
- * @param lockFileContent text content of `versions.lock`
+ * @param propsFileName name and path of the props file
+ * @param fileContents text content of all files
  */
 export function parseGcv(
-  propsFileContent: string,
-  lockFileContent: string
+  propsFileName: string,
+  fileContents: Record<string, string | null>
 ): PackageDependency<GradleManagerData>[] {
+  const propsFileContent = fileContents[propsFileName] ?? '';
+  const lockFileName = fs.getSiblingFileName(propsFileName, VERSIONS_LOCK);
+  const lockFileContent = fileContents[lockFileName] ?? '';
   const lockFileMap = parseLockFile(lockFileContent);
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);

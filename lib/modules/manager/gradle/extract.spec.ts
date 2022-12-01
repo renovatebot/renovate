@@ -1,7 +1,8 @@
-import { codeBlock } from 'common-tags';
+import { stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
+import { usesGcv } from './extract/consistent-versions-plugin';
 import * as parser from './parser';
 import { extractAllPackageFiles } from '.';
 
@@ -843,39 +844,22 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
+  // Tests for gradle-consistent-version plugin
   it('gradle-consistent-versions parse versions files', async () => {
-    const buildFile = codeBlock`
-      apply from: 'test.gradle'
+    const fsMock = {
+      'build.gradle': '(this file contains) com.palantir.consistent-versions',
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+      'versions.lock': stripIndent`
+        org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
+        org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)`,
+    };
 
-      repositories {
-          mavenCentral()
-      }
+    mockFs(fsMock);
 
-      apply plugin: 'com.palantir.consistent-versions'
-
-      dependencies {
-        implementation "org.apache.lucene"
-      }
-    `;
-
-    const versionsProps = `org.apache.lucene:* = 1.2.3`;
-
-    const versionsLock = codeBlock`
-org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
-org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
-`;
-
-    mockFs({
-      'build.gradle': buildFile,
-      'versions.props': versionsProps,
-      'versions.lock': versionsLock,
-    });
-
-    const res = await extractAllPackageFiles({} as ExtractConfig, [
-      'build.gradle',
-      'versions.props',
-      'versions.lock',
-    ]);
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
 
     expect(res).toMatchObject([
       {
@@ -894,7 +878,7 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
               fileReplacePosition: 22,
               packageFile: 'versions.props',
             },
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
           {
             depName: 'org.apache.lucene:lucene-codecs',
@@ -906,7 +890,7 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
               fileReplacePosition: 22,
               packageFile: 'versions.props',
             },
-            registryUrls: ['https://repo.maven.apache.org/maven2'],
+            registryUrls: [],
           },
         ],
       },
@@ -916,29 +900,45 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
     ]);
   });
 
-  it('gradle-consistent-versions plugin ignores props and lock files if plugin not enabled', async () => {
-    const buildFile = codeBlock`
-      apply from: 'test.gradle'
-
-      repositories {
-          mavenCentral()
-      }
-
-      dependencies {
-        implementation "org.apache.lucene"
-      }
-    `;
-
-    mockFs({
-      'build.gradle': buildFile,
+  it('gradle-consistent-versions plugin not used due to plugin not defined', async () => {
+    const fsMock = {
+      'build.gradle': 'no plugin defined here',
       'versions.props': `org.apache.lucene:* = 1.2.3`,
-    });
+      'versions.lock': `org.apache.lucene:lucene-core:1.2.3`,
+    };
+    mockFs(fsMock);
 
-    const res = await extractAllPackageFiles({} as ExtractConfig, [
-      'build.gradle',
-      'versions.props',
-    ]);
-
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
     expect(res).toBeNull();
+  });
+
+  it('gradle-consistent-versions plugin not used due to lockfile missing', async () => {
+    const fsMock = {
+      'build.gradle': '(this file contains) com.palantir.consistent-versions',
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toBeNull();
+  });
+
+  it('gradle-consistent-versions plugin works for sub folders', () => {
+    const fsMock = {
+      'mysub/build.kts': `(this file contains) 'com.palantir.consistent-versions'`,
+      'mysub/versions.props': `org.apache.lucene:* = 1.2.3`,
+      'mysub/versions.lock': `org.apache.lucene:lucene-core:1.2.3`,
+      'othersub/build.kts': `nothing here`,
+    };
+    mockFs(fsMock);
+
+    expect(usesGcv('mysub/versions.props', fsMock)).toBeTrue();
+    expect(usesGcv('othersub/versions.props', fsMock)).toBeFalse();
   });
 });
