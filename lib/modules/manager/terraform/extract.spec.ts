@@ -91,7 +91,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts providers', async () => {
       const res = await extractPackageFile(providers, 'providers.tf', {});
-      expect(res?.deps).toHaveLength(14);
+      expect(res?.deps).toHaveLength(15);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });

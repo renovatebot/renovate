@@ -388,7 +388,7 @@ exports[`modules/manager/terraform/extract extractPackageFile() extracts provide
       "depName": "hashicorp/terraform",
       "depType": "required_version",
       "extractVersion": "v(?<version>.*)$",
-      "lineNumber": 72,
+      "lineNumber": 76,
     },
     {
       "currentValue": "2.7.2",
@@ -441,6 +441,17 @@ exports[`modules/manager/terraform/extract extractPackageFile() extracts provide
       "packageName": "hashicorp/kubernetes",
       "registryUrls": [
         "https://terraform.example.com",
+      ],
+    },
+    {
+      "currentValue": ">= 4.0",
+      "datasource": "terraform-provider",
+      "depName": "oci",
+      "depType": "required_provider",
+      "lockedVersion": undefined,
+      "packageName": "oracle/oci",
+      "registryUrls": [
+        "https://terraform-company_special.example.com",
       ],
     },
   ],
