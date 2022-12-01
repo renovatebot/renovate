@@ -27,11 +27,11 @@ import {
 } from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
 
-// .lockfile is gradle default lockfile, versions.lock is gradle-consistent-versions lockfile
+// .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
-  return ['.lockfile', VERSIONS_LOCK]
-    .map((sfx) => fileName.endsWith(sfx))
-    .some((v) => v);
+  return (
+    fileName.endsWith('.lockfile') || fileName.endsWith(`/${VERSIONS_LOCK}`)
+  );
 }
 
 async function getUpdatedLockfiles(
