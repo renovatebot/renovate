@@ -871,7 +871,11 @@ org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
       'versions.lock': versionsLock,
     });
 
-    const res = await extractAllPackageFiles({} as ExtractConfig, Object.keys(fsMock));
+    const res = await extractAllPackageFiles({} as ExtractConfig, [
+      'build.gradle',
+      'versions.props',
+      'versions.lock',
+    ]);
 
     expect(res).toMatchObject([
       {
