@@ -7,7 +7,7 @@ describe('modules/datasource/deno/index', () => {
   describe('getReleases', () => {
     it('returns releases of standard library', async () => {
       httpMock
-        .scope('https://apiland.deno.dev')
+        .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/std')
         .reply(200, {
           versions: ['0.163.0', '0.162.0'],
@@ -36,6 +36,7 @@ describe('modules/datasource/deno/index', () => {
 
       const result = await deno.getReleases({
         packageName: 'https://deno.land/std',
+        registryUrl: deno.defaultRegistryUrls[0],
       });
       expect(result).toMatchObject({
         releases: [
@@ -58,20 +59,21 @@ describe('modules/datasource/deno/index', () => {
 
     it('throws error if module endpoint fails', async () => {
       httpMock
-        .scope('https://apiland.deno.dev')
+        .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/std')
         .reply(404);
 
       await expect(
         deno.getReleases({
           packageName: 'https://deno.land/std',
+          registryUrl: deno.defaultRegistryUrls[0],
         })
       ).rejects.toThrow();
     });
 
     it('throws error if version endpoint fails', async () => {
       httpMock
-        .scope('https://apiland.deno.dev')
+        .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/std')
         .reply(200, {
           versions: ['0.163.0', '0.162.0'],
@@ -92,6 +94,7 @@ describe('modules/datasource/deno/index', () => {
       await expect(
         deno.getReleases({
           packageName: 'https://deno.land/std',
+          registryUrl: deno.defaultRegistryUrls[0],
         })
       ).rejects.toThrow();
     });
@@ -106,7 +109,7 @@ describe('modules/datasource/deno/index', () => {
 
     it('returns releases of third-party library', async () => {
       httpMock
-        .scope('https://apiland.deno.dev')
+        .scope(deno.defaultRegistryUrls[0])
         .get('/v2/modules/postgres')
         .reply(200, {
           versions: ['v0.16.0', 'v0.16.1'],
@@ -135,6 +138,7 @@ describe('modules/datasource/deno/index', () => {
 
       const result = await deno.getReleases({
         packageName: 'https://deno.land/x/postgres',
+        registryUrl: deno.defaultRegistryUrls[0],
       });
       expect(result).toMatchObject({
         releases: [
