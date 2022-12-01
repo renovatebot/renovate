@@ -558,7 +558,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
-You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
+You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -3033,8 +3033,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
