@@ -22,16 +22,14 @@ import {
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
-  VERSIONS_LOCK,
+  isGcvLockFile,
   isGcvPropsFile,
 } from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
 
 // .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
 function isLockFile(fileName: string): boolean {
-  return (
-    fileName.endsWith('.lockfile') || fileName.endsWith(`/${VERSIONS_LOCK}`)
-  );
+  return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
 }
 
 async function getUpdatedLockfiles(
