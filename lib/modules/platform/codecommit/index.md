@@ -50,7 +50,7 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
   --token: AWS session token, if you have one
   ```
 
-## AWS IAM permission policy
+## Permissions
 
 Create a new policy for renovate with these permissions,
 Then attach it to the user/role.
