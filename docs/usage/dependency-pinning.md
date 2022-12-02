@@ -102,7 +102,7 @@ There are some dependencies that either (a) don't have the potential to break so
 
 For example, it's very hard for `eslint` to break anything in production.
 If your build/tests pass, then you are fine.
-Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+Consider enabling automerge for all lint packages to save yourself the work of manually approving the update each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
