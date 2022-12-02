@@ -96,10 +96,12 @@ describe('workers/repository/finalise/repository-statistics', () => {
         baseBranchSha,
         isModified: false,
         automerge: false,
+        pristine: false,
       });
       const expectedMeta = {
         automerge: branchCache.automerge,
         isModified: branchCache.isModified,
+        isPristine: branchCache.pristine,
         baseBranch,
         baseBranchSha,
         branchSha: sha,

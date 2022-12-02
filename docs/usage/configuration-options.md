@@ -558,7 +558,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
-You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
+You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -1957,7 +1957,7 @@ For example to apply a special label for Major updates:
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary in order to look up release notes.
 
-Using this field we can specify the exact url to fetch release notes from.
+Using this field we can specify the exact URL to fetch release notes from.
 
 Example setting source URL for package "dummy":
 
@@ -3033,8 +3033,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
