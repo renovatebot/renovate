@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import { parseGradle, parseProps } from './parser';
@@ -59,6 +60,125 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('Groovy: multi var assignments', () => {
+      it('simple map', () => {
+        const input = codeBlock`
+        ext {
+          versions = [
+            spotbugs_annotations  : '4.5.3',
+            core                  : '1.7.0',
+          ]
+
+          ignored = [ 'asdf' ]
+
+          libraries = [:]
+          libraries += [
+            guava: "com.google.guava:guava:31.1-jre",
+            detekt: '1.18.1',
+          ]
+        }
+        `;
+
+        const { vars } = parseGradle(input);
+        expect(vars).toMatchObject({
+          'versions.spotbugs_annotations': {
+            key: 'versions.spotbugs_annotations',
+            value: '4.5.3',
+          },
+          'versions.core': {
+            key: 'versions.core',
+            value: '1.7.0',
+          },
+          'libraries.guava': {
+            key: 'libraries.guava',
+            value: 'com.google.guava:guava:31.1-jre',
+          },
+          'libraries.detekt': {
+            key: 'libraries.detekt',
+            value: '1.18.1',
+          },
+        });
+      });
+
+      it('nested map', () => {
+        const input = codeBlock`
+          project.ext.versions = [
+            some: invalidsymbol,
+            android: [
+              buildTools: '30.0.3'
+            ],
+            kotlin: '1.4.30',
+            androidx: [
+              paging: '2.1.2',
+              kotlin: [
+                stdlib: '1.4.20',
+                coroutines: '1.3.7',
+              ],
+            ],
+            espresso: '3.2.0'
+          ]
+        `;
+
+        const { vars } = parseGradle(input);
+        expect(vars).toMatchObject({
+          'versions.android.buildTools': {
+            key: 'versions.android.buildTools',
+            value: '30.0.3',
+          },
+          'versions.kotlin': {
+            key: 'versions.kotlin',
+            value: '1.4.30',
+          },
+          'versions.androidx.paging': {
+            key: 'versions.androidx.paging',
+            value: '2.1.2',
+          },
+          'versions.androidx.kotlin.stdlib': {
+            key: 'versions.androidx.kotlin.stdlib',
+            value: '1.4.20',
+          },
+          'versions.androidx.kotlin.coroutines': {
+            key: 'versions.androidx.kotlin.coroutines',
+            value: '1.3.7',
+          },
+          'versions.espresso': {
+            key: 'versions.espresso',
+            value: '3.2.0',
+          },
+        });
+      });
+
+      it('map with interpolated dependency strings', () => {
+        const input = codeBlock`
+          def slfj4Version = "2.0.0"
+          libraries = [
+            jcl: "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
+            releaseCoroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
+            api: "org.slf4j:slf4j-api:$slfj4Version",
+          ]
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.slf4j:jcl-over-slf4j',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+          {
+            depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
+            groupName: 'libraries.releaseCoroutines',
+            currentValue: '0.26.1-eap13',
+          },
+          {
+            depName: 'org.slf4j:slf4j-api',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+        ]);
+      });
+    });
+
     describe('Kotlin: single var assignments', () => {
       test.each`
         input                        | name     | value
@@ -79,6 +199,116 @@ describe('modules/manager/gradle/parser', () => {
       `('$input', ({ input }) => {
         const { vars } = parseGradle(input);
         expect(vars).toBeEmpty();
+      });
+    });
+
+    describe('Kotlin: single extra var assignments', () => {
+      test.each`
+        input                                     | name     | value
+        ${'val foo by extra("1.2.3")'}            | ${'foo'} | ${'1.2.3'}
+        ${'val foo by extra { "1.2.3" }'}         | ${'foo'} | ${'1.2.3'}
+        ${'val foo: String by extra { "1.2.3" }'} | ${'foo'} | ${'1.2.3'}
+      `('$input', ({ input, name, value }) => {
+        const { vars } = parseGradle(input);
+        expect(vars).toContainKey(name);
+        expect(vars[name]).toMatchObject({ key: name, value });
+      });
+    });
+
+    describe('Kotlin: multi var assignments', () => {
+      it('simple map', () => {
+        const input =
+          'val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")';
+
+        const { vars } = parseGradle(input);
+        expect(vars).toMatchObject({
+          'versions.foo1': {
+            key: 'versions.foo1',
+            value: 'bar1',
+          },
+          'versions.foo2': {
+            key: 'versions.foo2',
+            value: 'bar2',
+          },
+          'versions.foo3': {
+            key: 'versions.foo3',
+            value: 'bar3',
+          },
+        });
+      });
+
+      it('nested map', () => {
+        const input = codeBlock`
+          ext["deps"] = mapOf(
+            "support" to mapOf(
+              "appCompat" to "com.android.support:appcompat-v7:26.0.2",
+              "invalid" to whatever,
+              "junit" to mapOf(
+                "jupiter" to "5.0.1",
+                "platform" to "1.0.1",
+              )
+              "design" to "com.android.support:design:26.0.2"
+            ),
+            "support2" to mapOfInvalid(
+              "design2" to "com.android.support:design:26.0.2"
+            ),
+            "picasso" to "com.squareup.picasso:picasso:2.5.2"
+          )
+        `;
+
+        const { vars } = parseGradle(input);
+        expect(vars).toMatchObject({
+          'deps.support.appCompat': {
+            key: 'deps.support.appCompat',
+            value: 'com.android.support:appcompat-v7:26.0.2',
+          },
+          'deps.support.junit.jupiter': {
+            key: 'deps.support.junit.jupiter',
+            value: '5.0.1',
+          },
+          'deps.support.junit.platform': {
+            key: 'deps.support.junit.platform',
+            value: '1.0.1',
+          },
+          'deps.support.design': {
+            key: 'deps.support.design',
+            value: 'com.android.support:design:26.0.2',
+          },
+          'deps.picasso': {
+            key: 'deps.picasso',
+            value: 'com.squareup.picasso:picasso:2.5.2',
+          },
+        });
+      });
+
+      it('map with interpolated dependency strings', () => {
+        const input = codeBlock`
+          val slfj4Version = "2.0.0"
+          libraries = mapOf(
+            "jcl" to "org.slf4j:jcl-over-slf4j:\${slfj4Version}",
+            "releaseCoroutines" to "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
+            "api" to "org.slf4j:slf4j-api:$slfj4Version",
+          )
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.slf4j:jcl-over-slf4j',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+          {
+            depName: 'org.jetbrains.kotlinx:kotlinx-coroutines-core',
+            groupName: 'libraries.releaseCoroutines',
+            currentValue: '0.26.1-eap13',
+          },
+          {
+            depName: 'org.slf4j:slf4j-api',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+        ]);
       });
     });
   });
@@ -169,6 +399,81 @@ describe('modules/manager/gradle/parser', () => {
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
         expect(deps).toMatchObject([output].filter(Boolean));
+      });
+    });
+
+    describe('dependencySet dependencies', () => {
+      it('simple dependencySet', () => {
+        const input = codeBlock`
+          ext.activemq_version = "5.8.0"
+          dependencySet(group: 'org.apache.activemq', version: activemq_version) {
+            entry 'activemq-broker'
+            entry('activemq-kahadb-store') {
+              exclude group: "org.springframework", name: "spring-context"
+            }
+            entry 'activemq-stomp'
+          }
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.apache.activemq:activemq-broker',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+          {
+            depName: 'org.apache.activemq:activemq-kahadb-store',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+          {
+            depName: 'org.apache.activemq:activemq-stomp',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+        ]);
+      });
+
+      describe('dependencySet variants', () => {
+        const validOutput = [
+          {
+            depName: 'foo:bar1',
+            currentValue: '1.2.3',
+            groupName: 'foo:1.2.3',
+          },
+          {
+            depName: 'foo:bar2',
+            currentValue: '1.2.3',
+            groupName: 'foo:1.2.3',
+          },
+        ];
+        const validOutput1 = validOutput.map((dep) => {
+          return { ...dep, groupName: 'baz' };
+        });
+
+        test.each`
+          def                               | str                                                                                                 | output
+          ${''}                             | ${'dependencySet([group: "foo", version: "1.2.3"]) { entry "bar1" }'}                               | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3", group: "foo", version: "1.2.3") { entry "bar1" }'} | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { { entry "bar1" } }'}                             | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry(["bar1"]) }'}                              | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry("bar", "baz") }'}                          | ${{}}
+          ${''}                             | ${'dependencySet(group: "${nonexistingvar}", version: "1.2.3") { entry "bar1"; entry "bar2" }'}     | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry "bar2" }'}                   | ${validOutput}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry ("bar2") }'}                 | ${validOutput}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: baz) { entry "bar1"; entry ("bar2") }'}                     | ${validOutput1}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: "${baz}") { entry "bar1"; entry ("bar2") }'}                | ${validOutput1}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry other; entry "bar2" }'}                     | ${validOutput}
+          ${'some = "foo"; baz = "1.2.3"'}  | ${'dependencySet(group: some, version: "${baz}456") { entry "bar1"; entry "bar2" }'}                | ${{}}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry(other); entry "bar2" }'}                    | ${validOutput}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry "${other}"; entry "bar2" }'}           | ${validOutput}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry("${other}"); entry "bar2" }'}          | ${validOutput}
+          ${''}                             | ${'dependencySet(group = "foo", version = "1.2.3") { entry "bar1"; entry "bar2" }'}                 | ${validOutput}
+        `('$def | $str', ({ def, str, output }) => {
+          const { deps } = parseGradle([def, str].join('\n'));
+          expect(deps).toMatchObject(output);
+        });
       });
     });
 
@@ -277,6 +582,12 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
+      ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f, b).version(v)'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to("${f}", "${b}").version("$v")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = parseGradle(input);
