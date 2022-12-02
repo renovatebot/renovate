@@ -181,6 +181,7 @@ describe('modules/platform/codecommit/index', () => {
     it('gets the eu-central-1 url', () => {
       process.env.AWS_ACCESS_KEY_ID = '';
       process.env.AWS_SECRET_ACCESS_KEY = '';
+      process.env.AWS_REGION = 'eu-central-1';
       expect(
         getCodeCommitUrl(
           {
