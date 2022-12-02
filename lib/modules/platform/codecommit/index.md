@@ -17,7 +17,7 @@ windows: [windows codecommit git integration](https://docs.aws.amazon.com/codeco
 
 codebuild: [codebuild codecommit git integration](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html)
 
-## Authentication as a USER
+### IAM User
 
 First, you must get an AWS [IAM Access Key id and a Secret access key id](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html)
 
