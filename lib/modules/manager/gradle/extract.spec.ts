@@ -854,6 +854,7 @@ describe('modules/manager/gradle/extract', () => {
       'build.gradle': '(this file contains) com.palantir.consistent-versions',
       'versions.props': `org.apache.lucene:* = 1.2.3`,
       'versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
         org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
         org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)`,
     };
@@ -908,7 +909,10 @@ describe('modules/manager/gradle/extract', () => {
     const fsMock = {
       'build.gradle': 'no plugin defined here',
       'versions.props': `org.apache.lucene:* = 1.2.3`,
-      'versions.lock': `org.apache.lucene:lucene-core:1.2.3`,
+      'versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
+        org.apache.lucene:lucene-core:1.2.3
+      `,
     };
     mockFs(fsMock);
 
@@ -937,7 +941,9 @@ describe('modules/manager/gradle/extract', () => {
     const fsMock = {
       'mysub/build.gradle.kts': `(this file contains) 'com.palantir.consistent-versions'`,
       'mysub/versions.props': `org.apache.lucene:* = 1.2.3`,
-      'mysub/versions.lock': `org.apache.lucene:lucene-core:1.2.3`,
+      'mysub/versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
+        org.apache.lucene:lucene-core:1.2.3`,
       'othersub/build.gradle.kts': `nothing here`,
     };
     mockFs(fsMock);
@@ -956,6 +962,7 @@ describe('modules/manager/gradle/extract', () => {
         org.apache.lucene:a.b = 1
       `,
       'versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
         org.apache.solr:x.y:1 (10 constraints: 95be0c15)
         org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
         org.apache.lucene:a.c:1 (10 constraints: 95be0c15)

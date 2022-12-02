@@ -7,10 +7,12 @@ import { isDependencyString, versionLikeSubstring } from '../utils';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
+const LOCKFILE_HEADER_TEXT =
+  '# Run ./gradlew --write-locks to regenerate this file';
 
 /**
  * Determines if Palantir gradle-consistent-versions is in use, https://github.com/palantir/gradle-consistent-versions.
- * The plugin name must be in build file and both `versions.props` and `versions.lock` must exist.
+ * Both `versions.props` and `versions.lock` must exist and the special header line of lock file must match
  *
  * @param versionsPropsFilename is the full file name path of `versions.props`
  * @param fileContents map with file contents of all files
@@ -19,26 +21,13 @@ export function usesGcv(
   versionsPropsFilename: string,
   fileContents: Record<string, string | null>
 ): boolean {
-  const buildFileGradle: string = fs.getSiblingFileName(
-    versionsPropsFilename,
-    'build.gradle'
-  );
-  const buildFileKts: string = fs.getSiblingFileName(
-    versionsPropsFilename,
-    'build.gradle.kts'
-  );
   const versionsLockFile: string = fs.getSiblingFileName(
     versionsPropsFilename,
     VERSIONS_LOCK
   );
-  const gcvPluginName = 'com.palantir.consistent-versions';
-  const versionsLockFileExists: boolean =
-    fileContents[versionsLockFile] !== undefined;
-  const pluginActivated: boolean =
-    (fileContents[buildFileGradle]?.includes(gcvPluginName) ?? false) ||
-    (fileContents[buildFileKts]?.includes(gcvPluginName) ?? false);
-
-  return versionsLockFileExists && pluginActivated;
+  return (
+    fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
+  );
 }
 
 /**
