@@ -4,7 +4,11 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { TektonBundle, TektonResource } from './types';
+import type {
+  TektonBundle,
+  TektonResolverParamsField,
+  TektonResource,
+} from './types';
 
 export function extractPackageFile(
   content: string,
@@ -67,13 +71,13 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     return;
   }
   let imageRef: string | undefined;
-  // Find a bundle reference from the Bundle resolver
+
+  // First, find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
-    for (const field of coerceArray(ref.resource)) {
-      if (field.name === 'bundle') {
-        imageRef = field.value;
-        break;
-      }
+    imageRef = getBundleValue(ref.params);
+    if (is.nullOrUndefined(imageRef)) {
+      // Fallback to the deprecated Bundle resolver attribute
+      imageRef = getBundleValue(ref.resource);
     }
   }
 
@@ -93,4 +97,15 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     'Tekton bundle dependency found'
   );
   deps.push(dep);
+}
+
+function getBundleValue(
+  fields: TektonResolverParamsField[] | undefined
+): string | undefined {
+  for (const field of coerceArray(fields)) {
+    if (field.name === 'bundle') {
+      return field.value;
+    }
+  }
+  return undefined;
 }
