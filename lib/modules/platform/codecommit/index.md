@@ -59,7 +59,7 @@ Change the `Resource` to the resources you want to use
 
 The policy json:
 
-```Json
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
