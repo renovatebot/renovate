@@ -1096,8 +1096,13 @@ describe('modules/manager/gradle/extract', () => {
       contains(special):chars:5 (10 constraints: 95be0c15)
       no.colon:6 (10 constraints: 95be0c15)
       this.is:valid.dep:7 (10 constraints: 95be0c15)
+
+      [Test dependencies]
+      this.is:valid.test.dep:8 (10 constraints: 95be0c15)
     `);
 
-    expect(parsedLock.size).toBe(1); // no 7 is valid exact dep
+    expect(parsedLock.size).toBe(2);
+    expect(parsedLock.get('this.is:valid.dep')?.depType).toBe('dependencies'); // no 7 is valid exact dep
+    expect(parsedLock.get('this.is:valid.test.dep')?.depType).toBe('test'); // no 7 is valid exact dep
   });
 });
