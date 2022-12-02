@@ -35,7 +35,6 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
 import { getUserArn, initIamClient } from './iam-client';
 
@@ -86,10 +85,10 @@ export async function initPlatform({
 
   // If any of the below fails, it will throw an exception stopping the program.
   client.buildCodeCommitClient();
-  // To check if we have permission to codecommit
-  await client.listRepositories();
-
   initIamClient();
+  // To check if we have permission to codecommit, throws exception if failed.
+
+  await client.listRepositories();
   if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID) {
     config.userArn = await getUserArn();
   }
@@ -128,7 +127,7 @@ export async function initRepo({
   logger.debug({ repositoryDetails: repo }, 'Repository details');
   const metadata = repo.repositoryMetadata;
 
-  const url = getCodeCommitUrl(metadata, repository);
+  const url = client.getCodeCommitUrl(metadata, repository);
   try {
     await git.initRepo({
       url,

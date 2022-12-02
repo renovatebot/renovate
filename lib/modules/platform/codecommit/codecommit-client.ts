@@ -306,8 +306,7 @@ export function getCodeCommitUrl(
     if (repoMetadata.cloneUrlHttp) {
       return repoMetadata.cloneUrlHttp;
     }
-    // shouldn't reach here, as clone url is always available, but just in case
-    // istanbul ignore next
+    // shouldn't reach here, but just in case
     return `https://git-codecommit.${
       process.env.AWS_REGION ?? 'us-east-1'
     }.amazonaws.com/v1/repos/${repoName}`;

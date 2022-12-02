@@ -24,6 +24,5 @@ export async function getUserArn(): Promise<string> {
   } catch (err) {
     logger.debug('Failed to get IAM user info');
   }
-
   return res ?? '';
 }
