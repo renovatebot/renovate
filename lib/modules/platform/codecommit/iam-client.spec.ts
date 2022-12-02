@@ -23,4 +23,9 @@ describe('modules/platform/codecommit/iam-client', () => {
     });
     await expect(iam.getUserArn()).resolves.toMatch('aws:arn:example:123456');
   });
+
+  it('should fail', async () => {
+    iamClient.on(GetUserCommand).rejects(new Error('error'));
+    await expect(iam.getUserArn()).resolves.toMatch('');
+  });
 });

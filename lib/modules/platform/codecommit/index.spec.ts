@@ -49,6 +49,7 @@ describe('modules/platform/codecommit/index', () => {
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
       password: 'SecretAccessKey',
+      token: 'token',
     });
   });
 
@@ -92,6 +93,14 @@ describe('modules/platform/codecommit/index', () => {
         endpoint: 'https://git-codecommit.REGION.amazonaws.com/',
       });
       process.env.AWS_REGION = temp;
+    });
+
+    it('should ', async () => {
+      await expect(
+        codeCommit.initPlatform({ endpoint: 'non://parsable.url' })
+      ).resolves.toEqual({
+        endpoint: 'non://parsable.url',
+      });
     });
   });
 

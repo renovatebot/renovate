@@ -100,7 +100,6 @@ export async function initPlatform({
         process.env.AWS_REGION ?? 'us-east-1'
       }.amazonaws.com/`,
   };
-  logger.info(`AWS_REGION: ${platformConfig.endpoint}`);
   return Promise.resolve(platformConfig);
 }
 

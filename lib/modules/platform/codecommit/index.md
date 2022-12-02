@@ -54,39 +54,40 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
 
 Create a new policy for renovate with these permissions, then attach it to the user/role.
 
-Add `"iam:GetUser",` to the `Action` array if you are using `Authentication as a USER` it will help reduce AWS requests
-Change the `Resource` to the resources you want to use
+Add `"iam:GetUser",` to the `Action` array if you are using `Authentication as a USER`.
+it will help reduce AWS requests.
+Change the `Resource` value to the resources you want to use.
 
 The policy json:
 
 ```json
 {
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "RenovatePolicy",
-            "Effect": "Allow",
-            "Action": [
-                "codecommit:DeleteCommentContent",
-                "codecommit:UpdatePullRequestDescription",
-                "codecommit:GitPull",
-                "codecommit:ListPullRequests",
-                "codecommit:GetCommentsForPullRequest",
-                "codecommit:ListRepositories",
-                "codecommit:UpdatePullRequestTitle",
-                "codecommit:GetFile",
-                "codecommit:UpdateComment",
-                "codecommit:GetRepository",
-                "codecommit:DescribePullRequestEvents",
-                "codecommit:CreatePullRequest",
-                "codecommit:CreatePullRequestApprovalRule",
-                "codecommit:GitPush",
-                "codecommit:UpdatePullRequestStatus",
-                "codecommit:GetPullRequest"
-            ],
-            "Resource": "*"
-        }
-    ]
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RenovatePolicy",
+      "Effect": "Allow",
+      "Action": [
+        "codecommit:DeleteCommentContent",
+        "codecommit:UpdatePullRequestDescription",
+        "codecommit:GitPull",
+        "codecommit:ListPullRequests",
+        "codecommit:GetCommentsForPullRequest",
+        "codecommit:ListRepositories",
+        "codecommit:UpdatePullRequestTitle",
+        "codecommit:GetFile",
+        "codecommit:UpdateComment",
+        "codecommit:GetRepository",
+        "codecommit:DescribePullRequestEvents",
+        "codecommit:CreatePullRequest",
+        "codecommit:CreatePullRequestApprovalRule",
+        "codecommit:GitPush",
+        "codecommit:UpdatePullRequestStatus",
+        "codecommit:GetPullRequest"
+      ],
+      "Resource": "*"
+    }
+  ]
 }
 ```
 

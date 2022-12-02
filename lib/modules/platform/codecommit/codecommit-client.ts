@@ -237,15 +237,15 @@ export async function getFile(
 
 export async function listPullRequests(
   repositoryName: string,
-  author: string | undefined
+  authorArn: string | undefined
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
 
-  if (author) {
-    input.authorArn = author;
+  if (authorArn) {
+    input.authorArn = authorArn;
   }
 
   const cmd = new ListPullRequestsCommand(input);
