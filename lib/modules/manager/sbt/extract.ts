@@ -1,4 +1,4 @@
-import { lang, query as q } from 'good-enough-parser';
+import { lang, lexer, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -15,6 +15,8 @@ import { normalizeScalaVersion } from './util';
 type Vars = Record<string, string>;
 
 interface Ctx {
+  readonly source: string;
+
   vars: Vars;
   deps: PackageDependency[];
   registryUrls: string[];
@@ -30,21 +32,46 @@ interface Ctx {
   depType?: string;
   useScalaVersion?: boolean;
   groupName?: string;
+
+  replaceStringStart?: number;
+  replaceStringEnd?: number;
 }
 
 const scala = lang.createLang('scala');
 
+function markReplaceStringStart(ctx: Ctx, token: lexer.Token): Ctx {
+  return { ...ctx, replaceStringStart: token.offset };
+}
+
+function markReplaceStringEnd(ctx: Ctx, token: lexer.Token): Ctx {
+  return { ...ctx, replaceStringEnd: token.offset + token.value.length + 1 };
+}
+
+function attachReplaceString(dep: PackageDependency, ctx: Ctx): void {
+  if (ctx.replaceStringStart && ctx.replaceStringEnd) {
+    dep.replaceString = ctx.source.slice(
+      ctx.replaceStringStart,
+      ctx.replaceStringEnd
+    );
+  }
+}
+
 const scalaVersionMatch = q
-  .sym<Ctx>('scalaVersion')
+  .sym<Ctx>('scalaVersion', markReplaceStringStart)
   .op(':=')
   .alt(
-    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
-    q.sym<Ctx>((ctx, { value: varName }) => {
+    q.str<Ctx>((ctx, token) => {
+      const { value: scalaVersion } = token;
+      ctx.scalaVersion = scalaVersion;
+      return markReplaceStringEnd({ ...ctx, scalaVersion }, token);
+    }),
+    q.sym<Ctx>((ctx, token) => {
+      const { value: varName } = token;
       const scalaVersion = ctx.vars[varName];
       if (scalaVersion) {
         ctx.scalaVersion = scalaVersion;
       }
-      return ctx;
+      return markReplaceStringEnd(ctx, token);
     })
   )
   .handler((ctx) => {
@@ -57,7 +84,12 @@ const scalaVersionMatch = q
         separateMinorPatch: true,
       };
       ctx.scalaVersion = normalizeScalaVersion(ctx.scalaVersion);
+
+      attachReplaceString(dep, ctx);
       ctx.deps.push(dep);
+
+      delete ctx.replaceStringStart;
+      delete ctx.replaceStringEnd;
     }
     return ctx;
   });
@@ -131,7 +163,9 @@ const versionMatch = q.alt<Ctx>(
     }
     return ctx;
   }),
-  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue }))
+  q.str<Ctx>((ctx, token) =>
+    markReplaceStringEnd({ ...ctx, currentValue: token.value }, token)
+  )
 );
 
 const simpleDependencyMatch = groupIdMatch
@@ -158,13 +192,6 @@ function depHandler(ctx: Ctx): Ctx {
     groupName,
   } = ctx;
 
-  delete ctx.groupId;
-  delete ctx.artifactId;
-  delete ctx.currentValue;
-  delete ctx.useScalaVersion;
-  delete ctx.depType;
-  delete ctx.groupName;
-
   const depName = `${groupId!}:${artifactId!}`;
 
   const dep: PackageDependency = {
@@ -187,17 +214,37 @@ function depHandler(ctx: Ctx): Ctx {
     dep.groupName = groupName;
   }
 
+  attachReplaceString(dep, ctx);
+
   ctx.deps.push(dep);
+
+  delete ctx.groupId;
+  delete ctx.artifactId;
+  delete ctx.currentValue;
+  delete ctx.useScalaVersion;
+  delete ctx.depType;
+  delete ctx.groupName;
+  delete ctx.replaceStringStart;
+  delete ctx.replaceStringEnd;
 
   return ctx;
 }
 
-function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
-  return { ...ctx, depType };
+function depTypeHandler(ctx: Ctx, token: lexer.Token): Ctx {
+  ctx.depType = token.value;
+  return markReplaceStringEnd(ctx, token);
 }
 
 const sbtPackageMatch = q
-  .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
+  .opt<Ctx>(
+    q
+      .alt(
+        q.sym<Ctx>('lazy', markReplaceStringStart).sym('val'),
+        q.sym<Ctx>('val', markReplaceStringStart)
+      )
+      .sym()
+      .op('=')
+  )
   .alt(simpleDependencyMatch, versionedDependencyMatch)
   .opt(
     q.alt<Ctx>(
@@ -209,7 +256,10 @@ const sbtPackageMatch = q
   .handler(depHandler);
 
 const sbtPluginMatch = q
-  .sym<Ctx>(regEx(/^(?:addSbtPlugin|addCompilerPlugin)$/))
+  .sym<Ctx>(
+    regEx(/^(?:addSbtPlugin|addCompilerPlugin)$/),
+    markReplaceStringStart
+  )
   .tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -272,6 +322,7 @@ export function extractPackageFile(
 
   try {
     parsedResult = scala.query(content, query, {
+      source: content,
       vars: {},
       deps: [],
       registryUrls: [REGISTRY_URLS.mavenCentral],

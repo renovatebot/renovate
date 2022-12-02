@@ -11,6 +11,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := "2.13.0-RC5"",
       "separateMinorPatch": true,
     },
     {
@@ -21,6 +22,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "lazy val ujson = "com.example" %% "foo" % "0.7.1"",
     },
     {
       "currentValue": "1.2.3",
@@ -48,6 +50,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := "2.13.0-RC5"",
       "separateMinorPatch": true,
     },
     {
@@ -58,6 +61,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "val ujson = "com.example" %% "foo" % "0.7.1"",
     },
     {
       "currentValue": "1.2.3",
@@ -120,6 +124,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "replaceString": "scalaVersion := "2.9.10"",
       "separateMinorPatch": true,
     },
     {
@@ -268,6 +273,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/5/",
         "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
+      "replaceString": "addSbtPlugin("org.example" % "waldo" % "0.0.9"",
     },
     {
       "currentValue": "(,8.4.0]",
@@ -304,6 +310,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
+      "replaceString": "scalaVersion := ScalaVersion
+",
       "separateMinorPatch": true,
     },
     {
@@ -437,6 +445,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/5/",
         "https://dl.bintray.com/sbt/sbt-plugin-releases",
       ],
+      "replaceString": "addSbtPlugin("org.example" % "waldo" % "0.0.9"",
     },
   ],
   "packageFileVersion": "3.2.1",
@@ -454,6 +463,8 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := ScalaVersion
+",
       "separateMinorPatch": true,
     },
     {
@@ -481,6 +492,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := ScalaVersion,",
       "separateMinorPatch": true,
     },
     {
@@ -508,6 +520,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := "2.12.10"",
       "separateMinorPatch": true,
     },
     {
@@ -535,6 +548,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
+      "replaceString": "scalaVersion := "2.12.10"",
       "separateMinorPatch": true,
     },
     {
