@@ -8,7 +8,7 @@ describe('modules/platform/codecommit/iam-client', () => {
 
   it('should return empty', async () => {
     iamClient.on(GetUserCommand).resolves({});
-    await expect(iam.getUserArn()).resolves.toMatch('');
+    await expect(iam.getUserArn()).resolves.toBeUndefined();
   });
 
   it('should return the user normally', async () => {
@@ -26,6 +26,6 @@ describe('modules/platform/codecommit/iam-client', () => {
 
   it('should fail', async () => {
     iamClient.on(GetUserCommand).rejects(new Error('error'));
-    await expect(iam.getUserArn()).resolves.toMatch('');
+    await expect(iam.getUserArn()).resolves.toBeUndefined();
   });
 });
