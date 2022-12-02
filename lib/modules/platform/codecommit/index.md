@@ -52,8 +52,7 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
 
 ## Permissions
 
-Create a new policy for renovate with these permissions,
-Then attach it to the user/role.
+Create a new policy for renovate with these permissions, then attach it to the user/role.
 
 Add `"iam:GetUser",` to the `Action` array if you are using `Authentication as a USER` it will help reduce AWS requests
 Change the `Resource` to the resources you want to use
