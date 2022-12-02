@@ -19,14 +19,14 @@ export function initIamClient(): void {
  * 2) there is a connection but no permission for the current user, we still get his user arn in the error message
  * 3) there is a problem in the connection to the aws api, then throw an error with the err
  */
-export async function getUserArn(): Promise<string> {
+export async function getUserArn(): Promise<string | undefined> {
   const cmd = new GetUserCommand({});
-  let res;
+  let res = undefined;
   try {
     const userRes: GetUserCommandOutput = await iam.send(cmd);
     res = userRes?.User?.Arn;
   } catch (err) {
     logger.debug('Failed to get IAM user info');
   }
-  return res ?? '';
+  return res;
 }

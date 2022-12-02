@@ -241,12 +241,9 @@ export async function listPullRequests(
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
+    authorArn,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
-
-  if (authorArn) {
-    input.authorArn = authorArn;
-  }
 
   const cmd = new ListPullRequestsCommand(input);
   return await codeCommitClient.send(cmd);
