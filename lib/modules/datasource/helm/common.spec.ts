@@ -12,11 +12,11 @@ describe('modules/datasource/helm/common', () => {
   describe('findSourceUrl', () => {
     test.each`
       input                     | output
-      ${'airflow'}              | ${{ sourceUrl: 'https://github.com/bitnami/charts', sourceDirectory: 'bitnami/airflow' }}
-      ${'coredns'}              | ${{ sourceUrl: 'https://github.com/coredns/helm', sourceDirectory: undefined }}
-      ${'pgadmin4'}             | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts', sourceDirectory: undefined }}
-      ${'private-chart-github'} | ${{ sourceUrl: 'https://github.example.com/some-org/charts', sourceDirectory: 'private-chart' }}
-      ${'private-chart-gitlab'} | ${{ sourceUrl: 'https://gitlab.example.com/some/group/charts', sourceDirectory: 'private-chart' }}
+      ${'airflow'}              | ${{ sourceUrl: 'https://github.com/bitnami/charts/tree/master/bitnami/airflow' }}
+      ${'coredns'}              | ${{ sourceUrl: 'https://github.com/coredns/helm' }}
+      ${'pgadmin4'}             | ${{ sourceUrl: 'https://github.com/rowanruseler/helm-charts' }}
+      ${'private-chart-github'} | ${{ sourceUrl: 'https://github.example.com/some-org/charts/tree/master/private-chart' }}
+      ${'private-chart-gitlab'} | ${{ sourceUrl: 'https://gitlab.example.com/some/group/charts/-/tree/master/private-chart' }}
       ${'dummy'}                | ${{}}
     `(
       '$input -> $output',
