@@ -3,6 +3,7 @@ import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import type { GradleManagerData } from '../types';
+import { isDependencyString, versionLikeSubstring } from '../utils';
 
 export const VERSIONS_PROPS = 'versions.props';
 export const VERSIONS_LOCK = 'versions.lock';
@@ -141,7 +142,7 @@ interface VersionWithPosition {
 /**
  * Parses `versions.lock`
  */
-function parseLockFile(input: string): Map<string, string> {
+export function parseLockFile(input: string): Map<string, string> {
   const lockLineRegex = regEx(
     `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`
   );
@@ -151,7 +152,9 @@ function parseLockFile(input: string): Map<string, string> {
     const lineMatch = lockLineRegex.exec(line);
     if (lineMatch?.groups) {
       const { depName, lockVersion } = lineMatch.groups;
-      depVerMap.set(depName, lockVersion);
+      if (isDependencyString(`${depName}:${lockVersion}`)) {
+        depVerMap.set(depName, lockVersion);
+      }
     }
   }
   logger.trace(
@@ -176,22 +179,28 @@ export function parsePropsFile(
 
   let startOfLineIdx = 0;
   const isCrLf = input.indexOf('\r\n') > 0;
+  const validGlob = /^[a-zA-Z][-_a-zA-Z0-9.:*]+$/;
   for (const line of input.split(newlineRegex)) {
     const lineMatch = propsLineRegex.exec(line);
     if (lineMatch?.groups) {
       const { depName, propsVersion } = lineMatch.groups;
-      const startPosInLine = line.lastIndexOf(propsVersion);
-      const propVersionPos = startOfLineIdx + startPosInLine;
-      if (depName.includes('*')) {
-        depVerRegexMap.set(depName, {
-          version: propsVersion,
-          filePos: propVersionPos,
-        });
-      } else {
-        depVerExactMap.set(depName, {
-          version: propsVersion,
-          filePos: propVersionPos,
-        });
+      if (
+        validGlob.test(depName) &&
+        versionLikeSubstring(propsVersion) !== null
+      ) {
+        const startPosInLine = line.lastIndexOf(propsVersion);
+        const propVersionPos = startOfLineIdx + startPosInLine;
+        if (depName.includes('*')) {
+          depVerRegexMap.set(depName, {
+            version: propsVersion,
+            filePos: propVersionPos,
+          });
+        } else {
+          depVerExactMap.set(depName, {
+            version: propsVersion,
+            filePos: propVersionPos,
+          });
+        }
       }
     }
     startOfLineIdx += line.length + (isCrLf ? 2 : 1);
