@@ -187,7 +187,7 @@
     "extract-zip": "2.0.1",
     "find-packages": "10.0.2",
     "find-up": "5.0.0",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.1.0",
     "git-url-parse": "13.1.0",
     "github-url-from-git": "1.5.0",
     "global-agent": "3.0.0",
