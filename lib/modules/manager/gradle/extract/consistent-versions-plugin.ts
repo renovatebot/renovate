@@ -73,7 +73,7 @@ export function parseGcv(
     if (lockFileMap.has(propDep)) {
       const newDep: Record<string, any> = {
         managerData: {
-          packageFile: VERSIONS_PROPS,
+          packageFile: propsFileName,
           fileReplacePosition: versionAndPosition.filePos,
         },
         packageName: propDep,
@@ -94,7 +94,7 @@ export function parseGcv(
       if (globRegex.test(exactDep)) {
         const newDep: Record<string, any> = {
           managerData: {
-            packageFile: VERSIONS_PROPS,
+            packageFile: propsFileName,
             fileReplacePosition: propVerAndPos.filePos,
           },
           depName: exactDep,
