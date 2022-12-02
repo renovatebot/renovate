@@ -70,7 +70,14 @@ describe('util/http/index', () => {
   });
 
   it('getJson', async () => {
-    httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toEqual({
       authorization: false,
       body: {
@@ -324,7 +331,11 @@ describe('util/http/index', () => {
     describe('getJson', () => {
       it('infers body type', async () => {
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: true }));
 
@@ -342,7 +353,11 @@ describe('util/http/index', () => {
       it('reports warnings', async () => {
         memCache.init();
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: 'foobar' }));
 
@@ -361,7 +376,11 @@ describe('util/http/index', () => {
 
       it('throws', async () => {
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: 'foobar' }));
 

@@ -152,11 +152,10 @@ dummy 1.2.3
           },
           {
             currentValue: '1.14.1',
-            datasource: 'github-tags',
-            packageName: 'elixir-lang/elixir',
+            datasource: 'hexpm-bob',
+            packageName: 'elixir',
             versioning: 'semver',
             depName: 'elixir',
-            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '0.19.1',
