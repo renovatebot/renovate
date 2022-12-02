@@ -78,7 +78,6 @@ export function parseGcv(
         },
         packageName: propDep,
         currentValue: versionAndPosition.version,
-        currentVersion: versionAndPosition.version,
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
       } as PackageDependency<GradleManagerData>;
@@ -100,7 +99,6 @@ export function parseGcv(
           },
           depName: exactDep,
           currentValue: propVerAndPos.version,
-          currentVersion: propVerAndPos.version,
           lockedVersion: lockVersionAndDepType.version,
           depType: lockVersionAndDepType.depType,
           groupName: propDepGlob,
