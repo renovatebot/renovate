@@ -50,7 +50,85 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(11);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'https://bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'https://bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'next',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'https://bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.1',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'https://bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.2',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'http://bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.3',
+          datasource: 'git-tags',
+          depName: 'bitbucket.com/hashicorp/example',
+          depType: 'module',
+          packageName: 'ssh://git@bitbucket.com/hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'bitbucket-tags',
+          depName: 'hashicorp/example',
+          depType: 'module',
+          packageName: 'hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'bitbucket-tags',
+          depName: 'hashicorp/example',
+          depType: 'module',
+          packageName: 'hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'bitbucket-tags',
+          depName: 'hashicorp/example',
+          depType: 'module',
+          packageName: 'hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'bitbucket-tags',
+          depName: 'hashicorp/example',
+          depType: 'module',
+          packageName: 'hashicorp/example',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'bitbucket-tags',
+          depName: 'hashicorp/example',
+          depType: 'module',
+          packageName: 'hashicorp/example',
+        },
+      ]);
     });
 
     it('extracts azureDevOps modules', async () => {
@@ -59,55 +137,208 @@ describe('modules/manager/terraform/extract', () => {
         'modules.tf',
         {}
       );
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: 'v1.0.0',
-            datasource: 'git-tags',
-            depName: 'MyOrg/MyProject/MyRepository',
-            depType: 'module',
-            packageName:
-              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
-          },
-          {
-            currentValue: 'v1.0.0',
-            datasource: 'git-tags',
-            depName: 'MyOrg/MyProject/MyRepository',
-            depType: 'module',
-            packageName:
-              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
-          },
-          {
-            currentValue: 'v1.0.0',
-            datasource: 'git-tags',
-            depName: 'MyOrg/MyProject/MyRepository//some-module/path',
-            depType: 'module',
-            packageName:
-              'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
-          },
-        ],
-      });
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'git-tags',
+          depName: 'MyOrg/MyProject/MyRepository',
+          depType: 'module',
+          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'git-tags',
+          depName: 'MyOrg/MyProject/MyRepository',
+          depType: 'module',
+          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+        },
+        {
+          currentValue: 'v1.0.0',
+          datasource: 'git-tags',
+          depName: 'MyOrg/MyProject/MyRepository//some-module/path',
+          depType: 'module',
+          packageName: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+        },
+      ]);
     });
 
     it('extracts providers', async () => {
       const res = await extractPackageFile(providers, 'providers.tf', {});
       expect(res?.deps).toHaveLength(15);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: '1.36.1',
+          datasource: 'terraform-provider',
+          depName: 'azurerm',
+          depType: 'provider',
+          packageName: 'hashicorp/azurerm',
+        },
+        {
+          currentValue: '=2.4',
+          datasource: 'terraform-provider',
+          depName: 'gitlab',
+          depType: 'provider',
+          packageName: 'hashicorp/gitlab',
+        },
+        {
+          currentValue: '=1.3',
+          datasource: 'terraform-provider',
+          depName: 'gitlab1',
+          depType: 'provider',
+          packageName: 'hashicorp/gitlab1',
+        },
+        {
+          datasource: 'terraform-provider',
+          depName: 'helm',
+          depType: 'provider',
+          packageName: 'hashicorp/helm',
+          skipReason: 'no-version',
+        },
+        {
+          currentValue: 'V1.9',
+          datasource: 'terraform-provider',
+          depName: 'newrelic',
+          depType: 'provider',
+          packageName: 'hashicorp/newrelic',
+        },
+        {
+          currentValue: '>= 2.7.0',
+          datasource: 'terraform-provider',
+          depName: 'aws',
+          depType: 'required_provider',
+          packageName: 'hashicorp/aws',
+        },
+        {
+          currentValue: '>= 2.0.0',
+          datasource: 'terraform-provider',
+          depName: 'azurerm',
+          depType: 'required_provider',
+          packageName: 'hashicorp/azurerm',
+        },
+        {
+          currentValue: '>= 0.13',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          depType: 'required_version',
+          extractVersion: 'v(?<version>.*)$',
+        },
+        {
+          currentValue: '2.7.2',
+          datasource: 'terraform-provider',
+          depName: 'docker',
+          depType: 'required_provider',
+          packageName: 'hashicorp/docker',
+          registryUrls: ['https://releases.hashicorp.com'],
+        },
+        {
+          currentValue: '2.7.0',
+          datasource: 'terraform-provider',
+          depName: 'aws',
+          depType: 'required_provider',
+          packageName: 'hashicorp/aws',
+        },
+        {
+          currentValue: '=2.27.0',
+          datasource: 'terraform-provider',
+          depName: 'azurerm',
+          depType: 'required_provider',
+          packageName: 'hashicorp/azurerm',
+        },
+        {
+          currentValue: '1.2.4',
+          datasource: 'terraform-provider',
+          depName: 'invalid',
+          depType: 'required_provider',
+          skipReason: 'unsupported-url',
+        },
+        {
+          currentValue: '1.2.4',
+          datasource: 'terraform-provider',
+          depName: 'helm',
+          depType: 'required_provider',
+          packageName: 'hashicorp/helm',
+        },
+        {
+          currentValue: '>= 1.0',
+          datasource: 'terraform-provider',
+          depName: 'kubernetes',
+          depType: 'required_provider',
+          packageName: 'hashicorp/kubernetes',
+          registryUrls: ['https://terraform.example.com'],
+        },
+        {
+          currentValue: '>= 4.0',
+          datasource: 'terraform-provider',
+          depName: 'oci',
+          depType: 'required_provider',
+          packageName: 'oracle/oci',
+          registryUrls: ['https://terraform-company_special.example.com'],
+        },
+      ]);
     });
 
     it('extracts docker resources', async () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
       expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.7.8',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'docker_image',
+          replaceString: 'nginx:1.7.8',
+        },
+        {
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          datasource: 'docker',
+          depType: 'docker_image',
+          replaceString: '${data.docker_registry_image.ubuntu.name}',
+          skipReason: 'contains-variable',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.7.8',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'docker_container',
+          replaceString: 'nginx:1.7.8',
+        },
+        {
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentDigest: undefined,
+          currentValue: 'v1',
+          datasource: 'docker',
+          depName: 'repo.mycompany.com:8080/foo-service',
+          depType: 'docker_service',
+          replaceString: 'repo.mycompany.com:8080/foo-service:v1',
+        },
+        {
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          skipReason: 'invalid-value',
+        },
+      ]);
     });
 
     it('extracts kubernetes resources', async () => {
       const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
       expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
-      expect(res?.deps).toMatchObject([
+      expect(res?.deps.sort()).toMatchObject([
         {
           depName: 'gcr.io/kaniko-project/executor',
           currentValue: 'v1.7.0',
@@ -212,9 +443,52 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extract helm releases', async () => {
       const res = await extractPackageFile(helm, 'helm.tf', {});
-      expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(6);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: '1.0.1',
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+        {
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+        {
+          datasource: 'helm',
+          depName: './charts/example',
+          depType: 'helm_release',
+          registryUrls: [undefined],
+          skipReason: 'local-chart',
+        },
+        {
+          currentValue: '4.0.1',
+          datasource: 'helm',
+          depName: undefined,
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+          skipReason: 'invalid-name',
+        },
+        {
+          currentValue: '5.0.1',
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: ['https://charts.helm.sh/stable'],
+        },
+        {
+          currentValue: '6.0.1',
+          datasource: 'helm',
+          depName: 'redis',
+          depType: 'helm_release',
+          registryUrls: [undefined],
+        },
+      ]);
     });
 
     it('update lockfile constraints with range strategy update-lockfile', async () => {
@@ -226,9 +500,34 @@ describe('modules/manager/terraform/extract', () => {
         'lockedVersion.tf',
         {}
       );
-      expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: '~> 3.0',
+          datasource: 'terraform-provider',
+          depName: 'aws',
+          depType: 'required_provider',
+          lockedVersion: '3.1.0',
+          packageName: 'hashicorp/aws',
+        },
+        {
+          currentValue: '~> 2.50.0',
+          datasource: 'terraform-provider',
+          depName: 'azurerm',
+          depType: 'required_provider',
+          lockedVersion: '2.50.0',
+          packageName: 'hashicorp/azurerm',
+        },
+        {
+          currentValue: '>= 1.0',
+          datasource: 'terraform-provider',
+          depName: 'kubernetes',
+          depType: 'required_provider',
+          packageName: 'example/kubernetes',
+          registryUrls: ['https://terraform.example.com'],
+        },
+      ]);
     });
 
     it('test terraform block with only requirement_terraform_version', async () => {
@@ -239,7 +538,15 @@ describe('modules/manager/terraform/extract', () => {
       );
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: '1.0.0',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          depType: 'required_version',
+          extractVersion: 'v(?<version>.*)$',
+        },
+      ]);
     });
 
     it('extracts terraform_version for tfe_workspace and ignores missing terraform_version keys', async () => {
@@ -248,9 +555,27 @@ describe('modules/manager/terraform/extract', () => {
         'tfeWorkspace.tf',
         {}
       );
-      expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
+      expect(res?.deps.sort()).toMatchObject([
+        {
+          currentValue: '1.1.6',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          depType: 'tfe_workspace',
+          extractVersion: 'v(?<version>.*)$',
+        },
+        {
+          skipReason: 'no-version',
+        },
+        {
+          currentValue: '1.1.9',
+          datasource: 'github-releases',
+          depName: 'hashicorp/terraform',
+          depType: 'tfe_workspace',
+          extractVersion: 'v(?<version>.*)$',
+        },
+      ]);
     });
   });
 });
