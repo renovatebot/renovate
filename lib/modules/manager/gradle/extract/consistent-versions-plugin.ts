@@ -90,7 +90,8 @@ export function parseGcv(
         packageName: propDep,
         currentValue: versionAndPosition.version,
         currentVersion: versionAndPosition.version,
-        lockedVersion: lockFileMap.get(propDep),
+        lockedVersion: lockFileMap.get(propDep)?.version,
+        depType: lockFileMap.get(propDep)?.depType,
       } as PackageDependency<GradleManagerData>;
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
@@ -101,7 +102,7 @@ export function parseGcv(
   // For each regular expression dep in props file (starting with the longest glob string)...
   for (const [propDepGlob, propVerAndPos] of propsFileRegexMap) {
     const globRegex = globToRegex(propDepGlob);
-    for (const [exactDep, exactVer] of lockFileMap) {
+    for (const [exactDep, lockVersionAndDepType] of lockFileMap) {
       if (globRegex.test(exactDep)) {
         const newDep: Record<string, any> = {
           managerData: {
@@ -111,7 +112,8 @@ export function parseGcv(
           depName: exactDep,
           currentValue: propVerAndPos.version,
           currentVersion: propVerAndPos.version,
-          lockedVersion: exactVer,
+          lockedVersion: lockVersionAndDepType.version,
+          depType: lockVersionAndDepType.depType,
           groupName: propDepGlob,
         } as PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
@@ -139,22 +141,33 @@ interface VersionWithPosition {
   filePos: number;
 }
 
+interface VersionWithDepType {
+  version: string;
+  depType: string;
+}
+
 /**
  * Parses `versions.lock`
  */
-export function parseLockFile(input: string): Map<string, string> {
+export function parseLockFile(input: string): Map<string, VersionWithDepType> {
   const lockLineRegex = regEx(
     `^(?<depName>[^:]+:[^:]+):(?<lockVersion>[^ ]+) \\(\\d+ constraints: [0-9a-f]+\\)$`
   );
 
-  const depVerMap = new Map<string, string>();
+  const depVerMap = new Map<string, VersionWithDepType>();
+  let isTestDepType = false;
   for (const line of input.split(newlineRegex)) {
     const lineMatch = lockLineRegex.exec(line);
     if (lineMatch?.groups) {
       const { depName, lockVersion } = lineMatch.groups;
       if (isDependencyString(`${depName}:${lockVersion}`)) {
-        depVerMap.set(depName, lockVersion);
+        depVerMap.set(depName, {
+          version: lockVersion,
+          depType: isTestDepType ? 'test' : 'dependencies',
+        } as VersionWithDepType);
       }
+    } else if (line === '[Test dependencies]') {
+      isTestDepType = true; // We know that all lines below this header are test dependencies
     }
   }
   logger.trace(
