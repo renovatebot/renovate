@@ -5,7 +5,9 @@
     Experimental features might be changed or even removed at any time.
     Subscribe to [GitHub issue #2868](https://github.com/renovatebot/renovate/issues/2868) to be notified of any changes.
 
-## Authentication as a role
+## Authentication
+
+### IAM Role
 
 The IAM role does not have credentials, so you will need to set up git-credentials-helper on your environment,
 
