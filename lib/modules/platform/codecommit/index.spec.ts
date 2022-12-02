@@ -25,8 +25,8 @@ import {
 } from '../../../constants/error-messages';
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
-import { CodeCommitPr, config } from './index';
 import { getCodeCommitUrl } from './codecommit-client';
+import { CodeCommitPr, config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
 const iamClient = mockClient(IAMClient);
@@ -165,7 +165,7 @@ describe('modules/platform/codecommit/index', () => {
     it('gets the right url', async () => {
       process.env.AWS_ACCESS_KEY_ID = '';
       process.env.AWS_SECRET_ACCESS_KEY = '';
-      await expect(
+      expect(
         getCodeCommitUrl(
           {
             defaultBranch: 'main',
@@ -181,7 +181,7 @@ describe('modules/platform/codecommit/index', () => {
     it('gets the eu-central-1 url', async () => {
       process.env.AWS_ACCESS_KEY_ID = '';
       process.env.AWS_SECRET_ACCESS_KEY = '';
-      await expect(
+      expect(
         getCodeCommitUrl(
           {
             defaultBranch: 'main',
