@@ -162,7 +162,7 @@ describe('modules/platform/codecommit/index', () => {
       });
     });
 
-    it('gets the right url', async () => {
+    it('gets the right url', () => {
       process.env.AWS_ACCESS_KEY_ID = '';
       process.env.AWS_SECRET_ACCESS_KEY = '';
       expect(
@@ -178,7 +178,7 @@ describe('modules/platform/codecommit/index', () => {
       ).toBe('https://git-codecommit.us-east-1.amazonaws.com/v1/repos/name');
     });
 
-    it('gets the eu-central-1 url', async () => {
+    it('gets the eu-central-1 url', () => {
       process.env.AWS_ACCESS_KEY_ID = '';
       process.env.AWS_SECRET_ACCESS_KEY = '';
       expect(
