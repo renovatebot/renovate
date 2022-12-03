@@ -69,7 +69,7 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     `);
 
     expect(parsedLock.size).toBe(2);
-    expect(parsedLock.get('this.is:valid.dep')?.depType).toBe('dependencies'); // no 7 is valid exact dep
-    expect(parsedLock.get('this.is:valid.test.dep')?.depType).toBe('test'); // no 7 is valid exact dep
+    expect(parsedLock.get('this.is:valid.dep')?.depType).toBe('dependencies');
+    expect(parsedLock.get('this.is:valid.test.dep')?.depType).toBe('test');
   });
 });
