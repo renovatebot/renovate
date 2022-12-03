@@ -1,10 +1,6 @@
 import type { ProgrammingLanguage } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
 import * as gradleVersioning from '../../versioning/gradle';
-import {
-  VERSIONS_LOCK,
-  VERSIONS_PROPS,
-} from './extract/consistent-versions-plugin';
 
 export { extractAllPackageFiles } from './extract';
 export { updateDependency } from './update';
@@ -20,8 +16,8 @@ export const defaultConfig = {
     '(^|\\/)gradle\\/.+\\.toml$',
     '\\.versions\\.toml$',
     // The two below is for gradle-consistent-versions plugin
-    `(^|\\/)${VERSIONS_PROPS}$`,
-    `(^|\\/)${VERSIONS_LOCK}$`,
+    `(^|\\/)versions.props$`,
+    `(^|\\/)versions.lock$`,
   ],
   timeout: 600,
   versioning: gradleVersioning.id,
