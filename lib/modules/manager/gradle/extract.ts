@@ -76,11 +76,12 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGcvPropsFile(packageFile)) {
-        if (usesGcv(packageFile, fileContents)) {
-          const updatesFromGcv = parseGcv(packageFile, fileContents);
-          extractedDeps.push(...updatesFromGcv);
-        } // else skip silently since this is just a name collision
+      } else if (
+        isGcvPropsFile(packageFile) &&
+        usesGcv(packageFile, fileContents)
+      ) {
+        const updatesFromGcv = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...updatesFromGcv);
       } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
