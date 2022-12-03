@@ -76,7 +76,7 @@ export function parseGcv(
           packageFile: propsFileName,
           fileReplacePosition: versionAndPosition.filePos,
         },
-        packageName: propDep,
+        depName: propDep,
         currentValue: versionAndPosition.version,
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
