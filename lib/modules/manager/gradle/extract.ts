@@ -5,7 +5,6 @@ import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import {
-  isGcvLockFile,
   isGcvPropsFile,
   parseGcv,
   usesGcv,
@@ -18,6 +17,7 @@ import type {
 } from './types';
 import {
   getVars,
+  isGradleScriptFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -76,14 +76,12 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else if (isGcvLockFile(packageFile)) {
-        // Skip and do not trigger parsing, wait for VERSIONS_PROPS
       } else if (isGcvPropsFile(packageFile)) {
         if (usesGcv(packageFile, fileContents)) {
           const updatesFromGcv = parseGcv(packageFile, fileContents);
           extractedDeps.push(...updatesFromGcv);
         } // else skip silently since this is just a name collision
-      } else {
+      } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
           deps,
