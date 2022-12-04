@@ -16,11 +16,22 @@ exports[`modules/manager/mix/extract extractPackageFile() extracts all dependenc
       "packageName": "ecto",
     },
     {
-      "currentValue": undefined,
-      "datasource": "github",
+      "currentValue": "v0.4.1",
+      "datasource": "github-tags",
       "depName": "cowboy",
-      "packageName": "cowboy",
-      "skipReason": "non-hex-dep-types",
+      "packageName": "ninenines/cowboy",
+    },
+    {
+      "currentValue": "main",
+      "datasource": "git-tags",
+      "depName": "phoenix",
+      "packageName": "https://github.com/phoenixframework/phoenix.git",
+    },
+    {
+      "currentValue": "795036d997c7503b21fb64d6bf1a89b83c44f2b5",
+      "datasource": "github-tags",
+      "depName": "ecto",
+      "packageName": "elixir-ecto/ecto",
     },
     {
       "currentValue": "~> 1.0",

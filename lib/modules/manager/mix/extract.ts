@@ -1,6 +1,8 @@
 import { logger } from '../../../logger';
 import { findLocalSiblingOrParent, localPathExists } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
 import type { PackageDependency, PackageFile } from '../types';
 
@@ -8,10 +10,13 @@ const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
   /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm
 );
+const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
+const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
+const branchRegexp = regEx(/branch:\s*"(?<value>[^"]+)"/);
+const tagRegexp = regEx(/tag:\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
-const githubDataSourceId = 'github';
 
 export async function extractPackageFile(
   content: string,
@@ -33,18 +38,28 @@ export async function extractPackageFile(
       while (depMatchGroups) {
         const { app, requirement, opts } = depMatchGroups;
         const github = githubRegexp.exec(opts)?.groups?.value;
+        const git = gitRegexp.exec(opts)?.groups?.value;
+        const ref = refRegexp.exec(opts)?.groups?.value;
+        const branch = branchRegexp.exec(opts)?.groups?.value;
+        const tag = tagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
-        const datasource = github ? githubDataSourceId : HexDatasource.id;
 
-        const dep: PackageDependency = {
-          depName: app,
-          currentValue: requirement,
-          datasource,
-          packageName: organization ? `${app}:${organization}` : app,
-        };
+        let dep: PackageDependency;
 
-        if (datasource === githubDataSourceId) {
-          dep.skipReason = 'non-hex-dep-types';
+        if (git ?? github) {
+          dep = {
+            depName: app,
+            currentValue: ref ?? branch ?? tag,
+            datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
+            packageName: git ?? github,
+          };
+        } else {
+          dep = {
+            depName: app,
+            currentValue: requirement,
+            datasource: HexDatasource.id,
+            packageName: organization ? `${app}:${organization}` : app,
+          };
         }
 
         deps.push(dep);
