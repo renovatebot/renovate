@@ -45,10 +45,6 @@ describe('config/presets/internal/index', () => {
     expect(internal.groups['helpers']).toMatchSnapshot();
   });
 
-  it('contains all index presets', () => {
-    expect(internal.groups).toMatchSnapshot();
-  });
-
   it('contains all monorepo presets', () => {
     expect(internal.groups['monorepo']).toMatchSnapshot();
   });
