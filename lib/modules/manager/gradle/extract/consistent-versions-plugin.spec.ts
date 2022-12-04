@@ -25,14 +25,11 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
   });
 
   it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
-    const crlfProps2ndLine = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`)[0].get(
-      'a.b:c.e'
-    );
-    const lfProps2ndLine =
-      parsePropsFile(`a.b:c.d=1\na.b:c.e=2`)[0].get('a.b:c.e');
+    const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`)[0];
+    const lfProps = parsePropsFile(`a.b:c.d=1\na.b:c.e=2`)[0];
 
-    expect(crlfProps2ndLine?.filePos).toBe(19);
-    expect(lfProps2ndLine?.filePos).toBe(18);
+    expect(crlfProps?.get('a.b:c.e')?.filePos).toBe(19);
+    expect(lfProps?.get('a.b:c.e')?.filePos).toBe(18);
   });
 
   it('gradle-consistent-versions plugin test bogus input lines', () => {
