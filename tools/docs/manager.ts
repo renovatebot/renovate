@@ -161,6 +161,11 @@ sidebar_label: ${displayName}
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
+
+      md += '## Default config\n\n';
+      md += '```json\n';
+      md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
+      md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${manager}/readme.md`
