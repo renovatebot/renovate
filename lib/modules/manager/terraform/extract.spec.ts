@@ -43,14 +43,134 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
-      expect(res).toMatchSnapshot();
+      expect(res?.deps).toIncludeAllPartialMembers([
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'next',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'next',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'githubuser/myrepo',
+          depType: 'module',
+          depName: 'github.com/githubuser/myrepo',
+          currentValue: 'tfmodule_one-v0.0.9',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'hashicorp/example.2.3',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example.2.3',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'hashicorp/example.2.3',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example.2.3',
+          currentValue: 'v1.0.0',
+          datasource: 'github-tags',
+        },
+        {
+          currentValue: '0.1.0',
+          depType: 'module',
+          depName: 'hashicorp/consul/aws',
+          datasource: 'terraform-module',
+        },
+        {
+          packageName: 'hashicorp/example',
+          depType: 'module',
+          depName: 'github.com/hashicorp/example',
+          currentValue: 'v2.0.0',
+          datasource: 'github-tags',
+        },
+        {
+          currentValue: '~> 1.1.0',
+          registryUrls: ['https://app.terraform.io'],
+          depType: 'module',
+          depName: 'app.terraform.io/example-corp/k8s-cluster/azurerm',
+          datasource: 'terraform-module',
+        },
+        {
+          currentValue: '~> 1.1',
+          registryUrls: ['https://app.terraform.io'],
+          depType: 'module',
+          depName: 'app.terraform.io/example-corp/k8s-cluster/azurerm',
+          datasource: 'terraform-module',
+        },
+        {
+          currentValue: '~~ 1.1',
+          registryUrls: ['https://app.terraform.io'],
+          depType: 'module',
+          depName: 'app.terraform.io/example-corp/k8s-cluster/azurerm',
+          datasource: 'terraform-module',
+        },
+        {
+          currentValue: '>= 1.0.0, <= 2.0.0',
+          depType: 'module',
+          depName: 'hashicorp/consul/aws',
+          datasource: 'terraform-module',
+        },
+        {
+          packageName: 'tieto-cem/terraform-aws-ecs-task-definition',
+          depType: 'module',
+          depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
+          currentValue: 'v0.1.0',
+          datasource: 'github-tags',
+        },
+        {
+          packageName: 'tieto-cem/terraform-aws-ecs-task-definition',
+          depType: 'module',
+          depName: 'github.com/tieto-cem/terraform-aws-ecs-task-definition',
+          currentValue: 'v0.1.0',
+          datasource: 'github-tags',
+        },
+        {
+          depType: 'module',
+          depName: 'terraform-aws-modules/security-group/aws',
+          datasource: 'terraform-module',
+        },
+        {
+          currentValue: '<= 2.4.0',
+          depType: 'module',
+          depName: 'terraform-aws-modules/security-group/aws',
+          datasource: 'terraform-module',
+        },
+        {
+          currentValue: '1.28.3',
+          depType: 'module',
+          depName: 'particuleio/addons/kubernetes',
+          datasource: 'terraform-module',
+        },
+        {
+          skipReason: 'local',
+        },
+        {
+          skipReason: 'no-source',
+        },
+      ]);
     });
 
     it('extracts bitbucket modules', async () => {
       const res = await extractPackageFile(bitbucketModules, 'modules.tf', {});
       expect(res?.deps).toHaveLength(11);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: 'v1.0.0',
           datasource: 'git-tags',
@@ -137,7 +257,8 @@ describe('modules/manager/terraform/extract', () => {
         'modules.tf',
         {}
       );
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: 'v1.0.0',
           datasource: 'git-tags',
@@ -166,7 +287,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(providers, 'providers.tf', {});
       expect(res?.deps).toHaveLength(15);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.36.1',
           datasource: 'terraform-provider',
@@ -282,7 +403,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
       expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           autoReplaceStringTemplate:
             '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
@@ -338,7 +459,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(kubernetes, 'kubernetes.tf', {});
       expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           depName: 'gcr.io/kaniko-project/executor',
           currentValue: 'v1.7.0',
@@ -445,7 +566,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(helm, 'helm.tf', {});
       expect(res?.deps).toHaveLength(6);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.0.1',
           datasource: 'helm',
@@ -502,7 +623,7 @@ describe('modules/manager/terraform/extract', () => {
       );
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '~> 3.0',
           datasource: 'terraform-provider',
@@ -538,7 +659,7 @@ describe('modules/manager/terraform/extract', () => {
       );
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(0);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.0.0',
           datasource: 'github-releases',
@@ -557,7 +678,7 @@ describe('modules/manager/terraform/extract', () => {
       );
       expect(res?.deps).toHaveLength(3);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(1);
-      expect(res?.deps.sort()).toMatchObject([
+      expect(res?.deps).toIncludeAllPartialMembers([
         {
           currentValue: '1.1.6',
           datasource: 'github-releases',
