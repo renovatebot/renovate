@@ -13825,6 +13825,34 @@ exports[`config/presets/internal/index contains all packages presets 1`] = `
 }
 `;
 
+exports[`config/presets/internal/index contains all preview presets 1`] = `
+{
+  "buildkite": {
+    "buildkite": {
+      "enabled": true,
+    },
+    "description": "Enable Buildkite functionality.",
+  },
+  "dockerCompose": {
+    "description": "Enable Docker Compose image updating.",
+    "docker-compose": {
+      "enabled": true,
+    },
+  },
+  "dockerVersions": {
+    "description": "Upgrade Docker tags to newer versions.",
+    "docker": {
+      "major": {
+        "enabled": true,
+      },
+      "minor": {
+        "enabled": true,
+      },
+    },
+  },
+}
+`;
+
 exports[`config/presets/internal/index contains all regex-managers presets 1`] = `
 {
   "dockerfileVersions": {
