@@ -104,7 +104,7 @@ export function parseGcv(
           groupName: propDepGlob,
         } as PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
-        // Remove from the lockfile map so the same exact lib will not be included in globbing
+        // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);
       }
     }
