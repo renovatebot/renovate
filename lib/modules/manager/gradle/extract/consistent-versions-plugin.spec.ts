@@ -25,11 +25,15 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
   });
 
   it('gradle-consistent-versions plugin correct position for CRLF and LF', () => {
-    const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`)[0];
-    const lfProps = parsePropsFile(`a.b:c.d=1\na.b:c.e=2`)[0];
+    const crlfProps = parsePropsFile(`a.b:c.d=1\r\na.b:c.e=2`);
+    expect(crlfProps).toBeArrayOfSize(2);
+    expect(crlfProps[0].has('a.b:c.e')).toBeTrue();
+    expect(crlfProps[0].get('a.b:c.e')).toMatchObject({ filePos: 19 });
 
-    expect(crlfProps?.get('a.b:c.e')?.filePos).toBe(19);
-    expect(lfProps?.get('a.b:c.e')?.filePos).toBe(18);
+    const lfProps = parsePropsFile(`a.b:c.d=1\na.b:c.e=2`);
+    expect(lfProps).toBeArrayOfSize(2);
+    expect(lfProps[0].has('a.b:c.e')).toBeTrue();
+    expect(lfProps[0].get('a.b:c.e')).toMatchObject({ filePos: 18 });
   });
 
   it('gradle-consistent-versions plugin test bogus input lines', () => {
@@ -44,8 +48,8 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
       valid.glob:* = 8
     `);
 
-    expect(parsedProps[0]?.size).toBe(1); // no 7 is valid exact dep
-    expect(parsedProps[1]?.size).toBe(1); // no 8 is valid glob dep
+    expect(parsedProps[0]).toMatchObject({ size: 1 }); // no 7 is valid exact dep
+    expect(parsedProps[1]).toMatchObject({ size: 1 }); // no 8 is valid glob dep
 
     // lockfile
     const parsedLock = parseLockFile(stripIndent`
@@ -62,7 +66,11 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
     `);
 
     expect(parsedLock.size).toBe(2);
-    expect(parsedLock.get('this.is:valid.dep')?.depType).toBe('dependencies');
-    expect(parsedLock.get('this.is:valid.test.dep')?.depType).toBe('test');
+    expect(parsedLock.get('this.is:valid.dep')).toMatchObject({
+      depType: 'dependencies',
+    });
+    expect(parsedLock.get('this.is:valid.test.dep')).toMatchObject({
+      depType: 'test',
+    });
   });
 });
