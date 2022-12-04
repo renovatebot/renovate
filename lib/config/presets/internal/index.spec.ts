@@ -25,6 +25,58 @@ describe('config/presets/internal/index', () => {
     expect(internal.groups['default']).toMatchSnapshot();
   });
 
+  it('contains all compatibility presets', () => {
+    expect(internal.groups['compatibility']).toMatchSnapshot();
+  });
+
+  it('contains all config presets', () => {
+    expect(internal.groups['config']).toMatchSnapshot();
+  });
+
+  it('contains all docker presets', () => {
+    expect(internal.groups['docker']).toMatchSnapshot();
+  });
+
+  it('contains all group presets', () => {
+    expect(internal.groups['group']).toMatchSnapshot();
+  });
+
+  it('contains all helpers presets', () => {
+    expect(internal.groups['helpers']).toMatchSnapshot();
+  });
+
+  it('contains all index presets', () => {
+    expect(internal.groups).toMatchSnapshot();
+  });
+
+  it('contains all monorepo presets', () => {
+    expect(internal.groups['monorepo']).toMatchSnapshot();
+  });
+
+  it('contains all npm presets', () => {
+    expect(internal.groups['npm']).toMatchSnapshot();
+  });
+
+  it('contains all packages presets', () => {
+    expect(internal.groups['packages']).toMatchSnapshot();
+  });
+
+  it('contains all preview presets', () => {
+    expect(internal.groups['preview']).toMatchSnapshot();
+  });
+
+  it('contains all regex-managers presets', () => {
+    expect(internal.groups['regexManagers']).toMatchSnapshot();
+  });
+
+  it('contains all schedule presets', () => {
+    expect(internal.groups['schedule']).toMatchSnapshot();
+  });
+
+  it('contains all workarounds presets', () => {
+    expect(internal.groups['workarounds']).toMatchSnapshot();
+  });
+
   for (const [groupName, groupPresets] of Object.entries(internal.groups)) {
     for (const [presetName, presetConfig] of Object.entries(groupPresets)) {
       const preset = `${groupName}:${presetName}`;
