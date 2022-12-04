@@ -7,8 +7,7 @@ import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../util/fs');
 
-// eslint-disable-next-line jest/no-export
-export function mockFs(files: Record<string, string>): void {
+function mockFs(files: Record<string, string>): void {
   // TODO: fix types, jest is using wrong overload (#7154)
   fs.getFileContentMap.mockImplementation(
     (fileNames: string[]): Promise<any> => {

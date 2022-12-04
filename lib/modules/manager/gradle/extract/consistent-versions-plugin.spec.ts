@@ -1,12 +1,9 @@
 import { stripIndent } from 'common-tags';
-import { mockFs } from '../extract.spec';
 import {
   parseLockFile,
   parsePropsFile,
   usesGcv,
 } from './consistent-versions-plugin';
-
-jest.mock('../../../../util/fs');
 
 describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
   afterAll(() => {
@@ -22,7 +19,6 @@ describe('modules/manager/gradle/extract/consistent-versions-plugin', () => {
         org.apache.lucene:lucene-core:1.2.3`,
       'othersub/build.gradle.kts': `nothing here`,
     };
-    mockFs(fsMock);
 
     expect(usesGcv('mysub/versions.props', fsMock)).toBeTrue();
     expect(usesGcv('othersub/versions.props', fsMock)).toBeFalse();
