@@ -249,6 +249,8 @@ const orgGroups = {
   'semantic-release': 'https://github.com/semantic-release/',
 };
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'apache-camel': '^org.apache.camel:',
