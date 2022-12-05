@@ -202,6 +202,19 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('Kotlin: single extra var assignments', () => {
+      test.each`
+        input                                     | name     | value
+        ${'val foo by extra("1.2.3")'}            | ${'foo'} | ${'1.2.3'}
+        ${'val foo by extra { "1.2.3" }'}         | ${'foo'} | ${'1.2.3'}
+        ${'val foo: String by extra { "1.2.3" }'} | ${'foo'} | ${'1.2.3'}
+      `('$input', ({ input, name, value }) => {
+        const { vars } = parseGradle(input);
+        expect(vars).toContainKey(name);
+        expect(vars[name]).toMatchObject({ key: name, value });
+      });
+    });
+
     describe('Kotlin: multi var assignments', () => {
       it('simple map', () => {
         const input =
@@ -389,6 +402,81 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
+    describe('dependencySet dependencies', () => {
+      it('simple dependencySet', () => {
+        const input = codeBlock`
+          ext.activemq_version = "5.8.0"
+          dependencySet(group: 'org.apache.activemq', version: activemq_version) {
+            entry 'activemq-broker'
+            entry('activemq-kahadb-store') {
+              exclude group: "org.springframework", name: "spring-context"
+            }
+            entry 'activemq-stomp'
+          }
+        `;
+
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          {
+            depName: 'org.apache.activemq:activemq-broker',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+          {
+            depName: 'org.apache.activemq:activemq-kahadb-store',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+          {
+            depName: 'org.apache.activemq:activemq-stomp',
+            currentValue: '5.8.0',
+            groupName: 'activemq_version',
+          },
+        ]);
+      });
+
+      describe('dependencySet variants', () => {
+        const validOutput = [
+          {
+            depName: 'foo:bar1',
+            currentValue: '1.2.3',
+            groupName: 'foo:1.2.3',
+          },
+          {
+            depName: 'foo:bar2',
+            currentValue: '1.2.3',
+            groupName: 'foo:1.2.3',
+          },
+        ];
+        const validOutput1 = validOutput.map((dep) => {
+          return { ...dep, groupName: 'baz' };
+        });
+
+        test.each`
+          def                               | str                                                                                                 | output
+          ${''}                             | ${'dependencySet([group: "foo", version: "1.2.3"]) { entry "bar1" }'}                               | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3", group: "foo", version: "1.2.3") { entry "bar1" }'} | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { { entry "bar1" } }'}                             | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry(["bar1"]) }'}                              | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry("bar", "baz") }'}                          | ${{}}
+          ${''}                             | ${'dependencySet(group: "${nonexistingvar}", version: "1.2.3") { entry "bar1"; entry "bar2" }'}     | ${{}}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry "bar2" }'}                   | ${validOutput}
+          ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry ("bar2") }'}                 | ${validOutput}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: baz) { entry "bar1"; entry ("bar2") }'}                     | ${validOutput1}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: "${baz}") { entry "bar1"; entry ("bar2") }'}                | ${validOutput1}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry other; entry "bar2" }'}                     | ${validOutput}
+          ${'some = "foo"; baz = "1.2.3"'}  | ${'dependencySet(group: some, version: "${baz}456") { entry "bar1"; entry "bar2" }'}                | ${{}}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry(other); entry "bar2" }'}                    | ${validOutput}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry "${other}"; entry "bar2" }'}           | ${validOutput}
+          ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: "${some}", version: "1.2.3") { entry("${other}"); entry "bar2" }'}          | ${validOutput}
+          ${''}                             | ${'dependencySet(group = "foo", version = "1.2.3") { entry "bar1"; entry "bar2" }'}                 | ${validOutput}
+        `('$def | $str', ({ def, str, output }) => {
+          const { deps } = parseGradle([def, str].join('\n'));
+          expect(deps).toMatchObject(output);
+        });
+      });
+    });
+
     describe('plugins', () => {
       test.each`
         def                 | input                                      | output
@@ -494,6 +582,12 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'library("foo", "bar", "baz", "qux").version("1.2.3")'}       | ${null}
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3", "4.5.6")'} | ${null}
       ${''}                                         | ${'library("foo", bar, "baz").version("1.2.3")'}                | ${null}
+      ${''}                                         | ${'alias("foo.bar").to("foo", "bar").version("1.2.3")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").versionRef("baz")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'version("baz", "1.2.3")'}                  | ${'alias("foo.bar").to("foo", "bar").version("${baz}")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to(f, b).version(v)'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'alias("foo.bar").to("${f}", "${b}").version("$v")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${''}                                         | ${'alias(["foo.bar"]).to("foo", "bar").version("1.2.3")'}       | ${null}
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = parseGradle(input);
