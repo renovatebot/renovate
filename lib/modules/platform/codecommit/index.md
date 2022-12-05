@@ -9,13 +9,23 @@
 
 ### IAM Role
 
-The IAM role does not have credentials, so you will need to set up git-credentials-helper on your environment,
+#### Machine pre-requisites
 
-EC2/linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/)
+1. aws-cli installed.
+2. Set up the environment with `git-credentials-helper`.
+   EC2/linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
 
-windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html)
+   windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
 
-codebuild: [codebuild codecommit git integration](https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html)
+3. Set the environment variable AWS_REGION.
+
+#### Codebuild Configuration
+
+add `git-credential-helper` to your `buildspec.yml`.
+
+```yaml
+env: git-credential-helper:yes
+```
 
 ### IAM User
 
@@ -52,13 +62,11 @@ Let Renovate use AWS CodeCommit authentication keys by doing one of the followin
 
 ## Permissions
 
-Create a new policy for renovate with these permissions, then attach it to the user/role.
+Create a new AWS policy for renovate with these permissions, then attach it to the user/role.
 
-Add `"iam:GetUser",` to the `Action` array if you are using `Authentication as a USER`.
-it will help reduce AWS requests.
 Change the `Resource` value to the resources you want to use.
 
-The policy json:
+The policy json.
 
 ```json
 {

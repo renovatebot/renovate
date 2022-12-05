@@ -236,12 +236,10 @@ export async function getFile(
 }
 
 export async function listPullRequests(
-  repositoryName: string,
-  authorArn: string | undefined
+  repositoryName: string
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
-    authorArn,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
 

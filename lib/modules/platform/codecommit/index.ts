@@ -36,7 +36,6 @@ import type {
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as client from './codecommit-client';
-import { getUserArn, initIamClient } from './iam-client';
 
 export interface CodeCommitPr extends Pr {
   body: string;
@@ -47,7 +46,6 @@ interface Config {
   defaultBranch?: string;
   region?: string;
   prList?: CodeCommitPr[];
-  userArn?: string;
 }
 
 export const config: Config = {};
@@ -85,13 +83,8 @@ export async function initPlatform({
 
   // If any of the below fails, it will throw an exception stopping the program.
   client.buildCodeCommitClient();
-  initIamClient();
   // To check if we have permission to codecommit, throws exception if failed.
-
   await client.listRepositories();
-  if (process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_ACCESS_KEY_ID) {
-    config.userArn = await getUserArn();
-  }
 
   const platformConfig: PlatformResult = {
     endpoint:
@@ -159,10 +152,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return config.prList;
   }
 
-  const listPrsResponse = await client.listPullRequests(
-    config.repository!,
-    config.userArn
-  );
+  const listPrsResponse = await client.listPullRequests(config.repository!);
   const fetchedPrs: CodeCommitPr[] = [];
 
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
