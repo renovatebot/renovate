@@ -11,7 +11,7 @@
 
 #### Machine pre-requisites
 
-1. aws-cli installed.
+1. `aws-cli` installed.
 2. Set up the environment with `git-credentials-helper`.
    EC2/linux: [EC2 codecommit git integration](https://aws.amazon.com/premiumsupport/knowledge-center/codecommit-git-repositories-ec2/).
 
