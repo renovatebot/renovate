@@ -4,6 +4,8 @@ import { extractPackageFile } from './extract';
 const featureWithBundlesAsObjects = Fixtures.get('bundles-as-objects.json');
 const featureWithBundlesAsStrings = Fixtures.get('bundles-as-strings.json');
 const featureWithComment = Fixtures.get('with-comment.json');
+const artifactsExtension = Fixtures.get('extension-artifacts.json');
+const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
 
 describe('modules/manager/osgifeature/extract', () => {
   describe('extractPackageFile()', () => {
@@ -67,6 +69,41 @@ describe('modules/manager/osgifeature/extract', () => {
             datasource: 'maven',
             depName: 'org.apache.aries:org.apache.aries.util',
             currentValue: '1.1.3',
+          },
+        ],
+      });
+    });
+
+    it('extracts the artifacts from an extension section', () => {
+      const packageFile = extractPackageFile(artifactsExtension, '', undefined);
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'com.day.cq:core.wcm.components.all',
+            currentValue: '2.21.0',
+          },
+        ],
+      });
+    });
+
+    it('extracts the artifacts a file with a double slash', () => {
+      const packageFile = extractPackageFile(
+        doubleSlashNotComment,
+        '',
+        undefined
+      );
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'com.h2database:h2-mvstore',
+            currentValue: '2.1.214',
+          },
+          {
+            datasource: 'maven',
+            depName: 'org.mongodb:mongo-java-driver',
+            currentValue: '3.12.11',
           },
         ],
       });

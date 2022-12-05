@@ -1,0 +1,5 @@
+{
+    "content-packages:ARTIFACTS|true": [
+        "com.day.cq:core.wcm.components.all:zip:2.21.0"
+    ]
+}
