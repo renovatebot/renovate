@@ -1992,7 +1992,7 @@ Managers which do not support replacement:
 - `maven`
 - `regex`
 
-Use this field to define the name of a replacement package.
+Use the `replacementName` config option to set the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
@@ -2012,7 +2012,7 @@ Managers which do not support replacement:
 - `maven`
 - `regex`
 
-Use this field to define the version of a replacement package.
+Use the `replacementVersion` config option to set the version of a replacement package.
 Must be used with `replacementName`.
 For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
 
