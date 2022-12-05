@@ -22,11 +22,9 @@ export function extractPackageFile(
       // Note: we do not support artifact list extensions as defined in
       // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
       // supports this
-      if (!isArtifactsEntry(section)) {
-        continue;
-      }
 
-      for (const entry of value as any) {
+      logger.debug({ fileName, section }, 'Parsing section');
+      for (const entry of extractArtifactList(section, value)) {
         let gav: string;
         if (entry instanceof Object) {
           gav = (entry as Bundle).id;
@@ -57,10 +55,22 @@ export function extractPackageFile(
   return deps.length > 0 ? { deps } : null;
 }
 
-function isArtifactsEntry(sectionName: string): boolean {
+function extractArtifactList(sectionName: string, sectionValue: any): any[] {
   // Compendiun R8 159.4: bundles entry
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  return 'bundles' === sectionName || sectionName.indexOf(':ARTIFACTS|') > 0;
+  if ('bundles' === sectionName || sectionName.indexOf(':ARTIFACTS|') > 0) {
+    return sectionValue as any[];
+  }
+
+  // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
+  if (
+    'execution-environment:JSON|false' === sectionName &&
+    'framework' in sectionValue
+  ) {
+    return [sectionValue.framework];
+  }
+
+  return [];
 }
 
 interface Bundle {

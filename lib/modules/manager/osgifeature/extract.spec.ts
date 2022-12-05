@@ -6,6 +6,7 @@ const featureWithBundlesAsStrings = Fixtures.get('bundles-as-strings.json');
 const featureWithComment = Fixtures.get('with-comment.json');
 const artifactsExtension = Fixtures.get('extension-artifacts.json');
 const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
+const frameworkArtifact = Fixtures.get('framework-artifact.json');
 
 describe('modules/manager/osgifeature/extract', () => {
   describe('extractPackageFile()', () => {
@@ -104,6 +105,19 @@ describe('modules/manager/osgifeature/extract', () => {
             datasource: 'maven',
             depName: 'org.mongodb:mongo-java-driver',
             currentValue: '3.12.11',
+          },
+        ],
+      });
+    });
+
+    it('extracts the artifacts from the framework artifact section', () => {
+      const packageFile = extractPackageFile(frameworkArtifact, '', undefined);
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'org.apache.felix:org.apache.felix.framework',
+            currentValue: '7.0.5',
           },
         ],
       });
