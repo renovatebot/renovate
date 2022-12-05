@@ -6,8 +6,8 @@ import { generic_image_resource } from './utils';
 
 export class GenericDockerImageRef extends DependencyExtractor {
   extract(hclMap: any): PackageDependency[] {
-    const resources = hclMap.resource;
-    if (is.nullOrUndefined(resources)) {
+    const resourceTypMap = hclMap.resource;
+    if (is.nullOrUndefined(resourceTypMap)) {
       return [];
     }
 
@@ -15,18 +15,18 @@ export class GenericDockerImageRef extends DependencyExtractor {
 
     for (const image_resource_def of generic_image_resource) {
       const { type, path } = image_resource_def;
-      const resource = resources[type];
+      const resourceInstancesMap = resourceTypMap[type];
       // is there a resource with current looked at type ( `image_resource_def` )
-      if (is.nullOrUndefined(resource)) {
+      if (is.nullOrUndefined(resourceInstancesMap)) {
         continue;
       }
 
       // loop over instances of a resource type
-      for (const resourceName of Object.keys(resource)) {
-        const test = resource[resourceName];
-        for (const testElement of test) {
+      for (const instanceName of Object.keys(resourceInstancesMap)) {
+        const instanceList = resourceInstancesMap[instanceName];
+        for (const instance of instanceList) {
           dependencies.push(
-            ...this.walkPath({ depType: type }, testElement, path)
+            ...this.walkPath({ depType: type }, instance, path)
           );
         }
       }
