@@ -764,9 +764,10 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 ## writeDiscoveredRepos
 
 By default, Renovate processes each repository that it finds.
-You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.    
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
 
-Known use cases consist, among other things, of horizontal scaling setups. See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172)
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 
