@@ -1895,7 +1895,7 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 Renovate will match `matchPaths` against a minimatch glob pattern.
 
-For example the following would match any `package.json`:
+For example the following would match any `package.json`, including files like `backend/package.json`:
 
 ```
   "matchPaths": ["package.json"],
