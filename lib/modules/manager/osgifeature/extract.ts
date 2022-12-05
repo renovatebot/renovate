@@ -1,3 +1,4 @@
+import * as json5 from 'json5';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -15,9 +16,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   try {
     // Compendium R8 159.3: JS comments are supported
-    // We only support inline comments, for now
-    const jsonContent = content.replace(/\/\/(.*)/, '');
-    const featureModel = JSON.parse(jsonContent);
+    const featureModel = json5.parse(content);
 
     for (const [section, value] of Object.entries(featureModel)) {
       // Note: we do not support artifact list extensions as defined in
