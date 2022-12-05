@@ -1898,13 +1898,29 @@ Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 For example the following would match any `package.json`, including files like `backend/package.json`:
 
 ```json
-  "matchPaths": ["package.json"],
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchPaths": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
 ```
 
 The following would match any file in directories starting with `app-`:
 
 ```json
-  "matchPaths": ["app-*/**"],
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchPaths": ["app/**"],
+      "groupName": "App dependencies" 
+    }
+  ]
+}
 ```
 
 ### matchSourceUrlPrefixes
