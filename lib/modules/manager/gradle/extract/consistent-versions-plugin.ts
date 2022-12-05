@@ -25,6 +25,11 @@ export function usesGcv(
     versionsPropsFilename,
     VERSIONS_LOCK
   );
+  logger.info(
+    `usesGcv() for file ${versionsPropsFilename}, resolved lockfile ${versionsLockFile} with contents ${
+      fileContents[versionsLockFile] ?? 'nil'
+    }`
+  );
   return (
     fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
   );
@@ -34,6 +39,11 @@ export function usesGcv(
  * Confirms whether the provided file name is the props file
  */
 export function isGcvPropsFile(fileName: string): boolean {
+  logger.info(
+    `isGcvPropsFile returns ${
+      fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`)
+    }`
+  );
   return fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`);
 }
 
