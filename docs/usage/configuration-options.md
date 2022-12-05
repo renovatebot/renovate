@@ -1917,7 +1917,7 @@ The following would match any file in directories starting with `app/`:
     {
       "description": "Group all dependencies from the app directory",
       "matchPaths": ["app/**"],
-      "groupName": "App dependencies" 
+      "groupName": "App dependencies"
     }
   ]
 }
