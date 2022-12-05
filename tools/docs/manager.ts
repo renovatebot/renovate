@@ -131,12 +131,12 @@ sidebar_label: ${displayName}
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
         md += '## Enabling\n\n';
-        md += `${displayName} functionality is currently in beta testing so you must opt in to test it out. To enable it, add a configuration like this to either your bot config or your \`renovate.json\`:\n\n`;
+        md += `${displayName} functionality is currently in beta testing, so you must opt-in to test it. To enable it, add a configuration like this to either your bot config or your \`renovate.json\`:\n\n`;
         md += '```\n';
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
         md +=
-          'If you find any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
+          'If you find any bugs, please [create a new discussion first](https://github.com/renovatebot/renovate/discussions/new). If you find that it works well, then let us know too.\n\n';
       }
       md += '## File Matching\n\n';
       if (!Array.isArray(fileMatch) || fileMatch.length === 0) {
