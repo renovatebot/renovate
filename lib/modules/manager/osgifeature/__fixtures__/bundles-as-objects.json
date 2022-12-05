@@ -1,0 +1,13 @@
+
+{
+    "bundles":[
+        {
+            "id":"commons-codec:commons-codec:1.15",
+            "start-order":"5"
+        },
+        {
+            "id":"commons-collections:commons-collections:3.2.2",
+            "start-order":"15"
+        }
+    ]
+}
