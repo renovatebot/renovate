@@ -1901,7 +1901,7 @@ For example the following would match any `package.json`, including files like `
   "matchPaths": ["package.json"],
 ```
 
-While the following would match any file in directories starting with `app-`:
+The following would match any file in directories starting with `app-`:
 
 ```
   "matchPaths": ["app-*/**"],
