@@ -15,7 +15,6 @@ import {
   UpdatePullRequestStatusCommand,
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
-import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../../../test/util';
 import {
@@ -29,22 +28,12 @@ import { getCodeCommitUrl } from './codecommit-client';
 import { CodeCommitPr, config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
-const iamClient = mockClient(IAMClient);
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
 
   beforeAll(async () => {
     codeCommit = await import('.');
-    iamClient.on(GetUserCommand).resolves({
-      User: {
-        Arn: 'aws:arn:example:123456',
-        UserName: 'someone',
-        UserId: 'something',
-        Path: 'somewhere',
-        CreateDate: new Date(),
-      },
-    });
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
