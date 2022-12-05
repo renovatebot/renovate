@@ -1893,17 +1893,17 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate will match `matchPaths` against a minimatch glob pattern.
+Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 
 For example the following would match any `package.json`, including files like `backend/package.json`:
 
-```
+```json
   "matchPaths": ["package.json"],
 ```
 
 The following would match any file in directories starting with `app-`:
 
-```
+```json
   "matchPaths": ["app-*/**"],
 ```
 
