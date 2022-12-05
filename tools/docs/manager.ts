@@ -136,7 +136,7 @@ sidebar_label: ${displayName}
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
         md +=
-          'If you find any bugs, please [create a bug report](https://github.com/renovatebot/renovate/issues/new/choose). If you find that it works well, then let us know too.\n\n';
+          'If you find any bugs, please [create a new discussion first](https://github.com/renovatebot/renovate/discussions/new). If you find that it works well, then let us know too.\n\n';
       }
       md += '## File Matching\n\n';
       if (!Array.isArray(fileMatch) || fileMatch.length === 0) {
