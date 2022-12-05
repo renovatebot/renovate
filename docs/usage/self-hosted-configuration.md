@@ -763,7 +763,8 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+The defaut behavior is for Renovate to process the repositories it finds.
+But you can use this optional parameter to let Renovate write the discovered repositories to a JSON file and exit.
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 
