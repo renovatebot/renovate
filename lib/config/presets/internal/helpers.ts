@@ -1,13 +1,15 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const presets: Record<string, Preset> = {
   disableTypesNodeMajor: {
     description: 'Disable `major` updates to `@types/node`.',
     packageRules: [
       {
+        enabled: false,
         matchPackageNames: ['@types/node'],
         matchUpdateTypes: ['major'],
-        enabled: false,
       },
     ],
   },
