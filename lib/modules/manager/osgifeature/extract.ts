@@ -38,11 +38,17 @@ export function extractPackageFile(
 
         // parsing should use the last entry for the version
         const parts = gav.split(':');
+        const currentValue = parts[parts.length - 1];
         const result: PackageDependency = {
           datasource: MavenDatasource.id,
           depName: `${parts[0]}:${parts[1]}`,
-          currentValue: `${parts[parts.length - 1]}`,
         };
+        if (currentValue.indexOf('${') === 0) {
+          result.skipReason = 'contains-variable';
+        } else {
+          result.currentValue = currentValue;
+        }
+
         deps.push(result);
       }
     }

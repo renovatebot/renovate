@@ -7,6 +7,7 @@ const featureWithComment = Fixtures.get('with-comment.json');
 const artifactsExtension = Fixtures.get('extension-artifacts.json');
 const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
 const frameworkArtifact = Fixtures.get('framework-artifact.json');
+const versionWithVariable = Fixtures.get('version-with-variable.json');
 
 describe('modules/manager/osgifeature/extract', () => {
   describe('extractPackageFile()', () => {
@@ -121,6 +122,19 @@ describe('modules/manager/osgifeature/extract', () => {
           },
         ],
       });
+    });
+  });
+
+  it('skips artifacts with variables in version', () => {
+    const packageFile = extractPackageFile(versionWithVariable, '', undefined);
+    expect(packageFile).toEqual({
+      deps: [
+        {
+          datasource: 'maven',
+          depName: 'com.fasterxml.jackson.core:jackson-annotations',
+          skipReason: 'contains-variable',
+        },
+      ],
     });
   });
 });
