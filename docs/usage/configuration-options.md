@@ -1909,7 +1909,7 @@ For example the following would match any `package.json`, including files like `
 }
 ```
 
-The following would match any file in directories starting with `app-`:
+The following would match any file in directories starting with `app/`:
 
 ```json
 {
