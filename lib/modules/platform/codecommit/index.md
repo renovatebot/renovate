@@ -17,7 +17,7 @@
 
    windows: [windows codecommit git integration](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-windows.html).
 
-3. Set the environment variable AWS_REGION.
+3. Set the environment variable `AWS_REGION`.
 
 #### Codebuild Configuration
 
