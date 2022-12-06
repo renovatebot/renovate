@@ -2,7 +2,7 @@ The `osgifeature` manager extracts dependencies from feature model definition fi
 
 Limitations:
 
-- support artifact list extensions as defined in section 159.7.3 of the OSGi R8 spec are not supported yet.
+- artifact list extensions as defined in section 159.7.3 of the OSGi R8 spec are not supported yet.
 
 References:
 
