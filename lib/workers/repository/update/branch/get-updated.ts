@@ -125,7 +125,9 @@ export async function getUpdatedPackageFiles(
         });
         if (status === 'unsupported') {
           // incompatible lock file
-          nonUpdatedFileContents[packageFile] = packageFileContent!;
+          if (!updatedFileContents[packageFile]) {
+            nonUpdatedFileContents[packageFile] = packageFileContent!;
+          }
         } else if (status === 'already-updated') {
           logger.debug(
             `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
@@ -154,7 +156,9 @@ export async function getUpdatedPackageFiles(
           { manager },
           'isLockFileUpdate without updateLockedDependency'
         );
-        nonUpdatedFileContents[packageFile] = packageFileContent!;
+        if (!updatedFileContents[packageFile]) {
+          nonUpdatedFileContents[packageFile] = packageFileContent!;
+        }
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
