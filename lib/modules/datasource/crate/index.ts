@@ -165,12 +165,15 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.flavor === 'crates.io') {
-      const crateUrl =
-        CrateDatasource.CRATES_IO_BASE_URL +
+    // This needs some thought for how to generalise to any arbitrary sparse
+    // registry in future.
+    if (info.flavor === 'crates.io' || info.flavor === 'artifactory-saas') {
+      const crateUrl = CrateDatasource.getSparseBase(info);
+      crateUrl.pathname =
+        crateUrl.pathname +
         CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
-        return (await this.http.get(crateUrl)).body;
+        return (await this.http.get(crateUrl.href)).body;
       } catch (err) {
         this.handleGenericErrors(err);
       }
@@ -196,8 +199,42 @@ export class CrateDatasource extends Datasource {
         const repo = tokens[3];
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${packageName}`;
       }
+      case 'artifactory-saas': {
+        // input: https://ORG.jfrog.io/artifactory/git/REPONAME.git
+        // For this purpose just append the packagename - dependency urls are used for grouping so it doesn't matter if its a real accessible url or not.
+        return `${info.rawUrl}/${packageName}`;
+      }
       default:
         return `${info.rawUrl}/${packageName}`;
+    }
+  }
+
+  /**
+   * Computes the base URL for a sparse version of a registry. A future
+   * impovement would be a hostAlias or similar mechanism to do this via
+   * configuration. We require this because pre-credential-sending cargo
+   * requires a git URL in cargo's config file, but the datasource is cleaner
+   * with sparse access.
+   *
+   * Only valid for registries with sparse indices
+   */
+  private static getSparseBase(info: RegistryInfo): URL {
+    switch (info.flavor) {
+      case 'crates.io':
+        return new URL(CrateDatasource.CRATES_IO_BASE_URL);
+      case 'artifactory-saas': {
+        // input: https://ORG.jfrog.io/artifactory/git/REPONAME.git
+        // Sparse index is at: https://ORG.jfrog.io/artifactory/api/cargo/REPONAME/index
+        const tokens = info.url.pathname.split('/');
+        const repo = tokens[3].slice(0, tokens[3].length - 4);
+        const url = new URL(info.url.href);
+        url.pathname = `/artifactory/api/cargo/${repo}/index/`;
+        return url;
+      }
+      default:
+        throw new Error(
+          `crate registry flavor has no sparse index: ${info.flavor}`
+        );
     }
   }
 
@@ -218,7 +255,7 @@ export class CrateDatasource extends Datasource {
   /**
    * Fetches information about a registry, by url.
    * If no url is given, assumes crates.io.
-   * If an url is given, assumes it's a valid Git repository
+   * If an url is given and the flavor is cloudsmith, assumes it's a valid Git repository
    * url and clones it to cache.
    */
   private static async fetchRegistryInfo({
@@ -241,6 +278,8 @@ export class CrateDatasource extends Datasource {
       flavor = 'crates.io';
     } else if (url.hostname === 'dl.cloudsmith.io') {
       flavor = 'cloudsmith';
+    } else if (url.hostname.endsWith('jfrog.io')) {
+      flavor = 'artifactory-saas';
     } else {
       flavor = 'other';
     }
@@ -251,10 +290,10 @@ export class CrateDatasource extends Datasource {
       url,
     };
 
-    if (flavor !== 'crates.io') {
+    if (flavor !== 'crates.io' && flavor !== 'artifactory-saas') {
       if (!GlobalConfig.get('allowCustomCrateRegistries')) {
         logger.warn(
-          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
+          `crate datasource: allowCustomCrateRegistries=true is required for non-sparse registries, bailing out on registry ${registryUrl}`
         );
         return null;
       }
