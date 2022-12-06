@@ -11,12 +11,47 @@ describe('modules/manager/terraform/hcl/index', () => {
     it('should return flat modules', async () => {
       const res = await parseHCL(modulesTF);
       expect(Object.keys(res.module)).toBeArrayOfSize(6);
-      expect(res).toMatchSnapshot();
+      expect(res).toMatchObject({
+        module: {
+          bar: [
+            {
+              source: 'github.com/hashicorp/example?ref=next',
+            },
+          ],
+          consul: [
+            {
+              source: 'hashicorp/consul/aws',
+              version: '0.1.0',
+            },
+          ],
+          foo: [
+            {
+              source: 'github.com/hashicorp/example?ref=v1.0.0',
+            },
+          ],
+          'repo-with-dot': [
+            {
+              source: 'github.com/hashicorp/example.2.3?ref=v1.0.0',
+            },
+          ],
+          'repo-with-dot-and-git-suffix': [
+            {
+              source: 'github.com/hashicorp/example.2.3.git?ref=v1.0.0',
+            },
+          ],
+          'repo-with-non-semver-ref': [
+            {
+              source:
+                'github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9',
+            },
+          ],
+        },
+      });
     });
 
     it('should return nested terraform block', async () => {
       const res = await parseHCL(lockedVersion);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         terraform: [
           {
             required_providers: [
@@ -33,7 +68,7 @@ describe('modules/manager/terraform/hcl/index', () => {
 
     it('should return resource blocks', async () => {
       const res = await parseHCL(resourcesTF);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         resource: {
           docker_container: {
             foo: {},
@@ -64,7 +99,7 @@ describe('modules/manager/terraform/hcl/index', () => {
   describe('parseJSON', () => {
     it('should parse json', async () => {
       const res = await parseJSON(resourcesTFJSON);
-      expect(res).toMatchSnapshot({
+      expect(res).toMatchObject({
         resource: {
           aws_instance: {
             example: {},
