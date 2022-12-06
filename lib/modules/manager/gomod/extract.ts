@@ -29,8 +29,8 @@ function getDep(
     dep.skipReason = 'unsupported-version';
   }
   const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
-  if (digestMatch) {
-    [, dep.currentDigest] = digestMatch;
+  if (digestMatch?.groups && digestMatch.groups['digest']) {
+    dep.currentDigest = digestMatch.groups['digest'];
     dep.digestOneAndOnly = true;
   }
   return dep;
