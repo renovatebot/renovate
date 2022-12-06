@@ -27,9 +27,7 @@ export function usesGcv(
     VERSIONS_LOCK
   );
   info(
-    `usesGcv() for file ${versionsPropsFilename}, resolved lockfile ${versionsLockFile} with contents ${
-      fileContents[versionsLockFile] ?? 'nil'
-    }. Result: ${
+    `usesGcv() for file ${versionsPropsFilename}: Result: ${
       fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
     }`
   );
@@ -79,6 +77,15 @@ export function parseGcv(
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);
 
+  info(`propsFileContent=${propsFileContent}`);
+  info(`lockFileContent=${lockFileContent}`);
+
+  info(`Parsed propsFile into exact map:
+${JSON.stringify(propsFileExactMap)}
+and glob map:
+${JSON.stringify(propsFileRegexMap)}
+`);
+
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
 
   // For each exact dep in props file
@@ -94,7 +101,7 @@ export function parseGcv(
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
       } as PackageDependency<GradleManagerData>;
-      info(`Extracted exact dependency ${newDep}`);
+      info(`Extracted exact dependency ${propDep}`);
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
       lockFileMap.delete(propDep);
@@ -123,6 +130,7 @@ export function parseGcv(
           groupName: propDepGlob,
         } as PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
+        info(`Extracted dependency ${exactDep} from glob ${propDepGlob}`);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);
       }
