@@ -1,26 +1,12 @@
 {
 	"kind": "storage#objects",
 	"prefixes": [
-		"channels/stable/release/2.17.0/",
-		"channels/stable/release/2.17.1/",
-		"channels/stable/release/2.17.3/",
 		"channels/stable/release/2.17.5/",
 		"channels/stable/release/2.17.6/",
 		"channels/stable/release/2.17.7/",
 		"channels/stable/release/2.18.0/",
-		"channels/stable/release/2.18.1/",
-		"channels/stable/release/2.18.2/",
-		"channels/stable/release/2.18.3/",
 		"channels/stable/release/2.18.4/",
 		"channels/stable/release/2.18.5/",
-		"channels/stable/release/41096/",
-		"channels/stable/release/42013/",
-		"channels/stable/release/42039/",
-		"channels/stable/release/42828/",
-		"channels/stable/release/44672/",
-		"channels/stable/release/45104/",
-		"channels/stable/release/45396/",
-		"channels/stable/release/45692/",
 		"channels/stable/release/latest/"
 	]
 }

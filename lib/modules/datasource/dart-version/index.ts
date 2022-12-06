@@ -70,7 +70,7 @@ export class DartVersionDatasource extends Datasource {
       })
       .flatMap((prefix) => {
         const version = this.getVersionFromPrefix(prefix);
-        return version ? { version } : [];
+        return version ? { version, isStable: channel === 'stable' } : [];
       });
 
   // Prefix should have a format of "channels/stable/release/2.9.3/"

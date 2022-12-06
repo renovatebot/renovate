@@ -52,12 +52,23 @@ describe('modules/datasource/dart-version/index', () => {
           )
           .reply(200, Fixtures.get(`${channel}.json`));
       }
+
       const res = await getPkgReleases({
         datasource,
         depName,
       });
-      expect(res).toMatchSnapshot();
-      expect(res?.releases).toHaveLength(103);
+
+      expect(res).toBeDefined();
+      expect(res?.sourceUrl).toBe('https://github.com/dart-lang/sdk');
+      expect(res?.releases).toHaveLength(21);
+      expect(res?.releases).toIncludeAllPartialMembers([
+        { version: '2.18.0', isStable: true },
+        { version: '2.17.7', isStable: true },
+        { version: '2.19.0-374.2.beta', isStable: false },
+        { version: '2.18.0-44.1.beta', isStable: false },
+        { version: '2.19.0-81.0.dev', isStable: false },
+        { version: '2.18.0-99.0.dev', isStable: false },
+      ]);
     });
   });
 });
