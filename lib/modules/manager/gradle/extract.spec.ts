@@ -1,4 +1,3 @@
-import { info } from 'console';
 import { stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
@@ -858,14 +857,10 @@ describe('modules/manager/gradle/extract', () => {
 
     mockFs(fsMock);
 
-    info(`Going to extract files with fsMock ${JSON.stringify(fsMock)}`);
-
     const res = await extractAllPackageFiles(
       {} as ExtractConfig,
       Object.keys(fsMock)
     );
-
-    info(`Got result ${JSON.stringify(res)}`);
 
     expect(res).toMatchObject([
       {

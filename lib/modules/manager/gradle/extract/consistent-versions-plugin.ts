@@ -1,4 +1,3 @@
-import { info } from 'console';
 import { logger } from '../../../../logger';
 import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
@@ -67,23 +66,10 @@ export function parseGcv(
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);
 
-  info(`Parsed propsFile into exact map:
-${JSON.stringify(Array.from(propsFileExactMap.entries()))}
-and glob map:
-${JSON.stringify(Array.from(propsFileRegexMap.entries()))}
-lockfile map:
-${JSON.stringify(Array.from(lockFileMap.entries()))}
-`);
-
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
 
   // For each exact dep in props file
   for (const [propDep, versionAndPosition] of propsFileExactMap) {
-    info(
-      `Considering prop ${propDep}.. Exists in lockfile? ${lockFileMap.has(
-        propDep
-      )}`
-    );
     if (lockFileMap.has(propDep)) {
       const newDep: Record<string, any> = {
         managerData: {
@@ -95,7 +81,6 @@ ${JSON.stringify(Array.from(lockFileMap.entries()))}
         lockedVersion: lockFileMap.get(propDep)?.version,
         depType: lockFileMap.get(propDep)?.depType,
       } as PackageDependency<GradleManagerData>;
-      info(`Extracted exact dependency ${propDep}`);
       extractedDeps.push(newDep);
       // Remove from the lockfile map so the same exact lib will not be included in globbing
       lockFileMap.delete(propDep);
@@ -106,11 +91,6 @@ ${JSON.stringify(Array.from(lockFileMap.entries()))}
   for (const [propDepGlob, propVerAndPos] of propsFileRegexMap) {
     const globRegex = globToRegex(propDepGlob);
     for (const [exactDep, lockVersionAndDepType] of lockFileMap) {
-      info(
-        `Considering lockfile dep ${exactDep} for glob ${propDepGlob}. Match with regex ${
-          globRegex.source
-        }? -> ${globRegex.test(exactDep)}`
-      );
       if (globRegex.test(exactDep)) {
         const newDep: Record<string, any> = {
           managerData: {
@@ -124,7 +104,6 @@ ${JSON.stringify(Array.from(lockFileMap.entries()))}
           groupName: propDepGlob,
         } as PackageDependency<GradleManagerData>;
         extractedDeps.push(newDep);
-        info(`Extracted dependency ${exactDep} from glob ${propDepGlob}`);
         // Remove from the lockfile map so the same lib will not be included in more generic globs later
         lockFileMap.delete(exactDep);
       }
@@ -133,7 +112,7 @@ ${JSON.stringify(Array.from(lockFileMap.entries()))}
   return extractedDeps;
 }
 
-// Translate glob syntax to a regex that does the same. Note cannot use replaceAll as it does not exist in Node14
+// Translate glob syntax to a regex that does the same. Note that we cannot use replaceAll as it does not exist in Node14
 // Loosely borrowed mapping to regex from https://github.com/palantir/gradle-consistent-versions/blob/develop/src/main/java/com/palantir/gradle/versions/FuzzyPatternResolver.java
 function globToRegex(depName: string): RegExp {
   return regEx(
