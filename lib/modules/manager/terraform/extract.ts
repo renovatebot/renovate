@@ -7,24 +7,18 @@ import {
   extractLocksForPackageFile,
 } from './util';
 
-const contentCheckList = [
-  'module "',
-  'provider "',
-  '"docker_',
-  '"kubernetes_',
-  'required_providers ',
-  ' "helm_release" ',
-  ' "docker_image" ',
-  'required_version',
-  'terraform_version', // part of tfe_workspace
-];
-
 export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
+
+  const contentCheckList = [];
+  for (const extractor of dependencyExtractors) {
+    contentCheckList.push(...extractor.getCheckList());
+  }
+
   if (!checkFileContainsDependency(content, contentCheckList)) {
     logger.trace(
       { fileName },

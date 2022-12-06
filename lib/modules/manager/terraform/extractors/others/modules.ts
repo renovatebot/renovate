@@ -23,6 +23,10 @@ export const azureDevOpsSshRefMatchRegex = regEx(
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
 export class ModuleExtractor extends DependencyExtractor {
+  getCheckList(): string[] {
+    return ['module'];
+  }
+
   extract(hclRoot: any): PackageDependency[] {
     const modules = hclRoot.module;
     if (is.nullOrUndefined(modules)) {

@@ -5,6 +5,10 @@ import { DependencyExtractor } from '../../base';
 import { checkIfStringIsPath } from '../../util';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
+  getCheckList(): string[] {
+    return [`"helm_release"`];
+  }
+
   override extract(hclMap: any): PackageDependency[] {
     const dependencies = [];
 

@@ -5,6 +5,10 @@ import { DependencyExtractor } from '../../base';
 import { generic_image_resource } from './utils';
 
 export class GenericDockerImageRef extends DependencyExtractor {
+  getCheckList(): string[] {
+    return generic_image_resource.map((value) => `"${value.type}"`);
+  }
+
   extract(hclMap: any): PackageDependency[] {
     const resourceTypMap = hclMap.resource;
     if (is.nullOrUndefined(resourceTypMap)) {

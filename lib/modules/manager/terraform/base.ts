@@ -6,6 +6,17 @@ import type { ProviderLock } from './lockfile/types';
 import { getLockedVersion, massageProviderLookupName } from './util';
 
 export abstract class DependencyExtractor {
+  /**
+   * Get a list of signals which can be used to scan for potential processable content
+   * @return a list of content signals
+   */
+  abstract getCheckList(): string[];
+
+  /**
+   * Extract dependencies from a HLC object
+   * @param hclRoot HLC parsing artifact.
+   * @param locks currently existing locks
+   */
   abstract extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[];
 }
 

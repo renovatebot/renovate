@@ -4,6 +4,10 @@ import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 
 export class TerraformVersionExtractor extends DependencyExtractor {
+  getCheckList(): string[] {
+    return ['required_version'];
+  }
+
   extract(hclRoot: any): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (is.nullOrUndefined(terraformBlocks)) {

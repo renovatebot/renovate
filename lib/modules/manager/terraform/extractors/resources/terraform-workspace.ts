@@ -3,6 +3,10 @@ import type { PackageDependency } from '../../../types';
 import { TerraformVersionExtractor } from '../terraform-block/terraform-version';
 
 export class TerraformWorkspaceExtractor extends TerraformVersionExtractor {
+  override getCheckList(): string[] {
+    return [`"tfe_workspace"`];
+  }
+
   override extract(hclMap: any): PackageDependency[] {
     const dependencies = [];
 

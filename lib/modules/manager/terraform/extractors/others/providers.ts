@@ -4,6 +4,10 @@ import { TerraformProviderExtractor } from '../../base';
 import type { ProviderLock } from '../../lockfile/types';
 
 export class ProvidersExtractor extends TerraformProviderExtractor {
+  getCheckList(): string[] {
+    return ['provider'];
+  }
+
   extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[] {
     const providerTypes = hclRoot.provider;
     if (is.nullOrUndefined(providerTypes)) {
