@@ -81,9 +81,9 @@ export function parseGcv(
   info(`lockFileContent=${lockFileContent}`);
 
   info(`Parsed propsFile into exact map:
-${JSON.stringify(propsFileExactMap)}
+${JSON.stringify(Array.from(propsFileExactMap.entries()))}
 and glob map:
-${JSON.stringify(propsFileRegexMap)}
+${JSON.stringify(Array.from(propsFileRegexMap.entries()))}
 `);
 
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
