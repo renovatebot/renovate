@@ -43,7 +43,7 @@ export function extractPackageFile(
           datasource: MavenDatasource.id,
           depName: `${parts[0]}:${parts[1]}`,
         };
-        if (currentValue.indexOf('${') === 0) {
+        if (currentValue.includes('${')) {
           result.skipReason = 'contains-variable';
         } else {
           result.currentValue = currentValue;
@@ -53,18 +53,18 @@ export function extractPackageFile(
       }
     }
   } catch (e) {
-    logger.warn('Failed parsing ' + fileName + ': ' + (e as Error).message);
+    logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
     return null;
     // TODO - better logging?
   }
 
-  return deps.length > 0 ? { deps } : null;
+  return deps.length ? { deps } : null;
 }
 
 function extractArtifactList(sectionName: string, sectionValue: any): any[] {
   // Compendiun R8 159.4: bundles entry
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  if ('bundles' === sectionName || sectionName.indexOf(':ARTIFACTS|') > 0) {
+  if ('bundles' === sectionName || sectionName.includes(':ARTIFACTS|')) {
     return sectionValue as any[];
   }
 

@@ -8,9 +8,7 @@ export const language: ProgrammingLanguage = 'java';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)src/main/features/.+\\.json$'],
-  versioning: mavenVersioning.id,
 };
 
 export const supportedDatasources = [MavenDatasource.id];
 
-export const displayName = 'osgifeature';
