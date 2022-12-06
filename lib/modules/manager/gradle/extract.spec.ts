@@ -1,8 +1,10 @@
+import { info } from 'console';
 import { stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import * as parser from './parser';
+// TODO: Remove this
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../util/fs');
@@ -846,20 +848,24 @@ describe('modules/manager/gradle/extract', () => {
   // Tests for gradle-consistent-version plugin
   it('gradle-consistent-versions parse versions files', async () => {
     const fsMock = {
-      'build.gradle': '(this file contains) com.palantir.consistent-versions',
       'versions.props': `org.apache.lucene:* = 1.2.3`,
       'versions.lock': stripIndent`
         # Run ./gradlew --write-locks to regenerate this file
         org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
-        org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)`,
+        org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
+      `,
     };
 
     mockFs(fsMock);
+
+    info(`Going to extract files with fsMock ${JSON.stringify(fsMock)}`);
 
     const res = await extractAllPackageFiles(
       {} as ExtractConfig,
       Object.keys(fsMock)
     );
+
+    info(`Got result ${JSON.stringify(res)}`);
 
     expect(res).toMatchObject([
       {
@@ -894,19 +900,14 @@ describe('modules/manager/gradle/extract', () => {
           },
         ],
       },
-      {
-        packageFile: 'build.gradle',
-      },
     ]);
   });
 
-  it('gradle-consistent-versions plugin not used due to plugin not defined', async () => {
+  it('gradle-consistent-versions plugin not used due to lockfile not a GCV lockfile', async () => {
     const fsMock = {
-      'build.gradle': 'no plugin defined here',
       'versions.props': `org.apache.lucene:* = 1.2.3`,
       'versions.lock': stripIndent`
-        # Run ./gradlew --write-locks to regenerate this file
-        org.apache.lucene:lucene-core:1.2.3
+        This is NOT a lock file
       `,
     };
     mockFs(fsMock);
@@ -934,7 +935,6 @@ describe('modules/manager/gradle/extract', () => {
 
   it('gradle-consistent-versions multi levels of glob', async () => {
     const fsMock = {
-      'build.gradle': '(this file contains) com.palantir.consistent-versions',
       'versions.props': stripIndent`
         org.apache.* = 4
         org.apache.lucene:* = 3
@@ -1034,11 +1034,6 @@ describe('modules/manager/gradle/extract', () => {
             depType: 'dependencies',
           },
         ],
-      },
-      {
-        packageFile: 'build.gradle',
-        datasource: 'maven',
-        deps: [],
       },
     ]);
   });

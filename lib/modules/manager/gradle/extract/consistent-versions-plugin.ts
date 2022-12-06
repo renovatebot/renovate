@@ -1,3 +1,4 @@
+import { info } from 'console';
 import { logger } from '../../../../logger';
 import * as fs from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
@@ -25,7 +26,7 @@ export function usesGcv(
     versionsPropsFilename,
     VERSIONS_LOCK
   );
-  logger.info(
+  info(
     `usesGcv() for file ${versionsPropsFilename}, resolved lockfile ${versionsLockFile} with contents ${
       fileContents[versionsLockFile] ?? 'nil'
     }`
@@ -39,10 +40,10 @@ export function usesGcv(
  * Confirms whether the provided file name is the props file
  */
 export function isGcvPropsFile(fileName: string): boolean {
-  logger.info(
-    `isGcvPropsFile returns ${
+  info(
+    `isGcvPropsFile() returns ${
       fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`)
-    }`
+    } for file ${fileName}`
   );
   return fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`);
 }
