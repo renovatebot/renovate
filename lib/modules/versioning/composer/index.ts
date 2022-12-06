@@ -52,7 +52,7 @@ function convertStabilityModifier(input: string): string {
     return input;
   }
 
-  // 1.0@beta2 to 1.0-beta.2
+  // 1.0@beta2 to 1.0@beta.2
   const stability = versionParts[1].replace(
     regEx(/(?:^|\s)(beta|alpha|rc)([1-9][0-9]*)(?: |$)/gi),
     '$1.$2'
@@ -60,6 +60,7 @@ function convertStabilityModifier(input: string): string {
 
   // If there is a stability part, npm semver expects the version
   // to be full
+  // 1.0@beta.2 to 1.0-beta.2
   return padZeroes(versionParts[0]) + '-' + stability;
 }
 
@@ -278,7 +279,37 @@ function getNewValue({
 }
 
 function sortVersions(a: string, b: string): number {
-  return npm.sortVersions(composer2npm(a), composer2npm(b));
+  const npmA = composer2npm(a);
+  const npmB = composer2npm(b);
+
+  const [versionA, stabilityA] = getVersionParts(npmA);
+  const [versionB, stabilityB] = getVersionParts(npmB);
+  if (
+    !npm.equals(versionA, versionB) ||
+    stabilityA === '' ||
+    stabilityB === ''
+  ) {
+    return npm.sortVersions(npmA, npmB);
+  }
+
+  const [stabilityTypeA, stabilityVersionA] = stabilityA.split('.');
+  const [stabilityTypeB, stabilityVersionB] = stabilityB.split('.');
+  if (stabilityTypeA === stabilityTypeB) {
+    if (stabilityVersionA === stabilityVersionB) {
+      return 0;
+    }
+
+    return parseInt(stabilityVersionA || '0', 10) >
+      parseInt(stabilityVersionB || '0', 10)
+      ? 1
+      : -1;
+  }
+
+  const stabilityOrder = ['-dev', '-alpha', '-beta', '-rc'];
+  return stabilityOrder.indexOf(stabilityTypeA) >
+    stabilityOrder.indexOf(stabilityTypeB)
+    ? 1
+    : -1;
 }
 
 function isCompatible(version: string): boolean {

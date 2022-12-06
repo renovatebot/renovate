@@ -173,8 +173,11 @@ describe('modules/versioning/composer/index', () => {
   );
 
   test.each`
-    versions                                     | expected
-    ${['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3']} | ${['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
+    versions                                                                   | expected
+    ${['1.2.3-beta', '2.0.1', '1.3.4', '1.2.3']}                               | ${['1.2.3-beta', '1.2.3', '1.3.4', '2.0.1']}
+    ${['1.0.0-rc.5', '1.0.0-rc.1', '1.0.0-rc.3', '1.0.0-rc']}                  | ${['1.0.0-rc', '1.0.0-rc.1', '1.0.0-rc.3', '1.0.0-rc.5']}
+    ${['1.0.0-beta', '1.0.0-dev', '1.0.0-rc', '1.0.0-alpha']}                  | ${['1.0.0-dev', '1.0.0-alpha', '1.0.0-beta', '1.0.0-rc']}
+    ${['1.2.0-dev', '1.0.0-rc.5', '1.2.0-rc.2', '1.0.0-rc.5', '1.2.0-beta.3']} | ${['1.0.0-rc.5', '1.0.0-rc.5', '1.2.0-dev', '1.2.0-beta.3', '1.2.0-rc.2']}
   `('$versions -> sortVersions -> $expected ', ({ versions, expected }) => {
     expect(versions.sort(semver.sortVersions)).toEqual(expected);
   });
