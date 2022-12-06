@@ -129,7 +129,8 @@ export async function extractPackageFile(
               depName,
               currentValue,
               datasource: DockerDatasource.id,
-              extractVersion: '^(?<version>\\d+(?:\\.\\d+)*[^-]*)',
+              extractVersion:
+                '^(?<version>\\d+\\.\\d+\\.\\d+(?:RC\\d+|beta\\d+|alpha\\d+)*)',
               versioning: composerVersioningId,
             });
           } else {

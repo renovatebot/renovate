@@ -85,7 +85,8 @@ describe('modules/manager/composer/extract', () => {
             datasource: 'docker',
             depName: 'php',
             depType: 'require',
-            extractVersion: '^(?<version>\\d+(?:\\.\\d+)*[^-]*)',
+            extractVersion:
+              '^(?<version>\\d+\\.\\d+\\.\\d+(?:RC\\d+|beta\\d+|alpha\\d+)*)',
             versioning: 'composer',
           },
           {
