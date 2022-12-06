@@ -3,7 +3,6 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
 import * as parser from './parser';
-// TODO: Remove this
 import { extractAllPackageFiles } from '.';
 
 jest.mock('../../../util/fs');
