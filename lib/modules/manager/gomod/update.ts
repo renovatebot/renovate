@@ -5,11 +5,11 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
-  let depNameNoVersion = depName.split('/').slice(0, 3).join('/');
-  if (depNameNoVersion.startsWith('gopkg.in')) {
-    depNameNoVersion = depNameNoVersion.replace(regEx(/\.v\d+$/), '');
+  let depNames = depName.split('/');
+  if (depNames[depNames.length - 1].startsWith('v')) {
+    return depNames.slice(0, depNames.length - 1).join('/');
   }
-  return depNameNoVersion;
+  return depName
 }
 
 export function updateDependency({
