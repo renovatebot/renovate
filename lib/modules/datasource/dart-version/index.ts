@@ -74,6 +74,8 @@ export class DartVersionDatasource extends Datasource {
       });
 
   // Prefix should have a format of "channels/stable/release/2.9.3/"
-  private getVersionFromPrefix = (prefix: string): string | undefined =>
-    prefix.split('/').at(-2);
+  private getVersionFromPrefix = (prefix: string): string | undefined => {
+    const parts = prefix.split('/');
+    return parts[parts.length - 2];
+  };
 }
