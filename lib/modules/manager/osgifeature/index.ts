@@ -1,6 +1,5 @@
 import type { ProgrammingLanguage } from '../../../constants';
 import { MavenDatasource } from '../../datasource/maven';
-import * as mavenVersioning from '../../versioning/maven';
 
 export { extractPackageFile } from './extract';
 
@@ -11,4 +10,3 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [MavenDatasource.id];
-

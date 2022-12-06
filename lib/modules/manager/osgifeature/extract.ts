@@ -2,6 +2,7 @@ import * as json5 from 'json5';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type { Bundle } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -77,8 +78,4 @@ function extractArtifactList(sectionName: string, sectionValue: any): any[] {
   }
 
   return [];
-}
-
-interface Bundle {
-  id: string;
 }
