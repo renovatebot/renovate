@@ -130,3 +130,46 @@ The `Dockerfile` is documented better as well.
 
 The syntax in the example is arbitrary and you can set your own syntax.
 If you do, update your `matchStrings` regex!
+
+### Using regexManager to update the dependency name in addition to version
+
+#### Updating `gitlab-ci include` dep names
+
+If the location of files used in gitlab-ci `includes:` has changed you can use the regex manager to update the `depName` as well as the version.
+
+When doing so ou may find you need to specify a second `matchString` for the new name, as when the regex manager validates the change it will not always detect that the new value is valid.
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": [".*y[a]?ml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+      ],
+      "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
+      "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",
+      "datasourceTemplate": "gitlab-tags",
+      "versioningTemplate": "gitlab-tags"
+    }
+  ]
+}
+```
+
+Will migrate:
+
+```yaml
+- project: 'pipeline-fragments/docker-lint'
+  ref: 2-4-0
+  file: 'ci-include-docker-lint-base.yml'
+```
+
+to
+
+```yaml
+- project: 'pipeline-solutions/gitlab/fragments/docker-lint'
+  ref: 2-4-1
+  file: 'ci-include-docker-lint-base.yml'
+```
