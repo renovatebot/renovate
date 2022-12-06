@@ -26,11 +26,6 @@ export function usesGcv(
     versionsPropsFilename,
     VERSIONS_LOCK
   );
-  info(
-    `usesGcv() for file ${versionsPropsFilename}: Result: ${
-      fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
-    }`
-  );
   return (
     fileContents[versionsLockFile]?.startsWith(LOCKFILE_HEADER_TEXT) ?? false
   );
@@ -40,11 +35,6 @@ export function usesGcv(
  * Confirms whether the provided file name is the props file
  */
 export function isGcvPropsFile(fileName: string): boolean {
-  info(
-    `isGcvPropsFile() returns ${
-      fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`)
-    } for file ${fileName}`
-  );
   return fileName === VERSIONS_PROPS || fileName.endsWith(`/${VERSIONS_PROPS}`);
 }
 
@@ -77,19 +67,23 @@ export function parseGcv(
   const [propsFileExactMap, propsFileRegexMap] =
     parsePropsFile(propsFileContent);
 
-  info(`propsFileContent=${propsFileContent}`);
-  info(`lockFileContent=${lockFileContent}`);
-
   info(`Parsed propsFile into exact map:
 ${JSON.stringify(Array.from(propsFileExactMap.entries()))}
 and glob map:
 ${JSON.stringify(Array.from(propsFileRegexMap.entries()))}
+lockfile map:
+${JSON.stringify(Array.from(lockFileMap.entries()))}
 `);
 
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
 
   // For each exact dep in props file
   for (const [propDep, versionAndPosition] of propsFileExactMap) {
+    info(
+      `Considering prop ${propDep}.. Exists in lockfile? ${lockFileMap.has(
+        propDep
+      )}`
+    );
     if (lockFileMap.has(propDep)) {
       const newDep: Record<string, any> = {
         managerData: {
