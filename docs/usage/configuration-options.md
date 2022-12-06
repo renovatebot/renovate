@@ -1893,17 +1893,34 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
-If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 
-```
-  "matchPaths": ["+(package.json)"],
+For example the following would match any `package.json`, including files like `backend/package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchPaths": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
 ```
 
-The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
+The following would match any file in directories starting with `app/`:
 
-```
-  "matchPaths": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchPaths": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
 ```
 
 ### matchSourceUrlPrefixes

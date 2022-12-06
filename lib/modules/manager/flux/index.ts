@@ -1,4 +1,5 @@
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -22,4 +23,5 @@ export const supportedDatasources = [
   GitTagsDatasource.id,
   BitBucketTagsDatasource.id,
   HelmDatasource.id,
+  DockerDatasource.id,
 ];
