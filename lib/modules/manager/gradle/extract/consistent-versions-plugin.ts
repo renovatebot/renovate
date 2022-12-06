@@ -133,14 +133,14 @@ ${JSON.stringify(Array.from(lockFileMap.entries()))}
   return extractedDeps;
 }
 
-// Translate glob syntax to a regex that does the same
+// Translate glob syntax to a regex that does the same. Note cannot use replaceAll as it does not exist in Node14
 // Loosely borrowed mapping to regex from https://github.com/palantir/gradle-consistent-versions/blob/develop/src/main/java/com/palantir/gradle/versions/FuzzyPatternResolver.java
 function globToRegex(depName: string): RegExp {
   return regEx(
     depName
-      .replaceAll('*', '_WC_CHAR_')
+      .replace(/\*/g, '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replaceAll('_WC_CHAR_', '.*?')
+      .replace('_WC_CHAR_', '.*?')
   );
 }
 
