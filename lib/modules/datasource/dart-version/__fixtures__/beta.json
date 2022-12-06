@@ -1,0 +1,29 @@
+{
+	"kind": "storage#objects",
+	"prefixes": [
+		"channels/beta/release/2.17.0-182.1.beta/",
+		"channels/beta/release/2.17.0-182.2.beta/",
+		"channels/beta/release/2.17.0-266.1.beta/",
+		"channels/beta/release/2.17.0-266.10.beta/",
+		"channels/beta/release/2.17.0-266.5.beta/",
+		"channels/beta/release/2.17.0-266.7.beta/",
+		"channels/beta/release/2.17.0-266.8.beta/",
+		"channels/beta/release/2.17.0-69.1.beta/",
+		"channels/beta/release/2.17.0-69.2.beta/",
+		"channels/beta/release/2.17.0/",
+		"channels/beta/release/2.17.1/",
+		"channels/beta/release/2.18.0-165.1.beta/",
+		"channels/beta/release/2.18.0-271.2.beta/",
+		"channels/beta/release/2.18.0-271.4.beta/",
+		"channels/beta/release/2.18.0-271.7.beta/",
+		"channels/beta/release/2.18.0-271.8.beta/",
+		"channels/beta/release/2.18.0-44.1.beta/",
+		"channels/beta/release/2.18.0/",
+		"channels/beta/release/2.19.0-146.1.beta/",
+		"channels/beta/release/2.19.0-146.2.beta/",
+		"channels/beta/release/2.19.0-255.2.beta/",
+		"channels/beta/release/2.19.0-374.1.beta/",
+		"channels/beta/release/2.19.0-374.2.beta/",
+		"channels/beta/release/latest/"
+	]
+}
