@@ -206,7 +206,7 @@
     "markdown-it": "13.0.1",
     "markdown-table": "2.0.0",
     "marshal": "0.5.4",
-    "minimatch": "5.1.0",
+    "minimatch": "5.1.1",
     "moo": "0.5.2",
     "nanoid": "3.3.4",
     "node-html-parser": "6.1.4",
