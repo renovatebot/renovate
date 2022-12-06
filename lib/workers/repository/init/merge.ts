@@ -22,6 +22,7 @@ import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
+import * as throttle from '../../../util/http/throttle';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -262,6 +263,7 @@ export async function mergeRenovateConfig(
     }
     // host rules can change concurrency
     queue.clear();
+    throttle.clear();
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);

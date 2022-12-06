@@ -1,4 +1,4 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { ProgrammingLanguage } from '../../../constants';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { NpmDatasource } from '../../datasource/npm';
 import * as npmVersioning from '../../versioning/npm';
@@ -12,7 +12,7 @@ export {
 } from './update';
 export { getRangeStrategy } from './range';
 
-export const language = ProgrammingLanguage.JavaScript;
+export const language: ProgrammingLanguage = 'js';
 export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {

@@ -9,6 +9,7 @@ import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import { reportErrors } from '../schema';
 import * as queue from './queue';
+import * as throttle from './throttle';
 import type { HttpResponse } from './types';
 import { Http } from '.';
 
@@ -21,6 +22,7 @@ describe('util/http/index', () => {
     http = new Http('dummy');
     hostRules.clear();
     queue.clear();
+    throttle.clear();
   });
 
   it('get', async () => {
@@ -68,7 +70,14 @@ describe('util/http/index', () => {
   });
 
   it('getJson', async () => {
-    httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toEqual({
       authorization: false,
       body: {
@@ -322,7 +331,11 @@ describe('util/http/index', () => {
     describe('getJson', () => {
       it('infers body type', async () => {
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: true }));
 
@@ -340,7 +353,11 @@ describe('util/http/index', () => {
       it('reports warnings', async () => {
         memCache.init();
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: 'foobar' }));
 
@@ -359,7 +376,11 @@ describe('util/http/index', () => {
 
       it('throws', async () => {
         httpMock
-          .scope(baseUrl)
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
           .get('/')
           .reply(200, JSON.stringify({ test: 'foobar' }));
 
@@ -431,6 +452,38 @@ describe('util/http/index', () => {
         reportErrors();
         expect(logger.logger.warn).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('works without throttling', async () => {
+      jest.useFakeTimers({ advanceTimers: 1 });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeLessThan(100);
+    });
+
+    it('limits request rate by host', async () => {
+      jest.useFakeTimers({ advanceTimers: true });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      jest.advanceTimersByTime(4000);
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeGreaterThanOrEqual(4000);
     });
   });
 });

@@ -1,15 +1,14 @@
-import { mocked } from '../../../test/util';
-import * as _hostRules from './host-rules';
+import * as hostRules from '../host-rules';
 import { clear, getQueue } from './queue';
-
-jest.mock('./host-rules');
-
-const hostRules = mocked(_hostRules);
 
 describe('util/http/queue', () => {
   beforeEach(() => {
-    hostRules.getRequestLimit.mockReturnValue(143);
     clear();
+    hostRules.clear();
+    hostRules.add({
+      matchHost: 'https://example.com',
+      concurrentRequestLimit: 143,
+    });
   });
 
   it('returns null for invalid URL', () => {

@@ -39,6 +39,7 @@ function jestGithubRunnerSpecs(): JestConfig {
 
 const config: JestConfig = {
   cacheDirectory: '.cache/jest',
+  clearMocks: true,
   coverageDirectory: './coverage',
   collectCoverage: true,
   collectCoverageFrom: [
@@ -68,7 +69,11 @@ const config: JestConfig = {
       },
     ],
   },
-  modulePathIgnorePatterns: ['<rootDir>/dist/', '/__fixtures__/'],
+  modulePathIgnorePatterns: [
+    '<rootDir>/dist/',
+    '/__fixtures__/',
+    '/__mocks__/',
+  ],
   reporters: ci ? ['default', 'github-actions'] : ['default'],
   setupFilesAfterEnv: [
     'jest-extended/all',

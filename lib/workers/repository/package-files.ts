@@ -12,16 +12,13 @@ export class PackageFiles {
   ): void {
     logger.debug(
       { baseBranch },
-      `PackageFiles.add() - Package file saved for branch`
+      `PackageFiles.add() - Package file saved for base branch`
     );
     this.data.set(baseBranch, packageFiles);
   }
 
   static clear(): void {
-    logger.debug(
-      { baseBranches: [...this.data.keys()] },
-      'PackageFiles.clear() - Package files deleted'
-    );
+    logger.debug('PackageFiles.clear() - Package files deleted');
     this.data.clear();
   }
 

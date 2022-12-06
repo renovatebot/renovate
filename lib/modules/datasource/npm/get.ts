@@ -85,7 +85,7 @@ export async function getDependency(
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
-      logger.debug({ dependency: packageName }, 'No versions returned');
+      logger.debug(`No versions returned for npm dependency ${packageName}`);
       return null;
     }
 
@@ -157,35 +157,12 @@ export async function getDependency(
     }
     return dep;
   } catch (err) {
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: unauthorized`
-      );
-      return null;
-    }
-    if (err.statusCode === 402) {
-      logger.debug(
-        {
-          packageUrl,
-          err,
-          statusCode: err.statusCode,
-          packageName,
-        },
-        `Dependency lookup failure: payment required`
-      );
-      return null;
-    }
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { err, packageName },
-        `Dependency lookup failure: not found`
-      );
+    const ignoredStatusCodes = [401, 402, 403, 404];
+    const ignoredResponseCodes = ['ENOTFOUND'];
+    if (
+      ignoredStatusCodes.includes(err.statusCode) ||
+      ignoredResponseCodes.includes(err.code)
+    ) {
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {

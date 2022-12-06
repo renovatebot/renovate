@@ -20,7 +20,6 @@ describe('modules/datasource/gradle-version/index', () => {
         versioning,
         depName: 'abc',
       };
-      jest.clearAllMocks();
     });
 
     it('processes real data', async () => {

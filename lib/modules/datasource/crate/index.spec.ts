@@ -10,7 +10,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import * as memCache from '../../../util/cache/memory';
-import { RegistryFlavor, RegistryInfo } from './types';
+import type { RegistryInfo } from './types';
 import { CrateDatasource } from '.';
 
 jest.mock('simple-git');
@@ -361,7 +361,7 @@ describe('modules/datasource/crate/index', () => {
       const info: RegistryInfo = {
         rawUrl: 'https://example.com',
         url: new URL('https://example.com'),
-        flavor: RegistryFlavor.Cloudsmith,
+        flavor: 'cloudsmith',
       };
       const crateDatasource = new CrateDatasource();
       await expect(

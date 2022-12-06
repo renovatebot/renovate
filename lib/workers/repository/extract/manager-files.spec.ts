@@ -78,7 +78,6 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toMatchObject([
         {
           packageFile: 'package.json',
-          packageJsonType: 'app',
           deps: [
             {
               currentValue: '2.0.0',

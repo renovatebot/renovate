@@ -85,11 +85,24 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
+If you set multiple filters, then the matches of each filter are added to the overall result.
+
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` within filters are not supported.
+Commas will be used as delimiter for a new filter.
+
+```
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+
+# in this example you can use regex instead
+RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+```
+
 **Minimatch**:
 
 ```json
 {
-  "autodiscoverFilter": "project/*"
+  "autodiscoverFilter": ["project/*"]
 }
 ```
 
@@ -99,15 +112,17 @@ All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
-  "autodiscoverFilter": "/project/.*/"
+  "autodiscoverFilter": ["/project/.*/"]
 }
 ```
 
-You can negate the regex by putting a `!` in front:
+You can negate the regex by putting a `!` in front.
+Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": "!/project/.*/"
+  "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
 
@@ -144,7 +159,9 @@ Supported tools for dynamic install are:
 - `bundler`
 - `cargo`
 - `composer`
+- `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
 - `jb`
 - `jsonnet-bundler`
@@ -158,6 +175,7 @@ Supported tools for dynamic install are:
 - `pnpm`
 - `poetry`
 - `python`
+- `rust`
 - `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
@@ -361,16 +379,15 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
-
 ## forkToken
 
-You probably don't need this option - it is an experimental setting for the Renovate hosted GitHub App.
-This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+
+If this value is configured then Renovate:
+
+- forks the target repository into the account that owns the PAT
+- keep this fork's default branch up-to-date with the target
+
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify
@@ -615,7 +632,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example url: `redis://localhost`.
+Example URL: `redis://localhost`.
 
 ## repositories
 
@@ -654,6 +671,11 @@ Set this to an S3 URI to enable S3 backed repository cache.
     AWS_SESSION_TOKEN
     AWS_REGION
 ```
+
+<!-- prettier-ignore -->
+!!! tip
+    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
 ## requireConfig
 
@@ -741,7 +763,11 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+By default, Renovate processes each repository that it finds.
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
+
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

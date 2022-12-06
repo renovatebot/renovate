@@ -24,3 +24,8 @@ export interface MsbuildSdk {
   readonly version: string;
   readonly rollForward: string;
 }
+
+export interface ProjectFile {
+  readonly isLeaf: boolean;
+  readonly name: string;
+}

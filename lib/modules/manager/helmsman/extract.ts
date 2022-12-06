@@ -60,7 +60,7 @@ export function extractPackageFile(
       json: true,
     }) as HelmsmanDocument;
     if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug({ fileName }, 'Missing helmRepos and/or apps keys');
+      logger.debug(`Missing helmRepos and/or apps keys in ${fileName}`);
       return null;
     }
 

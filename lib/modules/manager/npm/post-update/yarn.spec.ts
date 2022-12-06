@@ -40,7 +40,6 @@ env.getChildProcessEnv.mockReturnValue(envMock.basic);
 describe('modules/manager/npm/post-update/yarn', () => {
   beforeEach(() => {
     delete process.env.BUILDPACK;
-    jest.clearAllMocks();
     Fixtures.reset();
     GlobalConfig.set({ localDir: '.', cacheDir: '/tmp/cache' });
     docker.resetPrefetchedImages();
@@ -646,6 +645,18 @@ describe('modules/manager/npm/post-update/yarn', () => {
       expect(offlineMirror).toBeFalse();
       expect(yarnPath).toBeNull();
       expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n');
+    });
+
+    it('removes pure-lockfile and frozen-lockfile from .yarnrc', async () => {
+      Fixtures.mock(
+        {
+          '.yarnrc': `--install.pure-lockfile true\n--install.frozen-lockfile true\n`,
+        },
+        '/tmp/renovate'
+      );
+      GlobalConfig.set({ localDir: '/tmp/renovate', cacheDir: '/tmp/cache' });
+      await yarnHelper.checkYarnrc('/tmp/renovate');
+      expect(Fixtures.toJSON()['/tmp/renovate/.yarnrc']).toBe('\n\n');
     });
   });
 });

@@ -15,7 +15,7 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 Installing/enabling Mend's Renovate GitHub App is simple.
 
-First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
+First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
 ![Github App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
@@ -27,7 +27,7 @@ Renovate will ignore any repositories that don't have known package files, as we
 That said, most people run Renovate on selected repositories.
 Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you're done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 <!-- prettier-ignore -->
 !!! note
@@ -107,7 +107,7 @@ Sometimes Renovate detects that an override to these defaults is needed, and wil
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
+- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. Some prefer `"bump"`.
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub user(s) to assign the Pull Requests to
 

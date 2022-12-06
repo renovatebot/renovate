@@ -1,4 +1,3 @@
-import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { detectPlatform } from '../common';
@@ -75,7 +74,7 @@ function getAuthenticationRulesWithToken(
   if (!type) {
     type = detectPlatform(url);
   }
-  if (type === PlatformId.Gitlab) {
+  if (type === 'gitlab') {
     token = `gitlab-ci-token:${authToken}`;
   }
   return getAuthenticationRules(url, token);

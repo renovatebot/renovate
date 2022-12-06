@@ -36,7 +36,7 @@ export async function getTags(
 
     // istanbul ignore if
     if (!tags.length) {
-      logger.debug({ repository }, 'repository has no Github tags');
+      logger.debug(`No Github tags found for repository:${repository}`);
     }
 
     return tags.map((tag) => tag.name).filter(Boolean);
@@ -74,7 +74,7 @@ export async function getReleaseNotesMd(
 
   // istanbul ignore if
   if (res.body.truncated) {
-    logger.debug({ repository }, 'Git tree truncated');
+    logger.debug(`Git tree truncated repository:${repository}`);
   }
 
   const allFiles = res.body.tree.filter((f) => f.type === 'blob');

@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { PlatformId } from '../../constants';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { parseLinkHeader, parseUrl } from '../url';
@@ -16,7 +15,7 @@ export interface GitlabHttpOptions extends HttpOptions {
 }
 
 export class GitlabHttp extends Http<GitlabHttpOptions> {
-  constructor(type: string = PlatformId.Gitlab, options?: GitlabHttpOptions) {
+  constructor(type = 'gitlab', options?: GitlabHttpOptions) {
     super(type, options);
   }
 
@@ -67,7 +66,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
         err.statusCode === 429 ||
         (err.statusCode >= 500 && err.statusCode < 600)
       ) {
-        throw new ExternalHostError(err, PlatformId.Gitlab);
+        throw new ExternalHostError(err, 'gitlab');
       }
       const platformFailureCodes = [
         'EAI_AGAIN',
@@ -76,10 +75,10 @@ export class GitlabHttp extends Http<GitlabHttpOptions> {
         'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
       ];
       if (platformFailureCodes.includes(err.code)) {
-        throw new ExternalHostError(err, PlatformId.Gitlab);
+        throw new ExternalHostError(err, 'gitlab');
       }
       if (err.name === 'ParseError') {
-        throw new ExternalHostError(err, PlatformId.Gitlab);
+        throw new ExternalHostError(err, 'gitlab');
       }
       throw err;
     }
