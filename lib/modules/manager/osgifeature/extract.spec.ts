@@ -135,18 +135,22 @@ describe('modules/manager/osgifeature/extract', () => {
       );
       expect(packageFile).toBeNull();
     });
-  });
 
-  it('skips artifacts with variables in version', () => {
-    const packageFile = extractPackageFile(versionWithVariable, '', undefined);
-    expect(packageFile).toEqual({
-      deps: [
-        {
-          datasource: 'maven',
-          depName: 'com.fasterxml.jackson.core:jackson-annotations',
-          skipReason: 'contains-variable',
-        },
-      ],
+    it('skips artifacts with variables in version', () => {
+      const packageFile = extractPackageFile(
+        versionWithVariable,
+        '',
+        undefined
+      );
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'com.fasterxml.jackson.core:jackson-annotations',
+            skipReason: 'contains-variable',
+          },
+        ],
+      });
     });
   });
 });
