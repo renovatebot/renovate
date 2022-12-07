@@ -2396,17 +2396,17 @@
   dependencies:
     "@seald-io/nedb" "3.1.0"
 
-"@renovatebot/osv-offline@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.6.tgz#14e13db19976d2212deb6474113b483da5e245de"
-  integrity sha512-64qb/5mmKRQer2j5Bv7s7oCeJ9r3LzmypsUJLm6C2sTnP8gj4pfvLPtAVjGv6OMMfCIYqd8J2bnTY5arChBLwA==
+"@renovatebot/osv-offline@1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.7.tgz#87e8e3464d51d2a108c09be3da66ca1906466efd"
+  integrity sha512-f84i96ECTwn7l+q+GAiJkVmr+bq34BqLmSiTz0nhZMwDhIDioJthmRpkwe9101E3ui1tRivkpRLFprMfly1sGQ==
   dependencies:
     "@octokit/rest" "19.0.5"
     "@renovatebot/osv-offline-db" "1.0.1"
     adm-zip "0.5.9"
     fs-extra "10.1.0"
     got "11.8.5"
-    luxon "3.1.0"
+    luxon "3.1.1"
 
 "@renovatebot/pep440@2.1.5":
   version "2.1.5"
@@ -6933,11 +6933,6 @@ lru-cache@^7.4.4, lru-cache@^7.5.1, lru-cache@^7.7.1:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.14.1.tgz#8da8d2f5f59827edb388e63e459ac23d6d408fea"
   integrity sha512-ysxwsnTKdAx96aTRdhDOCQfDgbHnt8SK0KY8SEjO0wHinhWOFTESbjVCMPbU1uGXg/ch4lifqx0wfjOawU2+WA==
 
-luxon@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.1.0.tgz#9ac33d7142b7ea18d4ec8583cdeb0b079abef60d"
-  integrity sha512-7w6hmKC0/aoWnEsmPCu5Br54BmbmUp5GfcqBxQngRcXJ+q5fdfjEzn7dxmJh2YdDhgW8PccYtlWKSv4tQkrTQg==
-
 luxon@3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/luxon/-/luxon-3.1.1.tgz#b492c645b2474fb86f3bd3283213846b99c32c1e"
@@ -7230,7 +7225,7 @@ minimatch@5.1.0:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@^5.0.1, minimatch@^5.1.0:
+minimatch@5.1.1, minimatch@^5.0.1, minimatch@^5.1.0:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.1.tgz#6c9dffcf9927ff2a31e74b5af11adf8b9604b022"
   integrity sha512-362NP+zlprccbEt/SkxKfRMHnNY85V74mVnpUpNyr3F35covl09Kec7/sEFLt3RA4oXmewtoaanoIf67SE5Y5g==
