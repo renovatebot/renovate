@@ -1,7 +1,12 @@
+import { GlobalConfig } from '../../config/global';
 import { getOptions } from '../../config/options';
 import * as template from '.';
 
 describe('util/template/index', () => {
+  beforeEach(() => {
+    GlobalConfig.reset();
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
@@ -83,6 +88,40 @@ describe('util/template/index', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, undefined as never);
     expect(output).toBe('foo');
+  });
+
+  it('has access to basic environment variables (basicEnvVars)', () => {
+    const userTemplate = 'HOME is {{HOME}}';
+    const output = template.compile(userTemplate, undefined as never);
+    expect(output).toBe(`HOME is ${process.env.HOME ?? ''}`);
+  });
+
+  it('and has access to environment variables exposed with customEnvVariables', () => {
+    GlobalConfig.set({
+      customEnvVariables: {
+        SHELL: process.env.SHELL,
+      },
+    });
+    const userTemplate = 'SHELL is {{SHELL}}';
+    const output = template.compile(userTemplate, undefined as never);
+    expect(output).toBe(`SHELL is ${process.env.SHELL ?? ''}`);
+  });
+
+  it('and has access to custom variables defined with customEnvVariables', () => {
+    GlobalConfig.set({
+      customEnvVariables: {
+        CUSTOM_FOO: 'foo',
+      },
+    });
+    const userTemplate = 'CUSTOM_FOO is {{CUSTOM_FOO}}';
+    const output = template.compile(userTemplate, undefined as never);
+    expect(output).toBe('CUSTOM_FOO is foo');
+  });
+
+  it('and does not have access to other environment variables', () => {
+    const userTemplate = '{{LOGNAME}} {{UID}} {{SHELL}}';
+    const output = template.compile(userTemplate, undefined as never);
+    expect(output).toBe('  ');
   });
 
   describe('proxyCompileInput', () => {
