@@ -13,7 +13,7 @@ const frameworkArtifact = Fixtures.get('framework-artifact.json');
 const versionWithVariable = Fixtures.get('version-with-variable.json');
 const malformedDefinitions = Fixtures.get('various-malformed-definitions.json');
 
-describe('modules/manager/osgifeature/extract', () => {
+describe('modules/manager/osgi/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty file', () => {
       expect(extractPackageFile('', '', undefined)).toBeNull();

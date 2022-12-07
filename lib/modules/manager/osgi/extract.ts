@@ -13,7 +13,7 @@ export function extractPackageFile(
   // References:
   // - OSGi compendium release 8 ( https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html )
   // - The Sling implementation of the feature model ( https://sling.apache.org/documentation/development/feature-model.html )
-  logger.debug({ fileName }, 'osgifeature.extractPackageFile');
+  logger.debug({ fileName }, 'osgi.extractPackageFile');
 
   const deps: PackageDependency[] = [];
   try {
