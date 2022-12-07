@@ -85,3 +85,11 @@ In the example above, it will only show a text if `isMajor=true` and `hasRelease
 Returns `true` if at least one expression is `true`.
 
 `{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
+
+## Environment variables
+
+For security reasons, you can only access a handful of basic environment variables like `HOME` or `PATH` by default:
+
+`HOME is {{HOME}}`
+
+You can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
