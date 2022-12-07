@@ -132,6 +132,24 @@ exports[`modules/manager/tekton/extract extractPackageFile() extracts deps from 
       "depType": "tekton-bundle",
       "skipReason": "invalid-value",
     },
+    {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "currentValue": "1.0",
+      "datasource": "docker",
+      "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
+      "depType": "tekton-bundle",
+      "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    },
+    {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "currentValue": "1.0",
+      "datasource": "docker",
+      "depName": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver",
+      "depType": "tekton-bundle",
+      "replaceString": "gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    },
   ],
 }
 `;

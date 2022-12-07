@@ -558,7 +558,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
-You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
+You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -1893,17 +1893,34 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
-If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 
-```
-  "matchPaths": ["+(package.json)"],
+For example the following would match any `package.json`, including files like `backend/package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchPaths": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
 ```
 
-The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
+The following would match any file in directories starting with `app/`:
 
-```
-  "matchPaths": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchPaths": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
 ```
 
 ### matchSourceUrlPrefixes
@@ -3033,8 +3050,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".
