@@ -3,7 +3,7 @@ import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
-import type { Bundle } from './types';
+import type { Bundle, FeatureModel } from './types';
 
 export function extractPackageFile(
   content: string,
@@ -18,50 +18,68 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   try {
     // Compendium R8 159.3: JS comments are supported
-    const featureModel = json5.parse(content);
+    const featureModel = json5.parse<FeatureModel>(content);
 
     // Compendium R8 159.9: resource versioning
     if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
       return null;
     }
 
+    const allBundles: Bundle[] = [];
+    // OSGi Compendium R8 159.4: bundles entry
+    featureModel.bundles?.forEach((bundle) => {
+      allBundles.push(bundle);
+    });
+
+    // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
+    if (featureModel['execution-environment:JSON|false']?.['framework']) {
+      allBundles.push(
+        featureModel['execution-environment:JSON|false']['framework']
+      );
+    }
+
+    // parse custom sections
+    //
+    // Note: we do not support artifact list extensions as defined in
+    // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
+    // supports this
     for (const [section, value] of Object.entries(featureModel)) {
-      // Note: we do not support artifact list extensions as defined in
-      // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
-      // supports this
-
       logger.debug({ fileName, section }, 'Parsing section');
-      for (const entry of extractArtifactList(section, value)) {
-        const rawGav = typeof entry === 'string' ? entry : entry.id;
-        // skip invalid definitions, such as objects without an id set
-        if (!rawGav) {
-          continue;
-        }
+      const customSectionEntries = extractArtifactList(section, value);
+      customSectionEntries.forEach((bundle) => allBundles.push(bundle));
+    }
 
-        // both '/' and ':' are valid separators, but the Maven datasource
-        // expects the separator to be ':'
-        const gav = rawGav.replaceAll('/', ':');
-
-        // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
-        // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
-        const parts = gav.split(':');
-        if (parts.length < 3 || parts.length > 5) {
-          continue;
-        }
-        // parsing should use the last entry for the version
-        const currentValue = parts[parts.length - 1];
-        const result: PackageDependency = {
-          datasource: MavenDatasource.id,
-          depName: `${parts[0]}:${parts[1]}`,
-        };
-        if (currentValue.includes('${')) {
-          result.skipReason = 'contains-variable';
-        } else {
-          result.currentValue = currentValue;
-        }
-
-        deps.push(result);
+    // convert bundles to dependencies
+    for (const entry of allBundles) {
+      const rawGav = typeof entry === 'string' ? entry : entry.id;
+      // skip invalid definitions, such as objects without an id set
+      if (!rawGav) {
+        continue;
       }
+
+      // both '/' and ':' are valid separators, but the Maven datasource
+      // expects the separator to be ':'
+      const gav = rawGav.replaceAll('/', ':');
+
+      // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
+      // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
+      const parts = gav.split(':');
+      if (parts.length < 3 || parts.length > 5) {
+        continue;
+      }
+      // parsing should use the last entry for the version
+      const currentValue = parts[parts.length - 1];
+      const result: PackageDependency = {
+        datasource: MavenDatasource.id,
+        depName: `${parts[0]}:${parts[1]}`,
+      };
+      if (currentValue.includes('${')) {
+        result.skipReason = 'contains-variable';
+      } else {
+        result.currentValue = currentValue;
+      }
+
+      deps.push(result);
     }
   } catch (e) {
     logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
@@ -73,10 +91,10 @@ export function extractPackageFile(
 }
 
 function isSupportedFeatureResourceVersion(
-  featureModel: any,
+  featureModel: FeatureModel,
   fileName: string
 ): boolean {
-  const resourceVersion: string = featureModel['feature-resource-version'];
+  const resourceVersion = featureModel['feature-resource-version'];
   if (resourceVersion) {
     const resourceSemVer = coerce(resourceVersion);
     if (!resourceSemVer) {
@@ -101,18 +119,9 @@ function isSupportedFeatureResourceVersion(
 }
 
 function extractArtifactList(sectionName: string, sectionValue: any): Bundle[] {
-  // Compendiun R8 159.4: bundles entry
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  if ('bundles' === sectionName || sectionName.includes(':ARTIFACTS|')) {
+  if (sectionName.includes(':ARTIFACTS|')) {
     return sectionValue as Bundle[];
-  }
-
-  // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
-  if (
-    'execution-environment:JSON|false' === sectionName &&
-    'framework' in sectionValue
-  ) {
-    return [sectionValue.framework];
   }
 
   return [];

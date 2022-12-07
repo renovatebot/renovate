@@ -2,7 +2,7 @@
     "bundles":[
         {
             "#": "missing the 'id' attribute",
-            "not-id":"commons-codec:commons-codec:1.15",
+            "not-id":"commons-codec:commons-codec:1.15"
         },
         {
             "#": "too few parts in the GAV definition",
