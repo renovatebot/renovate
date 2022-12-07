@@ -26,16 +26,11 @@ export function extractPackageFile(
 
       logger.debug({ fileName, section }, 'Parsing section');
       for (const entry of extractArtifactList(section, value)) {
-        let gav: string;
-        if (entry instanceof Object) {
-          gav = (entry as Bundle).id;
-        } else {
-          gav = entry as string;
-        }
+        const rawGav = typeof entry === 'string' ? entry : entry.id
 
         // both '/' and ':' are valid separators, but the Maven datasource
         // expects the separator to be ':'
-        gav = gav.replaceAll('/', ':');
+        const gav = rawGav.replaceAll('/', ':');
 
         // parsing should use the last entry for the version
         const parts = gav.split(':');
@@ -62,11 +57,11 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-function extractArtifactList(sectionName: string, sectionValue: any): any[] {
+function extractArtifactList(sectionName: string, sectionValue: any): Bundle[] {
   // Compendiun R8 159.4: bundles entry
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
   if ('bundles' === sectionName || sectionName.includes(':ARTIFACTS|')) {
-    return sectionValue as any[];
+    return sectionValue as Bundle[];
   }
 
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
