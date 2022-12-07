@@ -17,7 +17,7 @@ import type {
   RawExecOptions,
 } from './types';
 
-function getChildEnv({
+export function getChildEnv({
   extraEnv,
   env: forcedEnv = {},
 }: ExecOptions): Record<string, string> {
