@@ -8,9 +8,7 @@ const artifactsExtension = Fixtures.get('extension-artifacts.json');
 const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
 const frameworkArtifact = Fixtures.get('framework-artifact.json');
 const versionWithVariable = Fixtures.get('version-with-variable.json');
-const bundlesAsObjectsMissingId = Fixtures.get(
-  'bundles-as-object-missing-id.json'
-);
+const malformedDefinitions = Fixtures.get('various-malformed-definitions.json');
 
 describe('modules/manager/osgifeature/extract', () => {
   describe('extractPackageFile()', () => {
@@ -127,13 +125,21 @@ describe('modules/manager/osgifeature/extract', () => {
       });
     });
 
-    it('skips depedencies with with missing ids', () => {
+    it('skips depedencies with with malformed definitions', () => {
       const packageFile = extractPackageFile(
-        bundlesAsObjectsMissingId,
+        malformedDefinitions,
         '',
         undefined
       );
-      expect(packageFile).toBeNull();
+      expect(packageFile).toEqual({
+        deps: [
+          {
+            datasource: 'maven',
+            depName: 'commons-codec:commons-codec',
+            currentValue: '1.15',
+          },
+        ],
+      });
     });
 
     it('skips artifacts with variables in version', () => {

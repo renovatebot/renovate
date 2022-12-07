@@ -1,3 +1,4 @@
+import { ContributionQueryOptions } from 'azure-devops-node-api/interfaces/ExtensionManagementInterfaces';
 import * as json5 from 'json5';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
@@ -26,14 +27,23 @@ export function extractPackageFile(
 
       logger.debug({ fileName, section }, 'Parsing section');
       for (const entry of extractArtifactList(section, value)) {
-        const rawGav = typeof entry === 'string' ? entry : entry.id
+        const rawGav = typeof entry === 'string' ? entry : entry.id;
+        // skip invalid definitions, such as objects without an id set
+        if (!rawGav) {
+          continue;
+        }
 
         // both '/' and ':' are valid separators, but the Maven datasource
         // expects the separator to be ':'
         const gav = rawGav.replaceAll('/', ':');
 
-        // parsing should use the last entry for the version
+        // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
+        // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
         const parts = gav.split(':');
+        if (parts.length < 3 || parts.length > 5) {
+          continue;
+        }
+        // parsing should use the last entry for the version
         const currentValue = parts[parts.length - 1];
         const result: PackageDependency = {
           datasource: MavenDatasource.id,
