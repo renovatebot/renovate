@@ -1,4 +1,5 @@
 import * as json5 from 'json5';
+import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -18,6 +19,11 @@ export function extractPackageFile(
   try {
     // Compendium R8 159.3: JS comments are supported
     const featureModel = json5.parse(content);
+
+    // Compendium R8 159.9: resource versioning
+    if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
+      return null;
+    }
 
     for (const [section, value] of Object.entries(featureModel)) {
       // Note: we do not support artifact list extensions as defined in
@@ -64,6 +70,34 @@ export function extractPackageFile(
   }
 
   return deps.length ? { deps } : null;
+}
+
+function isSupportedFeatureResourceVersion(
+  featureModel: any,
+  fileName: string
+): boolean {
+  const resourceVersion: string = featureModel['feature-resource-version'];
+  if (resourceVersion) {
+    const resourceSemVer = coerce(resourceVersion);
+    if (!resourceSemVer) {
+      logger.debug(
+        { fileName, resourceVersion },
+        'Skipping due to invalid feature-resource-version'
+      );
+      return false;
+    }
+
+    // we only support 1.x, although no over version has been defined
+    if (!satisfies(resourceSemVer, '^1')) {
+      logger.debug(
+        { fileName, resourceVersion },
+        'Skipping due to unsupported feature-resource-version'
+      );
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function extractArtifactList(sectionName: string, sectionValue: any): Bundle[] {

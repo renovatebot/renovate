@@ -1,5 +1,5 @@
-
 {
+    "feature-resource-version": "1.0",
     "bundles":[
         {
             "id":"commons-codec:commons-codec:1.15",

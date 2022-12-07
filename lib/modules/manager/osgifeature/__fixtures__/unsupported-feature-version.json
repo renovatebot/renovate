@@ -1,0 +1,9 @@
+{
+    "feature-resource-version": "2.0",
+    "bundles":[
+        {
+            "id":"commons-codec:commons-codec:1.15",
+            "start-order":"5"
+        }
+    ]
+}

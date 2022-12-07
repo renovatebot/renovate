@@ -1,6 +1,9 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
+const unsupportedFeatureVersion = Fixtures.get(
+  'unsupported-feature-version.json'
+);
 const featureWithBundlesAsObjects = Fixtures.get('bundles-as-objects.json');
 const featureWithBundlesAsStrings = Fixtures.get('bundles-as-strings.json');
 const featureWithComment = Fixtures.get('with-comment.json');
@@ -18,6 +21,12 @@ describe('modules/manager/osgifeature/extract', () => {
 
     it('returns null for invalid file', () => {
       expect(extractPackageFile('this-is-not-json', '', undefined)).toBeNull();
+    });
+
+    it('returns null for unsupported version of feature model definition', () => {
+      expect(
+        extractPackageFile(unsupportedFeatureVersion, '', undefined)
+      ).toBeNull();
     });
 
     it('extracts the bundles from a file with object bundles definitions', () => {
