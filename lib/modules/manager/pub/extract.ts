@@ -59,7 +59,7 @@ export function extractPackageFile(
       };
     }
   } catch (e) {
-    logger.debug({ packageFile }, 'Can not parse dependency');
+    logger.debug(`Could not parse dependency from ${packageFile}`);
   }
   return null;
 }

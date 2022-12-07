@@ -11,7 +11,6 @@ import {
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import { createConfigMigrationBranch } from './create';
 import type { MigratedData } from './migrated-data';
 import { rebaseMigrationBranch } from './rebase';
@@ -104,7 +103,7 @@ describe('workers/repository/config-migration/branch/index', () => {
 
     describe('handle closed PR', () => {
       const title = 'PR title';
-      const pr = partial<Pr>({ title, state: PrState.Closed, number: 1 });
+      const pr = partial<Pr>({ title, state: 'closed', number: 1 });
 
       it('skips branch when there is a closed one delete it and add an ignore PR message', async () => {
         platform.findPr.mockResolvedValueOnce(pr);

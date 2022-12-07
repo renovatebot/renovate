@@ -299,14 +299,13 @@ If you truly need to configure this then it probably means either:
 
 ## branchNameStrict
 
-By default, Renovate removes special characters when slugifying the branch name:
+If `true`, Renovate removes special characters when slugifying the branch name:
 
 - all special characters are removed
 - only alphabetic characters are allowed
 - hyphens `-` are used to separate sections
 
-To revert this behavior to that used in v32 and before, set this value to `false`.
-This will mean that special characters like `.` may end up in the branch name.
+The default `false` behavior will mean that special characters like `.` may end up in the branch name.
 
 ## branchPrefix
 
@@ -335,7 +334,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -382,8 +381,8 @@ If you want Renovate to signoff its commits, add the [`:gitSignOff` preset](http
 
 <!-- prettier-ignore -->
 !!! warning
-    Editing of `commitMessage` directly is now deprecated and not recommended.
-    Please instead edit the fields such as `commitMessageAction`, `commitMessageExtra`, etc.
+    We deprecated editing the `commitMessage` directly, and we recommend you stop using this config option.
+    Instead use config options like `commitMessageAction`, `commitMessageExtra`, and so on, to create the commit message you want.
 
 ## commitMessageAction
 
@@ -391,45 +390,25 @@ This is used to alter `commitMessage` and `prTitle` without needing to copy/past
 Actions may be like `Update`, `Pin`, `Roll back`, `Refresh`, etc.
 Check out the default value for `commitMessage` to understand how this field is used.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageExtra
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "prefix" is usually an automatically applied semantic commit prefix, but it can also be statically configured.
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageSuffix
 
 This is used to add a suffix to commit messages.
 Usually left empty except for internal use (multiple base branches, and vulnerability alerts).
 
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
-
 ## commitMessageTopic
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
-
-<!-- prettier-ignore -->
-!!! warning
-    Warning, for advanced use only! Use at your own risk!
 
 ## composerIgnorePlatformReqs
 
@@ -579,7 +558,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
-You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
+You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -748,10 +727,6 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
 
 ## excludeCommitPaths
 
-<!-- prettier-ignore -->
-!!! warning
-    For advanced users only!
-
 Be careful you know what you're doing with this option.
 The initial intended use is to allow the user to exclude certain dependencies from being added/removed/modified when "vendoring" dependencies.
 Example:
@@ -863,11 +838,6 @@ For now, you can only use this option on the GitLab platform.
 
 ## followTag
 
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality.
-    Only use this if you're sure you know what you're doing.
-
 For `followTag` to work, the datasource must support distribution streams or tags, like for example npm does.
 
 The main usecase is to follow a pre-release tag of a dependency, say TypeScripts's `"insiders"` build:
@@ -933,11 +903,6 @@ Usage of `direct` will fallback to the Renovate-native release fetching mechanis
 Also we support the `off` keyword which will stop any fetching immediately.
 
 ## group
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced functionality only.
-    Do not use unless you know what you're doing.
 
 The default configuration for groups are essentially internal to Renovate and you normally shouldn't need to modify them.
 But you may _add_ settings to any group by defining your own `group` configuration object.
@@ -1179,6 +1144,26 @@ Example config:
 Use an exact host for `matchHost` and not a domain (e.g. `api.github.com` as shown above and not `github.com`).
 Do not combine with `hostType` in the same rule or it won't work.
 
+### maxRequestsPerSecond
+
+In addition to `concurrentRequestLimit`, you can limit the maximum number of requests that can be made per one second.
+It can be used to set minimal delay between two requests to the same host.
+Fractional values are allowed, e.g. `0.25` means 1 request per 4 seconds.
+Default value `0` means no limit.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "api.github.com",
+      "maxRequestsPerSecond": 2
+    }
+  ]
+}
+```
+
 ### dnsCache
 
 Enable got [dnsCache](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#dnsCache) support.
@@ -1195,10 +1180,6 @@ You usually don't need to configure it in a host rule if you have already config
 `hostType` can help for cases like an enterprise registry that serves multiple package types and has different authentication for each, although it's often the case that multiple `matchHost` rules could achieve the same thing.
 
 ### insecureRegistry
-
-<!-- prettier-ignore -->
-!!! warning
-    Advanced config, use at your own risk.
 
 Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only.
 This is insecure and is not recommended.
@@ -1433,6 +1414,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
@@ -1911,33 +1893,37 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
-If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 
-```
-  "matchPaths": ["+(package.json)"],
-```
-
-The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
-
-```
-  "matchPaths": ["package.json"],
-```
-
-### matchSourceUrlPrefixes
-
-Here's an example of where you use this to group together all packages from the Vue monorepo:
+For example the following would match any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-      "groupName": "Vue monorepo packages"
+      "description": "Group dependencies from package.json files",
+      "matchPaths": ["**/package.json"],
+      "groupName": "All package.json changes"
     }
   ]
 }
 ```
+
+The following would match any file in directories starting with `app/`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchPaths": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
+```
+
+### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
@@ -1954,14 +1940,14 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls:
+Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/facebook/react"],
-      "groupName": "React"
+      "matchSourceUrls": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
     }
   ]
 }
@@ -1988,7 +1974,7 @@ For example to apply a special label for Major updates:
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary in order to look up release notes.
 
-Using this field we can specify the exact url to fetch release notes from.
+Using this field we can specify the exact URL to fetch release notes from.
 
 Example setting source URL for package "dummy":
 
@@ -2054,7 +2040,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images or GitHub Actions by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## platformAutomerge
 
@@ -3064,8 +3050,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".

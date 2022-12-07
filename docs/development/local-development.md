@@ -11,7 +11,7 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>=16.13.0`
+- Node.js `^16.13.0 || >= 18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
 - Java between `8` and `12`
@@ -215,10 +215,10 @@ Also create documentation for the option in the `docs/usage/configuration-option
 It's really easy to debug Renovate with the help of Chrome's inspect tool.
 Here's an example:
 
-1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
+1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
 1. Run Renovate using `yarn debug ...` instead of `yarn start ...`
-1. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 

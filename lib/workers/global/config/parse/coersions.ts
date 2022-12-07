@@ -36,6 +36,6 @@ export const coersions: Record<string, (arg: string) => unknown> = {
       throw new Error("Invalid JSON value: '" + val + "'");
     }
   },
-  string: (val: string): string => val,
+  string: (val: string): string => val.replace(/\\n/g, '\n'),
   integer: parseInt,
 };

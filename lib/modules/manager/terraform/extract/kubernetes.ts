@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import { TerraformDependencyTypes } from '../common';
 import type { ExtractionResult, ResourceManagerData } from '../types';
 import { keyValueExtractionRegex } from '../util';
 
@@ -42,7 +41,7 @@ export function extractTerraformKubernetesResource(
       }
 
       const managerData: ResourceManagerData = {
-        terraformDependencyType: TerraformDependencyTypes.resource,
+        terraformDependencyType: 'resource',
         resourceType,
       };
       const dep: PackageDependency<ResourceManagerData> = {

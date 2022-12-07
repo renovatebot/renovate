@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
@@ -111,7 +110,7 @@ export async function getPrCache(
     );
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'getPrList err');
-    throw new ExternalHostError(err, PlatformId.Github);
+    throw new ExternalHostError(err, 'github');
   }
 
   return prApiCache.getItems();

@@ -39,6 +39,7 @@ function jestGithubRunnerSpecs(): JestConfig {
 
 const config: JestConfig = {
   cacheDirectory: '.cache/jest',
+  clearMocks: true,
   coverageDirectory: './coverage',
   collectCoverage: true,
   collectCoverageFrom: [

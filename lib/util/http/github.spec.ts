@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DateTime } from 'luxon';
 import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
@@ -20,30 +21,30 @@ const repositoryCache = mocked(_repositoryCache);
 
 const githubApiHost = 'https://api.github.com';
 
-const graphqlQuery = `
-query(
-  $owner: String!,
-  $name: String!,
-  $count: Int,
-  $cursor: String
-) {
-  repository(owner: $name, name: $name) {
-    testItem (
-      orderBy: { field: UPDATED_AT, direction: DESC },
-      filterBy: { createdBy: "someone" },
-      first: $count,
-      after: $cursor,
-    ) {
-      pageInfo {
-        endCursor
-        hasNextPage
-      }
-      nodes {
-        number state title body
+const graphqlQuery = codeBlock`
+  query(
+    $owner: String!,
+    $name: String!,
+    $count: Int,
+    $cursor: String
+  ) {
+    repository(owner: $name, name: $name) {
+      testItem (
+        orderBy: { field: UPDATED_AT, direction: DESC },
+        filterBy: { createdBy: "someone" },
+        first: $count,
+        after: $cursor,
+      ) {
+        pageInfo {
+          endCursor
+          hasNextPage
+        }
+        nodes {
+          number state title body
+        }
       }
     }
   }
-}
 `;
 
 describe('util/http/github', () => {
@@ -154,7 +155,7 @@ describe('util/http/github', () => {
         .scope(githubApiHost, {
           reqheaders: {
             authorization: 'token abc',
-            accept: 'application/vnd.github.v3+json',
+            accept: 'application/json, application/vnd.github.v3+json',
           },
         })
         .get(url)

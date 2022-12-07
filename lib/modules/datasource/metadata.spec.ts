@@ -2,6 +2,7 @@ import { MavenDatasource } from './maven';
 import {
   addMetaData,
   massageGithubUrl,
+  massageUrl,
   shouldDeleteHomepage,
 } from './metadata';
 import { NpmDatasource } from './npm';
@@ -229,6 +230,50 @@ describe('modules/datasource/metadata', () => {
       { releaseTimestamp: '2000-01-02T12:34:56.000Z' },
       { releaseTimestamp: '2000-01-03T12:34:56.000Z' },
     ]);
+  });
+
+  describe('massageUrl', () => {
+    it('Should return an empty string when massaging an invalid url', () => {
+      expect(massageUrl('not a url')).toMatch('');
+    });
+
+    test.each`
+      sourceUrl
+      ${'git@github.com:user/repo'}
+      ${'http://github.com/user/repo'}
+      ${'http+git://github.com/user/repo'}
+      ${'https+git://github.com/user/repo'}
+      ${'ssh://git@github.com/user/repo'}
+      ${'git://github.com/user/repo'}
+      ${'https://www.github.com/user/repo'}
+      ${'https://user.github.com/repo'}
+    `('Should massage GitHub url $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://github.com/user/repo');
+    });
+
+    test.each`
+      sourceUrl
+      ${'http://gitlab.com/user/repo'}
+      ${'git://gitlab.com/user/repo'}
+      ${'https://gitlab.com/user/repo/tree/master'}
+      ${'http://gitlab.com/user/repo/'}
+      ${'http://gitlab.com/user/repo.git'}
+      ${'git@gitlab.com:user/repo.git'}
+    `('Should massage GitLab url $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://gitlab.com/user/repo');
+    });
+
+    test.each`
+      sourceUrl
+      ${'git@example.com:user/repo'}
+      ${'http://example.com/user/repo'}
+      ${'http+git://example.com/user/repo'}
+      ${'https+git://example.com/user/repo'}
+      ${'ssh://git@example.com/user/repo'}
+      ${'git://example.com/user/repo'}
+    `('Should massage other sourceUrl $sourceUrl', ({ sourceUrl }) => {
+      expect(massageUrl(sourceUrl)).toBe('https://example.com/user/repo');
+    });
   });
 
   it('Should massage github git@ url to valid https url', () => {

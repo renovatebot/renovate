@@ -90,7 +90,7 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug({ dependency: depName }, 'Found deprecationMessage');
+        logger.debug(`Found deprecationMessage for dependency ${depName}`);
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -154,15 +154,16 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
-      if (dependency.replacementName && dependency.replacementVersion) {
+      if (config.replacementName && config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
-          newName: dependency.replacementName,
+          newName: config.replacementName,
           newValue: versioning.getNewValue({
             // TODO #7154
             currentValue: currentValue!,
-            newVersion: dependency.replacementVersion,
+            newVersion: config.replacementVersion,
             rangeStrategy: rangeStrategy!,
+            isReplacement: true,
           })!,
         });
       }

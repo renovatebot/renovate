@@ -4,7 +4,6 @@ import {
   ListRepositoriesOutput,
   PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
-import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
 
 import {
@@ -13,7 +12,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -36,9 +35,7 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
-import { getUserArn, initIamClient } from './iam-client';
 
 export interface CodeCommitPr extends Pr {
   body: string;
@@ -49,8 +46,6 @@ interface Config {
   defaultBranch?: string;
   region?: string;
   prList?: CodeCommitPr[];
-  credentials?: Credentials;
-  userArn?: string;
 }
 
 export const config: Config = {};
@@ -61,52 +56,42 @@ export async function initPlatform({
   password,
   token: awsToken,
 }: PlatformParams): Promise<PlatformResult> {
-  let accessKeyId = username;
-  let secretAccessKey = password;
+  const accessKeyId = username;
+  const secretAccessKey = password;
   let region: string | undefined;
 
-  if (!accessKeyId) {
-    accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  if (accessKeyId) {
+    process.env.AWS_ACCESS_KEY_ID = accessKeyId;
   }
-  if (!secretAccessKey) {
-    secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  if (secretAccessKey) {
+    process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
+  }
+  if (awsToken) {
+    process.env.AWS_SESSION_TOKEN = awsToken;
   }
 
   if (endpoint) {
     const regionReg = regEx(/.*codecommit\.(?<region>.+)\.amazonaws\.com/);
     const codeCommitMatch = regionReg.exec(endpoint);
     region = codeCommitMatch?.groups?.region;
-    if (!region) {
+    if (region) {
+      process.env.AWS_REGION = region;
+    } else {
       logger.warn("Can't parse region, make sure your endpoint is correct");
     }
-  } else {
-    region = process.env.AWS_REGION;
   }
-
-  if (!accessKeyId || !secretAccessKey || !region) {
-    throw new Error(
-      'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-    );
-  }
-
-  config.region = region;
-  const credentials: Credentials = {
-    accessKeyId,
-    secretAccessKey,
-    sessionToken: awsToken ?? process.env.AWS_SESSION_TOKEN,
-  };
-  config.credentials = credentials;
 
   // If any of the below fails, it will throw an exception stopping the program.
-  client.buildCodeCommitClient(region, credentials);
-  // To check if we have permission to codecommit
+  client.buildCodeCommitClient();
+  // To check if we have permission to codecommit, throws exception if failed.
   await client.listRepositories();
 
-  initIamClient(region, credentials);
-  config.userArn = await getUserArn();
-
   const platformConfig: PlatformResult = {
-    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com/`,
+    endpoint:
+      endpoint ??
+      `https://git-codecommit.${
+        process.env.AWS_REGION ?? 'us-east-1'
+      }.amazonaws.com/`,
   };
   return Promise.resolve(platformConfig);
 }
@@ -127,7 +112,14 @@ export async function initRepo({
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
-  const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
+  if (!repo?.repositoryMetadata) {
+    logger.error({ repository }, 'Could not find repository');
+    throw new Error(REPOSITORY_NOT_FOUND);
+  }
+  logger.debug({ repositoryDetails: repo }, 'Repository details');
+  const metadata = repo.repositoryMetadata;
+
+  const url = client.getCodeCommitUrl(metadata, repository);
   try {
     await git.initRepo({
       url,
@@ -136,14 +128,6 @@ export async function initRepo({
     logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
-
-  if (!repo?.repositoryMetadata) {
-    logger.error({ repository }, 'Could not find repository');
-    throw new Error(REPOSITORY_NOT_FOUND);
-  }
-
-  logger.debug({ repositoryDetails: repo }, 'Repository details');
-  const metadata = repo.repositoryMetadata;
 
   if (!metadata.defaultBranch || !metadata.repositoryId) {
     logger.debug('Repo is empty');
@@ -168,10 +152,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return config.prList;
   }
 
-  const listPrsResponse = await client.listPullRequests(
-    config.repository!,
-    config.userArn!
-  );
+  const listPrsResponse = await client.listPullRequests(config.repository!);
   const fetchedPrs: CodeCommitPr[] = [];
 
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
@@ -192,8 +173,8 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
       state:
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
-          ? PrState.Open
-          : PrState.Closed,
+          ? 'open'
+          : 'closed',
       number: Number.parseInt(prId),
       title: prInfo.title!,
       body: prInfo.description!,
@@ -203,14 +184,14 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
 
   config.prList = fetchedPrs;
 
-  logger.debug({ length: fetchedPrs.length }, 'Retrieved Pull Requests');
+  logger.debug(`Retrieved Pull Requests, count: ${fetchedPrs.length}`);
   return fetchedPrs;
 }
 
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<CodeCommitPr | null> {
   let prsFiltered: CodeCommitPr[] = [];
   try {
@@ -225,13 +206,13 @@ export async function findPr({
     }
 
     switch (state) {
-      case PrState.All:
+      case 'all':
         break;
-      case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
+      case '!open':
+        prsFiltered = prsFiltered.filter((item) => item.state !== 'open');
         break;
       default:
-        prsFiltered = prsFiltered.filter((item) => item.state === PrState.Open);
+        prsFiltered = prsFiltered.filter((item) => item.state === 'open');
         break;
     }
   } catch (err) {
@@ -249,7 +230,7 @@ export async function getBranchPr(
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -267,12 +248,12 @@ export async function getPr(
   const prInfo = prRes.pullRequest;
   let prState: PrState;
   if (prInfo.pullRequestTargets![0].mergeMetadata?.isMerged) {
-    prState = PrState.Merged;
+    prState = 'merged';
   } else {
     prState =
       prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
-        ? PrState.Open
-        : PrState.Closed;
+        ? 'open'
+        : 'closed';
   }
 
   return {
@@ -387,7 +368,7 @@ export async function createPr({
 
   return {
     number: Number.parseInt(prCreateRes.pullRequest.pullRequestId),
-    state: PrState.Open,
+    state: 'open',
     title: prCreateRes.pullRequest.title,
     sourceBranch,
     targetBranch,
@@ -424,7 +405,7 @@ export async function updatePr({
   }
 
   const prStatusInput =
-    state === PrState.Closed
+    state === 'closed'
       ? PullRequestStatusEnum.CLOSED
       : PullRequestStatusEnum.OPEN;
   if (cachedPr?.state !== prStatusInput) {
@@ -582,7 +563,7 @@ export function getBranchStatus(branchName: string): Promise<BranchStatus> {
   logger.debug(
     'returning branch status yellow, because getBranchStatus isnt supported on aws yet'
   );
-  return Promise.resolve(BranchStatus.yellow);
+  return Promise.resolve('yellow');
 }
 
 /* istanbul ignore next */

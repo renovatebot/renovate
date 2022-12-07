@@ -29,10 +29,6 @@ const datasource = OrbDatasource.id;
 
 describe('modules/datasource/orb/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, {});
       expect(

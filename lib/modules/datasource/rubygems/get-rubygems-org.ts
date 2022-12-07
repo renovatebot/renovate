@@ -58,7 +58,7 @@ export class RubyGemsOrgDatasource extends Datasource {
       const startTime = Date.now();
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
-      logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
+      logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
     } catch (err) /* istanbul ignore next */ {
       if (err.statusCode !== 416) {
         contentLength = 0;
