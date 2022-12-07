@@ -1,7 +1,7 @@
 With [Repology](https://repology.org/) you can look up package versions from many package repositories.
 You can combine Repology with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to update dependencies which are not supported by Renovate.
 
-To specify which specific repository should be queried when looking up a package, the `packageName` has to have the repository identifier and the package name itself, separated by a slash.
+The `packageName` field should be constructed using the repository identifier and the actual package name separated by a slash.
 For example: `alpine_3_12/gcc` would look for a binary (or source package) called `gcc` within the `alpine_3_12` repository.
 
 A [list of all supported repositories](https://repology.org/repositories/statistics) can be found on the Repology homepage.
