@@ -28,9 +28,9 @@ function getDep(
   } else {
     dep.skipReason = 'unsupported-version';
   }
-  const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
-  if (digestMatch) {
-    [, dep.currentDigest] = digestMatch;
+  const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
+  if (digestMatch?.groups?.digest) {
+    dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
   }
   return dep;

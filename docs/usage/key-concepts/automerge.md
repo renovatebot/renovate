@@ -18,7 +18,7 @@ Renovate's approach is to ensure that automerging branches are up-to-date with t
 This means merging multiple branches in a row won't work reliably, so we prefer not to do that.
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
-As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just click "merge" anyway.
+As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just select "merge" anyway.
 For any updates where you want to review the release notes - or code - before you merge, you can keep automerge disabled.
 
 Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.

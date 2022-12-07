@@ -1,7 +1,12 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const presets: Record<string, Preset> = {
   disable: {
+    circleci: {
+      enabled: false,
+    },
     description: 'Disable Docker updates.',
     docker: {
       enabled: false,
@@ -9,27 +14,24 @@ export const presets: Record<string, Preset> = {
     'docker-compose': {
       enabled: false,
     },
-    circleci: {
-      enabled: false,
-    },
-  },
-  enableMajor: {
-    description: 'Enable Docker `major` updates.',
-    packageRules: [
-      {
-        matchDatasources: ['docker'],
-        matchUpdateTypes: ['major'],
-        enabled: true,
-      },
-    ],
   },
   disableMajor: {
     description: 'Disable Docker `major` updates.',
     packageRules: [
       {
+        enabled: false,
         matchDatasources: ['docker'],
         matchUpdateTypes: ['major'],
-        enabled: false,
+      },
+    ],
+  },
+  enableMajor: {
+    description: 'Enable Docker `major` updates.',
+    packageRules: [
+      {
+        enabled: true,
+        matchDatasources: ['docker'],
+        matchUpdateTypes: ['major'],
       },
     ],
   },
