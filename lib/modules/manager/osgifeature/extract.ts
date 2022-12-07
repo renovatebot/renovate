@@ -1,4 +1,3 @@
-import { ContributionQueryOptions } from 'azure-devops-node-api/interfaces/ExtensionManagementInterfaces';
 import * as json5 from 'json5';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
