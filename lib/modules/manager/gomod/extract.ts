@@ -30,7 +30,7 @@ function getDep(
   }
   const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
   if (digestMatch?.groups?.digest) {
-    dep.currentDigest = digestMatch.groups['digest'];
+    dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
   }
   return dep;
