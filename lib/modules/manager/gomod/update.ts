@@ -5,7 +5,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
 
 function getDepNameWithNoVersion(depName: string): string {
-  let depNames = depName.split('/');
+  const depNames = depName.split('/');
   if (depNames[depNames.length - 1].startsWith('v')) {
     return depNames.slice(0, depNames.length - 1).join('/');
   }
