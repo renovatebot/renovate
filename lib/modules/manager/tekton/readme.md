@@ -13,16 +13,17 @@ Tasks and Pipeline definitions can also live outside the Kubernetes cluster and 
 The `tekton` manager focuses on providing updates to Tekton resource references.
 
 Right now, Renovate's Tekton manager only supports references that are [Bundles](https://tekton.dev/docs/pipelines/tekton-bundle-contracts/).
-See the [`tektoncd/resolution` project on GitHub](https://github.com/tektoncd/resolution) for the different kinds of Tekton references.
+Read the [Tekton Pipeline remote resolution docs](https://tekton.dev/docs/pipelines/resolution/) for the different kinds of Tekton references and their corresponding resolvers.
 
 ### Using a Tekton Bundle reference
 
-There are two ways to use a Tekton Bundle reference:
+There are three ways to use a Tekton Bundle reference:
 
+1. Via the [Tekton Bundles Resolver](https://tekton.dev/docs/pipelines/bundle-resolver/)
 1. Via the [`tektoncd/resolution` project](https://github.com/tektoncd/resolution)
-2. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
+1. Via the `taskRun.spec.taskRef.bundle` and the `pipelineRun.spec.pipelineRef.bundle` attributes
 
-Renovate's Tekton manager supports both methods.
+Renovate's Tekton manager supports all the methods listed above.
 
 ### Set your own `fileMatch` pattern
 

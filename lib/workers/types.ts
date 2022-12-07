@@ -135,6 +135,7 @@ export interface BranchMetadata {
   baseBranchSha?: string | null;
   automerge: boolean;
   isModified?: boolean;
+  isPristine?: boolean;
 }
 
 export interface BaseBranchMetadata {
