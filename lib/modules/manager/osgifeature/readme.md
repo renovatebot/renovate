@@ -2,7 +2,7 @@ The `osgifeature` manager extracts dependencies from feature model definition fi
 It uses the `maven` datasource to find dependency updates.
 
 Artifact list extensions are not supported.
-For the definition of artifact list extensions, read [section 159.7.3 of the OSGi R8 spec](INSERT LINK TO SECTION HERE).
+For the definition of artifact list extensions, read [section 159.7.3 of the OSGi R8 spec](https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html#d0e156801).
 
 References:
 
