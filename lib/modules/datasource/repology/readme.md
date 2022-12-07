@@ -7,7 +7,7 @@ For example: `alpine_3_12/gcc` would look for a binary (or source package) calle
 A [list of all supported repositories](https://repology.org/repositories/statistics) can be found on the Repology homepage.
 
 To find the correct identifier, select the repository you want and copy the identifier in the URL: `https://repology.org/repository/<identifier>`.
-For example, the `Alpine Linux 3.12` repository points has this URL: `https://repology.org/repository/alpine_3_12` and has this repository identifier: `alpine_3_12`.
+For example, the `Alpine Linux 3.12` repository has this URL: `https://repology.org/repository/alpine_3_12` and has this repository identifier: `alpine_3_12`.
 
 **Usage Example**
 
@@ -30,7 +30,7 @@ First you would set a generic regex manager in your `renovate.json` file for `Do
 }
 ```
 
-Then you would use comments in your Dockerfile, so Renovate knows where to find the updates:
+Then you would put comments in your Dockerfile, to tell Renovate where to find the updates:
 
 ```docker
 FROM alpine:3.12.0@sha256:a15790640a6690aa1730c38cf0a440e2aa44aaca9b0e8931a9f2b0d7cc90fd65
@@ -45,6 +45,9 @@ RUN apk add --no-cache \
     musl-dev="${MUSL_DEV_VERSION}"
 ```
 
-We recommend you try `loose` versioning for distribution packages first.
-This is beacuse the version number usually doesn't match Renovate's default `semver` specification.
-Now whenever the OS package for `gcc` of `Alpine Linux 3.12` is updated, Renovate will automatically adjust the value of the environment variable to the newest version.
+When the operating system package for `gcc` of `Alpine Linux 3.12` is updated, Renovate updates the environment variable.
+
+<!-- prettier-ignore -->
+!!! tip
+    We recommend you try `loose` versioning for distribution packages first.
+    This is because the version number usually doesn't match Renovate's default `semver` specification.
