@@ -1,8 +1,8 @@
-The `osgifeature` manager extracts dependencies from feature model definition files, typically located under `src/main/features`. It uses `maven` datasource for looking up dependency updates.
+The `osgifeature` manager extracts dependencies from feature model definition files, typically located under `src/main/features`.
+It uses the `maven` datasource to find dependency updates.
 
-Limitations:
-
-- artifact list extensions as defined in section 159.7.3 of the OSGi R8 spec are not supported yet.
+Artifact list extensions are not supported.
+For the definition of artifact list extensions, read [section 159.7.3 of the OSGi R8 spec](INSERT LINK TO SECTION HERE).
 
 References:
 
