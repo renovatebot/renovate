@@ -8,6 +8,9 @@ const artifactsExtension = Fixtures.get('extension-artifacts.json');
 const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
 const frameworkArtifact = Fixtures.get('framework-artifact.json');
 const versionWithVariable = Fixtures.get('version-with-variable.json');
+const bundlesAsObjectsMissingId = Fixtures.get(
+  'bundles-as-object-missing-id.json'
+);
 
 describe('modules/manager/osgifeature/extract', () => {
   describe('extractPackageFile()', () => {
@@ -122,6 +125,15 @@ describe('modules/manager/osgifeature/extract', () => {
           },
         ],
       });
+    });
+
+    it('skips depedencies with with missing ids', () => {
+      const packageFile = extractPackageFile(
+        bundlesAsObjectsMissingId,
+        '',
+        undefined
+      );
+      expect(packageFile).toBeNull();
     });
   });
 
