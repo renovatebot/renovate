@@ -1,0 +1,7 @@
+title: Getting Started
+nav:
+  - 'Use Cases': 'use-cases.md'
+  - 'Running Renovate': 'running.md'
+  - 'Self-Hosting Examples': '/examples/self-hosting'
+  - 'Installing & Onboarding': 'installing-onboarding.md'
+  - 'Private Packages': 'private-packages.md'
