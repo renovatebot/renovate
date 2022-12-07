@@ -288,13 +288,13 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/pravesht/gocql v0.0.1');
     });
 
-    it('handles replace line with major version update', () => {
+    it('handles replace line with major version update (1)', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
         managerData: { lineNumber: 11 },
         newValue: 'v2.0.0',
         depType: 'replace',
-        currentValue: 'v0.7.0',
+        currentValue: 'v0.0.0',
         newMajor: 2,
         updateType: 'major' as UpdateType,
       };
@@ -302,6 +302,42 @@ describe('modules/manager/gomod/update', () => {
       expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pravesht/gocql/v2 v2.0.0');
     });
+
+    it('handles replace line with major version update (2)', () => {
+      const fileContent = `
+      go 1.19
+      require(
+        gomodules.xyz/jsonpatch/v2 v2.2.0
+      )`;
+      const upgrade = {
+        depName: 'gomodules.xyz/jsonpatch/v2',
+        managerData: {lineNumber: 3, multiLine: true},
+        newValue: 'v3.0.1',
+        depType: 'require',
+        currentValue: 'v2.2.0',
+        newMajor: 3,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({fileContent, upgrade});
+      expect(res).not.toEqual(fileContent);
+      expect(res).toContain('gomodules.xyz/jsonpatch/v3 v3.0.1');
+    });
+
+    it('handles replace line with major version update of packages starting with gopgk.in', () => {
+      const upgrade = {
+        depName: 'gopkg.in/russross/blackfriday.v1',
+        managerData: {lineNumber: 7},
+        newValue: 'v2.0.0',
+        depType: 'require',
+        currentValue: 'v1.0.0',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({fileContent: gomod1, upgrade});
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
+    });
+
 
     it('handles replace line with digest', () => {
       const upgrade = {
