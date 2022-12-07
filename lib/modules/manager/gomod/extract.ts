@@ -29,7 +29,7 @@ function getDep(
     dep.skipReason = 'unsupported-version';
   }
   const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
-  if (digestMatch?.groups?.digest]) {
+  if (digestMatch?.groups?.digest) {
     dep.currentDigest = digestMatch.groups['digest'];
     dep.digestOneAndOnly = true;
   }
