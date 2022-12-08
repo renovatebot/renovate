@@ -119,7 +119,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   rust: {
     datasource: 'docker',
     depName: 'rust',
-    versioning: 'docker',
+    versioning: semverVersioningId,
   },
   yarn: {
     datasource: 'npm',
