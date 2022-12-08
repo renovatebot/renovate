@@ -141,11 +141,11 @@ export class GoProxyDatasource extends Datasource {
       },
       asterisk: {
         match: '*',
-        value: (_: string) => '[^\\/]*',
+        value: (_: string) => '[^/]*',
       },
       qmark: {
         match: '?',
-        value: (_: string) => '[^\\/]',
+        value: (_: string) => '[^/]',
       },
       characterRangeOpen: {
         match: '[',

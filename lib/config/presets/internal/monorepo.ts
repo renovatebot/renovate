@@ -261,7 +261,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
-  spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   wordpress: '^@wordpress/',
 };
 
