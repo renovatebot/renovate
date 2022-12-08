@@ -6,12 +6,12 @@ import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-type RegistryCache = {
+interface RegistryCache {
   lastSync: Date;
   packageReleases: Record<string, string[]>; // Because we might need a "constructor" key
   contentLength: number;
   isSupported: boolean;
-};
+}
 
 const registryCaches: Record<string, RegistryCache> = {};
 
