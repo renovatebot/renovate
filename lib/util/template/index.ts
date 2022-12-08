@@ -180,8 +180,8 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   },
 };
 
-function getChildEnvFields() :string[] {
-  const childEnv = getChildEnv({})
+function getChildEnvFields(): string[] {
+  const childEnv = getChildEnv({});
   return Object.keys(childEnv);
 }
 
@@ -190,7 +190,8 @@ function getAllowedFieldsList(): string[] {
     .concat(exposedConfigOptions)
     .concat(prBodyFields)
     .concat(handlebarsUtilityFields)
-    .concat(getChildEnvFields());
+    .concat(getChildEnvFields())
+    .concat(['env']);
 
   return allowedFieldsList;
 }
@@ -200,6 +201,7 @@ function getAllowedTemplateFields(): Set<string> {
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
     ...getChildEnvFields(),
+    'env',
   ]);
 
   return allowedTemplateFields;
@@ -217,7 +219,7 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...getChildEnv({}), ...input };
+  const data = { ...GlobalConfig.get(), ...input, env: getChildEnv({}) };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
