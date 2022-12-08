@@ -90,6 +90,6 @@ Returns `true` if at least one expression is `true`.
 
 For security reasons, you can only access a handful of basic environment variables like `HOME` or `PATH` by default:
 
-`HOME is {{HOME}}`
+`HOME is {{env.HOME}}`
 
 If self-hosting, you can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
