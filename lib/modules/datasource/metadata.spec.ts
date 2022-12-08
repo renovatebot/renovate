@@ -92,7 +92,7 @@ describe('modules/datasource/metadata', () => {
       const packageName = 'some-chart';
 
       addMetaData(dep, datasource, packageName);
-      expect(dep).toMatchSnapshot({
+      expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
       });
     }
@@ -116,7 +116,7 @@ describe('modules/datasource/metadata', () => {
 
       addMetaData(dep, datasource, packageName);
       expect(dep.sourceDirectory).toBeUndefined();
-      expect(dep).toMatchSnapshot({
+      expect(dep).toMatchObject({
         sourceUrl: expectedSourceUrl,
       });
     }
@@ -133,7 +133,7 @@ describe('modules/datasource/metadata', () => {
     const packageName = '@neutrinojs/react';
 
     addMetaData(dep, datasource, packageName);
-    expect(dep).toMatchSnapshot({
+    expect(dep).toMatchObject({
       sourceUrl: 'https://github.com/neutrinojs/neutrino',
       sourceDirectory: 'packages/foo',
     });
