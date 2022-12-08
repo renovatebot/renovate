@@ -22,9 +22,7 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  private readonly versionsDatasources: {
-    [key: string]: VersionsDatasource;
-  } = {};
+  private readonly versionsDatasources: Record<string, VersionsDatasource> = {};
 
   private readonly internalRubyGemsDatasource: InternalRubyGemsDatasource;
 

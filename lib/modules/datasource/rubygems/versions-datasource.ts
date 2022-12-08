@@ -13,7 +13,7 @@ type RegistryCache = {
   isSupported: boolean;
 };
 
-const registryCaches: { [key: string]: RegistryCache } = {};
+const registryCaches: Record<string, RegistryCache> = {};
 
 // Note: use only for tests
 export function resetCache(): void {
@@ -49,8 +49,7 @@ export class VersionsDatasource extends Datasource {
     logger.debug(`getRubygemsOrgDependency(${packageName})`);
     await this.syncVersions();
     if (!this.registryCache.isSupported) {
-      const err = new Error(`${this.registryUrl} is not supported`);
-      throw err;
+      throw new Error(`${this.registryUrl} is not supported`);
     }
     if (!this.registryCache.packageReleases[packageName]) {
       return null;
