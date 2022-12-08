@@ -12,8 +12,8 @@ export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   fileMatch: [
     '\\.gradle(\\.kts)?$',
-    '(^|\\/)gradle\\.properties$',
-    '(^|\\/)gradle\\/.+\\.toml$',
+    '(^|/)gradle\\.properties$',
+    '(^|/)gradle\\/.+\\.toml$',
     '\\.versions\\.toml$',
   ],
   timeout: 600,
