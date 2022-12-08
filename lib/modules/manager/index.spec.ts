@@ -10,8 +10,8 @@ const datasources = getDatasourceList();
 describe('modules/manager/index', () => {
   describe('supportedDatasources', () => {
     for (const m of manager.getManagerList()) {
-      if (m === 'regex') {
-        // regex supports any
+      if (m === 'custom') {
+        // custom managers supports any
         continue;
       }
       const supportedDatasources = manager.get(m, 'supportedDatasources');

@@ -166,7 +166,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     it('fails with oldversion in depname', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom';
       upgrade.depName =
         '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
       upgrade.currentValue = '1';

@@ -67,7 +67,7 @@ export function extractPackageFile(
     return null;
   }
 
-  if (manager === 'regex') {
+  if (manager === 'custom') {
     return customManager.extractPackageFile(content, fileName, config);
   }
 

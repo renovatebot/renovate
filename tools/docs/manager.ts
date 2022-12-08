@@ -25,7 +25,7 @@ interface ManagerIssues {
 }
 
 function getTitle(manager: string, displayName: string): string {
-  if (manager === 'regex') {
+  if (manager === 'custom') {
     return `Custom Manager Support using Regex`;
   }
   return `Automated Dependency Updates for ${displayName}`;
@@ -126,7 +126,7 @@ title: ${getTitle(manager, displayName)}
 sidebar_label: ${displayName}
 ---
 `;
-    if (manager !== 'regex') {
+    if (manager !== 'custom') {
       const nameWithUrl = getNameWithUrl(manager, definition);
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
@@ -170,7 +170,7 @@ sidebar_label: ${displayName}
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${manager}/readme.md`
     );
-    if (manager !== 'regex') {
+    if (manager !== 'custom') {
       md += '\n## Additional Information\n\n';
     }
     md += managerReadmeContent + '\n\n';

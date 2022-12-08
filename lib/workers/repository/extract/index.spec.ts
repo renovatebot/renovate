@@ -50,7 +50,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.customManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res)).toContain('regex');
+      expect(Object.keys(res)).toContain('custom');
     });
   });
 });
