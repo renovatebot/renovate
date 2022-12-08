@@ -155,6 +155,9 @@ const prBodyFields = [
 ];
 
 const handlebarsUtilityFields = ['else'];
+
+const envObjectField = ['env'];
+
 type CompileInput = Record<string, unknown>;
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
@@ -191,8 +194,8 @@ function getAllowedFieldsList(): Set<string> {
     ...exposedConfigOptions,
     ...prBodyFields,
     ...handlebarsUtilityFields,
+    ...envObjectField,
     ...getChildEnvFields(),
-    'env',
   ]);
 
   return allowedFieldsList;
@@ -202,8 +205,8 @@ function getAllowedTemplateFields(): Set<string> {
   const allowedTemplateFields = new Set([
     ...Object.keys(allowedFields),
     ...exposedConfigOptions,
+    ...envObjectField,
     ...getChildEnvFields(),
-    'env',
   ]);
 
   return allowedTemplateFields;
