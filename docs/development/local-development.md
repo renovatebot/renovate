@@ -92,6 +92,8 @@ To ensure everything is working properly on your end, you must:
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
 
+Do not worry about the token error for now, as you will be given instructions on how to configure the token a little later down in this document.
+
 You only need to do these steps once.
 
 Before you submit a pull request you should:
