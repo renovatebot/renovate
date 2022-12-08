@@ -46,7 +46,7 @@ export class GenericDockerImageRef extends DependencyExtractor {
    * @param parentElement element from which the next element will be extracted
    * @param leftPath path elements left to walk down
    */
-  walkPath(
+  private walkPath(
     abstractDep: PackageDependency,
     parentElement: any,
     leftPath: string[]

@@ -50,7 +50,7 @@ export class ModuleExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  analyseTerraformModule(dep: PackageDependency): PackageDependency {
+  private analyseTerraformModule(dep: PackageDependency): PackageDependency {
     // TODO #7154
     const source = dep.managerData!.source as string;
     const githubRefMatch = githubRefMatchRegex.exec(source);

@@ -25,7 +25,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
   );
 
-  analyzeTerraformProvider(
+  protected analyzeTerraformProvider(
     dep: PackageDependency,
     locks: ProviderLock[],
     depType: string
