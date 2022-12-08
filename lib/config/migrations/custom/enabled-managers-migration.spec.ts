@@ -11,4 +11,15 @@ describe('config/migrations/custom/enabled-managers-migration', () => {
       }
     );
   });
+
+  it('should replace regex with custom', () => {
+    expect(EnabledManagersMigration).toMigrate(
+      {
+        enabledManagers: ['test1', 'regex', 'test2'],
+      },
+      {
+        enabledManagers: ['test1', 'custom', 'test2'],
+      }
+    );
+  });
 });
