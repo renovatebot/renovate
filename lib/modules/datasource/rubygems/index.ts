@@ -56,7 +56,7 @@ export class RubyGemsDatasource extends Datasource {
       });
     } catch (error) {
       if (
-        error.message === `${registryUrl} is not supported` &&
+        error.message === PAGE_NOT_FOUND_ERROR &&
         parseUrl(registryUrl)?.hostname !== 'rubygems.org'
       ) {
         return this.internalRubyGemsDatasource.getReleases({

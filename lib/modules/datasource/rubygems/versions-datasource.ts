@@ -49,7 +49,7 @@ export class VersionsDatasource extends Datasource {
     logger.debug(`getRubygemsOrgDependency(${packageName})`);
     await this.syncVersions();
     if (!this.registryCache.isSupported) {
-      throw new Error(`${this.registryUrl} is not supported`);
+      throw new Error(PAGE_NOT_FOUND_ERROR);
     }
     if (!this.registryCache.packageReleases[packageName]) {
       return null;
