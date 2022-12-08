@@ -4,15 +4,15 @@ import managers from './api';
 export function extractPackageFile(
   content: string,
   fileName: string,
-  config?: ExtractConfig
+  config: ExtractConfig
 ): Result<PackageFile | null> {
-  const customType = config?.customType ?? 'regex';
+  const { customType = 'regex' } = config;
   if (!managers.has(customType)) {
     return null;
   }
 
   const m = managers.get(customType)!;
-  return m.extractPackageFile
+  return m?.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)
     : null;
 }
