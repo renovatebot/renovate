@@ -552,9 +552,20 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
-    it('returns null if only local deps', async () => {
+    it('returns dep with skipReason local', async () => {
       const src = codeBlock`
         module "relative" {
+          source = "../fe"
+        }
+      `;
+      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+        deps: [{ skipReason: 'local' }],
+      });
+    });
+
+    it('returns null with only not added resources', async () => {
+      const src = codeBlock`
+        resource "test_resource" "relative" {
           source = "../fe"
         }
       `;

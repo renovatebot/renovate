@@ -30,7 +30,7 @@ export class TerraformVersionExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  analyseTerraformVersion(dep: PackageDependency): PackageDependency {
+  protected analyseTerraformVersion(dep: PackageDependency): PackageDependency {
     dep.depType = 'required_version';
     dep.datasource = GithubReleasesDatasource.id;
     dep.depName = 'hashicorp/terraform';

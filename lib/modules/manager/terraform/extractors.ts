@@ -7,14 +7,12 @@ import { TerraformWorkspaceExtractor } from './extractors/resources/terraform-wo
 import { RequiredProviderExtractor } from './extractors/terraform-block/required-provider';
 import { TerraformVersionExtractor } from './extractors/terraform-block/terraform-version';
 
-const resourceExtractors: DependencyExtractor[] = [];
-
-export default resourceExtractors;
-
-resourceExtractors.push(new HelmReleaseExtractor());
-resourceExtractors.push(new GenericDockerImageRef());
-resourceExtractors.push(new TerraformWorkspaceExtractor());
-resourceExtractors.push(new RequiredProviderExtractor());
-resourceExtractors.push(new TerraformVersionExtractor());
-resourceExtractors.push(new ProvidersExtractor());
-resourceExtractors.push(new ModuleExtractor());
+export const resourceExtractors: DependencyExtractor[] = [
+  new HelmReleaseExtractor(),
+  new GenericDockerImageRef(),
+  new TerraformWorkspaceExtractor(),
+  new RequiredProviderExtractor(),
+  new TerraformVersionExtractor(),
+  new ProvidersExtractor(),
+  new ModuleExtractor(),
+];

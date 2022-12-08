@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import type { ExtractConfig, PackageFile } from '../types';
-import dependencyExtractors from './extractors';
+import { resourceExtractors } from './extractors';
 import * as hcl from './hcl';
 import {
   checkFileContainsDependency,
@@ -15,7 +15,7 @@ export async function extractPackageFile(
   logger.trace({ content }, 'terraform.extractPackageFile()');
 
   const contentCheckList = [];
-  for (const extractor of dependencyExtractors) {
+  for (const extractor of resourceExtractors) {
     contentCheckList.push(...extractor.getCheckList());
   }
 
@@ -32,14 +32,16 @@ export async function extractPackageFile(
 
   const locks = await extractLocksForPackageFile(fileName);
 
-  for (const extractor of dependencyExtractors) {
+  for (const extractor of resourceExtractors) {
     const deps = extractor.extract(hclMap, locks);
     dependencies.push(...deps);
   }
 
   dependencies.forEach((value) => delete value.managerData);
-  if (dependencies.some((dep) => dep.skipReason !== 'local')) {
+  if (dependencies.length) {
     return { deps: dependencies };
   }
+
+  /* istanbul ignore next */
   return null;
 }
