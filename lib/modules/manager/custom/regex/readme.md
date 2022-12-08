@@ -125,7 +125,7 @@ But we included the `versioningTemplate` config option to show you why we call t
 You should use triple brace `{{{ }}}` templates like `{{{versioning}}}` to be safe.
 This is because Handlebars escapes special characters with double braces (by default).
 
-By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `regexManager` instead of _four_.
+By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `customManager` instead of _four_.
 The `Dockerfile` is documented better as well.
 
 The syntax in the example is arbitrary and you can set your own syntax.

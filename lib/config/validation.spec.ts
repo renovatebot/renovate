@@ -309,41 +309,42 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
-    it('validates regEx for each fileMatch', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['js', '***$}{]]['],
-            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-            datasourceTemplate: 'maven',
-            versioningTemplate: 'gradle',
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
-    });
+    describe('customManagers/regex', () => {
+      it('validates regEx for each fileMatch', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['js', '***$}{]]['],
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              datasourceTemplate: 'maven',
+              versioningTemplate: 'gradle',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+        expect(errors).toMatchSnapshot();
+      });
 
-    it('errors if no regexManager matchStrings', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: [],
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config as any,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchInlineSnapshot(`
+      it('errors if no matchStrings', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: [],
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config as any,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+        expect(errors).toMatchInlineSnapshot(`
         [
           {
             "message": "Each Regex Manager must contain a non-empty fileMatch array",
@@ -351,27 +352,27 @@ describe('config/validation', () => {
           },
         ]
       `);
-    });
+      });
 
-    it('errors if empty regexManager matchStrings', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['foo'],
-            matchStrings: [],
-          },
-          {
-            fileMatch: ['foo'],
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config as RenovateConfig,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
-      expect(errors).toMatchInlineSnapshot(`
+      it('errors if empty matchStrings', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['foo'],
+              matchStrings: [],
+            },
+            {
+              fileMatch: ['foo'],
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config as RenovateConfig,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(2);
+        expect(errors).toMatchInlineSnapshot(`
         [
           {
             "message": "Each Regex Manager must contain a non-empty matchStrings array",
@@ -383,104 +384,105 @@ describe('config/validation', () => {
           },
         ]
       `);
-    });
+      });
 
-    it('errors if no regexManager fileMatch', async () => {
-      const config = {
-        customManagers: [
-          {
-            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
-            datasourceTemplate: 'maven',
-            versioningTemplate: 'gradle',
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config as any,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-    });
+      it('errors if no fileMatch', async () => {
+        const config = {
+          customManagers: [
+            {
+              matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+              datasourceTemplate: 'maven',
+              versioningTemplate: 'gradle',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config as any,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+      });
 
-    it('validates regEx for each matchStrings', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['***$}{]]['],
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-    });
+      it('validates regEx for each matchStrings', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['Dockerfile'],
+              matchStrings: ['***$}{]]['],
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+      });
 
-    it('passes if regexManager fields are present', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
-            depNameTemplate: 'foo',
-            datasourceTemplate: 'bar',
-            registryUrlTemplate: 'foobar',
-            extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
-            depTypeTemplate: 'apple',
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
-    });
+      it('passes if all fields are present', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['Dockerfile'],
+              matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+              depNameTemplate: 'foo',
+              datasourceTemplate: 'bar',
+              registryUrlTemplate: 'foobar',
+              extractVersionTemplate: '^(?<version>v\\d+\\.\\d+)',
+              depTypeTemplate: 'apple',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(0);
+      });
 
-    it('errors if extra regexManager fields are present', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (?<currentValue>.*?)\\s'],
-            depNameTemplate: 'foo',
-            datasourceTemplate: 'bar',
-            depTypeTemplate: 'apple',
-            automerge: true,
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(1);
-    });
+      it('errors if extra fields are present', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['Dockerfile'],
+              matchStrings: ['ENV (?<currentValue>.*?)\\s'],
+              depNameTemplate: 'foo',
+              datasourceTemplate: 'bar',
+              depTypeTemplate: 'apple',
+              automerge: true,
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toHaveLength(1);
+      });
 
-    it('errors if regexManager fields are missing', async () => {
-      const config = {
-        customManagers: [
-          {
-            fileMatch: ['Dockerfile'],
-            matchStrings: ['ENV (.*?)\\s'],
-            depNameTemplate: 'foo',
-            datasourceTemplate: 'bar',
-          },
-        ],
-      };
-      const { warnings, errors } = await configValidation.validateConfig(
-        config,
-        true
-      );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(1);
+      it('errors if mandatory fields are missing', async () => {
+        const config = {
+          customManagers: [
+            {
+              fileMatch: ['Dockerfile'],
+              matchStrings: ['ENV (.*?)\\s'],
+              depNameTemplate: 'foo',
+              datasourceTemplate: 'bar',
+            },
+          ],
+        };
+        const { warnings, errors } = await configValidation.validateConfig(
+          config,
+          true
+        );
+        expect(warnings).toHaveLength(0);
+        expect(errors).toMatchSnapshot();
+        expect(errors).toHaveLength(1);
+      });
     });
 
     it('ignore keys', async () => {

@@ -151,13 +151,13 @@ export interface BranchSummary {
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {
+  customManagers?: RegExManager[];
   manager: string;
   fileList: string[];
   fileMatch?: string[];
   updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  customManagers?: RegExManager[];
   enabledManagers?: string[];
   enabled?: boolean;
 }

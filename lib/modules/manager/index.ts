@@ -1,6 +1,7 @@
 import { programmingLanguages } from '../../constants';
 import type { RangeStrategy } from '../../types';
 import managers from './api';
+import * as customManager from './custom';
 import type {
   ExtractConfig,
   GlobalManagerConfig,
@@ -65,6 +66,11 @@ export function extractPackageFile(
   if (!managers.has(manager)) {
     return null;
   }
+
+  if (manager === 'regex') {
+    return customManager.extractPackageFile(content, fileName, config);
+  }
+
   const m = managers.get(manager)!;
   return m.extractPackageFile
     ? m.extractPackageFile(content, fileName, config)

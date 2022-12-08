@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../../util/regex';
-import type { PackageDependency } from '../types';
+import { regEx } from '../../../../util/regex';
+import type { PackageDependency } from '../../types';
 import type { RecursionParameter, RegexManagerConfig } from './types';
 import {
   createDependency,

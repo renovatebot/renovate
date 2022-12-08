@@ -1,6 +1,6 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { logger } from '../../../logger';
-import type { CustomExtractConfig } from '../types';
+import { Fixtures } from '../../../../../test/fixtures';
+import { logger } from '../../../../logger';
+import type { CustomExtractConfig } from '../../types';
 import { defaultConfig, extractPackageFile } from '.';
 
 const dockerfileContent = Fixtures.get(`Dockerfile`);
@@ -8,7 +8,7 @@ const ansibleYamlContent = Fixtures.get(`ansible.yml`);
 const exampleJsonContent = Fixtures.get(`example.json`);
 const exampleGitlabCiYml = Fixtures.get(`gitlab-ci.yml`);
 
-describe('modules/manager/regex/index', () => {
+describe('modules/manager/custom/regex/index', () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
       pinDigests: false,

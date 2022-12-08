@@ -403,6 +403,7 @@ export async function validateConfig(
             }
             if (key === 'customManagers') {
               const allowedKeys = [
+                'customType',
                 'description',
                 'fileMatch',
                 'matchStrings',
@@ -418,13 +419,13 @@ export async function validateConfig(
                 'depTypeTemplate',
               ];
               // TODO: fix types #7154
-              for (const regexManager of val as any[]) {
+              for (const customManager of val as any[]) {
                 if (
-                  Object.keys(regexManager).some(
+                  Object.keys(customManager).some(
                     (k) => !allowedKeys.includes(k)
                   )
                 ) {
-                  const disallowedKeys = Object.keys(regexManager).filter(
+                  const disallowedKeys = Object.keys(customManager).filter(
                     (k) => !allowedKeys.includes(k)
                   );
                   errors.push({
@@ -433,10 +434,10 @@ export async function validateConfig(
                       ', '
                     )}`,
                   });
-                } else if (is.nonEmptyArray(regexManager.fileMatch)) {
-                  if (is.nonEmptyArray(regexManager.matchStrings)) {
+                } else if (is.nonEmptyArray(customManager.fileMatch)) {
+                  if (is.nonEmptyArray(customManager.matchStrings)) {
                     let validRegex = false;
-                    for (const matchString of regexManager.matchStrings) {
+                    for (const matchString of customManager.matchStrings) {
                       try {
                         regEx(matchString);
                         validRegex = true;
@@ -457,8 +458,8 @@ export async function validateConfig(
                       ];
                       for (const field of mandatoryFields) {
                         if (
-                          !regexManager[`${field}Template`] &&
-                          !regexManager.matchStrings.some(
+                          !customManager[`${field}Template`] &&
+                          !customManager.matchStrings.some(
                             (matchString: string) =>
                               matchString.includes(`(?<${field}>`)
                           )

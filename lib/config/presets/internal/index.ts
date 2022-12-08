@@ -19,6 +19,7 @@ import * as workaroundsPreset from './workarounds';
 export const groups: Record<string, Record<string, Preset>> = {
   compatibility: compatibilityPreset.presets,
   config: configPreset.presets,
+  customManagers: customManagersPreset.presets,
   default: defaultPreset.presets,
   docker: dockerPreset.presets,
   group: groupPreset.presets,
@@ -27,7 +28,6 @@ export const groups: Record<string, Record<string, Preset>> = {
   npm: npm.presets,
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
-  customManagers: customManagersPreset.presets,
   replacements: replacements.presets,
   schedule: schedulePreset.presets,
   workarounds: workaroundsPreset.presets,

@@ -1,9 +1,9 @@
 import { URL } from 'url';
 import is from '@sindresorhus/is';
-import type { RegexManagerTemplates } from '../../../config/types';
-import { logger } from '../../../logger';
-import * as template from '../../../util/template';
-import type { CustomExtractConfig, PackageDependency } from '../types';
+import type { RegexManagerTemplates } from '../../../../config/types';
+import { logger } from '../../../../logger';
+import * as template from '../../../../util/template';
+import type { CustomExtractConfig, PackageDependency } from '../../types';
 import type { ExtractionTemplate } from './types';
 
 export const validMatchFields = [
