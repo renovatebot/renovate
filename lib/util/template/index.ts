@@ -185,13 +185,15 @@ function getChildEnvFields(): string[] {
   return Object.keys(childEnv);
 }
 
-function getAllowedFieldsList(): string[] {
-  const allowedFieldsList = Object.keys(allowedFields)
-    .concat(exposedConfigOptions)
-    .concat(prBodyFields)
-    .concat(handlebarsUtilityFields)
-    .concat(getChildEnvFields())
-    .concat(['env']);
+function getAllowedFieldsList(): Set<string> {
+  const allowedFieldsList = new Set([
+    ...Object.keys(allowedFields),
+    ...exposedConfigOptions,
+    ...prBodyFields,
+    ...handlebarsUtilityFields,
+    ...getChildEnvFields(),
+    'env',
+  ]);
 
   return allowedFieldsList;
 }
@@ -228,7 +230,7 @@ export function compile(
       const varNames = match[1].split('.');
       const allowedFieldsList = getAllowedFieldsList();
       for (const varName of varNames) {
-        if (!allowedFieldsList.includes(varName)) {
+        if (!allowedFieldsList.has(varName)) {
           logger.info(
             { varName, template },
             'Disallowed variable name in template'
