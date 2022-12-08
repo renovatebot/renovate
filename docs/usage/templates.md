@@ -92,4 +92,4 @@ For security reasons, you can only access a handful of basic environment variabl
 
 `HOME is {{HOME}}`
 
-You can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
+If self-hosting, you can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
