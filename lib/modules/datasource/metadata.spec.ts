@@ -99,26 +99,24 @@ describe('modules/datasource/metadata', () => {
   );
 
   test.each`
-    sourceUrl                                                 | expectedSourceUrl
-    ${'https://github.com/bitnami'}                           | ${'https://github.com/bitnami'}
-    ${'https://github.com/bitnami/charts'}                    | ${'https://github.com/bitnami/charts'}
-    ${'https://gitlab.com/group'}                             | ${'https://gitlab.com/group'}
-    ${'https://gitlab.com/group/repo'}                        | ${'https://gitlab.com/group/repo'}
-    ${'https://gitlab.com/group/sub-group/repo'}              | ${'https://gitlab.com/group/sub-group/repo'}
-    ${'https://github.example.com/org/repo'}                  | ${'https://github.example.com/org/repo'}
-    ${'https://unknown-platform.com/some/repo/files/foo/bar'} | ${'https://unknown-platform.com/some/repo/files/foo/bar'}
+    sourceUrl
+    ${'https://github.com/bitnami'}
+    ${'https://github.com/bitnami/charts'}
+    ${'https://gitlab.com/group'}
+    ${'https://gitlab.com/group/repo'}
+    ${'https://gitlab.com/group/sub-group/repo'}
+    ${'https://github.example.com/org/repo'}
+    ${'https://unknown-platform.com/some/repo/files/foo/bar'}
   `(
     'Should not split a sourceDirectory when one cannot be detected $sourceUrl',
-    ({ sourceUrl, expectedSourceUrl }) => {
+    ({ sourceUrl }) => {
       const dep: ReleaseResult = { sourceUrl, releases: [] };
       const datasource = HelmDatasource.id;
       const packageName = 'some-chart';
 
       addMetaData(dep, datasource, packageName);
       expect(dep.sourceDirectory).toBeUndefined();
-      expect(dep).toMatchObject({
-        sourceUrl: expectedSourceUrl,
-      });
+      expect(dep).toMatchObject({ sourceUrl });
     }
   );
 
