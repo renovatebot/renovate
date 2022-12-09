@@ -40,6 +40,7 @@ body:
         - 'GitHub Enterprise Server'
         - 'gitlab.com'
         - 'GitLab self-hosted'
+        - 'AWS CodeCommit'
     validations:
       required: false
 
@@ -55,6 +56,7 @@ body:
           - Bitbucket Server
           - Azure DevOps
           - Gitea
+          - AWS CodeCommit
     validations:
       required: false
 

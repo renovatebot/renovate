@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
+import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
@@ -24,6 +25,10 @@ export class GoDatasource extends Datasource {
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
+  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
+  static readonly pversionRegexp = regEx(
+    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/
+  );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#7154)
@@ -59,8 +64,9 @@ export class GoDatasource extends Datasource {
       return null;
     }
 
-    // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
-    const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
+    // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    const tag =
+      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {

@@ -2,6 +2,7 @@ import { lang, lexer, query as q } from 'good-enough-parser';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   cleanupTempVars,
   coalesceVariable,
@@ -15,6 +16,8 @@ import {
   handleCustomRegistryUrl,
   handleDepInterpolation,
   handleDepSimpleString,
+  handleImplicitGradlePlugin,
+  handleKotlinShortNotationDep,
   handleLibraryDep,
   handleLongFormDep,
   handlePlugin,
@@ -372,6 +375,31 @@ const qGroovyMapNotationDependencies = q
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
+// kotlin("bom", "1.7.21")
+const qKotlinShortNotationDependencies = q
+  .sym<Ctx>('kotlin')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'moduleName'))
+      .op(',')
+      .opt(q.sym<Ctx>('version').op('='))
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      )
+      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .end(),
+  })
+  .handler(handleKotlinShortNotationDep)
+  .handler(cleanupTempVars);
+
 // (group = "foo", name = "bar", version = "1.2.3")
 const qKotlinMapNotationDependencies = q
   .tree({
@@ -710,6 +738,29 @@ const qApplyFrom = q
   .handler(handleApplyFrom)
   .handler(cleanupTempVars);
 
+// pmd { toolVersion = "1.2.3" }
+const qImplicitGradlePlugin = q
+  .sym(regEx(`^(?:${Object.keys(GRADLE_PLUGINS).join('|')})$`), storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q
+      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
+      .op('=')
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      ),
+  })
+  .handler((ctx) => storeInTokenMap(ctx, 'version'))
+  .handler(handleImplicitGradlePlugin)
+  .handler(cleanupTempVars);
+
 export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
@@ -734,12 +785,14 @@ export function parseGradle(
       qDependenciesInterpolation,
       qDependencySet,
       qGroovyMapNotationDependencies,
+      qKotlinShortNotationDependencies,
       qKotlinMapNotationDependencies,
       qPlugins,
       qRegistryUrls,
       qVersionCatalogs,
       qLongFormDep,
-      qApplyFrom
+      qApplyFrom,
+      qImplicitGradlePlugin
     ),
   });
 
