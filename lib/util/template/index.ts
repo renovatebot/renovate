@@ -158,11 +158,28 @@ const handlebarsUtilityFields = ['else'];
 
 const envObjectField = ['env'];
 
+const childEnvFields = Object.keys(getChildEnv({}) ?? {});
+
+const allowedFieldsList = new Set([
+  ...Object.keys(allowedFields),
+  ...exposedConfigOptions,
+  ...prBodyFields,
+  ...handlebarsUtilityFields,
+  ...envObjectField,
+  ...childEnvFields,
+]);
+
+const allowedTemplateFields = new Set([
+  ...Object.keys(allowedFields),
+  ...exposedConfigOptions,
+  ...envObjectField,
+  ...childEnvFields,
+]);
+
 type CompileInput = Record<string, unknown>;
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   get(target: CompileInput, prop: keyof CompileInput): unknown {
-    const allowedTemplateFields = getAllowedTemplateFields();
     if (!allowedTemplateFields.has(prop)) {
       return undefined;
     }
@@ -183,35 +200,6 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   },
 };
 
-function getChildEnvFields(): string[] {
-  const childEnv = getChildEnv({});
-  return Object.keys(childEnv);
-}
-
-function getAllowedFieldsList(): Set<string> {
-  const allowedFieldsList = new Set([
-    ...Object.keys(allowedFields),
-    ...exposedConfigOptions,
-    ...prBodyFields,
-    ...handlebarsUtilityFields,
-    ...envObjectField,
-    ...getChildEnvFields(),
-  ]);
-
-  return allowedFieldsList;
-}
-
-function getAllowedTemplateFields(): Set<string> {
-  const allowedTemplateFields = new Set([
-    ...Object.keys(allowedFields),
-    ...exposedConfigOptions,
-    ...envObjectField,
-    ...getChildEnvFields(),
-  ]);
-
-  return allowedTemplateFields;
-}
-
 export function proxyCompileInput(input: CompileInput): CompileInput {
   return new Proxy<CompileInput>(input, compileInputProxyHandler);
 }
@@ -231,7 +219,6 @@ export function compile(
     const matches = template.matchAll(templateRegex);
     for (const match of matches) {
       const varNames = match[1].split('.');
-      const allowedFieldsList = getAllowedFieldsList();
       for (const varName of varNames) {
         if (!allowedFieldsList.has(varName)) {
           logger.info(
