@@ -137,7 +137,7 @@ If you do, update your `matchStrings` regex!
 
 If the location of files used in gitlab-ci `includes:` has changed you can use the regex manager to update the `depName` as well as the version.
 
-When doing so ou may find you need to specify a second `matchString` for the new name, as when the regex manager validates the change it will not always detect that the new value is valid.
+When doing so you may find you need to specify a second `matchString` for the new name, as when the regex manager validates the change it will not always detect that the new value is valid.
 
 ```json
 {
