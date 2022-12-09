@@ -15,6 +15,7 @@ For dry runs, give the PAT these scopes:
 - `read_user`
 - `read_api`
 - `read_repository`
+- `write_repository` (when using autodiscover)
 
 Let Renovate use your PAT by doing _one_ of the following:
 
