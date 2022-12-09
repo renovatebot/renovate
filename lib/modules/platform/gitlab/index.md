@@ -16,6 +16,7 @@ For dry runs, give the PAT these scopes:
 - `read_user`
 - `read_api`
 - `read_repository`
+- `write_repository` (when using autodiscover)
 - `read_registry` (only if Renovate needs to access the [GitLab Container registry](https://docs.gitlab.com/ee/user/packages/container_registry/))
 
 Let Renovate use your PAT by doing _one_ of the following:

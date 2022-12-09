@@ -13,8 +13,3 @@ export interface HelmRepository {
 }
 
 export type HelmRepositoryData = Record<string, ReleaseResult>;
-
-export interface RepoSource {
-  sourceUrl?: string;
-  sourceDirectory?: string;
-}
