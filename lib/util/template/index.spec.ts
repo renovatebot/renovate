@@ -92,7 +92,7 @@ describe('util/template/index', () => {
 
   it('has access to basic environment variables (basicEnvVars)', () => {
     const userTemplate = 'HOME is {{env.HOME}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe(`HOME is ${process.env.HOME ?? ''}`);
   });
 
@@ -103,7 +103,7 @@ describe('util/template/index', () => {
       },
     });
     const userTemplate = 'SHELL is {{env.SHELL}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe(`SHELL is ${process.env.SHELL ?? ''}`);
   });
 
@@ -114,13 +114,13 @@ describe('util/template/index', () => {
       },
     });
     const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('CUSTOM_FOO is foo');
   });
 
   it('and does not have access to other environment variables', () => {
     const userTemplate = '{{LOGNAME}} {{UID}} {{SHELL}}';
-    const output = template.compile(userTemplate, undefined as never);
+    const output = template.compile(userTemplate, {});
     expect(output).toBe('  ');
   });
 
