@@ -95,6 +95,7 @@ export async function lookupUpdates(
       }
 
       res.sourceUrl = dependency?.sourceUrl;
+      res.registryUrl = dependency?.registryUrl;
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
       }

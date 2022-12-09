@@ -8,6 +8,7 @@ exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
         {
           "datasource": "maven",
           "depName": "bbb",
+          "registryUrl": "custom.reg",
           "updates": [
             "a",
             "b",

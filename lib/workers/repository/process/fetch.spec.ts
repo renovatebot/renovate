@@ -66,7 +66,10 @@ describe('workers/repository/process/fetch', () => {
           },
         ],
       };
-      lookupUpdates.mockResolvedValue({ updates: ['a', 'b'] } as never);
+      lookupUpdates.mockResolvedValue({
+        updates: ['a', 'b'],
+        registryUrl: 'custom.reg',
+      } as never);
       await fetchUpdates(config, packageFiles);
       expect(packageFiles).toMatchSnapshot();
     });

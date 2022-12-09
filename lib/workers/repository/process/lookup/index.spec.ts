@@ -1781,6 +1781,19 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
+    it('returns the registry url used to get package releases', async () => {
+      const registryUrl = 'https://private.registry.com'; // In this context applyPackageRules is run after getPkgReleases
+      config.registryUrls = [registryUrl];
+      config.currentValue = '0.9.99';
+      config.depName = 'q';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope(registryUrl).get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchObject({
+        registryUrl,
+      });
+    });
+
     it('handles replacements', async () => {
       config.currentValue = '1.4.1';
       config.depName = 'q';
