@@ -39,14 +39,14 @@
 
     #### Finding logs on hosted app
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     If you use the Renovate app (GitHub):
 
     1. Go to the affected PR, and search for "View repository job log here"
 
-    1. Click on the link to go to the "Mend Renovate Dashboard" and log in
+    1. Select the link to go to the "Mend Renovate Dashboard" and log in
 
     1. You are now in the correct repository log overview screen
 
@@ -59,7 +59,7 @@
 
     #### Finding logs when self-hosting
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
@@ -69,7 +69,7 @@
 
     ### Insufficient logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
@@ -79,13 +79,13 @@
 
     ### Formatting your logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     Please put your logs in a `<details>` and `<summary>` element like this:
 
 
-        <details><summary>Click me to see logs</summary>
+        <details><summary>Select me to see logs</summary>
 
         ```
         Copy/paste your logs here, between the starting and ending backticks

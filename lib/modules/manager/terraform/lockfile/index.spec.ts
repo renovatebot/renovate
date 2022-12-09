@@ -90,7 +90,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: '.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -122,7 +125,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: '.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -173,7 +179,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: '.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -205,7 +214,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: '.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -237,7 +249,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: 'test/.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(1);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -290,7 +305,10 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(1);
     expect(result?.[0].file).not.toBeNull();
-    expect(result?.[0].file).toMatchSnapshot();
+    expect(result?.[0].file).toMatchSnapshot({
+      type: 'addition',
+      path: 'test/.terraform.lock.hcl',
+    });
 
     expect(mockHash.mock.calls).toBeArrayOfSize(4);
     expect(mockHash.mock.calls).toMatchSnapshot();
@@ -436,7 +454,12 @@ describe('modules/manager/terraform/lockfile/index', () => {
     expect(result).toBeArrayOfSize(1);
 
     result?.forEach((value) => expect(value.file).not.toBeNull());
-    result?.forEach((value) => expect(value.file).toMatchSnapshot());
+    result?.forEach((value) =>
+      expect(value.file).toMatchSnapshot({
+        type: 'addition',
+        path: 'subfolder/.terraform.lock.hcl',
+      })
+    );
 
     expect(mockHash.mock.calls).toBeArrayOfSize(2);
     expect(mockHash.mock.calls).toMatchSnapshot();
