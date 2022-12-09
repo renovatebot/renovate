@@ -14,6 +14,8 @@ import type { GoproxyItem, VersionInfo } from './types';
 
 const parsedGoproxy: Record<string, GoproxyItem[]> = {};
 
+const modRegex = regEx(`^(?<baseMod>.*?)(?:[./]v(?<majorVersion>\\d+))?$`);
+
 export class GoProxyDatasource extends Datasource {
   static readonly id = 'go-proxy';
 
@@ -43,6 +45,12 @@ export class GoProxyDatasource extends Datasource {
       return result;
     }
 
+    const isGopkgin = packageName.startsWith('gopkg.in/');
+    const majorSuffixSeparator = isGopkgin ? '.' : '/';
+    const modParts = packageName.match(modRegex);
+    const baseMod = modParts?.groups?.baseMod ?? packageName;
+    const currentMajor = parseInt(modParts?.groups?.majorVersion ?? '0');
+
     for (const { url, fallback } of proxyList) {
       try {
         if (url === 'off') {
@@ -53,37 +61,28 @@ export class GoProxyDatasource extends Datasource {
         }
 
         let releases: Release[] = [];
-        if (packageName.startsWith('gopkg.in/')) {
-          const versionSuffixRegex = regEx(/\.v(\d+)$/);
-          const versionSuffixMatch = packageName.match(versionSuffixRegex);
-          if (versionSuffixMatch === null || versionSuffixMatch.length < 2) {
-            releases = await this.getVersionsWithInfo(url, packageName);
-          } else {
-            const versionSuffix = parseInt(versionSuffixMatch[1]);
-            for (let i = 0; ; i++) {
-              try {
-                const result = await this.getVersionsWithInfo(
-                  url,
-                  packageName.replace(
-                    versionSuffixRegex,
-                    `.v${versionSuffix + i}`
-                  )
-                );
-                if (result.length === 0) {
-                  break;
-                }
-                releases = releases.concat(result);
-              } catch (err) {
-                const statusCode = err?.response?.statusCode;
-                if (i > 0 && (statusCode === 404 || statusCode === 410)) {
-                  break;
-                }
-                throw err;
-              }
+        for (let i = 0; ; i++) {
+          try {
+            const majorVersion = currentMajor + i;
+            let mod: string;
+            if (majorVersion < 2 && !isGopkgin) {
+              mod = baseMod;
+              i++; // v0 and v1 are the same module
+            } else {
+              mod = `${baseMod}${majorSuffixSeparator}v${majorVersion}`;
             }
+            const result = await this.getVersionsWithInfo(url, mod);
+            if (result.length === 0) {
+              break;
+            }
+            releases = releases.concat(result);
+          } catch (err) {
+            const statusCode = err?.response?.statusCode;
+            if (i > 0 && statusCode === 404) {
+              break;
+            }
+            throw err;
           }
-        } else {
-          releases = await this.getVersionsWithInfo(url, packageName);
         }
 
         if (releases.length) {
