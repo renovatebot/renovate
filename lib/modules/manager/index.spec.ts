@@ -1,7 +1,12 @@
+import { mocked } from '../../../test/util';
 import { loadModules } from '../../util/modules';
 import { getDatasourceList } from '../datasource';
+import * as _regex from './custom/regex';
 import type { ManagerApi } from './types';
 import * as manager from '.';
+
+jest.mock('./custom/regex');
+const regex = mocked(_regex);
 
 jest.mock('../../util/fs');
 
@@ -126,6 +131,13 @@ describe('modules/manager/index', () => {
 
       expect(
         manager.extractPackageFile('dummy', '', 'filename', {})
+      ).not.toBeNull();
+    });
+
+    it('works with custom manager', () => {
+      regex.extractPackageFile.mockReturnValue({ deps: [] });
+      expect(
+        manager.extractPackageFile('custom', '', 'filename', {})
       ).not.toBeNull();
     });
 
