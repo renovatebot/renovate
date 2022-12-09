@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
+import { merge } from 'lodash';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { getChildEnv } from '../exec';
@@ -212,7 +213,10 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...input, env: getChildEnv({}) };
+  const childEnv = {
+    env: getChildEnv({}),
+  };
+  const data = merge(GlobalConfig.get(), input, childEnv);
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
