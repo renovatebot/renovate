@@ -1412,14 +1412,21 @@ This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
 Supported lock files are:
 
-- `package-lock.json`
-- `yarn.lock`
-- `pnpm-lock.yaml`
-- `composer.lock`
-- `Gemfile.lock`
-- `poetry.lock`
+- `.terraform.lock.hcl`
 - `Cargo.lock`
+- `composer.lock`
+- `flake.lock` // Nix lockfile?
+- `Gemfile.lock`
+- `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `package-lock.json`
+- `Pipfile.lock`
+- `pnpm-lock.yaml`
+- `poetry.lock`
+- `pyproject.toml`
+- `requirements.lock` // Helm V3 lockfile?
+- `requirements.txt` // pipenv lockfile?
+- `yarn.lock`
 
 Others may be added via feature request.
 
