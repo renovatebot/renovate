@@ -63,13 +63,13 @@ export class GoProxyDatasource extends Datasource {
         let releases: Release[] = [];
         for (let i = 0; ; i++) {
           try {
-            const majorVersion = currentMajor + i;
+            const major = currentMajor + i;
             let mod: string;
-            if (majorVersion < 2 && !isGopkgin) {
+            if (major < 2 && !isGopkgin) {
               mod = baseMod;
               i++; // v0 and v1 are the same module
             } else {
-              mod = `${baseMod}${majorSuffixSeparator}v${majorVersion}`;
+              mod = `${baseMod}${majorSuffixSeparator}v${major}`;
             }
             const result = await this.getVersionsWithInfo(url, mod);
             if (result.length === 0) {
