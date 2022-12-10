@@ -37,6 +37,10 @@ export function generateUpdate(
   if (release.releaseTimestamp !== undefined) {
     update.releaseTimestamp = release.releaseTimestamp;
   }
+  // istanbul ignore if
+  if (release.registryUrl !== undefined) {
+    update.registryUrl = release.registryUrl;
+  }
 
   const { currentValue } = config;
   if (currentValue) {
