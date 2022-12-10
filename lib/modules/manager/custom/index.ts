@@ -8,6 +8,7 @@ export function extractPackageFile(
 ): Result<PackageFile | null> {
   const { customType = 'regex' } = config;
   if (!managers.has(customType)) {
+    logger.warn({ customType }, 'Unknown customManagers type');
     return null;
   }
 
