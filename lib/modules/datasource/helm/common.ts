@@ -1,45 +1,43 @@
+import { detectPlatform } from '../../../util/common';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
-import type { HelmRelease, RepoSource } from './types';
+import type { HelmRelease } from './types';
 
 const chartRepo = regEx(/charts?|helm|helm-charts/i);
-const githubUrl = regEx(
-  /^(?<url>https:\/\/github\.com\/[^/]+\/(?<repo>[^/]+))(:?\/|\/tree\/[^/]+\/(?<path>.+))?$/
-);
 const githubRelease = regEx(
   /^(https:\/\/github\.com\/[^/]+\/[^/]+)\/releases\//
 );
 
-export function findSourceUrl(release: HelmRelease): RepoSource {
+function isPossibleChartRepo(url: string): boolean {
+  if (detectPlatform(url) === null) {
+    return false;
+  }
+
+  const parsed = parseGitUrl(url);
+  return chartRepo.test(parsed.name);
+}
+
+export function findSourceUrl(release: HelmRelease): string | null {
   // it's a github release :)
   const releaseMatch = githubRelease.exec(release.urls[0]);
   if (releaseMatch) {
-    return { sourceUrl: releaseMatch[1] };
+    return releaseMatch[1];
   }
 
-  if (release.home) {
-    const githubUrlMatch = githubUrl.exec(release.home);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
-      };
-    }
+  if (release.home && isPossibleChartRepo(release.home)) {
+    return release.home;
   }
 
   if (!release.sources?.length) {
-    return {};
+    return null;
   }
 
   for (const url of release.sources) {
-    const githubUrlMatch = githubUrl.exec(url);
-    if (githubUrlMatch?.groups && chartRepo.test(githubUrlMatch?.groups.repo)) {
-      return {
-        sourceUrl: githubUrlMatch.groups.url,
-        sourceDirectory: githubUrlMatch.groups.path,
-      };
+    if (isPossibleChartRepo(url)) {
+      return url;
     }
   }
 
   // fallback
-  return { sourceUrl: release.sources[0] };
+  return release.sources[0];
 }

@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import { detectPlatform } from '../../util/common';
+import { parseGitUrl } from '../../util/git/url';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { parseUrl, trimTrailingSlash, validateUrl } from '../../util/url';
@@ -129,6 +130,18 @@ export function addMetaData(
   const manualSourceUrl = manualSourceUrls[datasource]?.[packageNameLowercase];
   if (manualSourceUrl) {
     dep.sourceUrl = manualSourceUrl;
+  }
+
+  if (dep.sourceUrl && !dep.sourceDirectory) {
+    try {
+      const parsed = parseGitUrl(dep.sourceUrl);
+      if (parsed.filepathtype === 'tree' && parsed.filepath !== '') {
+        dep.sourceUrl = parsed.toString();
+        dep.sourceDirectory = parsed.filepath;
+      }
+    } catch (err) {
+      // ignore invalid urls
+    }
   }
 
   if (
