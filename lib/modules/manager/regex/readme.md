@@ -160,7 +160,7 @@ For example:
 }
 ```
 
-Will migrate:
+The config above will migrate:
 
 ```yaml
 - project: 'pipeline-fragments/docker-lint'
