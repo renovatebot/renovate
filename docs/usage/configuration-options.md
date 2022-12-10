@@ -1415,7 +1415,7 @@ Supported lock files are:
 - `.terraform.lock.hcl`
 - `Cargo.lock`
 - `composer.lock`
-- `flake.lock` // Nix lockfile?
+- `flake.lock`
 - `Gemfile.lock`
 - `gradle.lockfile`
 - `jsonnetfile.lock.json`
