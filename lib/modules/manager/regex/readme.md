@@ -168,7 +168,7 @@ The config above will migrate:
   file: 'ci-include-docker-lint-base.yml'
 ```
 
-to
+To this:
 
 ```yaml
 - project: 'pipeline-solutions/gitlab/fragments/docker-lint'
