@@ -50,11 +50,11 @@ export class DartVersionDatasource extends Datasource {
     return result.releases.length ? result : null;
   }
 
-  private getReleasesFromResponse = (
+  private getReleasesFromResponse(
     channel: string,
     prefixes: string[]
-  ): Release[] =>
-    prefixes
+  ): Release[] {
+    return prefixes
       .filter((prefix) => {
         const version = this.getVersionFromPrefix(prefix);
         if (
@@ -72,10 +72,11 @@ export class DartVersionDatasource extends Datasource {
         const version = this.getVersionFromPrefix(prefix);
         return version ? { version, isStable: channel === 'stable' } : [];
       });
+  }
 
   // Prefix should have a format of "channels/stable/release/2.9.3/"
-  private getVersionFromPrefix = (prefix: string): string | undefined => {
+  private getVersionFromPrefix(prefix: string): string | undefined {
     const parts = prefix.split('/');
     return parts[parts.length - 2];
-  };
+  }
 }
