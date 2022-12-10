@@ -142,12 +142,15 @@ async function mergeRegistries(
       if (!res) {
         continue;
       }
-      for (const release of res.releases || []) {
-        release.registryUrl = res.registryUrl;
-      }
-      delete res.registryUrl;
       if (combinedRes) {
+        for (const existingRelease of combinedRes.releases || []) {
+          existingRelease.registryUrl ??= combinedRes.registryUrl;
+        }
+        for (const additionalRelease of res.releases || []) {
+          additionalRelease.registryUrl = res.registryUrl;
+        }
         combinedRes = { ...res, ...combinedRes };
+        delete combinedRes.registryUrl;
         combinedRes.releases = [...combinedRes.releases, ...res.releases];
       } else {
         combinedRes = res;
