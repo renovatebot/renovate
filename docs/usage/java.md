@@ -35,6 +35,7 @@ Renovate can update:
 - dependencies whose version is defined in a `*.properties` file
 - `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
   directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
+- `versions.props` from [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
 
 Renovate does not support:
 
