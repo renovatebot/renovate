@@ -55,6 +55,17 @@ describe('config/migrations/custom/extends-migration', () => {
     );
   });
 
+  it('should rename presets', () => {
+    expect(ExtendsMigration).toMigrate(
+      {
+        extends: ['regexManagers:dockerfileVersions'],
+      },
+      {
+        extends: ['customManagers:dockerfileVersions'],
+      }
+    );
+  });
+
   it('it migrates presets', () => {
     GlobalConfig.set({
       migratePresets: {

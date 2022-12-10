@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../global';
-import { removedPresets } from '../../presets/common';
+import { removedPresets, renamedPresets } from '../../presets/common';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class ExtendsMigration extends AbstractMigration {
@@ -33,6 +33,10 @@ export class ExtendsMigration extends AbstractMigration {
 
     if (removedPresets[preset] !== undefined) {
       return removedPresets[preset];
+    }
+
+    if (renamedPresets[preset] !== undefined) {
+      return renamedPresets[preset];
     }
 
     if (migratePresets?.[preset] !== undefined) {

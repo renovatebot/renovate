@@ -24,6 +24,10 @@ export const removedPresets: Record<string, string | null> = {
   'helpers:oddIsUnstablePackages': null,
 };
 
+export const renamedPresets: Record<string, string | null> = {
+  'regexManagers:dockerfileVersions': 'customManagers:dockerfileVersions',
+};
+
 const renamedMonorepos: Record<string, string> = {
   'arcus event-grid': 'arcus.event-grid',
   'arcus security': 'arcus.security',
