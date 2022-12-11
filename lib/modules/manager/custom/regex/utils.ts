@@ -1,6 +1,6 @@
 import { URL } from 'url';
 import is from '@sindresorhus/is';
-import type { RegexManagerTemplates } from '../../../../config/types';
+import type { CustomManagerTemplates } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import * as template from '../../../../util/template';
 import type { CustomExtractConfig, PackageDependency } from '../../types';
@@ -50,7 +50,7 @@ export function createDependency(
   const { groups, replaceString } = extractionTemplate;
 
   for (const field of validMatchFields) {
-    const fieldTemplate = `${field}Template` as keyof RegexManagerTemplates;
+    const fieldTemplate = `${field}Template` as keyof CustomManagerTemplates;
     const tmpl = config[fieldTemplate];
     if (tmpl) {
       try {

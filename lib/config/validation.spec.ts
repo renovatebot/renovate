@@ -288,7 +288,7 @@ describe('config/validation', () => {
         true
       );
       expect(warnings).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([]);
       expect(errors).toHaveLength(0);
     });
 
@@ -327,7 +327,13 @@ describe('config/validation', () => {
         );
         expect(warnings).toHaveLength(0);
         expect(errors).toHaveLength(1);
-        expect(errors).toMatchSnapshot();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Invalid regExp for customManagers[0].fileMatch: `***$}{]][`',
+            topic: 'Configuration Error',
+          },
+        ]);
       });
 
       it('errors if no matchStrings', async () => {
@@ -344,14 +350,13 @@ describe('config/validation', () => {
         );
         expect(warnings).toHaveLength(0);
         expect(errors).toHaveLength(1);
-        expect(errors).toMatchInlineSnapshot(`
-        [
+        expect(errors).toMatchObject([
           {
-            "message": "Each Regex Manager must contain a non-empty fileMatch array",
-            "topic": "Configuration Error",
+            message:
+              'Each Regex Manager must contain a non-empty fileMatch array',
+            topic: 'Configuration Error',
           },
-        ]
-      `);
+        ]);
       });
 
       it('errors if empty matchStrings', async () => {
@@ -372,18 +377,18 @@ describe('config/validation', () => {
         );
         expect(warnings).toHaveLength(0);
         expect(errors).toHaveLength(2);
-        expect(errors).toMatchInlineSnapshot(`
-        [
+        expect(errors).toMatchObject([
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
-            "topic": "Configuration Error",
+            message:
+              'Each Regex Manager must contain a non-empty matchStrings array',
+            topic: 'Configuration Error',
           },
           {
-            "message": "Each Regex Manager must contain a non-empty matchStrings array",
-            "topic": "Configuration Error",
+            message:
+              'Each Regex Manager must contain a non-empty matchStrings array',
+            topic: 'Configuration Error',
           },
-        ]
-      `);
+        ]);
       });
 
       it('errors if no fileMatch', async () => {
@@ -480,7 +485,13 @@ describe('config/validation', () => {
           true
         );
         expect(warnings).toHaveLength(0);
-        expect(errors).toMatchSnapshot();
+        expect(errors).toMatchObject([
+          {
+            message:
+              'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
+            topic: 'Configuration Error',
+          },
+        ]);
         expect(errors).toHaveLength(1);
       });
     });
@@ -611,8 +622,20 @@ describe('config/validation', () => {
       );
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
-      expect(warnings).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
+          topic: 'Config error',
+        },
+      ]);
+      expect(warnings).toMatchObject([
+        {
+          message:
+            '"fileMatch" must be configured in a manager block and not here: npm.minor',
+          topic: 'Config warning',
+        },
+      ]);
     });
 
     it('errors if language or manager objects are nested', async () => {
@@ -638,7 +661,18 @@ describe('config/validation', () => {
       );
       expect(errors).toHaveLength(2);
       expect(warnings).toHaveLength(0);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'The "docker" object can only be configured at the top level of a config but was found inside "major.minor"',
+          topic: 'Configuration Error',
+        },
+        {
+          message:
+            'The "gradle" object can only be configured at the top level of a config but was found inside "java"',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('warns if hostType has the wrong parent', async () => {
@@ -650,7 +684,13 @@ describe('config/validation', () => {
       );
       expect(errors).toHaveLength(0);
       expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'hostType should only be configured within a "hostRules" object. Was found in .',
+          topic: 'hostType',
+        },
+      ]);
     });
 
     it('validates preset values', async () => {
@@ -676,7 +716,13 @@ describe('config/validation', () => {
         true
       );
       expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchSnapshot();
+      expect(warnings).toMatchObject([
+        {
+          message:
+            'packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"excludePackageNames":["bar"]}',
+          topic: 'Configuration Error',
+        },
+      ]);
       expect(errors).toHaveLength(0);
     });
 
@@ -695,7 +741,13 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toMatchObject([
+        {
+          message:
+            'packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {"matchUpdateTypes":["major"],"registryUrls":["https://registry.npmjs.org"]}',
+          topic: 'Configuration Error',
+        },
+      ]);
     });
 
     it('warns on nested group packageRules', async () => {

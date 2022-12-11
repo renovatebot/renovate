@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import type { RegexManagerTemplates } from '../../../../config/types';
+import type { CustomManagerTemplates } from '../../../../config/types';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -45,7 +45,7 @@ export function extractPackageFile(
   // filter all null values
   deps = deps.filter(is.truthy);
   if (deps.length) {
-    const res: PackageFile & RegexManagerTemplates = {
+    const res: PackageFile & CustomManagerTemplates = {
       deps,
       matchStrings: config.matchStrings,
     };
@@ -54,7 +54,7 @@ export function extractPackageFile(
     }
     // copy over templates for autoreplace
     for (const field of validMatchFields.map(
-      (f) => `${f}Template` as keyof RegexManagerTemplates
+      (f) => `${f}Template` as keyof CustomManagerTemplates
     )) {
       if (config[field]) {
         res[field] = config[field];

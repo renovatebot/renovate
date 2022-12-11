@@ -1,1 +1,1 @@
-This is a custom wrapper for the current regex manager and any future custom implmentations to come.
+This is a custom wrapper for the current regex manager and any future custom implementations to come.

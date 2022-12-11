@@ -1,6 +1,8 @@
-With the `regex` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
+With the `custom` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
 
-The `regex` manager is unique in Renovate because:
+**Note:** `customManagers` was formerly known as `regexManagers`
+
+The `custom` manager is unique in Renovate because:
 
 - It is configurable via regex named capture groups
 - It can extract any `datasource`

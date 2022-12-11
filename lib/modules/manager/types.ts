@@ -1,7 +1,7 @@
 import type { ReleaseType } from 'semver';
 import type {
+  CustomManagerTemplates,
   MatchStringsStrategy,
-  RegexManagerTemplates,
   UpdateType,
   ValidationMessage,
 } from '../../config/types';
@@ -22,7 +22,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   skipInstalls?: boolean;
 }
 
-export interface CustomExtractConfig extends RegexManagerTemplates {
+export interface CustomExtractConfig extends CustomManagerTemplates {
   customType?: string;
   autoReplaceStringTemplate?: string;
   matchStrings?: string[];

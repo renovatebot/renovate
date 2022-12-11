@@ -1,8 +1,8 @@
 import type { Merge } from 'type-fest';
 import type {
+  CustomManager,
   GroupConfig,
   LegacyAdminConfig,
-  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -151,7 +151,7 @@ export interface BranchSummary {
 }
 
 export interface WorkerExtractConfig extends ExtractConfig {
-  customManagers?: RegExManager[];
+  customManagers?: CustomManager[];
   manager: string;
   fileList: string[];
   fileMatch?: string[];

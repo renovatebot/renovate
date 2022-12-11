@@ -167,7 +167,7 @@ export type RenovateRepository =
       repository: string;
       secrets?: Record<string, string>;
     };
-export interface RegexManagerTemplates {
+export interface CustomManagerTemplates {
   depNameTemplate?: string;
   packageNameTemplate?: string;
   datasourceTemplate?: string;
@@ -178,7 +178,7 @@ export interface RegexManagerTemplates {
   extractVersionTemplate?: string;
   registryUrlTemplate?: string;
 }
-export interface RegExManager extends RegexManagerTemplates {
+export interface CustomManager extends CustomManagerTemplates {
   customType?: string;
   fileMatch: string[];
   matchStrings: string[];
@@ -241,7 +241,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
-  customManagers?: RegExManager[];
+  customManagers?: CustomManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
