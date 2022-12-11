@@ -8,6 +8,18 @@ export const REGISTRY_URLS = {
   mavenCentral: 'https://repo.maven.apache.org/maven2',
 };
 
+export const GRADLE_PLUGINS = {
+  checkstyle: 'com.puppycrawl.tools:checkstyle',
+  codenarc: 'org.codenarc:CodeNarc',
+  detekt: 'io.gitlab.arturbosch.detekt:detekt-core',
+  findbugs: 'com.google.code.findbugs:findbugs',
+  googleJavaFormat: 'com.google.googlejavaformat:google-java-format',
+  jacoco: 'org.jacoco:jacoco',
+  lombok: 'org.projectlombok:lombok',
+  pmd: 'net.sourceforge.pmd:pmd-java',
+  spotbugs: 'com.github.spotbugs:spotbugs',
+};
+
 export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
   'createXmlValueRemover',
   'events',
