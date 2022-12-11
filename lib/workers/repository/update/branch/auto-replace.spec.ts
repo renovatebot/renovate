@@ -171,7 +171,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
         "- project: 'pipeline-fragments/docker-lint'\n" +
         'ref: 2-4-0\n' +
         "file: 'ci-include-docker-lint-base.yml'";
-      upgrade.manager = 'regex';
+      upgrade.manager = 'custom';
       upgrade.depName = 'pipeline-solutions/gitlab/fragments/docker-lint';
       upgrade.currentValue = '2-4-0';
       upgrade.newValue = '2-4-1';
