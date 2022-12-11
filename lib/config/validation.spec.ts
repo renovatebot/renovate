@@ -137,7 +137,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(3);
       expect(errors).toMatchSnapshot();
     });
@@ -154,7 +154,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toContain('ansible');
     });
@@ -171,7 +171,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
@@ -188,8 +188,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it.each([
@@ -205,7 +205,7 @@ describe('config/validation', () => {
         const { warnings, errors } = await configValidation.validateConfig(
           config
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
         expect(errors).toMatchSnapshot();
       }
@@ -287,9 +287,8 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([]);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors for unsafe fileMatches', async () => {
@@ -304,7 +303,7 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
@@ -325,9 +324,9 @@ describe('config/validation', () => {
           config,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
-        expect(errors).toMatchObject([
+        expect(errors).toEqual([
           {
             message:
               'Invalid regExp for customManagers[0].fileMatch: `***$}{]][`',
@@ -348,9 +347,9 @@ describe('config/validation', () => {
           config as any,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
-        expect(errors).toMatchObject([
+        expect(errors).toEqual([
           {
             message:
               'Each Regex Manager must contain a non-empty fileMatch array',
@@ -375,9 +374,9 @@ describe('config/validation', () => {
           config as RenovateConfig,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(2);
-        expect(errors).toMatchObject([
+        expect(errors).toEqual([
           {
             message:
               'Each Regex Manager must contain a non-empty matchStrings array',
@@ -405,7 +404,7 @@ describe('config/validation', () => {
           config as any,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
       });
 
@@ -422,7 +421,7 @@ describe('config/validation', () => {
           config,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
       });
 
@@ -444,8 +443,8 @@ describe('config/validation', () => {
           config,
           true
         );
-        expect(warnings).toHaveLength(0);
-        expect(errors).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toBeEmptyArray();
       });
 
       it('errors if extra fields are present', async () => {
@@ -465,7 +464,7 @@ describe('config/validation', () => {
           config,
           true
         );
-        expect(warnings).toHaveLength(0);
+        expect(warnings).toBeEmptyArray();
         expect(errors).toHaveLength(1);
       });
 
@@ -484,8 +483,8 @@ describe('config/validation', () => {
           config,
           true
         );
-        expect(warnings).toHaveLength(0);
-        expect(errors).toMatchObject([
+        expect(warnings).toBeEmptyArray();
+        expect(errors).toEqual([
           {
             message:
               'Regex Managers must contain currentValueTemplate configuration or regex group named currentValue',
@@ -504,8 +503,8 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates timezone preset', async () => {
@@ -516,8 +515,8 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('does not validate constraints children', async () => {
@@ -528,8 +527,8 @@ describe('config/validation', () => {
         config as never, // TODO: #15963
         true
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates object with ignored children', async () => {
@@ -540,8 +539,8 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('validates valid registryAlias objects', async () => {
@@ -554,8 +553,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors if registryAliases depth is more than 1', async () => {
@@ -569,8 +568,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
         {
           message:
             'Invalid `registryAliases.registryAliases.sample` configuration: value is not a url',
@@ -589,8 +588,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
         {
           message:
             'Invalid `registryAliases.registryAliases.example1` configuration: value is not a url',
@@ -622,14 +621,14 @@ describe('config/validation', () => {
       );
       expect(errors).toHaveLength(1);
       expect(warnings).toHaveLength(1);
-      expect(errors).toMatchObject([
+      expect(errors).toEqual([
         {
           message:
             '"fileMatch" may not be defined at the top level of a config and must instead be within a manager block',
           topic: 'Config error',
         },
       ]);
-      expect(warnings).toMatchObject([
+      expect(warnings).toEqual([
         {
           message:
             '"fileMatch" must be configured in a manager block and not here: npm.minor',
@@ -660,8 +659,8 @@ describe('config/validation', () => {
         config
       );
       expect(errors).toHaveLength(2);
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
         {
           message:
             'The "docker" object can only be configured at the top level of a config but was found inside "major.minor"',
@@ -682,9 +681,9 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(errors).toHaveLength(0);
+      expect(errors).toBeEmptyArray();
       expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchObject([
+      expect(warnings).toEqual([
         {
           message:
             'hostType should only be configured within a "hostRules" object. Was found in .',
@@ -701,7 +700,7 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(1);
     });
 
@@ -716,14 +715,14 @@ describe('config/validation', () => {
         true
       );
       expect(warnings).toHaveLength(1);
-      expect(warnings).toMatchObject([
+      expect(warnings).toEqual([
         {
           message:
             'packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"excludePackageNames":["bar"]}',
           topic: 'Configuration Error',
         },
       ]);
-      expect(errors).toHaveLength(0);
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors if invalid combinations in packageRules', async () => {
@@ -739,9 +738,9 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(warnings).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
       expect(errors).toHaveLength(1);
-      expect(errors).toMatchObject([
+      expect(errors).toEqual([
         {
           message:
             'packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {"matchUpdateTypes":["major"],"registryUrls":["https://registry.npmjs.org"]}',
@@ -764,7 +763,7 @@ describe('config/validation', () => {
         config,
         true
       );
-      expect(errors).toHaveLength(0);
+      expect(errors).toBeEmptyArray();
       expect(warnings).toHaveLength(1);
     });
 
@@ -778,8 +777,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(0);
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toBeEmptyArray();
     });
 
     it('errors on invalid customEnvVariables objects', async () => {
@@ -792,8 +791,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
         {
           message:
             'Invalid `customEnvVariables.customEnvVariables.example2` configuration: value is not a string',
@@ -809,8 +808,8 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toMatchObject([
+      expect(warnings).toBeEmptyArray();
+      expect(errors).toEqual([
         {
           message:
             'Invalid schedule: `Invalid schedule: "30 5 * * *" has cron syntax, but doesn\'t have * as minutes`',
