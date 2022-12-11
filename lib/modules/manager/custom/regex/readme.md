@@ -1,22 +1,24 @@
-With the `custom` manager you can configure Renovate so it finds dependencies that are not detected by its other built-in package managers.
+This is a custom manager that uses regular expressions and capture groups to detect dependencies.
 
 **Note:** `customManagers` was formerly known as `regexManagers`
 
-The `custom` manager is unique in Renovate because:
+The `regex` manager is unique in Renovate because:
 
 - It is configurable via regex named capture groups
 - It can extract any `datasource`
-- By using the `customManagers` config, you can create multiple "regex managers" for the same repository
+- By using the `customManagers` config, you can create multiple regex managers for the same repository
 
 We have [additional Handlebars helpers](https://docs.renovatebot.com/templates/#additional-handlebars-helpers) to help you perform common transformations on the regex manager's template fields.
-Also read the documentation for the [`customManagers` config option](https://docs.renovatebot.com/configuration-options/#customManagers).
+Also read the documentation for the [`customManagers` config option](https://docs.renovatebot.com/configuration-options/#custommanagers).
 
 ### Required Fields
 
-The first two required fields are `fileMatch` and `matchStrings`:
+**Note:** Set the `customType` to `regex` to alert Renovate that you intend to use the `regex` manager. For now it is fine to leave this field empty in as Renovate defaults to the `regex` manager if `customType` is not specified.
+
+The next two required fields are `fileMatch` and `matchStrings`:
 
 - `fileMatch` works the same as any manager
-- `matchStrings` is a `customManagers` concept and is used for configuring a regular expression with named capture groups
+- `matchStrings` is a regex manager concept and is used for configuring a regular expression with named capture groups
 
 Before Renovate can look up a dependency and decide about updates, it needs this information about each dependency:
 
@@ -68,6 +70,7 @@ Continuing the above example with Yarn, here is the full Renovate config:
 {
   "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": ["ENV YARN_VERSION=(?<currentValue>.*?)\\n"],
       "depNameTemplate": "yarn",
@@ -104,6 +107,7 @@ You could configure Renovate to update the `Dockerfile` like this:
 {
   "customManagers": [
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
         "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
@@ -111,6 +115,7 @@ You could configure Renovate to update the `Dockerfile` like this:
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
     {
+      "customType": "regex",
       "fileMatch": ["^Dockerfile$"],
       "matchStrings": [
         "ARG IMAGE=(?<depName>.*?):(?<currentValue>.*?)@(?<currentDigest>sha256:[a-f0-9]+)\\s"
@@ -147,6 +152,7 @@ For example:
 {
   "regexManagers": [
     {
+      "customType": "regex",
       "fileMatch": [".*y[a]?ml$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [

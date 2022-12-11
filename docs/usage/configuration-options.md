@@ -515,12 +515,14 @@ If you need to _override_ constraints that Renovate detects from the repository,
 
 Use `customManagers` entries to configure the `regex` manager in Renovate.
 
+**Note:** `customManagers` was formerly known as `regexManagers`
+
 You can define custom managers for cases such as:
 
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
-The custom manager concept is based on using Regular Expression named capture groups.
+The current custom manager concept is based on using Regular Expression named capture groups.
 
 You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure it's corresponding template (e.g. `depNameTemplate`) for these fields:
 
@@ -534,7 +536,7 @@ We recommend you use only one of these methods, or you'll get confused.
 We recommend that you also tell Renovate what `versioning` to use.
 If the `versioning` field is missing, then Renovate defaults to using `semver` versioning.
 
-For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
+For more details and examples, see our [documentation for the `regex` manager](/modules/manager/custom/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
 ### matchStrings
