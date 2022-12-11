@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import type { ExtractConfig, PackageFile, Result } from '../types';
 import managers from './api';
 
