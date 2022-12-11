@@ -54,7 +54,7 @@ function getFilteredManagerConfig(
 export function generateFingerprintConfig(
   config: RenovateConfig
 ): FingerprintExtractConfig {
-  let managerExtractConfigs: WorkerExtractConfig[] = [];
+  const managerExtractConfigs: WorkerExtractConfig[] = [];
   let managerList: Set<string>;
   const { enabledManagers } = config;
   if (enabledManagers?.length) {
