@@ -270,6 +270,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -287,11 +290,11 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/go:latest' },
-      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e GOPROXY ' +
@@ -304,8 +307,10 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/go:latest' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
           'go get -d -t ./...' +
           '"',
         options: {
@@ -328,6 +333,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -345,6 +353,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool golang 1.14.0' },
       {
         cmd: 'go get -d -t ./...',
         options: {
@@ -412,6 +421,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -429,11 +441,11 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/go:latest' },
-      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
-          'docker run --rm --name=renovate_go --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e GOPROXY ' +
@@ -459,8 +471,10 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/go:latest' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
           'go get -d -t ./...' +
           '"',
         options: {
@@ -516,6 +530,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -533,8 +550,8 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/go:latest' },
-      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      {},
       {
         options: {
           env: {
@@ -579,6 +596,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -639,6 +659,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -708,6 +731,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -776,6 +802,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -852,6 +881,9 @@ describe('modules/manager/gomod/artifacts', () => {
     } as StatusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -902,6 +934,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -917,10 +952,33 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/go:latest' },
-      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      {},
       {
-        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy && go mod tidy"',
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
+          'go get -d -t ./...' +
+          ' && ' +
+          'go mod tidy' +
+          ' && ' +
+          'go mod tidy' +
+          '"',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -939,6 +997,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
     fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -954,10 +1015,33 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/go:latest' },
-      { cmd: 'docker ps --filter name=renovate_go -aq' },
+      { cmd: 'docker pull renovate/sidecar' },
+      {},
       {
-        cmd: 'docker run --rm --name=renovate_go --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/renovate/cache":"/tmp/renovate/cache" -e GOPROXY -e GOPRIVATE -e GONOPROXY -e GONOSUMDB -e GOINSECURE -e GOFLAGS -e CGO_ENABLED -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/go:latest bash -l -c "go get -d -t ./... && go mod tidy -compat=1.17 && go mod tidy -compat=1.17"',
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
+          'go get -d -t ./...' +
+          ' && ' +
+          'go mod tidy -compat=1.17' +
+          ' && ' +
+          'go mod tidy -compat=1.17' +
+          '"',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1311,6 +1395,9 @@ describe('modules/manager/gomod/artifacts', () => {
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
       updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
@@ -1327,6 +1414,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool golang 1.14.0' },
       {
         cmd: 'go get -d -t ./...',
         options: { cwd: '/tmp/github/some/repo' },
@@ -1382,10 +1470,43 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
-    const expectedResult = {
-      cmd: 'docker pull renovate/go:1.17.0',
-    };
-    expect(execSnapshots[0]).toMatchObject(expectedResult);
+    const expectedResult = [
+      {
+        cmd: 'docker pull renovate/sidecar',
+      },
+      {},
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool golang 1.17.0' +
+          ' && ' +
+          'go get -d -t ./...' +
+          ' && ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest' +
+          ' && ' +
+          'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28' +
+          ' && ' +
+          'go mod tidy ' +
+          '&& ' +
+          'go mod tidy' +
+          '"',
+      },
+    ];
+    expect(execSnapshots).toMatchObject(expectedResult);
   });
 
   it('config contains go version', async () => {
@@ -1421,9 +1542,42 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
       { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
     ]);
-    const expectedResult = {
-      cmd: 'docker pull renovate/go:1.14.0',
-    };
-    expect(execSnapshots[0]).toMatchObject(expectedResult);
+    const expectedResult = [
+      {
+        cmd: 'docker pull renovate/sidecar',
+      },
+      {},
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
+          'go get -d -t ./...' +
+          ' && ' +
+          'go install github.com/marwan-at-work/mod/cmd/mod@latest' +
+          ' && ' +
+          'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28' +
+          ' && ' +
+          'go mod tidy ' +
+          '&& ' +
+          'go mod tidy' +
+          '"',
+      },
+    ];
+    expect(execSnapshots).toMatchObject(expectedResult);
   });
 });

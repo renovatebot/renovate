@@ -52,7 +52,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   const depName = join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
-    dependency.source.git.subdir
+    dependency.source.git.subdir ?? ''
   );
 
   return {

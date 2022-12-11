@@ -184,7 +184,7 @@ You can use Renovate's "Dependency Dashboard" on platforms which support dynamic
 When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.
 
-If you want to get an update ahead of schedule, or want to retry a previously closed update, you can click on the update's checkbox in the Dependency Dashboard.
+If you want to get an update ahead of schedule, or want to retry a previously closed update, you can select the update's checkbox in the Dependency Dashboard.
 
 ### Dependency Dashboard Approval
 
@@ -194,7 +194,7 @@ We call this the "Dependency Dashboard Approval" workflow.
 Here's how it works:
 
 - You tell Renovate which package updates need "Dashboard Approval" by setting a custom `packageRule`
-- Renovate only raises updates for packages that need "Dashboard Approval" after you click on the corresponding checkbox on the dashboard
+- Renovate only raises updates for packages that need "Dashboard Approval" after you select the corresponding checkbox on the dashboard
 
 #### Benefits of using Dependency Dashboard Approval
 
