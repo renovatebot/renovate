@@ -259,8 +259,10 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep?.sourceDirectory).toBe('packages/react');
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+    );
+    expect(dep?.sourceDirectory).toBeUndefined();
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`
       [
@@ -296,8 +298,10 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
-    expect(dep?.sourceDirectory).toBe('packages/react');
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+    );
+    expect(dep?.sourceDirectory).toBeUndefined();
   });
 
   it('handles mixed sourceUrls in releases', async () => {
@@ -398,7 +402,9 @@ describe('modules/datasource/npm/get', () => {
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
 
-    expect(dep?.sourceUrl).toBe('https://github.com/neutrinojs/neutrino');
+    expect(dep?.sourceUrl).toBe(
+      'https://github.com/neutrinojs/neutrino/tree/master/packages/react'
+    );
     expect(dep?.sourceDirectory).toBe('packages/foo');
 
     expect(httpMock.getTrace()).toMatchInlineSnapshot(`

@@ -163,6 +163,42 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('succeeds when using autoReplaceStringTemplate to update depName when using regex', async () => {
+      const yml =
+        "- project: 'pipeline-fragments/docker-test'\n" +
+        'ref: 3-0-0\n' +
+        "file: 'ci-include-docker-test-base.yml'\n" +
+        "- project: 'pipeline-fragments/docker-lint'\n" +
+        'ref: 2-4-0\n' +
+        "file: 'ci-include-docker-lint-base.yml'";
+      upgrade.manager = 'regex';
+      upgrade.depName = 'pipeline-solutions/gitlab/fragments/docker-lint';
+      upgrade.currentValue = '2-4-0';
+      upgrade.newValue = '2-4-1';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = "'pipeline-fragments/docker-lint'\nref: 2-4-0";
+      upgrade.packageFile = '.gitlab-ci.yml';
+      upgrade.autoReplaceStringTemplate =
+        "'{{{depName}}}'\nref: {{{newValue}}}";
+      upgrade.matchStringsStrategy = 'combination';
+
+      // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
+      // there's nothing defined in there anymore that it can match
+      upgrade.matchStrings = [
+        '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
+        '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        "- project: 'pipeline-fragments/docker-test'\n" +
+          'ref: 3-0-0\n' +
+          "file: 'ci-include-docker-test-base.yml'\n" +
+          "- project: 'pipeline-solutions/gitlab/fragments/docker-lint'\n" +
+          'ref: 2-4-1\n' +
+          "file: 'ci-include-docker-lint-base.yml'"
+      );
+    });
+
     it('fails with oldversion in depname', async () => {
       const yml =
         'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
