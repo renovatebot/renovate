@@ -122,6 +122,7 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`
       );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
     it('config change', () => {
@@ -131,6 +132,7 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract result cannot be used due to config change'
       );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
     it('valid cache and config', () => {
@@ -140,6 +142,7 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract for sha=sha is valid and can be used'
       );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
   });
 });

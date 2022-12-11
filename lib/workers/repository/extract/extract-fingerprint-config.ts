@@ -37,7 +37,7 @@ function getFilteredManagerConfig(
   config: WorkerExtractConfig
 ): WorkerExtractConfig {
   return {
-    ...(config.manager === 'regex' ? getRegexManagerFields(config) : {}),
+    ...(config.manager === 'regex' && getRegexManagerFields(config)),
     manager: config.manager,
     fileMatch: config.fileMatch,
     npmrc: config.npmrc,
@@ -77,9 +77,8 @@ export function generateFingerprintConfig(
     }
   }
 
-  managerExtractConfigs = managerExtractConfigs.map(getFilteredManagerConfig);
   return {
     managerList,
-    managers: managerExtractConfigs,
+    managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
 }
