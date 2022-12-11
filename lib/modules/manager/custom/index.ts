@@ -14,9 +14,7 @@ export function extractPackageFile(
   }
 
   const m = managers.get(customType)!;
-  return m?.extractPackageFile
-    ? m.extractPackageFile(content, fileName, config)
-    : null;
+  return m.extractPackageFile(content, fileName, config);
 }
 export const defaultConfig = {
   pinDigests: false,
