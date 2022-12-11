@@ -1163,5 +1163,22 @@ describe('workers/repository/updates/generate', () => {
         'PATCH: Update dependency some-dep to 1.2.0'
       );
     });
+
+    it('using commitMessagePrefix without separator', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: '🆙',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          commitMessageAction: 'Update',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
+    });
   });
 });

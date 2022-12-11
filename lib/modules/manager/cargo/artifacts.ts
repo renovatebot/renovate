@@ -12,7 +12,8 @@ import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
   manifestPath: string,
-  isLockFileMaintenance: boolean
+  isLockFileMaintenance: boolean,
+  constraint: string | undefined
 ): Promise<void> {
   let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
   // If we're updating a specific crate, `cargo-update` requires `--workspace`
@@ -23,8 +24,9 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {
-      image: 'rust',
+      image: 'sidecar',
     },
+    toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await exec(cmd, execOptions);
 }
@@ -64,7 +66,11 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
-    await cargoUpdate(packageFileName, isLockFileMaintenance);
+    await cargoUpdate(
+      packageFileName,
+      isLockFileMaintenance,
+      config.constraints?.rust
+    );
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readLocalFile(lockFileName);
     if (existingLockFileContent === newCargoLockContent) {

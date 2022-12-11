@@ -1,0 +1,52 @@
+nav:
+  - Home: 'index.md'
+  - ... | getting-started
+  - Troubleshooting: 'troubleshooting.md'
+  - Configuration:
+      - 'Self-hosted': 'self-hosted-configuration.md'
+      - 'Repository': 'configuration-options.md'
+      - 'Presets': 'config-presets.md'
+  - ... | key-concepts
+  - ... | modules
+  - Language Support:
+      - 'Bazel': 'bazel.md'
+      - 'Docker': 'docker.md'
+      - 'Golang': 'golang.md'
+      - 'Java': 'java.md'
+      - 'JavaScript': 'javascript.md'
+      - 'Node.js Versions': 'node.md'
+      - 'Nuget': 'nuget.md'
+      - 'PHP': 'php.md'
+      - 'Python': 'python.md'
+      - 'Ruby': 'ruby.md'
+      - 'Rust': 'rust.md'
+  - Deep Dives:
+      - 'Should you Pin your Javascript Dependencies?': 'dependency-pinning.md'
+      - 'Config Template Editing': 'configuration-templates.md'
+      - 'Updating and Rebasing Branches': 'updating-rebasing.md'
+      - 'Semantic Commit Messages': 'semantic-commits.md'
+      - 'Noise Reduction': 'noise-reduction.md'
+  - Included Presets:
+      - 'Compatibility Presets': 'presets-compatibility.md'
+      - 'Default Presets': 'presets-default.md'
+      - 'Docker Presets': 'presets-docker.md'
+      - 'Full Config Presets': 'presets-config.md'
+      - 'Group Presets': 'presets-group.md'
+      - 'Helper Presets': 'presets-helpers.md'
+      - 'Monorepo Presets': 'presets-monorepo.md'
+      - 'npm Presets': 'presets-npm.md'
+      - 'Package Presets': 'presets-packages.md'
+      - 'Preview Presets': 'presets-preview.md'
+      - 'Regex Manager Presets': 'presets-regexManagers.md'
+      - 'Replacement Presets': 'presets-replacements.md'
+      - 'Schedule Presets': 'presets-schedule.md'
+      - 'Workaround Presets': 'presets-workarounds.md'
+  - All Other:
+      - ... | user-stories
+      - 'Security and Permissions': 'security-and-permissions.md'
+      - 'Merge Confidence': 'merge-confidence.md'
+      - 'Templates': 'templates.md'
+      - 'Frequently Asked Questions': 'faq.md'
+      - 'Known Limitations': 'known-limitations.md'
+      - 'Release notes for major versions': 'release-notes-for-major-versions.md'
+  - About Us: 'about-us.md'
