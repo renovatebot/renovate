@@ -95,6 +95,7 @@ export async function lookupUpdates(
       }
 
       res.sourceUrl = dependency?.sourceUrl;
+      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
       }
@@ -104,12 +105,9 @@ export async function lookupUpdates(
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
-      let allVersions = dependency.releases
-        .filter((release) => versioning.isVersion(release.version))
-        .map((release) => {
-          release.registryUrl ??= dependency.registryUrl;
-          return release;
-        });
+      let allVersions = dependency.releases.filter((release) =>
+        versioning.isVersion(release.version)
+      );
 
       // istanbul ignore if
       if (allVersions.length === 0) {

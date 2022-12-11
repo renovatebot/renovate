@@ -39,6 +39,11 @@ export function generateUpdate(
   }
   // istanbul ignore if
   if (release.registryUrl !== undefined) {
+    /**
+     * This means:
+     *  - registry strategy is set to merge
+     *  - releases were fetched from multiple registry urls
+     */
     update.registryUrl = release.registryUrl;
   }
 

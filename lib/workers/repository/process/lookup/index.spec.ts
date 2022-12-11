@@ -482,7 +482,6 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: '~1.2.0',
           newVersion: '1.2.1',
           releaseTimestamp: '2015-04-25T22:25:48.180Z',
-          registryUrl: 'https://registry.npmjs.org',
           updateType: 'patch',
         },
       ]);
@@ -505,7 +504,6 @@ describe('workers/repository/process/lookup/index', () => {
             "newMinor": 4,
             "newValue": undefined,
             "newVersion": "1.4.1",
-            "registryUrl": "https://registry.npmjs.org",
             "releaseTimestamp": "2015-05-17T04:25:07.299Z",
             "updateType": "minor",
           },
@@ -1813,7 +1811,6 @@ describe('workers/repository/process/lookup/index', () => {
           newValue: `2.5.16`,
           newVersion: `2.5.16`,
           updateType: `rollback`,
-          registryUrl: 'https://registry.npmjs.org',
         },
       ]);
     });
