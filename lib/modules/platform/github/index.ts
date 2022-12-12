@@ -181,6 +181,11 @@ export async function initPlatform({
       matchHost: 'pkg.github.com',
       token,
     });
+    gitHubRules.push({
+      matchHost: 'nuget.pkg.github.com',
+      username: 'dummy',
+      password: token,
+    });
   }
 
   return {
