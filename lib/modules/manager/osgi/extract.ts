@@ -32,7 +32,7 @@ export function extractPackageFile(
   }
 
   // OSGi Compendium R8 159.4: bundles entry
-  const allBundles: Bundle[] = featureModel.bundles ?? [];
+  const allBundles = featureModel.bundles ?? [];
 
   // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
   const execEnvFramework =
@@ -118,7 +118,7 @@ function isSupportedFeatureResourceVersion(
   return true;
 }
 
-function extractArtifactList(sectionName: string, sectionValue: any): Bundle[] {
+function extractArtifactList(sectionName: string, sectionValue: unknown): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
   if (sectionName.includes(':ARTIFACTS|')) {
     return sectionValue as Bundle[];

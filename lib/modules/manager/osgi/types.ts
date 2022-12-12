@@ -4,7 +4,7 @@ export interface FeatureModel {
   'execution-environment:JSON|false'?: {
     framework?: Bundle;
   };
-  [x: string]: any;
+  [x: string]: unknown;
 }
 
 export type Bundle = string | BundleObject;
