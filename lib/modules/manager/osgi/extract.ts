@@ -101,8 +101,7 @@ function isSupportedFeatureResourceVersion(
     const resourceSemVer = coerce(resourceVersion);
     if (!resourceSemVer) {
       logger.debug(
-        { fileName, resourceVersion },
-        'Skipping due to invalid feature-resource-version'
+        `Skipping file ${fileName} due to invalid feature-resource-version '${resourceVersion}'`
       );
       return false;
     }
@@ -110,8 +109,7 @@ function isSupportedFeatureResourceVersion(
     // we only support 1.x, although no over version has been defined
     if (!satisfies(resourceSemVer, '^1')) {
       logger.debug(
-        { fileName, resourceVersion },
-        'Skipping due to unsupported feature-resource-version'
+        `Skipping file ${fileName} due to unsupported feature-resource-version '${resourceVersion}'`
       );
       return false;
     }
