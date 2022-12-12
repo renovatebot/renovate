@@ -43,6 +43,11 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "matchHost": "pkg.github.com",
       "token": "123test",
     },
+    {
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "dummy",
+    },
   ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
@@ -62,6 +67,11 @@ exports[`modules/platform/github/index initPlatform() should support default end
     {
       "matchHost": "pkg.github.com",
       "token": "123test",
+    },
+    {
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "dummy",
     },
   ],
   "renovateUsername": "renovate-bot",
@@ -83,6 +93,11 @@ exports[`modules/platform/github/index initPlatform() should support default end
       "matchHost": "pkg.github.com",
       "token": "123test",
     },
+    {
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "dummy",
+    },
   ],
   "renovateUsername": "renovate-bot",
   "token": "123test",
@@ -102,6 +117,11 @@ exports[`modules/platform/github/index initPlatform() should support gitAuthor a
     {
       "matchHost": "pkg.github.com",
       "token": "123test",
+    },
+    {
+      "matchHost": "nuget.pkg.github.com",
+      "password": "123test",
+      "username": "dummy",
     },
   ],
   "renovateUsername": "renovate-bot",
