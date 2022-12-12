@@ -1200,7 +1200,7 @@ const options: RenovateOptions[] = [
   {
     name: 'customChangelogUrl',
     description:
-      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+      'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'pr',
     parent: 'packageRules',
@@ -2193,13 +2193,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: ['deprecationWarningIssues'],
     allowedValues: [
-      'prIgnoreNotification',
-      'branchAutomergeFailure',
-      'lockFileErrors',
       'artifactErrors',
-      'deprecationWarningIssues',
-      'onboardingClose',
+      'branchAutomergeFailure',
       'configErrorIssue',
+      'deprecationWarningIssues',
+      'lockFileErrors',
+      'onboardingClose',
+      'prEditedNotification',
+      'prIgnoreNotification',
     ],
     cli: false,
     env: false,

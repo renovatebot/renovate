@@ -15,7 +15,6 @@ import {
   UpdatePullRequestStatusCommand,
   UpdatePullRequestTitleCommand,
 } from '@aws-sdk/client-codecommit';
-import { GetUserCommand, IAMClient } from '@aws-sdk/client-iam';
 import { mockClient } from 'aws-sdk-client-mock';
 import { logger } from '../../../../test/util';
 import {
@@ -25,29 +24,21 @@ import {
 } from '../../../constants/error-messages';
 import * as git from '../../../util/git';
 import type { Platform } from '../types';
+import { getCodeCommitUrl } from './codecommit-client';
 import { CodeCommitPr, config } from './index';
 
 const codeCommitClient = mockClient(CodeCommitClient);
-const iamClient = mockClient(IAMClient);
 
 describe('modules/platform/codecommit/index', () => {
   let codeCommit: Platform;
 
   beforeAll(async () => {
     codeCommit = await import('.');
-    iamClient.on(GetUserCommand).resolves({
-      User: {
-        Arn: 'aws:arn:example:123456',
-        UserName: 'someone',
-        UserId: 'something',
-        Path: 'somewhere',
-        CreateDate: new Date(),
-      },
-    });
     await codeCommit.initPlatform({
       endpoint: 'https://git-codecommit.eu-central-1.amazonaws.com/',
       username: 'accessKeyId',
       password: 'SecretAccessKey',
+      token: 'token',
     });
   });
 
@@ -67,30 +58,6 @@ describe('modules/platform/codecommit/index', () => {
   });
 
   describe('initPlatform()', () => {
-    it('should throw if no username/password', async () => {
-      const err = new Error(
-        'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-      );
-      await expect(codeCommit.initPlatform({})).rejects.toThrow(err);
-    });
-
-    it('should show warning message if custom endpoint', async () => {
-      const err = new Error(
-        'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-      );
-      await expect(
-        codeCommit.initPlatform({
-          endpoint: 'endpoint',
-          username: 'abc',
-          password: '123',
-        })
-      ).rejects.toThrow(err);
-
-      expect(logger.logger.warn).toHaveBeenCalledWith(
-        "Can't parse region, make sure your endpoint is correct"
-      );
-    });
-
     it('should init', async () => {
       expect(
         await codeCommit.initPlatform({
@@ -116,6 +83,14 @@ describe('modules/platform/codecommit/index', () => {
       });
       process.env.AWS_REGION = temp;
     });
+
+    it('should ', async () => {
+      await expect(
+        codeCommit.initPlatform({ endpoint: 'non://parsable.url' })
+      ).resolves.toEqual({
+        endpoint: 'non://parsable.url',
+      });
+    });
   });
 
   describe('initRepos()', () => {
@@ -123,7 +98,12 @@ describe('modules/platform/codecommit/index', () => {
       jest.spyOn(git, 'initRepo').mockImplementationOnce(() => {
         throw new Error('any error');
       });
-      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({});
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
+        repositoryMetadata: {
+          defaultBranch: 'main',
+          repositoryId: 'id',
+        },
+      });
 
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' })
@@ -150,9 +130,11 @@ describe('modules/platform/codecommit/index', () => {
 
     it('getRepositoryInfo returns bad results 2', async () => {
       jest.spyOn(git, 'initRepo').mockReturnValueOnce(Promise.resolve());
-      codeCommitClient
-        .on(GetRepositoryCommand)
-        .resolvesOnce({ repositoryMetadata: {} });
+      codeCommitClient.on(GetRepositoryCommand).resolvesOnce({
+        repositoryMetadata: {
+          repositoryId: 'id',
+        },
+      });
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' })
       ).rejects.toThrow(new Error(REPOSITORY_EMPTY));
@@ -166,6 +148,8 @@ describe('modules/platform/codecommit/index', () => {
           repositoryId: 'id',
         },
       });
+      process.env.AWS_ACCESS_KEY_ID = 'something';
+      process.env.AWS_SECRET_ACCESS_KEY = 'something';
       await expect(
         codeCommit.initRepo({ repository: 'repositoryName' })
       ).resolves.toEqual({
@@ -174,6 +158,37 @@ describe('modules/platform/codecommit/index', () => {
         defaultBranch: 'main',
         isFork: false,
       });
+    });
+
+    it('gets the right url', () => {
+      process.env.AWS_ACCESS_KEY_ID = '';
+      process.env.AWS_SECRET_ACCESS_KEY = '';
+      expect(
+        getCodeCommitUrl(
+          {
+            defaultBranch: 'main',
+            repositoryId: 'id',
+            cloneUrlHttp:
+              'https://git-codecommit.us-east-1.amazonaws.com/v1/repos/name',
+          },
+          'name'
+        )
+      ).toBe('https://git-codecommit.us-east-1.amazonaws.com/v1/repos/name');
+    });
+
+    it('gets the eu-central-1 url', () => {
+      process.env.AWS_ACCESS_KEY_ID = '';
+      process.env.AWS_SECRET_ACCESS_KEY = '';
+      process.env.AWS_REGION = 'eu-central-1';
+      expect(
+        getCodeCommitUrl(
+          {
+            defaultBranch: 'main',
+            repositoryId: 'id',
+          },
+          'name'
+        )
+      ).toBe('https://git-codecommit.eu-central-1.amazonaws.com/v1/repos/name');
     });
   });
 

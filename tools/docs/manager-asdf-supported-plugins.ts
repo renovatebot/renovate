@@ -11,7 +11,7 @@ function generateTooling(): string {
 export async function generateManagerAsdfSupportedPlugins(
   dist: string
 ): Promise<void> {
-  const indexFileName = 'lib/modules/manager/asdf/readme.md';
+  const indexFileName = `${dist}/modules/manager/asdf/index.md`;
   let indexContent = await readFile(indexFileName);
   indexContent = replaceContent(indexContent, generateTooling());
   await updateFile(`${dist}/modules/manager/asdf/index.md`, indexContent);

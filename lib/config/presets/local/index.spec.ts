@@ -65,7 +65,8 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledOnce();
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
-        'some/repo'
+        'some/repo',
+        undefined
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -83,7 +84,8 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledOnce();
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
-        'some/repo'
+        'some/repo',
+        undefined
       );
       expect(content).toEqual({ resolved: 'preset' });
     });
@@ -101,7 +103,8 @@ describe('config/presets/local/index', () => {
       expect(platform.getRawFile).toHaveBeenCalledOnce();
       expect(platform.getRawFile).toHaveBeenCalledWith(
         'default.json',
-        'some/repo'
+        'some/repo',
+        undefined
       );
       expect(content).toEqual({ resolved: 'preset' });
     });

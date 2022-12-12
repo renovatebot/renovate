@@ -91,6 +91,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -131,6 +132,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -216,6 +218,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -262,6 +265,7 @@ describe('modules/manager/nuget/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e NUGET_PACKAGES ' +
+          '-e MSBUILDDISABLENODEREUSE ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
@@ -277,6 +281,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -320,6 +325,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -332,6 +338,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -373,6 +380,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
