@@ -698,11 +698,11 @@ const staticGroups = {
       },
     ],
   },
-  vaadinJavascript: {
-    description: 'Group all `@vaadin` packages together.',
+  vaadinWebComponents: {
+    description: 'Group all Vaadin Web components together.',
     packageRules: [
       {
-        groupName: 'Vaadin javascript packages',
+        groupName: 'Vaadin Web components',
         matchSourceUrls: ['https://github.com/vaadin/web-components'],
       },
     ],
