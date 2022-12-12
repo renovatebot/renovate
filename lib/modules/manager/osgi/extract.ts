@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
@@ -19,23 +20,24 @@ export function extractPackageFile(
   try {
     // Compendium R8 159.3: JS comments are supported
     const featureModel = json5.parse<FeatureModel>(content);
-
+  } catch (e) {
+    logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
+    return null;
+  }
+  
     // Compendium R8 159.9: resource versioning
     if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
       return null;
     }
 
-    const allBundles: Bundle[] = [];
     // OSGi Compendium R8 159.4: bundles entry
-    featureModel.bundles?.forEach((bundle) => {
-      allBundles.push(bundle);
-    });
+    const allBundles: Bundle[] = featureModel.bundles ?? [];
 
     // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
-    if (featureModel['execution-environment:JSON|false']?.['framework']) {
-      allBundles.push(
-        featureModel['execution-environment:JSON|false']['framework']
-      );
+    const execEnvFramework =
+      featureModel['execution-environment:JSON|false']?.['framework'];
+    if (!is.nullOrUndefined(execEnvFramework)) {
+      allBundles.push(execEnvFramework);
     }
 
     // parse custom sections
@@ -46,7 +48,7 @@ export function extractPackageFile(
     for (const [section, value] of Object.entries(featureModel)) {
       logger.debug({ fileName, section }, 'Parsing section');
       const customSectionEntries = extractArtifactList(section, value);
-      customSectionEntries.forEach((bundle) => allBundles.push(bundle));
+      allBundles.push(...customSectionEntries);
     }
 
     // convert bundles to dependencies
@@ -65,6 +67,10 @@ export function extractPackageFile(
       // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
       const parts = gav.split(':');
       if (parts.length < 3 || parts.length > 5) {
+        deps.push({
+          depName: gav,
+          skipReason: 'invalid-value',
+        });
         continue;
       }
       // parsing should use the last entry for the version
@@ -81,11 +87,6 @@ export function extractPackageFile(
 
       deps.push(result);
     }
-  } catch (e) {
-    logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
-    return null;
-    // TODO - better logging?
-  }
 
   return deps.length ? { deps } : null;
 }
