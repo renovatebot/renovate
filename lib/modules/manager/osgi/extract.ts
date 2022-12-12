@@ -17,76 +17,77 @@ export function extractPackageFile(
   logger.debug({ fileName }, 'osgi.extractPackageFile');
 
   const deps: PackageDependency[] = [];
+  let featureModel: FeatureModel;
   try {
     // Compendium R8 159.3: JS comments are supported
-    const featureModel = json5.parse<FeatureModel>(content);
+    featureModel = json5.parse<FeatureModel>(content);
   } catch (e) {
     logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
     return null;
   }
-  
-    // Compendium R8 159.9: resource versioning
-    if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
-      return null;
+
+  // Compendium R8 159.9: resource versioning
+  if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
+    return null;
+  }
+
+  // OSGi Compendium R8 159.4: bundles entry
+  const allBundles: Bundle[] = featureModel.bundles ?? [];
+
+  // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
+  const execEnvFramework =
+    featureModel['execution-environment:JSON|false']?.['framework'];
+  if (!is.nullOrUndefined(execEnvFramework)) {
+    allBundles.push(execEnvFramework);
+  }
+
+  // parse custom sections
+  //
+  // Note: we do not support artifact list extensions as defined in
+  // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
+  // supports this
+  for (const [section, value] of Object.entries(featureModel)) {
+    logger.debug({ fileName, section }, 'Parsing section');
+    const customSectionEntries = extractArtifactList(section, value);
+    allBundles.push(...customSectionEntries);
+  }
+
+  // convert bundles to dependencies
+  for (const entry of allBundles) {
+    const rawGav = typeof entry === 'string' ? entry : entry.id;
+    // skip invalid definitions, such as objects without an id set
+    if (!rawGav) {
+      continue;
     }
 
-    // OSGi Compendium R8 159.4: bundles entry
-    const allBundles: Bundle[] = featureModel.bundles ?? [];
+    // both '/' and ':' are valid separators, but the Maven datasource
+    // expects the separator to be ':'
+    const gav = rawGav.replaceAll('/', ':');
 
-    // The 'execution-environment' key is supported by the Sling/OSGi feature model implementation
-    const execEnvFramework =
-      featureModel['execution-environment:JSON|false']?.['framework'];
-    if (!is.nullOrUndefined(execEnvFramework)) {
-      allBundles.push(execEnvFramework);
+    // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
+    // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
+    const parts = gav.split(':');
+    if (parts.length < 3 || parts.length > 5) {
+      deps.push({
+        depName: gav,
+        skipReason: 'invalid-value',
+      });
+      continue;
+    }
+    // parsing should use the last entry for the version
+    const currentValue = parts[parts.length - 1];
+    const result: PackageDependency = {
+      datasource: MavenDatasource.id,
+      depName: `${parts[0]}:${parts[1]}`,
+    };
+    if (currentValue.includes('${')) {
+      result.skipReason = 'contains-variable';
+    } else {
+      result.currentValue = currentValue;
     }
 
-    // parse custom sections
-    //
-    // Note: we do not support artifact list extensions as defined in
-    // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
-    // supports this
-    for (const [section, value] of Object.entries(featureModel)) {
-      logger.debug({ fileName, section }, 'Parsing section');
-      const customSectionEntries = extractArtifactList(section, value);
-      allBundles.push(...customSectionEntries);
-    }
-
-    // convert bundles to dependencies
-    for (const entry of allBundles) {
-      const rawGav = typeof entry === 'string' ? entry : entry.id;
-      // skip invalid definitions, such as objects without an id set
-      if (!rawGav) {
-        continue;
-      }
-
-      // both '/' and ':' are valid separators, but the Maven datasource
-      // expects the separator to be ':'
-      const gav = rawGav.replaceAll('/', ':');
-
-      // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
-      // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
-      const parts = gav.split(':');
-      if (parts.length < 3 || parts.length > 5) {
-        deps.push({
-          depName: gav,
-          skipReason: 'invalid-value',
-        });
-        continue;
-      }
-      // parsing should use the last entry for the version
-      const currentValue = parts[parts.length - 1];
-      const result: PackageDependency = {
-        datasource: MavenDatasource.id,
-        depName: `${parts[0]}:${parts[1]}`,
-      };
-      if (currentValue.includes('${')) {
-        result.skipReason = 'contains-variable';
-      } else {
-        result.currentValue = currentValue;
-      }
-
-      deps.push(result);
-    }
+    deps.push(result);
+  }
 
   return deps.length ? { deps } : null;
 }
