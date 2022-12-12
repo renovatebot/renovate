@@ -2230,7 +2230,7 @@ Renovate defaults to `immediate` but you might want to change this to `not-pendi
 With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
 You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
 
-With prCreation set to `not-pending`, Renovate waits until all tests have finished running, and only then creates the PR.
+With prCreation set to `not-pending`, Renovate waits until tests pass or fail, and only then creates the PR.
 When you get the PR notification, you can take action immediately, as you have the full test results.
 Particularly in conjunction with automerge settings, you're reducing the "noise" as PRs might not be created at all.
 If there are no checks associated, Renovate will create the PR 24 hrs after the initial creation of the branch.
