@@ -8,7 +8,7 @@ const options: RenovateOptions[] = [
   {
     name: 'detectGlobalManagerConfig',
     description:
-      'If `true`, Renovate will try to detect global manager configuration from the file system.',
+      'If `true`, Renovate tries to detect global manager configuration from the file system.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -16,7 +16,7 @@ const options: RenovateOptions[] = [
   {
     name: 'detectHostRulesFromEnv',
     description:
-      'If `true`, Renovate will try to detect host rules from environment variables.',
+      'If `true`, Renovate tries to detect host rules from environment variables.',
     type: 'boolean',
     default: false,
     globalOnly: true,
@@ -231,7 +231,7 @@ const options: RenovateOptions[] = [
   {
     name: 'repositoryCacheType',
     description:
-      'Set the type of renovate repository cache if repositoryCache is not disabled.',
+      'Set the type of renovate repository cache if `repositoryCache` is enabled.',
     globalOnly: true,
     type: 'string',
     stage: 'repository',
@@ -277,7 +277,7 @@ const options: RenovateOptions[] = [
   {
     name: 'printConfig',
     description:
-      'If enabled, Renovate logs the fully resolved config for each repo, plus the fully resolved presets.',
+      'If enabled, Renovate logs the fully resolved config for each repository, plus the fully resolved presets.',
     type: 'boolean',
     default: false,
   },
@@ -437,7 +437,7 @@ const options: RenovateOptions[] = [
   {
     name: 'optimizeForDisabled',
     description:
-      'Set to `true` to first check for disabling in config before cloning.',
+      'Set to `true` to first check for disabling INSERT WHAT WE CHECK FOR HERE in config before cloning.',
     stage: 'repository',
     type: 'boolean',
     default: false,
@@ -467,7 +467,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dependencyDashboardTitle',
-    description: 'Title to use for the Dependency Dashboard issue.',
+    description: 'Title for the Dependency Dashboard issue.',
     type: 'string',
     default: `Dependency Dashboard`,
   },
@@ -578,7 +578,7 @@ const options: RenovateOptions[] = [
   {
     name: 'persistRepoData',
     description:
-      'If set to `true`, repository data is kept between runs instead of deleted.',
+      'If set to `true`: keep repository data between runs instead of deleting the data.',
     type: 'boolean',
     globalOnly: true,
     default: false,
@@ -609,7 +609,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'allowCustomCrateRegistries',
-    description: 'Set this to `true` if custom crate registries are allowed.',
+    description: 'Set this to `true` to allow custom crate registries.',
     globalOnly: true,
     type: 'boolean',
     default: false,
@@ -785,7 +785,7 @@ const options: RenovateOptions[] = [
   {
     name: 'enabledManagers',
     description:
-      'A list of package managers to enable. If defined, then all managers not on the list are disabled.',
+      'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
     mergeable: false,
     stage: 'repository',
@@ -811,7 +811,7 @@ const options: RenovateOptions[] = [
   {
     name: 'excludeCommitPaths',
     description:
-      'A file that matches any of these glob patterns will not be committed, even if it has been updated.',
+      'A file matching any of these glob patterns will not be committed, even if the file has been updated.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -897,7 +897,7 @@ const options: RenovateOptions[] = [
   {
     name: 'azureAutoApprove',
     description:
-      'If set to `true`, Azure DevOps PRs will be automatically approved.',
+      'Set to `true` to automatically approve Azure DevOps PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
@@ -1076,7 +1076,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchCurrentValue',
     description:
-      'A regex to match against the raw currentValue string of a dependency. Valid only within a `packageRules` object.',
+      'A regex to match against the raw `currentValue` string of a dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'package',
     parent: 'packageRules',
@@ -1167,7 +1167,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchFiles',
     description:
-      'List of strings to do an exact match against package files with full path. Will only work inside a `packageRules` object.',
+      'List of strings to do an exact match against package files with full path. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1178,7 +1178,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchPaths',
     description:
-      'List of strings or glob patterns to match against package files. Will only work inside a `packageRules` object.',
+      'List of strings or glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
@@ -1289,7 +1289,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'branchPrefixOld',
-    description: 'Old Prefix to check for existing PRs.',
+    description: 'Old prefix to check for existing PRs.',
     stage: 'branch',
     type: 'string',
     default: `renovate/`,
@@ -1765,7 +1765,7 @@ const options: RenovateOptions[] = [
   {
     name: 'groupSlug',
     description:
-      'Slug to use for group (e.g. in branch name). Will be calculated from `groupName` if `null`.',
+      'Slug to use for group (e.g. in branch name). Slug is calculated from `groupName` if `null`.',
     type: 'string',
     default: null,
     cli: false,
@@ -1814,7 +1814,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'assigneesSampleSize',
-    description: 'Take a random sample of given size from assignees.',
+    description: 'Take a random sample of given size from `assignees`.',
     type: 'integer',
     default: null,
   },
@@ -1856,7 +1856,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'reviewersSampleSize',
-    description: 'Take a random sample of given size from reviewers.',
+    description: 'Take a random sample of given size from `reviewers`.',
     type: 'integer',
     default: null,
   },
@@ -2057,7 +2057,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'Explicitly turn on insecure Docker registry access (HTTP).',
+    description: 'Explicitly turn on unsafe Docker registry access (HTTP).',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -2068,7 +2068,7 @@ const options: RenovateOptions[] = [
   {
     name: 'abortOnError',
     description:
-      'If enabled, Renovate will abort its run when HTTP request errors occur.',
+      'If enabled, Renovate aborts its run when HTTP request errors occur.',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -2152,7 +2152,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'prBodyDefinitions',
-    description: 'Table column definitions for use in PR tables.',
+    description: 'Table column definitions to use in PR tables.',
     type: 'object',
     freeChoice: true,
     mergeable: true,
@@ -2178,7 +2178,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyNotes',
     description:
-      'List of additional notes/templates to be included in the Pull Request bodies.',
+      'List of additional notes/templates to include in the Pull Request body.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -2348,7 +2348,7 @@ const options: RenovateOptions[] = [
   {
     name: 'cloneSubmodules',
     description:
-      'Set to `true` to enable initialization of submodules during repository clone.',
+      'Set to `true` to initialize submodules during repository clone.',
     type: 'boolean',
     default: false,
   },
