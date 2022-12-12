@@ -1424,7 +1424,7 @@ Supported lock files are:
 - `pnpm-lock.yaml`
 - `poetry.lock`
 - `pyproject.toml`
-- `requirements.lock` // Helm V3 lockfile?
+- `Chart.lock`
 - `requirements.txt` // pipenv lockfile?
 - `yarn.lock`
 
