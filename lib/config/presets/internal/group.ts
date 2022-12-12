@@ -698,6 +698,15 @@ const staticGroups = {
       },
     ],
   },
+  vaadinJavascript: {
+    description: 'Group all `@vaadin` packages together.',
+    packageRules: [
+      {
+        groupName: 'Vaadin javascript packages',
+        matchPackagePrefixes: ['@vaadin/'],
+      },
+    ],
+  },
 };
 
 const config: any = { ...staticGroups };
