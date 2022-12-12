@@ -703,7 +703,7 @@ const staticGroups = {
     packageRules: [
       {
         groupName: 'Vaadin javascript packages',
-        matchPackagePrefixes: ['@vaadin/'],
+        matchSourceUrls: ['https://github.com/vaadin/web-components'],
       },
     ],
   },
