@@ -20,11 +20,7 @@ import { ExternalHostError } from '../../../../types/errors/external-host-error'
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
-import {
-  deleteBranch,
-  getBranchLastCommitTime,
-  isCloned,
-} from '../../../../util/git';
+import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -105,7 +101,6 @@ export async function ensurePr(
       const lastEditTime = prCache.lastEdited;
       // return if pr cache is valid and pr was last edited before a day
       if (
-        isCloned() === false &&
         prFingerprint === prCache.fingerprint &&
         getElapsedHours(lastEditTime) > 24
       ) {
