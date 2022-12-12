@@ -1,6 +1,0 @@
-{
-    "bundles": [
-        "org.apache.felix/org.apache.felix.scr/2.1.26",
-        "org.apache.felix/org.apache.felix.log/1.2.4"
-    ]
-}

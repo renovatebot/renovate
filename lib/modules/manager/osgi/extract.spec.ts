@@ -5,12 +5,37 @@ const unsupportedFeatureVersion = Fixtures.get(
   'unsupported-feature-version.json'
 );
 const featureWithBundlesAsObjects = Fixtures.get('bundles-as-objects.json');
-const featureWithBundlesAsStrings = Fixtures.get('bundles-as-strings.json');
-const featureWithComment = Fixtures.get('with-comment.json');
-const artifactsExtension = Fixtures.get('extension-artifacts.json');
+const featureWithBundlesAsStrings = `{
+  "bundles": [
+    "org.apache.felix/org.apache.felix.scr/2.1.26",
+    "org.apache.felix/org.apache.felix.log/1.2.4"
+  ]
+}`;
+const featureWithComment = `{
+  // comments are permitted
+  "bundles": [ "org.apache.aries:org.apache.aries.util:1.1.3" ]
+}`;
+const artifactsExtension = `{
+  "content-packages:ARTIFACTS|true": [
+      "com.day.cq:core.wcm.components.all:zip:2.21.0"
+  ]
+}`;
 const doubleSlashNotComment = Fixtures.get('double-slash-not-comment.json');
-const frameworkArtifact = Fixtures.get('framework-artifact.json');
-const versionWithVariable = Fixtures.get('version-with-variable.json');
+const frameworkArtifact = `{
+  "execution-environment:JSON|false":{
+      "framework":{
+          "id":"org.apache.felix:org.apache.felix.framework:7.0.5"
+      }
+  }
+}`;
+const versionWithVariable = `{
+  "bundles":[
+      {
+          "id":"com.fasterxml.jackson.core:jackson-annotations:$\{jackson.version}",
+          "start-order":"20"
+      }
+  ]
+}`;
 const malformedDefinitions = Fixtures.get('various-malformed-definitions.json');
 
 describe('modules/manager/osgi/extract', () => {
