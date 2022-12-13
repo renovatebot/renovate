@@ -246,7 +246,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'object',
     cli: false,
-    env: true,
   },
   {
     name: 'forceCli',
