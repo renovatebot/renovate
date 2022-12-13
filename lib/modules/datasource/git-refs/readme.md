@@ -1,4 +1,8 @@
-This datasource returns a ref from a Git repository. The `depName` must be a FQDN. To fetch the latest digest of a ref instead of the named ref, specify the ref as the `currentValue` and match on the `currentDigest`. This datasource can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+This datasource can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
+
+This datasource returns a reference from a Git repository.
+The `depName` must be a fully qualified domain name.
+To fetch the latest digest of a reference instead of the named reference, specify the reference as the `currentValue` and match on the `currentDigest`.
 
 **Usage Example**
 
