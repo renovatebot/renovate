@@ -6,7 +6,8 @@ To fetch the latest digest of a reference instead of the named reference, specif
 
 **Usage example**
 
-A real-world example for this specific datasource would be maintaining the HEAD digest of the `master` branch of an unversioned and untagged repo in a config file. This can be achieved by configuring a generic regex manager in `renovate.json` for files named `versions.ini`:
+Say you want to maintain the HEAD digest of the `main` branch of an unversioned and untagged repository in a config file.
+You would configure a generic regex manager in `renovate.json` for files named `versions.ini`:
 
 ```json
 {
