@@ -1727,12 +1727,13 @@ Use this field to restrict rules to a particular language. e.g.
 
 ### matchCategories
 
-Use this field to restrict rules to a particular language or group. The categories can be found on the [manager documentation](./modules/manager.md). e.g.
+Use `matchCategories` to restrict rules to a particular language or group.
+The categories can be found in the [manager documentation](./modules/manager.md).
 
 <!-- prettier-ignore -->
 !!! warning
-    Rules with `matchCategories` are only applied after extraction of a repository, therefore it can not be used to completely prevent analyzes of a repository.
-    Still it can be used to prevent or change the renovation of dependencies.
+    Rules with `matchCategories` are only applied _after_ extraction of a repository, therefore it can not be used to completely prevent analyzes of a repository.
+    Still it can be used to prevent or change the updating of dependencies.
 
 ```json
 {
@@ -1746,7 +1747,7 @@ Use this field to restrict rules to a particular language or group. The categori
 ```
 
 In the above example, this rule will not prevent Renovate from extracting Python dependencies, but it will stop them from being updated.
-If you wish to skip extraction altogether, you'd need to use a feature like `enabledManagers` instead.
+If you wish to skip extraction altogether, use a feature like `enabledManagers` instead.
 
 ### matchBaseBranches
 
