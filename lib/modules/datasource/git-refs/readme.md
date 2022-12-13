@@ -15,7 +15,7 @@ You would configure a generic regex manager in `renovate.json` for files named `
     {
       "fileMatch": ["^versions.ini$"],
       "matchStrings": ["GOOGLE_API_VERSION=(?<currentDigest>.*?)\\n"],
-      "currentValueTemplate": "master",
+      "currentValueTemplate": "main",
       "depNameTemplate": "https://github.com/googleapis/googleapis",
       "datasourceTemplate": "git-refs"
     }
