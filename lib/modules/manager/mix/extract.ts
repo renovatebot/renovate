@@ -47,7 +47,7 @@ export async function extractPackageFile(
         if (git ?? github) {
           dep = {
             depName: app,
-            currentValue: ref ?? branch ?? tag,
+            currentValue: ref ?? branchOrTag,
             datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
             packageName: git ?? github,
           };
