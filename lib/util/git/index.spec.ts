@@ -1034,4 +1034,62 @@ describe('util/git/index', () => {
       expect(await git.getSubmodules()).toHaveLength(0);
     });
   });
+
+  describe('installHook()', () => {
+    it('installHook()', async () => {
+      //git.getCommitMessages() only returns the first line (i.e. subject) of each msg
+      await git.installHook(
+        'commit-msg',
+        '#!/bin/sh\necho "APPENDED FROM COMMIT-MSG HOOK" >> $1;'
+      );
+      const files: FileChange[] = [
+        {
+          type: 'addition',
+          path: 'some-new-file',
+          contents: 'some new-contents',
+        },
+      ];
+      setNoVerify(['push']);
+      await git.commitFiles({
+        branchName: 'renovate/something',
+        files,
+        message: 'Orig-commit-msg',
+      });
+
+      const messages = await git.getCommitMessages();
+      expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
+    });
+  });
+
+  describe('fetchRevSpec()', () => {
+    it('fetchRevSpec()', async () => {
+      //duplicate defaultBranch as local branch with prefix "origin/"
+      await git.fetchRevSpec(
+        `refs/heads/${defaultBranch}:refs/heads/origin/${defaultBranch}`
+      );
+      //checkout this duplicate
+      const sha = await git.checkoutBranch(`origin/${defaultBranch}`);
+      expect(sha).toBe(git.getBranchCommit(defaultBranch));
+    });
+  });
+
+  describe('hasDiff()', () => {
+    it('hasDiff() - src == dst should always be equal', () => {
+      return expect(
+        git.hasDiff(
+          'remotes/origin/renovate/equal_branch',
+          'remotes/origin/renovate/equal_branch'
+        )
+      ).resolves.toBeFalse();
+    });
+
+    it('hasDiff() - compare with modified branch should return true', () => {
+      return expect(
+        git.hasDiff(
+          `remotes/origin/${defaultBranch}`,
+          'remotes/origin/renovate/modified_branch'
+        )
+      ).resolves.toBeTrue();
+    });
+  });
 });

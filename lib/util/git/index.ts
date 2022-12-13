@@ -229,6 +229,10 @@ async function fetchBranchCommits(): Promise<void> {
   }
 }
 
+export async function fetchRevSpec(revSpec: string): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', revSpec]));
+}
+
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.ignoredAuthors = [];
@@ -243,6 +247,18 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   gitInitialized = false;
   submodulesInitizialized = false;
   await fetchBranchCommits();
+}
+
+export async function installHook(
+  name: string,
+  hookSource: string
+): Promise<void> {
+  await syncGit();
+  const localDir = GlobalConfig.get('localDir')!;
+  const gitHooks = upath.join(localDir, '.git/hooks');
+  await fs.mkdir(gitHooks, { recursive: true });
+  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
+  await fs.chmod(`${gitHooks}/${name}`, fs.constants.S_IRWXU);
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -853,10 +869,13 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -983,7 +1002,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
