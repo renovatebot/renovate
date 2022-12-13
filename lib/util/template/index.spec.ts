@@ -88,7 +88,7 @@ describe('util/template/index', () => {
   it('has access to basic environment variables (basicEnvVars)', () => {
     const userTemplate = 'HOME is {{env.HOME}}';
     const output = template.compile(userTemplate, {});
-    expect(output).toBe(`HOME is ${process.env.HOME ?? ''}`);
+    expect(output).toBe('HOME is /root');
   });
 
   it('and has access to environment variables (can be exposed with customEnvVariables)', () => {
@@ -99,7 +99,7 @@ describe('util/template/index', () => {
     };
     const userTemplate = 'SHELL is {{env.SHELL}}';
     const output = template.compile(userTemplate, input);
-    expect(output).toBe(`SHELL is ${process.env.SHELL ?? ''}`);
+    expect(output).toBe('SHELL is /bin/bash');
   });
 
   it('and has access to custom variables (can be defined with customEnvVariables)', () => {
