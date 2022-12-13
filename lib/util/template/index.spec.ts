@@ -94,7 +94,7 @@ describe('util/template/index', () => {
   it('and has access to environment variables (can be exposed with customEnvVariables)', () => {
     const input = {
       env: {
-        SHELL: process.env.SHELL,
+        SHELL: '/bin/bash',
       },
     };
     const userTemplate = 'SHELL is {{env.SHELL}}';
