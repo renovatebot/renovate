@@ -1,12 +1,12 @@
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
 import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 
 export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,
@@ -33,7 +33,8 @@ export async function createConfigMigrationBranch(
   const contents = await MigratedDataFactory.applyPrettierFormatting(
     migratedConfigData
   );
-  return commitAndPush({
+  return scm.commitAndPush({
+    targetBranch: config.baseBranch,
     branchName: getMigrationBranchName(config),
     files: [
       {

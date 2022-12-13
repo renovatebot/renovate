@@ -2,7 +2,6 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
 import { scm } from '../../../../modules/platform/scm';
 import { getFile } from '../../../../util/git';
 import { OnboardingCommitMessageFactory } from './commit-message';
@@ -52,7 +51,8 @@ export async function rebaseOnboardingBranch(
   }
 
   // TODO #7154
-  return commitAndPush({
+  return scm.commitAndPush({
+    targetBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
       {

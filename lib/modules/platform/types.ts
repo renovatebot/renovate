@@ -219,4 +219,5 @@ export interface PlatformScm {
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<CommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
 }

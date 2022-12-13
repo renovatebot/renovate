@@ -51,6 +51,7 @@ import type {
   CommitResult,
   CommitSha,
   LocalConfig,
+  PushFilesConfig,
   StatusResult,
   StorageConfig,
   TreeItem,
@@ -503,11 +504,9 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName])
-    ).trim();
     await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    config.currentBranch = branchName;
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -703,6 +702,7 @@ export async function isBranchConflicted(
   const origBranch = config.currentBranch;
   try {
     await git.reset(ResetMode.HARD);
+    //TODO: see #18600
     if (origBranch !== baseBranch) {
       await git.checkout(baseBranch);
     }
@@ -1010,11 +1010,12 @@ export async function prepareCommit({
 }
 
 export async function pushCommit({
-  branchName,
+  sourceRef,
+  targetRef,
   files,
-}: CommitFilesConfig): Promise<boolean> {
+}: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing branch ${branchName}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1026,14 +1027,14 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${branchName}:${branchName}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
-    handleCommitError(files, branchName, err);
+    handleCommitError(files, sourceRef, err);
   }
   return result;
 }
@@ -1062,7 +1063,11 @@ export async function commitFiles(
   try {
     const commitResult = await prepareCommit(commitConfig);
     if (commitResult) {
-      const pushResult = await pushCommit(commitConfig);
+      const pushResult = await pushCommit({
+        sourceRef: commitConfig.branchName,
+        targetRef: commitConfig.targetBranch ?? commitConfig.branchName,
+        files: commitConfig.files,
+      });
       if (pushResult) {
         const { branchName } = commitConfig;
         const { commitSha } = commitResult;

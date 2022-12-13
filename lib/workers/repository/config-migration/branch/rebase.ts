@@ -1,14 +1,13 @@
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
 import { scm } from '../../../../modules/platform/scm';
 import { checkoutBranch, getFile } from '../../../../util/git';
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
@@ -46,7 +45,8 @@ export async function rebaseMigrationBranch(
   contents = await MigratedDataFactory.applyPrettierFormatting(
     migratedConfigData
   );
-  return commitAndPush({
+  return scm.commitAndPush({
+    targetBranch: config.baseBranch,
     branchName,
     files: [
       {
