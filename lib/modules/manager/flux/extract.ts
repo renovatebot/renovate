@@ -9,6 +9,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
+import { getDep } from '../dockerfile/extract';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { isSystemManifest } from './common';
 import type {
@@ -71,6 +72,14 @@ function readManifest(content: string, file: string): FluxManifest | null {
         }
         break;
       case 'GitRepository':
+        if (
+          resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
+          resource.spec?.url
+        ) {
+          manifest.resources.push(resource);
+        }
+        break;
+      case 'OCIRepository':
         if (
           resource.apiVersion?.startsWith('source.toolkit.fluxcd.io/') &&
           resource.spec?.url
@@ -147,12 +156,12 @@ function resolveSystemManifest(
 function resolveResourceManifest(
   manifest: ResourceFluxManifest,
   helmRepositories: HelmRepository[]
-): PackageDependency<FluxManagerData>[] {
-  const deps: PackageDependency<FluxManagerData>[] = [];
+): PackageDependency[] {
+  const deps: PackageDependency[] = [];
   for (const resource of manifest.resources) {
     switch (resource.kind) {
       case 'HelmRelease': {
-        const dep: PackageDependency<FluxManagerData> = {
+        const dep: PackageDependency = {
           depName: resource.spec.chart.spec.chart,
           currentValue: resource.spec.chart.spec.version,
           datasource: HelmDatasource.id,
@@ -175,7 +184,7 @@ function resolveResourceManifest(
         break;
       }
       case 'GitRepository': {
-        const dep: PackageDependency<FluxManagerData> = {
+        const dep: PackageDependency = {
           depName: resource.metadata.name,
         };
 
@@ -191,6 +200,27 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep.currentValue = resource.spec.ref.tag;
           resolveGitRepositoryPerSourceTag(dep, resource.spec.url);
+        } else {
+          dep.skipReason = 'unversioned-reference';
+        }
+        deps.push(dep);
+        break;
+      }
+      case 'OCIRepository': {
+        const container = resource.spec.url?.replace('oci://', '');
+        let dep: PackageDependency = {
+          depName: container,
+        };
+        if (resource.spec.ref?.digest) {
+          dep = getDep(`${container}@${resource.spec.ref.digest}`, false);
+          if (resource.spec.ref?.tag) {
+            logger.debug('A digest and tag was found, ignoring tag');
+          }
+        } else if (resource.spec.ref?.tag) {
+          dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
+          dep.autoReplaceStringTemplate =
+            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+          dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';
         }
@@ -218,7 +248,7 @@ export function extractPackageFile(
       }
     }
   }
-  let deps: PackageDependency<FluxManagerData>[] | null = null;
+  let deps: PackageDependency[] | null = null;
   switch (manifest.kind) {
     case 'system':
       deps = resolveSystemManifest(manifest);
@@ -259,7 +289,7 @@ export async function extractAllPackageFiles(
   }
 
   for (const manifest of manifests) {
-    let deps: PackageDependency<FluxManagerData>[] | null = null;
+    let deps: PackageDependency[] | null = null;
     switch (manifest.kind) {
       case 'system':
         deps = resolveSystemManifest(manifest);
