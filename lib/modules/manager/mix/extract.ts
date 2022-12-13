@@ -13,8 +13,7 @@ const depMatchRegExp = regEx(
 const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
 const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
 const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
-const branchRegexp = regEx(/branch:\s*"(?<value>[^"]+)"/);
-const tagRegexp = regEx(/tag:\s*"(?<value>[^"]+)"/);
+const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
 const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
 const commentMatchRegExp = regEx(/#.*$/);
 
@@ -40,8 +39,7 @@ export async function extractPackageFile(
         const github = githubRegexp.exec(opts)?.groups?.value;
         const git = gitRegexp.exec(opts)?.groups?.value;
         const ref = refRegexp.exec(opts)?.groups?.value;
-        const branch = branchRegexp.exec(opts)?.groups?.value;
-        const tag = tagRegexp.exec(opts)?.groups?.value;
+        const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
         const organization = organizationRegexp.exec(opts)?.groups?.value;
 
         let dep: PackageDependency;
