@@ -2232,7 +2232,6 @@ You'll have to wait until the checks have been performed, before you can decide 
 
 With prCreation set to `not-pending`, Renovate waits until tests pass or fail, and only then creates the PR.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-Particularly in conjunction with automerge settings, you're reducing the "noise" as PRs might not be created at all.
 If there are no checks associated, Renovate will create the PR once 24 hrs has elapsed since creation of the commit.
 
 With prCreation set to `status-success`, Renovate waits until all tests have finished running successfully, and only then creates the PR.
