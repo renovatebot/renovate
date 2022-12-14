@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import { parseGradle, parseProps } from './parser';
-import { REGISTRY_URLS } from './parser/common';
+import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
 
@@ -372,6 +372,33 @@ describe('modules/manager/gradle/parser', () => {
         expect(deps).toMatchObject([
           { depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' },
         ]);
+      });
+    });
+
+    describe('kotlin() short notation dependencies', () => {
+      const output = {
+        depName: 'foo',
+        packageName: 'org.jetbrains.kotlin:kotlin-foo',
+        currentValue: '1.2.3',
+      };
+
+      test.each`
+        def                | str                                   | output
+        ${''}              | ${'kotlin("foo", "1.2.3")'}           | ${output}
+        ${''}              | ${'kotlin("foo", version = "1.2.3")'} | ${output}
+        ${'some = "foo"'}  | ${'kotlin(some, version = "1.2.3")'}  | ${output}
+        ${'some = "foo"'}  | ${'kotlin("${some}", "1.2.3")'}       | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", baz)'}               | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", version = baz)'}     | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", property("baz"))'}   | ${output}
+        ${'baz = "1.2.3"'} | ${'kotlin("foo", "${baz}456")'}       | ${{ skipReason: 'unknown-version' }}
+        ${''}              | ${'kotlin("foo", some)'}              | ${null}
+        ${''}              | ${'kotlin(["foo", "1.2.3"])'}         | ${null}
+        ${''}              | ${'kotlin("foo", "1.2.3", "4.5.6")'}  | ${null}
+        ${''}              | ${'kotlin("foo", "1.2.3@@@")'}        | ${null}
+      `('$def | $str', ({ def, str, output }) => {
+        const { deps } = parseGradle([def, str].join('\n'));
+        expect(deps).toMatchObject([output].filter(Boolean));
       });
     });
 
@@ -759,6 +786,31 @@ describe('modules/manager/gradle/parser', () => {
         'Max recursion depth reached in script file: foo/bar.gradle'
       );
       expect(vars).toBeEmpty();
+    });
+  });
+
+  describe('implicit gradle plugins', () => {
+    test.each`
+      def                | input                                           | output
+      ${'baz = "1.2.3"'} | ${'checkstyle { toolVersion = "${baz}" }'}      | ${{ depName: 'checkstyle', packageName: GRADLE_PLUGINS['checkstyle'], currentValue: '1.2.3' }}
+      ${''}              | ${'codenarc { toolVersion = "1.2.3" }'}         | ${{ depName: 'codenarc', packageName: GRADLE_PLUGINS['codenarc'], currentValue: '1.2.3' }}
+      ${''}              | ${'detekt { toolVersion = "1.2.3" }'}           | ${{ depName: 'detekt', packageName: GRADLE_PLUGINS['detekt'], currentValue: '1.2.3' }}
+      ${''}              | ${'findbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'findbugs', packageName: GRADLE_PLUGINS['findbugs'], currentValue: '1.2.3' }}
+      ${''}              | ${'googleJavaFormat { toolVersion = "1.2.3" }'} | ${{ depName: 'googleJavaFormat', packageName: GRADLE_PLUGINS['googleJavaFormat'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}               | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = property("baz") }'}   | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
+      ${''}              | ${'lombok { version = "1.2.3" }'}               | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion = "1.2.3" }'}              | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { foo = "bar"; toolVersion = "1.2.3" }'} | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
+      ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'spotbugs', packageName: GRADLE_PLUGINS['spotbugs'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion = "@@@" }'}                | ${null}
+      ${''}              | ${'pmd { toolVersion = "${baz}" }'}             | ${null}
+      ${'baz = "1.2.3"'} | ${'pmd { toolVersion = "${baz}.456" }'}         | ${{ depName: 'pmd', currentValue: '1.2.3.456', skipReason: 'unknown-version' }}
+      ${''}              | ${'pmd { [toolVersion = "6.36.0"] }'}           | ${null}
+      ${''}              | ${'unknown { toolVersion = "1.2.3" }'}          | ${null}
+    `('$def | $input', ({ def, input, output }) => {
+      const { deps } = parseGradle([def, input].join('\n'));
+      expect(deps).toMatchObject([output].filter(Boolean));
     });
   });
 });

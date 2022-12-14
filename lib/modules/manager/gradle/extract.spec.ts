@@ -1,3 +1,4 @@
+import { stripIndent } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
 import type { ExtractConfig } from '../types';
@@ -838,6 +839,195 @@ describe('modules/manager/gradle/extract', () => {
       {
         packageFile: 'buildSrc/build.gradle',
         deps: [{ depType: 'devDependencies' }],
+      },
+    ]);
+  });
+
+  // Tests for gradle-consistent-version plugin
+  it('gradle-consistent-versions parse versions files', async () => {
+    const fsMock = {
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+      'versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
+        org.apache.lucene:lucene-core:1.2.3 (10 constraints: 95be0c15)
+        org.apache.lucene:lucene-codecs:1.2.3 (5 constraints: 1231231)
+      `,
+    };
+
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'versions.lock',
+      },
+      {
+        packageFile: 'versions.props',
+        deps: [
+          {
+            depName: 'org.apache.lucene:lucene-core',
+            depType: 'dependencies',
+            fileReplacePosition: 22,
+            groupName: 'org.apache.lucene:*',
+            lockedVersion: '1.2.3',
+            managerData: {
+              fileReplacePosition: 22,
+              packageFile: 'versions.props',
+            },
+            registryUrls: [],
+          },
+          {
+            depName: 'org.apache.lucene:lucene-codecs',
+            depType: 'dependencies',
+            fileReplacePosition: 22,
+            groupName: 'org.apache.lucene:*',
+            lockedVersion: '1.2.3',
+            managerData: {
+              fileReplacePosition: 22,
+              packageFile: 'versions.props',
+            },
+            registryUrls: [],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('gradle-consistent-versions plugin not used due to lockfile not a GCV lockfile', async () => {
+    const fsMock = {
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+      'versions.lock': stripIndent`
+        This is NOT a lock file
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toBeNull();
+  });
+
+  it('gradle-consistent-versions plugin not used due to lockfile missing', async () => {
+    const fsMock = {
+      'build.gradle': '(this file contains) com.palantir.consistent-versions',
+      'versions.props': `org.apache.lucene:* = 1.2.3`,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+    expect(res).toBeNull();
+  });
+
+  it('gradle-consistent-versions multi levels of glob', async () => {
+    const fsMock = {
+      'versions.props': stripIndent`
+        org.apache.* = 4
+        org.apache.lucene:* = 3
+        org.apache.lucene:a.* = 2
+        org.apache.lucene:a.b = 1
+      `,
+      'versions.lock': stripIndent`
+        # Run ./gradlew --write-locks to regenerate this file
+        org.apache.solr:x.y:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.b:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.c:1 (10 constraints: 95be0c15)
+        org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
+        org.apache.lucene:d:1 (10 constraints: 95be0c15)
+        org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      {} as ExtractConfig,
+      Object.keys(fsMock)
+    );
+
+    // Each lock dep is only present once, with highest prio for exact prop match, then globs from longest to shortest
+    expect(res).toMatchObject([
+      {
+        packageFile: 'versions.lock',
+        datasource: 'maven',
+        deps: [],
+      },
+      {
+        packageFile: 'versions.props',
+        datasource: 'maven',
+        deps: [
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 91,
+            },
+            depName: 'org.apache.lucene:a.b',
+            currentValue: '1',
+            lockedVersion: '1',
+            fileReplacePosition: 91,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 65,
+            },
+            depName: 'org.apache.lucene:a.c',
+            currentValue: '2',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:a.*',
+            fileReplacePosition: 65,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 65,
+            },
+            depName: 'org.apache.lucene:a.d',
+            currentValue: '2',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:a.*',
+            fileReplacePosition: 65,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 39,
+            },
+            depName: 'org.apache.lucene:d',
+            currentValue: '3',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:*',
+            fileReplacePosition: 39,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+          {
+            managerData: {
+              packageFile: 'versions.props',
+              fileReplacePosition: 39,
+            },
+            depName: 'org.apache.lucene:e.f',
+            currentValue: '3',
+            lockedVersion: '1',
+            groupName: 'org.apache.lucene:*',
+            fileReplacePosition: 39,
+            registryUrls: [],
+            depType: 'dependencies',
+          },
+        ],
       },
     ]);
   });
