@@ -156,33 +156,24 @@ const prBodyFields = [
 
 const handlebarsUtilityFields = ['else'];
 
-const envObjectField = ['env'];
-
-const childEnvFields = Object.keys(getChildEnv({}) ?? {});
-
-export const allowedFieldsList = new Set([
-  ...Object.keys(allowedFields),
-  ...exposedConfigOptions,
-  ...prBodyFields,
-  ...handlebarsUtilityFields,
-  ...envObjectField,
-  ...childEnvFields,
-]);
-
-export const allowedTemplateFields = new Set([
-  ...Object.keys(allowedFields),
-  ...exposedConfigOptions,
-  ...envObjectField,
-  ...childEnvFields,
-]);
+const allowedFieldsList = Object.keys(allowedFields)
+  .concat(exposedConfigOptions)
+  .concat(prBodyFields)
+  .concat(handlebarsUtilityFields);
 
 type CompileInput = Record<string, unknown>;
+
+const allowedTemplateFields = new Set([
+  ...Object.keys(allowedFields),
+  ...exposedConfigOptions,
+]);
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   get(target: CompileInput, prop: keyof CompileInput): unknown {
     if (prop === 'env') {
       return target[prop];
     }
+
     if (!allowedTemplateFields.has(prop)) {
       return undefined;
     }
@@ -215,15 +206,15 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const childEnv = {
-    env: getChildEnv({}),
-  };
-  const data = merge({}, GlobalConfig.get(), childEnv, input);
+  const data = { ...GlobalConfig.get(), ...input, env: getChildEnv({}) };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
-    const allowedFields = new Set([...allowedFieldsList, ...Object.keys(getChildEnv({}))]);
+    const allowedFields = new Set([
+      ...allowedFieldsList,
+      ...Object.keys(getChildEnv({})),
+    ]);
     for (const match of matches) {
       const varNames = match[1].split('.');
       for (const varName of varNames) {
