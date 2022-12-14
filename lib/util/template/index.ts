@@ -161,7 +161,7 @@ const envObjectField = ['env'];
 
 const childEnvFields = Object.keys(getChildEnv({}) ?? {});
 
-const allowedFieldsList = new Set([
+export const allowedFieldsList = new Set([
   ...Object.keys(allowedFields),
   ...exposedConfigOptions,
   ...prBodyFields,
@@ -170,7 +170,7 @@ const allowedFieldsList = new Set([
   ...childEnvFields,
 ]);
 
-const allowedTemplateFields = new Set([
+export const allowedTemplateFields = new Set([
   ...Object.keys(allowedFields),
   ...exposedConfigOptions,
   ...envObjectField,

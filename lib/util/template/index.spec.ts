@@ -91,26 +91,43 @@ describe('util/template/index', () => {
     expect(output).toBe('HOME is /root');
   });
 
-  it('and has access to environment variables (can be exposed with customEnvVariables)', () => {
-    const input = {
-      env: {
-        SHELL: '/bin/bash',
-      },
-    };
-    const userTemplate = 'SHELL is {{env.SHELL}}';
-    const output = template.compile(userTemplate, input);
-    expect(output).toBe('SHELL is /bin/bash');
-  });
+  describe('customEnvVariables', () => {
+    beforeEach(() => {
+      // in reality, the variable would be exposed through customEnvVariables config setting
+      template.allowedFieldsList.add('SHELL');
+      template.allowedTemplateFields.add('SHELL');
+      template.allowedFieldsList.add('CUSTOM_FOO');
+      template.allowedTemplateFields.add('CUSTOM_FOO');
+    });
 
-  it('and has access to custom variables (can be defined with customEnvVariables)', () => {
-    const input = {
-      env: {
-        CUSTOM_FOO: 'foo',
-      },
-    };
-    const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
-    const output = template.compile(userTemplate, input);
-    expect(output).toBe('CUSTOM_FOO is foo');
+    afterEach(() => {
+      template.allowedFieldsList.delete('SHELL');
+      template.allowedTemplateFields.delete('SHELL');
+      template.allowedFieldsList.delete('CUSTOM_FOO');
+      template.allowedTemplateFields.delete('CUSTOM_FOO');
+    });
+
+    it('and has access to environment variables (can be exposed with customEnvVariables)', () => {
+      const input = {
+        env: {
+          SHELL: '/bin/bash',
+        },
+      };
+      const userTemplate = 'SHELL is {{env.SHELL}}';
+      const output = template.compile(userTemplate, input);
+      expect(output).toBe('SHELL is /bin/bash');
+    });
+
+    it('and has access to custom variables (can be defined with customEnvVariables)', () => {
+      const input = {
+        env: {
+          CUSTOM_FOO: 'foo',
+        },
+      };
+      const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
+      const output = template.compile(userTemplate, input);
+      expect(output).toBe('CUSTOM_FOO is foo');
+    });
   });
 
   it('and does not have access to other environment variables', () => {
