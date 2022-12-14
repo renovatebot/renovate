@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import merge from 'deepmerge';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
@@ -206,7 +207,11 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...input, env: getChildEnv({}) };
+  const data = merge.all([
+    GlobalConfig.get(),
+    { env: getChildEnv({}) },
+    input ?? {},
+  ]);
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
