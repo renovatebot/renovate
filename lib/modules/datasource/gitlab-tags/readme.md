@@ -30,7 +30,6 @@ Now you may use comments in your `versions.ini` files to automatically update de
 ```ini
 # renovate: datasource=gitlab-tags depName=gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list versioning=semver registryUrl=https://gitlab.com
 NKJS_VERSION=3.4.0
-
 ```
 
 By default, `gitlab-tags` uses the `semver` versioning scheme.
