@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
-import merge from 'lodash/merge';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
 import { getChildEnv } from '../exec';
