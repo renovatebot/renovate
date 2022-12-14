@@ -4,7 +4,8 @@ To specify which specific repository should be queried when looking up a package
 
 As an example, `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list:@gitlab-org/nk-js` would look for the`@gitlab-org/nk-js` packages in the generic packages repository of the `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` project.
 
-To specify where to find a self-hosted GitLab instance, specify `registryUrl`. An example would be `https://gitlab.company.com`.
+To specify where to find a self-hosted GitLab instance, specify `registryUrl`.
+An example would be `https://gitlab.company.com`.
 
 If you are using a self-hosted GitLab instance, please note the following requirements:
 
