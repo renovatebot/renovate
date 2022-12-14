@@ -216,7 +216,7 @@ export function compile(
   const childEnv = {
     env: getChildEnv({}),
   };
-  const data = merge({}, GlobalConfig.get(), input, childEnv);
+  const data = merge({}, GlobalConfig.get(), childEnv, input);
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
