@@ -47,8 +47,20 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
 
-  // Handle Pipeline resource
+  // Handle PipelineRun resource with inline Pipeline definition
+  const pipelineSpec = doc.spec?.pipelineSpec;
+  if (is.truthy(pipelineSpec)) {
+    const pipeline: TektonResource = { spec: pipelineSpec };
+    deps.push(...getDeps(pipeline));
+  }
+
+  // Handle regular tasks of Pipeline resource
   for (const task of coerceArray(doc.spec?.tasks)) {
+    addDep(task.taskRef, deps);
+  }
+
+  // Handle finally tasks of Pipeline resource
+  for (const task of coerceArray(doc.spec?.finally)) {
     addDep(task.taskRef, deps);
   }
 

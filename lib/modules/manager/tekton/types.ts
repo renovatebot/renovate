@@ -1,6 +1,6 @@
 export interface TektonResource {
   spec: TektonResourceSpec;
-  items: TektonResource[];
+  items?: TektonResource[];
 }
 
 interface TektonResourceSpec {
@@ -8,8 +8,12 @@ interface TektonResourceSpec {
   taskRef: TektonBundle;
   // PipelineRun
   pipelineRef: TektonBundle;
+  // PipelienRun with inline Pipeline definition
+  pipelineSpec?: TektonResourceSpec;
   // Pipeline
   tasks: TektonResourceSpec[];
+  // Pipeline
+  finally: TektonResourceSpec[];
   // TriggerTemplate
   resourcetemplates: TektonResource[];
 }
