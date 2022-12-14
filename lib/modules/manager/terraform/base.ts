@@ -13,8 +13,8 @@ export abstract class DependencyExtractor {
   abstract getCheckList(): string[];
 
   /**
-   * Extract dependencies from a HLC object
-   * @param hclRoot HLC parsing artifact.
+   * Extract dependencies from a HCL object
+   * @param hclRoot HCL parsing artifact.
    * @param locks currently existing locks
    */
   abstract extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[];
