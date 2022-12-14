@@ -1705,6 +1705,28 @@ See also `matchPackagePrefixes`.
 
 The above will match all package names starting with `eslint` but exclude ones starting with `eslint-foo`.
 
+### matchCategories
+
+Use `matchCategories` to restrict rules to a particular language or group.
+The categories can be found in the [manager documentation](./modules/manager.md).
+
+<!-- prettier-ignore -->
+!!! warning
+Rules with `matchCategories` are only applied _after_ extraction of a repository.
+You can not use `matchCategories` to stop processing a repository.
+You can still use `matchCategories` to stop or change updating the dependencies though.
+
+```json
+{
+  "packageRules": [
+    {
+      "matchCategories": ["python"],
+      "enabled": false
+    }
+  ]
+}
+```
+
 ### matchLanguages
 
 Use this field to restrict rules to a particular language. e.g.
@@ -1719,28 +1741,6 @@ Use this field to restrict rules to a particular language. e.g.
     {
       "matchPackageNames": ["request"],
       "matchLanguages": ["python"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-### matchCategories
-
-Use `matchCategories` to restrict rules to a particular language or group.
-The categories can be found in the [manager documentation](./modules/manager.md).
-
-<!-- prettier-ignore -->
-!!! warning
-    Rules with `matchCategories` are only applied _after_ extraction of a repository.
-    You can not use `matchCategories` to stop processing a repository.
-    You can still use `matchCategories` to stop or change updating the dependencies though.
-
-```json
-{
-  "packageRules": [
-    {
-      "matchCategories": ["python"],
       "enabled": false
     }
   ]
