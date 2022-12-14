@@ -213,7 +213,7 @@ export function compile(
     const matches = template.matchAll(templateRegex);
     const allowedFields = new Set([
       ...allowedFieldsList,
-      ...Object.keys(getChildEnv({})),
+      ...Object.keys(getChildEnv({}) ?? {}),
     ]);
     for (const match of matches) {
       const varNames = match[1].split('.');
