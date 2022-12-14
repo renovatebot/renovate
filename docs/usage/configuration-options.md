@@ -1732,8 +1732,9 @@ The categories can be found in the [manager documentation](./modules/manager.md)
 
 <!-- prettier-ignore -->
 !!! warning
-    Rules with `matchCategories` are only applied _after_ extraction of a repository, therefore it can not be used to completely prevent analyzes of a repository.
-    Still it can be used to prevent or change the updating of dependencies.
+    Rules with `matchCategories` are only applied _after_ extraction of a repository.
+    You can not use `matchCategories` to stop processing a repository.
+    You can still use `matchCategories` to stop or change updating the dependencies though.
 
 ```json
 {
