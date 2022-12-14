@@ -1,0 +1,6 @@
+{
+    "*": "ls-lint",
+    "*.md": "markdown-lint",
+    "**/*.{ts,js,mjs,cjs}": "eslint",
+    "**/*.{ts,js,mjs,json,md,yml}": "prettier"
+}
