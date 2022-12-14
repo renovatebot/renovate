@@ -181,6 +181,9 @@ type CompileInput = Record<string, unknown>;
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   get(target: CompileInput, prop: keyof CompileInput): unknown {
+    if (prop === 'env') {
+      return target[prop];
+    }
     if (!allowedTemplateFields.has(prop)) {
       return undefined;
     }
@@ -221,10 +224,11 @@ export function compile(
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
+    const allowedFields = new Set([...allowedFieldsList, ...Object.keys(getChildEnv({}))]);
     for (const match of matches) {
       const varNames = match[1].split('.');
       for (const varName of varNames) {
-        if (!allowedFieldsList.has(varName)) {
+        if (!allowedFields.has(varName)) {
           logger.info(
             { varName, template },
             'Disallowed variable name in template'
