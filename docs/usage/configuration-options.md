@@ -2230,11 +2230,14 @@ Renovate defaults to `immediate` but you might want to change this to `not-pendi
 With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
 You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
 
-With prCreation set to `not-pending`, Renovate waits until tests pass or fail, and only then creates the PR.
+With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
-If there are no checks associated, Renovate will create the PR once 24 hrs has elapsed since creation of the commit.
+If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
 
-With prCreation set to `status-success`, Renovate waits until all tests have finished running successfully, and only then creates the PR.
+With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+
+For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
 
 ## prFooter
 
