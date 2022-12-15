@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -39,6 +40,15 @@ describe('modules/manager/flux/extract', () => {
             depName: 'renovate-repo',
             packageName: 'renovatebot/renovate',
             sourceUrl: 'https://github.com/renovatebot/renovate',
+          },
+          {
+            autoReplaceStringTemplate:
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest: undefined,
+            currentValue: 'v1.8.2',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            replaceString: 'v1.8.2',
           },
         ],
       });
@@ -482,6 +492,146 @@ describe('modules/manager/flux/extract', () => {
       });
     });
 
+    it('ignores OCIRepository with no tag and no digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            skipReason: 'unversioned-reference',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            tag: v1.8.2
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentValue: 'v1.8.2',
+            currentDigest: undefined,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString: 'v1.8.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a tag that contains a digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            tag: v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            autoReplaceStringTemplate:
+              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            currentValue: 'v1.8.2',
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+            datasource: DockerDatasource.id,
+            replaceString:
+              'v1.8.2@sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+          },
+        ],
+      });
+    });
+
+    it('extracts OCIRepository with a digest and tag but prefers digest', () => {
+      const result = extractPackageFile(
+        codeBlock`
+        apiVersion: source.toolkit.fluxcd.io/v1beta2
+        kind: OCIRepository
+        metadata:
+          name: kyverno-controller
+          namespace: flux-system
+        spec:
+          ref:
+            digest: sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc
+            tag: v1.8.2
+          url: oci://ghcr.io/kyverno/manifests/kyverno
+      `,
+        'test.yaml'
+      );
+      expect(result).toEqual({
+        deps: [
+          {
+            currentDigest:
+              'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
+            datasource: DockerDatasource.id,
+            depName: 'ghcr.io/kyverno/manifests/kyverno',
+          },
+        ],
+      });
+    });
+
     it('ignores resources of an unknown kind', () => {
       const result = extractPackageFile(
         codeBlock`
@@ -518,6 +668,7 @@ describe('modules/manager/flux/extract', () => {
         'lib/modules/manager/flux/__fixtures__/helmRelease.yaml',
         'lib/modules/manager/flux/__fixtures__/helmSource.yaml',
         'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
         'lib/modules/manager/flux/__fixtures__/flux-system/gotk-components.yaml',
       ]);
 
@@ -544,6 +695,20 @@ describe('modules/manager/flux/extract', () => {
             },
           ],
           packageFile: 'lib/modules/manager/flux/__fixtures__/gitSource.yaml',
+        },
+        {
+          deps: [
+            {
+              autoReplaceStringTemplate:
+                '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              currentDigest: undefined,
+              currentValue: 'v1.8.2',
+              depName: 'ghcr.io/kyverno/manifests/kyverno',
+              datasource: DockerDatasource.id,
+              replaceString: 'v1.8.2',
+            },
+          ],
+          packageFile: 'lib/modules/manager/flux/__fixtures__/ociSource.yaml',
         },
         {
           deps: [
