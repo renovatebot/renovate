@@ -206,14 +206,15 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...input, env: getChildEnv({}) };
+  const env = getChildEnv({})
+  const data = { ...GlobalConfig.get(), ...input, env) };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
     const allowedFields = new Set([
       ...allowedFieldsList,
-      ...Object.keys(getChildEnv({}) ?? {}),
+      ...Object.keys(env),
     ]);
     for (const match of matches) {
       const varNames = match[1].split('.');
