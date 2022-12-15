@@ -15,7 +15,7 @@ Indirect updates are disabled by default. To enable them, add a package rule suc
 {
   "packageRules": [
     {
-      "matchDatasources": ["go"],
+      "matchManagers": ["gomod"],
       "matchDepTypes": ["indirect"],
       "enabled": true
     }
