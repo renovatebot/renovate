@@ -1,7 +1,24 @@
+import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
+import * as _exec from '../exec';
 import * as template from '.';
 
+jest.mock('../exec');
+
+const exec = mocked(_exec);
+
 describe('util/template/index', () => {
+  beforeEach(() => {
+    exec.getChildEnv.mockReturnValue({
+      CUSTOM_FOO: 'foo',
+      HOME: '/root',
+    });
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
@@ -91,32 +108,10 @@ describe('util/template/index', () => {
     expect(output).toBe('HOME is /root');
   });
 
-  it('and has access to environment variables (can be exposed with customEnvVariables)', () => {
-    const input = {
-      env: {
-        SHELL: '/bin/bash',
-      },
-    };
-    const userTemplate = 'SHELL is {{env.SHELL}}';
-    const output = template.compile(userTemplate, input);
-    expect(output).toBe('SHELL is /bin/bash');
-  });
-
-  it('and has access to custom variables (can be defined with customEnvVariables)', () => {
-    const input = {
-      env: {
-        CUSTOM_FOO: 'foo',
-      },
-    };
+  it('and has access to custom variables (customEnvVariables)', () => {
     const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
-    const output = template.compile(userTemplate, input);
-    expect(output).toBe('CUSTOM_FOO is foo');
-  });
-
-  it('and does not have access to other environment variables', () => {
-    const userTemplate = '{{LOGNAME}} {{UID}} {{SHELL}}';
     const output = template.compile(userTemplate, {});
-    expect(output).toBe('  ');
+    expect(output).toBe('CUSTOM_FOO is foo');
   });
 
   describe('proxyCompileInput', () => {
