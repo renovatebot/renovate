@@ -26,7 +26,7 @@ export function extractPackageFile(
     return null;
   }
 
-  if (!is.plainObject(featureModel)) {
+  if (featureModel === null || featureModel === undefined) {
     return null;
   }
 
