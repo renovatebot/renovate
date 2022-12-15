@@ -362,5 +362,16 @@ describe('modules/manager/gomod/update', () => {
       });
       expect(res).toBeNull();
     });
+
+    it('should not make any changes for indirect upgrades', () => {
+      const upgrade = {
+        depName: 'github.com/davecgh/go-spew',
+        managerData: { lineNumber: 4 },
+        newValue: 'v1.1.1',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).toEqual(gomod1);
+    });
   });
 });

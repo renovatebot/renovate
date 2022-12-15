@@ -70,10 +70,18 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
-      if (requireMatch && !line.endsWith('// indirect')) {
-        logger.trace({ lineNumber }, `require line: "${line}"`);
-        const dep = getDep(lineNumber, requireMatch, 'require');
-        deps.push(dep);
+      if (requireMatch) {
+        if (line.endsWith('// indirect')) {
+          logger.trace({ lineNumber }, `indirect line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'indirect');
+          dep.enabled = false;
+          dep.skipReason = 'disabled'; // https://github.com/renovatebot/renovate/issues/19430
+          deps.push(dep);
+        } else {
+          logger.trace({ lineNumber }, `require line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'require');
+          deps.push(dep);
+        }
       }
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
