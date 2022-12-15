@@ -437,7 +437,7 @@ const options: RenovateOptions[] = [
   {
     name: 'optimizeForDisabled',
     description:
-      'Set to `true` to first check for disabling INSERT WHAT WE CHECK FOR HERE in config before cloning.',
+      'Set to `true` to perform a check for disabled config prior to cloning.',
     stage: 'repository',
     type: 'boolean',
     default: false,
@@ -1288,7 +1288,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'branchPrefixOld',
-    description: 'Old prefix to check for existing PRs.',
+    description: 'Old branchPrefix value to check for existing PRs.',
     stage: 'branch',
     type: 'string',
     default: `renovate/`,
@@ -2056,7 +2056,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'Explicitly turn on unsafe Docker registry access (HTTP).',
+    description: 'Explicitly turn on insecure Docker registry access (HTTP).',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
