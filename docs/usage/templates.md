@@ -88,13 +88,13 @@ Returns `true` if at least one expression is `true`.
 
 ## Environment variables
 
-For security reasons, you can only access a handful of basic environment variables like `HOME` or `PATH` by default:
+By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.
+This is for security reasons.
 
 `HOME is {{env.HOME}}`
 
-If self-hosting, you can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
+If you're self-hosting Renovate, you can expose additional variables with the  [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
 
-You can alse use setting [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) to allow
-using all environment variables in templates, but always consider the security implications of using that setting.
-If secrets or any other confidential information is stored in environment variables, they could be leaked
-by a malicious script.
+You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config option to allow all environment variables in templates.
+Always consider the security implications of using `exposeAllEnv`.
+Secrets and other confidential information stored in environment variables could be leaked by a malicious script.
