@@ -662,6 +662,16 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts single-line
   {
     "currentValue": "v1.0.0",
     "datasource": "go",
+    "depName": "github.com/davecgh/go-spew",
+    "depType": "indirect",
+    "enabled": false,
+    "managerData": {
+      "lineNumber": 4,
+    },
+  },
+  {
+    "currentValue": "v1.0.0",
+    "datasource": "go",
     "depName": "golang.org/x/foo",
     "depType": "require",
     "managerData": {
