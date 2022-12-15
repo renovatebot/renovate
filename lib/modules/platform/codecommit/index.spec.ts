@@ -1099,7 +1099,7 @@ describe('modules/platform/codecommit/index', () => {
       expect(res).toBeFalse();
     });
 
-    it('doesnt find comments obj', async () => {
+    it('doesnt find comments obj and source or destination commit', async () => {
       const commentsRes = {
         commentsForPullRequestData: [
           {
@@ -1125,8 +1125,6 @@ describe('modules/platform/codecommit/index', () => {
             {
               sourceReference: 'refs/heads/sourceBranch',
               destinationReference: 'refs/heads/targetBranch',
-              sourceCommit: '123',
-              destinationCommit: '321',
             },
           ],
         },
@@ -1137,7 +1135,7 @@ describe('modules/platform/codecommit/index', () => {
         topic: null,
         content: 'my comment content',
       });
-      expect(res).toBeTrue();
+      expect(res).toBeFalse();
     });
   });
 
