@@ -50,8 +50,7 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   // Handle PipelineRun resource with inline Pipeline definition
   const pipelineSpec = doc.spec?.pipelineSpec;
   if (is.truthy(pipelineSpec)) {
-    const pipeline: TektonResource = { spec: pipelineSpec };
-    deps.push(...getDeps(pipeline));
+    deps.push(...getDeps({ spec: pipelineSpec }));
   }
 
   // Handle regular tasks of Pipeline resource

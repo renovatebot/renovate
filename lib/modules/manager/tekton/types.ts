@@ -13,7 +13,7 @@ interface TektonResourceSpec {
   // Pipeline
   tasks: TektonResourceSpec[];
   // Pipeline
-  finally: TektonResourceSpec[];
+  finally?: TektonResourceSpec[];
   // TriggerTemplate
   resourcetemplates: TektonResource[];
 }
