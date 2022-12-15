@@ -48,7 +48,22 @@ export interface GitRepository extends KubernetesResource {
   };
 }
 
-export type FluxResource = HelmRelease | HelmRepository | GitRepository;
+export interface OciRepository extends KubernetesResource {
+  kind: 'OCIRepository';
+  spec: {
+    ref: {
+      digest?: string;
+      tag?: string;
+    };
+    url: string;
+  };
+}
+
+export type FluxResource =
+  | HelmRelease
+  | HelmRepository
+  | GitRepository
+  | OciRepository;
 
 export interface FluxFile {
   file: string;

@@ -1,14 +1,16 @@
 import { getConfig, git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
+import * as _bundler from '../../../../modules/manager/bundler';
 import * as _composer from '../../../../modules/manager/composer';
 import * as _gitSubmodules from '../../../../modules/manager/git-submodules';
 import * as _helmv3 from '../../../../modules/manager/helmv3';
 import * as _npm from '../../../../modules/manager/npm';
 import * as _terraform from '../../../../modules/manager/terraform';
-import type { BranchConfig } from '../../../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
 
+const bundler = mocked(_bundler);
 const composer = mocked(_composer);
 const gitSubmodules = mocked(_gitSubmodules);
 const helmv3 = mocked(_helmv3);
@@ -16,6 +18,7 @@ const npm = mocked(_npm);
 const terraform = mocked(_terraform);
 const autoReplace = mocked(_autoReplace);
 
+jest.mock('../../../../modules/manager/bundler');
 jest.mock('../../../../modules/manager/composer');
 jest.mock('../../../../modules/manager/helmv3');
 jest.mock('../../../../modules/manager/npm');
@@ -499,6 +502,146 @@ describe('workers/repository/update/branch/get-updated', () => {
             contents: 'version: 0.0.2',
           },
         ],
+      });
+    });
+
+    describe('when some artifacts have changed and others have not', () => {
+      const pushGemUpgrade = (opts: Partial<BranchUpgradeConfig>) =>
+        config.upgrades.push({
+          packageFile: 'Gemfile',
+          lockFiles: ['Gemfile.lock'],
+          branchName: '',
+          manager: 'bundler',
+          ...opts,
+        });
+
+      const mockUpdated = () => {
+        bundler.updateLockedDependency.mockReturnValueOnce({
+          status: 'updated',
+          files: { Gemfile: 'new contents' },
+        });
+      };
+
+      const mockUnsupported = () => {
+        bundler.updateLockedDependency.mockReturnValueOnce({
+          status: 'unsupported',
+        });
+      };
+
+      beforeEach(() => {
+        git.getFile.mockResolvedValue('existing content');
+      });
+
+      describe('updated lockfile + unsupported lockfile', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          mockUpdated();
+
+          pushGemUpgrade({ depName: 'flipper-redis', isLockfileUpdate: true });
+          mockUnsupported();
+
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: 'new contents' })
+          );
+        });
+      });
+
+      describe('unsupported lockfile + updated lockfile', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          mockUnsupported();
+
+          pushGemUpgrade({ depName: 'flipper-redis', isLockfileUpdate: true });
+          mockUpdated();
+
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: 'new contents' })
+          );
+        });
+      });
+
+      describe('lockfile update + non-lockfile update', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          pushGemUpgrade({
+            depName: 'flipper-redis',
+            currentValue: "'~> 0.22.2'",
+            newVersion: '0.25.4',
+          });
+          const newContent = "gem 'flipper-redis', '~> 0.25.0'";
+          autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
+          mockUnsupported();
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: newContent })
+          );
+        });
+      });
+
+      describe('non-lockfile update + lockfile update', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({
+            depName: 'flipper-redis',
+            currentValue: "'~> 0.22.2'",
+            newVersion: '0.25.4',
+          });
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          const newContent = "gem 'flipper-redis', '~> 0.25.0'";
+          autoReplace.doAutoReplace.mockResolvedValueOnce(newContent);
+          mockUnsupported();
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: newContent })
+          );
+        });
+      });
+
+      describe('remediation update + lockfile unsupported update', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({
+            depName: 'flipper-redis',
+            currentValue: "'~> 0.22.2'",
+            newVersion: '0.25.4',
+            isRemediation: true,
+          });
+          mockUpdated();
+
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          mockUnsupported();
+
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: 'new contents' })
+          );
+        });
+      });
+
+      describe('lockfile unsupported update + remediation update', () => {
+        it('only writes changed contents', async () => {
+          pushGemUpgrade({ depName: 'flipper', isLockfileUpdate: true });
+          mockUnsupported();
+
+          pushGemUpgrade({
+            depName: 'flipper-redis',
+            currentValue: "'~> 0.22.2'",
+            newVersion: '0.25.4',
+            isRemediation: true,
+          });
+          mockUpdated();
+
+          await getUpdatedPackageFiles(config);
+          expect(bundler.updateArtifacts).toHaveBeenCalledOnce();
+          expect(bundler.updateArtifacts).toHaveBeenCalledWith(
+            expect.objectContaining({ newPackageFileContent: 'new contents' })
+          );
+        });
       });
     });
   });

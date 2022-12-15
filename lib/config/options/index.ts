@@ -246,7 +246,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     type: 'object',
     cli: false,
-    env: false,
   },
   {
     name: 'forceCli',
@@ -1200,7 +1199,7 @@ const options: RenovateOptions[] = [
   {
     name: 'customChangelogUrl',
     description:
-      'If set, Renovate will use this url to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
+      'If set, Renovate will use this URL to fetch changelogs for a matched dependency. Valid only within a `packageRules` object.',
     type: 'string',
     stage: 'pr',
     parent: 'packageRules',

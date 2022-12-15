@@ -2,6 +2,7 @@ import { lang, lexer, query as q } from 'good-enough-parser';
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 import {
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   cleanupTempVars,
   coalesceVariable,
@@ -15,6 +16,8 @@ import {
   handleCustomRegistryUrl,
   handleDepInterpolation,
   handleDepSimpleString,
+  handleImplicitGradlePlugin,
+  handleKotlinShortNotationDep,
   handleLibraryDep,
   handleLongFormDep,
   handlePlugin,
@@ -147,6 +150,152 @@ const qKotlinSingleVarAssignment = q
   })
   .handler(cleanupTempVars);
 
+// val foo by extra { "1.2.3" }
+const qKotlinSingleExtraVarAssignment = q
+  .sym<Ctx>('val')
+  .sym(storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+  .opt(q.op<Ctx>(':').sym('String'))
+  .sym('by')
+  .sym('extra')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    search: q
+      .begin<Ctx>()
+      .join(qStringValue)
+      .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+      .handler(handleAssignment)
+      .end(),
+  })
+  .handler(cleanupTempVars);
+
+// foo: "1.2.3"
+const qGroovySingleMapOfVarAssignment = q
+  .sym(storeVarToken)
+  .handler((ctx) => {
+    ctx.tmpTokenStore.backupVarTokens = ctx.varTokens;
+    return ctx;
+  })
+  .handler(coalesceVariable)
+  .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+  .op(':')
+  .join(qTemplateString)
+  .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+  .handler(handleAssignment)
+  .handler((ctx) => {
+    ctx.varTokens = ctx.tmpTokenStore.backupVarTokens!;
+    ctx.varTokens.pop();
+    return ctx;
+  });
+
+// versions = [ android: [ buildTools: '30.0.3' ], kotlin: '1.4.30' ]
+const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
+  .alt(q.op('='), q.op('+='))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '[',
+    endsWith: ']',
+    search: q.alt(
+      q
+        .sym(storeVarToken)
+        .op(':')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '[',
+          endsWith: ']',
+          search: q.alt(
+            q
+              .sym(storeVarToken)
+              .op(':')
+              .tree({
+                type: 'wrapped-tree',
+                maxDepth: 1,
+                startsWith: '[',
+                endsWith: ']',
+                search: qGroovySingleMapOfVarAssignment,
+                postHandler: (ctx) => {
+                  ctx.varTokens.pop();
+                  return ctx;
+                },
+              }),
+            qGroovySingleMapOfVarAssignment
+          ),
+          postHandler: (ctx) => {
+            ctx.varTokens.pop();
+            return ctx;
+          },
+        }),
+      qGroovySingleMapOfVarAssignment
+    ),
+  })
+  .handler(cleanupTempVars);
+
+// "foo1" to "bar1"
+const qKotlinSingleMapOfVarAssignment = qStringValue
+  .sym('to')
+  .handler((ctx) => {
+    ctx.tmpTokenStore.backupVarTokens = ctx.varTokens;
+    return ctx;
+  })
+  .handler(coalesceVariable)
+  .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+  .join(qTemplateString)
+  .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+  .handler(handleAssignment)
+  .handler((ctx) => {
+    ctx.varTokens = ctx.tmpTokenStore.backupVarTokens!;
+    ctx.varTokens.pop();
+    return ctx;
+  });
+
+// val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
+const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
+  .op('=')
+  .sym('mapOf')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.alt(
+      qStringValue
+        .sym('to')
+        .sym('mapOf')
+        .tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q.alt(
+            qStringValue
+              .sym('to')
+              .sym('mapOf')
+              .tree({
+                type: 'wrapped-tree',
+                maxDepth: 1,
+                startsWith: '(',
+                endsWith: ')',
+                search: qKotlinSingleMapOfVarAssignment,
+                postHandler: (ctx) => {
+                  ctx.varTokens.pop();
+                  return ctx;
+                },
+              }),
+            qKotlinSingleMapOfVarAssignment
+          ),
+          postHandler: (ctx) => {
+            ctx.varTokens.pop();
+            return ctx;
+          },
+        }),
+      qKotlinSingleMapOfVarAssignment
+    ),
+  })
+  .handler(cleanupTempVars);
+
 // "foo:bar:1.2.3"
 const qDependenciesSimpleString = qStringValue
   .handler((ctx) => storeInTokenMap(ctx, 'stringToken'))
@@ -157,6 +306,54 @@ const qDependenciesSimpleString = qStringValue
 const qDependenciesInterpolation = qTemplateString
   .handler((ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
   .handler(handleDepInterpolation)
+  .handler(cleanupTempVars);
+
+// dependencySet(group: 'foo', version: bar) { entry 'baz' }
+const qDependencySet = q
+  .sym<Ctx>('dependencySet', storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .sym('group')
+      .alt(q.op(':'), q.op('='))
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .op(',')
+      .sym('version')
+      .alt(q.op(':'), q.op('='))
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .end(),
+  })
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q
+      .sym<Ctx>('entry')
+      .alt(
+        qTemplateString,
+        qVariableAccessIdentifier,
+        q.tree({
+          type: 'wrapped-tree',
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q
+            .begin<Ctx>()
+            .alt(qTemplateString, qVariableAccessIdentifier)
+            .end(),
+        })
+      )
+      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .handler(handleLongFormDep),
+  })
   .handler(cleanupTempVars);
 
 // group: "foo", name: "bar", version: "1.2.3"
@@ -176,6 +373,31 @@ const qGroovyMapNotationDependencies = q
   .alt(qTemplateString, qVariableAccessIdentifier)
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleLongFormDep)
+  .handler(cleanupTempVars);
+
+// kotlin("bom", "1.7.21")
+const qKotlinShortNotationDependencies = q
+  .sym<Ctx>('kotlin')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'moduleName'))
+      .op(',')
+      .opt(q.sym<Ctx>('version').op('='))
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      )
+      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .end(),
+  })
+  .handler(handleKotlinShortNotationDep)
   .handler(cleanupTempVars);
 
 // (group = "foo", name = "bar", version = "1.2.3")
@@ -395,6 +617,45 @@ const qVersionCatalogDependencies = q
   .handler(handleLibraryDep)
   .handler(cleanupTempVars);
 
+// alias("foo.bar").to("foo", "bar").version("1.2.3")
+const qVersionCatalogAliasDependencies = q
+  .sym<Ctx>('alias')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .join(qStringValue)
+      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .end(),
+  })
+  .op('.')
+  .sym('to')
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .op(',')
+      .alt(qTemplateString, qVariableAccessIdentifier)
+      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .end(),
+  })
+  .opt(qVersionCatalogVersion)
+  .handler(handleLibraryDep)
+  .handler(cleanupTempVars);
+
+const qVersionCatalogs = q.alt(
+  qVersionCatalogDependencies,
+  qVersionCatalogAliasDependencies
+);
+
 // someMethod("foo", "bar", "1.2.3")
 const qLongFormDep = q
   .opt<Ctx>(
@@ -477,6 +738,29 @@ const qApplyFrom = q
   .handler(handleApplyFrom)
   .handler(cleanupTempVars);
 
+// pmd { toolVersion = "1.2.3" }
+const qImplicitGradlePlugin = q
+  .sym(regEx(`^(?:${Object.keys(GRADLE_PLUGINS).join('|')})$`), storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    maxMatches: 1,
+    startsWith: '{',
+    endsWith: '}',
+    search: q
+      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
+      .op('=')
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      ),
+  })
+  .handler((ctx) => storeInTokenMap(ctx, 'version'))
+  .handler(handleImplicitGradlePlugin)
+  .handler(cleanupTempVars);
+
 export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
@@ -493,16 +777,22 @@ export function parseGradle(
     maxDepth: 32,
     search: q.alt<Ctx>(
       qGroovySingleVarAssignment,
+      qGroovyMultiVarAssignment,
       qKotlinSingleVarAssignment,
+      qKotlinSingleExtraVarAssignment,
+      qKotlinMultiMapOfVarAssignment,
       qDependenciesSimpleString,
       qDependenciesInterpolation,
+      qDependencySet,
       qGroovyMapNotationDependencies,
+      qKotlinShortNotationDependencies,
       qKotlinMapNotationDependencies,
       qPlugins,
       qRegistryUrls,
-      qVersionCatalogDependencies,
+      qVersionCatalogs,
       qLongFormDep,
-      qApplyFrom
+      qApplyFrom,
+      qImplicitGradlePlugin
     ),
   });
 

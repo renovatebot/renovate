@@ -1,5 +1,7 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const presets: Record<string, Preset> = {
   base: {
     description: 'Default base configuration for all languages.',
@@ -26,7 +28,6 @@ export const presets: Record<string, Preset> = {
   semverAllMonthly: {
     description:
       'Preserve SemVer ranges and update everything together once a month.',
-    separateMajorMinor: false,
     extends: [
       ':preserveSemverRanges',
       'group:all',
@@ -34,8 +35,9 @@ export const presets: Record<string, Preset> = {
       ':maintainLockFilesMonthly',
     ],
     lockFileMaintenance: {
-      extends: ['group:all'],
       commitMessageAction: 'Update',
+      extends: ['group:all'],
     },
+    separateMajorMinor: false,
   },
 };
