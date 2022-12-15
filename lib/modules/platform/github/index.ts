@@ -719,7 +719,10 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkToken && config.repository !== p.sourceRepo) {
+    if (
+      !config.forkToken &&
+      config.repository?.toLowerCase() !== p.sourceRepo?.toLowerCase()
+    ) {
       return false;
     }
 
