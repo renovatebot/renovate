@@ -2000,17 +2000,7 @@ You can suggest a new community package rule by editing [the `replacements.ts` f
 
 This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
-
-Managers which do not support replacement:
-
-- `bazel`
-- `git-submodules`
-- `gomod`
-- `gradle`
-- `hermit`
-- `homebrew`
-- `maven`
-- `regex`
+For a list of managers which do not support replacement read the `replacementName` config option docs.
 
 Use this field to define the version of a replacement package.
 Must be used with `replacementName`.
