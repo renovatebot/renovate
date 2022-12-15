@@ -26,6 +26,10 @@ export function extractPackageFile(
     return null;
   }
 
+  if (!is.plainObject(featureModel)) {
+    return null;
+  }
+
   // Compendium R8 159.9: resource versioning
   if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
     return null;
@@ -118,9 +122,12 @@ function isSupportedFeatureResourceVersion(
   return true;
 }
 
-function extractArtifactList(sectionName: string, sectionValue: unknown): Bundle[] {
+function extractArtifactList(
+  sectionName: string,
+  sectionValue: unknown
+): Bundle[] {
   // The 'ARTIFACTS' key is supported by the Sling/OSGi feature model implementation
-  if (sectionName.includes(':ARTIFACTS|')) {
+  if (sectionName.includes(':ARTIFACTS|') && is.array(sectionValue)) {
     return sectionValue as Bundle[];
   }
 
