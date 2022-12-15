@@ -118,7 +118,7 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
-              'https://dl.bintray.com/sbt/sbt-plugin-releases',
+              'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             ],
           },
         ],
