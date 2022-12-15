@@ -93,3 +93,8 @@ For security reasons, you can only access a handful of basic environment variabl
 `HOME is {{env.HOME}}`
 
 If self-hosting, you can expose additional variables with setting [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables).
+
+You can alse use setting [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) to allow
+using all environment variables in templates, but always consider the security implications of using that setting.
+If secrets or any other confidential information is stored in environment variables, they could be leaked
+by a malicious script.
