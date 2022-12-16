@@ -93,7 +93,7 @@ This is for security reasons.
 
 `HOME is {{env.HOME}}`
 
-If you're self-hosting Renovate, you can expose additional variables with the  [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
+If you're self-hosting Renovate, you can expose additional variables with the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
 
 You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config option to allow all environment variables in templates.
 Always consider the security implications of using `exposeAllEnv`.
