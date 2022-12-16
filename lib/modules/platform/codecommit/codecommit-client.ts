@@ -9,9 +9,6 @@ import {
   DeleteCommentContentCommand,
   DeleteCommentContentInput,
   DeleteCommentContentOutput,
-  DescribePullRequestEventsCommand,
-  DescribePullRequestEventsInput,
-  DescribePullRequestEventsOutput,
   GetCommentsForPullRequestCommand,
   GetCommentsForPullRequestInput,
   GetCommentsForPullRequestOutput,
@@ -33,7 +30,6 @@ import {
   PostCommentForPullRequestCommand,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
-  PullRequestEventType,
   PullRequestStatusEnum,
   UpdateCommentCommand,
   UpdateCommentInput,
@@ -78,11 +74,9 @@ export async function deleteComment(
 }
 
 export async function getPrComments(
-  repositoryName: string,
   pullRequestId: string
 ): Promise<GetCommentsForPullRequestOutput> {
   const input: GetCommentsForPullRequestInput = {
-    repositoryName,
     pullRequestId,
   };
   const cmd = new GetCommentsForPullRequestCommand(input);
@@ -116,18 +110,6 @@ export async function createPrComment(
     beforeCommitId,
   };
   const cmd = new PostCommentForPullRequestCommand(input);
-  return await codeCommitClient.send(cmd);
-}
-
-export async function getPrEvents(
-  pullRequestId: string
-): Promise<DescribePullRequestEventsOutput> {
-  const input: DescribePullRequestEventsInput = {
-    pullRequestId,
-    pullRequestEventType:
-      PullRequestEventType.PULL_REQUEST_SOURCE_REFERENCE_UPDATED,
-  };
-  const cmd = new DescribePullRequestEventsCommand(input);
   return await codeCommitClient.send(cmd);
 }
 
