@@ -14,15 +14,15 @@ export function extractPackageFile(
   // References:
   // - OSGi compendium release 8 ( https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html )
   // - The Sling implementation of the feature model ( https://sling.apache.org/documentation/development/feature-model.html )
-  logger.debug({ fileName }, 'osgi.extractPackageFile');
+  logger.trace({ fileName }, 'osgi.extractPackageFile');
 
   const deps: PackageDependency[] = [];
   let featureModel: FeatureModel;
   try {
     // Compendium R8 159.3: JS comments are supported
     featureModel = json5.parse<FeatureModel>(content);
-  } catch (e) {
-    logger.warn(`Failed parsing ${fileName}: ${(e as Error).message}`);
+  } catch (err) {
+    logger.warn({ fileName, err }, 'Failed to parse osgi file');
     return null;
   }
 
@@ -51,7 +51,7 @@ export function extractPackageFile(
   // section 159.7.3 yet. As of 05-12-2022, there is no implementation that
   // supports this
   for (const [section, value] of Object.entries(featureModel)) {
-    logger.debug({ fileName, section }, 'Parsing section');
+    logger.trace({ fileName, section }, 'Parsing section');
     const customSectionEntries = extractArtifactList(section, value);
     allBundles.push(...customSectionEntries);
   }
