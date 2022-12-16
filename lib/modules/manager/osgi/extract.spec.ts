@@ -1,5 +1,12 @@
 import { extractPackageFile } from './extract';
 
+const noArtifacts = `{
+  "configurations": {
+    "org.apache.sling.jcr.davex.impl.servlets.SlingDavExServlet":{
+      "alias":"/server"
+    }
+  }
+}`;
 const unsupportedFeatureVersion = `{
   "feature-resource-version": "2.0",
   "bundles":[
@@ -120,6 +127,10 @@ describe('modules/manager/osgi/extract', () => {
 
     it('returns null for a null string passed in as a feature model definition', () => {
       expect(extractPackageFile('null', '', undefined)).toBeNull();
+    });
+
+    it('returns null for a valid file with no artifact definitions', () => {
+      expect(extractPackageFile(noArtifacts, '', undefined)).toBeNull();
     });
 
     it('extracts the bundles from a file with object bundles definitions', () => {
