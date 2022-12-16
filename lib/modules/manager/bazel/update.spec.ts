@@ -93,9 +93,10 @@ describe('modules/manager/bazel/update', () => {
         newDigest,
       };
 
-      const output = input
-        .replace(`tag="${currentValue}"`, `tag="${newValue}"`)
-        .replace(currentDigest, newDigest);
+      const output = input.replace(
+        `tag="${currentValue}"`,
+        `tag="${newValue}"`
+      );
 
       const res = await updateDependency({ fileContent: input, upgrade });
 

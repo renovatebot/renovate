@@ -121,10 +121,6 @@ export async function updateDependency({
         result = updateCode(result, [idx, 'tag'], newValue);
       }
 
-      if (newDigest) {
-        result = updateCode(result, [idx, 'digest'], newDigest);
-      }
-
       return result;
     }
 

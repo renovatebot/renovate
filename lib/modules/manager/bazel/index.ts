@@ -2,10 +2,11 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GoDatasource } from '../../datasource/go';
+import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 import { updateDependency } from './update';
 
-export { extractPackageFile, updateDependency };
+export { extractPackageFile, updateDependency, updateArtifacts };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)WORKSPACE(|\\.bazel)$', '\\.bzl$'],

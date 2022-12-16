@@ -4,7 +4,7 @@ export interface UrlParsedResult {
   currentValue: string;
 }
 
-export interface BazelManagerData {
+export interface BazelManagerData extends Record<string, unknown> {
   idx: number;
 }
 
