@@ -66,7 +66,7 @@ export function extractPackageFile(
 
     // both '/' and ':' are valid separators, but the Maven datasource
     // expects the separator to be ':'
-    const gav = rawGav.replaceAll('/', ':');
+    const gav = rawGav.replace(/\//g, ':');
 
     // identifiers support 3-5 parts, see OSGi R8 - 159.2.1 Identifiers
     // groupId ':' artifactId ( ':' type ( ':' classifier )? )? ':' version
