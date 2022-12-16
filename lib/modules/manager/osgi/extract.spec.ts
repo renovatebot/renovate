@@ -86,6 +86,15 @@ const malformedDefinitions = `{
       }
   ]
 }`;
+const invalidFeatureVersion = `{
+  "feature-resource-version": "unknown",
+  "bundles":[
+      {
+          "id":"commons-codec:commons-codec:1.15",
+          "start-order":"5"
+      }
+  ]
+}`;
 
 describe('modules/manager/osgi/extract', () => {
   describe('extractPackageFile()', () => {
@@ -100,6 +109,12 @@ describe('modules/manager/osgi/extract', () => {
     it('returns null for unsupported version of feature model definition', () => {
       expect(
         extractPackageFile(unsupportedFeatureVersion, '', undefined)
+      ).toBeNull();
+    });
+
+    it('returns null for an invalid version of feature model definition', () => {
+      expect(
+        extractPackageFile(invalidFeatureVersion, '', undefined)
       ).toBeNull();
     });
 
