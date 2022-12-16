@@ -19,7 +19,11 @@ import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
@@ -27,6 +31,23 @@ import {
 } from './host-rules';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
+
+export function buildArgs(config: UpdateArtifactsConfig): string[] {
+  // --major is the default and does not need to be handled separately.
+  const patch = config.updateType === 'patch' && '--patch';
+  const minor = config.updateType === 'minor' && '--minor';
+
+  // --patch and --minor flags are only suggestions, use --strict to enforce them.
+  const strict = (patch || minor) && '--strict';
+
+  const conservative =
+    config.postUpdateOptions?.includes('bundlerConservative') &&
+    '--conservative';
+  const args = [patch, minor, strict, conservative, '--update'].filter(
+    is.nonEmptyString
+  );
+  return args;
+}
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
@@ -81,17 +102,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  // --major is the default and does not need to be handled separately.
-  const patch = config.updateType === 'patch' && '--patch';
-  const minor = config.updateType === 'minor' && '--minor';
-  // --patch and --minor flags are only suggestions, use --strict to enforce them.
-  const strict = (patch || minor) && '--strict';
-  const conservative =
-    config.postUpdateOptions?.includes('bundlerConservative') &&
-    '--conservative';
-  const args = [patch, minor, strict, conservative, '--update'].filter(
-    is.nonEmptyString
-  );
+  const args = buildArgs(config);
 
   const updatedDepNames = updatedDeps
     .map(({ depName }) => depName)
