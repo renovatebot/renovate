@@ -34,7 +34,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { looseEquals, fromBase64 } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
