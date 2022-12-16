@@ -212,11 +212,13 @@ export function compile(
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
-    const allowedFields = new Set([...allowedFieldsList, ...Object.keys(env)]);
     for (const match of matches) {
       const varNames = match[1].split('.');
+      if (varNames[0] === 'env') {
+        continue;
+      }
       for (const varName of varNames) {
-        if (!allowedFields.has(varName)) {
+        if (!allowedFieldsList.includes(varName)) {
           logger.info(
             { varName, template },
             'Disallowed variable name in template'
