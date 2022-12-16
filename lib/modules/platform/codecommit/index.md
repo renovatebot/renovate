@@ -86,7 +86,6 @@ The policy json.
         "codecommit:GetFile",
         "codecommit:UpdateComment",
         "codecommit:GetRepository",
-        "codecommit:DescribePullRequestEvents",
         "codecommit:CreatePullRequest",
         "codecommit:CreatePullRequestApprovalRule",
         "codecommit:GitPush",
