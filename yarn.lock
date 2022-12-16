@@ -2398,16 +2398,16 @@
   dependencies:
     "@seald-io/nedb" "3.1.0"
 
-"@renovatebot/osv-offline@1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.7.tgz#87e8e3464d51d2a108c09be3da66ca1906466efd"
-  integrity sha512-f84i96ECTwn7l+q+GAiJkVmr+bq34BqLmSiTz0nhZMwDhIDioJthmRpkwe9101E3ui1tRivkpRLFprMfly1sGQ==
+"@renovatebot/osv-offline@1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.0.8.tgz#d8a386c0614a24e00326f224e2bf6fc90df5a03c"
+  integrity sha512-oYryh9uttikbaYhcoiJn8DBMjgxbneu9NvVF5PnG7qrUDYr7KIrlxdOlo8vQ2iytT1qd8+VzOLDoJReu1EL1Ag==
   dependencies:
     "@octokit/rest" "19.0.5"
     "@renovatebot/osv-offline-db" "1.0.1"
     adm-zip "0.5.9"
     fs-extra "10.1.0"
-    got "11.8.5"
+    got "11.8.6"
     luxon "3.1.1"
 
 "@renovatebot/pep440@2.1.5":
@@ -2972,10 +2972,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.11.13.tgz#dff34f226ec1ac0432ae3b136ec5552bd3b9c0fe"
   integrity sha512-IASpMGVcWpUsx5xBOrxMj7Bl8lqfuTY7FKAnPmu5cHkfQVWF8GulWS1jbRqA934qZL35xh5xN/+Xe/i26Bod4w==
 
-"@types/node@16.18.6":
-  version "16.18.6"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.6.tgz#87846192fd51b693368fad3e99123169225621d4"
-  integrity sha512-vmYJF0REqDyyU0gviezF/KHq/fYaUbFhkcNbQCuPGFQj6VTbXuHZoxs/Y7mutWe73C8AC6l9fFu8mSYiBAqkGA==
+"@types/node@16.18.7":
+  version "16.18.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.18.7.tgz#9e34404dba546a6f0851439ebba142680ae56fe0"
+  integrity sha512-SghuoXv8ghvkrKjTyvhRTeNzivPzGQ8pe09PPGdyqsExiKvBYV/6E3imvjsaJuW8ca61qQN2+SoSzyEHS9r2LA==
 
 "@types/node@^13.7.0":
   version "13.13.52"
@@ -5462,24 +5462,7 @@ gopd@^1.0.1:
   dependencies:
     get-intrinsic "^1.1.3"
 
-got@11.8.5:
-  version "11.8.5"
-  resolved "https://registry.yarnpkg.com/got/-/got-11.8.5.tgz#ce77d045136de56e8f024bebb82ea349bc730046"
-  integrity sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==
-  dependencies:
-    "@sindresorhus/is" "^4.0.0"
-    "@szmarczak/http-timer" "^4.0.5"
-    "@types/cacheable-request" "^6.0.1"
-    "@types/responselike" "^1.0.0"
-    cacheable-lookup "^5.0.3"
-    cacheable-request "^7.0.2"
-    decompress-response "^6.0.0"
-    http2-wrapper "^1.0.0-beta.5.2"
-    lowercase-keys "^2.0.0"
-    p-cancelable "^2.0.0"
-    responselike "^2.0.0"
-
-got@^11.7.0:
+got@11.8.6, got@^11.7.0:
   version "11.8.6"
   resolved "https://registry.yarnpkg.com/got/-/got-11.8.6.tgz#276e827ead8772eddbcfc97170590b841823233a"
   integrity sha512-6tfZ91bOr7bOXnK7PRDCGBLa1H4U080YHNaAQ2KsMGlLEzRbk44nsZF2E1IeRc3vtJHPVbKCYgdFbaGO2ljd8g==
