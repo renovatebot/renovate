@@ -175,36 +175,7 @@ describe('modules/manager/bundler/artifacts', () => {
       ]);
     });
 
-    it('supports conservative mode', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['Gemfile.lock'],
-      } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
-          newPackageFileContent: 'Updated Gemfile content',
-          config: {
-            ...config,
-            postUpdateOptions: [
-              ...(config.postUpdateOptions ?? []),
-              'bundlerConservative',
-            ],
-          },
-        })
-      ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchObject([
-        expect.objectContaining({
-          cmd: 'bundler lock --conservative --update foo bar',
-        }),
-      ]);
-    });
-
-    it('supports updateType patch', async () => {
+    it('supports conservative mode and updateType option', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.readLocalFile.mockResolvedValueOnce(null);
       const execSnapshots = mockExecAll();
@@ -220,38 +191,16 @@ describe('modules/manager/bundler/artifacts', () => {
           config: {
             ...config,
             updateType: 'patch',
+            postUpdateOptions: [
+              ...(config.postUpdateOptions ?? []),
+              'bundlerConservative',
+            ],
           },
         })
       ).toEqual([updatedGemfileLock]);
       expect(execSnapshots).toMatchObject([
         expect.objectContaining({
-          cmd: 'bundler lock --patch --strict --update foo bar',
-        }),
-      ]);
-    });
-
-    it('supports updateType minor', async () => {
-      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(null);
-      const execSnapshots = mockExecAll();
-      git.getRepoStatus.mockResolvedValueOnce({
-        modified: ['Gemfile.lock'],
-      } as StatusResult);
-      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
-      expect(
-        await updateArtifacts({
-          packageFileName: 'Gemfile',
-          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
-          newPackageFileContent: 'Updated Gemfile content',
-          config: {
-            ...config,
-            updateType: 'minor',
-          },
-        })
-      ).toEqual([updatedGemfileLock]);
-      expect(execSnapshots).toMatchObject([
-        expect.objectContaining({
-          cmd: 'bundler lock --minor --strict --update foo bar',
+          cmd: 'bundler lock --patch --strict --conservative --update foo bar',
         }),
       ]);
     });
@@ -621,6 +570,7 @@ describe('modules/manager/bundler/artifacts', () => {
           config: {
             ...config,
             isLockFileMaintenance: true,
+            updateType: 'patch', // This will have no effect together with isLockFileMaintenance
           },
         })
       ).not.toBeNull();
