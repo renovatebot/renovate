@@ -81,11 +81,17 @@ export async function updateArtifacts(
     return null;
   }
 
-  const args = [
+  // --major is the default and does not need to be handled separately.
+  const patch = config.updateType === 'patch' && '--patch';
+  const minor = config.updateType === 'minor' && '--minor';
+  // --patch and --minor flags are only suggestions, use --strict to enforce them.
+  const strict = (patch || minor) && '--strict';
+  const conservative =
     config.postUpdateOptions?.includes('bundlerConservative') &&
-      '--conservative',
-    '--update',
-  ].filter(is.nonEmptyString);
+    '--conservative';
+  const args = [patch, minor, strict, conservative, '--update'].filter(
+    is.nonEmptyString
+  );
 
   const updatedDepNames = updatedDeps
     .map(({ depName }) => depName)
