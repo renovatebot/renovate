@@ -35,9 +35,9 @@ const hostConfigVariablePrefix = 'BUNDLE_';
 export function buildArgs(config: UpdateArtifactsConfig): string[] {
   const args: string[] = [];
   // --major is the default and does not need to be handled separately.
-  switch(config.updateType) {
+  switch (config.updateType) {
     case 'patch':
-      args.push('--patch',  '--strict');
+      args.push('--patch', '--strict');
       break;
     case 'minor':
       args.push('--minor', '--strict');
