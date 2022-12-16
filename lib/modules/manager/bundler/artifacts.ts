@@ -33,19 +33,22 @@ import {
 const hostConfigVariablePrefix = 'BUNDLE_';
 
 export function buildArgs(config: UpdateArtifactsConfig): string[] {
+  const args: string[] = [];
   // --major is the default and does not need to be handled separately.
-  const patch = config.updateType === 'patch' && '--patch';
-  const minor = config.updateType === 'minor' && '--minor';
+  switch(config.updateType) {
+    case 'patch':
+      args.push('--patch',  '--strict');
+      break;
+    case 'minor':
+      args.push('--minor', '--strict');
+      break;
+  }
 
-  // --patch and --minor flags are only suggestions, use --strict to enforce them.
-  const strict = (patch || minor) && '--strict';
+  if (config.postUpdateOptions?.includes('bundlerConservative')) {
+    args.push('--conservative');
+  }
 
-  const conservative =
-    config.postUpdateOptions?.includes('bundlerConservative') &&
-    '--conservative';
-  const args = [patch, minor, strict, conservative, '--update'].filter(
-    is.nonEmptyString
-  );
+  args.push('--update');
   return args;
 }
 
