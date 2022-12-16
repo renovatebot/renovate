@@ -118,6 +118,10 @@ describe('modules/manager/osgi/extract', () => {
       ).toBeNull();
     });
 
+    it('returns null for a null string passed in as a feature model definition', () => {
+      expect(extractPackageFile('null', '', undefined)).toBeNull();
+    });
+
     it('extracts the bundles from a file with object bundles definitions', () => {
       const packageFile = extractPackageFile(
         featureWithBundlesAsObjects,
