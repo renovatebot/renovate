@@ -41,7 +41,7 @@ export class DartVersionDatasource extends Datasource {
           )
         ).body;
         const releases = this.getReleasesFromResponse(channel, resp.prefixes);
-        result.releases = [...result.releases, ...releases];
+        result.releases.push(...releases);
       }
     } catch (err) {
       this.handleGenericErrors(err);
@@ -55,10 +55,10 @@ export class DartVersionDatasource extends Datasource {
     prefixes: string[]
   ): Release[] {
     return prefixes
-      .filter((prefix) => {
-        const version = this.getVersionFromPrefix(prefix);
+      .map(prefix =>  this.getVersionFromPrefix(prefix))
+      .filter(is.string)
+      .filter((version) => {
         if (
-          !version ||
           version === 'latest' ||
           // The API response contains a stable version being released as a non-stable
           // release. So we filter out these releases here.
@@ -68,10 +68,7 @@ export class DartVersionDatasource extends Datasource {
         }
         return true;
       })
-      .flatMap((prefix) => {
-        const version = this.getVersionFromPrefix(prefix);
-        return version ? { version, isStable: channel === 'stable' } : [];
-      });
+      .map((version) => ({ version, isStable: channel === 'stable' }));
   }
 
   // Prefix should have a format of "channels/stable/release/2.9.3/"
