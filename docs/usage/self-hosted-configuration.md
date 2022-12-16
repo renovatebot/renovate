@@ -513,6 +513,17 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 ## optimizeForDisabled
 
+When this option is `true`, Renovate will do the following during repository initialization:
+
+- Attempt to fetch the default config file (`renovate.json`)
+- Check if the file contains `"enabled": false`
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+This option is only useful where the ratio of disabled repos is quite high.
+It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+
 ## password
 
 ## persistRepoData

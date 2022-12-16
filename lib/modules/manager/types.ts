@@ -97,6 +97,7 @@ export interface Package<T> extends ManagerData<T> {
   target?: string;
   versioning?: string;
   dataType?: string;
+  enabled?: boolean;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
