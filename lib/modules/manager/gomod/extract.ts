@@ -134,6 +134,12 @@ function parseMultiLine(
       const dep = getDep(lineNumber, multiMatch, blockType);
       dep.managerData!.multiLine = true;
       deps.push(dep);
+    } else if (multiMatch && line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} indirect line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, 'indirect');
+      dep.managerData!.multiLine = true;
+      dep.enabled = false;
+      deps.push(dep);
     } else if (line.trim() !== ')') {
       logger.trace(`No multi-line match: ${line}`);
     }
