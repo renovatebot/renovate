@@ -16,7 +16,7 @@ import {
 import { logger } from '../../../../logger';
 import * as _npmPostExtract from '../../../../modules/manager/npm/post-update';
 import type { WriteExistingFilesResult } from '../../../../modules/manager/npm/post-update/types';
-import type { Pr } from '../../../../modules/platform';
+import type { EnsureCommentConfig, Pr } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import * as _repoCache from '../../../../util/cache/repository';
 import * as _exec from '../../../../util/exec';
@@ -255,6 +255,7 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
     it('skips branch if closed digest PR found', async () => {
@@ -267,6 +268,7 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
     it('skips branch if closed minor PR found', async () => {
@@ -278,17 +280,22 @@ describe('workers/repository/update/branch/index', () => {
       } as Pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
     it('skips branch if merged PR found', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      git.branchExists.mockReturnValue(true);
-      checkExisting.prAlreadyExisted.mockResolvedValueOnce({
+      const pr = partial<Pr>({
         number: 13,
         state: 'merged',
-      } as Pr);
+      });
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValue(true);
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce(pr);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+      expect(logger.debug).toHaveBeenCalledWith(
+        `Merged PR with PrNo: ${pr.number} is blocking this branch`
+      );
     });
 
     it('throws error if closed PR found', async () => {
@@ -321,31 +328,64 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('skips branch if edited PR found', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
-        updatedInVer: '1.0.3',
-        createdInVer: '1.0.2',
-      });
-      git.branchExists.mockReturnValue(true);
-      platform.getBranchPr.mockResolvedValueOnce({
+      const pr = partial<Pr>({
         state: 'open',
-        bodyStruct: { hash: '' },
-      } as Pr);
+      });
+      const ensureCommentConfig = partial<EnsureCommentConfig>({
+        number: pr.number,
+        topic: 'Edited/Blocked Notification',
+      });
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValue(true);
       git.isBranchModified.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
         prNo: undefined,
         result: 'pr-edited',
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        `PR has been edited, PrNo:${pr.number}`
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({ ...ensureCommentConfig })
+      );
+    });
+
+    it('skips branch if edited PR found without commenting', async () => {
+      const pr = partial<Pr>({
+        state: 'open',
+      });
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValue(true);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      const res = await branchWorker.processBranch({
+        ...config,
+        suppressNotifications: ['prEditedNotification'],
+      });
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        `PR has been edited, PrNo:${pr.number}`
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
     });
 
     it('skips branch if target branch changed', async () => {
-      schedule.isScheduledNow.mockReturnValueOnce(false);
-      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
-        updatedInVer: '1.0.3',
-        createdInVer: '1.0.2',
+      const pr = partial<Pr>({
+        state: 'open',
       });
+      const ensureCommentConfig = partial<EnsureCommentConfig>({
+        number: pr.number,
+        topic: 'Edited/Blocked Notification',
+      });
+      schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockReturnValue(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: 'open',
@@ -359,6 +399,13 @@ describe('workers/repository/update/branch/index', () => {
         prNo: undefined,
         result: 'pr-edited',
       });
+      expect(logger.debug).toHaveBeenCalledWith(
+        `PR has been edited, PrNo:${pr.number}`
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({ ...ensureCommentConfig })
+      );
     });
 
     it('skips branch if branch edited and no PR found', async () => {
@@ -957,28 +1004,35 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('branch pr no rebase (dry run)', async () => {
-      git.branchExists.mockReturnValue(true);
-      jest.spyOn(prWorker, 'updatePrDebugData').mockReturnValueOnce({
-        updatedInVer: '1.0.3',
-        createdInVer: '1.0.2',
-      });
-      platform.getBranchPr.mockResolvedValueOnce({
+      const pr = partial<Pr>({
         state: 'open',
-      } as Pr);
+        number: 1,
+      });
+      git.branchExists.mockReturnValue(true);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
       expect(await branchWorker.processBranch(config)).toEqual({
         branchExists: true,
-        prNo: undefined,
+        prNo: 1,
         result: 'pr-edited',
       });
       expect(logger.info).toHaveBeenCalledWith(
-        `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
+        `DRY-RUN: Would ensure edited/blocked PR comment in PR #${pr.number}`
       );
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
     it('branch pr no schedule lockfile (dry run)', async () => {
+      const pr = partial<Pr>({
+        title: 'rebase!',
+        number: 1,
+        state: 'open',
+        bodyStruct: {
+          hash: hashBody(`- [x] <!-- rebase-check -->`),
+          rebaseRequested: true,
+        },
+      });
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         updatedPackageFiles: [{}],
         artifactErrors: [{}],
@@ -988,14 +1042,7 @@ describe('workers/repository/update/branch/index', () => {
         updatedArtifacts: [partial<FileChange>({})],
       } as WriteExistingFilesResult);
       git.branchExists.mockReturnValue(true);
-      platform.getBranchPr.mockResolvedValueOnce({
-        title: 'rebase!',
-        state: 'open',
-        bodyStruct: {
-          hash: hashBody(`- [x] <!-- rebase-check -->`),
-          rebaseRequested: true,
-        },
-      } as Pr);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
       git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -1013,6 +1060,9 @@ describe('workers/repository/update/branch/index', () => {
         result: 'done',
         commitSha: null,
       });
+      expect(logger.info).toHaveBeenCalledWith(
+        `DRY-RUN: Would remove edited/blocked PR comment in PR #${pr.number}`
+      );
     });
 
     it('branch pr no schedule (dry run)', async () => {

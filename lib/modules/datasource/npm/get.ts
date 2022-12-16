@@ -41,19 +41,6 @@ function getPackageSource(repository: any): PackageSource {
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const sourceUrlCopy = `${res.sourceUrl}`;
-    const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
-    if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
-      // Massage the repository URL for non-compliant strings for github (see issue #4610)
-      // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
-      // and add directory to the repository
-      res.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
-      res.sourceDirectory ||= sourceUrlSplit
-        .slice(7, sourceUrlSplit.length)
-        .join('/');
-    }
   }
   return res;
 }
