@@ -26,12 +26,12 @@ export function extractPackageFile(
     return null;
   }
 
-  if (featureModel === null || featureModel === undefined) {
-    return null;
-  }
-
-  // Compendium R8 159.9: resource versioning
-  if (!isSupportedFeatureResourceVersion(featureModel, fileName)) {
+  if (
+    // for empty an empty result
+    is.nullOrUndefined(featureModel) ||
+    // Compendium R8 159.9: resource versioning
+    !isSupportedFeatureResourceVersion(featureModel, fileName)
+  ) {
     return null;
   }
 
