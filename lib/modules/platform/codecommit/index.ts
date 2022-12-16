@@ -39,6 +39,8 @@ import * as client from './codecommit-client';
 
 export interface CodeCommitPr extends Pr {
   body: string;
+  destinationCommit: string;
+  sourceCommit: string;
 }
 
 interface Config {
@@ -171,6 +173,8 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     const pr: CodeCommitPr = {
       targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+      destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
+      sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
       state:
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? 'open'
@@ -258,10 +262,12 @@ export async function getPr(
 
   return {
     sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+    sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
     state: prState,
     number: pullRequestId,
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
+    destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
     sha: prInfo.revisionId,
     body: prInfo.description!,
   };
@@ -361,7 +367,8 @@ export async function createPr({
   if (
     !prCreateRes.pullRequest?.title ||
     !prCreateRes.pullRequest?.pullRequestId ||
-    !prCreateRes.pullRequest?.description
+    !prCreateRes.pullRequest?.description ||
+    !prCreateRes.pullRequest?.pullRequestTargets?.length
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -372,6 +379,9 @@ export async function createPr({
     title: prCreateRes.pullRequest.title,
     sourceBranch,
     targetBranch,
+    sourceCommit: prCreateRes.pullRequest.pullRequestTargets[0].sourceCommit!,
+    destinationCommit:
+      prCreateRes.pullRequest.pullRequestTargets[0].destinationCommit!,
     sourceRepo: config.repository,
     body: prCreateRes.pullRequest.description,
   };
@@ -599,10 +609,7 @@ export async function ensureComment({
   const body = `${header}${sanitize(content)}`;
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${number}`
-    );
+    prCommentsResponse = await client.getPrComments(`${number}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return false;
@@ -631,17 +638,10 @@ export async function ensureComment({
   }
 
   if (!commentId) {
-    const prEvent = await client.getPrEvents(`${number}`);
+    const prs = await getPrList();
+    const thisPr = prs.filter((item) => item.number === number);
 
-    if (!prEvent?.pullRequestEvents) {
-      return false;
-    }
-
-    const event =
-      prEvent.pullRequestEvents[0]
-        .pullRequestSourceReferenceUpdatedEventMetadata;
-
-    if (!event?.beforeCommitId || !event?.afterCommitId) {
+    if (!thisPr[0].sourceCommit || !thisPr[0].destinationCommit) {
       return false;
     }
 
@@ -649,8 +649,8 @@ export async function ensureComment({
       `${number}`,
       config.repository,
       body,
-      event.beforeCommitId,
-      event.afterCommitId
+      thisPr[0].destinationCommit,
+      thisPr[0].sourceCommit
     );
     logger.info(
       { repository: config.repository, prNo: number, topic },
@@ -685,10 +685,7 @@ export async function ensureCommentRemoval(
 
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${prNo}`
-    );
+    prCommentsResponse = await client.getPrComments(`${prNo}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return;
