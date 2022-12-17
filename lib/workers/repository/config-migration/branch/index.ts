@@ -3,7 +3,6 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { PrState } from '../../../../types';
 import {
   branchExists,
   checkoutBranch,
@@ -37,7 +36,7 @@ export async function checkConfigMigrationBranch(
     const closedPrConfig: FindPRConfig = {
       branchName: configMigrationBranch,
       prTitle,
-      state: PrState.Closed,
+      state: 'closed',
     };
 
     // handles closed PR
@@ -82,7 +81,7 @@ export async function migrationPrExists(branchName: string): Promise<boolean> {
 
 async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
   if (
-    pr.state === PrState.Closed &&
+    pr.state === 'closed' &&
     !config.suppressNotifications!.includes('prIgnoreNotification')
   ) {
     if (GlobalConfig.get('dryRun')) {

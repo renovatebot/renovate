@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
-import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
 import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
@@ -136,7 +135,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

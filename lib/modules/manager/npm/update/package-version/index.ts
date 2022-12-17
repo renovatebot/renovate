@@ -31,7 +31,8 @@ export function bumpPackageVersion(
     } else {
       newPjVersion = semver.inc(currentValue, bumpVersion as ReleaseType);
     }
-    logger.debug({ newPjVersion });
+    // TODO: fix types (#7154)
+    logger.debug(`newPjVersion: ${newPjVersion!}`);
     bumpedContent = content.replace(
       regEx(`(?<version>"version":\\s*")[^"]*`),
       `$<version>${newPjVersion!}`

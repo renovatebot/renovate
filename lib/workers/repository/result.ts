@@ -75,7 +75,7 @@ export function processResult(
     enabled = true;
     onboarded = false;
   } else {
-    logger.debug({ res }, 'Unknown res');
+    logger.debug(`Unknown res: ${res}`);
     status = 'unknown';
   }
   logger.debug(

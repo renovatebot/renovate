@@ -144,7 +144,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
-      logger.debug({ url }, 'Host is disabled - rejecting request');
+      logger.debug(`Host is disabled - rejecting request. HostUrl: ${url}`);
       throw new Error(HOST_DISABLED);
     }
     options = applyAuthorization(options);
@@ -244,6 +244,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       ...httpOptions,
       method,
       responseType: 'json',
+    };
+    // signal that we expect a json response
+    opts.headers = {
+      accept: 'application/json',
+      ...opts.headers,
     };
     if (body) {
       opts.json = body;

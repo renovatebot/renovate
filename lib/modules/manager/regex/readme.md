@@ -50,7 +50,7 @@ RUN curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version ${YARN_VER
 
 You would need to capture the `currentValue` with a named capture group, like this: `ENV YARN_VERSION=(?<currentValue>.*?)\\n`.
 
-If you're looking for an online regex testing tool that supports capture groups, try [https://regex101.com/](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
+If you're looking for an online regex testing tool that supports capture groups, try [regex101.com](<https://regex101.com/?flavor=javascript&flags=g&regex=ENV%20YARN_VERSION%3D(%3F%3CcurrentValue%3E.*%3F)%5Cn&testString=FROM%20node%3A12%0AENV%20YARN_VERSION%3D1.19.1%0ARUN%20curl%20-o-%20-L%20https%3A%2F%2Fyarnpkg.com%2Finstall.sh%20%7C%20bash%20-s%20--%20--version%20%24%7BYARN_VERSION%7D>).
 Be aware that backslashes (`'\'`) of the resulting regex have to still be escaped e.g. `\n\s` --> `\\n\\s`.
 You can use the Code Generator in the sidebar and copy the regex in the generated "Alternative syntax" comment into JSON.
 
@@ -130,3 +130,48 @@ The `Dockerfile` is documented better as well.
 
 The syntax in the example is arbitrary and you can set your own syntax.
 If you do, update your `matchStrings` regex!
+
+### Using regexManager to update the dependency name in addition to version
+
+#### Updating `gitlab-ci include` dep names
+
+You can use the regex manager to update the `depName` and the version.
+This can be handy when the location of files referenced in gitlab-ci `includes:` fields has changed.
+
+You may need to set a second `matchString` for the new name to ensure the regex manager can detect the new value.
+For example:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": [".*y[a]?ml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+      ],
+      "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
+      "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",
+      "datasourceTemplate": "gitlab-tags",
+      "versioningTemplate": "gitlab-tags"
+    }
+  ]
+}
+```
+
+The config above will migrate:
+
+```yaml
+- project: 'pipeline-fragments/docker-lint'
+  ref: 2-4-0
+  file: 'ci-include-docker-lint-base.yml'
+```
+
+To this:
+
+```yaml
+- project: 'pipeline-solutions/gitlab/fragments/docker-lint'
+  ref: 2-4-1
+  file: 'ci-include-docker-lint-base.yml'
+```

@@ -5,7 +5,6 @@ import {
   platform,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
-import { PlatformId } from '../../../constants';
 import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
@@ -15,7 +14,7 @@ let config: RenovateConfig;
 beforeEach(() => {
   jest.resetAllMocks();
   config = getConfig();
-  config.platform = PlatformId.Github;
+  config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });
@@ -100,22 +99,38 @@ describe('workers/repository/finalise/prune', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('posts comment if someone pushed to PR', async () => {
+    it('notifies via PR changes if someone pushed to PR', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       git.getBranchList.mockReturnValueOnce(
         config.branchList.concat(['renovate/c'])
       );
       platform.getBranchPr.mockResolvedValueOnce({} as never);
       git.isBranchModified.mockResolvedValueOnce(true);
-      platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo',
+      } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getBranchList).toHaveBeenCalledTimes(1);
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
-      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
-    it('skips comment if dry run', async () => {
+    it('skips appending - abandoned to PR title if already present', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo - abandoned',
+      } as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
+    it('skips changes to PR if dry run', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       GlobalConfig.set({ dryRun: 'full' });
       git.getBranchList.mockReturnValueOnce(

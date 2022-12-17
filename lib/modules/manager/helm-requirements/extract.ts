@@ -15,11 +15,11 @@ export function extractPackageFile(
   try {
     doc = load(content, { json: true }); // TODO #9610
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
+    logger.debug(`Failed to parse helm requirements.yaml in ${fileName}`);
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug({ fileName }, 'requirements.yaml has no dependencies');
+    logger.debug(`requirements.yaml in ${fileName} has no dependencies`);
     return null;
   }
   deps = doc.dependencies.map((dep: Record<string, any>) => {

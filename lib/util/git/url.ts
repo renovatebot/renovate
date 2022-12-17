@@ -11,10 +11,14 @@ export function parseGitUrl(url: string): gitUrlParse.GitUrl {
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
 
+  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
+    ? parsedUrl.protocol
+    : 'https';
+
   parsedUrl.token = token ?? '';
 
   if (token) {
-    switch (detectPlatform(url)) {
+    switch (detectPlatform(parsedUrl.toString(protocol))) {
       case 'gitlab':
         parsedUrl.token = token.includes(':')
           ? token
@@ -28,9 +32,6 @@ export function getHttpUrl(url: string, token?: string): string {
     }
   }
 
-  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
-    ? parsedUrl.protocol
-    : 'https';
   return parsedUrl.toString(protocol);
 }
 

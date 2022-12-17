@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { Range } from 'semver';
+import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -100,7 +101,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -128,7 +129,7 @@ export interface RepoGlobalConfig {
   localDir?: string;
   cacheDir?: string;
   containerbaseDir?: string;
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -180,7 +181,7 @@ export interface RegexManagerTemplates {
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
-  matchStringsStrategy?: string;
+  matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
 }
 
@@ -230,6 +231,7 @@ export interface RenovateConfig
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
+  registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -245,6 +247,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
+  skipInstalls?: boolean;
 }
 
 export interface AllConfig

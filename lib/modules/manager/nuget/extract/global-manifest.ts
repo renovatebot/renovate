@@ -14,7 +14,7 @@ export function extractMsbuildGlobalManifest(
   try {
     manifest = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName: packageFile }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${packageFile}`);
     return null;
   }
 

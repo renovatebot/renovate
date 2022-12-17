@@ -1,5 +1,6 @@
 import { quickStringify } from './stringify';
 
 export function clone<T>(input: T | null = null): T {
-  return JSON.parse(quickStringify(input));
+  const stringifiedInput = quickStringify(input);
+  return stringifiedInput ? JSON.parse(stringifiedInput) : null;
 }

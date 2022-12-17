@@ -472,6 +472,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should downgra
   "newMajor": 1,
   "newValue": "1.16.0",
   "newVersion": "1.16.0",
+  "registryUrl": undefined,
   "updateType": "rollback",
 }
 `;
@@ -525,6 +526,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should roll ba
     "newMajor": 3,
     "newValue": "3.0.1-insiders.20180726",
     "newVersion": "3.0.1-insiders.20180726",
+    "registryUrl": undefined,
     "updateType": "rollback",
   },
 ]

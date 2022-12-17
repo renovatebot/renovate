@@ -44,7 +44,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   }
 
   const gitRemote = parseUrl(dependency.source.git.remote);
-  if (gitRemote === null) {
+  if (!gitRemote) {
     logger.debug({ dependency }, 'Invalid Git remote URL');
     return null;
   }
@@ -52,7 +52,7 @@ function extractDependency(dependency: Dependency): PackageDependency | null {
   const depName = join(
     gitRemote.host,
     gitRemote.pathname.replace(/\.git$/, ''),
-    dependency.source.git.subdir
+    dependency.source.git.subdir ?? ''
   );
 
   return {
