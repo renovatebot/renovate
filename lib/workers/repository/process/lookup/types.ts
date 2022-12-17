@@ -59,9 +59,9 @@ export interface UpdateResult {
   currentVersion?: string;
   isSingleVersion?: boolean;
   skipReason?: SkipReason;
+  registryUrl?: string;
   releases: Release[];
   fixedVersion?: string;
-  registryUrl?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
