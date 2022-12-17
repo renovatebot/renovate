@@ -1708,13 +1708,13 @@ The above will match all package names starting with `eslint` but exclude ones s
 ### matchCategories
 
 Use `matchCategories` to restrict rules to a particular language or group.
+Matching is done using "any" logic, i.e. "match any of the following categories".
 The categories can be found in the [manager documentation](./modules/manager.md).
 
 <!-- prettier-ignore -->
-!!! warning
-    Rules with `matchCategories` are only applied _after_ extraction of a repository.
-    You can not use `matchCategories` to stop processing a repository.
-    You can still use `matchCategories` to stop or change updating the dependencies though.
+!!! note
+    Rules with `matchCategories` are only applied _after_ extraction of dependencies.
+    You can't use `matchCategories` to prevent particular categories from being extracted, but you can use it after extraction to prevent them from being looked up or updated.
 
 ```json
 {
