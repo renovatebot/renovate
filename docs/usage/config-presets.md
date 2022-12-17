@@ -47,6 +47,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
+| GitHub with preset name and path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | Default branch |
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitHub with preset name with a tag          | `github>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | GitHub with preset name and path with a tag | `github>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
@@ -83,6 +84,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Local default                              | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
 | Local with preset path                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
 | Local with preset path (JSON5)             | `local>abc/foo:xyz.json5`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
+| Local with preset name and path            | `local>abc/foo//path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
 | Local default with a tag                   | `local>abc/foo#1.2.3`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.3`        |

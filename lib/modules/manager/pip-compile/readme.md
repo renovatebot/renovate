@@ -48,3 +48,4 @@ Renovate reads the `requirements.txt` file and extracts these `pip-compile` argu
 - `--allow-unsafe`
 - `--no-emit-index-url`
 - `--strip-extras`
+- `--resolver`

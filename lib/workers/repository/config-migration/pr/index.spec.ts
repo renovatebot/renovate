@@ -1,3 +1,4 @@
+import type { Indent } from 'detect-indent';
 import type { RequestError, Response } from 'got';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../../../test/fixtures';
@@ -30,6 +31,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   const migratedData: MigratedData = {
     content: migratedContent,
     filename: configFileName,
+    indent: partial<Indent>({}),
   };
   let config: RenovateConfig;
 
@@ -166,6 +168,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, {
         content: migratedContent,
         filename: 'renovate.json5',
+        indent: partial<Indent>({}),
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();

@@ -45,10 +45,11 @@ async function fetchDepUpdates(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   if (depConfig.ignoreDeps!.includes(depName!)) {
-    logger.debug({ dependency: depName }, 'Dependency is ignored');
+    // TODO: fix types (#7154)
+    logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
-    logger.debug({ dependency: depName }, 'Dependency is disabled');
+    logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {

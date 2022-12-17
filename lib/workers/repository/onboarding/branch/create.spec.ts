@@ -14,7 +14,6 @@ describe('workers/repository/onboarding/branch/create', () => {
   let config: RenovateConfig;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     config = getConfig();
   });
 

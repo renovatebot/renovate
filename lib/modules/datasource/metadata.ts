@@ -1,8 +1,8 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import { DateTime } from 'luxon';
 import { detectPlatform } from '../../util/common';
+import { parseGitUrl } from '../../util/git/url';
 import * as hostRules from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { parseUrl, trimTrailingSlash, validateUrl } from '../../util/url';
@@ -13,22 +13,23 @@ const githubPages = regEx('^https://([^.]+).github.com/([^/]+)$');
 const gitPrefix = regEx('^git:/?/?');
 
 export function massageUrl(sourceUrl: string): string {
-  const parsedUrl = URL.parse(sourceUrl);
-  if (!parsedUrl?.hostname) {
+  // Replace git@ sourceUrl with https so hostname can be parsed
+  const massagedUrl = massageGitAtUrl(sourceUrl);
+
+  // Check if URL is valid
+  const parsedUrl = parseUrl(massagedUrl);
+  if (!parsedUrl) {
     return '';
   }
-  if (parsedUrl.hostname.includes('gitlab')) {
+
+  if (detectPlatform(massagedUrl) === 'gitlab') {
     return massageGitlabUrl(sourceUrl);
   }
   return massageGithubUrl(sourceUrl);
 }
 
 export function massageGithubUrl(url: string): string {
-  let massagedUrl = url;
-
-  if (url.startsWith('git@')) {
-    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
-  }
+  const massagedUrl = massageGitAtUrl(url);
 
   return massagedUrl
     .replace('http:', 'https:')
@@ -44,12 +45,23 @@ export function massageGithubUrl(url: string): string {
 }
 
 function massageGitlabUrl(url: string): string {
-  return url
+  const massagedUrl = massageGitAtUrl(url);
+
+  return massagedUrl
     .replace('http:', 'https:')
     .replace(gitPrefix, 'https://')
     .replace(regEx(/\/tree\/.*$/i), '')
     .replace(regEx(/\/$/i), '')
     .replace('.git', '');
+}
+
+function massageGitAtUrl(url: string): string {
+  let massagedUrl = url;
+
+  if (url.startsWith('git@')) {
+    massagedUrl = url.replace(':', '/').replace('git@', 'https://');
+  }
+  return massagedUrl;
 }
 
 export function normalizeDate(input: any): string | null {
@@ -118,6 +130,18 @@ export function addMetaData(
   const manualSourceUrl = manualSourceUrls[datasource]?.[packageNameLowercase];
   if (manualSourceUrl) {
     dep.sourceUrl = manualSourceUrl;
+  }
+
+  if (dep.sourceUrl && !dep.sourceDirectory) {
+    try {
+      const parsed = parseGitUrl(dep.sourceUrl);
+      if (parsed.filepathtype === 'tree' && parsed.filepath !== '') {
+        dep.sourceUrl = parsed.toString();
+        dep.sourceDirectory = parsed.filepath;
+      }
+    } catch (err) {
+      // ignore invalid urls
+    }
   }
 
   if (

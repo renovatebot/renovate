@@ -19,11 +19,12 @@ import { instrument } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
+import * as throttle from '../../util/http/throttle';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
-import { Limit, isLimitReached } from './limits';
+import { isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -49,7 +50,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (isLimitReached(Limit.Commits)) {
+  if (isLimitReached('Commits')) {
     logger.info('Max commits created for this run.');
     return true;
   }
@@ -167,6 +168,7 @@ export async function start(): Promise<number> {
 
           // host rules can change concurrency
           queue.clear();
+          throttle.clear();
 
           await repositoryWorker.renovateRepository(repoConfig);
           setMeta({});

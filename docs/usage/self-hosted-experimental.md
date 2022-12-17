@@ -63,6 +63,39 @@ Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
+
+<!-- prettier-ignore -->
+!!! note
+    For the Gitea platform only.
+
+The sort method for autodiscover server side repository search.
+
+Allowed values:
+
+- `alpha`
+- `created`
+- `updated`
+- `size`
+- `id`
+
+Default value: `alpha`.
+
+## `RENOVATE_X_AUTODISCOVER_REPO_ORDER`
+
+<!-- prettier-ignore -->
+!!! note
+    For the Gitea platform only.
+
+The order method for autodiscover server side repository search.
+
+Allowed values:
+
+- `asc`
+- `desc`
+
+Default value: `asc`.
+
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.

@@ -1,7 +1,14 @@
+import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  partial,
+  platform,
+} from '../../../../../test/util';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 jest.mock('../../../../util/git');
@@ -11,16 +18,24 @@ describe('workers/repository/config-migration/branch/create', () => {
   const indent = '  ';
   const renovateConfig = JSON.stringify(raw, undefined, indent) + '\n';
   const filename = 'renovate.json';
+  const prettierSpy = jest.spyOn(
+    MigratedDataFactory,
+    'applyPrettierFormatting'
+  );
 
   let config: RenovateConfig;
   let migratedConfigData: MigratedData;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     config = getConfig();
     config.baseBranch = 'dev';
     config.defaultBranch = 'master';
-    migratedConfigData = { content: renovateConfig, filename };
+    migratedConfigData = {
+      content: renovateConfig,
+      filename,
+      indent: partial<Indent>({}),
+    };
+    prettierSpy.mockResolvedValueOnce(migratedConfigData.content);
   });
 
   describe('createConfigMigrationBranch', () => {

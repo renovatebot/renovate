@@ -1,6 +1,5 @@
 import { getConfig, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { BranchStatus } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { setArtifactErrorStatus } from './artifacts';
 
@@ -28,7 +27,7 @@ describe('workers/repository/update/branch/artifacts', () => {
     });
 
     it('skips status', async () => {
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.red);
+      platform.getBranchStatusCheck.mockResolvedValueOnce('red');
       await setArtifactErrorStatus(config);
       expect(platform.setBranchStatus).not.toHaveBeenCalled();
     });

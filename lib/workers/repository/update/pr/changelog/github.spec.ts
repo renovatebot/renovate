@@ -1,10 +1,9 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { GlobalConfig } from '../../../../../config/global';
-import { PlatformId } from '../../../../../constants';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
-import { ChangeLogError, getChangeLogJSON } from '.';
+import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
@@ -42,7 +41,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
@@ -212,7 +211,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
           ...upgrade,
           sourceUrl: 'https://github.com',
         })
-      ).toEqual({ error: ChangeLogError.MissingGithubToken });
+      ).toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {
@@ -235,7 +234,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -273,7 +272,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -294,7 +293,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
@@ -336,7 +335,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
