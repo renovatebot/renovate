@@ -53,7 +53,6 @@ export interface UpdateResult {
   sourceDirectory?: string;
   changelogUrl?: string;
   dependencyUrl?: string;
-  registryUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string | null;
@@ -62,6 +61,7 @@ export interface UpdateResult {
   skipReason?: SkipReason;
   releases: Release[];
   fixedVersion?: string;
+  registryUrl?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
   versioning?: string;
