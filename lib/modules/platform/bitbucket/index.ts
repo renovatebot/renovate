@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -360,28 +360,28 @@ export async function getBranchStatus(
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   const noOfFailures = statuses.filter(
     (status: { state: string }) =>
       status.state === 'FAILED' || status.state === 'STOPPED'
   ).length;
   if (noOfFailures) {
-    return BranchStatus.red;
+    return 'red';
   }
   const noOfPending = statuses.filter(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  return BranchStatus.green;
+  return 'green';
 }
 
 const bbToRenovateStatusMapping: Record<string, BranchStatus> = {
-  SUCCESSFUL: BranchStatus.green,
-  INPROGRESS: BranchStatus.yellow,
-  FAILED: BranchStatus.red,
+  SUCCESSFUL: 'green',
+  INPROGRESS: 'yellow',
+  FAILED: 'red',
 };
 
 export async function getBranchStatusCheck(

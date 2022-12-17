@@ -58,6 +58,7 @@ elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
 gauche 0.9.12
+gohugo extended_0.104.3
 golang 1.19.2
 haskell 9.4.2
 helm 3.10.1
@@ -151,11 +152,10 @@ dummy 1.2.3
           },
           {
             currentValue: '1.14.1',
-            datasource: 'github-tags',
-            packageName: 'elixir-lang/elixir',
+            datasource: 'hexpm-bob',
+            packageName: 'elixir',
             versioning: 'semver',
             depName: 'elixir',
-            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '0.19.1',
@@ -179,6 +179,14 @@ dummy 1.2.3
             packageName: 'practicalscheme/gauche',
             versioning: 'semver',
             depName: 'gauche',
+          },
+          {
+            currentValue: '0.104.3',
+            datasource: 'github-releases',
+            packageName: 'gohugoio/hugo',
+            versioning: 'semver',
+            depName: 'gohugo',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.19.2',

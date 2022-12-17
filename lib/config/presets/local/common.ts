@@ -7,11 +7,12 @@ import { PRESET_DEP_NOT_FOUND, fetchPreset, parsePreset } from '../util';
 export async function fetchJSONFile(
   repo: string,
   fileName: string,
-  _endpoint?: string
+  _endpoint?: string,
+  tag?: string | null
 ): Promise<Preset> {
   let raw: string | null;
   try {
-    raw = await platform.getRawFile(fileName, repo);
+    raw = await platform.getRawFile(fileName, repo, tag ?? undefined);
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;

@@ -12,7 +12,6 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import type { Platform, RepoParams } from '../types';
@@ -413,7 +412,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should return green if status is not applicable', async () => {
@@ -434,7 +433,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should return red if status is failed', async () => {
@@ -455,7 +454,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should return red if context status is error', async () => {
@@ -476,7 +475,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should return yellow if status is pending', async () => {
@@ -497,7 +496,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return yellow if status is not set', async () => {
@@ -518,7 +517,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return yellow if status is unknown', async () => {
@@ -540,7 +539,7 @@ describe('modules/platform/azure/index', () => {
         'somebranch',
         'a-genre/a-name'
       );
-      expect(res).toBe(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should return null if status not found', async () => {
@@ -576,7 +575,7 @@ describe('modules/platform/azure/index', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('should pass through failed', async () => {
@@ -589,7 +588,7 @@ describe('modules/platform/azure/index', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('should pass through pending', async () => {
@@ -602,7 +601,7 @@ describe('modules/platform/azure/index', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('should fall back to yellow if no statuses returned', async () => {
@@ -615,7 +614,7 @@ describe('modules/platform/azure/index', () => {
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
   });
 
@@ -1111,7 +1110,7 @@ describe('modules/platform/azure/index', () => {
         branchName: 'test',
         context: 'test',
         description: 'test',
-        state: BranchStatus.yellow,
+        state: 'yellow',
         url: 'test.com',
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(
@@ -1143,7 +1142,7 @@ describe('modules/platform/azure/index', () => {
         branchName: 'test',
         context: 'renovate/artifact/test',
         description: 'test',
-        state: BranchStatus.green,
+        state: 'green',
         url: 'test.com',
       });
       expect(createCommitStatusMock).toHaveBeenCalledWith(

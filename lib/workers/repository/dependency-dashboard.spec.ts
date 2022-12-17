@@ -19,7 +19,7 @@ import {
   massageMarkdown,
 } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
-import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
@@ -213,12 +213,12 @@ describe('workers/repository/dependency-dashboard', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          result: BranchResult.Automerged,
+          result: 'automerged',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          result: BranchResult.Automerged,
+          result: 'automerged',
           dependencyDashboardApproval: false,
         },
       ];
@@ -289,63 +289,63 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName8',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr9',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
-          result: BranchResult.Done,
+          result: 'done',
           prBlockedBy: 'BranchAutomerge',
           branchName: 'branchName9',
         },
@@ -372,7 +372,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prNo: 1,
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName1',
         },
         {
@@ -383,7 +383,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName2',
         },
       ];
@@ -408,7 +408,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           prNo: 1,
           branchName: 'branchName1',
         },
@@ -420,7 +420,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName2',
         },
         {
@@ -428,7 +428,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           prNo: 3,
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName3',
         },
       ];
@@ -453,7 +453,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName1',
         },
         {
@@ -463,7 +463,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName2',
         },
       ];
@@ -488,7 +488,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName1',
         },
         {
@@ -498,21 +498,21 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName4',
         },
       ];
@@ -540,7 +540,7 @@ describe('workers/repository/dependency-dashboard', () => {
           upgrades: [
             { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
           ],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName1',
         },
       ];
@@ -587,14 +587,14 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
       ];
@@ -649,14 +649,14 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.BranchLimitReached,
+          result: 'branch-limit-reached',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName2',
         },
       ];
@@ -704,21 +704,21 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
       ];

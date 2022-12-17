@@ -43,7 +43,7 @@ export async function generateLockFiles(
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
   const toolConstraints: ToolConstraint[] = [
-    await getNodeToolConstraint(config, []),
+    await getNodeToolConstraint(config, [], lockFileDir),
   ];
   const cmd: string[] = [];
   let cmdOptions = '';

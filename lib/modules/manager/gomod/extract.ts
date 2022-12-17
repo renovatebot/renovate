@@ -28,9 +28,9 @@ function getDep(
   } else {
     dep.skipReason = 'unsupported-version';
   }
-  const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
-  if (digestMatch) {
-    [, dep.currentDigest] = digestMatch;
+  const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
+  if (digestMatch?.groups?.digest) {
+    dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
   }
   return dep;
@@ -45,7 +45,7 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'npm',
+    versioning: 'go-mod-directive',
     rangeStrategy: 'replace',
   };
 }
@@ -70,10 +70,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
-      if (requireMatch && !line.endsWith('// indirect')) {
-        logger.trace({ lineNumber }, `require line: "${line}"`);
-        const dep = getDep(lineNumber, requireMatch, 'require');
-        deps.push(dep);
+      if (requireMatch) {
+        if (line.endsWith('// indirect')) {
+          logger.trace({ lineNumber }, `indirect line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'indirect');
+          dep.enabled = false;
+          deps.push(dep);
+        } else {
+          logger.trace({ lineNumber }, `require line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'require');
+          deps.push(dep);
+        }
       }
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
@@ -126,6 +133,12 @@ function parseMultiLine(
       logger.trace({ lineNumber }, `${blockType} line: "${line}"`);
       const dep = getDep(lineNumber, multiMatch, blockType);
       dep.managerData!.multiLine = true;
+      deps.push(dep);
+    } else if (multiMatch && line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} indirect line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, 'indirect');
+      dep.managerData!.multiLine = true;
+      dep.enabled = false;
       deps.push(dep);
     } else if (line.trim() !== ')') {
       logger.trace(`No multi-line match: ${line}`);

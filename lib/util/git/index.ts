@@ -28,6 +28,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -45,7 +46,6 @@ import {
   getCachedModifiedResult,
   setCachedModifiedResult,
 } from './modified-cache';
-import { deleteCachedBranchParentShaResult } from './parent-sha-cache';
 import { configSigningKey, writePrivateKey } from './private-key';
 import type {
   CommitFilesConfig,
@@ -237,8 +237,8 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
-    LANG: 'C',
-    LC_ALL: 'C',
+    LANG: 'C.UTF-8',
+    LC_ALL: 'C.UTF-8',
   });
   gitInitialized = false;
   submodulesInitizialized = false;
@@ -461,6 +461,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
 }
 
 // istanbul ignore next
@@ -494,7 +495,7 @@ export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
-    n: 10,
+    n: 20,
     format: { message: '%s' },
   });
   return res.all.map((commit) => commit.message);
@@ -663,7 +664,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   );
   config.branchIsModified[branchName] = true;
   setCachedModifiedResult(branchName, true);
-  deleteCachedBranchParentShaResult(branchName);
   return true;
 }
 

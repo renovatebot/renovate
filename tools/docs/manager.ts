@@ -131,12 +131,12 @@ sidebar_label: ${displayName}
       md += `Renovate supports updating ${nameWithUrl} dependencies.\n\n`;
       if (defaultConfig.enabled === false) {
         md += '## Enabling\n\n';
-        md += `${displayName} functionality is currently in beta testing so you must opt in to test it out. To enable it, add a configuration like this to either your bot config or your \`renovate.json\`:\n\n`;
+        md += `${displayName} functionality is currently in beta testing, so you must opt-in to test it. To enable it, add a configuration like this to either your bot config or your \`renovate.json\`:\n\n`;
         md += '```\n';
         md += `{\n  "${manager}": {\n    "enabled": true\n  }\n}`;
         md += '\n```\n\n';
         md +=
-          'If you find any bugs, please [raise a bug report](https://github.com/renovatebot/renovate/issues/new?template=3-Bug_report.md). If you find that it works well, then feedback on that would be welcome too.\n\n';
+          'If you find any bugs, please [create a new discussion first](https://github.com/renovatebot/renovate/discussions/new). If you find that it works well, then let us know too.\n\n';
       }
       md += '## File Matching\n\n';
       if (!Array.isArray(fileMatch) || fileMatch.length === 0) {
@@ -161,6 +161,11 @@ sidebar_label: ${displayName}
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
+
+      md += '## Default config\n\n';
+      md += '```json\n';
+      md += JSON.stringify(definition.defaultConfig, null, 2) + '\n';
+      md += '```\n\n';
     }
     const managerReadmeContent = await readFile(
       `lib/modules/manager/${manager}/readme.md`
@@ -207,7 +212,7 @@ sidebar_label: ${displayName}
     languageText += allLanguages[language].map(getManagerLink).join(', ');
     languageText += '\n\n';
   }
-  let indexContent = await readFile(`docs/usage/modules/manager.md`);
+  let indexContent = await readFile(`docs/usage/modules/manager/index.md`);
   indexContent = replaceContent(indexContent, languageText);
-  await updateFile(`${dist}/modules/manager.md`, indexContent);
+  await updateFile(`${dist}/modules/manager/index.md`, indexContent);
 }
