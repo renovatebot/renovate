@@ -17,34 +17,34 @@ describe('modules/manager/npm/post-update/node-version', () => {
     it('returns package.json range', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const res = await getNodeConstraint(config);
+      const res = await getNodeConstraint(config, '');
       expect(res).toBe('^12.16.0');
     });
 
     it('returns .node-version value', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce('12.16.1\n');
-      const res = await getNodeConstraint(config);
+      const res = await getNodeConstraint(config, '');
       expect(res).toBe('12.16.1');
     });
 
     it('returns .nvmrc value', async () => {
       fs.readLocalFile.mockResolvedValueOnce('12.16.2\n');
-      const res = await getNodeConstraint(config);
+      const res = await getNodeConstraint(config, '');
       expect(res).toBe('12.16.2');
     });
 
     it('ignores unusable ranges in dotfiles', async () => {
       fs.readLocalFile.mockResolvedValueOnce('latest');
       fs.readLocalFile.mockResolvedValueOnce('lts');
-      const res = await getNodeConstraint(config);
+      const res = await getNodeConstraint(config, '');
       expect(res).toBe('^12.16.0');
     });
 
     it('returns no constraint', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null as never);
       fs.readLocalFile.mockResolvedValueOnce(null as never);
-      const res = await getNodeConstraint({ ...config, constraints: null });
+      const res = await getNodeConstraint({ ...config, constraints: null }, '');
       expect(res).toBeNull();
     });
   });
@@ -64,9 +64,11 @@ describe('modules/manager/npm/post-update/node-version', () => {
   describe('getNodeToolConstraint()', () => {
     it('returns getNodeUpdate', async () => {
       expect(
-        await getNodeToolConstraint(config, [
-          { depName: 'node', newValue: '16.15.0' },
-        ])
+        await getNodeToolConstraint(
+          config,
+          [{ depName: 'node', newValue: '16.15.0' }],
+          ''
+        )
       ).toEqual({
         toolName: 'node',
         constraint: '16.15.0',
@@ -74,7 +76,7 @@ describe('modules/manager/npm/post-update/node-version', () => {
     });
 
     it('returns getNodeConstraint', async () => {
-      expect(await getNodeToolConstraint(config, [])).toEqual({
+      expect(await getNodeToolConstraint(config, [], '')).toEqual({
         toolName: 'node',
         constraint: '^12.16.0',
       });

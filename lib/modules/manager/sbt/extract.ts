@@ -8,7 +8,7 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
-import { MAVEN_REPO } from '../gradle/common';
+import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
 import { normalizeScalaVersion } from './util';
 
@@ -274,7 +274,7 @@ export function extractPackageFile(
     parsedResult = scala.query(content, query, {
       vars: {},
       deps: [],
-      registryUrls: [MAVEN_REPO],
+      registryUrls: [REGISTRY_URLS.mavenCentral],
     });
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Sbt parsing error');

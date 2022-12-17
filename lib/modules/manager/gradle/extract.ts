@@ -1,9 +1,14 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { getFileContentMap } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
+import {
+  isGcvPropsFile,
+  parseGcv,
+  usesGcv,
+} from './extract/consistent-versions-plugin';
 import { parseGradle, parseProps } from './parser';
 import type {
   GradleManagerData,
@@ -12,6 +17,7 @@ import type {
 } from './types';
 import {
   getVars,
+  isGradleScriptFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -44,6 +50,8 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const registryUrls: string[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
+  const fileContents = await getFileContentMap(packageFiles, true);
+
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
@@ -53,7 +61,7 @@ export async function extractAllPackageFiles(
 
     try {
       // TODO #7154
-      const content = (await readLocalFile(packageFile, 'utf8'))!;
+      const content = fileContents[packageFile]!;
       const dir = upath.dirname(toAbsolutePath(packageFile));
 
       const updateVars = (newVars: PackageVariables): void => {
@@ -68,13 +76,19 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else {
+      } else if (
+        isGcvPropsFile(packageFile) &&
+        usesGcv(packageFile, fileContents)
+      ) {
+        const updatesFromGcv = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...updatesFromGcv);
+      } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
           deps,
           urls,
           vars: gradleVars,
-        } = await parseGradle(content, vars, packageFile);
+        } = parseGradle(content, vars, packageFile, fileContents);
         urls.forEach((url) => {
           if (!registryUrls.includes(url)) {
             registryUrls.push(url);
@@ -101,6 +115,7 @@ export async function extractAllPackageFiles(
     // istanbul ignore else
     if (key) {
       let pkgFile = packageFilesByName[key];
+      // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
         pkgFile = {
           packageFile: key,

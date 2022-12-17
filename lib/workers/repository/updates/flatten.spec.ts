@@ -1,6 +1,4 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
-
-import { ProgrammingLanguage } from '../../../constants';
 import { flattenUpdates } from './flatten';
 
 let config: RenovateConfig;
@@ -100,7 +98,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'amd64/node',
-                language: ProgrammingLanguage.Docker,
+                language: 'docker',
                 sourceUrl: 'https://github.com/nodejs/node',
                 updates: [{ newValue: '10.0.1' }],
               },
@@ -111,7 +109,7 @@ describe('workers/repository/updates/flatten', () => {
             deps: [
               {
                 depName: 'calico/node',
-                language: ProgrammingLanguage.Docker,
+                language: 'docker',
                 sourceUrl: 'https://calico.com',
                 updates: [{ newValue: '3.2.0', updateType: 'minor' }],
               },

@@ -98,7 +98,7 @@ function handleGotError(
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
-    logger.debug({ path }, 'Endpoint needs paid GitHub plan');
+    logger.debug(`Endpoint: ${path}, needs paid GitHub plan`);
     return err;
   }
   if (err.statusCode === 403 && message.includes('rate limit exceeded')) {

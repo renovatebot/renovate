@@ -17,7 +17,6 @@ describe('instrumentation/index', () => {
   const oldEnv = process.env;
 
   beforeEach(() => {
-    jest.clearAllMocks();
     api.trace.disable(); // clear global components
     process.env = { ...oldEnv };
   });

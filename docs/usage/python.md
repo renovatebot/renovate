@@ -9,6 +9,7 @@ Renovate supports the following Python package managers:
 
 - `pip` (e.g. `requirements.txt`, `requirements.pip`) files
 - `pipenv` (e.g. `Pipfile`)
+- `poetry` (e.g. `pyproject.toml`)
 - `setup.py` file
 - `setup.cfg` file
 
@@ -58,6 +59,10 @@ some-other-package==1.0.0
 ### Sources in `Pipfile`
 
 Renovate detects any custom-configured sources in `Pipfile` and uses them.
+
+### Sources in `pyproject.toml`
+
+Renovate detects any custom-configured sources in `pyproject.toml` and uses them.
 
 ### Specify URL in configuration
 

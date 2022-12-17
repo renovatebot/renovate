@@ -42,7 +42,7 @@ export async function getConfiguredRegistries(
     return undefined;
   }
 
-  logger.debug({ nuGetConfigPath }, 'found NuGet.config');
+  logger.debug(`Found NuGet.config at ${nuGetConfigPath}`);
   const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
   if (!nuGetConfig) {
     return undefined;
@@ -66,7 +66,7 @@ export async function getConfiguredRegistries(
           if (child.attr.protocolVersion) {
             registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
           }
-          logger.debug({ registryUrl }, 'adding registry URL');
+          logger.debug(`Adding registry URL ${registryUrl}`);
           registries.push({
             name: child.attr.key,
             url: registryUrl,

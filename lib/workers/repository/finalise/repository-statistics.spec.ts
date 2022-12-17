@@ -87,21 +87,23 @@ describe('workers/repository/finalise/repository-statistics', () => {
 
     it('processes cache with baseBranches and branches', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
-      const parentSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
+      const baseBranchSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranch = 'base-branch';
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
         sha,
-        parentSha,
         baseBranch,
+        baseBranchSha,
         isModified: false,
         automerge: false,
+        pristine: false,
       });
       const expectedMeta = {
         automerge: branchCache.automerge,
         isModified: branchCache.isModified,
+        isPristine: branchCache.pristine,
         baseBranch,
-        baseBranchSha: parentSha,
+        baseBranchSha,
         branchSha: sha,
       };
       const branches: BranchCache[] = [

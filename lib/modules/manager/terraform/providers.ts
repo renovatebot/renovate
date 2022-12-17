@@ -3,7 +3,6 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 import type { PackageDependency } from '../types';
-import { TerraformDependencyTypes } from './common';
 import type { ProviderLock } from './lockfile/types';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import {
@@ -13,7 +12,7 @@ import {
 } from './util';
 
 export const sourceExtractionRegex = regEx(
-  /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
+  /^(?:(?<hostname>(?:[a-zA-Z0-9-_]+\.+)+[a-zA-Z0-9-_]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/
 );
 
 export function extractTerraformProvider(
@@ -26,7 +25,7 @@ export function extractTerraformProvider(
   const dep: PackageDependency<TerraformManagerData> = {
     managerData: {
       moduleName,
-      terraformDependencyType: TerraformDependencyTypes.provider,
+      terraformDependencyType: 'provider',
     },
   };
   let braceCounter = 0;

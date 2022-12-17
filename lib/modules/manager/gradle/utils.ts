@@ -1,11 +1,9 @@
 import upath from 'upath';
 import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
-import { TokenType } from './common';
 import type {
   GradleManagerData,
   PackageVariables,
-  Token,
   VariableRegistry,
 } from './types';
 
@@ -83,32 +81,13 @@ export function parseDependencyString(
   };
 }
 
-export function interpolateString(
-  childTokens: Token[],
-  variables: PackageVariables
-): string | null {
-  const resolvedSubstrings: string[] = [];
-  for (const childToken of childTokens) {
-    const type = childToken.type;
-    if (type === TokenType.String) {
-      resolvedSubstrings.push(childToken.value);
-    } else if (type === TokenType.Variable) {
-      const varName = childToken.value;
-      const varData = variables[varName];
-      if (varData) {
-        resolvedSubstrings.push(varData.value);
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-  return resolvedSubstrings.join('');
-}
-
 const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
 const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
+
+export function isGradleScriptFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.gradle.kts') || filename.endsWith('.gradle');
+}
 
 export function isGradleVersionsFile(path: string): boolean {
   const filename = upath.basename(path);
