@@ -193,7 +193,7 @@ describe('modules/versioning/ubuntu/index', () => {
     ${'impish'}   | ${false}
     ${'jammy'}    | ${false}
   `('isStable("$version") === $expected', ({ version, expected }) => {
-    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
     expect(ubuntu.isStable(version)).toBe(expected);
   });
 

@@ -154,6 +154,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e BUILDPACK_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "some-dir" renovate/sidecar ' +
             'bash -l -c "' +
             'install-tool node 16.16.0 ' +
@@ -239,19 +240,19 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const pkg = {
         deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if pkg has no deps at all', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if specified lerna version is not a valid semVer range', () => {
       const pkg = {
         deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
   });
 });

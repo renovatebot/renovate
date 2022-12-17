@@ -26,6 +26,7 @@ const hostRules = mocked(_hostRules);
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -271,6 +272,7 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -329,10 +331,11 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
-          'install-tool python 3.3.2 ' +
+          'install-tool python 2.7.5 ' +
           '&& ' +
           "pip install --user 'poetry>=1.0' " +
           '&& ' +
@@ -377,7 +380,7 @@ describe('modules/manager/poetry/artifacts', () => {
     ]);
 
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool python 3.3.2' },
+      { cmd: 'install-tool python 2.7.5' },
       { cmd: "pip install --user 'poetry>=1.0'" },
       { cmd: 'poetry update --lock --no-interaction dep1' },
     ]);

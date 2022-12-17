@@ -32,6 +32,8 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/maven/org/scalatest/')
         .reply(404)
         .get('/maven/org.scalatest/')
+        .reply(404)
+        .get('/maven/org/scalatest/scalatest/maven-metadata.xml')
         .reply(404);
 
       const res = await getPkgReleases({
@@ -52,6 +54,10 @@ describe('modules/datasource/sbt-package/index', () => {
         .get('/maven2/com/example/empty/')
         .reply(200, '')
         .get('/maven2/com.example/')
+        .reply(404)
+        .get('/maven2/com/example/empty/maven-metadata.xml')
+        .reply(404)
+        .get('/maven2/com/example/empty/index.html')
         .reply(404);
 
       const res = await getPkgReleases({
@@ -206,10 +212,14 @@ describe('modules/datasource/sbt-package/index', () => {
       });
     });
 
-    it('falls back to Maven for GitLab-hosted packages', async () => {
+    it('falls back to Maven for orgarization root folder non-listable repositories', async () => {
       httpMock
         .scope('https://gitlab.com/api/v4/projects/123/packages/maven/')
-        .get('/org/example/example/maven-metadata.xml')
+        .get('/org/example/')
+        .reply(404)
+        .get('/org.example/')
+        .reply(404)
+        .get('/org/example/example_2.13/maven-metadata.xml')
         .reply(
           200,
           `
@@ -227,15 +237,15 @@ describe('modules/datasource/sbt-package/index', () => {
             </metadata>
           `
         )
-        .head('/org/example/example/1.2.3/example-1.2.3.pom')
+        .head('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200)
-        .get('/org/example/example/1.2.3/example-1.2.3.pom')
+        .get('/org/example/example_2.13/1.2.3/example_2.13-1.2.3.pom')
         .reply(200);
 
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        depName: 'org.example:example_2.13',
         registryUrls: [
           'https://gitlab.com/api/v4/projects/123/packages/maven/',
         ],

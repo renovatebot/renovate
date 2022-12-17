@@ -1,46 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/orb/index getReleases processes homeUrl 1`] = `
-Object {
+{
   "homepage": "https://google.com",
   "registryUrl": "https://circleci.com/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
       "version": "3.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T17:41:26.595Z",
       "version": "4.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T18:14:41.116Z",
       "version": "4.1.0",
     },
-    Object {
+    {
       "version": "4.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T21:28:37.846Z",
       "version": "4.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T21:40:44.870Z",
       "version": "4.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T22:13:29.297Z",
       "version": "4.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-12T17:13:31.542Z",
       "version": "4.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-12T18:56:42.563Z",
       "version": "4.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-13T23:19:09.356Z",
       "version": "4.2.0",
     },
@@ -49,46 +49,46 @@ Object {
 `;
 
 exports[`modules/datasource/orb/index getReleases processes real data 1`] = `
-Object {
+{
   "homepage": "https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows",
   "registryUrl": "https://circleci.com/",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "releaseTimestamp": "2018-12-11T05:28:14.080Z",
       "version": "3.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T17:41:26.595Z",
       "version": "4.0.0",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T18:14:41.116Z",
       "version": "4.1.0",
     },
-    Object {
+    {
       "version": "4.1.1",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T21:28:37.846Z",
       "version": "4.1.2",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T21:40:44.870Z",
       "version": "4.1.3",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-11T22:13:29.297Z",
       "version": "4.1.4",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-12T17:13:31.542Z",
       "version": "4.1.5",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-12T18:56:42.563Z",
       "version": "4.1.6",
     },
-    Object {
+    {
       "releaseTimestamp": "2018-12-13T23:19:09.356Z",
       "version": "4.2.0",
     },

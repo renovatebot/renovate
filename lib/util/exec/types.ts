@@ -27,7 +27,6 @@ export interface DockerOptions {
   cwd?: Opt<string>;
 }
 
-// TODO: rename #16653
 export interface RawExecOptions extends ChildProcessSpawnOptions {
   // TODO: to be removed in #16655
   /**
@@ -38,7 +37,6 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
   cwd?: string;
 }
 
-// TODO: rename #16653
 export interface ExecResult {
   stdout: string;
   stderr: string;
@@ -46,7 +44,6 @@ export interface ExecResult {
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
-// TODO: rename #16653
 export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;

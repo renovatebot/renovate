@@ -1,51 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/pre-commit/extract extractPackageFile() extracts from complex config file correctly 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "v3.3.0",
       "datasource": "github-tags",
       "depName": "pre-commit/pre-commit-hooks",
       "depType": "repository",
       "packageName": "pre-commit/pre-commit-hooks",
     },
-    Object {
+    {
       "currentValue": "19.3b0",
       "datasource": "github-tags",
       "depName": "psf/black",
       "depType": "repository",
       "packageName": "psf/black",
     },
-    Object {
-      "currentValue": "19.3b0",
-      "datasource": "gitlab-tags",
-      "depName": "psf/black",
-      "depType": "repository",
-      "packageName": "psf/black",
-    },
-    Object {
+    {
       "currentValue": "19.3b0",
       "datasource": "gitlab-tags",
       "depName": "psf/black",
       "depType": "repository",
       "packageName": "psf/black",
     },
-    Object {
+    {
+      "currentValue": "19.3b0",
+      "datasource": "gitlab-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "packageName": "psf/black",
+    },
+    {
       "currentValue": "v2.1.2",
       "datasource": "github-tags",
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "packageName": "prettier/pre-commit",
     },
-    Object {
+    {
       "currentValue": "v2.1.2",
       "datasource": "github-tags",
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "packageName": "prettier/pre-commit",
     },
-    Object {
+    {
       "currentValue": "v1.0.0",
       "datasource": undefined,
       "depName": undefined,

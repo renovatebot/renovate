@@ -1,0 +1,66 @@
+{
+  "channel-version": "3.1",
+  "latest-release": "3.1.29",
+  "latest-release-date": "2022-09-13",
+  "latest-runtime": "3.1.29",
+  "latest-sdk": "3.1.423",
+  "support-phase": "maintenance",
+  "releases": [
+    {
+      "release-date": "2022-09-13",
+      "release-version": "3.1.29",
+      "security": true,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/3.1/3.1.29/3.1.29.md",
+      "runtime": {
+        "version": "3.1.29",
+        "version-display": "3.1.29"
+      },
+      "sdk": {
+        "version": "3.1.423",
+        "version-display": "3.1.423"
+      }
+    },
+    {
+      "release-date": "2020-01-14",
+      "release-version": "3.1.1",
+      "security": true,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/3.1/3.1.1/3.1.1.md",
+      "runtime": {
+        "version": "3.1.1",
+        "version-display": "3.1.1"
+      },
+      "sdk": {
+        "version": "3.1.101",
+        "version-display": "3.1.101"
+      }
+    },
+    {
+      "release-date": "2019-12-03",
+      "release-version": "3.1.0",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/3.1/3.1.0/3.1.0.md",
+      "runtime": {
+        "version": "3.1.0",
+        "version-display": "3.1.0"
+      },
+      "sdk": {
+        "version": "3.1.100",
+        "version-display": "3.1.100"
+      }
+    },
+    {
+      "release-date": "2019-10-15",
+      "release-version": "3.1.0-preview1",
+      "security": false,
+      "release-notes": "https://github.com/dotnet/core/blob/main/release-notes/3.1/preview/3.1.0-preview1.md",
+      "runtime": {
+        "version": "3.1.0-preview1.19506.1",
+        "version-display": "3.1.0-preview1"
+      },
+      "sdk": {
+        "version": "3.1.100-preview1-014459",
+        "version-display": "3.1.100-preview1"
+      }
+    }
+  ]
+}

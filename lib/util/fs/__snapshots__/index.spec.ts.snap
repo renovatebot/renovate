@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`util/fs/index readLocalDirectory returns dir content 1`] = `
-Array [
+[
   "Cargo.lock",
   "Cargo.toml",
 ]
 `;
 
 exports[`util/fs/index readLocalDirectory returns dir content 2`] = `
-Array [
+[
   "Cargo.lock",
   "Cargo.toml",
   "subdir",

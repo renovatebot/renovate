@@ -1,12 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/validation validateConfig(config) catches invalid allowedVersions regex 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid regExp for packageRules[1].allowedVersions: \`/***$}{]][/\`",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid regExp for packageRules[3].allowedVersions: \`!/***$}{]][/\`",
     "topic": "Configuration Error",
   },
@@ -14,12 +14,12 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid regExp for packageRules[1].matchCurrentVersion: \`/***$}{]][/\`",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid regExp for packageRules[3].matchCurrentVersion: \`!/***$}{]][/\`",
     "topic": "Configuration Error",
   },
@@ -27,8 +27,8 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid template in config path: commitMessage",
     "topic": "Configuration Error",
   },
@@ -36,56 +36,56 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) errors for all types 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Configuration option \`enabled\` should be boolean. Found: 1 (number)",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Configuration option \`labels\` should be a list (Array)",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Configuration option \`lockFileMaintenance\` should be a json object",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Configuration option \`packageRules[3].matchPackagePatterns\` should be a list (Array)",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Configuration option \`prCommitsPerRunLimit\` should be an integer. Found: false (boolean)",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Configuration option \`semanticCommitType\` should be a string",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid configuration option: packageRules[1].foo",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid regExp for packageRules[3].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
     "topic": "Configuration Error",
   },
-  Object {
-    "message": "Invalid schedule: \`Invalid schedule: \\"every 15 mins every weekday\\" should not specify minutes\`",
+  {
+    "message": "Invalid schedule: \`Invalid schedule: "every 15 mins every weekday" should not specify minutes\`",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "extends: Invalid schedule: Unsupported timezone Europe/Brussel",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "packageRules must contain JSON objects",
     "topic": "Configuration Error",
   },
-  Object {
-    "message": "packageRules[1]: Each packageRule must contain at least one match* or exclude* selector. Rule: {\\"foo\\":1}",
+  {
+    "message": "packageRules[1]: Each packageRule must contain at least one match* or exclude* selector. Rule: {"foo":1}",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "timezone: Invalid schedule: Unsupported timezone Asia",
     "topic": "Configuration Error",
   },
@@ -93,12 +93,12 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) errors for unsafe fileMatches 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid regExp for npm.fileMatch: \`abc ([a-z]+) ([a-z]+))\`",
     "topic": "Configuration Error",
   },
@@ -106,90 +106,90 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
-Array [
-  Object {
-    "message": "\\"fileMatch\\" may not be defined at the top level of a config and must instead be within a manager block",
+[
+  {
+    "message": ""fileMatch" may not be defined at the top level of a config and must instead be within a manager block",
     "topic": "Config error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
-Array [
-  Object {
-    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.minor",
+[
+  {
+    "message": ""fileMatch" must be configured in a manager block and not here: npm.minor",
     "topic": "Config warning",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if included not supported enabled managers for combined supported and not supported managers 1`] = `
-Array [
-  Object {
-    "message": "The following managers configured in enabledManagers are not supported: \\"foo\\"",
+[
+  {
+    "message": "The following managers configured in enabledManagers are not supported: "foo"",
     "topic": "Configuration Error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if included not supported enabled managers for multiple not supported managers 1`] = `
-Array [
-  Object {
-    "message": "The following managers configured in enabledManagers are not supported: \\"foo, bar\\"",
+[
+  {
+    "message": "The following managers configured in enabledManagers are not supported: "foo, bar"",
     "topic": "Configuration Error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if included not supported enabled managers for single not supported manager 1`] = `
-Array [
-  Object {
-    "message": "The following managers configured in enabledManagers are not supported: \\"foo\\"",
+[
+  {
+    "message": "The following managers configured in enabledManagers are not supported: "foo"",
     "topic": "Configuration Error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if invalid combinations in packageRules 1`] = `
-Array [
-  Object {
-    "message": "packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {\\"matchUpdateTypes\\":[\\"major\\"],\\"registryUrls\\":[\\"https://registry.npmjs.org\\"]}",
+[
+  {
+    "message": "packageRules[0]: packageRules cannot combine both matchUpdateTypes and registryUrls. Rule: {"matchUpdateTypes":["major"],"registryUrls":["https://registry.npmjs.org"]}",
     "topic": "Configuration Error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if language or manager objects are nested 1`] = `
-Array [
-  Object {
-    "message": "The \\"docker\\" object can only be configured at the top level of a config but was found inside \\"major.minor\\"",
+[
+  {
+    "message": "The "docker" object can only be configured at the top level of a config but was found inside "major.minor"",
     "topic": "Configuration Error",
   },
-  Object {
-    "message": "The \\"gradle\\" object can only be configured at the top level of a config but was found inside \\"java\\"",
+  {
+    "message": "The "gradle" object can only be configured at the top level of a config but was found inside "java"",
     "topic": "Configuration Error",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Regex Managers must contain currentValueTemplate configuration or regex group named currentValue",
     "topic": "Configuration Error",
   },
 ]
 `;
 
-exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `Array []`;
+exports[`config/validation validateConfig(config) ignore packageRule nesting validation for presets 1`] = `[]`;
 
 exports[`config/validation validateConfig(config) included managers of the wrong type 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Configuration option \`packageRules[0].matchManagers\` should be a list (Array)",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "packageRules: Managers should be type of List. You have included string.",
     "topic": "Configuration Error",
   },
@@ -197,8 +197,8 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) returns deprecation warnings 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.",
     "topic": "Deprecation Warning",
   },
@@ -206,16 +206,16 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) returns nested errors 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid configuration option: foo",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid configuration option: lockFileMaintenance.bar",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "Invalid regExp for packageRules[0].excludePackagePatterns: \`abc ([a-z]+) ([a-z]+))\`",
     "topic": "Configuration Error",
   },
@@ -223,12 +223,12 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) selectors outside packageRules array trigger errors 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "docker.minor.matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },
-  Object {
+  {
     "message": "matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },
@@ -236,8 +236,8 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
-Array [
-  Object {
+[
+  {
     "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
     "topic": "Configuration Error",
   },
@@ -245,18 +245,18 @@ Array [
 `;
 
 exports[`config/validation validateConfig(config) warns if hostType has the wrong parent 1`] = `
-Array [
-  Object {
-    "message": "hostType should only be configured within a \\"hostRules\\" object. Was found in .",
+[
+  {
+    "message": "hostType should only be configured within a "hostRules" object. Was found in .",
     "topic": "hostType",
   },
 ]
 `;
 
 exports[`config/validation validateConfig(config) warns if only selectors in packageRules 1`] = `
-Array [
-  Object {
-    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {\\"matchDepTypes\\":[\\"foo\\"],\\"excludePackageNames\\":[\\"bar\\"]}",
+[
+  {
+    "message": "packageRules[0]: Each packageRule must contain at least one non-match* or non-exclude* field. Rule: {"matchDepTypes":["foo"],"excludePackageNames":["bar"]}",
     "topic": "Configuration Error",
   },
 ]

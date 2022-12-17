@@ -1,5 +1,4 @@
-import { defaultConfig, platform } from '../../../../../test/util';
-import { BranchStatus } from '../../../../types';
+import { getConfig, platform } from '../../../../../test/util';
 import {
   ConfidenceConfig,
   StabilityConfig,
@@ -14,7 +13,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });
@@ -29,22 +28,22 @@ describe('workers/repository/update/branch/status-checks', () => {
     });
 
     it('sets status yellow', async () => {
-      config.stabilityStatus = BranchStatus.yellow;
+      config.stabilityStatus = 'yellow';
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
     it('sets status green', async () => {
-      config.stabilityStatus = BranchStatus.green;
+      config.stabilityStatus = 'green';
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
 
     it('skips status if already set', async () => {
-      config.stabilityStatus = BranchStatus.green;
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
+      config.stabilityStatus = 'green';
+      platform.getBranchStatusCheck.mockResolvedValueOnce('green');
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
@@ -56,7 +55,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     beforeEach(() => {
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
       };
     });
@@ -72,7 +71,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     it('sets status yellow', async () => {
       config.minimumConfidence = 'high';
-      config.confidenceStatus = BranchStatus.yellow;
+      config.confidenceStatus = 'yellow';
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -80,7 +79,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     it('sets status green', async () => {
       config.minimumConfidence = 'high';
-      config.confidenceStatus = BranchStatus.green;
+      config.confidenceStatus = 'green';
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
@@ -88,8 +87,8 @@ describe('workers/repository/update/branch/status-checks', () => {
 
     it('skips status if already set', async () => {
       config.minimumConfidence = 'high';
-      config.confidenceStatus = BranchStatus.green;
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
+      config.confidenceStatus = 'green';
+      platform.getBranchStatusCheck.mockResolvedValueOnce('green');
       await setConfidence(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
@@ -98,9 +97,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
   describe('getBranchStatus', () => {
     it('should return green if ignoreTests=true', async () => {
-      expect(await resolveBranchStatus('somebranch', true)).toBe(
-        BranchStatus.green
-      );
+      expect(await resolveBranchStatus('somebranch', true)).toBe('green');
     });
   });
 });

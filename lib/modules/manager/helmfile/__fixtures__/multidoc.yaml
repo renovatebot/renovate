@@ -65,6 +65,10 @@ releases:
 
 - name:  "external-dns"
   chart: "bitnami/external-dns"
-  namespace: "external-dns"
+  namespace: {{`"{{request.object.metadata.name}}"`}}
   version: {{ .Values | getOrNil "external_dns.version" | default "4.5.5" }}
   installed: {{ .Values | getOrNil "external_dns.installed" | default false }}
+  text: |-
+    {{`{{ range .Alerts }}
+      *Alert:* {{ .Annotations.summary }}
+    {{ end }}`}}

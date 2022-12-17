@@ -3,6 +3,7 @@ import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
+import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
 
 export function getWarnings(config: RenovateConfig): string {
@@ -57,7 +58,7 @@ function getDepWarnings(
   return { warnings, warningFiles };
 }
 
-export function getDepWarningsPR(
+export function getDepWarningsOnboardingPR(
   packageFiles: Record<string, PackageFile[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
@@ -80,6 +81,28 @@ export function getDepWarningsPR(
   return warningText;
 }
 
+export function getDepWarningsPR(
+  packageFiles: Record<string, PackageFile[]>,
+  dependencyDashboard?: boolean
+): string {
+  const { warnings, warningFiles } = getDepWarnings(packageFiles);
+  let warningText = '';
+  if (!warnings.length) {
+    return '';
+  }
+  logger.debug({ warnings, warningFiles }, 'Found package lookup warnings');
+  warningText = emojify(
+    `\n---\n\n### :warning: Dependency Lookup Warnings :warning:\n\n`
+  );
+  warningText += 'Warnings were logged while processing this repo. ';
+  if (dependencyDashboard) {
+    warningText += `Please check the Dependency Dashboard for more information.\n\n`;
+  } else {
+    warningText += `Please check the logs for more information.\n\n`;
+  }
+  return warningText;
+}
+
 export function getDepWarningsDashboard(
   packageFiles: Record<string, PackageFile[]>
 ): string {
@@ -89,7 +112,9 @@ export function getDepWarningsDashboard(
   }
 
   const depWarnings = warnings
-    .map((w) => w.replace('Failed to look up dependency ', ''))
+    .map((w) =>
+      w.replace(regEx(/^Failed to look up(?: [-\w]+)? dependency /), '')
+    )
     .map((dep) => '`' + dep + '`')
     .join(', ');
 

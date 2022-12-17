@@ -252,6 +252,43 @@ describe('util/exec/docker/index', () => {
       );
     });
 
+    it('adds custom containerbaseDir to volumes', async () => {
+      mockExecAll();
+      GlobalConfig.set({
+        cacheDir: '/tmp/cache',
+        containerbaseDir: '/tmp/containerbase',
+        dockerUser: 'some-user',
+      });
+      const volumes: VolumeOption[] = ['/tmp/foo'];
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+        volumes: [...volumes, ...volumes],
+      });
+      expect(res).toBe(
+        command(
+          image,
+          `-v "/tmp/cache":"/tmp/cache" -v "/tmp/containerbase":"/tmp/containerbase" -v "/tmp/foo":"/tmp/foo"`
+        )
+      );
+    });
+
+    it('adds dedupes default containerbaseDir in volumes', async () => {
+      mockExecAll();
+      GlobalConfig.set({
+        cacheDir: '/tmp/cache',
+        containerbaseDir: '/tmp/cache/containerbase',
+        dockerUser: 'some-user',
+      });
+      const volumes: VolumeOption[] = ['/tmp/foo'];
+      const res = await generateDockerCommand(commands, preCommands, {
+        ...dockerOptions,
+        volumes: [...volumes, ...volumes],
+      });
+      expect(res).toBe(
+        command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`)
+      );
+    });
+
     it('handles tag parameter', async () => {
       mockExecAll();
       const res = await generateDockerCommand(commands, preCommands, {

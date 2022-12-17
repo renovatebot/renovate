@@ -5,34 +5,34 @@ exports[`modules/datasource/git-refs/index getDigest() returns digest for HEAD 1
 exports[`modules/datasource/git-refs/index getDigest() returns digest for tag 1`] = `"2b52829c7c1bd65b3501c450849c53b90b11fa0e"`;
 
 exports[`modules/datasource/git-refs/index getReleases returns versions filtered from tags 1`] = `
-Object {
-  "releases": Array [
-    Object {
+{
+  "releases": [
+    {
       "gitRef": "v1.0.0",
       "newDigest": "a9920c014aebc28dc1b23e7efcc006d045512345",
       "version": "v1.0.0",
     },
-    Object {
+    {
       "gitRef": "v1.0.1",
       "newDigest": "281fbfb58990ec98b237a923d67904c102bec34c",
       "version": "v1.0.1",
     },
-    Object {
+    {
       "gitRef": "v1.0.2",
       "newDigest": "9cb93e0b236385a4e2efd089d7c6a458f5ff321f",
       "version": "v1.0.2",
     },
-    Object {
+    {
       "gitRef": "v1.0.3",
       "newDigest": "8b0d0e0aec21ea059448ef0255387dbb82c61973",
       "version": "v1.0.3",
     },
-    Object {
+    {
       "gitRef": "v1.0.4",
       "newDigest": "2b52829c7c1bd65b3501c450849c53b90b11fa0e",
       "version": "v1.0.4",
     },
-    Object {
+    {
       "gitRef": "v1.0.5",
       "newDigest": "2d138c34e4c6939d0a8686943e851c6528aa04db",
       "version": "v1.0.5",

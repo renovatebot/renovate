@@ -1,4 +1,9 @@
 {
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
   "name": "Renovate",
   "dockerFile": "Dockerfile",
   "settings": {
@@ -8,7 +13,8 @@
   "extensions": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "orta.vscode-jest"
+    "orta.vscode-jest",
+    "EditorConfig.editorconfig"
   ],
   "runArgs": [
     "--cap-add=SYS_PTRACE",

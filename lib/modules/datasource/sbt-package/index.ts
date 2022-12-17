@@ -3,7 +3,6 @@ import { logger } from '../../../logger';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
-import { detectPlatform } from '../../platform/util';
 import * as ivyVersioning from '../../versioning/ivy';
 import { compare } from '../../versioning/maven/compare';
 import { MavenDatasource } from '../maven';
@@ -158,12 +157,6 @@ export class SbtPackageDatasource extends MavenDatasource {
       return null;
     }
 
-    const platform = detectPlatform(registryUrl);
-    if (platform === 'gitlab') {
-      const mavenReleases = await super.getReleases(config);
-      return mavenReleases;
-    }
-
     const [groupId, artifactId] = packageName.split(':');
     const groupIdSplit = groupId.split('.');
     const artifactIdSplit = artifactId.split('_');
@@ -203,6 +196,14 @@ export class SbtPackageDatasource extends MavenDatasource {
           releases: versions.map((v) => ({ version: v })),
         };
       }
+    }
+
+    logger.debug(
+      `No versions discovered for ${packageName} listing organization root package folder, fallback to maven datasource for version discovery`
+    );
+    const mavenReleaseResult = await super.getReleases(config);
+    if (mavenReleaseResult) {
+      return mavenReleaseResult;
     }
 
     logger.debug(

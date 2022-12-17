@@ -17,5 +17,6 @@
   },
   "omnisharp.autoStart": false,
   "jest.autoRun": "off",
-  "jest.jestCommandLine": "yarn jest"
+  "jest.jestCommandLine": "yarn jest",
+  "npm.packageManager": "yarn"
 }

@@ -1,3 +1,4 @@
+import hasha from 'hasha';
 import { getPrBodyStruct, hashBody } from './pr-body';
 
 describe('modules/platform/pr-body', () => {
@@ -47,10 +48,47 @@ describe('modules/platform/pr-body', () => {
       );
     });
 
-    it('returns rebaseRequested flag', () => {
-      expect(getPrBodyStruct('- [x] <!-- rebase-check -->')).toEqual({
-        hash: '023952693e1e00a52a71b65d9b4804bca6ca9f215c20f6e029dbf420f322d541',
+    it('hashes an undefined body', () => {
+      // nullish operator branch coverage
+      const hash =
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+      expect(hashBody(undefined)).toBe(hash);
+    });
+
+    it('returns rebaseRequested=true flag', () => {
+      const input = '- [x] <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
         rebaseRequested: true,
+      });
+    });
+
+    it('returns rebaseRequested=false flag', () => {
+      const input = '- [ ] <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
+        rebaseRequested: false,
+      });
+    });
+
+    it('returns rebaseRequested=undefined flag', () => {
+      const input = '-  <!-- rebase-check -->';
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
+      });
+    });
+
+    it('returns raw config hash', () => {
+      const config = '{}';
+      const rawConfigHash = hasha(config, { algorithm: 'sha256' });
+      const input = `<!--renovate-config-hash:${rawConfigHash}-->`;
+      const hash = hashBody(input);
+      expect(getPrBodyStruct(input)).toEqual({
+        hash,
+        rawConfigHash,
       });
     });
 

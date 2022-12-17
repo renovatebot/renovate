@@ -11,6 +11,7 @@ import type {
   TerraformModuleVersions,
   TerraformRelease,
 } from './types';
+import { createSDBackendURL } from './utils';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -81,9 +82,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
 
     try {
-      pkgUrl = joinUrlParts(
+      // TODO: types (#7154)
+
+      pkgUrl = createSDBackendURL(
         registryUrl,
-        serviceDiscovery['modules.v1']!,
+        'modules.v1',
+        serviceDiscovery,
         repository
       );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
@@ -128,11 +132,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let res: TerraformModuleVersions;
     let pkgUrl: string;
     try {
-      pkgUrl = joinUrlParts(
+      // TODO: types (#7154)
+      pkgUrl = createSDBackendURL(
         registryUrl,
-        serviceDiscovery['modules.v1']!,
-        repository,
-        'versions'
+        'modules.v1',
+        serviceDiscovery,
+        `${repository}/versions`
       );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {

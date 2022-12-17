@@ -1,9 +1,4 @@
-import {
-  defaultConfig,
-  git,
-  mockedFunction,
-  platform,
-} from '../../../../../test/util';
+import { getConfig, git, platform } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -15,9 +10,9 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO #7154 incompatible types
+      // TODO: incompatible types (#7154)
       config = {
-        ...defaultConfig,
+        ...getConfig(),
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: 'disabled',
@@ -29,7 +24,6 @@ describe('workers/repository/update/branch/commit', () => {
       } as BranchConfig;
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
-      platform.commitFiles = jest.fn();
       GlobalConfig.reset();
     });
 
@@ -58,10 +52,7 @@ describe('workers/repository/update/branch/commit', () => {
       config.platformCommit = true;
       await commitFilesToBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      // TODO #7154
-      expect(
-        mockedFunction(platform.commitFiles!).mock.calls
-      ).toMatchSnapshot();
+      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
     });
 
     it('dry runs', async () => {

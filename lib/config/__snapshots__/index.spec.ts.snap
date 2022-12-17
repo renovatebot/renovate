@@ -1,26 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges 1`] = `
-Object {
+{
   "branchTopic": "lock-file-maintenance",
   "commitMessageAction": "Lock file maintenance",
   "commitMessageExtra": null,
   "commitMessageTopic": null,
   "enabled": false,
   "groupName": null,
-  "prBodyDefinitions": Object {
+  "prBodyDefinitions": {
     "Change": "All locks refreshed",
   },
   "rebaseStalePrs": true,
   "recreateClosed": true,
-  "schedule": Array [
+  "schedule": [
     "on monday",
   ],
 }
 `;
 
 exports[`config/index mergeChildConfig(parentConfig, childConfig) merges constraints 1`] = `
-Object {
+{
   "node": "<15",
   "npm": "^6.0.0",
 }

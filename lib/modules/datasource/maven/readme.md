@@ -1,4 +1,4 @@
-### Making your changelogs fetchable
+#### Making your changelogs fetchable
 
 In case you are publishing artifacts and you want to ensure that your changelogs are fetchable by `Renovate`, you need to configure the [scm section](https://maven.apache.org/scm/git.html) on their `pom.xml` file.
 

@@ -10,10 +10,8 @@
   },
   "packageRules": [
     {
-      "matchPackageNames": [
-        "mcr.microsoft.com/vscode/devcontainers/typescript-node"
-      ],
-      "extends": ["schedule:monthly"]
+      "matchPackageNames": ["containerbase/node"],
+      "versioning": "node"
     },
     {
       "matchDepTypes": ["dependencies"],

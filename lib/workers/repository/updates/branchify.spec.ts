@@ -1,4 +1,4 @@
-import { RenovateConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, mocked, mockedFunction } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _changelog from '../changelog';
 import { branchifyUpgrades } from './branchify';
@@ -151,6 +151,39 @@ describe('workers/repository/updates/branchify', () => {
       ]);
       const res = await branchifyUpgrades(config, {});
       expect(embedChangelogs).not.toHaveBeenCalled();
+      expect(Object.keys(res.branches)).toHaveLength(2);
+    });
+
+    it('fetch changelogs if required', async () => {
+      config.fetchReleaseNotes = true;
+      config.repoIsOnboarded = true;
+      mockedFunction(_changelog.needsChangelogs).mockReturnValueOnce(true);
+      flattenUpdates.mockResolvedValueOnce([
+        {
+          depName: 'foo',
+          branchName: 'foo',
+          prTitle: 'some-title',
+          version: '1.1.0',
+          groupName: 'My Group',
+          group: { branchName: 'renovate/{{groupSlug}}' },
+        },
+        {
+          depName: 'foo',
+          branchName: 'foo',
+          prTitle: 'some-title',
+          version: '2.0.0',
+        },
+        {
+          depName: 'bar',
+          branchName: 'bar-{{version}}',
+          prTitle: 'some-title',
+          version: '1.1.0',
+          groupName: 'My Group',
+          group: { branchName: 'renovate/my-group' },
+        },
+      ]);
+      const res = await branchifyUpgrades(config, {});
+      expect(embedChangelogs).toHaveBeenCalledOnce();
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
   });

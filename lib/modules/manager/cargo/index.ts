@@ -1,10 +1,10 @@
-import { ProgrammingLanguage } from '../../../constants';
+import type { ProgrammingLanguage } from '../../../constants';
 import { CrateDatasource } from '../../datasource/crate';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
 
-export const language = ProgrammingLanguage.Rust;
+export const language: ProgrammingLanguage = 'rust';
 export const supportsLockFileMaintenance = true;
 
 export { extractPackageFile, updateArtifacts };

@@ -1,20 +1,20 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/migrate-validate migrateAndValidate() handles invalid 1`] = `
-Object {
-  "errors": Array [
-    Object {
+{
+  "errors": [
+    {
       "message": "Invalid configuration option: foo",
       "topic": "Configuration Error",
     },
   ],
   "foo": "none",
-  "warnings": Array [],
+  "warnings": [],
 }
 `;
 
 exports[`config/migrate-validate migrateAndValidate() isOnboarded 1`] = `
-Object {
-  "errors": Array [],
+{
+  "errors": [],
 }
 `;

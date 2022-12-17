@@ -1,9 +1,10 @@
-import type { GithubHttp } from '../../../util/http/github';
-import { AbstractGithubDatasourceCache } from '../github-releases/cache/cache-base';
 import type {
   CacheOptions,
-  StoredItemBase,
-} from '../github-releases/cache/types';
+  GithubCachedTag,
+  GithubGraphqlTag,
+} from '../../../util/github/types';
+import type { GithubHttp } from '../../../util/http/github';
+import { AbstractGithubDatasourceCache } from '../github-releases/cache/cache-base';
 
 const query = `
 query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
@@ -43,33 +44,9 @@ query ($owner: String!, $name: String!, $cursor: String, $count: Int!) {
 }
 `;
 
-export interface FetchedTag {
-  version: string;
-  target:
-    | {
-        type: 'Commit';
-        hash: string;
-        releaseTimestamp: string;
-      }
-    | {
-        type: 'Tag';
-        target: {
-          hash: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
-      };
-}
-
-export interface StoredTag extends StoredItemBase {
-  hash: string;
-  releaseTimestamp: string;
-}
-
 export class CacheableGithubTags extends AbstractGithubDatasourceCache<
-  StoredTag,
-  FetchedTag
+  GithubCachedTag,
+  GithubGraphqlTag
 > {
   readonly cacheNs = 'github-datasource-graphql-tags-v2';
   readonly graphqlQuery = query;
@@ -78,7 +55,7 @@ export class CacheableGithubTags extends AbstractGithubDatasourceCache<
     super(http, opts);
   }
 
-  coerceFetched(item: FetchedTag): StoredTag | null {
+  coerceFetched(item: GithubGraphqlTag): GithubCachedTag | null {
     const { version, target } = item;
     if (target.type === 'Commit') {
       const { hash, releaseTimestamp } = target;

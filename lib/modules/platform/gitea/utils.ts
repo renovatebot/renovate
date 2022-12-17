@@ -1,5 +1,4 @@
 import type { MergeStrategy } from '../../../config/types';
-import { PlatformId } from '../../../constants';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import * as hostRules from '../../../util/host-rules';
@@ -25,13 +24,13 @@ export function getRepoUrl(
     if (!repo.ssh_url) {
       throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
     }
-    logger.debug({ url: repo.ssh_url }, `using SSH URL`);
+    logger.debug(`Using SSH URL: ${repo.ssh_url}`);
     return repo.ssh_url;
   }
 
   // Find options for current host and determine Git endpoint
   const opts = hostRules.find({
-    hostType: PlatformId.Gitea,
+    hostType: 'gitea',
     url: endpoint,
   });
 
@@ -53,7 +52,7 @@ export function getRepoUrl(
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
 
-  logger.debug({ url: repo.clone_url }, `using HTTP URL`);
+  logger.debug(`Using HTTP URL: ${repo.clone_url}`);
   const repoUrl = parseUrl(repo.clone_url);
   if (!repoUrl) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);

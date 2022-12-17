@@ -83,7 +83,6 @@ export class AdoptiumJavaDatasource extends Datasource {
         release_type: 'ga',
         sort_method: 'DATE',
         sort_order: 'DESC',
-        vendor: 'adoptium',
       })}`
     );
 

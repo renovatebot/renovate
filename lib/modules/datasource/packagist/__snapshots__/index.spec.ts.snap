@@ -1,100 +1,100 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/packagist/index getReleases adds packagist source implicitly 1`] = `
-Object {
+{
   "registryUrl": "https://packagist.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0",
       "releaseTimestamp": "2014-05-30T16:51:39.000Z",
       "version": "1.0",
     },
-    Object {
+    {
       "gitRef": "v1.1",
       "releaseTimestamp": "2015-07-07T15:38:25.000Z",
       "version": "1.1",
     },
-    Object {
+    {
       "gitRef": "v2.0",
       "releaseTimestamp": "2016-01-17T13:08:01.000Z",
       "version": "2.0",
     },
-    Object {
+    {
       "gitRef": "v2.1",
       "releaseTimestamp": "2016-01-30T16:12:54.000Z",
       "version": "2.1",
     },
-    Object {
+    {
       "gitRef": "v2.1.1",
       "releaseTimestamp": "2016-04-06T08:37:20.000Z",
       "version": "2.1.1",
     },
-    Object {
+    {
       "gitRef": "v2.1.2",
       "releaseTimestamp": "2016-04-06T12:41:37.000Z",
       "version": "2.1.2",
     },
-    Object {
+    {
       "gitRef": "v2.1.3",
       "releaseTimestamp": "2016-04-12T09:09:47.000Z",
       "version": "2.1.3",
     },
-    Object {
+    {
       "gitRef": "v2.2",
       "releaseTimestamp": "2016-04-23T12:43:28.000Z",
       "version": "2.2",
     },
-    Object {
+    {
       "gitRef": "v2.2.1",
       "releaseTimestamp": "2016-04-23T18:00:21.000Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "gitRef": "v2.2.2",
       "releaseTimestamp": "2016-07-01T09:58:24.000Z",
       "version": "2.2.2",
     },
-    Object {
+    {
       "gitRef": "v2.2.3",
       "releaseTimestamp": "2016-07-01T15:53:33.000Z",
       "version": "2.2.3",
     },
-    Object {
+    {
       "gitRef": "v2.2.4",
       "releaseTimestamp": "2016-07-01T15:53:33.000Z",
       "version": "2.2.4",
     },
-    Object {
+    {
       "gitRef": "v2.3",
       "releaseTimestamp": "2016-12-21T14:50:24.000Z",
       "version": "2.3",
     },
-    Object {
+    {
       "gitRef": "v2.4",
       "releaseTimestamp": "2017-02-16T13:24:20.000Z",
       "version": "2.4",
     },
-    Object {
+    {
       "gitRef": "v2.5",
       "releaseTimestamp": "2018-02-16T15:31:05.000Z",
       "version": "2.5",
     },
-    Object {
+    {
       "gitRef": "v2.5.1",
       "releaseTimestamp": "2019-03-19T11:43:38.000Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "gitRef": "v2.5.2",
       "releaseTimestamp": "2019-03-26T09:00:38.000Z",
       "version": "2.5.2",
     },
-    Object {
+    {
       "gitRef": "v2.5.3",
       "releaseTimestamp": "2019-03-28T15:20:43.000Z",
       "version": "2.5.3",
     },
-    Object {
+    {
       "gitRef": "v2.5.4",
       "releaseTimestamp": "2019-08-06T09:24:58.000Z",
       "version": "2.5.4",
@@ -105,100 +105,100 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases processes real versioned data 1`] = `
-Object {
+{
   "registryUrl": "https://packagist.org",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v1.0",
       "releaseTimestamp": "2014-05-30T16:51:39.000Z",
       "version": "1.0",
     },
-    Object {
+    {
       "gitRef": "v1.1",
       "releaseTimestamp": "2015-07-07T15:38:25.000Z",
       "version": "1.1",
     },
-    Object {
+    {
       "gitRef": "v2.0",
       "releaseTimestamp": "2016-01-17T13:08:01.000Z",
       "version": "2.0",
     },
-    Object {
+    {
       "gitRef": "v2.1",
       "releaseTimestamp": "2016-01-30T16:12:54.000Z",
       "version": "2.1",
     },
-    Object {
+    {
       "gitRef": "v2.1.1",
       "releaseTimestamp": "2016-04-06T08:37:20.000Z",
       "version": "2.1.1",
     },
-    Object {
+    {
       "gitRef": "v2.1.2",
       "releaseTimestamp": "2016-04-06T12:41:37.000Z",
       "version": "2.1.2",
     },
-    Object {
+    {
       "gitRef": "v2.1.3",
       "releaseTimestamp": "2016-04-12T09:09:47.000Z",
       "version": "2.1.3",
     },
-    Object {
+    {
       "gitRef": "v2.2",
       "releaseTimestamp": "2016-04-23T12:43:28.000Z",
       "version": "2.2",
     },
-    Object {
+    {
       "gitRef": "v2.2.1",
       "releaseTimestamp": "2016-04-23T18:00:21.000Z",
       "version": "2.2.1",
     },
-    Object {
+    {
       "gitRef": "v2.2.2",
       "releaseTimestamp": "2016-07-01T09:58:24.000Z",
       "version": "2.2.2",
     },
-    Object {
+    {
       "gitRef": "v2.2.3",
       "releaseTimestamp": "2016-07-01T15:53:33.000Z",
       "version": "2.2.3",
     },
-    Object {
+    {
       "gitRef": "v2.2.4",
       "releaseTimestamp": "2016-07-01T15:53:33.000Z",
       "version": "2.2.4",
     },
-    Object {
+    {
       "gitRef": "v2.3",
       "releaseTimestamp": "2016-12-21T14:50:24.000Z",
       "version": "2.3",
     },
-    Object {
+    {
       "gitRef": "v2.4",
       "releaseTimestamp": "2017-02-16T13:24:20.000Z",
       "version": "2.4",
     },
-    Object {
+    {
       "gitRef": "v2.5",
       "releaseTimestamp": "2018-02-16T15:31:05.000Z",
       "version": "2.5",
     },
-    Object {
+    {
       "gitRef": "v2.5.1",
       "releaseTimestamp": "2019-03-19T11:43:38.000Z",
       "version": "2.5.1",
     },
-    Object {
+    {
       "gitRef": "v2.5.2",
       "releaseTimestamp": "2019-03-26T09:00:38.000Z",
       "version": "2.5.2",
     },
-    Object {
+    {
       "gitRef": "v2.5.3",
       "releaseTimestamp": "2019-03-28T15:20:43.000Z",
       "version": "2.5.3",
     },
-    Object {
+    {
       "gitRef": "v2.5.4",
       "releaseTimestamp": "2019-08-06T09:24:58.000Z",
       "version": "2.5.4",
@@ -209,141 +209,141 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports includes packages 1`] = `
-Object {
+{
   "homepage": "http://guzzlephp.org/",
   "registryUrl": "https://composer.renovatebot.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "v3.0.0",
       "releaseTimestamp": "2012-10-16T04:57:15.000Z",
       "version": "3.0.0",
     },
-    Object {
+    {
       "gitRef": "v3.0.1",
       "releaseTimestamp": "2012-10-22T20:20:55.000Z",
       "version": "3.0.1",
     },
-    Object {
+    {
       "gitRef": "v3.0.2",
       "releaseTimestamp": "2012-10-25T04:55:19.000Z",
       "version": "3.0.2",
     },
-    Object {
+    {
       "gitRef": "v3.0.3",
       "releaseTimestamp": "2012-11-04T20:31:03.000Z",
       "version": "3.0.3",
     },
-    Object {
+    {
       "gitRef": "v3.0.4",
       "releaseTimestamp": "2012-11-12T00:00:24.000Z",
       "version": "3.0.4",
     },
-    Object {
+    {
       "gitRef": "v3.0.5",
       "releaseTimestamp": "2012-11-19T00:15:33.000Z",
       "version": "3.0.5",
     },
-    Object {
+    {
       "gitRef": "v3.0.6",
       "releaseTimestamp": "2012-12-10T05:25:04.000Z",
       "version": "3.0.6",
     },
-    Object {
+    {
       "gitRef": "v3.0.7",
       "releaseTimestamp": "2012-12-19T23:06:35.000Z",
       "version": "3.0.7",
     },
-    Object {
+    {
       "gitRef": "v3.1.0",
       "releaseTimestamp": "2013-01-14T05:09:07.000Z",
       "version": "3.1.0",
     },
-    Object {
+    {
       "gitRef": "v3.1.1",
       "releaseTimestamp": "2013-01-21T05:46:09.000Z",
       "version": "3.1.1",
     },
-    Object {
+    {
       "gitRef": "v3.1.2",
       "releaseTimestamp": "2013-01-28T00:07:40.000Z",
       "version": "3.1.2",
     },
-    Object {
+    {
       "gitRef": "v3.2.0",
       "releaseTimestamp": "2013-02-15T01:33:10.000Z",
       "version": "3.2.0",
     },
-    Object {
+    {
       "gitRef": "v3.3.0",
       "releaseTimestamp": "2013-03-04T00:41:45.000Z",
       "version": "3.3.0",
     },
-    Object {
+    {
       "gitRef": "v3.3.1",
       "releaseTimestamp": "2013-03-10T23:05:38.000Z",
       "version": "3.3.1",
     },
-    Object {
+    {
       "gitRef": "v3.4.0",
       "releaseTimestamp": "2013-04-12T05:58:15.000Z",
       "version": "3.4.0",
     },
-    Object {
+    {
       "gitRef": "v3.4.1",
       "releaseTimestamp": "2013-04-16T20:56:26.000Z",
       "version": "3.4.1",
     },
-    Object {
+    {
       "gitRef": "v3.4.2",
       "releaseTimestamp": "2013-04-29T23:55:30.000Z",
       "version": "3.4.2",
     },
-    Object {
+    {
       "gitRef": "v3.4.3",
       "releaseTimestamp": "2013-04-30T20:31:38.000Z",
       "version": "3.4.3",
     },
-    Object {
+    {
       "gitRef": "v3.5.0",
       "releaseTimestamp": "2013-05-13T20:17:47.000Z",
       "version": "3.5.0",
     },
-    Object {
+    {
       "gitRef": "v3.6.0",
       "releaseTimestamp": "2013-05-30T07:01:25.000Z",
       "version": "3.6.0",
     },
-    Object {
+    {
       "gitRef": "v3.7.0",
       "releaseTimestamp": "2013-06-11T00:24:07.000Z",
       "version": "3.7.0",
     },
-    Object {
+    {
       "gitRef": "v3.7.1",
       "releaseTimestamp": "2013-07-05T20:17:54.000Z",
       "version": "3.7.1",
     },
-    Object {
+    {
       "gitRef": "v3.7.2",
       "releaseTimestamp": "2013-08-02T18:31:05.000Z",
       "version": "3.7.2",
     },
-    Object {
+    {
       "gitRef": "v3.7.3",
       "releaseTimestamp": "2013-09-08T21:09:18.000Z",
       "version": "3.7.3",
     },
-    Object {
+    {
       "gitRef": "v3.7.4",
       "releaseTimestamp": "2013-10-02T20:47:00.000Z",
       "version": "3.7.4",
     },
-    Object {
+    {
       "gitRef": "v3.8.0",
       "releaseTimestamp": "2013-12-05T23:39:20.000Z",
       "version": "3.8.0",
     },
-    Object {
+    {
       "gitRef": "v3.8.1",
       "releaseTimestamp": "2014-01-28T22:29:15.000Z",
       "version": "3.8.1",
@@ -354,14 +354,14 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports lazy repositories 1`] = `
-Object {
+{
   "registryUrl": "https://composer.renovatebot.com/composer/lazy",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "5.3.4",
       "version": "5.3.4",
     },
-    Object {
+    {
       "gitRef": "7.0.0-beta.1",
       "version": "7.0.0-beta.1",
     },
@@ -370,18 +370,18 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports plain packages 1`] = `
-Object {
+{
   "registryUrl": "https://composer.renovatebot.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "0.0.1",
       "version": "0.0.1",
     },
-    Object {
+    {
       "gitRef": "1.0.x-dev",
       "version": "1.0.x-dev",
     },
-    Object {
+    {
       "gitRef": "1.0.0",
       "version": "1.0.0",
     },
@@ -390,27 +390,27 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports provider-includes 1`] = `
-Object {
+{
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "1.0",
       "version": "1.0",
     },
-    Object {
+    {
       "gitRef": "1.1",
       "version": "1.1",
     },
-    Object {
+    {
       "gitRef": "1.4",
       "version": "1.4",
     },
-    Object {
+    {
       "gitRef": "1.5",
       "version": "1.5",
     },
-    Object {
+    {
       "gitRef": "1.5.1",
       "version": "1.5.1",
     },
@@ -420,27 +420,27 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports providers 1`] = `
-Object {
+{
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "1.0",
       "version": "1.0",
     },
-    Object {
+    {
       "gitRef": "1.1",
       "version": "1.1",
     },
-    Object {
+    {
       "gitRef": "1.4",
       "version": "1.4",
     },
-    Object {
+    {
       "gitRef": "1.5",
       "version": "1.5",
     },
-    Object {
+    {
       "gitRef": "1.5.1",
       "version": "1.5.1",
     },
@@ -450,27 +450,27 @@ Object {
 `;
 
 exports[`modules/datasource/packagist/index getReleases supports providers without a hash 1`] = `
-Object {
+{
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "registryUrl": "https://composer.renovatebot.com",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "gitRef": "1.0",
       "version": "1.0",
     },
-    Object {
+    {
       "gitRef": "1.1",
       "version": "1.1",
     },
-    Object {
+    {
       "gitRef": "1.4",
       "version": "1.4",
     },
-    Object {
+    {
       "gitRef": "1.5",
       "version": "1.5",
     },
-    Object {
+    {
       "gitRef": "1.5.1",
       "version": "1.5.1",
     },

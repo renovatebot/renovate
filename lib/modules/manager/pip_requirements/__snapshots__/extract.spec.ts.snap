@@ -1,65 +1,65 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
     },
-    Object {
+    {
       "currentValue": undefined,
       "datasource": "pypi",
       "depName": "sphinx",
     },
-    Object {
+    {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "http://example.com/private-pypi/",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() extracts multiple dependencies 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "==1",
     "currentVersion": "1",
     "datasource": "pypi",
     "depName": "Django",
   },
-  Object {
+  {
     "currentValue": "==0.6.27",
     "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
   },
-  Object {
+  {
     "currentValue": "==0.2",
     "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
   },
-  Object {
+  {
     "currentValue": "==2.4.5",
     "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
   },
-  Object {
+  {
     "currentValue": "==0.1.2",
     "currentVersion": "0.1.2",
     "datasource": "pypi",
@@ -69,33 +69,33 @@ Array [
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles comments and commands 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "==1.11.23",
     "currentVersion": "1.11.23",
     "datasource": "pypi",
     "depName": "Django",
   },
-  Object {
+  {
     "currentValue": "==0.6.27",
     "currentVersion": "0.6.27",
     "datasource": "pypi",
     "depName": "distribute",
     "skipReason": "ignored",
   },
-  Object {
+  {
     "currentValue": "==0.2",
     "currentVersion": "0.2",
     "datasource": "pypi",
     "depName": "dj-database-url",
   },
-  Object {
+  {
     "currentValue": "==2.4.5",
     "currentVersion": "2.4.5",
     "datasource": "pypi",
     "depName": "psycopg2",
   },
-  Object {
+  {
     "currentValue": "==0.1.2",
     "currentVersion": "0.1.2",
     "datasource": "pypi",
@@ -105,91 +105,91 @@ Array [
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url 1`] = `
-Object {
-  "additionalRegistryUrls": Array [
+{
+  "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
   ],
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "==2.0.12",
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
     },
-    Object {
+    {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
-    Object {
+    {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
     },
-    Object {
+    {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
       "depName": "not_semver",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://artifactory.company.com/artifactory/api/pypi/python/simple",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to config 1`] = `
-Object {
-  "additionalRegistryUrls": Array [
+{
+  "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
   ],
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "==2.0.12",
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
     },
-    Object {
+    {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
-    Object {
+    {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
     },
-    Object {
+    {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
@@ -200,42 +200,42 @@ Object {
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra index url and defaults without index to pypi 1`] = `
-Object {
-  "additionalRegistryUrls": Array [
+{
+  "additionalRegistryUrls": [
     "http://example.com/private-pypi/",
   ],
-  "deps": Array [
-    Object {
+  "deps": [
+    {
       "currentValue": "==2.0.12",
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
     },
-    Object {
+    {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
-    Object {
+    {
       "currentValue": "==0.3.1",
       "currentVersion": "0.3.1",
       "datasource": "pypi",
       "depName": "some-package",
     },
-    Object {
+    {
       "currentValue": "==1.0.0",
       "currentVersion": "1.0.0",
       "datasource": "pypi",
       "depName": "some-other-package",
     },
-    Object {
+    {
       "currentValue": "==1.9",
       "currentVersion": "1.9",
       "datasource": "pypi",
@@ -246,77 +246,77 @@ Object {
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extra spaces around pinned dependency equal signs 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "==2.0.12",
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
     },
-    Object {
+    {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://artifactory.company.com/artifactory/api/pypi/python/simple",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() handles extras and complex index url 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "==2.0.12",
       "currentVersion": "2.0.12",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==4.1.1",
       "currentVersion": "4.1.1",
       "datasource": "pypi",
       "depName": "celery",
     },
-    Object {
+    {
       "currentValue": "== 3.2.1",
       "currentVersion": "3.2.1",
       "datasource": "pypi",
       "depName": "foo",
     },
   ],
-  "registryUrls": Array [
+  "registryUrls": [
     "https://artifactory.company.com/artifactory/api/pypi/python/simple",
   ],
 }
 `;
 
 exports[`modules/manager/pip_requirements/extract extractPackageFile() should handle hashes 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "==1.9.1",
       "currentVersion": "1.9.1",
       "datasource": "pypi",
       "depName": "Django",
     },
-    Object {
+    {
       "currentValue": "==0.22.1",
       "currentVersion": "0.22.1",
       "datasource": "pypi",
       "depName": "bgg",
     },
-    Object {
+    {
       "currentValue": "==2016.1.8",
       "currentVersion": "2016.1.8",
       "datasource": "pypi",

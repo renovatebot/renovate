@@ -425,7 +425,6 @@ This repository currently has no open or pending branches.
 
 <details><summary>no-ver-no-digest/Dockerfile</summary>
 
- - \`ubuntu no version found\`
 
 </details>
 
@@ -510,6 +509,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
 
 ## Awaiting Schedule
 

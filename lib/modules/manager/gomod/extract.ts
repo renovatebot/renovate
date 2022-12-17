@@ -5,6 +5,7 @@ import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
 import type { PackageDependency, PackageFile } from '../types';
+import type { MultiLineParseResult } from './types';
 
 function getDep(
   lineNumber: number,
@@ -27,9 +28,9 @@ function getDep(
   } else {
     dep.skipReason = 'unsupported-version';
   }
-  const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
-  if (digestMatch) {
-    [, dep.currentDigest] = digestMatch;
+  const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
+  if (digestMatch?.groups?.digest) {
+    dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
   }
   return dep;
@@ -44,24 +45,22 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'npm',
+    versioning: 'go-mod-directive',
     rangeStrategy: 'replace',
   };
 }
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
-  const constraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      let line = lines[lineNumber];
+      const line = lines[lineNumber];
       const goVer = line.startsWith('go ') ? line.replace('go ', '') : null;
       if (goVer && semver.validRange(goVer)) {
         const dep = getGoDep(lineNumber, goVer);
         deps.push(dep);
-        constraints.go = line.replace('go ', '^');
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
@@ -71,27 +70,40 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
-      if (requireMatch && !line.endsWith('// indirect')) {
-        logger.trace({ lineNumber }, `require line: "${line}"`);
-        const dep = getDep(lineNumber, requireMatch, 'require');
-        deps.push(dep);
+      if (requireMatch) {
+        if (line.endsWith('// indirect')) {
+          logger.trace({ lineNumber }, `indirect line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'indirect');
+          dep.enabled = false;
+          deps.push(dep);
+        } else {
+          logger.trace({ lineNumber }, `require line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'require');
+          deps.push(dep);
+        }
       }
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
-        do {
-          lineNumber += 1;
-          line = lines[lineNumber];
-          const multiMatch = regEx(/^\s+([^\s]+)\s+([^\s]+)/).exec(line);
-          logger.trace(`reqLine: "${line}"`);
-          if (multiMatch && !line.endsWith('// indirect')) {
-            logger.trace({ lineNumber }, `require line: "${line}"`);
-            const dep = getDep(lineNumber, multiMatch, 'require');
-            dep.managerData!.multiLine = true;
-            deps.push(dep);
-          } else if (line.trim() !== ')') {
-            logger.trace(`No multi-line match: ${line}`);
-          }
-        } while (line.trim() !== ')');
+        const matcher = regEx(/^\s+([^\s]+)\s+([^\s]+)/);
+        const { reachedLine, detectedDeps } = parseMultiLine(
+          lineNumber,
+          lines,
+          matcher,
+          'require'
+        );
+        lineNumber = reachedLine;
+        deps.push(...detectedDeps);
+      } else if (line.trim() === 'replace (') {
+        logger.trace(`Matched multi-line replace on line ${lineNumber}`);
+        const matcher = regEx(/^\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/);
+        const { reachedLine, detectedDeps } = parseMultiLine(
+          lineNumber,
+          lines,
+          matcher,
+          'replace'
+        );
+        lineNumber = reachedLine;
+        deps.push(...detectedDeps);
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -100,5 +112,37 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  return { constraints, deps };
+  return { deps };
+}
+
+function parseMultiLine(
+  startingLine: number,
+  lines: string[],
+  matchRegex: RegExp,
+  blockType: 'require' | 'replace'
+): MultiLineParseResult {
+  const deps: PackageDependency[] = [];
+  let lineNumber = startingLine;
+  let line = '';
+  do {
+    lineNumber += 1;
+    line = lines[lineNumber];
+    const multiMatch = matchRegex.exec(line);
+    logger.trace(`${blockType}: "${line}"`);
+    if (multiMatch && !line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, blockType);
+      dep.managerData!.multiLine = true;
+      deps.push(dep);
+    } else if (multiMatch && line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} indirect line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, 'indirect');
+      dep.managerData!.multiLine = true;
+      dep.enabled = false;
+      deps.push(dep);
+    } else if (line.trim() !== ')') {
+      logger.trace(`No multi-line match: ${line}`);
+    }
+  } while (line.trim() !== ')');
+  return { reachedLine: lineNumber, detectedDeps: deps };
 }

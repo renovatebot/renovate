@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`config/massage massageConfig does not massage lockFileMaintenance 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "lockFileMaintenance": Object {
+{
+  "packageRules": [
+    {
+      "lockFileMaintenance": {
         "enabled": true,
       },
-      "matchBaseBranches": Array [
+      "matchBaseBranches": [
         "release/ft10/1.9.x",
       ],
-      "matchManagers": Array [
+      "matchManagers": [
         "helmv3",
       ],
-      "schedule": Array [
+      "schedule": [
         "at any time",
       ],
     },
@@ -22,28 +22,28 @@ Object {
 `;
 
 exports[`config/massage massageConfig massages packageRules matchUpdateTypes 1`] = `
-Object {
-  "packageRules": Array [
-    Object {
-      "matchPackageNames": Array [
+{
+  "packageRules": [
+    {
+      "matchPackageNames": [
         "foo",
       ],
       "separateMajorMinor": false,
     },
-    Object {
-      "matchPackageNames": Array [
+    {
+      "matchPackageNames": [
         "foo",
       ],
-      "matchUpdateTypes": Array [
+      "matchUpdateTypes": [
         "minor",
       ],
       "semanticCommitType": "feat",
     },
-    Object {
-      "matchPackageNames": Array [
+    {
+      "matchPackageNames": [
         "foo",
       ],
-      "matchUpdateTypes": Array [
+      "matchUpdateTypes": [
         "patch",
       ],
       "semanticCommitType": "fix",

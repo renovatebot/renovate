@@ -2,13 +2,19 @@ import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
+import {
+  KubernetesApiDatasource,
+  supportedApis,
+} from '../../datasource/kubernetes-api';
+import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { KubernetesConfiguration } from './types';
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  fileName: string,
+  config: ExtractConfig
 ): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');
 
@@ -20,21 +26,24 @@ export function extractPackageFile(
   }
 
   const deps: PackageDependency[] = [
-    ...extractImages(content),
+    ...extractImages(content, config),
     ...extractApis(content, fileName),
   ];
 
   return deps.length ? { deps } : null;
 }
 
-function extractImages(content: string): PackageDependency[] {
+function extractImages(
+  content: string,
+  config: ExtractConfig
+): PackageDependency[] {
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
     const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
     if (match) {
       const currentFrom = match[1];
-      const dep = getDep(currentFrom);
+      const dep = getDep(currentFrom, true, config.registryAliases);
       logger.debug(
         {
           depName: dep.depName,
@@ -51,7 +60,7 @@ function extractImages(content: string): PackageDependency[] {
 }
 
 function extractApis(content: string, fileName: string): PackageDependency[] {
-  let doc: KubernetesConfiguration[] | undefined;
+  let doc: KubernetesConfiguration[];
 
   try {
     doc = loadAll(content) as KubernetesConfiguration[];
@@ -67,8 +76,11 @@ function extractApis(content: string, fileName: string): PackageDependency[] {
         is.nonEmptyStringAndNotWhitespace(m.kind) &&
         is.nonEmptyStringAndNotWhitespace(m.apiVersion)
     )
+    .filter((m) => supportedApis.has(m.kind))
     .map((configuration) => ({
       depName: configuration.kind,
       currentValue: configuration.apiVersion,
+      datasource: KubernetesApiDatasource.id,
+      versioning: kubernetesApiVersioning.id,
     }));
 }

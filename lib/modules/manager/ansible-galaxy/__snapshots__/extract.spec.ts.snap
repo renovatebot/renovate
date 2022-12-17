@@ -1,54 +1,54 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.9.3",
     "datasource": "galaxy-collection",
     "depName": "geerlingguy.php_roles",
     "depType": "galaxy-collection",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://galaxy.ansible.com",
     ],
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "galaxy-collection",
     "depName": "davidban77.gns3",
     "depType": "galaxy-collection",
-    "registryUrls": Array [],
+    "registryUrls": [],
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "github-tags",
     "depName": "github.com/organization/repo_name",
     "depType": "galaxy-collection",
     "packageName": "https://github.com/organization/repo_name.git",
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",
     "depType": "galaxy-collection",
     "packageName": "https://example.com/organization/repo_name.git",
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",
     "depType": "galaxy-collection",
     "packageName": "https://example.com/organization/repo_name.git",
   },
-  Object {
+  {
     "datasource": "galaxy-collection",
     "depName": "f5networks.f5_modules",
     "depType": "galaxy-collection",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://cloud.redhat.com/api/automation-hub/",
     ],
     "skipReason": "no-version",
   },
-  Object {
+  {
     "currentValue": null,
     "datasource": "git-tags",
     "depName": "foo.bar/organization/repo_name",
@@ -56,23 +56,23 @@ Array [
     "packageName": "https://foo.bar/organization/repo_name.git",
     "skipReason": "no-version",
   },
-  Object {
+  {
     "currentValue": "1.0.0",
     "depName": "fooBar",
     "depType": "galaxy-collection",
     "skipReason": "no-source-match",
   },
-  Object {
+  {
     "depName": "foo.Bar",
     "depType": "galaxy-collection",
     "skipReason": "unsupported",
   },
-  Object {
+  {
     "depName": "foo.Bar",
     "depType": "galaxy-collection",
     "skipReason": "local-dependency",
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "git-tags",
     "depName": "example.com/organization/repo_name",
@@ -80,14 +80,14 @@ Array [
     "packageName": "https://example.com/organization/repo_name.git",
     "skipReason": "unsupported",
   },
-  Object {
+  {
     "currentValue": "1.9.6",
     "datasource": "galaxy",
     "depName": "geerlingguy.java",
     "depType": "role",
     "packageName": "geerlingguy.java",
   },
-  Object {
+  {
     "currentValue": "2.9.0",
     "datasource": "galaxy",
     "depName": "geerlingguy.docker",
@@ -98,30 +98,30 @@ Array [
 `;
 
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check collection style requirements file in reverse order and missing empty line 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.9.3",
     "datasource": "galaxy-collection",
     "depName": "geerlingguy.php_roles",
     "depType": "galaxy-collection",
-    "registryUrls": Array [
+    "registryUrls": [
       "https://galaxy.ansible.com",
     ],
   },
-  Object {
+  {
     "currentValue": "1.2.2",
     "datasource": "galaxy-collection",
     "depName": "davidban77.gns3",
     "depType": "galaxy-collection",
   },
-  Object {
+  {
     "currentValue": "1.9.6",
     "datasource": "galaxy",
     "depName": "geerlingguy.java",
     "depType": "role",
     "packageName": "geerlingguy.java",
   },
-  Object {
+  {
     "currentValue": "2.9.0",
     "datasource": "galaxy",
     "depName": "geerlingguy.docker",
@@ -132,14 +132,14 @@ Array [
 `;
 
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() check galaxy definition file 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "1.4.0",
     "datasource": "galaxy-collection",
     "depName": "ansible.windows",
     "depType": "galaxy-collection",
   },
-  Object {
+  {
     "currentValue": ">=1.0.0,<2.0.0",
     "datasource": "galaxy-collection",
     "depName": "community.windows",
@@ -149,15 +149,15 @@ Array [
 `;
 
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() extracts dependencies from a not beautified requirements file 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "galaxy",
     "depName": "yatesr.timezone",
     "depType": "role",
     "packageName": "yatesr.timezone",
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
@@ -168,85 +168,85 @@ Array [
 `;
 
 exports[`modules/manager/ansible-galaxy/extract extractPackageFile() extracts multiple dependencies from requirements.yml 1`] = `
-Array [
-  Object {
+[
+  {
     "currentValue": "0.1.0",
     "datasource": "galaxy",
     "depName": "yatesr.timezone",
     "depType": "role",
     "packageName": "yatesr.timezone",
   },
-  Object {
+  {
     "currentValue": "0.19.0",
     "datasource": "galaxy",
     "depName": "cloudalchemy.node-exporter",
     "depType": "role",
     "packageName": "cloudalchemy.node-exporter",
   },
-  Object {
+  {
     "currentValue": "master",
     "datasource": "git-tags",
     "depName": "nginx_role",
     "depType": "role",
     "packageName": "https://github.com/bennojoy/nginx",
   },
-  Object {
+  {
     "currentValue": "v1.4",
     "datasource": "git-tags",
     "depName": "willthames/git-ansible-galaxy",
     "depType": "role",
     "packageName": "http://bitbucket.org/willthames/git-ansible-galaxy",
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "depType": "role",
     "packageName": "git@gitlab.company.com:mygroup/ansible-base.git",
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "testGroup/testProject",
     "depType": "role",
     "packageName": "ssh://git@gitlab.company.com/testGroup/testProject.git",
   },
-  Object {
+  {
     "currentValue": "0.1",
     "datasource": "git-tags",
     "depName": "testGroup/testProject2",
     "depType": "role",
     "packageName": "ssh://gitlab.company.com/testGroup/testProject2.git",
   },
-  Object {
+  {
     "currentValue": "3.1",
     "datasource": "git-tags",
     "depName": "testGroup/testProject3",
     "depType": "role",
     "packageName": "ssh://git@gitlab.company.com:23/testGroup/testProject3.git",
   },
-  Object {
+  {
     "currentValue": "0.14",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "depType": "role",
     "packageName": "git@gitlab.company.com:mygroup/ansible-base.git",
   },
-  Object {
+  {
     "currentValue": "0.14",
     "datasource": "git-tags",
     "depName": "mygroup/ansible-base",
     "depType": "role",
     "packageName": "company.com:mygroup/ansible-base.git",
   },
-  Object {
+  {
     "currentValue": "47.11",
     "datasource": "git-tags",
     "depName": "org/repo",
     "depType": "role",
     "packageName": "git://github.com/org/repo.git",
   },
-  Object {
+  {
     "currentValue": "47.11",
     "datasource": "git-tags",
     "depName": "org/re.po",

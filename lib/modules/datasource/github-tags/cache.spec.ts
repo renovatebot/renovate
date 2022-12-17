@@ -1,11 +1,12 @@
+import type { GithubGraphqlTag } from '../../../util/github/types';
 import { GithubHttp } from '../../../util/http/github';
-import { CacheableGithubTags, FetchedTag } from './cache';
+import { CacheableGithubTags } from './cache';
 
 describe('modules/datasource/github-tags/cache', () => {
   const http = new GithubHttp();
   const cache = new CacheableGithubTags(http, { resetDeltaMinutes: 0 });
 
-  const fetchedItem: FetchedTag = {
+  const fetchedItem: GithubGraphqlTag = {
     version: '1.2.3',
     target: {
       type: 'Commit',

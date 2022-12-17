@@ -1,6 +1,6 @@
 import { getDigest, getPkgReleases } from '..';
+import * as httpMock from '../../../../test/http-mock';
 import * as _hostRules from '../../../util/host-rules';
-import { CacheableGithubReleases } from './cache';
 import { GitHubReleaseMocker } from './test';
 import { GithubReleasesDatasource } from '.';
 
@@ -9,12 +9,20 @@ const hostRules: any = _hostRules;
 
 const githubApiHost = 'https://api.github.com';
 
-describe('modules/datasource/github-releases/index', () => {
-  const cacheGetItems = jest.spyOn(
-    CacheableGithubReleases.prototype,
-    'getItems'
-  );
+const responseBody = [
+  { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
+  { tag_name: 'v', published_at: '2020-03-09T12:00:00Z' },
+  { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
+  { tag_name: 'v1.1.0', draft: false, published_at: '2020-03-09T10:00:00Z' },
+  { tag_name: '1.2.0', draft: true, published_at: '2020-03-09T10:00:00Z' },
+  {
+    tag_name: '2.0.0',
+    published_at: '2020-04-09T10:00:00Z',
+    prerelease: true,
+  },
+];
 
+describe('modules/datasource/github-releases/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     hostRules.hosts.mockReturnValue([]);
@@ -25,17 +33,10 @@ describe('modules/datasource/github-releases/index', () => {
 
   describe('getReleases', () => {
     it('returns releases', async () => {
-      cacheGetItems.mockResolvedValueOnce([
-        { version: 'a', releaseTimestamp: '2020-03-09T13:00:00Z' },
-        { version: 'v', releaseTimestamp: '2020-03-09T12:00:00Z' },
-        { version: '1.0.0', releaseTimestamp: '2020-03-09T11:00:00Z' },
-        { version: 'v1.1.0', releaseTimestamp: '2020-03-09T10:00:00Z' },
-        {
-          version: '2.0.0',
-          releaseTimestamp: '2020-04-09T10:00:00Z',
-          isStable: false,
-        },
-      ] as never);
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/dep/releases?per_page=100')
+        .reply(200, responseBody);
 
       const res = await getPkgReleases({
         datasource: GithubReleasesDatasource.id,

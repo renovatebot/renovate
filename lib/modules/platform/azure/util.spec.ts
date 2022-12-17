@@ -4,7 +4,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
@@ -13,18 +12,6 @@ import {
 } from './util';
 
 describe('modules/platform/azure/util', () => {
-  describe('getNewBranchName', () => {
-    it('should add refs/heads', () => {
-      const res = getNewBranchName('testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-
-    it('should be the same', () => {
-      const res = getNewBranchName('refs/heads/testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-  });
-
   describe('getGitStatusContextCombinedName', () => {
     it('should return undefined if null context passed', () => {
       const contextName = getGitStatusContextCombinedName(null);

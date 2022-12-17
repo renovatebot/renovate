@@ -17,7 +17,7 @@
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for esbuild */,
     "lib": ["es2020"],
-    "types": ["node", "jest", "jest-extended", "expect-more-jest"],
+    "types": ["node", "jest-extended", "expect-more-jest"],
     "allowJs": true,
     "checkJs": true,
     "importsNotUsedAsValues": "error"

@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON filters unnecessary warns 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "@renovate/no",
@@ -12,44 +12,44 @@ Object {
     "sourceUrl": "https://github.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
@@ -60,9 +60,9 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
@@ -71,44 +71,44 @@ Object {
     "sourceUrl": "https://github-enterprise.example.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github-enterprise.example.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
@@ -119,9 +119,9 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
@@ -130,44 +130,44 @@ Object {
     "sourceUrl": "https://github.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
@@ -178,9 +178,9 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON supports node engines 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
@@ -189,44 +189,44 @@ Object {
     "sourceUrl": "https://github.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
@@ -237,9 +237,9 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON uses GitHub tags 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
@@ -248,44 +248,44 @@ Object {
     "sourceUrl": "https://github.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
@@ -296,9 +296,9 @@ Object {
 `;
 
 exports[`workers/repository/update/pr/changelog/github getChangeLogJSON works without Github 1`] = `
-Object {
+{
   "hasReleaseNotes": true,
-  "project": Object {
+  "project": {
     "apiBaseUrl": "https://api.github.com/",
     "baseUrl": "https://github.com/",
     "depName": "renovate",
@@ -307,44 +307,44 @@ Object {
     "sourceUrl": "https://github.com/chalk/chalk",
     "type": "github",
   },
-  "versions": Array [
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+  "versions": [
+    {
+      "changes": [],
+      "compare": {},
       "date": undefined,
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.5.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {},
+    {
+      "changes": [],
+      "compare": {},
       "date": "2017-12-24T03:20:46.238Z",
       "gitRef": undefined,
       "releaseNotes": null,
       "version": "2.4.2",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "date": "2017-10-24T03:20:46.238Z",
       "gitRef": "npm_2.3.0",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_2.2.2...npm_2.3.0",
       },
       "version": "2.3.0",
     },
-    Object {
-      "changes": Array [],
-      "compare": Object {
+    {
+      "changes": [],
+      "compare": {
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },
       "date": undefined,
       "gitRef": "npm_2.2.2",
-      "releaseNotes": Object {
+      "releaseNotes": {
         "notesSourceUrl": "",
         "url": "https://github.com/chalk/chalk/compare/npm_1.0.0...npm_2.2.2",
       },

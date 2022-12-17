@@ -1,85 +1,85 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should contain both currentVersion newVersion unstable 1`] = `
-Array [
-  Object {
+[
+  {
     "version": "1.0.1-rc0",
   },
-  Object {
+  {
     "version": "1.0.1-rc1",
   },
-  Object {
+  {
     "version": "1.0.1",
   },
-  Object {
+  {
     "version": "1.1.0",
   },
-  Object {
+  {
     "version": "1.2.0-rc0",
   },
-  Object {
+  {
     "version": "1.2.0-rc1",
   },
 ]
 `;
 
 exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should contain currentVersion unstable 1`] = `
-Array [
-  Object {
+[
+  {
     "version": "1.0.1-rc0",
   },
-  Object {
+  {
     "version": "1.0.1-rc1",
   },
-  Object {
+  {
     "version": "1.0.1",
   },
-  Object {
-    "version": "1.1.0",
-  },
-]
-`;
-
-exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should contain only stable 1`] = `
-Array [
-  Object {
-    "version": "1.0.0",
-  },
-  Object {
-    "version": "1.0.1",
-  },
-  Object {
+  {
     "version": "1.1.0",
   },
 ]
 `;
 
 exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should contain newVersion unstable 1`] = `
-Array [
-  Object {
+[
+  {
     "version": "1.0.1",
   },
-  Object {
+  {
     "version": "1.1.0",
   },
-  Object {
+  {
     "version": "1.2.0-rc0",
   },
-  Object {
+  {
     "version": "1.2.0-rc1",
   },
 ]
 `;
 
-exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should valueToVersion 1`] = `
-Array [
-  Object {
+exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should contain only stable 1`] = `
+[
+  {
+    "version": "1.0.0",
+  },
+  {
     "version": "1.0.1",
   },
-  Object {
+  {
     "version": "1.1.0",
   },
-  Object {
+]
+`;
+
+exports[`workers/repository/update/pr/changelog/releases getReleaseNotes() should valueToVersion 1`] = `
+[
+  {
+    "version": "1.0.1",
+  },
+  {
+    "version": "1.1.0",
+  },
+  {
     "version": "1.2.0",
   },
 ]

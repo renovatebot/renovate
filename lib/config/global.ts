@@ -10,6 +10,7 @@ export class GlobalConfig {
     'allowScripts',
     'binarySource',
     'cacheDir',
+    'containerbaseDir',
     'customEnvVariables',
     'dockerChildPrefix',
     'dockerImagePrefix',

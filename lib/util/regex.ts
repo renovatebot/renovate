@@ -24,16 +24,25 @@ export function regEx(
   flags?: string | undefined,
   useCache = true
 ): RegExp {
+  let canBeCached = useCache;
+  if (canBeCached && flags?.includes('g')) {
+    canBeCached = false;
+  }
+  if (canBeCached && is.regExp(pattern) && pattern.flags.includes('g')) {
+    canBeCached = false;
+  }
+
   const key = flags ? `${pattern.toString()}:${flags}` : pattern.toString();
-  if (useCache) {
+  if (canBeCached) {
     const cachedResult = cache.get(key);
     if (cachedResult) {
       return cachedResult;
     }
   }
+
   try {
     const instance = new RegEx(pattern, flags);
-    if (useCache) {
+    if (canBeCached) {
       cache.set(key, instance);
     }
     return instance;

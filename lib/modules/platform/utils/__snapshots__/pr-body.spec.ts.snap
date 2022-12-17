@@ -45,7 +45,7 @@ exports[`modules/platform/utils/pr-body .smartTruncate truncates to 1000 1`] = `
 
 :vertical_traffic_light: **Automerge**: Enabled.
 
-:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with \\"\`rebase!\`\\".
+:recycle: **Rebasing**: Whenever PR becomes conflicted, or if you modify the PR title to begin with "\`rebase!\`".
 
 :no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.
 

@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/datasource/crate/index getReleases clones cloudsmith private registry 1`] = `
-Object {
+{
   "dependencyUrl": "https://cloudsmith.io/~myorg/repos/myrepo/packages/detail/cargo/mypkg",
   "registryUrl": "https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
   ],
@@ -16,14 +16,14 @@ Object {
 `;
 
 exports[`modules/datasource/crate/index getReleases clones other private registry 1`] = `
-Object {
+{
   "dependencyUrl": "https://github.com/mcorbin/testregistry/mypkg",
   "registryUrl": "https://github.com/mcorbin/testregistry",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
   ],
@@ -31,66 +31,66 @@ Object {
 `;
 
 exports[`modules/datasource/crate/index getReleases processes real data: amethyst 1`] = `
-Object {
+{
   "dependencyUrl": "https://crates.io/crates/amethyst",
   "homepage": "https://amethyst.rs/",
   "registryUrl": "https://crates.io",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
-    Object {
+    {
       "version": "0.1.3",
     },
-    Object {
+    {
       "version": "0.1.4",
     },
-    Object {
+    {
       "version": "0.2.1",
     },
-    Object {
+    {
       "version": "0.3.0",
     },
-    Object {
+    {
       "version": "0.3.1",
     },
-    Object {
+    {
       "version": "0.4.0",
     },
-    Object {
+    {
       "version": "0.4.1",
     },
-    Object {
+    {
       "version": "0.4.2",
     },
-    Object {
+    {
       "version": "0.4.3",
     },
-    Object {
+    {
       "version": "0.5.0",
     },
-    Object {
+    {
       "version": "0.5.1",
     },
-    Object {
+    {
       "version": "0.6.0",
     },
-    Object {
+    {
       "version": "0.7.0",
     },
-    Object {
+    {
       "version": "0.8.0",
     },
-    Object {
+    {
       "version": "0.9.0",
     },
-    Object {
+    {
       "version": "0.10.0",
     },
-    Object {
+    {
       "isDeprecated": true,
       "version": "0.10.1",
     },
@@ -100,205 +100,205 @@ Object {
 `;
 
 exports[`modules/datasource/crate/index getReleases processes real data: libc 1`] = `
-Object {
+{
   "dependencyUrl": "https://crates.io/crates/libc",
   "registryUrl": "https://crates.io",
-  "releases": Array [
-    Object {
+  "releases": [
+    {
       "version": "0.1.0",
     },
-    Object {
+    {
       "version": "0.1.1",
     },
-    Object {
+    {
       "version": "0.1.2",
     },
-    Object {
+    {
       "version": "0.1.3",
     },
-    Object {
+    {
       "version": "0.1.4",
     },
-    Object {
+    {
       "version": "0.1.5",
     },
-    Object {
+    {
       "version": "0.1.6",
     },
-    Object {
+    {
       "version": "0.1.7",
     },
-    Object {
+    {
       "version": "0.1.8",
     },
-    Object {
+    {
       "isDeprecated": true,
       "version": "0.1.9",
     },
-    Object {
+    {
       "version": "0.1.10",
     },
-    Object {
+    {
       "isDeprecated": true,
       "version": "0.1.11",
     },
-    Object {
+    {
       "version": "0.1.12",
     },
-    Object {
+    {
       "version": "0.2.0",
     },
-    Object {
+    {
       "version": "0.2.1",
     },
-    Object {
+    {
       "version": "0.2.2",
     },
-    Object {
+    {
       "version": "0.2.3",
     },
-    Object {
+    {
       "version": "0.2.4",
     },
-    Object {
+    {
       "version": "0.2.5",
     },
-    Object {
+    {
       "version": "0.2.6",
     },
-    Object {
+    {
       "version": "0.2.7",
     },
-    Object {
+    {
       "version": "0.2.8",
     },
-    Object {
+    {
       "version": "0.2.9",
     },
-    Object {
+    {
       "version": "0.2.10",
     },
-    Object {
+    {
       "version": "0.2.11",
     },
-    Object {
+    {
       "version": "0.2.12",
     },
-    Object {
+    {
       "version": "0.2.13",
     },
-    Object {
+    {
       "version": "0.2.14",
     },
-    Object {
+    {
       "version": "0.2.15",
     },
-    Object {
+    {
       "version": "0.2.16",
     },
-    Object {
+    {
       "version": "0.2.17",
     },
-    Object {
+    {
       "version": "0.2.18",
     },
-    Object {
+    {
       "version": "0.2.19",
     },
-    Object {
+    {
       "version": "0.2.20",
     },
-    Object {
+    {
       "version": "0.2.21",
     },
-    Object {
+    {
       "version": "0.2.22",
     },
-    Object {
+    {
       "version": "0.2.23",
     },
-    Object {
+    {
       "version": "0.2.24",
     },
-    Object {
+    {
       "version": "0.2.25",
     },
-    Object {
+    {
       "version": "0.2.26",
     },
-    Object {
+    {
       "version": "0.2.27",
     },
-    Object {
+    {
       "version": "0.2.28",
     },
-    Object {
+    {
       "version": "0.2.29",
     },
-    Object {
+    {
       "version": "0.2.30",
     },
-    Object {
+    {
       "version": "0.2.31",
     },
-    Object {
+    {
       "version": "0.2.32",
     },
-    Object {
+    {
       "version": "0.2.33",
     },
-    Object {
+    {
       "version": "0.2.34",
     },
-    Object {
+    {
       "version": "0.2.35",
     },
-    Object {
+    {
       "version": "0.2.36",
     },
-    Object {
+    {
       "version": "0.2.37",
     },
-    Object {
+    {
       "version": "0.2.38",
     },
-    Object {
+    {
       "version": "0.2.39",
     },
-    Object {
+    {
       "version": "0.2.40",
     },
-    Object {
+    {
       "version": "0.2.41",
     },
-    Object {
+    {
       "version": "0.2.42",
     },
-    Object {
+    {
       "version": "0.2.43",
     },
-    Object {
+    {
       "version": "0.2.44",
     },
-    Object {
+    {
       "version": "0.2.45",
     },
-    Object {
+    {
       "version": "0.2.46",
     },
-    Object {
+    {
       "version": "0.2.47",
     },
-    Object {
+    {
       "version": "0.2.48",
     },
-    Object {
+    {
       "version": "0.2.49",
     },
-    Object {
+    {
       "version": "0.2.50",
     },
-    Object {
+    {
       "version": "0.2.51",
     },
   ],

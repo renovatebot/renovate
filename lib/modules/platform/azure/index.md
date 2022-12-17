@@ -20,12 +20,12 @@ Remember to set `platform=azure` somewhere in your Renovate config file.
 ### Setting up a new pipeline
 
 Create a brand new pipeline within Azure DevOps, and select your source:
-![Azure DevOps create new pipeline](/assets/images/azure-devops-setup-1.png)
+![Azure DevOps create new pipeline](/assets/images/azure-devops-setup-1.png){ loading=lazy }
 
 Then select your repository.
 
 Within _Configure your pipeline_ select: **Starter pipeline**
-![Azure DevOps starter pipeline template](/assets/images/azure-devops-setup-2.png)
+![Azure DevOps starter pipeline template](/assets/images/azure-devops-setup-2.png){ loading=lazy }
 
 Replace _all_ content in the starter pipeline with:
 

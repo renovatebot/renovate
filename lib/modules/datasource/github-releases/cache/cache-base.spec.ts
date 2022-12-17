@@ -1,12 +1,15 @@
 import { DateTime } from 'luxon';
 import { mocked } from '../../../../../test/util';
 import * as _packageCache from '../../../../util/cache/package';
+import type {
+  GithubCachedItem,
+  GithubGraphqlRepoResponse,
+} from '../../../../util/github/types';
 import {
   GithubGraphqlResponse,
   GithubHttp,
 } from '../../../../util/http/github';
 import { AbstractGithubDatasourceCache } from './cache-base';
-import type { QueryResponse, StoredItemBase } from './types';
 
 jest.mock('../../../../util/cache/package');
 const packageCache = mocked(_packageCache);
@@ -17,14 +20,14 @@ interface FetchedItem {
   foo: string;
 }
 
-interface StoredItem extends StoredItemBase {
+interface StoredItem extends GithubCachedItem {
   bar: string;
 }
 
 type GraphqlDataResponse = {
   statusCode: 200;
   headers: Record<string, string>;
-  body: GithubGraphqlResponse<QueryResponse<FetchedItem>>;
+  body: GithubGraphqlResponse<GithubGraphqlRepoResponse<FetchedItem>>;
 };
 
 type GraphqlResponse = GraphqlDataResponse | Error;
@@ -191,7 +194,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     const createdAt = now.minus({ minutes: 119 }).toISO();
     packageCache.get.mockResolvedValueOnce({
       items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
-      createdAt: createdAt,
+      createdAt,
       updatedAt: createdAt,
     });
     responses = [
@@ -216,7 +219,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
     const createdAt = now.minus({ minutes: 120 }).toISO();
     packageCache.get.mockResolvedValueOnce({
       items: { v1: { version: 'v1', releaseTimestamp, bar: 'aaa' } },
-      createdAt: createdAt,
+      createdAt,
       updatedAt: createdAt,
     });
     responses = [
@@ -237,7 +240,7 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       'test-cache',
       'https://api.github.com/:foo:bar',
       {
-        createdAt: createdAt,
+        createdAt,
         items: {
           v1: { bar: 'aaa', releaseTimestamp, version: 'v1' },
           v2: { bar: 'bbb', releaseTimestamp: recentTimestamp, version: 'v2' },
@@ -333,13 +336,57 @@ describe('modules/datasource/github-releases/cache/cache-base', () => {
       {
         statusCode: 200,
         headers: {},
-        body: { errors: [{ message: 'Ooops' }] },
+        body: { errors: [{} as never, { message: 'Ooops' }] },
       },
     ];
     const cache = new TestCache(http, { resetDeltaMinutes: 0 });
 
     await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
       'Ooops'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('throws for unknown graphql errors', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: { errors: [] },
+      },
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'GitHub datasource cache: unknown GraphQL error'
+    );
+    expect(packageCache.get).toHaveBeenCalled();
+    expect(packageCache.set).not.toHaveBeenCalled();
+  });
+
+  it('throws for empty payload', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      items: {},
+      createdAt: t3,
+      updatedAt: t3,
+    });
+    responses = [
+      {
+        statusCode: 200,
+        headers: {},
+        body: { data: { repository: { payload: null as never } } },
+      },
+    ];
+    const cache = new TestCache(http, { resetDeltaMinutes: 0 });
+
+    await expect(cache.getItems({ packageName: 'foo/bar' })).rejects.toThrow(
+      'GitHub datasource cache: failed to obtain payload data'
     );
     expect(packageCache.get).toHaveBeenCalled();
     expect(packageCache.set).not.toHaveBeenCalled();

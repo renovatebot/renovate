@@ -3,7 +3,7 @@ import { regEx } from '../../../util/regex';
 
 export function makeVersion(
   version: string,
-  options: semver.Options
+  options: semver.RangeOptions
 ): string | boolean | null {
   const splitVersion = version.split('.');
   const prerelease = semver.prerelease(version, options);
@@ -57,7 +57,7 @@ export function containsOperators(input: string): boolean {
 export function matchesWithOptions(
   version: string,
   cleanRange: string,
-  options: semver.Options
+  options: semver.RangeOptions
 ): boolean {
   let cleanedVersion = version;
   if (

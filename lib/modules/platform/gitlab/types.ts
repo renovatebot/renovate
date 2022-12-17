@@ -1,3 +1,5 @@
+import type { Pr } from '../types';
+
 export interface GitlabIssue {
   iid: number;
 
@@ -30,6 +32,13 @@ export interface GitLabMergeRequest {
   reviewers?: GitLabUser[];
   labels: string[];
   sha: string;
+  head_pipeline?: {
+    status: string;
+  };
+}
+
+export interface GitlabPr extends Pr {
+  headPipelineStatus?: string;
 }
 
 export interface UpdateMergeRequest {
@@ -43,6 +52,7 @@ export interface UpdateMergeRequest {
 export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
 export interface RepoResponse {
+  id: number;
   archived: boolean;
   mirror: boolean;
   default_branch: string;

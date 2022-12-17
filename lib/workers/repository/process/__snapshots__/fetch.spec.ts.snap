@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
-Object {
-  "maven": Array [
-    Object {
-      "deps": Array [
-        Object {
+{
+  "maven": [
+    {
+      "deps": [
+        {
           "datasource": "maven",
           "depName": "bbb",
-          "updates": Array [
+          "updates": [
             "a",
             "b",
           ],
@@ -21,24 +21,24 @@ Object {
 `;
 
 exports[`workers/repository/process/fetch fetchUpdates() handles ignored, skipped and disabled 1`] = `
-Object {
-  "npm": Array [
-    Object {
-      "deps": Array [
-        Object {
+{
+  "npm": [
+    {
+      "deps": [
+        {
           "depName": "abcd",
           "skipReason": "ignored",
-          "updates": Array [],
+          "updates": [],
         },
-        Object {
+        {
           "depName": "foo",
           "skipReason": "disabled",
-          "updates": Array [],
+          "updates": [],
         },
-        Object {
+        {
           "depName": "skipped",
           "skipReason": "some-reason",
-          "updates": Array [],
+          "updates": [],
         },
       ],
       "packageFile": "package.json",

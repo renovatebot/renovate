@@ -25,10 +25,10 @@ export class GolangVersionDatasource extends Datasource {
   }
 
   override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website/',
+    'https://raw.githubusercontent.com/golang/website',
   ];
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultVersioning = semverVersioningId;
 
@@ -36,7 +36,7 @@ export class GolangVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if: should never happen because of defaultRegistryUrls
+    // istanbul ignore if
     if (!registryUrl) {
       return null;
     }
@@ -48,7 +48,7 @@ export class GolangVersionDatasource extends Datasource {
     };
     const golangVersionsUrl = joinUrlParts(
       registryUrl,
-      `master/internal/history/release.go`
+      `HEAD/internal/history/release.go`
     );
 
     const response = await this.http.get(golangVersionsUrl);

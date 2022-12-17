@@ -1,14 +1,15 @@
-// TODO #7154
 import is from '@sindresorhus/is';
-import hasha from 'hasha';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
+import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
+import { fingerprint } from '../../../util/fingerprint';
 import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
+import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import { branchifyUpgrades } from '../updates/branchify';
 import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
@@ -61,6 +62,30 @@ function extractStats(
   return stats;
 }
 
+export function isCacheExtractValid(
+  baseBranchSha: string,
+  configHash: string,
+  cachedExtract?: BaseBranchCache
+): boolean {
+  if (!(cachedExtract?.sha && cachedExtract.configHash)) {
+    return false;
+  }
+  if (cachedExtract.sha !== baseBranchSha) {
+    logger.debug(
+      `Cached extract result cannot be used due to base branch SHA change (old=${cachedExtract.sha}, new=${baseBranchSha})`
+    );
+    return false;
+  }
+  if (cachedExtract.configHash !== configHash) {
+    logger.debug('Cached extract result cannot be used due to config change');
+    return false;
+  }
+  logger.debug(
+    `Cached extract for sha=${baseBranchSha} is valid and can be used`
+  );
+  return true;
+}
+
 export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
@@ -71,13 +96,9 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = hasha(JSON.stringify(config));
+  const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (
-    cachedExtract?.sha === baseBranchSha &&
-    cachedExtract?.configHash === configHash
-  ) {
-    logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
+  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
@@ -94,6 +115,7 @@ export async function extract(
   } else {
     await checkoutBranch(baseBranch!);
     packageFiles = await extractAllDependencies(config);
+    // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,
       configHash,
@@ -129,7 +151,10 @@ export async function lookup(
     config,
     packageFiles
   );
-  logger.debug({ config: packageFiles }, 'packageFiles with updates');
+  logger.debug(
+    { baseBranch: config.baseBranch, config: packageFiles },
+    'packageFiles with updates'
+  );
   sortBranches(branches);
   return { branches, branchList, packageFiles };
 }

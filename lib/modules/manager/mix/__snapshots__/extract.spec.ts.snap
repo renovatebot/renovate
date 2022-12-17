@@ -1,45 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/mix/extract extractPackageFile() extracts all dependencies 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "currentValue": "~> 0.8.1",
       "datasource": "hex",
       "depName": "postgrex",
       "packageName": "postgrex",
     },
-    Object {
+    {
       "currentValue": ">2.1.0 or <=3.0.0",
       "datasource": "hex",
       "depName": "ecto",
       "packageName": "ecto",
     },
-    Object {
+    {
       "currentValue": "ninenines/cowboy",
       "datasource": "github",
       "depName": "cowboy",
       "skipReason": "non-hex-dep-types",
     },
-    Object {
+    {
       "currentValue": "~> 1.0",
       "datasource": "hex",
       "depName": "secret",
       "packageName": "secret:acme",
     },
-    Object {
+    {
       "currentValue": ">2.1.0 and <=3.0.0",
       "datasource": "hex",
       "depName": "ex_doc",
       "packageName": "ex_doc",
     },
-    Object {
+    {
       "currentValue": ">= 1.0.0",
       "datasource": "hex",
       "depName": "jason",
       "packageName": "jason",
     },
-    Object {
+    {
       "currentValue": "~> 1.0",
       "datasource": "hex",
       "depName": "jason",

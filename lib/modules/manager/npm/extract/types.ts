@@ -6,16 +6,15 @@ export type DependenciesMeta = Record<
   { optional: boolean; built: boolean; unplugged: boolean }
 >;
 
-export interface NpmPackage extends PackageJson {
+export type NpmPackage = PackageJson & {
   renovate?: unknown;
   _from?: any;
   _args?: any;
   _id?: any;
   dependenciesMeta?: DependenciesMeta;
-  packageManager?: string;
   overrides?: OverrideDependency;
   volta?: PackageJson.Dependency;
-}
+};
 
 export type LockFileEntry = Record<
   string,

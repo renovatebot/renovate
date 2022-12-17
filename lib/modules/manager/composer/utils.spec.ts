@@ -27,7 +27,55 @@ describe('modules/manager/composer/utils', () => {
           },
           {}
         )
-      ).toEqual({ composer: '1.*', php: '7.4.27' });
+      ).toEqual({ composer: '1.*', php: '<=7.4.27' });
+    });
+
+    it('returns platform 0 minor php version', () => {
+      expect(
+        extractConstraints(
+          {
+            config: { platform: { php: '7.0.5' } },
+            require: { php: '^7.0 || ~8.0' },
+          },
+          {}
+        )
+      ).toEqual({ composer: '1.*', php: '<=7.0.5' });
+    });
+
+    it('returns platform 0 patch php version', () => {
+      expect(
+        extractConstraints(
+          {
+            config: { platform: { php: '7.4.0' } },
+            require: { php: '^7.0 || ~8.0' },
+          },
+          {}
+        )
+      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
+    });
+
+    it('returns platform lowest minor php version', () => {
+      expect(
+        extractConstraints(
+          {
+            config: { platform: { php: '7' } },
+            require: { php: '^7.0 || ~8.0' },
+          },
+          {}
+        )
+      ).toEqual({ composer: '1.*', php: '<=7.0.0' });
+    });
+
+    it('returns platform lowest patch php version', () => {
+      expect(
+        extractConstraints(
+          {
+            config: { platform: { php: '7.4' } },
+            require: { php: '~7.4 || ~8.0' },
+          },
+          {}
+        )
+      ).toEqual({ composer: '1.*', php: '<=7.4.0' });
     });
 
     it('returns from require-dev', () => {

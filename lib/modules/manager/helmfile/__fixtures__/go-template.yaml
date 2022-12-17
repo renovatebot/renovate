@@ -37,3 +37,4 @@ releases:
   - name: example-public
     version: 2.0.0
     chart: stable/external-dns
+    namespace: "{{ env "NAMESPACE" }}"

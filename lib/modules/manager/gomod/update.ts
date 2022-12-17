@@ -46,10 +46,16 @@ export function updateDependency({
       updateLineExp = regEx(/(?<depPart>go)(?<divider>\s+)[^\s]+/);
     }
     if (depType === 'replace') {
-      updateLineExp = regEx(
-        /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
-      );
-    } else if (depType === 'require') {
+      if (upgrade.managerData.multiLine) {
+        updateLineExp = regEx(
+          /^(?<depPart>\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+        );
+      } else {
+        updateLineExp = regEx(
+          /^(?<depPart>replace\s+[^\s]+[\s]+[=][>]+\s+)(?<divider>[^\s]+\s+)[^\s]+/
+        );
+      }
+    } else if (depType === 'require' || depType === 'indirect') {
       if (upgrade.managerData.multiLine) {
         updateLineExp = regEx(/^(?<depPart>\s+[^\s]+)(?<divider>\s+)[^\s]+/);
       } else {
@@ -88,7 +94,7 @@ export function updateDependency({
       );
     }
     if (upgrade.updateType === 'major') {
-      logger.debug({ depName }, 'gomod: major update');
+      logger.debug(`gomod: major update for ${depName}`);
       if (depName.startsWith('gopkg.in/')) {
         const oldV = depName.split('.').pop();
         newLine = newLine.replace(`.${oldV}`, `.v${upgrade.newMajor}`);
@@ -114,7 +120,10 @@ export function updateDependency({
         }
       }
     }
-    if (lineToChange.endsWith('+incompatible')) {
+    if (
+      lineToChange.endsWith('+incompatible') &&
+      !upgrade.newValue?.endsWith('+incompatible')
+    ) {
       let toAdd = '+incompatible';
 
       if (upgrade.updateType === 'major' && upgrade.newMajor! >= 2) {
@@ -126,6 +135,11 @@ export function updateDependency({
       logger.debug('No changes necessary');
       return fileContent;
     }
+
+    if (depType === 'indirect') {
+      newLine += ' // indirect';
+    }
+
     lines[upgrade.managerData.lineNumber] = newLine;
     return lines.join('\n');
   } catch (err) {

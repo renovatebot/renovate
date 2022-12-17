@@ -259,6 +259,23 @@ describe('modules/manager/gomod/update', () => {
       );
     });
 
+    it('handles +incompatible tag without duplicating it', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        managerData: { lineNumber: 8 },
+        newValue: 'v26.0.0+incompatible',
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).not.toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible'
+      );
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
+    });
+
     it('handles replace line with minor version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
@@ -318,12 +335,56 @@ describe('modules/manager/gomod/update', () => {
       expect(res).toContain('github.com/caarlos0/env/v6 v6.1.0');
     });
 
+    it('handles multiline replace update', () => {
+      const fileContent = `
+      go 1.18
+      replace (
+        k8s.io/client-go => k8s.io/client-go v0.21.9
+      )`;
+      const upgrade = {
+        depName: 'k8s.io/client-go',
+        managerData: { lineNumber: 3, multiLine: true },
+        newValue: 'v2.2.2',
+        depType: 'replace',
+        currentValue: 'v0.21.9',
+        newMajor: 2,
+        updateType: 'major' as UpdateType,
+      };
+      const res = updateDependency({ fileContent, upgrade });
+      expect(res).not.toEqual(fileContent);
+      expect(res).toContain('k8s.io/client-go/v2 => k8s.io/client-go v2.2.2');
+    });
+
     it('should return null for replacement', () => {
       const res = updateDependency({
         fileContent: '',
         upgrade: { updateType: 'replacement' },
       });
       expect(res).toBeNull();
+    });
+
+    it('should perform indirect upgrades when top-level', () => {
+      const upgrade = {
+        depName: 'github.com/davecgh/go-spew',
+        managerData: { lineNumber: 4 },
+        newValue: 'v1.1.1',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
+
+    it('should perform indirect upgrades when in require blocks', () => {
+      const upgrade = {
+        depName: 'github.com/go-ole/go-ole',
+        managerData: { lineNumber: 23, multiLine: true },
+        newValue: 'v1.5.0',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod3, upgrade });
+      expect(res).not.toEqual(gomod2);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
   });
 });

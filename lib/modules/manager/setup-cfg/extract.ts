@@ -75,7 +75,7 @@ function parseDep(
     depName,
     currentValue,
     datasource: PypiDatasource.id,
-    depType: depType,
+    depType,
   };
 
   if (currentValue?.startsWith('==')) {

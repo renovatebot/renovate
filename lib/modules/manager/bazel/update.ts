@@ -1,54 +1,68 @@
-// TODO: types (#7154)
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
+import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import type { UpdateDependencyConfig } from '../types';
-import type { BazelManagerData } from './types';
+import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
+import type { BazelManagerData, RecordFragment, StringFragment } from './types';
 
 const http = new Http('bazel');
 
-function updateWithNewVersion(
+function getUrlFragments(rule: RecordFragment): StringFragment[] {
+  const urls: StringFragment[] = [];
+
+  const urlRecord = rule.children['url'];
+  if (urlRecord?.type === 'string') {
+    urls.push(urlRecord);
+  }
+
+  const urlsRecord = rule.children['urls'];
+  if (urlsRecord?.type === 'array') {
+    for (const urlRecord of urlsRecord.children) {
+      if (urlRecord.type === 'string') {
+        urls.push(urlRecord);
+      }
+    }
+  }
+
+  return urls;
+}
+
+const urlMassages = {
+  'bazel-skylib.': 'bazel_skylib-',
+  '/bazel-gazelle/releases/download/0': '/bazel-gazelle/releases/download/v0',
+  '/bazel-gazelle-0': '/bazel-gazelle-v0',
+  '/rules_go/releases/download/0': '/rules_go/releases/download/v0',
+  '/rules_go-0': '/rules_go-v0',
+};
+
+function massageUrl(url: string): string {
+  let result = url;
+  for (const [from, to] of Object.entries(urlMassages)) {
+    result = result.replace(from, to);
+  }
+  return result;
+}
+
+function replaceAll(input: string, from: string, to: string): string {
+  return input.split(from).join(to);
+}
+
+function replaceValues(
   content: string,
-  currentValue: string,
-  newValue: string
+  from: string | null | undefined,
+  to: string | null | undefined
 ): string {
   // istanbul ignore if
-  if (currentValue === newValue) {
+  if (!from || !to || from === to) {
     return content;
   }
-  const replaceFrom = currentValue.replace(regEx(/^v/), '');
-  const replaceTo = newValue.replace(regEx(/^v/), '');
-  let newContent = content;
-  do {
-    newContent = newContent.replace(replaceFrom, replaceTo);
-  } while (newContent.includes(replaceFrom));
-  return newContent;
-}
-
-function extractUrl(flattened: string): string[] | null {
-  const urlMatch = regEx(/url="(.*?)"/).exec(flattened);
-  if (!urlMatch) {
-    logger.debug('Cannot locate urls in new definition');
-    return null;
-  }
-  return [urlMatch[1]];
-}
-
-function extractUrls(content: string): string[] | null {
-  const flattened = content.replace(regEx(/\n/g), '').replace(regEx(/\s/g), '');
-  const urlsMatch = regEx(/urls?=\[.*?\]/).exec(flattened);
-  if (!urlsMatch) {
-    return extractUrl(flattened);
-  }
-  const urls = urlsMatch[0]
-    .replace(regEx(/urls?=\[/), '')
-    .replace(regEx(/,?\]$/), '')
-    .split(',')
-    .map((url) => url.replace(regEx(/"/g), ''));
-  return urls;
+  const massagedFrom = from.replace(regEx(/^v/), '');
+  const massagedTo = to.replace(regEx(/^v/), '');
+  return replaceAll(content, massagedFrom, massagedTo);
 }
 
 async function getHashFromUrl(url: string): Promise<string | null> {
@@ -75,22 +89,20 @@ async function getHashFromUrl(url: string): Promise<string | null> {
 
 async function getHashFromUrls(urls: string[]): Promise<string | null> {
   const hashes = (
-    await Promise.all(urls.map((url) => getHashFromUrl(url)))
-  ).filter(Boolean);
-  const distinctHashes = [...new Set(hashes)];
-  if (!distinctHashes.length) {
-    logger.debug({ hashes, urls }, 'Could not calculate hash for URLs');
+    await pMap(urls, (url) => getHashFromUrl(massageUrl(url)))
+  ).filter(is.truthy);
+  if (!hashes.length) {
+    logger.debug({ urls }, 'Could not calculate hash for URLs');
     return null;
   }
+
+  const distinctHashes = new Set(hashes);
   // istanbul ignore if
-  if (distinctHashes.length > 1) {
+  if (distinctHashes.size > 1) {
     logger.warn({ urls }, 'Found multiple hashes for single def');
   }
-  return distinctHashes[0];
-}
 
-function setNewHash(content: string, hash: string): string {
-  return content.replace(regEx(/(sha256\s*=\s*)"[^"]+"/), `$1"${hash}"`);
+  return hashes[0];
 }
 
 export async function updateDependency({
@@ -98,83 +110,77 @@ export async function updateDependency({
   upgrade,
 }: UpdateDependencyConfig<BazelManagerData>): Promise<string | null> {
   try {
-    logger.debug(
-      `bazel.updateDependency(): ${upgrade.newValue ?? upgrade.newDigest}`
-    );
-    let newDef: string | undefined;
-    if (upgrade.depType === 'container_pull' && upgrade.managerData?.def) {
-      newDef = upgrade.managerData.def
-        .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
-        .replace(regEx(/(digest\s*=\s*)"[^"]+"/), `$1"${upgrade.newDigest}"`);
+    const { newValue, newDigest } = upgrade;
+    logger.debug({ newValue, newDigest }, `bazel.updateDependency()`);
+    const idx = upgrade.managerData!.idx;
+
+    if (upgrade.depType === 'container_pull') {
+      let result = fileContent;
+
+      if (newValue) {
+        result = updateCode(result, [idx, 'tag'], newValue);
+      }
+
+      if (newDigest) {
+        result = updateCode(result, [idx, 'digest'], newDigest);
+      }
+
+      return result;
     }
+
     if (
-      (upgrade.depType === 'git_repository' ||
-        upgrade.depType === 'go_repository') &&
-      upgrade.managerData?.def
+      upgrade.depType === 'git_repository' ||
+      upgrade.depType === 'go_repository'
     ) {
-      newDef = upgrade.managerData.def
-        .replace(regEx(/(tag\s*=\s*)"[^"]+"/), `$1"${upgrade.newValue}"`)
-        .replace(regEx(/(commit\s*=\s*)"[^"]+"/), `$1"${upgrade.newDigest}"`);
-      if (upgrade.currentDigest && upgrade.updateType !== 'digest') {
-        newDef = newDef.replace(
-          regEx(/(commit\s*=\s*)"[^"]+".*?\n/),
-          `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
-        );
+      let result = fileContent;
+
+      if (newValue) {
+        result = updateCode(result, [idx, 'tag'], newValue);
       }
-    } else if (
-      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
-      upgrade.managerData?.def &&
-      (upgrade.currentValue || upgrade.currentDigest) &&
-      (upgrade.newValue ?? upgrade.newDigest)
-    ) {
-      newDef = updateWithNewVersion(
-        upgrade.managerData.def,
-        (upgrade.currentValue ?? upgrade.currentDigest)!,
-        (upgrade.newValue ?? upgrade.newDigest)!
-      );
-      const massages = {
-        'bazel-skylib.': 'bazel_skylib-',
-        '/bazel-gazelle/releases/download/0':
-          '/bazel-gazelle/releases/download/v0',
-        '/bazel-gazelle-0': '/bazel-gazelle-v0',
-        '/rules_go/releases/download/0': '/rules_go/releases/download/v0',
-        '/rules_go-0': '/rules_go-v0',
-      };
-      for (const [from, to] of Object.entries(massages)) {
-        newDef = newDef.replace(from, to);
+
+      if (newDigest) {
+        result = updateCode(result, [idx, 'commit'], newDigest);
       }
-      const urls = extractUrls(newDef);
-      if (!urls?.length) {
-        logger.debug({ newDef }, 'urls is empty');
+
+      return result;
+    }
+
+    if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
+      const rule = findCodeFragment(fileContent, [idx]);
+      // istanbul ignore if
+      if (rule?.type !== 'record') {
         return null;
       }
+
+      const urlFragments = getUrlFragments(rule);
+      if (!urlFragments?.length) {
+        logger.debug(`def: ${rule.value}, urls is empty`);
+        return null;
+      }
+
+      const updateValues = (oldUrl: string): string => {
+        let url = oldUrl;
+        url = replaceValues(url, upgrade.currentValue, upgrade.newValue);
+        url = replaceValues(url, upgrade.currentDigest, upgrade.newDigest);
+        return url;
+      };
+
+      const urls = urlFragments.map(({ value }) => updateValues(value));
       const hash = await getHashFromUrls(urls);
       if (!hash) {
         return null;
       }
-      logger.debug({ hash }, 'Calculated hash');
-      newDef = setNewHash(newDef, hash);
-    }
-    logger.debug({ oldDef: upgrade.managerData?.def, newDef });
 
-    // istanbul ignore if: needs test
-    if (!newDef) {
-      return null;
+      let result = fileContent;
+      result = patchCodeAtFragments(result, urlFragments, updateValues);
+      result = updateCode(result, [idx, 'strip_prefix'], updateValues);
+      result = updateCode(result, [idx, 'sha256'], hash);
+      return result;
     }
-
-    let existingRegExStr = `(?:maybe\\s*\\(\\s*)?${upgrade.depType}(?:\\(|,)[^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
-    if (newDef.endsWith('\n')) {
-      existingRegExStr += '\n';
-    }
-    const existingDef = regEx(existingRegExStr);
-    // istanbul ignore if
-    if (!existingDef.test(fileContent)) {
-      logger.debug('Cannot match existing string');
-      return null;
-    }
-    return fileContent.replace(existingDef, newDef);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
-    return null;
   }
+
+  // istanbul ignore next
+  return null;
 }

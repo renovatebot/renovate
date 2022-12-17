@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../test/http-mock';
-import { PrState } from '../../../types';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { toBase64 } from '../../../util/string';
 import {
@@ -67,6 +66,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
   };
 
   const mockRepo: Repo = {
+    id: 123,
     allow_rebase: true,
     allow_rebase_explicit: true,
     allow_merge_commits: true,
@@ -108,7 +108,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
 
   const mockPR: PR = {
     number: 13,
-    state: PrState.Open,
+    state: 'open',
     title: 'Some PR',
     body: 'Lorem ipsum dolor sit amet',
     mergeable: true,
@@ -347,7 +347,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull] endpoint', async () => {
       const updatedMockPR: PR = {
         ...mockPR,
-        state: PrState.Closed,
+        state: 'closed',
         title: 'new-title',
         body: 'new-body',
       };
@@ -358,7 +358,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, updatedMockPR);
 
       const res = await updatePR(mockRepo.full_name, mockPR.number, {
-        state: PrState.Closed,
+        state: 'closed',
         title: 'new-title',
         body: 'new-body',
         assignees: [otherMockUser.username],
@@ -441,7 +441,7 @@ describe('modules/platform/gitea/gitea-helper', () => {
         .reply(200, [mockPR]);
 
       const res = await searchPRs(mockRepo.full_name, {
-        state: PrState.Open,
+        state: 'open',
         labels: [mockLabel.id, otherMockLabel.id],
       });
       expect(res).toEqual([mockPR]);

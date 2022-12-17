@@ -6,6 +6,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       prBodyColumns: undefined,
     };
@@ -90,6 +91,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {

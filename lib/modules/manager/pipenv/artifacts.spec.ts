@@ -24,6 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
@@ -53,6 +54,7 @@ describe('modules/manager/pipenv/artifacts', () => {
     // python
     getPkgReleases.mockResolvedValueOnce({
       releases: [
+        { version: '3.7.6' },
         { version: '3.8.5' },
         { version: '3.9.1' },
         { version: '3.10.2' },
@@ -123,7 +125,7 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, constraints: { python: '3.7' } },
+        config: { ...config, constraints: { python: '== 3.8.*' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -155,7 +157,7 @@ describe('modules/manager/pipenv/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    pipFileLock._meta.requires.python_version = '3.7';
+    pipFileLock._meta.requires.python_full_version = '3.7.6';
     fs.ensureCacheDir.mockResolvedValueOnce(
       '/tmp/renovate/cache/others/pipenv'
     );
@@ -175,7 +177,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool python 3.10.2' },
+      { cmd: 'install-tool python 3.7.6' },
       { cmd: 'pip install --user pipenv' },
       { cmd: 'pipenv lock', options: { cwd: '/tmp/github/some/repo' } },
     ]);

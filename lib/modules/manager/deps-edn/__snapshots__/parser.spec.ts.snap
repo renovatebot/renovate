@@ -1,144 +1,144 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/deps-edn/parser parseEdnFile extracts file 1`] = `
-Object {
-  "aliases": Object {
-    "1.10": Object {
-      "override-deps": Object {
-        "org.clojure/clojure": Object {
+{
+  "aliases": {
+    "1.10": {
+      "override-deps": {
+        "org.clojure/clojure": {
           "mvn/version": "1.10.0",
         },
       },
     },
-    "1.9": Object {
-      "override-deps": Object {
-        "org.clojure/clojure": Object {
+    "1.9": {
+      "override-deps": {
+        "org.clojure/clojure": {
           "mvn/version": "1.9.0",
         },
       },
     },
-    "datomic": Object {
-      "extra-deps": Object {
-        "com.datomic/datomic-free": Object {
+    "datomic": {
+      "extra-deps": {
+        "com.datomic/datomic-free": {
           "mvn/version": "0.9.5703",
         },
       },
     },
-    "dev": Object {
-      "extra-deps": Object {
-        "org.clojure/clojurescript": Object {
+    "dev": {
+      "extra-deps": {
+        "org.clojure/clojurescript": {
           "mvn/version": "1.10.520",
         },
-        "org.clojure/tools.namespace": Object {
+        "org.clojure/tools.namespace": {
           "mvn/version": "0.2.11",
         },
       },
-      "extra-paths": Array [
+      "extra-paths": [
         "dev",
         "target/classes",
       ],
     },
-    "repl": Object {
-      "extra-deps": Object {
-        "cider/cider-nrepl": Object {
+    "repl": {
+      "extra-deps": {
+        "cider/cider-nrepl": {
           "mvn/version": "0.21.1",
         },
-        "nrepl/nrepl": Object {
+        "nrepl/nrepl": {
           "mvn/version": "0.6.0",
         },
-        "org.clojure/tools.namespace": Object {
+        "org.clojure/tools.namespace": {
           "mvn/version": "0.2.11",
         },
       },
-      "main-opts": Array [
+      "main-opts": [
         "-m",
         "nrepl.cmdline",
         "--middleware",
         "[cider.nrepl/cider-middleware]",
       ],
     },
-    "test": Object {
-      "extra-deps": Object {
-        "io.github.lambdaisland/kaocha-cljs": Object {
+    "test": {
+      "extra-deps": {
+        "io.github.lambdaisland/kaocha-cljs": {
           "git/tag": "0.0-21",
         },
-        "lambdaisland/kaocha": Object {
+        "lambdaisland/kaocha": {
           "git/tag": "0.0-389",
           "git/url": "https://github.com/lambdaisland/kaocha.git",
         },
-        "org.clojure/clojurescript": Object {
+        "org.clojure/clojurescript": {
           "mvn/version": "1.10.520",
         },
       },
-      "extra-paths": Array [
+      "extra-paths": [
         "test",
       ],
     },
-    "test-bitbucket": Object {
-      "extra-deps": Object {
-        "lambdaisland/kaocha": Object {
+    "test-bitbucket": {
+      "extra-deps": {
+        "lambdaisland/kaocha": {
           "git/tag": "0.0-389",
           "git/url": "https://bitbucket.org/lambdaisland/kaocha.git",
         },
-        "org.bitbucket.lambdaisland/kaocha-cljs": Object {
+        "org.bitbucket.lambdaisland/kaocha-cljs": {
           "git/tag": "0.0-21",
         },
       },
-      "extra-paths": Array [
+      "extra-paths": [
         "test",
       ],
     },
-    "test-git": Object {
-      "extra-deps": Object {
-        "bar/bar": Object {
+    "test-git": {
+      "extra-deps": {
+        "bar/bar": {
           "git/url": "https://example.com/bar.git",
         },
-        "baz/baz": Object {},
-        "foo/foo": Object {
+        "baz/baz": {},
+        "foo/foo": {
           "git/sha": "123",
           "git/url": "git@example.com/foo.git",
         },
       },
-      "extra-paths": Array [
+      "extra-paths": [
         "test",
       ],
     },
-    "test-gitlab": Object {
-      "extra-deps": Object {
-        "com.gitlab.lambdaisland/kaocha-cljs": Object {
+    "test-gitlab": {
+      "extra-deps": {
+        "com.gitlab.lambdaisland/kaocha-cljs": {
           "git/tag": "0.0-21",
         },
-        "lambdaisland/kaocha": Object {
+        "lambdaisland/kaocha": {
           "git/tag": "0.0-389",
           "git/url": "https://gitlab.com/lambdaisland/kaocha.git",
         },
       },
-      "extra-paths": Array [
+      "extra-paths": [
         "test",
       ],
     },
   },
-  "deps": Object {
-    "invalid/package!": Object {
+  "deps": {
+    "invalid/package!": {
       "mvn/version": "1.2.3",
     },
     "invalid/version": "nil",
-    "io.github.nextjournal/clerk": Object {
+    "io.github.nextjournal/clerk": {
       "mvn/version": "0.7.418",
     },
-    "persistent-sorted-set": Object {
+    "persistent-sorted-set": {
       "mvn/version": "0.1.2",
     },
   },
-  "mvn/repos": Object {
+  "mvn/repos": {
     "central": "nil",
-    "clojars": Object {
+    "clojars": {
       "url": "https://deps.com/foo/bar",
     },
-    "my-auth-repo": Object {
+    "my-auth-repo": {
       "url": "https://my.auth.com/repo",
     },
-    "my-private-repo": Object {
+    "my-private-repo": {
       "url": "s3://my-bucket/maven/releases",
     },
   },

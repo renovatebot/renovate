@@ -1,11 +1,14 @@
-import { defaultConfig } from '../../../../test/util';
-import type { UpdateType } from '../../../config/types';
+import { getConfig } from '../../../../test/util';
+import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
+let defaultConfig: RenovateConfig;
+
 beforeEach(() => {
   jest.resetAllMocks();
+  defaultConfig = getConfig();
 });
 
 describe('workers/repository/updates/generate', () => {
@@ -235,6 +238,36 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeFalsy();
     });
 
+    it('groups multiple digest updates immortally', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra: 'to {{{newDigestShort}}}',
+          newValue: '5.1.2',
+          newDigest: 'sha256:abcdef123',
+          isDigest: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra: 'to {{{newDigestShort}}}',
+          newValue: '5.2.0',
+          newDigest: 'sha256:abcdef987654321',
+          isDigest: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeDefined();
+      expect(res.recreateClosed).toBeTrue();
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -242,9 +275,10 @@ describe('workers/repository/updates/generate', () => {
           depName: 'depB',
           groupName: 'some-group',
           branchName: 'some-branch',
-          prTitle: 'some-title',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
-            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -252,15 +286,18 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
         },
         {
           manager: 'some-manager',
           depName: 'depA',
           groupName: 'some-group',
           branchName: 'some-branch',
-          prTitle: 'some-title',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
-            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
@@ -268,14 +305,20 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.foo).toBe(2);
-      expect(res.singleVersion).toBeUndefined();
-      expect(res.recreateClosed).toBeTrue();
-      expect(res.groupName).toBeDefined();
-      expect(res.releaseTimestamp).toBe('2017-02-08T20:01:41+00:00');
+      expect(res).toMatchObject({
+        foo: 2,
+        isGroup: true,
+        recreateClosed: true,
+        prTitle: 'some-group (minor)',
+        commitMessage: 'some-group',
+        groupName: 'some-group',
+        releaseTimestamp: '2017-02-08T20:01:41+00:00',
+      });
     });
 
     it('groups multiple upgrades different version but same value', () => {
@@ -484,6 +527,9 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toBe(
         'chore(package): update dependency some-dep to v1.2.0'
       );
+      expect(res.commitMessage).toBe(
+        'chore(package): update dependency some-dep to v1.2.0'
+      );
     });
 
     it('scopes monorepo commits', () => {
@@ -509,6 +555,9 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('chore(): update dependency some-dep to v1.2.0');
+      expect(res.commitMessage).toBe(
+        'chore(): update dependency some-dep to v1.2.0'
+      );
     });
 
     it('scopes monorepo commits with nested package files using parent directory', () => {
@@ -535,6 +584,9 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
+        'chore(bar): update dependency some-dep to v1.2.0'
+      );
+      expect(res.commitMessage).toBe(
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
@@ -564,6 +616,9 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
+      expect(res.commitMessage).toBe(
+        'chore(foo/bar): update dependency some-dep to v1.2.0'
+      );
     });
 
     it('use prettyVersion in pr title when there is a v', () => {
@@ -585,6 +640,9 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe(
+        'chore(foo/bar): update dependency some-dep v1.2.0'
+      );
+      expect(res.commitMessage).toBe(
         'chore(foo/bar): update dependency some-dep v1.2.0'
       );
     });
@@ -610,6 +668,9 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep v3.2.0'
       );
+      expect(res.commitMessage).toBe(
+        'chore(foo/bar): update dependency some-dep v3.2.0'
+      );
     });
 
     it('use newMajor in pr title with v', () => {
@@ -631,6 +692,9 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('chore(foo/bar): update dependency some-dep v3');
+      expect(res.commitMessage).toBe(
+        'chore(foo/bar): update dependency some-dep v3'
+      );
     });
 
     it('Default commitMessageExtra pr title', () => {
@@ -653,6 +717,9 @@ describe('workers/repository/updates/generate', () => {
       expect(res.prTitle).toBe(
         'chore(foo/bar): update dependency some-dep to v1.2.0'
       );
+      expect(res.commitMessage).toBe(
+        'chore(foo/bar): update dependency some-dep to v1.2.0'
+      );
     });
 
     it('adds commit message body', () => {
@@ -669,8 +736,8 @@ describe('workers/repository/updates/generate', () => {
         } as BranchUpgradeConfig,
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage).toContain('\n');
+      expect(res.prTitle).toBe('Update dependency some-dep to v1.2.0');
+      expect(res.commitMessage).toBe('Update dependency some-dep to v1.2.0');
     });
 
     it('supports manual prTitle', () => {
@@ -686,6 +753,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('upgrade some-dep');
+      expect(res.commitMessage).toBe('update dependency some-dep to');
     });
 
     it('handles @types specially', () => {
@@ -1038,6 +1106,79 @@ describe('workers/repository/updates/generate', () => {
       expect(excludeCommitPaths.sort()).toStrictEqual(
         ['some/path', 'some/other/path', 'some/other-manager/path'].sort()
       );
+    });
+
+    it('generates pretty version name properly', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          depName: 'some-dep',
+          isSingleVersion: true,
+          manager: 'some-manager',
+          newValue: 'foo-pkg-v3.2.1',
+          newVersion: 'foo-pkg-v3.2.1',
+          semanticCommits: 'enabled',
+          semanticCommitScope: 'package',
+          semanticCommitType: 'chore',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+      );
+      expect(res.commitMessage).toBe(
+        'chore(package): update dependency some-dep to foo-pkg-v3.2.1'
+      );
+    });
+
+    it('prevents issue with duplicating "v" character', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          branchName: 'some-branch',
+          commitMessage: 'update to vv1.2.0',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('update to v1.2.0');
+      expect(res.commitMessage).toBe('update to v1.2.0');
+    });
+
+    it('apply semanticCommits and commitMessagePrefix together', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: 'PATCH:',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          semanticCommits: 'enabled',
+          semanticCommitScope: null,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('PATCH: Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe(
+        'PATCH: Update dependency some-dep to 1.2.0'
+      );
+    });
+
+    it('using commitMessagePrefix without separator', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: '🆙',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          commitMessageAction: 'Update',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
     });
   });
 });

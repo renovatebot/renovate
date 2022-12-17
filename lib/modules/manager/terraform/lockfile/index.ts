@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import pMap from 'p-map';
 import { logger } from '../../../../logger';
+import * as p from '../../../../util/promises';
 import { GetPkgReleasesConfig, getPkgReleases } from '../../../datasource';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import { get as getVersioning } from '../../../versioning';
@@ -19,7 +19,7 @@ import {
 async function updateAllLocks(
   locks: ProviderLock[]
 ): Promise<ProviderLockUpdate[]> {
-  const updates = await pMap(
+  const updates = await p.map(
     locks,
     async (lock) => {
       const updateConfig: GetPkgReleasesConfig = {
@@ -56,7 +56,7 @@ async function updateAllLocks(
       };
       return update;
     },
-    { concurrency: 4 } // allow to look up 4 lock in parallel
+    { concurrency: 4 }
   );
 
   return updates.filter(is.truthy);

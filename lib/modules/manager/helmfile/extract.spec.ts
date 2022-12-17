@@ -335,7 +335,7 @@ describe('modules/manager/helmfile/extract', () => {
         datasource: 'helm',
         deps: [
           {
-            depName: '{{ requiredEnv "RELEASE_NAME" }}',
+            depName: '',
             skipReason: 'local-chart',
           },
           { depName: null, skipReason: 'local-chart' },

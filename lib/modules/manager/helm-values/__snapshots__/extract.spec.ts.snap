@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/helm-values/extract extractPackageFile() extracts from complex values file correctly" 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "1.18-alpine",
@@ -11,7 +11,7 @@ Object {
       "depName": "docker.io/library/nginx",
       "replaceString": "docker.io/library/nginx:1.18-alpine",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "11.6.0-debian-9-r0",
@@ -20,7 +20,7 @@ Object {
       "replaceString": "11.6.0-debian-9-r0",
       "versioning": "docker",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "0.7.0-debian-9-r12",
@@ -29,7 +29,7 @@ Object {
       "replaceString": "0.7.0-debian-9-r12",
       "versioning": "docker",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": "sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809",
       "currentValue": "11.5.0-debian-9-r0",
@@ -38,7 +38,7 @@ Object {
       "replaceString": "11.5.0-debian-9-r0@sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809",
       "versioning": "docker",
     },
-    Object {
+    {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "2.1.3-debian-10-r38",
@@ -52,9 +52,9 @@ Object {
 `;
 
 exports[`modules/manager/helm-values/extract extractPackageFile() extracts from values.yaml correctly with same structure as "helm create" 1`] = `
-Object {
-  "deps": Array [
-    Object {
+{
+  "deps": [
+    {
       "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "1.16.1",

@@ -1,11 +1,12 @@
+import type { GithubGraphqlRelease } from '../../../../util/github/types';
 import { GithubHttp } from '../../../../util/http/github';
-import { CacheableGithubReleases, FetchedRelease } from '.';
+import { CacheableGithubReleases } from '.';
 
 describe('modules/datasource/github-releases/cache/index', () => {
   const http = new GithubHttp();
   const cache = new CacheableGithubReleases(http, { resetDeltaMinutes: 0 });
 
-  const fetchedItem: FetchedRelease = {
+  const fetchedItem: GithubGraphqlRelease = {
     version: '1.2.3',
     releaseTimestamp: '2020-04-09T10:00:00.000Z',
     isDraft: false,

@@ -268,7 +268,7 @@ describe('modules/versioning/semver-coerced/index', () => {
     });
 
     it('should return -1 for a < b', () => {
-      expect(semverCoerced.sortVersions('1.0.0', '1.0.1')).toEqual(-1);
+      expect(semverCoerced.sortVersions('1.0.0', '1.0.1')).toBe(-1);
     });
 
     it('should return 1 for a > b', () => {

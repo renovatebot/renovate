@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 1 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
@@ -10,7 +10,7 @@ Array [
     "depName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
@@ -18,7 +18,7 @@ Array [
     "depName": "node",
     "replaceString": "node:10.0.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "9.4.0",
@@ -26,7 +26,7 @@ Array [
     "depName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -34,7 +34,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -42,7 +42,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -50,7 +50,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "stable",
@@ -58,7 +58,7 @@ Array [
     "depName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "datasource": "docker",
     "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
@@ -68,8 +68,8 @@ Array [
 `;
 
 exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
@@ -77,7 +77,7 @@ Array [
     "depName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
@@ -85,7 +85,7 @@ Array [
     "depName": "node",
     "replaceString": "node:10.0.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "9.4.0",
@@ -93,7 +93,7 @@ Array [
     "depName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -101,7 +101,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -109,7 +109,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -117,7 +117,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "stable",
@@ -125,7 +125,7 @@ Array [
     "depName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "datasource": "docker",
     "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
@@ -135,8 +135,8 @@ Array [
 `;
 
 exports[`modules/manager/docker-compose/extract extractPackageFile() extracts multiple image lines for version 3 without set version key 1`] = `
-Array [
-  Object {
+[
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
@@ -144,7 +144,7 @@ Array [
     "depName": "quay.io/something/redis",
     "replaceString": "quay.io/something/redis:alpine",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
@@ -152,7 +152,7 @@ Array [
     "depName": "node",
     "replaceString": "node:10.0.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "9.4.0",
@@ -160,7 +160,7 @@ Array [
     "depName": "postgres",
     "replaceString": "postgres:9.4.0",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -168,7 +168,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_vote",
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
@@ -176,7 +176,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_result",
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
@@ -184,7 +184,7 @@ Array [
     "depName": "dockersamples/examplevotingapp_worker",
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "stable",
@@ -192,7 +192,7 @@ Array [
     "depName": "dockersamples/visualizer",
     "replaceString": "dockersamples/visualizer:stable",
   },
-  Object {
+  {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "datasource": "docker",
     "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",

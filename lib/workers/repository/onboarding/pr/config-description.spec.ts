@@ -49,7 +49,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
           - Start dependency updates only once this onboarding PR is merged
           - Run Renovate on following schedule: before 5am
 
-        🔡 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the \\"What to Expect\\" section below will be updated the next time Renovate runs.
+        🔡 Would you like to change the way Renovate is upgrading your dependencies? Simply edit the \`renovate.json\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.
 
         ---
         "

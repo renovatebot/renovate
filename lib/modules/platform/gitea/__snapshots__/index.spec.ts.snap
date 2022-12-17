@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`modules/platform/gitea/index createPr should use base branch by default 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
   },
   "cannotMergeReason": undefined,
@@ -21,8 +21,8 @@ Object {
 `;
 
 exports[`modules/platform/gitea/index createPr should use default branch if requested 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
   },
   "cannotMergeReason": undefined,
@@ -41,11 +41,11 @@ Object {
 `;
 
 exports[`modules/platform/gitea/index getPr should fallback to direct fetching if cache fails 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
   },
-  "cannotMergeReason": "pr.mergeable=\\"false\\"",
+  "cannotMergeReason": "pr.mergeable="false"",
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
   "hasAssignees": false,
@@ -61,8 +61,8 @@ Object {
 `;
 
 exports[`modules/platform/gitea/index getPr should return enriched pull request which exists if open 1`] = `
-Object {
-  "bodyStruct": Object {
+{
+  "bodyStruct": {
     "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
   },
   "cannotMergeReason": undefined,
@@ -81,16 +81,16 @@ Object {
 `;
 
 exports[`modules/platform/gitea/index getPrList should filter list by creator 1`] = `
-Object {
+{
   "endpoint": "https://gitea.com/",
   "gitAuthor": "Renovate Bot <renovate@example.com>",
 }
 `;
 
 exports[`modules/platform/gitea/index getPrList should filter list by creator 2`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
     },
     "cannotMergeReason": undefined,
@@ -106,8 +106,8 @@ Array [
     "targetBranch": "some-base-branch",
     "title": "Some PR",
   },
-  Object {
-    "bodyStruct": Object {
+  {
+    "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
     "cannotMergeReason": undefined,
@@ -123,8 +123,8 @@ Array [
     "targetBranch": "other-base-branch",
     "title": "Other PR",
   },
-  Object {
-    "bodyStruct": Object {
+  {
+    "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
     "cannotMergeReason": undefined,
@@ -144,9 +144,9 @@ Array [
 `;
 
 exports[`modules/platform/gitea/index getPrList should return list of pull requests 1`] = `
-Array [
-  Object {
-    "bodyStruct": Object {
+[
+  {
+    "bodyStruct": {
       "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
     },
     "cannotMergeReason": undefined,
@@ -162,8 +162,8 @@ Array [
     "targetBranch": "some-base-branch",
     "title": "Some PR",
   },
-  Object {
-    "bodyStruct": Object {
+  {
+    "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
     "cannotMergeReason": undefined,
@@ -179,8 +179,8 @@ Array [
     "targetBranch": "other-base-branch",
     "title": "Other PR",
   },
-  Object {
-    "bodyStruct": Object {
+  {
+    "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
     "cannotMergeReason": undefined,
@@ -199,51 +199,47 @@ Array [
 ]
 `;
 
-exports[`modules/platform/gitea/index getRepos should return an array of repos 1`] = `
-Array [
-  "a/b",
-  "c/d",
-]
-`;
-
 exports[`modules/platform/gitea/index initPlatform() should support custom endpoint 1`] = `
-Object {
+{
   "endpoint": "https://gitea.renovatebot.com/",
   "gitAuthor": "Renovate Bot <renovate@example.com>",
 }
 `;
 
 exports[`modules/platform/gitea/index initPlatform() should support default endpoint 1`] = `
-Object {
+{
   "endpoint": "https://gitea.com/",
   "gitAuthor": "Renovate Bot <renovate@example.com>",
 }
 `;
 
 exports[`modules/platform/gitea/index initPlatform() should use username as author name if full name is missing 1`] = `
-Object {
+{
   "endpoint": "https://gitea.com/",
   "gitAuthor": "renovate <renovate@example.com>",
 }
 `;
 
 exports[`modules/platform/gitea/index initRepo should fall back to merge method "merge" 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;
 
 exports[`modules/platform/gitea/index initRepo should fall back to merge method "rebase-merge" 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;
 
 exports[`modules/platform/gitea/index initRepo should fall back to merge method "squash" 1`] = `
-Object {
+{
   "defaultBranch": "master",
   "isFork": false,
+  "repoFingerprint": "c48ad9428365701f1a7f4798a410db2401b13267c205e345beb5b469a4a1480b163e1ce663ce483cfe579b2748a807cbeeba2035dc55eca5fe46d60d182510ec",
 }
 `;

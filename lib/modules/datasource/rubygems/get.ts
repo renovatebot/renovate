@@ -85,7 +85,7 @@ export class InternalRubyGemsDatasource extends Datasource {
     }
 
     if (!info) {
-      logger.debug({ dependency }, 'RubyGems package not found.');
+      logger.debug(`RubyGems package not found packageName: ${dependency} `);
       return null;
     }
 

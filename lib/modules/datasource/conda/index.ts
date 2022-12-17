@@ -15,7 +15,9 @@ export class CondaDatasource extends Datasource {
     super(datasource);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
+
+  override readonly registryStrategy = 'hunt';
 
   override readonly defaultRegistryUrls = [defaultRegistryUrl];
 
@@ -37,8 +39,6 @@ export class CondaDatasource extends Datasource {
       return null;
     }
 
-    logger.trace({ registryUrl, packageName }, 'fetching conda package');
-
     const url = joinUrlParts(registryUrl, packageName);
 
     const result: ReleaseResult = {
@@ -55,7 +55,7 @@ export class CondaDatasource extends Datasource {
 
       response.body.versions.forEach((version: string) => {
         const thisRelease: Release = {
-          version: version,
+          version,
         };
         result.releases.push(thisRelease);
       });

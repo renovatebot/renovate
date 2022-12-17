@@ -1,42 +1,31 @@
 import * as hostRules from '../../util/host-rules';
-import { detectPlatform } from './util';
+import { getNewBranchName, repoFingerprint } from './util';
 
 describe('modules/platform/util', () => {
   beforeEach(() => hostRules.clear());
 
-  describe('getHostType', () => {
+  describe('repoFingerprint', () => {
     it.each`
-      url                                                    | hostType
-      ${'some-invalid@url:::'}                               | ${null}
-      ${'https://enterprise.example.com/chalk/chalk'}        | ${null}
-      ${'https://github.com/semantic-release/gitlab'}        | ${'github'}
-      ${'https://github-enterprise.example.com/chalk/chalk'} | ${'github'}
-      ${'https://gitlab.com/chalk/chalk'}                    | ${'gitlab'}
-      ${'https://gitlab-enterprise.example.com/chalk/chalk'} | ${'gitlab'}
-    `('("$url") === $hostType', ({ url, hostType }) => {
-      expect(detectPlatform(url)).toBe(hostType);
+      repoId       | endpoint                | fingerprint
+      ${'some-id'} | ${null}                 | ${'361b1bf27a0c0ef8fa5d270f588aa5747ba9497b16de64a44f186253295bc80a3891ecfee768f5c88734a6a738eacca69ccca7e50b16529cfc50dca77226a760'}
+      ${'some-id'} | ${'https://github.com'} | ${'423e527a4f88a1b6aae8b70e72a4ae80b44fe83f11b90851f5bc654f39a3272c76b57d7ad30cabd727c04c254a3e7ea16109d05e398a228701ac805460344815'}
+    `(
+      '("$repoId", "$endpoint") === $fingerprint',
+      ({ repoId, endpoint, fingerprint }) => {
+        expect(repoFingerprint(repoId, endpoint)).toBe(fingerprint);
+      }
+    );
+  });
+
+  describe('getNewBranchName', () => {
+    it('should add refs/heads', () => {
+      const res = getNewBranchName('testBB');
+      expect(res).toBe(`refs/heads/testBB`);
     });
 
-    it('uses host rules', () => {
-      hostRules.add({
-        hostType: 'gitlab-changelog',
-        matchHost: 'gl.example.com',
-      });
-      hostRules.add({
-        hostType: 'github-changelog',
-        matchHost: 'gh.example.com',
-      });
-      hostRules.add({
-        hostType: 'gitea',
-        matchHost: 'gt.example.com',
-      });
-      expect(detectPlatform('https://gl.example.com/chalk/chalk')).toBe(
-        'gitlab'
-      );
-      expect(detectPlatform('https://gh.example.com/chalk/chalk')).toBe(
-        'github'
-      );
-      expect(detectPlatform('https://gt.example.com/chalk/chalk')).toBeNull();
+    it('should be the same', () => {
+      const res = getNewBranchName('refs/heads/testBB');
+      expect(res).toBe(`refs/heads/testBB`);
     });
   });
 });

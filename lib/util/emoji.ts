@@ -93,9 +93,13 @@ export function unemojify(text: string): string {
 
 function stripEmoji(emoji: string): string {
   const hexCode = stripHexCode(fromUnicodeToHexcode(emoji));
-  const codePoint = fromHexcodeToCodepoint(hexCode);
-  const result = fromCodepointToUnicode(codePoint);
-  return result;
+  // `hexCode` could be empty if `emoji` is a modifier character that isn't
+  // modifying anything
+  if (hexCode) {
+    const codePoint = fromHexcodeToCodepoint(hexCode);
+    return fromCodepointToUnicode(codePoint);
+  }
+  return '';
 }
 
 export function stripEmojis(input: string): string {
