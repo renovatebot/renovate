@@ -15,6 +15,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Chart\\.yaml$'],
 };
 
-export const categories: Category[] = ['helm'];
+export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const supportedDatasources = [DockerDatasource.id, HelmDatasource.id];

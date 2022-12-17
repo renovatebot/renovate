@@ -1,4 +1,4 @@
-import type { ProgrammingLanguage } from '../../../constants';
+import type { Category, ProgrammingLanguage } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
@@ -10,6 +10,8 @@ export const language: ProgrammingLanguage = 'ruby';
 export const defaultConfig = {
   fileMatch: ['(^|/)Puppetfile$'],
 };
+
+export const categories: Category[] = ['iac', 'ruby'];
 
 export const supportedDatasources = [
   PuppetForgeDatasource.id,

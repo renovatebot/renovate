@@ -8,6 +8,6 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories: Category[] = ['helm'];
+export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const supportedDatasources = [DockerDatasource.id];

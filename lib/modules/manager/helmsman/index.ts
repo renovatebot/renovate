@@ -6,6 +6,6 @@ export const defaultConfig = {
   fileMatch: [],
 };
 
-export const categories: Category[] = ['helm', 'cd'];
+export const categories: Category[] = ['helm', 'cd', 'kubernetes'];
 
 export const supportedDatasources = [HelmDatasource.id];

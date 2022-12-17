@@ -10,6 +10,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)requirements\\.yaml$'],
 };
 
-export const categories: Category[] = ['helm'];
+export const categories: Category[] = ['helm', 'kubernetes'];
 
 export const supportedDatasources = [HelmDatasource.id];

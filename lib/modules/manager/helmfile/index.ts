@@ -11,6 +11,6 @@ export const defaultConfig = {
   fileMatch: ['(^|/)helmfile\\.yaml$'],
 };
 
-export const categories: Category[] = ['helm', 'cd'];
+export const categories: Category[] = ['helm', 'cd', 'kubernetes'];
 
 export const supportedDatasources = [HelmDatasource.id, DockerDatasource.id];
