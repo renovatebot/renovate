@@ -1,8 +1,8 @@
-import { RenovateConfig, getConfig, git } from '../../../../test/util';
-import { initRepoCache } from '../../../util/cache/repository/init';
+import { RenovateConfig, getConfig, git } from '../../../test/util';
+import { initRepoCache } from '../cache/repository/init';
 import { detectSemanticCommits } from './semantic';
 
-jest.mock('../../../util/git');
+jest.mock('.');
 
 let config: RenovateConfig;
 
@@ -13,7 +13,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/init/semantic', () => {
+describe('util/git/semantic', () => {
   describe('detectSemanticCommits()', () => {
     beforeEach(async () => {
       await initRepoCache({ repoFingerprint: '0123456789abcdef' });
