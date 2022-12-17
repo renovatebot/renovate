@@ -90,7 +90,7 @@ Fill the array with alternate index URL(s).
 
 ## Disabling Python support
 
-To disable _all_ Python support in Renovate, do this:
+To disable all managers with `language` set to `python` in Renovate, do this:
 
 ```json
 {
