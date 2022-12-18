@@ -23,9 +23,7 @@ export class GithubGraphqlMemoryCacheAdapter<
     const expiry = this.createdAt.plus({
       days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
     });
-    const { seconds: ttlSeconds } = expiry
-      .diff(this.now, ['seconds'])
-      .toObject();
+    const ttlSeconds = expiry.diff(this.now, ['seconds']).as('seconds');
     if (ttlSeconds && ttlSeconds > 0) {
       const key = this.fullKey();
       memCache.set(key, cacheRecord);
