@@ -18,9 +18,7 @@ export class GithubGraphqlPackageCacheAdapter<
     const expiry = this.createdAt.plus({
       days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
     });
-    const { minutes: ttlMinutes } = expiry
-      .diff(this.now, ['minutes'])
-      .toObject();
+    const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
     if (ttlMinutes && ttlMinutes > 0) {
       await packageCache.set(
         this.cacheNs,
