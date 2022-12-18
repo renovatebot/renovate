@@ -4,9 +4,9 @@ import * as httpMock from '../../../../test/http-mock';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
-  GithubGraphqlDatasourceHelper as Datasource,
-  GithubGraphqlDatasourceHelper,
-} from './datasource-helper';
+  GithubGraphqlDatasourceFetcher as Datasource,
+  GithubGraphqlDatasourceFetcher,
+} from './datasource-fetcher';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
@@ -91,7 +91,7 @@ async function catchError<T>(cb: () => Promise<T>): Promise<Error> {
   }
 }
 
-describe('util/github/graphql/datasource-helper', () => {
+describe('util/github/graphql/datasource-fetcher', () => {
   describe('prepareQuery', () => {
     it('returns valid query for valid payload query', () => {
       const payloadQuery = adapter.query;
@@ -405,7 +405,7 @@ describe('util/github/graphql/datasource-helper', () => {
             .post('/graphql')
             .reply(200, resp(data, undefined, isPrivate));
 
-          const instance = new GithubGraphqlDatasourceHelper(
+          const instance = new GithubGraphqlDatasourceFetcher(
             { packageName: 'foo/bar' },
             http,
             adapter
