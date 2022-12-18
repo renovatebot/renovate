@@ -4,6 +4,11 @@ import { getFileContentMap } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
+import {
+  isGcvPropsFile,
+  parseGcv,
+  usesGcv,
+} from './extract/consistent-versions-plugin';
 import { parseGradle, parseProps } from './parser';
 import type {
   GradleManagerData,
@@ -12,6 +17,7 @@ import type {
 } from './types';
 import {
   getVars,
+  isGradleScriptFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -70,7 +76,13 @@ export async function extractAllPackageFiles(
       } else if (isTOMLFile(packageFile)) {
         const updatesFromCatalog = parseCatalog(packageFile, content);
         extractedDeps.push(...updatesFromCatalog);
-      } else {
+      } else if (
+        isGcvPropsFile(packageFile) &&
+        usesGcv(packageFile, fileContents)
+      ) {
+        const updatesFromGcv = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...updatesFromGcv);
+      } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(registry, dir);
         const {
           deps,

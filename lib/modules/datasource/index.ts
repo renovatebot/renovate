@@ -139,20 +139,21 @@ async function mergeRegistries(
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
-      if (res) {
-        if (combinedRes) {
-          for (const existingRelease of combinedRes.releases || []) {
-            existingRelease.registryUrl = combinedRes.registryUrl;
-          }
-          for (const additionalRelease of res.releases || []) {
-            additionalRelease.registryUrl = res.registryUrl;
-          }
-          combinedRes = { ...res, ...combinedRes };
-          delete combinedRes.registryUrl;
-          combinedRes.releases = [...combinedRes.releases, ...res.releases];
-        } else {
-          combinedRes = res;
+      if (!res) {
+        continue;
+      }
+      if (combinedRes) {
+        for (const existingRelease of combinedRes.releases || []) {
+          existingRelease.registryUrl ??= combinedRes.registryUrl;
         }
+        for (const additionalRelease of res.releases || []) {
+          additionalRelease.registryUrl = res.registryUrl;
+        }
+        combinedRes = { ...res, ...combinedRes };
+        delete combinedRes.registryUrl;
+        combinedRes.releases = [...combinedRes.releases, ...res.releases];
+      } else {
+        combinedRes = res;
       }
     } catch (err) {
       if (err instanceof ExternalHostError) {

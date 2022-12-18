@@ -1,24 +1,47 @@
+import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
+import { HttpError } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-let lastSync = new Date('2000-01-01');
-let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
-let contentLength = 0;
+interface RegistryCache {
+  lastSync: Date;
+  packageReleases: Record<string, string[]>; // Because we might need a "constructor" key
+  contentLength: number;
+  isSupported: boolean;
+}
+
+const registryCaches: Record<string, RegistryCache> = {};
 
 // Note: use only for tests
 export function resetCache(): void {
-  lastSync = new Date('2000-01-01');
-  packageReleases = Object.create(null);
-  contentLength = 0;
+  Object.keys(registryCaches).forEach((key) => {
+    registryCaches[key].lastSync = new Date('2000-01-01');
+    registryCaches[key].packageReleases = Object.create(null);
+    registryCaches[key].contentLength = 0;
+    registryCaches[key].isSupported = false;
+  });
 }
 
-export class RubyGemsOrgDatasource extends Datasource {
-  constructor(override readonly id: string) {
+export class VersionsDatasource extends Datasource {
+  private registryUrl: string;
+  private registryCache: RegistryCache;
+
+  constructor(override readonly id: string, registryUrl: string) {
     super(id);
+    this.registryUrl = registryUrl;
+    if (!registryCaches[registryUrl]) {
+      registryCaches[registryUrl] = {
+        lastSync: new Date('2000-01-01'),
+        packageReleases: Object.create(null),
+        contentLength: 0,
+        isSupported: false,
+      };
+    }
+    this.registryCache = registryCaches[registryUrl];
   }
 
   async getReleases({
@@ -26,13 +49,18 @@ export class RubyGemsOrgDatasource extends Datasource {
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     logger.debug(`getRubygemsOrgDependency(${packageName})`);
     await this.syncVersions();
-    if (!packageReleases[packageName]) {
+    if (!this.registryCache.isSupported) {
+      throw new Error(PAGE_NOT_FOUND_ERROR);
+    }
+    if (!this.registryCache.packageReleases[packageName]) {
       return null;
     }
     const dep: ReleaseResult = {
-      releases: packageReleases[packageName].map((version) => ({
-        version,
-      })),
+      releases: this.registryCache.packageReleases[packageName].map(
+        (version) => ({
+          version,
+        })
+      ),
     };
     return dep;
   }
@@ -45,11 +73,11 @@ export class RubyGemsOrgDatasource extends Datasource {
   }
 
   async updateRubyGemsVersions(): Promise<void> {
-    const url = 'https://rubygems.org/versions';
+    const url = `${this.registryUrl}/versions`;
     const options = {
       headers: {
         'accept-encoding': 'identity',
-        range: `bytes=${contentLength}-`,
+        range: `bytes=${this.registryCache.contentLength}-`,
       },
     };
     let newLines: string;
@@ -59,25 +87,30 @@ export class RubyGemsOrgDatasource extends Datasource {
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
+      this.registryCache.isSupported = true;
     } catch (err) /* istanbul ignore next */ {
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        this.registryCache.isSupported = false;
+        return;
+      }
       if (err.statusCode !== 416) {
-        contentLength = 0;
-        packageReleases = Object.create(null); // Because we might need a "constructor" key
+        this.registryCache.contentLength = 0;
+        this.registryCache.packageReleases = Object.create(null); // Because we might need a "constructor" key
         logger.debug({ err }, 'Rubygems fetch error');
         throw new ExternalHostError(new Error('Rubygems fetch error'));
       }
       logger.debug('Rubygems: No update');
-      lastSync = new Date();
+      this.registryCache.lastSync = new Date();
       return;
     }
 
     for (const line of newLines.split(newlineRegex)) {
-      RubyGemsOrgDatasource.processLine(line);
+      this.processLine(line);
     }
-    lastSync = new Date();
+    this.registryCache.lastSync = new Date();
   }
 
-  private static processLine(line: string): void {
+  private processLine(line: string): void {
     let split: string[] | undefined;
     let pkg: string | undefined;
     let versions: string | undefined;
@@ -88,18 +121,22 @@ export class RubyGemsOrgDatasource extends Datasource {
       }
       split = l.split(' ');
       [pkg, versions] = split;
-      pkg = RubyGemsOrgDatasource.copystr(pkg);
-      packageReleases[pkg] = packageReleases[pkg] || [];
+      pkg = VersionsDatasource.copystr(pkg);
+      this.registryCache.packageReleases[pkg] =
+        this.registryCache.packageReleases[pkg] || [];
       const lineVersions = versions.split(',').map((version) => version.trim());
       for (const lineVersion of lineVersions) {
         if (lineVersion.startsWith('-')) {
           const deletedVersion = lineVersion.slice(1);
           logger.trace({ pkg, deletedVersion }, 'Rubygems: Deleting version');
-          packageReleases[pkg] = packageReleases[pkg].filter(
-            (version) => version !== deletedVersion
-          );
+          this.registryCache.packageReleases[pkg] =
+            this.registryCache.packageReleases[pkg].filter(
+              (version) => version !== deletedVersion
+            );
         } else {
-          packageReleases[pkg].push(RubyGemsOrgDatasource.copystr(lineVersion));
+          this.registryCache.packageReleases[pkg].push(
+            VersionsDatasource.copystr(lineVersion)
+          );
         }
       }
     } catch (err) /* istanbul ignore next */ {
@@ -110,14 +147,14 @@ export class RubyGemsOrgDatasource extends Datasource {
     }
   }
 
-  private static isDataStale(): boolean {
-    return getElapsedMinutes(lastSync) >= 5;
+  private isDataStale(): boolean {
+    return getElapsedMinutes(this.registryCache.lastSync) >= 15;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
   async syncVersions(): Promise<void> {
-    if (RubyGemsOrgDatasource.isDataStale()) {
+    if (this.isDataStale()) {
       this.updateRubyGemsVersionsPromise =
         this.updateRubyGemsVersionsPromise ?? this.updateRubyGemsVersions();
       await this.updateRubyGemsVersionsPromise;

@@ -4,7 +4,6 @@ import {
   ListRepositoriesOutput,
   PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
-import type { Credentials } from '@aws-sdk/types';
 import JSON5 from 'json5';
 
 import {
@@ -36,12 +35,12 @@ import type {
 } from '../types';
 import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getCodeCommitUrl } from './codecommit-client';
 import * as client from './codecommit-client';
-import { getUserArn, initIamClient } from './iam-client';
 
 export interface CodeCommitPr extends Pr {
   body: string;
+  destinationCommit: string;
+  sourceCommit: string;
 }
 
 interface Config {
@@ -49,8 +48,6 @@ interface Config {
   defaultBranch?: string;
   region?: string;
   prList?: CodeCommitPr[];
-  credentials?: Credentials;
-  userArn?: string;
 }
 
 export const config: Config = {};
@@ -61,52 +58,42 @@ export async function initPlatform({
   password,
   token: awsToken,
 }: PlatformParams): Promise<PlatformResult> {
-  let accessKeyId = username;
-  let secretAccessKey = password;
+  const accessKeyId = username;
+  const secretAccessKey = password;
   let region: string | undefined;
 
-  if (!accessKeyId) {
-    accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  if (accessKeyId) {
+    process.env.AWS_ACCESS_KEY_ID = accessKeyId;
   }
-  if (!secretAccessKey) {
-    secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  if (secretAccessKey) {
+    process.env.AWS_SECRET_ACCESS_KEY = secretAccessKey;
+  }
+  if (awsToken) {
+    process.env.AWS_SESSION_TOKEN = awsToken;
   }
 
   if (endpoint) {
     const regionReg = regEx(/.*codecommit\.(?<region>.+)\.amazonaws\.com/);
     const codeCommitMatch = regionReg.exec(endpoint);
     region = codeCommitMatch?.groups?.region;
-    if (!region) {
+    if (region) {
+      process.env.AWS_REGION = region;
+    } else {
       logger.warn("Can't parse region, make sure your endpoint is correct");
     }
-  } else {
-    region = process.env.AWS_REGION;
   }
-
-  if (!accessKeyId || !secretAccessKey || !region) {
-    throw new Error(
-      'Init: You must configure a AWS user(accessKeyId), password(secretAccessKey) and endpoint/AWS_REGION'
-    );
-  }
-
-  config.region = region;
-  const credentials: Credentials = {
-    accessKeyId,
-    secretAccessKey,
-    sessionToken: awsToken ?? process.env.AWS_SESSION_TOKEN,
-  };
-  config.credentials = credentials;
 
   // If any of the below fails, it will throw an exception stopping the program.
-  client.buildCodeCommitClient(region, credentials);
-  // To check if we have permission to codecommit
+  client.buildCodeCommitClient();
+  // To check if we have permission to codecommit, throws exception if failed.
   await client.listRepositories();
 
-  initIamClient(region, credentials);
-  config.userArn = await getUserArn();
-
   const platformConfig: PlatformResult = {
-    endpoint: endpoint ?? `https://git-codecommit.${region}.amazonaws.com/`,
+    endpoint:
+      endpoint ??
+      `https://git-codecommit.${
+        process.env.AWS_REGION ?? 'us-east-1'
+      }.amazonaws.com/`,
   };
   return Promise.resolve(platformConfig);
 }
@@ -127,7 +114,14 @@ export async function initRepo({
     throw new Error(REPOSITORY_NOT_FOUND);
   }
 
-  const url = getCodeCommitUrl(config.region!, repository, config.credentials!);
+  if (!repo?.repositoryMetadata) {
+    logger.error({ repository }, 'Could not find repository');
+    throw new Error(REPOSITORY_NOT_FOUND);
+  }
+  logger.debug({ repositoryDetails: repo }, 'Repository details');
+  const metadata = repo.repositoryMetadata;
+
+  const url = client.getCodeCommitUrl(metadata, repository);
   try {
     await git.initRepo({
       url,
@@ -136,14 +130,6 @@ export async function initRepo({
     logger.debug({ err }, 'Failed to git init');
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
-
-  if (!repo?.repositoryMetadata) {
-    logger.error({ repository }, 'Could not find repository');
-    throw new Error(REPOSITORY_NOT_FOUND);
-  }
-
-  logger.debug({ repositoryDetails: repo }, 'Repository details');
-  const metadata = repo.repositoryMetadata;
 
   if (!metadata.defaultBranch || !metadata.repositoryId) {
     logger.debug('Repo is empty');
@@ -168,10 +154,7 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     return config.prList;
   }
 
-  const listPrsResponse = await client.listPullRequests(
-    config.repository!,
-    config.userArn!
-  );
+  const listPrsResponse = await client.listPullRequests(config.repository!);
   const fetchedPrs: CodeCommitPr[] = [];
 
   if (listPrsResponse && !listPrsResponse.pullRequestIds) {
@@ -190,6 +173,8 @@ export async function getPrList(): Promise<CodeCommitPr[]> {
     const pr: CodeCommitPr = {
       targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
       sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+      destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
+      sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
       state:
         prInfo.pullRequestStatus === PullRequestStatusEnum.OPEN
           ? 'open'
@@ -277,10 +262,12 @@ export async function getPr(
 
   return {
     sourceBranch: prInfo.pullRequestTargets![0].sourceReference!,
+    sourceCommit: prInfo.pullRequestTargets![0].sourceCommit!,
     state: prState,
     number: pullRequestId,
     title: prInfo.title!,
     targetBranch: prInfo.pullRequestTargets![0].destinationReference!,
+    destinationCommit: prInfo.pullRequestTargets![0].destinationCommit!,
     sha: prInfo.revisionId,
     body: prInfo.description!,
   };
@@ -380,7 +367,8 @@ export async function createPr({
   if (
     !prCreateRes.pullRequest?.title ||
     !prCreateRes.pullRequest?.pullRequestId ||
-    !prCreateRes.pullRequest?.description
+    !prCreateRes.pullRequest?.description ||
+    !prCreateRes.pullRequest?.pullRequestTargets?.length
   ) {
     throw new Error('Could not create pr, missing PR info');
   }
@@ -391,6 +379,9 @@ export async function createPr({
     title: prCreateRes.pullRequest.title,
     sourceBranch,
     targetBranch,
+    sourceCommit: prCreateRes.pullRequest.pullRequestTargets[0].sourceCommit!,
+    destinationCommit:
+      prCreateRes.pullRequest.pullRequestTargets[0].destinationCommit!,
     sourceRepo: config.repository,
     body: prCreateRes.pullRequest.description,
   };
@@ -618,10 +609,7 @@ export async function ensureComment({
   const body = `${header}${sanitize(content)}`;
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${number}`
-    );
+    prCommentsResponse = await client.getPrComments(`${number}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return false;
@@ -650,17 +638,10 @@ export async function ensureComment({
   }
 
   if (!commentId) {
-    const prEvent = await client.getPrEvents(`${number}`);
+    const prs = await getPrList();
+    const thisPr = prs.filter((item) => item.number === number);
 
-    if (!prEvent?.pullRequestEvents) {
-      return false;
-    }
-
-    const event =
-      prEvent.pullRequestEvents[0]
-        .pullRequestSourceReferenceUpdatedEventMetadata;
-
-    if (!event?.beforeCommitId || !event?.afterCommitId) {
+    if (!thisPr[0].sourceCommit || !thisPr[0].destinationCommit) {
       return false;
     }
 
@@ -668,8 +649,8 @@ export async function ensureComment({
       `${number}`,
       config.repository,
       body,
-      event.beforeCommitId,
-      event.afterCommitId
+      thisPr[0].destinationCommit,
+      thisPr[0].sourceCommit
     );
     logger.info(
       { repository: config.repository, prNo: number, topic },
@@ -704,10 +685,7 @@ export async function ensureCommentRemoval(
 
   let prCommentsResponse: GetCommentsForPullRequestOutput;
   try {
-    prCommentsResponse = await client.getPrComments(
-      config.repository!,
-      `${prNo}`
-    );
+    prCommentsResponse = await client.getPrComments(`${prNo}`);
   } catch (err) {
     logger.debug({ err }, 'Unable to retrieve pr comments');
     return;
