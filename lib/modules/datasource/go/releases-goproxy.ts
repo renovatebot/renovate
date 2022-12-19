@@ -75,7 +75,7 @@ export class GoProxyDatasource extends Datasource {
             if (result.length === 0) {
               break;
             }
-            releases = releases.concat(result);
+            releases.push(...result);
           } catch (err) {
             const statusCode = err?.response?.statusCode;
             if (i > 0 && statusCode === 404) {
