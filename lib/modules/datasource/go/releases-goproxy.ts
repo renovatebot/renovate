@@ -60,7 +60,7 @@ export class GoProxyDatasource extends Datasource {
           break;
         }
 
-        let releases: Release[] = [];
+        const releases: Release[] = [];
         for (let i = 0; ; i++) {
           try {
             const major = currentMajor + i;
