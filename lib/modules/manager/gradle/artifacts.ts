@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { dirname } from 'upath';
+import { dirname, join } from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
@@ -15,10 +15,22 @@ import { getFileList, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import {
   extraEnv,
+  extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
+  prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  isGcvLockFile,
+  isGcvPropsFile,
+} from './extract/consistent-versions-plugin';
+import { isGradleBuildFile } from './utils';
+
+// .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
+function isLockFile(fileName: string): boolean {
+  return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
+}
 
 async function getUpdatedLockfiles(
   oldLockFileContentMap: Record<string, string | null>
@@ -28,7 +40,7 @@ async function getUpdatedLockfiles(
   const status = await getRepoStatus();
 
   for (const modifiedFile of status.modified) {
-    if (modifiedFile.endsWith('.lockfile')) {
+    if (isLockFile(modifiedFile)) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
@@ -67,6 +79,17 @@ async function getSubProjectList(
   return subprojects;
 }
 
+async function getGradleVersion(gradlewFile: string): Promise<string | null> {
+  const propertiesFile = join(
+    dirname(gradlewFile),
+    'gradle/wrapper/gradle-wrapper.properties'
+  );
+  const properties = await readLocalFile(propertiesFile, 'utf8');
+  const extractResult = extractGradleVersion(properties ?? '');
+
+  return extractResult ? extractResult.version : null;
+}
+
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -76,7 +99,7 @@ export async function updateArtifacts({
   logger.debug(`gradle.updateArtifacts(${packageFileName})`);
 
   const fileList = await getFileList();
-  const lockFiles = fileList.filter((file) => file.endsWith('.lockfile'));
+  const lockFiles = fileList.filter((file) => isLockFile(file));
   if (!lockFiles.length) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
     return null;
@@ -90,12 +113,25 @@ export async function updateArtifacts({
     );
     return null;
   }
+
+  if (
+    config.isLockFileMaintenance &&
+    (!isGradleBuildFile(packageFileName) ||
+      dirname(packageFileName) !== dirname(gradlewFile))
+  ) {
+    logger.trace(
+      'No build.gradle(.kts) file or not in root project - skipping lock file maintenance'
+    );
+    return null;
+  }
+
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
     const oldLockFileContentMap = await getFileContentMap(lockFiles);
 
     await writeLocalFile(packageFileName, newPackageFileContent);
+    await prepareGradleCommand(gradlewFile);
 
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
@@ -108,7 +144,8 @@ export async function updateArtifacts({
         {
           toolName: 'java',
           constraint:
-            config.constraints?.java ?? getJavaConstraint(config.currentValue),
+            config.constraints?.java ??
+            getJavaConstraint(await getGradleVersion(gradlewFile)),
         },
       ],
     };
@@ -119,7 +156,7 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
-    if (config.isLockFileMaintenance) {
+    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
       cmd += ' --write-locks';
     } else {
       const updatedDepNames = updatedDeps

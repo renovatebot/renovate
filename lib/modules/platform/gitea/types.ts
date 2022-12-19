@@ -1,11 +1,9 @@
-import type { PrState } from '../../../types';
-
 export interface PrReviewersParams {
   reviewers?: string[];
   team_reviewers?: string[];
 }
 
-export type PRState = PrState.Open | PrState.Closed | PrState.All;
+export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
   | 'pending'
@@ -133,9 +131,23 @@ export interface CombinedCommitStatus {
   statuses: CommitStatus[];
 }
 
+export type RepoSortMethod = 'alpha' | 'created' | 'updated' | 'size' | 'id';
+
+export type SortMethod = 'asc' | 'desc';
+
 export interface RepoSearchParams {
   uid?: number;
   archived?: boolean;
+
+  /**
+   * Repo sort type, defaults to `alpha`.
+   */
+  sort?: RepoSortMethod;
+
+  /**
+   * Repo sort order, defaults to `asc`
+   */
+  order?: SortMethod;
 }
 
 export type IssueCreateParams = Partial<IssueUpdateLabelsParams> &

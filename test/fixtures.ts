@@ -5,6 +5,7 @@ import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
 import upath from 'upath';
 
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
 const realFs = jest.requireActual('fs') as typeof fs;
 
 /**

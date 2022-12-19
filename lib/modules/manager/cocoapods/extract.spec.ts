@@ -13,7 +13,7 @@ describe('modules/manager/cocoapods/extract', () => {
     it('extracts from simple file', async () => {
       GlobalConfig.set(adminConfig);
       const res = await extractPackageFile(simplePodfile, 'Podfile');
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         { depName: 'a' },
         { depName: 'a/sub' },
         { depName: 'b', currentValue: '1.2.3' },
@@ -42,7 +42,7 @@ describe('modules/manager/cocoapods/extract', () => {
     it('extracts from complex file', async () => {
       GlobalConfig.set(adminConfig);
       const res = await extractPackageFile(complexPodfile, 'Podfile');
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         { depName: 'IQKeyboardManager', currentValue: '~> 6.5.0' },
         { depName: 'CYLTabBarController', currentValue: '~> 1.28.3' },
         { depName: 'PureLayout', currentValue: '~> 3.1.4' },

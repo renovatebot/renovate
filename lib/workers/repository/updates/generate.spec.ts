@@ -238,6 +238,36 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeFalsy();
     });
 
+    it('groups multiple digest updates immortally', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          manager: 'some-manager',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra: 'to {{{newDigestShort}}}',
+          newValue: '5.1.2',
+          newDigest: 'sha256:abcdef123',
+          isDigest: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra: 'to {{{newDigestShort}}}',
+          newValue: '5.2.0',
+          newDigest: 'sha256:abcdef987654321',
+          isDigest: true,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.groupName).toBeDefined();
+      expect(res.recreateClosed).toBeTrue();
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch: BranchUpgradeConfig[] = [
         {
@@ -1132,6 +1162,23 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toBe(
         'PATCH: Update dependency some-dep to 1.2.0'
       );
+    });
+
+    it('using commitMessagePrefix without separator', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: '🆙',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          commitMessageAction: 'Update',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
     });
   });
 });

@@ -14,6 +14,7 @@ describe('workers/repository/update/pr/body/header', () => {
     expect(
       getPrHeader({
         manager: 'some-manager',
+        baseBranch: 'base',
         branchName: 'branch',
         upgrades: [],
       })
@@ -26,6 +27,7 @@ describe('workers/repository/update/pr/body/header', () => {
       getPrHeader({
         manager: 'some-manager',
         branchName: 'branch',
+        baseBranch: 'base',
         upgrades: [],
         prHeader: 'HEADER',
       })

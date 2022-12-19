@@ -11,25 +11,42 @@ export function parseGitUrl(url: string): gitUrlParse.GitUrl {
 export function getHttpUrl(url: string, token?: string): string {
   const parsedUrl = parseGitUrl(url);
 
+  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
+    ? parsedUrl.protocol
+    : 'https';
+
   parsedUrl.token = token ?? '';
 
   if (token) {
-    switch (detectPlatform(url)) {
+    switch (detectPlatform(parsedUrl.toString(protocol))) {
       case 'gitlab':
         parsedUrl.token = token.includes(':')
           ? token
           : `gitlab-ci-token:${token}`;
+        break;
+      case 'github':
+        parsedUrl.token = token.includes(':')
+          ? token
+          : `x-access-token:${token}`;
+        break;
     }
   }
 
-  const protocol = regEx(/^https?$/).exec(parsedUrl.protocol)
-    ? parsedUrl.protocol
-    : 'https';
   return parsedUrl.toString(protocol);
 }
 
 export function getRemoteUrlWithToken(url: string, hostType?: string): string {
-  const hostRule = hostRules.find({ url, hostType });
+  let coercedUrl: string;
+
+  try {
+    coercedUrl = getHttpUrl(url);
+  } catch {
+    logger.warn(`Attempting to use non-git url '${url}' for git operations`);
+
+    coercedUrl = url;
+  }
+
+  const hostRule = hostRules.find({ url: coercedUrl, hostType });
 
   if (hostRule?.token) {
     logger.debug(`Found hostRules token for url ${url}`);

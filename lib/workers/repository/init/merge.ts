@@ -22,6 +22,7 @@ import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
+import * as throttle from '../../../util/http/throttle';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -222,7 +223,11 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config),
+    await presets.resolveConfigPresets(
+      decryptedConfig,
+      config,
+      config.ignorePresets
+    ),
     repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
@@ -258,6 +263,7 @@ export async function mergeRenovateConfig(
     }
     // host rules can change concurrency
     queue.clear();
+    throttle.clear();
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);

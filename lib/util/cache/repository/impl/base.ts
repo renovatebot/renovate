@@ -1,17 +1,13 @@
-import { promisify } from 'util';
-import zlib from 'zlib';
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import { compress, decompress } from '../../../compress';
 import * as schema from '../../../schema';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
 import { RepoCacheRecord, RepoCacheV13 } from '../schemas';
 import type { RepoCache, RepoCacheData } from '../types';
-
-const compress = promisify(zlib.brotliCompress);
-const decompress = promisify(zlib.brotliDecompress);
 
 export abstract class RepoCacheBase implements RepoCache {
   protected platform = GlobalConfig.get('platform')!;
@@ -32,9 +28,7 @@ export abstract class RepoCacheBase implements RepoCache {
       logger.debug('Repository cache fingerprint is invalid');
       return;
     }
-    const compressed = Buffer.from(oldCache.payload, 'base64');
-    const uncompressed = await decompress(compressed);
-    const jsonStr = uncompressed.toString('utf8');
+    const jsonStr = await decompress(oldCache.payload);
     this.data = JSON.parse(jsonStr);
     this.oldHash = oldCache.hash;
   }
@@ -73,8 +67,7 @@ export abstract class RepoCacheBase implements RepoCache {
     const repository = this.repository;
     const fingerprint = this.fingerprint;
 
-    const compressedPayload = await compress(jsonStr);
-    const payload = compressedPayload.toString('base64');
+    const payload = await compress(jsonStr);
 
     await this.write({
       revision,

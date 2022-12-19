@@ -1,10 +1,11 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, mocked } from '../../../../test/util';
+import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
+import type { StatusResult } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
@@ -14,6 +15,7 @@ jest.mock('../../datasource');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
+jest.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
 
@@ -108,7 +110,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -137,7 +139,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config: { ...config, updateType: 'lockFileMaintenance' },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -171,7 +173,7 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -201,12 +203,252 @@ describe('modules/manager/helmv3/artifacts', () => {
         newPackageFileContent: chartFile,
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         artifactError: {
           lockFile: 'Chart.lock',
           stderr: 'not found',
         },
+      },
+    ]);
+  });
+
+  it('add sub chart artifacts to file list if Chart.lock exists', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as never);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce(ociLockFile2 as never);
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz'],
+      deleted: ['charts/example-1.6.2.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    const test = await helmv3.updateArtifacts({
+      packageFileName: 'Chart.yaml',
+      updatedDeps,
+      newPackageFileContent: chartFile,
+      config: {
+        postUpdateOptions: ['helmUpdateSubChartArchives'],
+        ...config,
+      },
+    });
+    expect(test).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Chart.lock',
+          contents: ociLockFile2,
+        },
+      },
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
+  });
+
+  it('add sub chart artifacts to file list if Chart.lock is missing', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz'],
+      deleted: ['charts/example-1.6.2.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
+  });
+
+  it('add sub chart artifacts without old archives', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
+  });
+
+  it('add sub chart artifacts and ignore files outside of the chart folder', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
+      deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'charts/example-1.9.2.tgz',
+          contents: undefined,
+        },
+      },
+      {
+        file: {
+          type: 'deletion',
+          path: 'charts/example-1.6.2.tgz',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
+      },
+    ]);
+  });
+
+  it('skip artifacts which are not lock files or in the chart folder', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
+    const execSnapshots = mockExecAll();
+    fs.privateCacheDir.mockReturnValue(
+      '/tmp/renovate/cache/__renovate-private-cache'
+    );
+    fs.getParentDir.mockReturnValue('');
+
+    // sub chart artifacts
+    fs.getSiblingFileName.mockReturnValueOnce('charts');
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['example/example.tgz'],
+    } as StatusResult);
+    const updatedDeps = [{ depName: 'dep1' }];
+    expect(
+      await helmv3.updateArtifacts({
+        packageFileName: 'Chart.yaml',
+        updatedDeps,
+        newPackageFileContent: chartFile,
+        config: {
+          postUpdateOptions: ['helmUpdateSubChartArchives'],
+          ...config,
+        },
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'helm repo add repo-test --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories https://gitlab.com/api/v4/projects/xxxxxxx/packages/helm/stable',
+      },
+      {
+        cmd: "helm dependency update --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories ''",
       },
     ]);
   });
@@ -231,7 +473,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -268,7 +510,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: { stable: 'the_stable_url', repo1: 'the_repo1_url' },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -318,7 +560,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -364,7 +606,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           registryAliases: {},
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -407,7 +649,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',
@@ -454,7 +696,7 @@ describe('modules/manager/helmv3/artifacts', () => {
           },
         },
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       {
         file: {
           type: 'addition',

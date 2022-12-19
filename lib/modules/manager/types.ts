@@ -48,7 +48,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   depName?: string;
   depType?: string;
   manager?: string | null;
-  packageJsonType?: 'app' | 'library';
   rangeStrategy: RangeStrategy;
 }
 
@@ -78,7 +77,6 @@ export interface PackageFile<T = Record<string, any>>
   npmrc?: string;
   packageFile?: string | null;
   packageJsonName?: string;
-  packageJsonType?: 'app' | 'library';
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
@@ -99,6 +97,7 @@ export interface Package<T> extends ManagerData<T> {
   target?: string;
   versioning?: string;
   dataType?: string;
+  enabled?: boolean;
 
   // npm manager
   bumpVersion?: ReleaseType | string;
@@ -137,6 +136,7 @@ export interface LookupUpdate {
   checksumUrl?: string;
   downloadUrl?: string;
   releaseTimestamp?: any;
+  registryUrl?: string;
 }
 
 export interface PackageDependency<T = Record<string, any>> extends Package<T> {
@@ -149,7 +149,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   fixedVersion?: string;
   currentVersion?: string;
-  lockedVersion?: string | null;
+  lockedVersion?: string;
   propSource?: string;
   registryUrls?: string[] | null;
   rangeStrategy?: RangeStrategy;
@@ -198,9 +198,9 @@ export interface UpdateArtifactsResult {
   file?: FileChange;
 }
 
-export interface UpdateArtifact {
+export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
-  updatedDeps: PackageDependency[];
+  updatedDeps: PackageDependency<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
@@ -220,7 +220,7 @@ export interface UpdateLockedConfig {
   lockFile: string;
   lockFileContent?: string;
   depName: string;
-  currentVersion?: string;
+  currentVersion: string;
   newVersion: string;
   allowParentUpdates?: boolean;
   allowHigherOrRemoved?: boolean;

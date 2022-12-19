@@ -4,15 +4,17 @@ import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+const apiData: Record<string, string[]> = JSON5.parse(
+  dataFiles.get('data/kubernetes-api.json5')!
+);
+
+export const supportedApis = new Set(Object.keys(apiData));
+
 export class KubernetesApiDatasource extends Datasource {
   static readonly id = 'kubernetes-api';
-  private readonly kubernetesApiVersions: Record<string, string[]>;
 
   constructor() {
     super(KubernetesApiDatasource.id);
-    this.kubernetesApiVersions = JSON5.parse(
-      dataFiles.get('data/kubernetes-api.json5')!
-    );
   }
 
   override defaultVersioning = kubernetesApiVersioning.id;
@@ -20,7 +22,7 @@ export class KubernetesApiDatasource extends Datasource {
   getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const versions = this.kubernetesApiVersions[packageName];
+    const versions = apiData[packageName];
     if (versions) {
       const releases = versions.map((version) => ({ version }));
       return Promise.resolve({ releases });

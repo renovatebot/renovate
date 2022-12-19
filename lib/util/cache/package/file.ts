@@ -2,6 +2,7 @@ import cacache from 'cacache';
 import { DateTime } from 'luxon';
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { compress, decompress } from '../../compress';
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
@@ -27,7 +28,12 @@ export async function get<T = never>(
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
-        return cachedValue.value;
+        // istanbul ignore if
+        if (!cachedValue.compress) {
+          return cachedValue.value;
+        }
+        const res = await decompress(cachedValue.value);
+        return JSON.parse(res);
       }
       await rm(namespace, key);
     }
@@ -51,7 +57,8 @@ export async function set(
     cacheFileName,
     getKey(namespace, key),
     JSON.stringify({
-      value,
+      compress: true,
+      value: await compress(JSON.stringify(value)),
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     })
   );

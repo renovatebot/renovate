@@ -66,7 +66,7 @@ describe('workers/repository/stats', () => {
       memCache.get.mockImplementationOnce(() => httpStats as any);
       expect(printRequestStats()).toBeUndefined();
       expect(log.trace).toHaveBeenCalledOnce();
-      expect(log.debug).toHaveBeenCalledTimes(3);
+      expect(log.debug).toHaveBeenCalledTimes(2);
       expect(log.trace.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "allRequests": [
@@ -127,21 +127,23 @@ describe('workers/repository/stats', () => {
           },
         }
       `);
-      expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
+      expect(log.debug.mock.calls[0][0]).toMatchInlineSnapshot(`
         {
           "get": {
             "avgMs": 40,
             "count": 4,
             "maxMs": 100,
+            "medianMs": 20,
           },
           "set": {
             "avgMs": 70,
             "count": 3,
             "maxMs": 110,
+            "medianMs": 80,
           },
         }
       `);
-      expect(log.debug.mock.calls[2][0]).toMatchInlineSnapshot(`
+      expect(log.debug.mock.calls[1][0]).toMatchInlineSnapshot(`
         {
           "hostStats": {
             "api.github.com": {

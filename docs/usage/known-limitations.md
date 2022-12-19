@@ -23,7 +23,7 @@ For scheduled action to take place, both these need to happen:
 
 ### GitHub hosted app scheduled jobs
 
-On the GitHub hosted app Mend checks each active repository approximately every 3 hours, if no activity has been seen before then (merged PRs, etc).
+On the GitHub hosted app Mend checks each active repository roughly every three hours, if no activity has been seen before then (merged PRs, etc).
 
 For this reason, you should set your schedule window to at least three or four hours.
 This makes it likely that Renovate bot checks your repository at least once during the schedule.

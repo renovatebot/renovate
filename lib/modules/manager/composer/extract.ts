@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { api as semverComposer } from '../../versioning/composer';
 import type { PackageDependency, PackageFile } from '../types';
@@ -86,7 +87,7 @@ export async function extractPackageFile(
   try {
     composerJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
   const repositories: Record<string, Repo> = {};
@@ -98,7 +99,7 @@ export async function extractPackageFile(
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
   let lockParsed: ComposerLock | undefined;
   if (lockContents) {
-    logger.debug({ packageFile: fileName }, 'Found composer lock file');
+    logger.debug(`Found composer lock file ${fileName}`);
     res.lockFiles = [lockfilePath];
     try {
       lockParsed = JSON.parse(lockContents) as ComposerLock;
@@ -111,9 +112,6 @@ export async function extractPackageFile(
   if (composerJson.repositories) {
     parseRepositories(composerJson.repositories, repositories, registryUrls);
   }
-  if (registryUrls.length !== 0) {
-    res.registryUrls = registryUrls;
-  }
 
   const deps: PackageDependency[] = [];
   const depTypes: ('require' | 'require-dev')[] = ['require', 'require-dev'];
@@ -124,45 +122,64 @@ export async function extractPackageFile(
           composerJson[depType]!
         )) {
           const currentValue = version.trim();
-          // Default datasource and packageName
-          let datasource = PackagistDatasource.id;
-          let packageName = depName;
+          if (depName === 'php') {
+            deps.push({
+              depType,
+              depName,
+              currentValue,
+              datasource: GithubTagsDatasource.id,
+              packageName: 'php/php-src',
+              extractVersion: '^php-(?<version>.*)$',
+            });
+          } else {
+            // Default datasource and packageName
+            let datasource = PackagistDatasource.id;
+            let packageName = depName;
 
-          // Check custom repositories by type
-          if (repositories[depName]) {
-            switch (repositories[depName].type) {
-              case 'vcs':
-              case 'git':
-                datasource = GitTagsDatasource.id;
-                packageName = repositories[depName].url;
-                break;
+            // Check custom repositories by type
+            if (repositories[depName]) {
+              switch (repositories[depName].type) {
+                case 'vcs':
+                case 'git':
+                  datasource = GitTagsDatasource.id;
+                  packageName = repositories[depName].url;
+                  break;
+              }
             }
-          }
-          const dep: PackageDependency = {
-            depType,
-            depName,
-            currentValue,
-            datasource,
-          };
-          if (depName !== packageName) {
-            dep.packageName = packageName;
-          }
-          if (!depName.includes('/')) {
-            dep.skipReason = 'unsupported';
-          }
-          if (lockParsed) {
-            const lockField =
-              depType === 'require'
-                ? 'packages'
-                : /* istanbul ignore next */ 'packages-dev';
-            const lockedDep = lockParsed[lockField]?.find(
-              (item) => item.name === dep.depName
-            );
-            if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
-              dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
+            const dep: PackageDependency = {
+              depType,
+              depName,
+              currentValue,
+              datasource,
+            };
+            if (depName !== packageName) {
+              dep.packageName = packageName;
             }
+            if (!depName.includes('/')) {
+              dep.skipReason = 'unsupported';
+            }
+            if (lockParsed) {
+              const lockField =
+                depType === 'require'
+                  ? 'packages'
+                  : /* istanbul ignore next */ 'packages-dev';
+              const lockedDep = lockParsed[lockField]?.find(
+                (item) => item.name === dep.depName
+              );
+              if (lockedDep && semverComposer.isVersion(lockedDep.version)) {
+                dep.lockedVersion = lockedDep.version.replace(regEx(/^v/i), '');
+              }
+            }
+            if (
+              !dep.skipReason &&
+              (!repositories[depName] ||
+                repositories[depName].type === 'composer') &&
+              registryUrls.length !== 0
+            ) {
+              dep.registryUrls = registryUrls;
+            }
+            deps.push(dep);
           }
-          deps.push(dep);
         }
       } catch (err) /* istanbul ignore next */ {
         logger.debug({ fileName, depType, err }, 'Error parsing composer.json');

@@ -54,7 +54,7 @@ This section explains some common use cases where having the Dependency Dashboar
 Renovate's Dependency Dashboard shows an overview of all updates that are still "to do".
 
 If you close an update PR from Renovate without merging, the Dashboard will list this update in the Closed/Ignored section.
-If you later change your mind about the update, you can get a new PR by clicking the corresponding checkbox on the dashboard.
+If you later change your mind about the update, you can get a new PR by selecting the corresponding checkbox on the dashboard.
 
 ### Dependency Dashboard Approval workflow
 

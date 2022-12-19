@@ -4,11 +4,10 @@ import type { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import type { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
 import type { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import { PlatformId } from '../../../constants';
 import type { HostRule } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 
-const hostType = PlatformId.Azure;
+const hostType = 'azure';
 let endpoint: string;
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {

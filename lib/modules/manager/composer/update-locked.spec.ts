@@ -14,6 +14,7 @@ describe('modules/manager/composer/update-locked', () => {
       lockFileContent,
       depName: 'awesome/git',
       newVersion: '1.2.0',
+      currentVersion: '0.9.0',
     };
     expect(updateLockedDependency(config).status).toBe('already-updated');
   });
@@ -25,6 +26,7 @@ describe('modules/manager/composer/update-locked', () => {
       lockFileContent,
       depName: 'awesome/git',
       newVersion: '1.0.0',
+      currentVersion: '0.9.0',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });

@@ -45,6 +45,16 @@ export default ({ range, to }: { range: string; to: string }): string => {
       return part;
     }
 
+    if (part.version.split('.').length > to.split('.').length) {
+      const diff = part.version.split('.').length - to.split('.').length;
+      const versionToReplace = [to, ...Array(diff).fill('0')].join('.');
+      const replacement = replacePart(part, versionToReplace);
+      return {
+        ...replacement,
+        version: replacement.version.split('.').slice(0, -diff).join('.'),
+      };
+    }
+
     return replacePart(part, to);
   });
 

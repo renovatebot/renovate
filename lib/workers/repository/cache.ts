@@ -9,10 +9,11 @@ import type {
 } from '../../util/cache/repository/types';
 import {
   getBranchCommit,
-  getBranchParentSha,
   isBranchBehindBase,
+  isBranchConflicted,
   isBranchModified,
 } from '../../util/git';
+import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 
 function generateBranchUpgradeCache(
@@ -51,21 +52,20 @@ async function generateBranchCache(
   const { baseBranch, branchName } = branch;
   try {
     const sha = getBranchCommit(branchName) ?? null;
-    // TODO: fix types (#7154)
-    const baseBranchSha = getBranchCommit(baseBranch!)!;
+    const baseBranchSha = getBranchCommit(baseBranch);
+    const pristine = getCachedPristineResult(branchName);
     let prNo = null;
-    let parentSha = null;
     let isModified = false;
     let isBehindBase = false;
+    let isConflicted = false;
     if (sha) {
-      parentSha = await getBranchParentSha(branchName);
       const branchPr = await platform.getBranchPr(branchName);
       if (branchPr) {
         prNo = branchPr.number;
       }
       isModified = await isBranchModified(branchName);
-      // TODO: fix types (#7154)
-      isBehindBase = await isBranchBehindBase(branchName, baseBranch!);
+      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
@@ -75,13 +75,13 @@ async function generateBranchCache(
     return {
       automerge,
       baseBranchSha,
-      // TODO: fix types (#7154)
-      baseBranch: baseBranch!,
+      baseBranch,
       branchFingerprint,
       branchName,
       isBehindBase,
+      isConflicted,
       isModified,
-      parentSha,
+      pristine,
       prNo,
       sha,
       upgrades,

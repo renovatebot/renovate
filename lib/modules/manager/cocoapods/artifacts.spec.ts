@@ -144,7 +144,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
-    ).toMatchSnapshot([{ file: { contents: 'New Podfile' } }]);
+    ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -170,7 +170,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       { file: { type: 'addition', path: 'Podfile.lock' } },
       { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
       { file: { type: 'addition', path: 'Pods/New' } },
@@ -241,7 +241,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot([
+    expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/ruby:2.7.4' },
       {
         cmd:
@@ -285,7 +285,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot([
+    expect(execSnapshots).toMatchObject([
       { cmd: 'docker pull renovate/ruby:latest' },
       {
         cmd:

@@ -8,8 +8,6 @@ describe('modules/platform/bitbucket/comments', () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
   beforeEach(() => {
-    jest.clearAllMocks();
-
     setBaseUrl(baseUrl);
   });
 

@@ -1,6 +1,5 @@
 import { git, platform } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 import { shouldReuseExistingBranch } from './reuse';
 
@@ -11,7 +10,7 @@ describe('workers/repository/update/branch/reuse', () => {
     const pr: Pr = {
       number: 42,
       sourceBranch: 'master',
-      state: PrState.Open,
+      state: 'open',
       title: 'any',
     };
     let config: BranchConfig;
@@ -20,6 +19,7 @@ describe('workers/repository/update/branch/reuse', () => {
       config = {
         manager: 'some-manager',
         branchName: 'renovate/some-branch',
+        baseBranch: 'base',
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
         upgrades: [],

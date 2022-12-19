@@ -36,7 +36,9 @@ export async function getUpdatedPackageFiles(
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
     const depName = upgrade.depName!;
+    // TODO: fix types, can be undefined (#7154)
     const newVersion = upgrade.newVersion!;
+    const currentVersion = upgrade.currentVersion!;
     const updateLockedDependency = get(manager, 'updateLockedDependency')!;
     packageFileManagers[packageFile] = manager;
     packageFileUpdatedDeps[packageFile] =
@@ -81,6 +83,7 @@ export async function getUpdatedPackageFiles(
         ...upgrade,
         depName,
         newVersion,
+        currentVersion,
         packageFile,
         packageFileContent: packageFileContent!,
         lockFile,
@@ -100,6 +103,9 @@ export async function getUpdatedPackageFiles(
       }
       if (files) {
         updatedFileContents = { ...updatedFileContents, ...files };
+        Object.keys(files).forEach(
+          (file) => delete nonUpdatedFileContents[file]
+        );
       }
       if (status === 'update-failed' || status === 'unsupported') {
         upgrade.remediationNotPossible = true;
@@ -110,6 +116,7 @@ export async function getUpdatedPackageFiles(
           ...upgrade,
           depName,
           newVersion,
+          currentVersion,
           packageFile,
           packageFileContent: packageFileContent!,
           lockFile,
@@ -118,7 +125,9 @@ export async function getUpdatedPackageFiles(
         });
         if (status === 'unsupported') {
           // incompatible lock file
-          nonUpdatedFileContents[packageFile] = packageFileContent!;
+          if (!updatedFileContents[packageFile]) {
+            nonUpdatedFileContents[packageFile] = packageFileContent!;
+          }
         } else if (status === 'already-updated') {
           logger.debug(
             `Upgrade of ${depName} to ${newVersion} is already done in existing branch`
@@ -137,6 +146,9 @@ export async function getUpdatedPackageFiles(
           }
           if (files) {
             updatedFileContents = { ...updatedFileContents, ...files };
+            Object.keys(files).forEach(
+              (file) => delete nonUpdatedFileContents[file]
+            );
           }
         }
       } else {
@@ -144,7 +156,9 @@ export async function getUpdatedPackageFiles(
           { manager },
           'isLockFileUpdate without updateLockedDependency'
         );
-        nonUpdatedFileContents[packageFile] = packageFileContent!;
+        if (!updatedFileContents[packageFile]) {
+          nonUpdatedFileContents[packageFile] = packageFileContent!;
+        }
       }
     } else {
       const bumpPackageVersion = get(manager, 'bumpPackageVersion');
@@ -169,6 +183,7 @@ export async function getUpdatedPackageFiles(
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res!;
+            delete nonUpdatedFileContents[packageFile];
           }
           continue;
         } else if (reuseExistingBranch) {
@@ -223,10 +238,12 @@ export async function getUpdatedPackageFiles(
         }
         logger.debug(`Updating ${depName} in ${packageFile || lockFile}`);
         updatedFileContents[packageFile] = newContent;
+        delete nonUpdatedFileContents[packageFile];
       }
       if (newContent === packageFileContent) {
         if (upgrade.manager === 'git-submodules') {
           updatedFileContents[packageFile] = newContent;
+          delete nonUpdatedFileContents[packageFile];
         }
       }
     }

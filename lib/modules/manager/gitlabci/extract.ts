@@ -130,8 +130,7 @@ export async function extractAllPackageFiles(
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
-      logger.debug({ file }, 'Empty or non existent gitlabci file');
-
+      logger.debug(`Empty or non existent gitlabci file ${file}`);
       continue;
     }
     let doc: GitlabPipeline;

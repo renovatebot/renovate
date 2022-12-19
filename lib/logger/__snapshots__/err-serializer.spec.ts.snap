@@ -28,6 +28,7 @@ exports[`logger/err-serializer got sanitize http error 1`] = `
       "content-type": "application/json",
     },
     "httpVersion": null,
+    "retryCount": 0,
     "statusCode": 412,
     "statusMessage": "Precondition Failed",
   },

@@ -56,16 +56,22 @@ export async function checkYarnrc(
       const yarnBinaryExists = yarnPath
         ? await localPathIsFile(yarnPath)
         : false;
+      let scrubbedYarnrc = yarnrc
+        .replace('--install.pure-lockfile true', '')
+        .replace('--install.frozen-lockfile true', '');
       if (!yarnBinaryExists) {
-        const scrubbedYarnrc = yarnrc.replace(
+        scrubbedYarnrc = scrubbedYarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
+        yarnPath = null;
+      }
+      if (yarnrc !== scrubbedYarnrc) {
+        logger.debug(`Writing scrubbed .yarnrc to ${lockFileDir}`);
         await writeLocalFile(
           upath.join(lockFileDir, '.yarnrc'),
           scrubbedYarnrc
         );
-        yarnPath = null;
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -93,7 +99,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades),
+      await getNodeToolConstraint(config, upgrades, lockFileDir),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate

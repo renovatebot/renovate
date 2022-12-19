@@ -196,7 +196,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://api.github.com/repos/some/yet-other-repository/releases',
@@ -231,7 +231,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://gitlab.com/api/v4/projects/some%2Fyet-other-repository/releases',
@@ -270,7 +270,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         },
         {} as ChangeLogRelease
       );
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           notesSourceUrl:
             'https://my.custom.domain/api/v4/projects/some%2Fyet-other-repository/releases',
@@ -288,7 +288,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('getReleaseNotes()', () => {
-    it('should return null for release notes without body', async () => {
+    it('should return null for release notes without body and name', async () => {
       httpMock
         .scope('https://api.github.com/')
         .get('/repos/some/repository/releases?per_page=100')
@@ -341,6 +341,141 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         tag: '1.0.1',
         url: 'https://github.com/some/other-repository/releases/1.0.1',
       });
+    });
+
+    it('gets release notes with name ""', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            name: 'some release name',
+            body: undefined,
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        {
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
+      );
+      expect(res).toEqual({
+        body: '',
+        id: undefined,
+        name: 'some release name',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+    });
+
+    it('filters release note name when same as version', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0`, name: 'Release v1.0.0' },
+          {
+            tag_name: `${prefix}1.0.1`,
+            name: '1.0.1',
+            body: 'some body',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        {
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
+      );
+      expect(res).toEqual({
+        body: 'some body\n',
+        id: undefined,
+        name: undefined,
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+    });
+
+    it('strips release note with version prefixed name', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            name: 'v1.0.1 some release',
+            body: 'some body',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        {
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
+      );
+      expect(res).toEqual({
+        body: 'some body\n',
+        id: undefined,
+        name: 'some release',
+        notesSourceUrl:
+          'https://api.github.com/repos/some/other-repository/releases',
+        tag: '1.0.1',
+        url: 'https://github.com/some/other-repository/releases/1.0.1',
+      });
+    });
+
+    it('release notes without body and name that matches version tag returns null', async () => {
+      const prefix = '';
+      httpMock
+        .scope('https://api.github.com/')
+        .get('/repos/some/other-repository/releases?per_page=100')
+        .reply(200, [
+          { tag_name: `${prefix}1.0.0` },
+          {
+            tag_name: `${prefix}1.0.1`,
+            name: '1.0.1',
+          },
+        ]);
+      const res = await getReleaseNotes(
+        {
+          ...githubProject,
+          repository: 'some/other-repository',
+          depName: 'other',
+        },
+        {
+          version: '1.0.1',
+          gitRef: '1.0.1',
+        } as ChangeLogRelease,
+        {} as BranchUpgradeConfig
+      );
+      expect(res).toBeNull();
     });
 
     it('gets release notes with body "v"', async () => {
