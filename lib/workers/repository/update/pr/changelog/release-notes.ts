@@ -36,7 +36,7 @@ export async function getReleaseList(
       case 'github':
         return await github.getReleaseList(project, release);
       case 'azure':
-        logger.info('Azure DevOps Releases are not supported.');
+        logger.debug('Azure DevOps Releases are not supported.');
         return [];
 
       default:
