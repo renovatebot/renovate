@@ -26,7 +26,7 @@ If you don’t have Java installed, the Gradle tests will be skipped.
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
@@ -91,6 +91,8 @@ To ensure everything is working properly on your end, you must:
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
+
+Do not worry about the token error for now, as you will be given instructions on how to configure the token a little later down in this document.
 
 You only need to do these steps once.
 
@@ -215,10 +217,10 @@ Also create documentation for the option in the `docs/usage/configuration-option
 It's really easy to debug Renovate with the help of Chrome's inspect tool.
 Here's an example:
 
-1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
+1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
 1. Run Renovate using `yarn debug ...` instead of `yarn start ...`
-1. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 

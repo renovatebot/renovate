@@ -1,14 +1,13 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum TokenType {
-  Number = 1,
-  String,
-}
+export const TokenType = {
+  Number: 1,
+  String: 2,
+};
 
 type Token = {
-  type: TokenType;
+  type: number;
   val: string | number;
 };
 
@@ -86,17 +85,16 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierRank {
-  Dev = -1,
-  Default = 0,
-  RC,
-  Snapshot,
-  Final,
-  GA,
-  Release,
-  SP,
-}
+export const QualifierRank = {
+  Dev: -1,
+  Default: 0,
+  RC: 1,
+  Snapshot: 2,
+  Final: 3,
+  GA: 4,
+  Release: 5,
+  SP: 6,
+} as const;
 
 export function qualifierRank(input: string): number {
   const val = input.toLowerCase();

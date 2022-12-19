@@ -7,7 +7,6 @@ import {
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { PrState } from '../../../../types';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
@@ -45,7 +44,7 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
   return platform.findPr({
     branchName: config.onboardingBranch!,
     prTitle: config.onboardingPrTitle,
-    state: PrState.NotOpen,
+    state: '!open',
   });
 }
 

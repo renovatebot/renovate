@@ -260,10 +260,14 @@ export async function updateArtifacts({
         ...getGitEnvironmentVariables(),
       },
       docker: {
-        image: 'go',
-        tagConstraint: goConstraints,
-        tagScheme: 'npm',
+        image: 'sidecar',
       },
+      toolConstraints: [
+        {
+          toolName: 'golang',
+          constraint: goConstraints,
+        },
+      ],
     };
 
     const execCommands: string[] = [];

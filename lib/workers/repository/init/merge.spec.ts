@@ -163,6 +163,24 @@ describe('workers/repository/init/merge', () => {
         configFileRaw: '{"something":"new"}',
       });
     });
+
+    it('finds .renovaterc.json5', async () => {
+      git.getFileList.mockResolvedValue(['package.json', '.renovaterc.json5']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      platform.getRawFile.mockResolvedValueOnce('{"something":"new"}');
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json5',
+        configFileParsed: {},
+        configFileRaw: '{}',
+      });
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: '.renovaterc.json5',
+        configFileParsed: {
+          something: 'new',
+        },
+        configFileRaw: '{"something":"new"}',
+      });
+    });
   });
 
   describe('checkForRepoConfigError', () => {
@@ -227,7 +245,7 @@ describe('workers/repository/init/merge', () => {
         automerge: true,
         packageRules: [
           {
-            matchSourceUrlPrefixes: ['https://github.com/facebook/react'],
+            matchSourceUrls: ['https://github.com/facebook/react'],
           },
         ],
       });
