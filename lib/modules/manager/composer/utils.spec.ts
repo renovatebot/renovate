@@ -462,5 +462,13 @@ describe('modules/manager/composer/utils', () => {
         takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
       ).toEqual(githubToken);
     });
+
+    it('take git-tags fine grained token', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'github_pat_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(gitTagsGithubToken);
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked, partial } from '../../../../test/util';
+import { env, fs, git, logger, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -290,6 +290,118 @@ describe('modules/manager/composer/artifacts', () => {
         },
       },
     ]);
+  });
+
+  it('hostRule for GithubPersonalAccessToken log token type', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Using GitHub Personal Access Token'
+    );
+  });
+
+  it('hostRule for GithubServerToServerToken log token type', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghs_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Using GitHub Server-to-Server token'
+    );
+  });
+
+  it('hostRule with GithubFineGrainedPersonalAccessToken log token type', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'github_pat_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Using GitHub Fine-grained Personal Access Token'
+    );
+  });
+
+  it('hostRule with unknown github token type log token type', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(logger.logger.debug).toHaveBeenCalledWith(
+      'Using unknown GitHub token type'
+    );
   });
 
   it('returns updated composer.lock', async () => {
