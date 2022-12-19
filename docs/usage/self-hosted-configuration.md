@@ -513,6 +513,17 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 ## optimizeForDisabled
 
+When this option is `true`, Renovate will do the following during repository initialization:
+
+- Attempt to fetch the default config file (`renovate.json`)
+- Check if the file contains `"enabled": false`
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+This option is only useful where the ratio of disabled repos is quite high.
+It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
+
 ## password
 
 ## persistRepoData
@@ -763,7 +774,11 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+By default, Renovate processes each repository that it finds.
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
+
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

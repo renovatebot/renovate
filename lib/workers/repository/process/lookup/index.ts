@@ -95,6 +95,7 @@ export async function lookupUpdates(
       }
 
       res.sourceUrl = dependency?.sourceUrl;
+      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
       }

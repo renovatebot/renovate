@@ -9,9 +9,6 @@ import {
   DeleteCommentContentCommand,
   DeleteCommentContentInput,
   DeleteCommentContentOutput,
-  DescribePullRequestEventsCommand,
-  DescribePullRequestEventsInput,
-  DescribePullRequestEventsOutput,
   GetCommentsForPullRequestCommand,
   GetCommentsForPullRequestInput,
   GetCommentsForPullRequestOutput,
@@ -30,16 +27,9 @@ import {
   ListRepositoriesCommand,
   ListRepositoriesInput,
   ListRepositoriesOutput,
-  // MergeBranchesByFastForwardCommand,
-  // MergeBranchesByFastForwardInput,
-  // MergeBranchesByFastForwardOutput,
-  // MergeBranchesBySquashCommand,
-  // MergeBranchesBySquashInput,
-  // MergeBranchesBySquashOutput,
   PostCommentForPullRequestCommand,
   PostCommentForPullRequestInput,
   PostCommentForPullRequestOutput,
-  PullRequestEventType,
   PullRequestStatusEnum,
   UpdateCommentCommand,
   UpdateCommentInput,
@@ -54,7 +44,7 @@ import {
   UpdatePullRequestTitleInput,
   UpdatePullRequestTitleOutput,
 } from '@aws-sdk/client-codecommit';
-import type { Credentials } from '@aws-sdk/types';
+import type { RepositoryMetadata } from '@aws-sdk/client-codecommit/dist-types/models/models_0';
 import is from '@sindresorhus/is';
 import * as aws4 from 'aws4';
 import { REPOSITORY_UNINITIATED } from '../../../constants/error-messages';
@@ -62,15 +52,9 @@ import { logger } from '../../../logger';
 
 let codeCommitClient: CodeCommitClient;
 
-export function buildCodeCommitClient(
-  region: string,
-  credentials: Credentials
-): void {
+export function buildCodeCommitClient(): void {
   if (!codeCommitClient) {
-    codeCommitClient = new CodeCommitClient({
-      region,
-      credentials,
-    });
+    codeCommitClient = new CodeCommitClient({});
   }
 
   // istanbul ignore if
@@ -90,11 +74,9 @@ export async function deleteComment(
 }
 
 export async function getPrComments(
-  repositoryName: string,
   pullRequestId: string
 ): Promise<GetCommentsForPullRequestOutput> {
   const input: GetCommentsForPullRequestInput = {
-    repositoryName,
     pullRequestId,
   };
   const cmd = new GetCommentsForPullRequestCommand(input);
@@ -128,18 +110,6 @@ export async function createPrComment(
     beforeCommitId,
   };
   const cmd = new PostCommentForPullRequestCommand(input);
-  return await codeCommitClient.send(cmd);
-}
-
-export async function getPrEvents(
-  pullRequestId: string
-): Promise<DescribePullRequestEventsOutput> {
-  const input: DescribePullRequestEventsInput = {
-    pullRequestId,
-    pullRequestEventType:
-      PullRequestEventType.PULL_REQUEST_SOURCE_REFERENCE_UPDATED,
-  };
-  const cmd = new DescribePullRequestEventsCommand(input);
   return await codeCommitClient.send(cmd);
 }
 
@@ -248,14 +218,13 @@ export async function getFile(
 }
 
 export async function listPullRequests(
-  repositoryName: string,
-  authorArn: string
+  repositoryName: string
 ): Promise<ListPullRequestsOutput> {
   const input: ListPullRequestsInput = {
     repositoryName,
-    authorArn,
     pullRequestStatus: PullRequestStatusEnum.OPEN,
   };
+
   const cmd = new ListPullRequestsCommand(input);
   return await codeCommitClient.send(cmd);
 }
@@ -306,19 +275,28 @@ export async function createPrApprovalRule(
 }
 
 export function getCodeCommitUrl(
-  region: string,
-  repoName: string,
-  credentials: Credentials
+  repoMetadata: RepositoryMetadata,
+  repoName: string
 ): string {
-  const signer = new aws4.RequestSigner(
-    {
-      service: 'codecommit',
-      host: `git-codecommit.${region}.amazonaws.com`,
-      method: 'GIT',
-      path: `v1/repos/${repoName}`,
-    },
-    credentials
-  );
+  logger.debug('get code commit url');
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    if (repoMetadata.cloneUrlHttp) {
+      return repoMetadata.cloneUrlHttp;
+    }
+    // shouldn't reach here, but just in case
+    return `https://git-codecommit.${
+      process.env.AWS_REGION ?? 'us-east-1'
+    }.amazonaws.com/v1/repos/${repoName}`;
+  }
+
+  const signer = new aws4.RequestSigner({
+    service: 'codecommit',
+    host: `git-codecommit.${
+      process.env.AWS_REGION ?? 'us-east-1'
+    }.amazonaws.com`,
+    method: 'GIT',
+    path: `v1/repos/${repoName}`,
+  });
   const dateTime = signer.getDateTime();
 
   /* istanbul ignore if */
@@ -326,11 +304,10 @@ export function getCodeCommitUrl(
     throw new Error(REPOSITORY_UNINITIATED);
   }
 
-  const accessKeyId = credentials.accessKeyId;
   const token = `${dateTime}Z${signer.signature()}`;
 
-  let username = `${accessKeyId}${
-    credentials.sessionToken ? `%${credentials.sessionToken}` : ''
+  let username = `${process.env.AWS_ACCESS_KEY_ID}${
+    process.env.AWS_SESSION_TOKEN ? `%${process.env.AWS_SESSION_TOKEN}` : ''
   }`;
 
   // massaging username with the session token,
@@ -338,5 +315,7 @@ export function getCodeCommitUrl(
   if (username.includes('/')) {
     username = username.replace(/\//g, '%2F');
   }
-  return `https://${username}:${token}@git-codecommit.${region}.amazonaws.com/v1/repos/${repoName}`;
+  return `https://${username}:${token}@git-codecommit.${
+    process.env.AWS_REGION ?? 'us-east-1'
+  }.amazonaws.com/v1/repos/${repoName}`;
 }

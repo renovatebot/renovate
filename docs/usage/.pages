@@ -19,6 +19,7 @@ nav:
       - 'PHP': 'php.md'
       - 'Python': 'python.md'
       - 'Ruby': 'ruby.md'
+      - 'Rust': 'rust.md'
   - Deep Dives:
       - 'Should you Pin your Javascript Dependencies?': 'dependency-pinning.md'
       - 'Config Template Editing': 'configuration-templates.md'
