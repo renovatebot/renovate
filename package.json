@@ -234,7 +234,7 @@
     "url-join": "4.0.1",
     "validate-npm-package-name": "5.0.0",
     "xmldoc": "1.2.0",
-    "zod": "3.19.1"
+    "zod": "3.20.0"
   },
   "optionalDependencies": {
     "re2": "1.18.0"
