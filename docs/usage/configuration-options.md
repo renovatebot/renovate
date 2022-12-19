@@ -18,6 +18,7 @@ You can store your Renovate configuration file in one of these locations:
 1. `.gitlab/renovate.json5`
 1. `.renovaterc`
 1. `.renovaterc.json`
+1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
 <!-- prettier-ignore -->
