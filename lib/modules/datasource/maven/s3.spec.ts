@@ -51,7 +51,7 @@ describe('modules/datasource/maven/s3', () => {
           Bucket: 'repobucket',
           Key: 'org/example/package/maven-metadata.xml',
         })
-        .resolvesOnce({ Body: meta })
+        .resolvesOnce({ Body: meta as never })
         .on(HeadObjectCommand, {
           Bucket: 'repobucket',
           Key: 'org/example/package/0.0.1/package-0.0.1.pom',

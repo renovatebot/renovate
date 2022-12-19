@@ -1,4 +1,5 @@
-import type { lexer } from 'good-enough-parser';
+import { lexer, query as q } from 'good-enough-parser';
+import { regEx } from '../../../../util/regex';
 import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
 
 export const REGISTRY_URLS = {
@@ -111,3 +112,90 @@ export function interpolateString(
 
   return resolvedSubstrings.join('');
 }
+
+export const qStringValue = q.str((ctx: Ctx, node: lexer.Token) => {
+  storeVarToken(ctx, node);
+  return ctx;
+});
+
+export const qStringValueAsSymbol = q.str((ctx: Ctx, node: lexer.Token) => {
+  const nodeTransformed: lexer.SymbolToken = {
+    ...node,
+    type: 'symbol',
+  };
+  storeVarToken(ctx, nodeTransformed);
+  return ctx;
+});
+
+// foo.bar["baz"] = "1.2.3"
+export const qVariableAssignmentIdentifier = q
+  .sym(storeVarToken)
+  .many(
+    q.alt(
+      q.op<Ctx>('.').sym(storeVarToken),
+      q.tree<Ctx>({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '[',
+        endsWith: ']',
+        search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
+      })
+    ),
+    0,
+    32
+  )
+  .handler(stripReservedPrefixFromKeyTokens);
+
+// foo.bar["baz"] -> "foo.bar.baz"
+export const qVariableAccessIdentifier =
+  qVariableAssignmentIdentifier.handler(coalesceVariable);
+
+// project.ext.getProperty(...)
+// extra.get(...)
+export const qPropertyAccessIdentifier = q
+  .opt(q.sym<Ctx>(regEx(/^(?:rootProject|project)$/)).op('.'))
+  .alt(
+    q.opt(q.sym<Ctx>('ext').op('.')).sym(regEx(/^(?:property|getProperty)$/)),
+    q
+      .sym<Ctx>(regEx(/^(?:extra|ext)$/))
+      .op('.')
+      .sym('get')
+  )
+  .tree({
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
+  });
+
+// "foo${bar}baz"
+export const qTemplateString = q
+  .tree({
+    type: 'string-tree',
+    maxDepth: 2,
+    preHandler: (ctx) => {
+      ctx.tmpTokenStore.templateTokens = [];
+      return ctx;
+    },
+    search: q.alt(
+      qStringValue.handler((ctx) => {
+        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
+        ctx.varTokens = [];
+        return ctx;
+      }),
+      qPropertyAccessIdentifier.handler((ctx) => {
+        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
+        ctx.varTokens = [];
+        return ctx;
+      }),
+      qVariableAccessIdentifier.handler((ctx) => {
+        ctx.tmpTokenStore.templateTokens?.push(...ctx.varTokens);
+        ctx.varTokens = [];
+        return ctx;
+      })
+    ),
+  })
+  .handler((ctx) => {
+    ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
+    return ctx;
+  });
