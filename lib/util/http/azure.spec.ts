@@ -14,7 +14,7 @@ describe('util/http/azure', () => {
     jest.resetAllMocks();
   });
 
-  it('gets paginated json', async () => {
+  it('gets paginated JSON', async () => {
     httpMock
       .scope(azureApiHost)
       .get('/some-org/some-project/some-path?$top=2')
