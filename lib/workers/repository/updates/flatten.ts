@@ -6,6 +6,7 @@ import {
 import type { RenovateConfig } from '../../../config/types';
 import { getDefaultConfig } from '../../../modules/datasource';
 import { get } from '../../../modules/manager';
+import { detectSemanticCommits } from '../../../util/git/semantic';
 import { applyPackageRules } from '../../../util/package-rules';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -185,6 +186,12 @@ export async function flattenUpdates(
           }
         }
       }
+    }
+  }
+  if (config.semanticCommits === 'auto') {
+    const semanticCommits = await detectSemanticCommits();
+    for (const update of updates) {
+      update.semanticCommits = semanticCommits;
     }
   }
   return updates
