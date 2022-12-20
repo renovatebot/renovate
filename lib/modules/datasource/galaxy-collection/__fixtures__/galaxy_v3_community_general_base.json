@@ -1,0 +1,13 @@
+{
+  "href": "/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/community/general/",
+  "namespace": "community",
+  "name": "general",
+  "deprecated": false,
+  "versions_url": "/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/community/general/versions/",
+  "highest_version": {
+    "href": "/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/community/general/versions/6.1.0/",
+    "version": "6.1.0"
+  },
+  "created_at": "2022-10-21T20:36:24.892616Z",
+  "updated_at": "2022-12-17T22:07:54.964715Z"
+}

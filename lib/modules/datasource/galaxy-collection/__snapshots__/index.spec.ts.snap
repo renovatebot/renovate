@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`modules/datasource/galaxy-collection/index getReleases processes real data 1`] = `
+exports[`modules/datasource/galaxy-collection/index getReleases - test real data from ansible-galaxy processes real data 1`] = `
 {
-  "registryUrl": "https://galaxy.ansible.com/",
+  "registryUrl": "https://galaxy.ansible.com",
   "releases": [
     {
       "dependencies": {},
@@ -39,9 +39,9 @@ exports[`modules/datasource/galaxy-collection/index getReleases processes real d
 }
 `;
 
-exports[`modules/datasource/galaxy-collection/index getReleases returns only valid versions if a version detail fails 1`] = `
+exports[`modules/datasource/galaxy-collection/index getReleases - test real data from ansible-galaxy returns only valid versions if a version detail fails 1`] = `
 {
-  "registryUrl": "https://galaxy.ansible.com/",
+  "registryUrl": "https://galaxy.ansible.com",
   "releases": [
     {
       "dependencies": {},
@@ -57,6 +57,32 @@ exports[`modules/datasource/galaxy-collection/index getReleases returns only val
       "newDigest": "a53eaf6a51987d30cc48ebcd20f0102dae0f17a7a02071928381e5a62951a0ed",
       "version": "1.2.0",
     },
+  ],
+}
+`;
+
+exports[`modules/datasource/galaxy-collection/index getReleases - test real data from automationhub / galaxy_ng processes real data 1`] = `
+{
+  "registryUrl": "https://automationhub.example.com/api/galaxy/content/community/v3/collections",
+  "releases": [
+    {
+      "dependencies": {},
+      "downloadUrl": "https://automationhub.example.com/api/galaxy/v3/plugin/ansible/content/community/collections/artifacts/community-general-6.0.1.tar.gz",
+      "isDeprecated": false,
+      "newDigest": "607b1f55e1b6e4afa60e0727b26af64d186ce3e6a8c189a594ff50e1875ffa41",
+      "version": "6.0.1",
+    },
+    {
+      "dependencies": {},
+      "downloadUrl": "https://automationhub.example.com/api/galaxy/v3/plugin/ansible/content/community/collections/artifacts/community-general-6.1.0.tar.gz",
+      "isDeprecated": false,
+      "newDigest": "8381b677a7264c13700e1e62bf49df8781ac8a0e72213dcca128aec39b2a8b93",
+      "version": "6.1.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/ansible-collections/community.general",
+  "tags": [
+    "community",
   ],
 }
 `;

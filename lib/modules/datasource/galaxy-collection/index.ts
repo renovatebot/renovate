@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
+import { regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -11,6 +12,11 @@ import type {
   VersionsProjectResult,
 } from './types';
 
+function isFullUrl(registryUrl: string): boolean {
+  const regex = regEx(/(http|https):[\\/]{2,}.*[\\/][a-z]+/);
+  return regex.test(registryUrl);
+}
+
 export class GalaxyCollectionDatasource extends Datasource {
   static readonly id = 'galaxy-collection';
 
@@ -18,9 +24,9 @@ export class GalaxyCollectionDatasource extends Datasource {
     super(GalaxyCollectionDatasource.id);
   }
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
-  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com/'];
+  override readonly defaultRegistryUrls = ['https://galaxy.ansible.com'];
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,
@@ -34,26 +40,36 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const baseUrl = `${registryUrl}api/v2/collections/${namespace}/${projectName}/`;
+    const galaxyUrl = isFullUrl(`${registryUrl}`)
+      ? `${registryUrl}`
+      : `${registryUrl}/api/v2/collections`;
+    const galaxyCollectionUrl = `${galaxyUrl}/${namespace}/${projectName}/`;
 
-    let baseUrlResponse: HttpResponse<BaseProjectResult>;
+    let galaxyUrlResponse: HttpResponse<BaseProjectResult>;
     try {
-      baseUrlResponse = await this.http.getJson<BaseProjectResult>(baseUrl);
+      galaxyUrlResponse = await this.http.getJson<BaseProjectResult>(
+        galaxyCollectionUrl
+      );
     } catch (err) {
       this.handleGenericErrors(err);
     }
 
-    if (!baseUrlResponse?.body) {
+    if (!galaxyUrlResponse?.body) {
       logger.warn(
         { dependency: packageName },
-        `Received invalid data from ${baseUrl}`
+        `Received invalid data from ${galaxyCollectionUrl}`
       );
       return null;
     }
 
-    const baseProject = baseUrlResponse.body;
+    const baseProject = galaxyUrlResponse.body;
+    // galaxy v2 / v3 detection
+    if (typeof baseProject.highest_version !== 'undefined') {
+      //v3
+      baseProject.latest_version = baseProject.highest_version;
+    } // else v2 -> no-op;
 
-    const versionsUrl = `${baseUrl}versions/`;
+    const versionsUrl = `${galaxyCollectionUrl}versions/`;
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {
@@ -65,6 +81,12 @@ export class GalaxyCollectionDatasource extends Datasource {
     }
 
     const versionsProject = versionsUrlResponse.body;
+
+    // galaxy v2 / v3 detection
+    if (typeof versionsProject.data !== 'undefined') {
+      //v3
+      versionsProject.results = versionsProject.data;
+    } // else v2 -> no-op;
 
     const releases: Release[] = versionsProject.results.map((value) => {
       const release: Release = {

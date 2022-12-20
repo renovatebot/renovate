@@ -1,0 +1,70 @@
+{
+  "version": "6.1.0",
+  "href": "/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/community/general/versions/6.1.0/",
+  "created_at": "2022-10-21T20:36:24.892616Z",
+  "updated_at": "2022-10-21T20:36:24.892633Z",
+  "requires_ansible": ">=2.11.0",
+  "artifact": {
+    "filename": "community-general-6.1.0.tar.gz",
+    "sha256": "8381b677a7264c13700e1e62bf49df8781ac8a0e72213dcca128aec39b2a8b93",
+    "size": 2299209
+  },
+  "collection": {
+    "id": "e6adbe71-3ba9-434b-8bcf-7989f7909fa3",
+    "name": "general",
+    "href": "/api/galaxy/content/community/v3/plugin/ansible/content/community/collections/index/community/general/"
+  },
+  "download_url": "https://automationhub.example.com/api/galaxy/v3/plugin/ansible/content/community/collections/artifacts/community-general-6.1.0.tar.gz",
+  "name": "general",
+  "namespace": {
+    "name": "community"
+  },
+  "signatures": [],
+  "metadata": {
+    "authors": [
+      "Ansible (https://github.com/ansible)"
+    ],
+    "contents": [],
+    "dependencies": {},
+    "description": "",
+    "documentation": "https://docs.ansible.com/ansible/latest/collections/community/general/",
+    "homepage": "https://github.com/ansible-collections/community.general",
+    "issues": "https://github.com/ansible-collections/community.general/issues",
+    "license": [],
+    "repository": "https://github.com/ansible-collections/community.general",
+    "tags": [
+      "community"
+    ]
+  },
+  "git_url": null,
+  "git_commit_sha": null,
+  "manifest": {
+    "format": 1,
+    "collection_info": {
+      "name": "general",
+      "issues": "https://github.com/ansible-collections/community.general/issues",
+      "authors": [
+        "Ansible (https://github.com/ansible)"
+      ],
+      "license": [],
+      "version": "6.1.0",
+      "homepage": "https://github.com/ansible-collections/community.general",
+      "namespace": "community",
+      "repository": "https://github.com/ansible-collections/community.general",
+      "description": null,
+      "dependencies": {},
+      "documentation": "https://docs.ansible.com/ansible/latest/collections/community/general/"
+    },
+    "file_manifest_file": {
+      "name": "FILES.json",
+      "ftype": "file",
+      "format": 1,
+      "chksum_type": "sha256",
+      "chksum_sha256": "664925784cd6cf562197239bcf18f575a6180e2b52322b9d43df1d00fb1c5127"
+    }
+  },
+  "files": {
+    "files": [],
+    "format": 1
+  }
+}

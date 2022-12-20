@@ -4,10 +4,16 @@ export interface BaseProjectResult {
   latest_version: {
     version: string;
   };
+  // new in v3, replaces latest_version
+  highest_version?: {
+    version: string;
+  };
 }
 
 export interface VersionsProjectResult {
   results: Versions[];
+  // new in v3, replaces results
+  data?: Versions[];
 }
 
 export interface VersionsDetailResult {
