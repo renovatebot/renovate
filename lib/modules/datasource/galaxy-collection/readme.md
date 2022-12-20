@@ -16,5 +16,3 @@ collections:
     version: 6.1.0
     source: https://automationhub.example.com/api/galaxy/content/community/v3/collection
 ```
-
-Currently the datasource does not handle authentication.
