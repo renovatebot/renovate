@@ -81,6 +81,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.gitlab/renovate.json5`
 - `.renovaterc`
 - `.renovaterc.json`
+- `.renovaterc.json5`
 - `package.json` (deprecated)
 
 #### package.json

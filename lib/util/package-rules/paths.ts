@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
+import { logger } from '../../logger';
 import { Matcher } from './base';
 
 export class PathsMatcher extends Matcher {
@@ -15,10 +16,21 @@ export class PathsMatcher extends Matcher {
       return false;
     }
 
-    return matchPaths.some(
-      (rulePath) =>
-        packageFile.includes(rulePath) ||
-        minimatch(packageFile, rulePath, { dot: true })
-    );
+    return matchPaths.some((rulePath) => {
+      if (minimatch(packageFile, rulePath, { dot: true })) {
+        return true;
+      }
+
+      if (packageFile.includes(rulePath)) {
+        logger.warn(
+          {
+            rulePath,
+            packageFile,
+          },
+          'Partial matches for `matchPaths` are deprecated. Please use a minimatch glob pattern or switch to `matchFiles` if you need exact matching.'
+        );
+        return true;
+      }
+    });
   }
 }

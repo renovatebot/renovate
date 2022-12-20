@@ -1,3 +1,4 @@
+import { HelmDatasource } from './helm';
 import { MavenDatasource } from './maven';
 import {
   addMetaData,
@@ -74,6 +75,65 @@ describe('modules/datasource/metadata', () => {
     addMetaData(dep, datasource, packageName);
     expect(dep).toMatchSnapshot({
       sourceUrl: 'https://github.com/carltongibson/django-filter',
+    });
+  });
+
+  test.each`
+    sourceUrl                                                                  | expectedSourceUrl                            | expectedSourceDirectory
+    ${'https://github.com/bitnami/charts/tree/master/bitnami/kube-prometheus'} | ${'https://github.com/bitnami/charts'}       | ${'bitnami/kube-prometheus'}
+    ${'https://gitlab.com/group/sub-group/repo/tree/main/some/path'}           | ${'https://gitlab.com/group/sub-group/repo'} | ${'some/path'}
+    ${'https://gitlab.com/group/sub-group/repo/-/tree/main/some/path'}         | ${'https://gitlab.com/group/sub-group/repo'} | ${'some/path'}
+    ${'https://github.example.com/org/repo/tree/main/foo/bar/baz'}             | ${'https://github.example.com/org/repo'}     | ${'foo/bar/baz'}
+  `(
+    'Should split the sourceDirectory out of sourceUrl for known platforms: $sourceUrl -> ($expectedSourceUrl, $expectedSourceDirectory)',
+    ({ sourceUrl, expectedSourceUrl, expectedSourceDirectory }) => {
+      const dep: ReleaseResult = { sourceUrl, releases: [] };
+      const datasource = HelmDatasource.id;
+      const packageName = 'some-chart';
+
+      addMetaData(dep, datasource, packageName);
+      expect(dep).toMatchObject({
+        sourceUrl: expectedSourceUrl,
+      });
+    }
+  );
+
+  test.each`
+    sourceUrl
+    ${'https://github.com/bitnami'}
+    ${'https://github.com/bitnami/charts'}
+    ${'https://gitlab.com/group'}
+    ${'https://gitlab.com/group/repo'}
+    ${'https://gitlab.com/group/sub-group/repo'}
+    ${'https://github.example.com/org/repo'}
+    ${'https://unknown-platform.com/some/repo/files/foo/bar'}
+  `(
+    'Should not split a sourceDirectory when one cannot be detected $sourceUrl',
+    ({ sourceUrl }) => {
+      const dep: ReleaseResult = { sourceUrl, releases: [] };
+      const datasource = HelmDatasource.id;
+      const packageName = 'some-chart';
+
+      addMetaData(dep, datasource, packageName);
+      expect(dep.sourceDirectory).toBeUndefined();
+      expect(dep).toMatchObject({ sourceUrl });
+    }
+  );
+
+  it('Should not overwrite any existing sourceDirectory', () => {
+    const dep: ReleaseResult = {
+      sourceUrl:
+        'https://github.com/neutrinojs/neutrino/tree/master/packages/react',
+      sourceDirectory: 'packages/foo',
+      releases: [],
+    };
+    const datasource = NpmDatasource.id;
+    const packageName = '@neutrinojs/react';
+
+    addMetaData(dep, datasource, packageName);
+    expect(dep).toMatchObject({
+      sourceUrl: 'https://github.com/neutrinojs/neutrino',
+      sourceDirectory: 'packages/foo',
     });
   });
 

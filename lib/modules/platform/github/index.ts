@@ -21,7 +21,11 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type {
+  BranchStatus,
+  HostRule,
+  VulnerabilityAlert,
+} from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -34,7 +38,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { fromBase64 } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -166,14 +170,31 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const platformResult: PlatformResult = {
+  const gitHubRules: HostRule[] = [];
+  if (!platformConfig.isGhe) {
+    gitHubRules.push({
+      matchHost: 'ghcr.io',
+      username: 'dummy',
+      password: token,
+    });
+    gitHubRules.push({
+      matchHost: 'pkg.github.com',
+      token,
+    });
+    gitHubRules.push({
+      matchHost: 'nuget.pkg.github.com',
+      username: 'dummy',
+      password: token,
+    });
+  }
+
+  return {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
+    hostRules: gitHubRules,
   };
-
-  return platformResult;
 }
 
 // Get all repositories that the user has access to
@@ -719,7 +740,7 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkToken && config.repository !== p.sourceRepo) {
+    if (!config.forkToken && !looseEquals(config.repository, p.sourceRepo)) {
       return false;
     }
 

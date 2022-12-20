@@ -2,7 +2,6 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
-  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -154,11 +153,8 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
-  updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  regexManagers?: RegExManager[];
-  enabledManagers?: string[];
   enabled?: boolean;
 }
 

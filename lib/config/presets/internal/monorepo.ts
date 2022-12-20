@@ -124,6 +124,7 @@ const repoGroups = {
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   mailing: 'https://github.com/sofn-xyz/mailing',
+  mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -226,6 +227,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -248,6 +250,8 @@ const orgGroups = {
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
 };
+
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],

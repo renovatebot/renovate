@@ -79,10 +79,12 @@ const packageFileVersionMatch = q
     })
   );
 
-const variableNameMatch = q.sym<Ctx>((ctx, { value: varName }) => ({
-  ...ctx,
-  currentVarName: varName,
-}));
+const variableNameMatch = q
+  .sym<Ctx>((ctx, { value: varName }) => ({
+    ...ctx,
+    currentVarName: varName,
+  }))
+  .opt(q.op<Ctx>(':').sym('String'));
 
 const variableValueMatch = q.str<Ctx>((ctx, { value }) => {
   ctx.vars[ctx.currentVarName!] = value;
