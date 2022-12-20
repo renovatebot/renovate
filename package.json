@@ -234,7 +234,7 @@
     "url-join": "4.0.1",
     "validate-npm-package-name": "5.0.0",
     "xmldoc": "1.2.0",
-    "zod": "3.20.0"
+    "zod": "3.20.2"
   },
   "optionalDependencies": {
     "re2": "1.18.0"
@@ -283,8 +283,8 @@
     "@types/url-join": "4.0.1",
     "@types/validate-npm-package-name": "4.0.0",
     "@types/xmldoc": "1.1.6",
-    "@typescript-eslint/eslint-plugin": "5.46.0",
-    "@typescript-eslint/parser": "5.46.0",
+    "@typescript-eslint/eslint-plugin": "5.46.1",
+    "@typescript-eslint/parser": "5.46.1",
     "aws-sdk-client-mock": "2.0.1",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
