@@ -13,9 +13,9 @@ import type {
 } from './types';
 
 function hasRegistryUrlPathIncluded(registryUrl: string): boolean {
-  const myUrl = parseUrl(registryUrl);
-  if (myUrl != null) {
-    return myUrl.pathname.length > 1; // returns "/" for url w/o path
+  const customRegistryUrl = parseUrl(registryUrl);
+  if (customRegistryUrl != null) {
+    return customRegistryUrl.pathname.length > 1; // returns "/" for url w/o path
   }
   return false;
 }
