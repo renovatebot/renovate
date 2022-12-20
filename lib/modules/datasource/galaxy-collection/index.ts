@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -12,9 +12,12 @@ import type {
   VersionsProjectResult,
 } from './types';
 
-function isFullUrl(registryUrl: string): boolean {
-  const regex = regEx(/(http|https):[\\/]{2,}.*[\\/][a-z]+/);
-  return regex.test(registryUrl);
+function hasRegistryUrlPathIncluded(registryUrl: string): boolean {
+  const myUrl = parseUrl(registryUrl);
+  if (myUrl != null) {
+    return myUrl.pathname.length > 1; // returns "/" for url w/o path
+  }
+  return false;
 }
 
 export class GalaxyCollectionDatasource extends Datasource {
@@ -40,7 +43,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     // TODO: types (#7154)
     /* eslint-disable @typescript-eslint/restrict-template-expressions */
-    const galaxyUrl = isFullUrl(`${registryUrl}`)
+    const galaxyUrl = hasRegistryUrlPathIncluded(`${registryUrl}`)
       ? `${registryUrl}`
       : `${registryUrl}/api/v2/collections`;
     const galaxyCollectionUrl = `${galaxyUrl}/${namespace}/${projectName}/`;
