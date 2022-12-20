@@ -39,7 +39,7 @@ const customBaseUrl = 'https://my-mirror.example.com';
 const customHostAndPath =
   'https://automationhub.example.com/api/galaxy/content/community/v3/collections';
 
-let galaxyUrls = [
+const galaxyUrls = [
   { datasourceUrl: defaultBaseUrl, path: '/api/v2/collections' },
   { datasourceUrl: customBaseUrl, path: '/api/v2/collections' },
   { datasourceUrl: customHostAndPath, path: '' },
@@ -48,7 +48,7 @@ let galaxyUrls = [
 const datasource = GalaxyCollectionDatasource.id;
 
 describe('modules/datasource/galaxy-collection/index', () => {
-  for (let galaxyUrl of galaxyUrls) {
+  for (const galaxyUrl of galaxyUrls) {
     describe('getReleases ' + galaxyUrl.datasourceUrl, () => {
       it('returns null for 404 result', async () => {
         httpMock
