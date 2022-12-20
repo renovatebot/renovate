@@ -6,7 +6,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
 import type { PackageDependency, PackageFile } from '../types';
-import type { FleetFile, FleetFileHelm, GitRepo } from './types';
+import type { FleetFile, FleetHelmBlock, GitRepo } from './types';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
   const dep: PackageDependency = {
@@ -38,7 +38,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   };
 }
 
-function extractFleetFile(doc: FleetFileHelm): PackageDependency {
+function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   const dep: PackageDependency = {
     depType: 'fleet',
     datasource: HelmDatasource.id,
@@ -51,6 +51,7 @@ function extractFleetFile(doc: FleetFileHelm): PackageDependency {
     };
   }
   dep.depName = doc.chart;
+  dep.packageName = doc.chart;
 
   if (!doc.repo) {
     if (checkIfStringIsPath(doc.chart)) {
@@ -80,6 +81,28 @@ function extractFleetFile(doc: FleetFileHelm): PackageDependency {
   };
 }
 
+function extractFleetFile(doc: FleetFile): PackageDependency[] {
+  const result: PackageDependency[] = [];
+
+  result.push(extractFleetHelmBlock(doc.helm));
+
+  if (!is.undefined(doc.targetCustomizations)) {
+    for (const custom of doc.targetCustomizations) {
+      const dep = extractFleetHelmBlock({
+        // merge base config with customization
+        ...doc.helm,
+        ...custom.helm,
+      });
+      result.push({
+        // overwrite name with customization name to allow splitting of PRs
+        ...dep,
+        depName: custom.name,
+      });
+    }
+  }
+  return result;
+}
+
 export function extractPackageFile(
   content: string,
   packageFile: string
@@ -95,7 +118,7 @@ export function extractPackageFile(
       const docs = loadAll(content, null, { json: true }) as FleetFile[];
       const fleetDeps = docs
         .filter((doc) => is.truthy(doc?.helm))
-        .flatMap((doc) => extractFleetFile(doc.helm));
+        .flatMap((doc) => extractFleetFile(doc));
 
       deps.push(...fleetDeps);
     } else {

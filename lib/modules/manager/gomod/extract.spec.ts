@@ -66,7 +66,7 @@ replace (
             depType: 'golang',
             currentValue: '1.18',
             datasource: 'golang-version',
-            versioning: 'npm',
+            versioning: 'go-mod-directive',
             rangeStrategy: 'replace',
           },
           {

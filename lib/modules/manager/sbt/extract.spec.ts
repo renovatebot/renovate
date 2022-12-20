@@ -99,6 +99,21 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts typed variables', () => {
+      const content = `
+        val version: String = "1.2.3"
+        libraryDependencies += "foo" % "bar" % version
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.2.3',
+            groupName: 'version',
+          },
+        ],
+      });
+    });
+
     it('skips deps when scala version is missing', () => {
       expect(extractPackageFile(sbtMissingScalaVersion)).toEqual({
         deps: [
