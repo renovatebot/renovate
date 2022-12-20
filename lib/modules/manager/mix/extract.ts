@@ -8,7 +8,7 @@ const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
   /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
 );
-const commentMatchRegExp = regEx(/^\s*#/);
+const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
@@ -18,7 +18,7 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
   const contentArr = content
     .split(newlineRegex)
-    .filter((line) => !commentMatchRegExp.test(line));
+    .map((line) => line.replace(commentMatchRegExp, ''));
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
       let depBuffer = '';

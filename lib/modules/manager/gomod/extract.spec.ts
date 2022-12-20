@@ -13,7 +13,9 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(8);
+      expect(res).toHaveLength(9);
+      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(7);
+      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(1);
       expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(1);
     });
@@ -21,8 +23,23 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(58);
+      expect(res).toHaveLength(59);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
+      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
+    });
+
+    it('ignores empty spaces in multi-line requires', () => {
+      const goMod = `
+module github.com/renovate-tests/gomod
+go 1.19
+require (
+	cloud.google.com/go v0.45.1
+
+	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
+)
+`;
+      const res = extractPackageFile(goMod)?.deps;
+      expect(res).toHaveLength(3);
     });
 
     it('extracts replace directives from multi-line and single line', () => {
@@ -49,7 +66,7 @@ replace (
             depType: 'golang',
             currentValue: '1.18',
             datasource: 'golang-version',
-            versioning: 'npm',
+            versioning: 'go-mod-directive',
             rangeStrategy: 'replace',
           },
           {
@@ -83,6 +100,17 @@ replace (
           },
           {
             managerData: {
+              lineNumber: 9,
+              multiLine: true,
+            },
+            depName: 'k8s.io/cluster-bootstrap',
+            depType: 'indirect',
+            enabled: false,
+            currentValue: 'v0.17.3',
+            datasource: 'go',
+          },
+          {
+            managerData: {
               lineNumber: 10,
               multiLine: true,
             },
@@ -90,40 +118,6 @@ replace (
             depType: 'replace',
             currentValue: 'v0.17.3',
             datasource: 'go',
-          },
-        ],
-      });
-    });
-
-    it('extracts digest updates for untagged releases', () => {
-      const goMod = `
-module github.com/omercnet/renovate-go-test
-
-go 1.19
-
-require github.com/omercnet/go-untagged v0.0.2-0.20221125140048-3917a80154e7
-
-`;
-      const res = extractPackageFile(goMod);
-      expect(res).toEqual({
-        deps: [
-          {
-            currentValue: '1.19',
-            datasource: 'golang-version',
-            depName: 'go',
-            depType: 'golang',
-            managerData: { lineNumber: 3 },
-            rangeStrategy: 'replace',
-            versioning: 'npm',
-          },
-          {
-            currentDigest: '3917a80154e7',
-            currentValue: 'v0.0.2-0.20221125140048-3917a80154e7',
-            datasource: 'go',
-            depName: 'github.com/omercnet/go-untagged',
-            depType: 'require',
-            digestOneAndOnly: true,
-            managerData: { lineNumber: 5 },
           },
         ],
       });
