@@ -206,7 +206,7 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const env = getChildEnv({}) ?? {};
+  const env = getChildEnv({});
   const data = { ...GlobalConfig.get(), ...input, env };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
