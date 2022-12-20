@@ -104,7 +104,6 @@ export async function lookupUpdates(
       res.homepage = dependency.homepage;
       res.changelogUrl = dependency.changelogUrl;
       res.dependencyUrl = dependency?.dependencyUrl;
-      res.registryUrl = dependency.registryUrl;
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
