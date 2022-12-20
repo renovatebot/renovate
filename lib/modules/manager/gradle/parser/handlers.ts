@@ -5,7 +5,7 @@ import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import { parseGradle } from '../parser';
-import type { Ctx, GradleManagerData, VariableData } from '../types';
+import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
   ANNOYING_METHODS,
@@ -36,13 +36,12 @@ export function handleAssignment(ctx: Ctx): Ctx {
       ctx.deps.push(dep);
     }
 
-    const varData: VariableData = {
+    ctx.globalVars[key] = {
       key,
       value: valTokens[0].value,
       fileReplacePosition: valTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-    ctx.globalVars[key] = varData;
   }
 
   return ctx;
@@ -217,7 +216,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
     depType: 'plugin',
     depName,
     packageName,
-    registryUrls: ['https://plugins.gradle.org/m2/'],
+    registryUrls: [REGISTRY_URLS.gradlePluginPortal],
     commitMessageTopic: `plugin ${depName}`,
     currentValue: pluginVersion[0].value,
     managerData: {
@@ -304,13 +303,13 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
 
   const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
   const key = `libs.${aliasToken.value.replace(regEx(/[-_]/g), '.')}`;
-  const varData: VariableData = {
+
+  ctx.globalVars[key] = {
     key,
     value: `${groupId}:${artifactId}`,
     fileReplacePosition: aliasToken.offset,
     packageFile: ctx.packageFile,
   };
-  ctx.globalVars = { ...ctx.globalVars, [key]: varData };
 
   if (ctx.tokenMap.version) {
     const version = interpolateString(
