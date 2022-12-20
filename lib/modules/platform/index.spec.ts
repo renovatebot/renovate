@@ -90,8 +90,8 @@ describe('modules/platform/index', () => {
         {
           hostType: 'github',
           matchHost: 'github.com',
-          token: '123',
-          username: 'abc',
+          token: '456',
+          username: 'def',
         },
       ],
     };
@@ -103,8 +103,8 @@ describe('modules/platform/index', () => {
         {
           hostType: 'github',
           matchHost: 'github.com',
-          token: '123',
-          username: 'abc',
+          token: '456',
+          username: 'def',
         },
         {
           hostType: 'github',
