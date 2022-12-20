@@ -64,7 +64,7 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const baseProject = galaxyUrlResponse.body;
     // galaxy v2 / v3 detection
-    if (typeof baseProject.highest_version !== 'undefined') {
+    if (typeof baseProject?.highest_version !== 'undefined') {
       //v3
       baseProject.latest_version = baseProject.highest_version;
     } // else v2 -> no-op;
@@ -83,7 +83,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     const versionsProject = versionsUrlResponse.body;
 
     // galaxy v2 / v3 detection
-    if (typeof versionsProject.data !== 'undefined') {
+    if (typeof versionsProject?.data !== 'undefined') {
       //v3
       versionsProject.results = versionsProject.data;
     } // else v2 -> no-op;
