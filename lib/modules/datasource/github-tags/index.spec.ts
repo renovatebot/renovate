@@ -113,13 +113,13 @@ describe('modules/datasource/github-tags/index', () => {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
           releaseTimestamp: '2021-01-01',
-          newDigest: '123',
+          hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
           releaseTimestamp: '2022-01-01',
-          newDigest: 'abc',
+          hash: 'abc',
         },
       ]);
 

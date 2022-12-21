@@ -5,6 +5,7 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import {
   Release,
+  ReleaseResult,
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
@@ -45,6 +46,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
+  let dependency: ReleaseResult | null = null;
   const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
@@ -77,7 +79,7 @@ export async function lookupUpdates(
 
       config = mergeConfigConstraints(config);
 
-      const dependency = clone(await getPkgReleases(config));
+      dependency = clone(await getPkgReleases(config));
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
@@ -95,6 +97,7 @@ export async function lookupUpdates(
       }
 
       res.sourceUrl = dependency?.sourceUrl;
+      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
       }
@@ -377,6 +380,14 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+        }
+        if (update.newVersion) {
+          const registryUrl = dependency?.releases?.find(
+            (release) => release.version === update.newVersion
+          )?.registryUrl;
+          if (registryUrl && registryUrl !== res.registryUrl) {
+            update.registryUrl = registryUrl;
+          }
         }
       }
     }

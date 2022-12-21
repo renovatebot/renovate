@@ -1,0 +1,15 @@
+{
+	"kind": "storage#objects",
+	"prefixes": [
+		"channels/beta/release/2.17.0-69.2.beta/",
+		"channels/beta/release/2.17.0/",
+		"channels/beta/release/2.17.1/",
+		"channels/beta/release/2.18.0-271.8.beta/",
+		"channels/beta/release/2.18.0-44.1.beta/",
+		"channels/beta/release/2.18.0/",
+		"channels/beta/release/2.19.0-255.2.beta/",
+		"channels/beta/release/2.19.0-374.1.beta/",
+		"channels/beta/release/2.19.0-374.2.beta/",
+		"channels/beta/release/latest/"
+	]
+}

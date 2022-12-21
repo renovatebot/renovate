@@ -36,6 +36,8 @@ const repoGroups = {
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-lambda-powertools-typescript':
+    'https://github.com/awslabs/aws-lambda-powertools-typescript',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -122,6 +124,7 @@ const repoGroups = {
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   mailing: 'https://github.com/sofn-xyz/mailing',
+  mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -132,6 +135,7 @@ const repoGroups = {
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
+  'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
@@ -214,6 +218,7 @@ const repoGroups = {
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
+  'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -222,6 +227,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -244,6 +250,8 @@ const orgGroups = {
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
 };
+
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
