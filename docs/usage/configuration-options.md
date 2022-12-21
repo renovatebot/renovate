@@ -1709,7 +1709,7 @@ The above will match all package names starting with `eslint` but exclude ones s
 
 Use `matchCategories` to restrict rules to a particular language or group.
 Matching is done using "any" logic, i.e. "match any of the following categories".
-The categories can be found in the [manager documentation](./modules/manager.md).
+The categories can be found in the [manager documentation](./modules/manager/index.md).
 
 <!-- prettier-ignore -->
 !!! note

@@ -16,7 +16,7 @@ export const defaultConfig = {
   fileMatch: [systemManifestRegex],
 };
 
-export const categories: Category[] = ['kubernetes', 'cd'];
+export const categories: Category[] = ['cd', 'kubernetes'];
 
 export const supportedDatasources = [
   GithubReleasesDatasource.id,

@@ -16,4 +16,4 @@ export const defaultConfig = {
   fileMatch: ['(^|/)terragrunt\\.hcl$'],
 };
 
-export const categories: Category[] = ['terraform', 'iac'];
+export const categories: Category[] = ['iac', 'terraform'];

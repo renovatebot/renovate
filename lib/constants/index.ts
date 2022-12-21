@@ -1,3 +1,3 @@
 export * from './platforms';
 export * from './programming-language';
-export * from './category';
+export type { Category } from './category';

@@ -30,4 +30,4 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-export const categories: Category[] = ['terraform', 'iac'];
+export const categories: Category[] = ['iac', 'terraform'];
