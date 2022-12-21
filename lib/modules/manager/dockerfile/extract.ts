@@ -195,10 +195,17 @@ export function getDep(
 
   // Pretty up special prefixes
   if (dep.depName) {
-    const specialPrefixes = ['amd64', 'arm64', 'library'];
+    const specialPrefixes = [
+      'amd64',
+      'arm64',
+      'docker.io', // needs to be **before** "library" in order to remove "docker.io/library" prefix as well
+      'library',
+    ];
     for (const prefix of specialPrefixes) {
       if (dep.depName.startsWith(`${prefix}/`)) {
-        dep.packageName = dep.depName;
+        if (!dep.packageName) {
+          dep.packageName = dep.depName;
+        }
         dep.depName = dep.depName.replace(`${prefix}/`, '');
         if (specifyReplaceString) {
           dep.autoReplaceStringTemplate =

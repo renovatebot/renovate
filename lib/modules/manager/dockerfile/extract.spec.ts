@@ -1070,8 +1070,9 @@ describe('modules/manager/dockerfile/extract', () => {
             'sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4',
           currentValue: '16.14.2-alpine3.14',
           datasource: 'docker',
-          depName: 'docker.io/library/node',
+          depName: 'node',
           depType: 'final',
+          packageName: 'docker.io/library/node',
           replaceString:
             'ARG NODE_IMAGE_HASH="@sha256:ba9c961513b853210ae0ca1524274eafa5fd94e20b856343887ca7274c8450e4"\n' +
             'ARG NODE_IMAGE_HOST="docker.io/library/"\n' +
