@@ -82,7 +82,7 @@ export const presets: Record<string, Preset> = {
         allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
-        matchDatasources: ['docker', 'adoptium-java'],
+        matchDatasources: ['adoptium-java'],
         matchPackageNames: [
           'eclipse-temurin',
           'amazoncorretto',
@@ -94,6 +94,21 @@ export const presets: Record<string, Preset> = {
         ],
         versioning:
           'regex:^(?<major>\\d+)?(\\.(?<minor>\\d+))?(\\.(?<patch>\\d+))?([\\._+](?<build>\\d+))?(-(?<compatibility>.*))?$',
+      },
+      {
+        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|-|$)/',
+        description:
+          'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
+        matchDatasources: ['docker'],
+        matchPackageNames: [
+          'eclipse-temurin',
+          'amazoncorretto',
+          'adoptopenjdk',
+          'openjdk',
+          'java',
+          'java-jre',
+          'sapmachine',
+        ],
       },
     ],
   },
