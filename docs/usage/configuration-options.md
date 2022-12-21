@@ -18,6 +18,7 @@ You can store your Renovate configuration file in one of these locations:
 1. `.gitlab/renovate.json5`
 1. `.renovaterc`
 1. `.renovaterc.json`
+1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
 <!-- prettier-ignore -->
@@ -334,7 +335,7 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `helmv3`, `npm`, 'nuget', `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3`, `npm`, `nuget`, `maven` and `sbt` only, so raise a feature request if you have a use for it with other package managers.
 Its purpose is if you want Renovate to update the `version` field within your package file any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
@@ -558,7 +559,7 @@ Examples of what having a Dependency Dashboard will allow you to do:
 This feature allows you to use Renovate's Dependency Dashboard to force approval of updates before they are created.
 
 By setting `dependencyDashboardApproval` to `true` in config (including within `packageRules`), you can tell Renovate to wait for your approval from the Dependency Dashboard before creating a branch/PR.
-You can approve a pending PR by ticking the checkbox in the Dependency Dashboard issue.
+You can approve a pending PR by selecting the checkbox in the Dependency Dashboard issue.
 
 <!-- prettier-ignore -->
 !!! tip
@@ -1414,6 +1415,7 @@ Supported lock files are:
 
 - `package-lock.json`
 - `yarn.lock`
+- `pnpm-lock.yaml`
 - `composer.lock`
 - `Gemfile.lock`
 - `poetry.lock`
@@ -1893,33 +1895,37 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate will match `matchPaths` against both a partial string match or a minimatch glob pattern.
-If you want to avoid the partial string matching so that only glob matching is performed, wrap your string in `+(...)` like so:
+Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
 
-```
-  "matchPaths": ["+(package.json)"],
-```
-
-The above will match only the root `package.json`, whereas the following would match any `package.json` in any subdirectory too:
-
-```
-  "matchPaths": ["package.json"],
-```
-
-### matchSourceUrlPrefixes
-
-Here's an example of where you use this to group together all packages from the Vue monorepo:
+For example the following would match any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
-      "groupName": "Vue monorepo packages"
+      "description": "Group dependencies from package.json files",
+      "matchPaths": ["**/package.json"],
+      "groupName": "All package.json changes"
     }
   ]
 }
 ```
+
+The following would match any file in directories starting with `app/`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchPaths": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
+```
+
+### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
 
@@ -1936,14 +1942,14 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchSourceUrls
 
-Here's an example of where you use this to match exact package urls:
+Here's an example of where you use this to group together all packages from the Vue monorepo:
 
 ```json
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/facebook/react"],
-      "groupName": "React"
+      "matchSourceUrls": ["https://github.com/vuejs/vue"],
+      "groupName": "Vue monorepo packages"
     }
   ]
 }
@@ -1970,7 +1976,7 @@ For example to apply a special label for Major updates:
 Use this field to set the source URL for a package, including overriding an existing one.
 Source URLs are necessary in order to look up release notes.
 
-Using this field we can specify the exact url to fetch release notes from.
+Using this field we can specify the exact URL to fetch release notes from.
 
 Example setting source URL for package "dummy":
 
@@ -2077,14 +2083,18 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
-- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
-- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
-- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
-- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 
@@ -2224,13 +2234,16 @@ This setting tells Renovate when you would like it to raise PRs:
 Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
 
 With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-Your test suite takes a bit of time to complete, so if you go look at the new PR right away, you don't know if your tests pass or fail.
-You're basically waiting until you have the test results, before you can decide if you want to merge the PR or not.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
 
-With prCreation set to `not-pending`, Renovate waits until all tests have finished running, and only then creates the PR.
+With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
+If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
 
-When you set prCreation to `not-pending` you're reducing the "noise" but get notified of new PRs a bit later.
+With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+
+For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
 
 ## prFooter
 
@@ -3046,8 +3059,8 @@ For this to work, you must enable the [Dependency graph](https://docs.github.com
 Follow these steps:
 
 1. While logged in to GitHub, navigate to your repository
-1. Click on the "Settings" tab
-1. Click on "Code security and analysis" in the sidebar
+1. Select the "Settings" tab
+1. Select "Code security and analysis" in the sidebar
 1. Enable the "Dependency graph"
 1. Enable "Dependabot alerts"
 1. If you're running Renovate in app mode: make sure the app has `read` permissions for "Vulnerability alerts".

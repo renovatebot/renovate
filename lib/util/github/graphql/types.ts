@@ -31,7 +31,7 @@ export interface GithubGraphqlDatasourceAdapter<
 
 export type RawQueryResponse<Payload> = [Payload, null] | [null, Error];
 
-export interface GithubGraphqlRepoResponsePayload<T> {
+export interface GithubGraphqlPayload<T> {
   nodes: T[];
   pageInfo?: {
     hasNextPage?: boolean;
@@ -42,17 +42,9 @@ export interface GithubGraphqlRepoResponsePayload<T> {
 export interface GithubGraphqlRepoResponse<T> {
   repository: {
     isRepoPrivate?: boolean;
-    payload: GithubGraphqlRepoResponsePayload<T>;
+    payload: GithubGraphqlPayload<T>;
   };
 }
-
-/**
- * Payload data unified with `isRepoPrivate` flag moved from upper level
- */
-export type GithubGraphqlPayload<T> =
-  GithubGraphqlRepoResponse<T>['repository']['payload'] & {
-    isRepoPrivate: GithubGraphqlRepoResponse<T>['repository']['isRepoPrivate'];
-  };
 
 export interface GithubPackageConfig {
   /**
@@ -99,13 +91,13 @@ export interface GithubGraphqlTag {
   target:
     | {
         type: 'Commit';
-        newDigest: string;
+        oid: string;
         releaseTimestamp: string;
       }
     | {
         type: 'Tag';
         target: {
-          newDigest: string;
+          oid: string;
         };
         tagger: {
           releaseTimestamp: string;
@@ -117,7 +109,7 @@ export interface GithubGraphqlTag {
  * Result of GraphQL response transformation for tags (via tags)
  */
 export interface GithubTagItem extends GithubDatasourceItem {
-  newDigest: string;
+  hash: string;
   gitRef: string;
 }
 

@@ -36,11 +36,10 @@ import {
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
 import { gitRefLabel, isArtifactoryServer, sourceLabels } from './common';
-import {
+import type {
   Image,
   ImageConfig,
   ImageList,
-  MediaType,
   OciImage,
   OciImageList,
   RegistryRepository,
@@ -407,10 +406,10 @@ export class DockerDatasource extends Datasource {
         return null;
       }
       headers.accept = [
-        MediaType.manifestListV2,
-        MediaType.manifestV2,
-        MediaType.ociManifestV1,
-        MediaType.ociManifestIndexV1,
+        'application/vnd.docker.distribution.manifest.list.v2+json',
+        'application/vnd.docker.distribution.manifest.v2+json',
+        'application/vnd.oci.image.manifest.v1+json',
+        'application/vnd.oci.image.index.v1+json',
       ].join(', ');
       const url = `${registryHost}/v2/${dockerRepository}/manifests/${tag}`;
       const manifestResponse = await this.http[mode](url, {
@@ -540,7 +539,10 @@ export class DockerDatasource extends Datasource {
       return null;
     }
 
-    if (manifest.mediaType === MediaType.manifestListV2) {
+    if (
+      manifest.mediaType ===
+      'application/vnd.docker.distribution.manifest.list.v2+json'
+    ) {
       if (manifest.manifests.length) {
         logger.trace(
           { registry, dockerRepository, tag },
@@ -561,7 +563,8 @@ export class DockerDatasource extends Datasource {
     }
 
     if (
-      manifest.mediaType === MediaType.manifestV2 &&
+      manifest.mediaType ===
+        'application/vnd.docker.distribution.manifest.v2+json' &&
       is.string(manifest.config?.digest)
     ) {
       return manifest.config?.digest;
@@ -569,7 +572,7 @@ export class DockerDatasource extends Datasource {
 
     // OCI image lists are not required to specify a mediaType
     if (
-      manifest.mediaType === MediaType.ociManifestIndexV1 ||
+      manifest.mediaType === 'application/vnd.oci.image.index.v1+json' ||
       (!manifest.mediaType && 'manifests' in manifest)
     ) {
       if (manifest.manifests.length) {
@@ -593,7 +596,7 @@ export class DockerDatasource extends Datasource {
 
     // OCI manifests are not required to specify a mediaType
     if (
-      (manifest.mediaType === MediaType.ociManifestV1 ||
+      (manifest.mediaType === 'application/vnd.oci.image.manifest.v1+json' ||
         (!manifest.mediaType && 'config' in manifest)) &&
       is.string(manifest.config?.digest)
     ) {
@@ -627,8 +630,10 @@ export class DockerDatasource extends Datasource {
       );
 
       if (
-        manifestResponse?.headers['content-type'] !== MediaType.manifestV2 &&
-        manifestResponse?.headers['content-type'] !== MediaType.ociManifestV1
+        manifestResponse?.headers['content-type'] !==
+          'application/vnd.docker.distribution.manifest.v2+json' &&
+        manifestResponse?.headers['content-type'] !==
+          'application/vnd.oci.image.manifest.v1+json'
       ) {
         return null;
       }
@@ -1058,8 +1063,10 @@ export class DockerDatasource extends Datasource {
             | OciImage;
           if (
             manifestList.schemaVersion === 2 &&
-            (manifestList.mediaType === MediaType.manifestListV2 ||
-              manifestList.mediaType === MediaType.ociManifestIndexV1 ||
+            (manifestList.mediaType ===
+              'application/vnd.docker.distribution.manifest.list.v2+json' ||
+              manifestList.mediaType ===
+                'application/vnd.oci.image.index.v1+json' ||
               (!manifestList.mediaType && 'manifests' in manifestList))
           ) {
             for (const manifest of manifestList.manifests) {

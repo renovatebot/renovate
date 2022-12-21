@@ -4,7 +4,6 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
-import { PrState } from '../../../types';
 import {
   deleteBranch,
   getBranchList,
@@ -23,7 +22,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PrState.Open,
+        state: 'open',
       });
       const branchIsModified = await isBranchModified(branchName);
       if (pr) {
@@ -40,7 +39,7 @@ async function cleanUpBranches(
               await platform.updatePr({
                 number: pr.number,
                 prTitle: newPrTitle,
-                state: PrState.Open,
+                state: 'open',
               });
             }
 
@@ -68,7 +67,7 @@ async function cleanUpBranches(
           await platform.updatePr({
             number: pr.number,
             prTitle: newPrTitle,
-            state: PrState.Closed,
+            state: 'closed',
           });
           await deleteBranch(branchName);
         }

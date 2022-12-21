@@ -1,6 +1,8 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
 import { flattenUpdates } from './flatten';
 
+jest.mock('../../../util/git/semantic');
+
 let config: RenovateConfig;
 
 beforeEach(() => {

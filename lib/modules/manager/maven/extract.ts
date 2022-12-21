@@ -418,20 +418,35 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     });
   });
 
+  const rootDeps = new Set<string>();
   // Resolve placeholders
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
+      if (dep.depType === 'parent') {
+        const parentPkg = extractedPackages[pkg.parent!];
+        if (parentPkg && !parentPkg.parent) {
+          rootDeps.add(dep.depName!);
+        }
+      }
       const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
   });
 
-  return packageFileNames.map((name) => ({
-    ...extractedPackages[name],
-    deps: extractedDeps[name],
-  }));
+  const packageFiles = packageFileNames.map((packageFile) => {
+    const pkg = extractedPackages[packageFile];
+    const deps = extractedDeps[packageFile];
+    for (const dep of deps) {
+      if (rootDeps.has(dep.depName!)) {
+        dep.depType = 'parent-root';
+      }
+    }
+    return { ...pkg, deps };
+  });
+
+  return packageFiles;
 }
 
 function cleanResult(

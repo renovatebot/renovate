@@ -1549,6 +1549,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       config.datasource = DockerDatasource.id;
       docker.getReleases.mockResolvedValueOnce({
+        registryUrl: 'https://index.docker.io',
         releases: [
           { version: '8.1.0' },
           { version: '8.1.5' },
@@ -1557,15 +1558,20 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.2.5' },
           { version: '8.2' },
           { version: '8' },
-          { version: '9.0' },
+          { version: '9.0', registryUrl: 'https://other.registry' },
           { version: '9' },
         ],
       });
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
+        registryUrl: 'https://index.docker.io',
         updates: [
           { newValue: '8.2', updateType: 'minor' },
-          { newValue: '9.0', updateType: 'major' },
+          {
+            newValue: '9.0',
+            updateType: 'major',
+            registryUrl: 'https://other.registry',
+          },
         ],
       });
     });
