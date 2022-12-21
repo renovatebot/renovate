@@ -131,6 +131,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'yarn',
     versioning: npmVersioningId,
   },
+  dart: {
+    datasource: 'dart-version',
+    depName: 'dart',
+    versioning: semverVersioningId,
+  },
+  flutter: {
+    datasource: 'flutter-version',
+    depName: 'flutter',
+    versioning: semverVersioningId,
+  },
 };
 
 export function supportsDynamicInstall(toolName: string): boolean {
