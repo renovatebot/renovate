@@ -2,7 +2,7 @@
 !!! warning
     Renovate does not support Composer version `2.5.0` or newer.
     This is because of changes in the default behavior of Composer.
-    For now, you can do ... to workaround the problem.
+    For now, you can configure `constraints.php` to be `< 2.5.0` to work around the problem.
     Subscribe to these issues/discussions to follow our progress: insert link to issues.
 
 Extracts dependencies from `composer.json` files, and keeps the associated `composer.lock` file updated too.
