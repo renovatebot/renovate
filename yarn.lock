@@ -3802,13 +3802,13 @@ bunyan@1.8.15:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@17.0.3:
-  version "17.0.3"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.0.3.tgz#9ba14e0e50eca763ae7e2ee89036a948a13035ed"
-  integrity sha512-pwsIK/grdM0cHpfVaNFxMdzElBtLJGsVPE+JnxqXP1l40O01Z1mfDE8MbRTuwomGq/UwEtGisOylutOEVJxEqg==
+cacache@17.0.4:
+  version "17.0.4"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.0.4.tgz#5023ed892ba8843e3b7361c26d0ada37e146290c"
+  integrity sha512-Z/nL3gU+zTUjz5pCA5vVjYM8pmaw2kxM7JEiE0fv3w77Wj+sFbi70CrBruUWH0uNcEdvLDixFpgA2JM4F4DBjA==
   dependencies:
     "@npmcli/fs" "^3.1.0"
-    fs-minipass "^2.1.0"
+    fs-minipass "^3.0.0"
     glob "^8.0.1"
     lru-cache "^7.7.1"
     minipass "^4.0.0"
@@ -5243,6 +5243,13 @@ fs-minipass@^2.0.0, fs-minipass@^2.1.0:
   integrity sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg==
   dependencies:
     minipass "^3.0.0"
+
+fs-minipass@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/fs-minipass/-/fs-minipass-3.0.0.tgz#8e6ed2b4e1ba44077cae69971393068a1bbeeed6"
+  integrity sha512-EUojgQaSPy6sxcqcZgQv6TVF6jiKvurji3AxhAivs/Ep4O1UpS8TusaxpybfFHZ2skRhLqzk6WR8nqNYIMMDeA==
+  dependencies:
+    minipass "^4.0.0"
 
 fs-monkey@^1.0.3:
   version "1.0.3"
