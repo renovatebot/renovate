@@ -1018,6 +1018,32 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchDepNames',
+    description:
+      'Dep names to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludeDepNames',
+    description:
+      'Dep names to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'matchPackagePrefixes',
     description:
       'Package name prefixes to match. Valid only within a `packageRules` object.',
@@ -1061,6 +1087,34 @@ const options: RenovateOptions[] = [
     name: 'excludePackagePatterns',
     description:
       'Package name patterns to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'matchDepPatterns',
+    description:
+      'Dep name patterns to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'excludeDepPatterns',
+    description:
+      'Dep name patterns to exclude. Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     format: 'regex',

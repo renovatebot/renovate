@@ -1,11 +1,11 @@
 import { DepNameMatcher } from './dep-names';
 
 describe('util/package-rules/dep-names', () => {
-  const packageNameMatcher = new DepNameMatcher();
+  const depNameMatcher = new DepNameMatcher();
 
   describe('match', () => {
     it('should return false if packageFile is not defined', () => {
-      const result = packageNameMatcher.matches(
+      const result = depNameMatcher.matches(
         {
           depName: undefined,
         },
@@ -19,7 +19,7 @@ describe('util/package-rules/dep-names', () => {
 
   describe('exclude', () => {
     it('should return false if packageFile is not defined', () => {
-      const result = packageNameMatcher.excludes(
+      const result = depNameMatcher.excludes(
         {
           depName: undefined,
         },

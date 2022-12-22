@@ -1,11 +1,11 @@
 import { DepPatternsMatcher } from './dep-patterns';
 
 describe('util/package-rules/dep-patterns', () => {
-  const packageNameMatcher = new DepPatternsMatcher();
+  const depPatternsMatcher = new DepPatternsMatcher();
 
   describe('match', () => {
     it('should return false if depName is not defined', () => {
-      const result = packageNameMatcher.matches(
+      const result = depPatternsMatcher.matches(
         {
           depName: undefined,
         },
@@ -19,7 +19,7 @@ describe('util/package-rules/dep-patterns', () => {
 
   describe('exclude', () => {
     it('should return false if depName is not defined', () => {
-      const result = packageNameMatcher.excludes(
+      const result = depPatternsMatcher.excludes(
         {
           depName: undefined,
         },
