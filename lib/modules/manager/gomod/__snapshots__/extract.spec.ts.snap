@@ -636,6 +636,19 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts multi-line 
       "multiLine": true,
     },
   },
+  {
+    "currentDigest": "d98b1b443823",
+    "currentValue": "v0.0.0-20191003171128-d98b1b443823",
+    "datasource": "go",
+    "depName": "golang.org/x/net",
+    "depType": "indirect",
+    "digestOneAndOnly": true,
+    "enabled": false,
+    "managerData": {
+      "lineNumber": 61,
+      "multiLine": true,
+    },
+  },
 ]
 `;
 
@@ -657,6 +670,16 @@ exports[`modules/manager/gomod/extract extractPackageFile() extracts single-line
     "depType": "require",
     "managerData": {
       "lineNumber": 3,
+    },
+  },
+  {
+    "currentValue": "v1.0.0",
+    "datasource": "go",
+    "depName": "github.com/davecgh/go-spew",
+    "depType": "indirect",
+    "enabled": false,
+    "managerData": {
+      "lineNumber": 4,
     },
   },
   {
