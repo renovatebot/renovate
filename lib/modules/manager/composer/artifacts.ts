@@ -132,7 +132,7 @@ export async function updateArtifacts({
       logger.trace({ preCmd, preArgs }, 'composer pre-update command');
       commands.push('git stash -- composer.json');
       commands.push(`${preCmd} ${preArgs}`);
-      commands.push('git stash pop');
+      commands.push('git stash pop || true');
     }
 
     const cmd = 'composer';
