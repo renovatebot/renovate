@@ -135,6 +135,7 @@ describe('modules/manager/sbt/extract', () => {
               'https://repo.maven.apache.org/maven2',
               'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             ],
+            variableName: 'sbtReleaseVersion',
           },
         ],
         packageFileVersion: '1.0.1',
