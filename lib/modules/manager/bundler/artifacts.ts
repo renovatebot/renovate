@@ -166,7 +166,7 @@ export async function updateArtifacts(
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),
       },
-      docker: { image: 'sidecar' },
+      docker: {},
       toolConstraints: [
         {
           toolName: 'ruby',

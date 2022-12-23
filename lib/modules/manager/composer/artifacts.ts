@@ -117,9 +117,7 @@ export async function updateArtifacts({
         COMPOSER_AUTH: getAuthJson(),
       },
       toolConstraints: [phpToolConstraint, composerToolConstraint],
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
     };
 
     const commands: string[] = [];
