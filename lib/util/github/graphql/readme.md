@@ -9,7 +9,42 @@ The freshness period is equal to the TTL of the entire cache, and this allows fo
 In most cases, only one page of releases will need to be fetched during a Renovate run.
 While it is possible to reduce this to zero for most runs, the practical implementation is complex and prone to errors.
 
-# Conceptual overview
+# Components overview
+
+```
+lib/util/github/graphql
+│
+├── cache-strategies
+│   ├── abstract-cache-strategy.ts   <- common logic: `reconcile()` and `finalize()`
+│   ├── memory-cache-strategy.ts     <- single Renovate run (private packages)
+│   └── package-cache-strategy.ts    <- long-term persistence (public packages)
+│
+├── query-adapters
+│   ├── releases-query-adapter.ts    <- GitHub releases
+│   └── tags-query-adapter.ts        <- GitHub tags
+│
+├── datasource-fetcher.ts            <- Complex pagination loop
+│
+└── index.ts                         <- Facade that hides whole thing
+```
+
+The datasource-fetcher.ts file contains the core component that implements the logic for looping over paginated GraphQL results.
+This class is meant to be instantiated every time we need to paginate over GraphQL results.
+It is responsible for handling several aspects of the fetch process, including:
+
+- Making HTTP requests to the `/graphql` endpoint
+- Handling and aggregating errors that may occur during the fetch process
+- Dynamically adjusting the page size and retrying in the event of server errors
+- Enforcing a maximum limit on the number of queries that can be made
+- Detecting whether a package is private or public, and selecting the appropriate cache strategy (in-memory or long-term) accordingly
+- Ensuring proper concurrency when querying the same package simultaneously.
+
+The `cache-strategies/` directory is responsible for caching implementation.
+The core function is `reconcile()` which updates the cache data structure with pages of items one-by-one.
+
+The files in `query-adapters/` directory allow for GitHub releases and tags to be fetched according to their specifics and to be transformed to the form suitable for caching.
+
+# Process overview
 
 ## Initial fetch
 
@@ -127,38 +162,3 @@ Given we performed fetch at the day of latest release, new cache looks like:
 ```
 
 It will be updated by further fetches until cache reset at `2023-01-20`.
-
-# Components overview
-
-```
-lib/util/github/graphql
-│
-├── cache-strategies
-│   ├── abstract-cache-strategy.ts   <- common logic: `reconcile()` and `finalize()`
-│   ├── memory-cache-strategy.ts     <- single Renovate run (private packages)
-│   └── package-cache-strategy.ts    <- long-term persistence (public packages)
-│
-├── query-adapters
-│   ├── releases-query-adapter.ts    <- GitHub releases
-│   └── tags-query-adapter.ts        <- GitHub tags
-│
-├── datasource-fetcher.ts            <- Complex pagination loop
-│
-└── index.ts                         <- Facade that hides whole thing
-```
-
-The datasource-fetcher.ts file contains the core component that implements the logic for looping over paginated GraphQL results.
-This class is meant to be instantiated every time we need to paginate over GraphQL results.
-It is responsible for handling several aspects of the fetch process, including:
-
-- Making HTTP requests to the `/graphql` endpoint
-- Handling and aggregating errors that may occur during the fetch process
-- Dynamically adjusting the page size and retrying in the event of server errors
-- Enforcing a maximum limit on the number of queries that can be made
-- Detecting whether a package is private or public, and selecting the appropriate cache strategy (in-memory or long-term) accordingly
-- Ensuring proper concurrency when querying the same package simultaneously.
-
-The `cache-strategies/` directory is responsible for caching implementation.
-The core function is `reconcile()` which updates the cache data structure with pages of items one-by-one.
-
-The files in `query-adapters/` directory allow for GitHub releases and tags to be fetched according to their specifics and to be transformed to the form suitable for caching.
