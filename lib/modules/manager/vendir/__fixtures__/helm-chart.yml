@@ -1,4 +1,3 @@
-# https://github.com/vmware-tanzu/carvel-vendir/blob/1525c1998a4ea007307bc8f18cfb69d5f63d844f/examples/helm-chart/vendir.yml
 apiVersion: vendir.k14s.io/v1alpha1
 kind: Config
 directories:

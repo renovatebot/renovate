@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/vendir/extract extractPackageFile() extracts helm-chart from vendir.yml correctly 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "7.10.1",
+      "datasource": "helm",
+      "depName": "contour",
+      "registryUrls": [
+        "https://charts.bitnami.com/bitnami",
+      ],
+    },
+  ],
+}
+`;

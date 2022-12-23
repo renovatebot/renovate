@@ -2,6 +2,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
 const helmChart = Fixtures.get('helm-chart.yml');
+const emptyDirectories = Fixtures.get('empty-directories.yml');
 
 describe('modules/manager/vendir/extract', () => {
   describe('extractPackageFile()', () => {
@@ -16,6 +17,11 @@ describe('modules/manager/vendir/extract', () => {
 
     it('returns null for empty yaml file content', () => {
       const result = extractPackageFile('');
+      expect(result).toBeNull();
+    });
+
+    it('returns null for empty directories key', () => {
+      const result = extractPackageFile(emptyDirectories);
       expect(result).toBeNull();
     });
 
