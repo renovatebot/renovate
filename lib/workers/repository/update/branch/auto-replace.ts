@@ -133,7 +133,8 @@ async function checkExistingBranch(
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
-  reuseExistingBranch: boolean
+  reuseExistingBranch: boolean,
+  firstUpdate = true
 ): Promise<string | null> {
   const {
     packageFile,
@@ -176,7 +177,7 @@ export async function doAutoReplace(
         );
       }
     }
-    if (await confirmIfDepUpdated(upgrade, existingContent)) {
+    if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },
         'Package file is already updated - no work to do'
