@@ -84,7 +84,7 @@ jobs:
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@9b0c1fce7a93df8e3bb8926b0d6e9d89e92f20a7 # tag=v3.0.11
+        uses: actions/cache@c1a5de879eb890d062a85ee0252d6036480b1fe2 # v3.2.1
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}

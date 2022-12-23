@@ -34,7 +34,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { fromBase64 } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -719,7 +719,7 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkToken && config.repository !== p.sourceRepo) {
+    if (!config.forkToken && !looseEquals(config.repository, p.sourceRepo)) {
       return false;
     }
 

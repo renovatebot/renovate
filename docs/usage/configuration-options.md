@@ -18,6 +18,7 @@ You can store your Renovate configuration file in one of these locations:
 1. `.gitlab/renovate.json5`
 1. `.renovaterc`
 1. `.renovaterc.json`
+1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
 <!-- prettier-ignore -->
@@ -2081,14 +2082,18 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
-- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
-- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
-- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
-- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 
@@ -2228,13 +2233,16 @@ This setting tells Renovate when you would like it to raise PRs:
 Renovate defaults to `immediate` but you might want to change this to `not-pending` instead.
 
 With prCreation set to `immediate`, you'll get a Pull Request and possible associated notification right away when a new update is available.
-Your test suite takes a bit of time to complete, so if you go look at the new PR right away, you don't know if your tests pass or fail.
-You're basically waiting until you have the test results, before you can decide if you want to merge the PR or not.
+You'll have to wait until the checks have been performed, before you can decide if you want to merge the PR or not.
 
-With prCreation set to `not-pending`, Renovate waits until all tests have finished running, and only then creates the PR.
+With prCreation set to `not-pending`, Renovate creates the PR only once all tests have passed or failed.
 When you get the PR notification, you can take action immediately, as you have the full test results.
+If there are no checks associated, Renovate will create the PR once 24 hrs have elapsed since creation of the commit.
 
-When you set prCreation to `not-pending` you're reducing the "noise" but get notified of new PRs a bit later.
+With prCreation set to `status-success`, Renovate creates the PR only if/ once all tests have passed.
+
+For all cases of non-immediate PR creation, Renovate doesn't run instantly once tests complete.
+Instead, Renovate can create the PR on its next run after relevant tests have completed, so there will be some delay.
 
 ## prFooter
 

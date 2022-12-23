@@ -391,6 +391,25 @@ hostRules: [
 ];
 ```
 
+### pip
+
+If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
+This is because `packageRules` are applied _after_ package file extraction.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["pip_requirements"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
+```
+
 ### poetry
 
 For every Poetry source, a `hostRules` search is done and then any found credentials are added to env like `POETRY_HTTP_BASIC_X_USERNAME` and `POETRY_HTTP_BASIC_X_PASSWORD`, where `X` represents the normalized name of the source in `pyproject.toml`.
