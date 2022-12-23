@@ -3,7 +3,6 @@ import { getConfig, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
-import { sourceExtractionRegex } from '../../../../modules/manager/terragrunt/providers';
 import type { BranchUpgradeConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
 
