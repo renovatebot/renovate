@@ -1,8 +1,8 @@
 import { DateTime, Settings } from 'luxon';
-import * as packageCache from '../../../../util/cache/package';
+import * as packageCache from '../../../cache/package';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { GithubGraphqlPackageCacheAdapter } from './package-cache-adapter';
+import { GithubGraphqlPackageCacheStrategy } from './package-cache-strategy';
 
 const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
 
@@ -13,7 +13,7 @@ const mockTime = (input: string): void => {
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
-describe('util/github/graphql/cache-adapters/package-cache-adapter', () => {
+describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
   const cacheGet = jest.spyOn(packageCache, 'get');
   const cacheSet = jest.spyOn(packageCache, 'set');
 
@@ -43,9 +43,9 @@ describe('util/github/graphql/cache-adapters/package-cache-adapter', () => {
     };
     const page = [newItem];
 
-    const adapter = new GithubGraphqlPackageCacheAdapter('foo', 'bar');
-    const isPaginationDone = await adapter.reconcile(page);
-    const res = await adapter.finalize();
+    const strategy = new GithubGraphqlPackageCacheStrategy('foo', 'bar');
+    const isPaginationDone = await strategy.reconcile(page);
+    const res = await strategy.finalize();
 
     expect(res).toEqual([...Object.values(oldItems), newItem]);
     expect(isPaginationDone).toBe(false);

@@ -1,18 +1,18 @@
 import { DateTime } from 'luxon';
 import type {
   GithubDatasourceItem,
-  GithubGraphqlCacheAdapter,
   GithubGraphqlCacheRecord,
+  GithubGraphqlCacheStrategy,
 } from '../types';
 import { isDateExpired } from '../util';
 
 /**
- * Cache adapter handles the caching Github GraphQL items
- * and reconciling them with newly obtained from paginated queries.
+ * Cache strategy handles the caching Github GraphQL items
+ * and reconciling them with newly obtained ones from paginated queries.
  */
-export abstract class AbstractGithubGraphqlCacheAdapter<
+export abstract class AbstractGithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem
-> implements GithubGraphqlCacheAdapter<GithubItem>
+> implements GithubGraphqlCacheStrategy<GithubItem>
 {
   /**
    * Time period after which a cache record is considered expired.
@@ -43,7 +43,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
   ) {}
 
   /**
-   * Load data previously persisted by this adapter
+   * Load data previously persisted by this strategy
    * for given `cacheNs` and `cacheKey`.
    */
   private async getItems(): Promise<Record<string, GithubItem>> {
@@ -60,7 +60,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
     const storedData = await this.load();
     if (storedData) {
       const cacheTTLDuration = {
-        days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
       };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
@@ -79,7 +79,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
@@ -143,7 +143,7 @@ export abstract class AbstractGithubGraphqlCacheAdapter<
   }
 
   /**
-   * Loading and persisting data is delegated to the concrete adapter.
+   * Loading and persisting data is delegated to the concrete strategy.
    */
   abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
   abstract persist(

@@ -1,14 +1,14 @@
 import * as memCache from '../../../cache/memory';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { AbstractGithubGraphqlCacheAdapter } from './abstract-cache-adapter';
+import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
 
 /**
- * In-memory adapter meant to be used for private packages
+ * In-memory strategy meant to be used for private packages
  * and for testing purposes.
  */
-export class GithubGraphqlMemoryCacheAdapter<
+export class GithubGraphqlMemoryCacheStrategy<
   GithubItem extends GithubDatasourceItem
-> extends AbstractGithubGraphqlCacheAdapter<GithubItem> {
+> extends AbstractGithubGraphqlCacheStrategy<GithubItem> {
   private fullKey(): string {
     return `github-graphql-cache:${this.cacheNs}:${this.cacheKey}`;
   }
@@ -21,7 +21,7 @@ export class GithubGraphqlMemoryCacheAdapter<
 
   persist(cacheRecord: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
     const expiry = this.createdAt.plus({
-      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
     });
     const ttlSeconds = expiry.diff(this.now, ['seconds']).as('seconds');
     if (ttlSeconds && ttlSeconds > 0) {

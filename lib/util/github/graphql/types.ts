@@ -131,7 +131,7 @@ export interface GithubGraphqlCacheRecord<
   updatedAt: string;
 }
 
-export interface GithubGraphqlCacheAdapter<
+export interface GithubGraphqlCacheStrategy<
   GithubItem extends GithubDatasourceItem
 > {
   reconcile(items: GithubItem[]): Promise<boolean>;

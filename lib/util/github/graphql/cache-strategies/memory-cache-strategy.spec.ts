@@ -2,7 +2,7 @@ import { DateTime, Settings } from 'luxon';
 import * as memCache from '../../../cache/memory';
 import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { GithubGraphqlMemoryCacheAdapter } from './memory-cache-adapter';
+import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
 
 const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
 
@@ -13,7 +13,7 @@ const mockTime = (input: string): void => {
 
 type CacheRecord = GithubGraphqlCacheRecord<GithubDatasourceItem>;
 
-describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
+describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     memCache.init();
@@ -34,9 +34,9 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     let now = '2022-10-31 15:29:59';
     mockTime(now);
 
-    let adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
-    let isPaginationDone = await adapter.reconcile([items['1']]);
-    let res = await adapter.finalize();
+    let strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    let isPaginationDone = await strategy.reconcile([items['1']]);
+    let res = await strategy.finalize();
 
     expect(res).toEqual(Object.values(items));
     expect(isPaginationDone).toBe(true);
@@ -49,9 +49,9 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     now = '2022-10-31 15:30:00';
     mockTime(now);
 
-    adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
-    isPaginationDone = await adapter.reconcile([]);
-    res = await adapter.finalize();
+    strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    isPaginationDone = await strategy.reconcile([]);
+    res = await strategy.finalize();
 
     expect(res).toEqual([]);
     expect(isPaginationDone).toBe(false);
@@ -84,9 +84,9 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
     };
     const page = [newItem];
 
-    const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
-    const isPaginationDone = await adapter.reconcile(page);
-    const res = await adapter.finalize();
+    const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    const isPaginationDone = await strategy.reconcile(page);
+    const res = await strategy.finalize();
 
     expect(res).toEqual([...Object.values(oldItems), newItem]);
     expect(isPaginationDone).toBe(false);
@@ -121,8 +121,8 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
       { version: '4', releaseTimestamp: isoTs('2022-10-15 18:00') },
     ].reverse();
 
-    const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
-    const isPaginationDone = await adapter.reconcile(page);
+    const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    const isPaginationDone = await strategy.reconcile(page);
 
     expect(isPaginationDone).toBe(true);
   });
@@ -159,9 +159,9 @@ describe('util/github/graphql/cache-adapters/memory-cache-adapter', () => {
       items['8'],
     ].reverse();
 
-    const adapter = new GithubGraphqlMemoryCacheAdapter('foo', 'bar');
-    const isPaginationDone = await adapter.reconcile(page);
-    const res = await adapter.finalize();
+    const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    const isPaginationDone = await strategy.reconcile(page);
+    const res = await strategy.finalize();
 
     expect(res).toEqual([
       { version: '0', releaseTimestamp: isoTs('2022-09-30 10:00') },

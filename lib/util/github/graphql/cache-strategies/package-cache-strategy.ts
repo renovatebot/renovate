@@ -1,13 +1,13 @@
 import * as packageCache from '../../../cache/package';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
-import { AbstractGithubGraphqlCacheAdapter } from './abstract-cache-adapter';
+import { AbstractGithubGraphqlCacheStrategy } from './abstract-cache-strategy';
 
 /**
- * Package cache adapter meant to be used for public packages.
+ * Package cache strategy meant to be used for public packages.
  */
-export class GithubGraphqlPackageCacheAdapter<
+export class GithubGraphqlPackageCacheStrategy<
   GithubItem extends GithubDatasourceItem
-> extends AbstractGithubGraphqlCacheAdapter<GithubItem> {
+> extends AbstractGithubGraphqlCacheStrategy<GithubItem> {
   load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined> {
     return packageCache.get(this.cacheNs, this.cacheKey);
   }
@@ -16,7 +16,7 @@ export class GithubGraphqlPackageCacheAdapter<
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>
   ): Promise<void> {
     const expiry = this.createdAt.plus({
-      days: AbstractGithubGraphqlCacheAdapter.cacheTTLDays,
+      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
     });
     const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
     if (ttlMinutes && ttlMinutes > 0) {

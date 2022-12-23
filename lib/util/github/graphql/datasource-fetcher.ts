@@ -9,11 +9,11 @@ import type {
 } from '../../http/github';
 import type { HttpResponse } from '../../http/types';
 import { getApiBaseUrl } from '../url';
-import { GithubGraphqlMemoryCacheAdapter } from './cache-adapters/memory-cache-adapter';
-import { GithubGraphqlPackageCacheAdapter } from './cache-adapters/package-cache-adapter';
+import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
+import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
 import type {
   GithubDatasourceItem,
-  GithubGraphqlCacheAdapter,
+  GithubGraphqlCacheStrategy,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlPayload,
   GithubGraphqlRepoParams,
@@ -44,17 +44,6 @@ export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
   ResultItem extends GithubDatasourceItem
 > {
-  static prepareQuery(payloadQuery: string): string {
-    return `
-      query($owner: String!, $name: String!, $cursor: String, $count: Int!) {
-        repository(owner: $owner, name: $name) {
-          isRepoPrivate: isPrivate
-          payload: ${payloadQuery}
-        }
-      }
-    `;
-  }
-
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,
@@ -226,17 +215,18 @@ export class GithubGraphqlDatasourceFetcher<
     return res;
   }
 
-  private cacheAdapter: GithubGraphqlCacheAdapter<ResultItem> | undefined;
-  private getCacheAdapter(): GithubGraphqlCacheAdapter<ResultItem> {
-    if (this.cacheAdapter) {
-      return this.cacheAdapter;
+  private _cacheStrategy: GithubGraphqlCacheStrategy<ResultItem> | undefined;
+
+  private cacheStrategy(): GithubGraphqlCacheStrategy<ResultItem> {
+    if (this._cacheStrategy) {
+      return this._cacheStrategy;
     }
     const cacheNs = this.getCacheNs();
     const cacheKey = this.getCacheKey();
-    this.cacheAdapter = this.isCacheable
-      ? new GithubGraphqlPackageCacheAdapter<ResultItem>(cacheNs, cacheKey)
-      : new GithubGraphqlMemoryCacheAdapter<ResultItem>(cacheNs, cacheKey);
-    return this.cacheAdapter;
+    this._cacheStrategy = this.isCacheable
+      ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
+      : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+    return this._cacheStrategy;
   }
 
   private async doPaginatedQuery(): Promise<ResultItem[]> {
@@ -256,12 +246,12 @@ export class GithubGraphqlDatasourceFetcher<
         resultItems.push(item);
       }
 
-      // It's important to call `getCacheAdapter()` after `doShrinkableQuery()`
+      // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
       // because `doShrinkableQuery()` may change `this.isCacheable`.
       //
       // Otherwise, cache items for public packages will never be persisted
       // in long-term cache.
-      isPaginationDone = await this.getCacheAdapter().reconcile(resultItems);
+      isPaginationDone = await this.cacheStrategy().reconcile(resultItems);
 
       hasNextPage = !!queryResult?.pageInfo?.hasNextPage;
       nextCursor = queryResult?.pageInfo?.endCursor;
@@ -270,7 +260,7 @@ export class GithubGraphqlDatasourceFetcher<
       }
     }
 
-    return this.getCacheAdapter().finalize();
+    return this.cacheStrategy().finalize();
   }
 
   /**

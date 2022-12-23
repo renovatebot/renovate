@@ -1,6 +1,6 @@
 import { adapter } from './tags-adapter';
 
-describe('util/github/graphql/tags-adapter', () => {
+describe('util/github/graphql/query-adapters/tags-adapter', () => {
   it('transforms Commit type', () => {
     expect(
       adapter.transform({
