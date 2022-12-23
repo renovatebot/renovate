@@ -2,6 +2,7 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn lint-staged
+yarn ls-lint
 
 BRANCH_NAME=$(git branch --show-current)
 
