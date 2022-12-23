@@ -226,6 +226,7 @@ describe('modules/versioning/poetry/index', () => {
     ${'~1.2'}           | ${'replace'}  | ${'1.2.3'}         | ${'2.0.0'}         | ${'~2.0'}
     ${'~1'}             | ${'replace'}  | ${'1.2.3'}         | ${'2.0.0'}         | ${'~2'}
     ${'^2.2'}           | ${'widen'}    | ${'2.2.0'}         | ${'3.0.0'}         | ${'^2.2 || ^3.0.0'}
+    ${'^3.5'}           | ${'pin'}      | ${'3.5'}           | ${'3.5'}           | ${'3.5'}
   `(
     'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
     ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
