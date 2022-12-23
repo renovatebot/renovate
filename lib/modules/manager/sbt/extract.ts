@@ -29,7 +29,7 @@ interface Ctx {
   currentVarName?: string;
   depType?: string;
   useScalaVersion?: boolean;
-  groupName?: string;
+  variableName?: string;
 }
 
 const scala = lang.createLang('scala');
@@ -129,7 +129,7 @@ const versionMatch = q.alt<Ctx>(
     const currentValue = ctx.vars[varName];
     if (currentValue) {
       ctx.currentValue = currentValue;
-      ctx.groupName = varName;
+      ctx.variableName = varName;
     }
     return ctx;
   }),
@@ -157,7 +157,7 @@ function depHandler(ctx: Ctx): Ctx {
     currentValue,
     useScalaVersion,
     depType,
-    groupName,
+    variableName,
   } = ctx;
 
   delete ctx.groupId;
@@ -165,7 +165,7 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.currentValue;
   delete ctx.useScalaVersion;
   delete ctx.depType;
-  delete ctx.groupName;
+  delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
 
@@ -185,8 +185,9 @@ function depHandler(ctx: Ctx): Ctx {
     dep.datasource = SbtPluginDatasource.id;
   }
 
-  if (groupName) {
-    dep.groupName = groupName;
+  if (variableName) {
+    dep.groupName = variableName;
+    dep.variableName = variableName;
   }
 
   ctx.deps.push(dep);
