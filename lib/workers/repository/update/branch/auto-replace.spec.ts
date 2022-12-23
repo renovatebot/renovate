@@ -115,7 +115,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
       reuseExistingBranch = false;
-      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch, false);
       expect(res).toEqual(src);
     });
 
