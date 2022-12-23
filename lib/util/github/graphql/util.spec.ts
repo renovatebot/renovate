@@ -1,9 +1,37 @@
+import { codeBlock } from 'common-tags';
+import { parse as graphqlParse } from 'graphql';
 import { DateTime } from 'luxon';
-import { isDateExpired } from './util';
+import { isDateExpired, prepareQuery } from './util';
 
 const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
 
 describe('util/github/graphql/util', () => {
+  describe('prepareQuery', () => {
+    it('returns valid query for valid payload query', () => {
+      const payloadQuery = codeBlock`
+        items {
+          pageInfo {
+            hasNextPage
+            endCursor
+          }
+          nodes {
+            version
+            releaseTimestamp
+            foo
+          }
+        }
+      `;
+      expect(() => graphqlParse(`query { ${payloadQuery} }`)).not.toThrow();
+      expect(() => graphqlParse(prepareQuery(payloadQuery))).not.toThrow();
+    });
+
+    it('returns invalid query for invalid payload query', () => {
+      const payloadQuery = '!@#';
+      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow();
+      expect(() => graphqlParse(prepareQuery(payloadQuery))).toThrow();
+    });
+  });
+
   test.each`
     currentTime           | initialTimestamp      | duration        | expected
     ${'2022-11-25 15:58'} | ${'2022-11-25 15:00'} | ${{ hours: 1 }} | ${false}
