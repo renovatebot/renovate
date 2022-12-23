@@ -18,7 +18,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   bundler: {
     datasource: 'rubygems',
     depName: 'bundler',
-    versioning: 'ruby',
+    versioning: rubyVersioningId,
   },
   cocoapods: {
     datasource: 'rubygems',
@@ -115,6 +115,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
+  },
+  ruby: {
+    datasource: 'github-releases',
+    depName: 'containerbase/php-ruby',
+    versioning: rubyVersioningId,
   },
   rust: {
     datasource: 'docker',

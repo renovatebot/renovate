@@ -166,12 +166,12 @@ export async function updateArtifacts(
         ...bundlerHostRulesVariables,
         GEM_HOME: await ensureCacheDir('bundler'),
       },
-      docker: {
-        image: 'ruby',
-        tagScheme: 'ruby',
-        tagConstraint: await getRubyConstraint(updateArtifact),
-      },
+      docker: {},
       toolConstraints: [
+        {
+          toolName: 'ruby',
+          constraint: await getRubyConstraint(updateArtifact),
+        },
         {
           toolName: 'bundler',
           constraint: bundler,
