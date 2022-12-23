@@ -75,7 +75,7 @@ export async function updateArtifacts({
     extraEnv: {
       CP_HOME_DIR: await ensureCacheDir('cocoapods'),
     },
-    docker: { image: 'sidecar' },
+    docker: {},
     toolConstraints: [
       {
         toolName: 'ruby',
