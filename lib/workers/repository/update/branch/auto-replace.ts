@@ -65,7 +65,7 @@ export async function confirmIfDepUpdated(
         expectedValue: newValue,
         foundValue: newUpgrade.currentValue,
       },
-      'Value mismatch'
+      'Value is not updated'
     );
     return false;
   }
@@ -175,6 +175,13 @@ export async function doAutoReplace(
           newDigest
         );
       }
+    }
+    if (await confirmIfDepUpdated(upgrade, existingContent)) {
+      logger.debug(
+        { packageFile, depName },
+        'Package file is already updated - no work to do'
+      );
+      return existingContent;
     }
     logger.debug(
       { packageFile, depName },

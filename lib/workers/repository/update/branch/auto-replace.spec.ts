@@ -3,6 +3,7 @@ import { getConfig, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { extractPackageFile } from '../../../../modules/manager/html';
+import { sourceExtractionRegex } from '../../../../modules/manager/terragrunt/providers';
 import type { BranchUpgradeConfig } from '../../../types';
 import { doAutoReplace } from './auto-replace';
 
@@ -101,6 +102,22 @@ describe('workers/repository/update/branch/auto-replace', () => {
         reuseExistingBranch
       );
       expect(res).toEqual(srcAlreadyUpdated);
+    });
+
+    it('handles no work', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      const src = `     ${script}   `;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = '7.0.9';
+      upgrade.newValue = '7.1.0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
+      reuseExistingBranch = false;
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
+      expect(res).toEqual(src);
     });
 
     it('returns existing content if replaceString mismatch', async () => {
