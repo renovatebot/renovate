@@ -7,22 +7,20 @@ import { massagePattern } from './utils';
 
 export class PackagePatternsMatcher extends Matcher {
   override matches(
-    { depName, updateType }: PackageRuleInputConfig,
+    { depName, packageName }: PackageRuleInputConfig,
     { matchPackagePatterns }: PackageRule
   ): boolean | null {
     if (is.undefined(matchPackagePatterns)) {
       return null;
     }
 
-    if (is.undefined(depName)) {
-      return false;
-    }
-
     let isMatch = false;
     for (const packagePattern of matchPackagePatterns) {
-      const packageRegex = regEx(massagePattern(packagePattern));
-      if (packageRegex.test(depName)) {
-        logger.trace(`${depName} matches against ${String(packageRegex)}`);
+      if (
+        [depName, packageName].some((p) =>
+          isPackagePatternMatch(packagePattern, p)
+        )
+      ) {
         isMatch = true;
       }
     }
@@ -30,25 +28,39 @@ export class PackagePatternsMatcher extends Matcher {
   }
 
   override excludes(
-    { depName, updateType }: PackageRuleInputConfig,
+    { depName, packageName }: PackageRuleInputConfig,
     { excludePackagePatterns }: PackageRule
   ): boolean | null {
     // ignore lockFileMaintenance for backwards compatibility
     if (is.undefined(excludePackagePatterns)) {
       return null;
     }
-    if (is.undefined(depName)) {
-      return false;
-    }
 
     let isMatch = false;
-    for (const pattern of excludePackagePatterns) {
-      const packageRegex = regEx(massagePattern(pattern));
-      if (packageRegex.test(depName)) {
-        logger.trace(`${depName} matches against ${String(packageRegex)}`);
+    for (const packagePattern of excludePackagePatterns) {
+      if (
+        [depName, packageName].some((p) =>
+          isPackagePatternMatch(packagePattern, p)
+        )
+      ) {
         isMatch = true;
       }
     }
     return isMatch;
   }
+}
+
+function isPackagePatternMatch(
+  pckPattern: string,
+  pck?: string | null
+): boolean {
+  if (is.nullOrUndefined(pck)) {
+    return false;
+  }
+  const re = regEx(massagePattern(pckPattern));
+  if (re.test(pck)) {
+    logger.trace(`${pck} matches against ${String(re)}`);
+    return true;
+  }
+  return false;
 }
