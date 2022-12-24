@@ -1029,6 +1029,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'excludeDepNames',
@@ -1042,6 +1043,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'matchPackagePrefixes',
@@ -1110,6 +1112,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'excludeDepPatterns',
@@ -1124,6 +1127,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+    advancedUse: true,
   },
   {
     name: 'matchCurrentValue',
