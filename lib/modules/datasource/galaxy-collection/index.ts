@@ -3,7 +3,7 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { parseUrl } from '../../../util/url';
+import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -14,8 +14,8 @@ import type {
 
 function hasRegistryUrlPathIncluded(registryUrl: string): boolean {
   const urlToCheck = parseUrl(registryUrl);
-  if (urlToCheck != null) {
-    return urlToCheck.pathname.length > 1; // returns "/" for url w/o path
+  if (!is.nullOrUndefined(urlToCheck)) {
+    return urlToCheck.pathname.length > 1; // returns "/" for URL without path
   }
   return false;
 }
@@ -43,10 +43,10 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     // TODO: types (#7154)
     /* eslint-disable @typescript-eslint/restrict-template-expressions */
-    const galaxyUrl = hasRegistryUrlPathIncluded(`${registryUrl}`)
-      ? `${registryUrl}`
-      : `${registryUrl}/api/v2/collections`;
-    const galaxyCollectionUrl = `${galaxyUrl}/${namespace}/${projectName}/`;
+    const galaxyUrl = hasRegistryUrlPathIncluded(registryUrl!)
+      ? registryUrl!
+      : joinUrlParts(registryUrl!, 'api/v2/collections');
+    const galaxyCollectionUrl = joinUrlParts(galaxyUrl, namespace, projectName);
 
     let galaxyUrlResponse: HttpResponse<BaseProjectResult>;
     try {
@@ -67,12 +67,12 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     const baseProject = galaxyUrlResponse.body;
     // galaxy v2 / v3 detection
-    if (typeof baseProject?.highest_version !== 'undefined') {
+    if (!is.nullOrUndefined(baseProject?.highest_version)) {
       //v3
       baseProject.latest_version = baseProject.highest_version;
     } // else v2 -> no-op;
 
-    const versionsUrl = `${galaxyCollectionUrl}versions/`;
+    const versionsUrl = ensureTrailingSlash(joinUrlParts(galaxyCollectionUrl, 'versions'));
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {
@@ -86,7 +86,7 @@ export class GalaxyCollectionDatasource extends Datasource {
     const versionsProject = versionsUrlResponse.body;
 
     // galaxy v2 / v3 detection
-    if (typeof versionsProject?.data !== 'undefined') {
+    if (!is.nullOrUndefined(versionsProject?.data)) {
       //v3
       versionsProject.results = versionsProject.data;
     } // else v2 -> no-op;
