@@ -8,6 +8,8 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   BaseProjectResult,
+  BaseProjectResultV2,
+  BaseProjectResultV3,
   VersionsDetailResult,
   VersionsProjectResult,
 } from './types';
@@ -18,6 +20,33 @@ function hasRegistryUrlPathIncluded(registryUrl: string): boolean {
     return urlToCheck.pathname.length > 1; // returns "/" for URL without path
   }
   return false;
+}
+
+function isBaseProjectResultV2(
+  result: BaseProjectResult
+): result is BaseProjectResultV2 {
+  return is.truthy('latest_version' in result);
+}
+
+function isBaseProjectResultV3(
+  result: BaseProjectResult
+): result is BaseProjectResultV3 {
+  return is.truthy('highest_version' in result);
+}
+
+function convertBaseProject(
+  base: BaseProjectResult
+): BaseProjectResultV2 | null {
+  if (isBaseProjectResultV2(base)) {
+    return base;
+  }
+  if (isBaseProjectResultV3(base)) {
+    return {
+      ...base,
+      latest_version: base.highest_version,
+    };
+  }
+  return null;
 }
 
 export class GalaxyCollectionDatasource extends Datasource {
@@ -43,10 +72,10 @@ export class GalaxyCollectionDatasource extends Datasource {
 
     // TODO: types (#7154)
     /* eslint-disable @typescript-eslint/restrict-template-expressions */
-    const galaxyUrl = hasRegistryUrlPathIncluded(registryUrl!)
+    const baseUrl = hasRegistryUrlPathIncluded(registryUrl!)
       ? registryUrl!
       : joinUrlParts(registryUrl!, 'api/v2/collections');
-    const galaxyCollectionUrl = joinUrlParts(galaxyUrl, namespace, projectName);
+    const galaxyCollectionUrl = joinUrlParts(baseUrl, namespace, projectName);
 
     let galaxyUrlResponse: HttpResponse<BaseProjectResult>;
     try {
@@ -65,14 +94,16 @@ export class GalaxyCollectionDatasource extends Datasource {
       return null;
     }
 
-    const baseProject = galaxyUrlResponse.body;
-    // galaxy v2 / v3 detection
-    if (!is.nullOrUndefined(baseProject?.highest_version)) {
-      //v3
-      baseProject.latest_version = baseProject.highest_version;
-    } // else v2 -> no-op;
+    // then you can use it like this
+    const baseProject = convertBaseProject(galaxyUrlResponse.body);
+    if (is.nullOrUndefined(baseProject)) {
+      logger.debug("couldn't convert response to object");
+      return null;
+    }
 
-    const versionsUrl = ensureTrailingSlash(joinUrlParts(galaxyCollectionUrl, 'versions'));
+    const versionsUrl = ensureTrailingSlash(
+      joinUrlParts(galaxyCollectionUrl, 'versions')
+    );
 
     let versionsUrlResponse: HttpResponse<VersionsProjectResult>;
     try {

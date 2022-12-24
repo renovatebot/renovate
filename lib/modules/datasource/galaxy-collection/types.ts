@@ -1,11 +1,16 @@
 export interface BaseProjectResult {
   versions_url: string;
   deprecated: boolean;
+}
+
+export interface BaseProjectResultV2 extends BaseProjectResult {
   latest_version: {
     version: string;
   };
-  // new in v3, replaces latest_version
-  highest_version?: {
+}
+
+export interface BaseProjectResultV3 extends BaseProjectResult {
+  highest_version: {
     version: string;
   };
 }

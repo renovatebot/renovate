@@ -53,7 +53,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('returns null for 404 result', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/foo/bar/')
+          .get(galaxyUrl.path + '/foo/bar')
           .reply(404);
         expect(
           await getPkgReleases({
@@ -67,7 +67,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('throws for remote host error', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/foo/bar/')
+          .get(galaxyUrl.path + '/foo/bar')
           .reply(500);
         await expect(
           getPkgReleases({
@@ -81,7 +81,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('returns null for unexpected data at base', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/community/kubernetes/')
+          .get(galaxyUrl.path + '/community/kubernetes')
           .reply(200, '');
         expect(
           await getPkgReleases({
@@ -95,7 +95,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('returns null for unexpected data at versions', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/community/kubernetes/')
+          .get(galaxyUrl.path + '/community/kubernetes')
           .reply(200, communityKubernetesBase)
           .get(galaxyUrl.path + '/community/kubernetes/versions/')
           .reply(200, '');
@@ -111,7 +111,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('throws error for remote host versions error', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/community/kubernetes/')
+          .get(galaxyUrl.path + '/community/kubernetes')
           .reply(200, communityKubernetesBase)
           .get(galaxyUrl.path + '/community/kubernetes/versions/')
           .reply(500);
@@ -147,7 +147,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       it('returns null for unknown error', async () => {
         httpMock
           .scope(galaxyUrl.datasourceUrl)
-          .get(galaxyUrl.path + '/foo/bar/')
+          .get(galaxyUrl.path + '/foo/bar')
           .replyWithError('some unknown error');
         expect(
           await getPkgReleases({
@@ -164,7 +164,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns only valid versions if a version detail fails', async () => {
       httpMock
         .scope(defaultBaseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v2/collections/community/kubernetes')
         .reply(200, communityKubernetesBase)
         .get('/api/v2/collections/community/kubernetes/versions/')
         .reply(200, communityKubernetesVersions)
@@ -189,7 +189,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(defaultBaseUrl)
-        .get('/api/v2/collections/community/kubernetes/')
+        .get('/api/v2/collections/community/kubernetes')
         .reply(200, communityKubernetesBase)
         .get('/api/v2/collections/community/kubernetes/versions/')
         .reply(200, communityKubernetesVersions)
@@ -215,7 +215,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('returns only valid versions if a version detail fails', async () => {
       httpMock
         .scope(customHostAndPath)
-        .get('/community/general/')
+        .get('/community/general')
         .reply(200, v3CommunityGeneralBase)
         .get('/community/general/versions/')
         .reply(200, v3CommunityGeneralVersions)
@@ -237,7 +237,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
     it('processes real data', async () => {
       httpMock
         .scope(customHostAndPath)
-        .get('/community/general/')
+        .get('/community/general')
         .reply(200, v3CommunityGeneralBase)
         .get('/community/general/versions/')
         .reply(200, v3CommunityGeneralVersions)
