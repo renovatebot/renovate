@@ -4,6 +4,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import type { HttpResponse } from '../../../util/http/types';
 import * as p from '../../../util/promises';
 import { ensureTrailingSlash, joinUrlParts, parseUrl } from '../../../util/url';
+import * as pep440Versioning from '../../versioning/pep440';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
@@ -59,6 +60,8 @@ export class GalaxyCollectionDatasource extends Datasource {
   override readonly customRegistrySupport = true;
 
   override readonly defaultRegistryUrls = ['https://galaxy.ansible.com'];
+
+  override readonly defaultVersioning = pep440Versioning.id;
 
   @cache({
     namespace: `datasource-${GalaxyCollectionDatasource.id}`,

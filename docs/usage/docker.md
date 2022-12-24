@@ -246,6 +246,25 @@ module.exports = {
 };
 ```
 
+#### AWS ECR (Amazon Web Services Elastic Container Registry)
+
+Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "username": "AKIAABCDEFGHIJKLMNOPQ",
+      "encrypted": {
+        "password": "w...A"
+      }
+    }
+  ]
+}
+```
+
 #### Google Container Registry / Google Artifact Registry
 
 ##### Using long-lived service account credentials

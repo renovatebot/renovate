@@ -634,8 +634,14 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
+        cmd: 'git stash -- composer.json',
+      },
+      {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'git stash pop || true',
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
@@ -674,8 +680,14 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
+        cmd: 'git stash -- composer.json',
+      },
+      {
         cmd: 'composer install --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
         options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
+      },
+      {
+        cmd: 'git stash pop || true',
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',

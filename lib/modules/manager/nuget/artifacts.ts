@@ -68,9 +68,7 @@ async function runDotnetRestore(
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     extraEnv: {
       NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
       MSBUILDDISABLENODEREUSE: '1',

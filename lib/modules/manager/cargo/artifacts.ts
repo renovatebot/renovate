@@ -23,9 +23,7 @@ async function cargoUpdate(
   }
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await exec(cmd, execOptions);
