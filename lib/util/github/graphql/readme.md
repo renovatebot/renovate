@@ -1,9 +1,9 @@
 GraphQL can be used to efficiently retrieve all the tags and releases from GitHub.
-The approach involves fetching items in reverse chronological order by the created_at field.
+The approach involves fetching items in reverse chronological order by the `created_at` field.
 Items can be retrieved page by page until the first cached item is reached.
 
-Although sorting by the updated_at field would be more precise, this option is not available in the API.
-As a result, we also fetch relatively fresh items, which are defined as items that have been updated or deleted within the time-to-live (TTL) period of the cache.
+Although sorting by the `updated_at` field would be more precise, this option is not available in the API.
+As a result, we also fetch relatively all items that are relatively _fresh_.
 The freshness period is equal to the TTL of the entire cache, and this allows for updates or deletions to be reflected in the cache during that time.
 
 In most cases, only one page of releases will need to be fetched during a Renovate run.
