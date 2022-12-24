@@ -13,6 +13,8 @@ const prefetchedImages = new Map<string, string>();
 
 const digestRegex = regEx('Digest: (.*?)\n');
 
+export const sideCarImage = 'sidecar';
+
 export async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (prefetchedImages.has(taggedImage)) {
     logger.debug(
@@ -211,8 +213,8 @@ export async function generateDockerCommand(
   preCommands: string[],
   options: DockerOptions
 ): Promise<string> {
-  const { envVars, cwd, tagScheme, tagConstraint } = options;
-  let image = options.image;
+  const { envVars, cwd } = options;
+  let image = sideCarImage;
   const volumes = options.volumes ?? [];
   const {
     localDir,
@@ -259,21 +261,13 @@ export async function generateDockerCommand(
 
   image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
 
-  let tag: string | null = null;
-  if (options.tag) {
-    tag = options.tag;
-  } else if (tagConstraint) {
-    const tagVersioning = tagScheme ?? 'semver';
-    tag = await getDockerTag(image, tagConstraint, tagVersioning);
-    logger.debug(
-      { image, tagConstraint, tagVersioning, tag },
-      'Resolved tag constraint'
-    );
-  } else {
-    logger.debug(`No tag or tagConstraint specified for image: ${image}`);
-  }
+  // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
+  logger.debug(
+    { image /*, tagConstraint: sideCarImageVersion, tag */ },
+    'Resolved tag constraint'
+  );
 
-  const taggedImage = tag ? `${image}:${tag}` : `${image}`;
+  const taggedImage = image; // TODO: tag ? `${image}:${tag}` : `${image}`;
   await prefetchDockerImage(taggedImage);
   result.push(taggedImage);
 
