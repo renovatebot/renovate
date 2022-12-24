@@ -53,9 +53,7 @@ export async function updateArtifacts({
       : config.constraints?.dart ?? getDartConstraint(oldLockFileContent);
     await exec(`${toolName} pub upgrade`, {
       cwdFile: packageFileName,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints: [
         {
           toolName,
