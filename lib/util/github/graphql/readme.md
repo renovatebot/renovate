@@ -43,6 +43,8 @@ The `cache-strategies/` directory is responsible for caching implementation.
 The core function is `reconcile()` which updates the cache data structure with pages of items one-by-one.
 
 The files in `query-adapters/` directory allow for GitHub releases and tags to be fetched according to their specifics and to be transformed to the form suitable for caching.
+For cached items, only `version` and `releaseTimestamp` fields are mandatory.
+Other fields are specific to GitHub tags or GitHub releases.
 
 # Process overview
 
