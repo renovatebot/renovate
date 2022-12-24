@@ -641,7 +641,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo' },
       },
       {
-        cmd: 'git stash pop',
+        cmd: 'git stash pop || true',
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
@@ -687,7 +687,7 @@ describe('modules/manager/composer/artifacts', () => {
         options: { cwd: '/tmp/github/some/repo', encoding: 'utf-8' },
       },
       {
-        cmd: 'git stash pop',
+        cmd: 'git stash pop || true',
       },
       {
         cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
