@@ -175,8 +175,11 @@ describe('modules/manager/pub/artifacts', () => {
             '-e CONTAINERBASE_CACHE_DIR ' +
             '-w "/tmp/github/some/repo" ' +
             'renovate/sidecar ' +
-            'bash -l -c ' +
-            `"install-tool ${params.sdk} 3.3.9 && ${params.sdk} pub upgrade"`,
+            'bash -l -c "' +
+            `install-tool ${params.sdk} 3.3.9` +
+            ' && ' +
+            `${params.sdk} pub upgrade` +
+            '"',
         },
       ]);
     });
