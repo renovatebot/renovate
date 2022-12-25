@@ -1421,6 +1421,7 @@ Supported lock files are:
 - `poetry.lock`
 - `Cargo.lock`
 - `jsonnetfile.lock.json`
+- `pubspec.lock`
 
 Others may be added via feature request.
 
