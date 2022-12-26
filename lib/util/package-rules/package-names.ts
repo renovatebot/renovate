@@ -4,28 +4,28 @@ import { Matcher } from './base';
 
 export class PackageNameMatcher extends Matcher {
   override matches(
-    { depName, packageName }: PackageRuleInputConfig,
+    { depName }: PackageRuleInputConfig,
     { matchPackageNames }: PackageRule
   ): boolean | null {
     if (is.undefined(matchPackageNames)) {
       return null;
     }
-    return !!(
-      (depName && matchPackageNames.includes(depName)) ||
-      (packageName && matchPackageNames.includes(packageName))
-    );
+    if (is.undefined(depName)) {
+      return false;
+    }
+    return matchPackageNames.includes(depName);
   }
 
   override excludes(
-    { depName, packageName }: PackageRuleInputConfig,
+    { depName }: PackageRuleInputConfig,
     { excludePackageNames }: PackageRule
   ): boolean | null {
     if (is.undefined(excludePackageNames)) {
       return null;
     }
-    return !!(
-      (depName && excludePackageNames.includes(depName)) ||
-      (packageName && excludePackageNames.includes(packageName))
-    );
+    if (is.undefined(depName)) {
+      return false;
+    }
+    return excludePackageNames.includes(depName);
   }
 }
