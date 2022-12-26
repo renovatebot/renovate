@@ -11,6 +11,7 @@ import {
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
+  sideCarImage,
 } from '.';
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
@@ -202,15 +203,14 @@ describe('util/exec/docker/index', () => {
     const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
-    const image = 'sample_image';
+    const image = sideCarImage;
     const dockerOptions = {
-      image,
       cwd: '/tmp/foobar',
       envVars,
     };
     const command = (img: string, vol?: string): string =>
       `docker run --rm ` +
-      `--name=renovate_sample_image ` +
+      `--name=renovate_${img} ` +
       `--label=renovate_child ` +
       `--user=some-user ` +
       (vol ? `${vol} ` : '') +
@@ -289,30 +289,15 @@ describe('util/exec/docker/index', () => {
       );
     });
 
-    it('handles tag parameter', async () => {
-      mockExecAll();
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-        tag: '1.2.3',
-      });
-      expect(res).toBe(command(`${image}:1.2.3`));
-    });
-
-    it('handles tag constraint', async () => {
-      mockExecAll();
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [
-          { version: '1.2.3' },
-          { version: '1.2.4' },
-          { version: '2.0.0' },
-        ],
-      } as never);
-      const res = await generateDockerCommand(commands, preCommands, {
-        ...dockerOptions,
-        tagScheme: 'npm',
-        tagConstraint: '^1.2.3',
-      });
-      expect(res).toBe(command(`${image}:1.2.4`));
-    });
+    // TODO: it('handles tag constraint', async () => {
+    //   mockExecAll();
+    //   getPkgReleases.mockResolvedValueOnce({
+    //     releases: [{ version: '5.5.5' }, { version: '6.0.0' }],
+    //   } as never);
+    //   const res = await generateDockerCommand(commands, preCommands, {
+    //     ...dockerOptions,
+    //   });
+    //   expect(res).toBe(command(`${image}:5.5.5`));
+    // });
   });
 });
