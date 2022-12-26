@@ -118,7 +118,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   },
   ruby: {
     datasource: 'github-releases',
-    depName: 'containerbase/php-ruby',
+    depName: 'containerbase/ruby-prebuild',
     versioning: rubyVersioningId,
   },
   rust: {
