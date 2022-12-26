@@ -10,9 +10,9 @@ export class PackageNameMatcher extends Matcher {
     if (is.undefined(matchPackageNames)) {
       return null;
     }
-    return (
-      (is.string(depName) && matchPackageNames.includes(depName)) ||
-      (is.string(packageName) && matchPackageNames.includes(packageName))
+    return !!(
+      (depName && matchPackageNames.includes(depName)) ||
+      (packageName && matchPackageNames.includes(packageName))
     );
   }
 
@@ -23,9 +23,9 @@ export class PackageNameMatcher extends Matcher {
     if (is.undefined(excludePackageNames)) {
       return null;
     }
-    return (
-      (is.string(depName) && excludePackageNames.includes(depName)) ||
-      (is.string(packageName) && excludePackageNames.includes(packageName))
+    return !!(
+      (depName && excludePackageNames.includes(depName)) ||
+      (packageName && excludePackageNames.includes(packageName))
     );
   }
 }
