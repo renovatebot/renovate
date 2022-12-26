@@ -109,12 +109,70 @@ describe('util/package-rules/index', () => {
     expect(res.groupName).toBe('xyz');
   });
 
-  it('applies excludePackageNames', () => {
-    const dep = {
-      depName: 'xyz/foo',
-    };
-    const res = applyPackageRules({ ...config1, ...dep });
-    expect(res.groupName).toBeUndefined();
+  describe('excludePackageNames', () => {
+    it('does not applies excludePackageNames (depName==packageName)', () => {
+      const config: TestConfig = {
+        depName: 'xyz/bar',
+        packageName: 'xyz/bar',
+        packageRules: [
+          {
+            matchPackagePrefixes: ['xyz/'],
+            excludePackageNames: ['xyz/foo'],
+            groupName: 'xyz',
+          },
+        ],
+      };
+      const res = applyPackageRules(config);
+      expect(res.groupName).toBe('xyz');
+    });
+
+    it('applies excludePackageNames (depName==packageName)', () => {
+      const config: TestConfig = {
+        depName: 'xyz/foo',
+        packageName: 'xyz/foo',
+        packageRules: [
+          {
+            matchPackagePrefixes: ['xyz/'],
+            excludePackageNames: ['xyz/foo'],
+            groupName: 'xyz',
+          },
+        ],
+      };
+      const res = applyPackageRules(config);
+      expect(res.groupName).toBeUndefined();
+    });
+
+    it('does not applies excludePackageNames (depName!=packageName)', () => {
+      const config: TestConfig = {
+        depName: 'xyz/bar',
+        packageName: 'uvw:xyz/bar',
+        packageRules: [
+          {
+            matchPackagePrefixes: ['xyz/'],
+            excludePackageNames: ['xyz/foo'],
+            groupName: 'xyz',
+          },
+        ],
+      };
+      const res = applyPackageRules(config);
+      expect(res.groupName).toBe('xyz');
+    });
+
+    it('also applies excludePackageNames (depName!=packageName)', () => {
+      const config: TestConfig = {
+        depName: 'xyz/foo',
+        packageName: 'uvw:xyz/foo',
+        packageRules: [
+          {
+            matchPackagePrefixes: ['xyz/'],
+            excludePackageNames: ['xyz/foo'],
+            groupName: 'xyz',
+          },
+        ],
+      };
+      const res = applyPackageRules(config);
+      expect(res.groupName).toBeUndefined();
+    });
   });
 
   it('applies excludePackagePrefixes', () => {
