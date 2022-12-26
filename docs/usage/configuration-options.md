@@ -1608,6 +1608,10 @@ Use the syntax `!/ /` like the following:
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
 
+### excludeDepNames
+
+### excludeDepPatterns
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -1838,6 +1842,10 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchDepNames
+
+### matchDepPatterns
 
 ### matchPackageNames
 
