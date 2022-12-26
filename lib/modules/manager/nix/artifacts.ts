@@ -46,9 +46,7 @@ export async function updateArtifacts({
         constraint: config.constraints?.nix,
       },
     ],
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
   };
 
   try {

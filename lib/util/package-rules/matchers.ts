@@ -2,6 +2,8 @@ import { BaseBranchesMatcher } from './base-branches';
 import { CurrentValueMatcher } from './current-value';
 import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
+import { DepNameMatcher } from './dep-names';
+import { DepPatternsMatcher } from './dep-patterns';
 import { DepTypesMatcher } from './dep-types';
 import { FilesMatcher } from './files';
 import { LanguagesMatcher } from './languages';
@@ -20,6 +22,8 @@ export default matchers;
 
 // each manager under the same key will use a logical OR, if multiple matchers are applied AND will be used
 matchers.push([
+  new DepNameMatcher(),
+  new DepPatternsMatcher(),
   new PackageNameMatcher(),
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),
