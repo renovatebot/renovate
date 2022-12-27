@@ -20,14 +20,8 @@ export class GithubGraphqlMemoryCacheStrategy<
   }
 
   persist(cacheRecord: GithubGraphqlCacheRecord<GithubItem>): Promise<void> {
-    const expiry = this.createdAt.plus({
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
-    });
-    const ttlSeconds = expiry.diff(this.now, ['seconds']).as('seconds');
-    if (ttlSeconds && ttlSeconds > 0) {
-      const key = this.fullKey();
-      memCache.set(key, cacheRecord);
-    }
+    const key = this.fullKey();
+    memCache.set(key, cacheRecord);
     return Promise.resolve();
   }
 }
