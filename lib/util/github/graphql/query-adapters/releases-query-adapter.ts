@@ -1,13 +1,13 @@
-import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher';
 import type {
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlRelease,
   GithubReleaseItem,
-} from './types';
+} from '../types';
+import { prepareQuery } from '../util';
 
 const key = 'github-releases-datasource-v2';
 
-const query = GithubGraphqlDatasourceFetcher.prepareQuery(`
+const query = prepareQuery(`
   releases(
     first: $count
     after: $cursor
