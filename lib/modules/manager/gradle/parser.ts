@@ -49,7 +49,7 @@ export function parseGradle(
 
     globalVars: initVars,
     deps: [],
-    depRegistryUrls: [],
+    registryUrls: [],
 
     varTokens: [],
     tmpTokenStore: {},
@@ -59,7 +59,7 @@ export function parseGradle(
   if (parsedResult) {
     deps.push(...parsedResult.deps);
     vars = { ...vars, ...parsedResult.globalVars };
-    urls.push(...parsedResult.depRegistryUrls);
+    urls.push(...parsedResult.registryUrls);
   }
 
   return { deps, urls, vars };

@@ -74,7 +74,7 @@ export interface Ctx {
 
   globalVars: PackageVariables;
   deps: PackageDependency<GradleManagerData>[];
-  depRegistryUrls: string[];
+  registryUrls: string[];
 
   varTokens: lexer.Token[];
   tmpTokenStore: Record<string, lexer.Token[]>;
