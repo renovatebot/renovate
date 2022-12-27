@@ -95,6 +95,6 @@ This is for security reasons.
 
 If you're self-hosting Renovate, you can expose additional variables with the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
 
-You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config option to allow all environment variables in templates.
-Always consider the security implications of using `exposeAllEnv`.
-Secrets and other confidential information stored in environment variables could be leaked by a malicious script.
+You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config
+option to allow all environment variables in templates, but make sure to consider the security implications of
+giving the scripts unrestricted access to all variables.
