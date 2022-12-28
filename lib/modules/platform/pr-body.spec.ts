@@ -19,11 +19,6 @@ describe('modules/platform/pr-body', () => {
         hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       });
       expect(
-        getPrBodyStruct('<!--  renovate:start--> <!--  renovate:end  -->')
-      ).toEqual({
-        hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-      });
-      expect(
         getPrBodyStruct(
           'something \n<!--renovate-debug:eyJjcmVhdGVkSW5WZXIiOiAiMS4yLjEiLCJ1cGRhdGVkSW5WZXIiOiAiMS4yLjMifQ==-->'
         )
@@ -48,18 +43,16 @@ describe('modules/platform/pr-body', () => {
       ).toEqual(hash);
       expect(
         getPrBodyStruct(
-          '<!--  renovate:start-->\n\n    This is a RenovateBot PR body\n\n<!--  renovate:end  -->'
+          '<!--renovate:start-->\n\n    This is a RenovateBot PR body\n\n<!--renovate:end-->'
         )
       ).toEqual(hash);
       expect(
         getPrBodyStruct(
-          '<!--  renovate:start-->\n\n    This is a RenovateBot PR body\n\n'
+          '<!--renovate:start-->\n\n    This is a RenovateBot PR body\n\n'
         )
       ).toEqual(hash);
       expect(
-        getPrBodyStruct(
-          'This is a RenovateBot PR body<!-------  renovate:end  ---------->'
-        )
+        getPrBodyStruct('This is a RenovateBot PR body<!--renovate:end-->')
       ).toEqual(hash);
     });
 
@@ -179,30 +172,30 @@ describe('modules/platform/pr-body', () => {
 
     it('With Renovate Body extended', () => {
       const newBody = `
-      <!---------          renovate:start         -->
+      <!--renovate:start-->
       my new body
       
-      <!---------                renovate:end  -->`;
+      <!--renovate:end-->`;
       const existingBody = `
       There is some other text 
-      <!--       renovate:start        -->
+      <!--renovate:start-->
       
       
       the existing body
       
-      <!---------   renovate:end   ---------->
+      <!--renovate:end-->
       
-      with additional textes`;
+      with additional texts`;
       const expected = `
       There is some other text 
-      <!--       renovate:start        -->
+      <!--renovate:start-->
       
       
       my new body
       
-      <!---------   renovate:end   ---------->
+      <!--renovate:end-->
       
-      with additional textes`;
+      with additional texts`;
       expect(updateRenovateBody(newBody, existingBody)).toBe(expected);
     });
   });

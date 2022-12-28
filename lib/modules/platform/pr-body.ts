@@ -62,8 +62,8 @@ function getRenovateBodyIndexes(input: string | undefined | null): {
   const inputBody = input ?? '';
   // we want to remove all the new lines and spaces after the start tag and also before the end tag (\s*).
   // use dedicated regular expressions for that
-  const startRegex = regEx(/<!--[- ]*?renovate:start[- ]*?-->\s*/);
-  const endRegex = regEx(/\s*<!--[- ]*?renovate:end[- ]*?-->/);
+  const startRegex = regEx(/<!--renovate:start-->\s*/);
+  const endRegex = regEx(/\s*<!--renovate:end-->/);
   const renovateBodyIndexs: ReturnType<typeof getRenovateBodyIndexes> = {
     start: 0,
     startBody: 0,

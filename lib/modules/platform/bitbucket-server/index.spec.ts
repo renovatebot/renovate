@@ -1714,7 +1714,7 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('sanitizes HTML comments in the body', () => {
-          const prBody = bitbucket.massageMarkdown(`<!--  renovate:start -->
+          const prBody = bitbucket.massageMarkdown(`<!--renovate:start-->
 ---
 
 - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox

@@ -49,7 +49,7 @@ describe('modules/platform/codecommit/index', () => {
 
   it('validates massageMarkdown functionality', () => {
     const newStr = codeCommit.massageMarkdown(
-      '<!-- renovate:start  --><details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123--><!-- renovate:end -->'
+      '<!--renovate:start--><details><summary>foo</summary>bar</details>text<details>\n<!--renovate-debug:hiddenmessage123--><!--renovate:end-->'
     );
     expect(newStr).toBe(
       '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)'
@@ -58,10 +58,10 @@ describe('modules/platform/codecommit/index', () => {
 
   it('validates massageMarkdown functionality with new lines', () => {
     const newStr = codeCommit.massageMarkdown(
-      `<!-- renovate:start  -->
+      `<!--renovate:start-->
 <details><summary>foo</summary>bar</details>text<details>
 <!--renovate-debug:hiddenmessage123-->
-<!-- renovate:end -->`
+<!--renovate:end-->`
     );
     expect(newStr).toBe(
       '**foo**bartext\n[//]: # (<!--renovate-debug:hiddenmessage123-->)'
