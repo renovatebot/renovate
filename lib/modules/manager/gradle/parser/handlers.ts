@@ -248,7 +248,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
 
 export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   const registryName = loadFromTokenMap(ctx, 'registryUrl')[0].value;
-  ctx.depRegistryUrls.push(
+  ctx.registryUrls.push(
     REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS]
   );
 
@@ -281,7 +281,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     try {
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
-        ctx.depRegistryUrls.push(registryUrl);
+        ctx.registryUrls.push(registryUrl);
       }
     } catch (e) {
       // no-op
@@ -370,7 +370,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   ctx.deps.push(...matchResult.deps);
   ctx.globalVars = { ...ctx.globalVars, ...matchResult.vars };
-  ctx.depRegistryUrls.push(...matchResult.urls);
+  ctx.registryUrls.push(...matchResult.urls);
 
   return ctx;
 }
