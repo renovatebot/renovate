@@ -15,7 +15,10 @@ import {
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import {
+  hashBody,
+  updateRenovateBody,
+} from '../../../../modules/platform/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
@@ -325,10 +328,11 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
+        const newPrBody = updateRenovateBody(prBody, existingPr.body);
         await platform.updatePr({
           number: existingPr.number,
           prTitle,
-          prBody,
+          prBody: newPrBody,
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
