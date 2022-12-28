@@ -1087,8 +1087,12 @@ describe('modules/platform/azure/index', () => {
   describe('massageMarkdown(input)', () => {
     it('returns updated pr body', () => {
       const prBody =
+        '<!--  renovate:start -->\n\n' +
+        '<!--renovate-debug:abcdef-->\n' +
+        '<!--renovate-config-hash:ghijkl-->\n' +
         '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
-        'plus also [a link](https://github.com/foo/bar/issues/5)';
+        'plus also [a link](https://github.com/foo/bar/issues/5)' +
+        '\n\n<!--renovate:end-->';
       expect(azure.massageMarkdown(prBody)).toBe(
         'plus also [a link](https://github.com/foo/bar/issues/5)'
       );

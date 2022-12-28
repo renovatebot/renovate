@@ -1714,7 +1714,8 @@ describe('modules/platform/bitbucket-server/index', () => {
         });
 
         it('sanitizes HTML comments in the body', () => {
-          const prBody = bitbucket.massageMarkdown(`---
+          const prBody = bitbucket.massageMarkdown(`<!--  renovate:start -->
+---
 
 - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox
 - [ ] <!-- recreate-branch=renovate/docker-renovate-renovate-16.x --><a href="/some/link">Update renovate/renovate to 16.1.2</a>
@@ -1724,7 +1725,8 @@ describe('modules/platform/bitbucket-server/index', () => {
 Empty comment.
 <!-- This is another comment -->
 Followed by some information.
-<!-- followed by some more comments -->`);
+<!-- followed by some more comments -->
+<!--renovate:end-->`);
           expect(prBody).toMatchSnapshot();
         });
       });

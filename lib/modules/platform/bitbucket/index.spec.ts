@@ -990,8 +990,12 @@ describe('modules/platform/bitbucket/index', () => {
   describe('massageMarkdown()', () => {
     it('returns diff files', () => {
       const prBody =
+        '<!--  renovate:start -->\n\n' +
+        '<!--renovate-debug:abcdef-->\n' +
+        '<!--renovate-config-hash:ghijkl-->\n' +
         '<details><summary>foo</summary>bar</details>text<details>' +
-        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->';
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
+        '\n\n<!--  renovate:end -->';
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
