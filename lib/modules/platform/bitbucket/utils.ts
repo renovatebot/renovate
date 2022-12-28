@@ -181,6 +181,7 @@ export function prInfo(pr: PrResponse): Pr {
     number: pr.id,
     displayNumber: `Pull Request #${pr.id}`,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
+    body: pr.summary?.raw,
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,

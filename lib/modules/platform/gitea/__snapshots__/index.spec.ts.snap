@@ -2,6 +2,7 @@
 
 exports[`modules/platform/gitea/index createPr should use base branch by default 1`] = `
 {
+  "body": "pr-body",
   "bodyStruct": {
     "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
   },
@@ -22,6 +23,7 @@ exports[`modules/platform/gitea/index createPr should use base branch by default
 
 exports[`modules/platform/gitea/index createPr should use default branch if requested 1`] = `
 {
+  "body": "pr-body",
   "bodyStruct": {
     "hash": "9d586a6aedc4e7cb205276933c9e474cd3c2b341d3340458c31eb750795f197d",
   },
@@ -42,6 +44,7 @@ exports[`modules/platform/gitea/index createPr should use default branch if requ
 
 exports[`modules/platform/gitea/index getPr should fallback to direct fetching if cache fails 1`] = `
 {
+  "body": "some random pull request",
   "bodyStruct": {
     "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
   },
@@ -62,6 +65,7 @@ exports[`modules/platform/gitea/index getPr should fallback to direct fetching i
 
 exports[`modules/platform/gitea/index getPr should return enriched pull request which exists if open 1`] = `
 {
+  "body": "some random pull request",
   "bodyStruct": {
     "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
   },
@@ -90,6 +94,7 @@ exports[`modules/platform/gitea/index getPrList should filter list by creator 1`
 exports[`modules/platform/gitea/index getPrList should filter list by creator 2`] = `
 [
   {
+    "body": "some random pull request",
     "bodyStruct": {
       "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
     },
@@ -107,6 +112,7 @@ exports[`modules/platform/gitea/index getPrList should filter list by creator 2`
     "title": "Some PR",
   },
   {
+    "body": "other random pull request",
     "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
@@ -124,6 +130,7 @@ exports[`modules/platform/gitea/index getPrList should filter list by creator 2`
     "title": "Other PR",
   },
   {
+    "body": "other random pull request",
     "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
@@ -146,6 +153,7 @@ exports[`modules/platform/gitea/index getPrList should filter list by creator 2`
 exports[`modules/platform/gitea/index getPrList should return list of pull requests 1`] = `
 [
   {
+    "body": "some random pull request",
     "bodyStruct": {
       "hash": "f41557d6153a316ee747e13de8952c4068de931585c1a18d095d6703254de6af",
     },
@@ -163,6 +171,7 @@ exports[`modules/platform/gitea/index getPrList should return list of pull reque
     "title": "Some PR",
   },
   {
+    "body": "other random pull request",
     "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },
@@ -180,6 +189,7 @@ exports[`modules/platform/gitea/index getPrList should return list of pull reque
     "title": "Other PR",
   },
   {
+    "body": "other random pull request",
     "bodyStruct": {
       "hash": "916e5965a20785df1883ff5dc219508a1070ae1f37ccb64e954526f3ca1d22f4",
     },

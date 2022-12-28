@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as schema from '../../../util/schema';
-import { getPrBodyStruct } from '../pr-body';
+import { getPrBodyStruct, getRenovateBodyIndexes } from '../pr-body';
 import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
 
@@ -17,6 +17,7 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     state:
       pr.state === 'closed' && is.string(pr.merged_at) ? 'merged' : pr.state,
     bodyStruct,
+    body: pr.body,
     updated_at: pr.updated_at,
     node_id: pr.node_id,
   };

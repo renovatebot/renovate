@@ -123,6 +123,7 @@ function toRenovatePR(data: PR): Pr | null {
     title,
     isDraft,
     bodyStruct: getPrBodyStruct(data.body),
+    body: data.body,
     sha: data.head.sha,
     sourceBranch: data.head.label,
     targetBranch: data.base.ref,
