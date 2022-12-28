@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as schema from '../../../util/schema';
-import { getPrBodyStruct, getRenovateBodyIndexes } from '../pr-body';
+import { getPrBodyStruct } from '../pr-body';
 import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
 
