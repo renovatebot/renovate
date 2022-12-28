@@ -58,7 +58,6 @@ function getRenovateBodyIndexes(input: string | undefined | null): {
   startBody: number;
   end: number;
   endBody: number;
-  hasTags: boolean;
 } {
   const inputBody = input ?? '';
   // we want to remove all the new lines and spaces after the start tag and also before the end tag (\s*).
@@ -70,7 +69,6 @@ function getRenovateBodyIndexes(input: string | undefined | null): {
     startBody: 0,
     end: inputBody.length,
     endBody: inputBody.length,
-    hasTags: false,
   };
   const [startMatch, endMatch] = [
     startRegex.exec(inputBody),
