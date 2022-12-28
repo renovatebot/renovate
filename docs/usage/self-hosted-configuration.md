@@ -362,17 +362,16 @@ If this option is not set, Renovate will fallback to 15 minutes.
 
 ## exposeAllEnv
 
-To keep you safe, Renovate only passes a limited set of environment variables to package managers. If you must expose
-all environment variables to package managers, you can set this option to `true`.
+To keep you safe, Renovate only passes a limited set of environment variables to package managers.
+If you must expose all environment variables to package managers, you can set this option to `true`.
 
 <!-- prettier-ignore -->
 !!! warning
-    Always consider the security implications of using `exposeAllEnv`! Secrets and other confidential information stored
-    in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+    Always consider the security implications of using `exposeAllEnv`!
+    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
 
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
-Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables)
-config option to handpick a set of variables you need to expose.
+Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
