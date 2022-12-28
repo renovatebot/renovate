@@ -53,10 +53,65 @@ export function getRenovateConfigHashPayload(body: string): string | undefined {
   return match?.groups?.payload;
 }
 
+function getRenovateBodyIndexes(input: string | undefined | null): {
+  start: number;
+  startBody: number;
+  end: number;
+  endBody: number;
+  hasTags: boolean;
+} {
+  const inputBody = input ?? '';
+  // we want to remove all the new lines and spaces after the start tag and also before the end tag (\s*).
+  // use dedicated regular expressions for that
+  const startRegex = regEx(/<!--[- ]*?renovate:start[- ]*?-->\s*/);
+  const endRegex = regEx(/\s*<!--[- ]*?renovate:end[- ]*?-->/);
+  const renovateBodyIndexs: ReturnType<typeof getRenovateBodyIndexes> = {
+    start: 0,
+    startBody: 0,
+    end: inputBody.length,
+    endBody: inputBody.length,
+    hasTags: false,
+  };
+  const [startMatch, endMatch] = [
+    startRegex.exec(inputBody),
+    endRegex.exec(inputBody),
+  ];
+  if (startMatch) {
+    renovateBodyIndexs.start = startMatch.index;
+    renovateBodyIndexs.startBody = startMatch.index + startMatch[0].length;
+  }
+  if (endMatch) {
+    renovateBodyIndexs.endBody = endMatch.index;
+    renovateBodyIndexs.end = endMatch.index + endMatch[0].length;
+  }
+  return renovateBodyIndexs;
+}
+
+function getRenovateBody(input: string | undefined | null): string {
+  const indexs = getRenovateBodyIndexes(input);
+  const renovateBody = (input ?? '').substring(
+    indexs.startBody,
+    indexs.endBody
+  );
+  return renovateBody.trim();
+}
+
+export function updateRenovateBody(
+  newBody: string | undefined | null,
+  existingBody: string | undefined | null
+): string {
+  const newBodyWithoutTags = getRenovateBody(newBody);
+  const indexes = getRenovateBodyIndexes(existingBody);
+  const existingBodyDefined = existingBody ?? '';
+  const prefix = existingBodyDefined.substring(0, indexes.startBody);
+  const suffix = existingBodyDefined.substring(indexes.endBody);
+  return prefix + newBodyWithoutTags + suffix;
+}
+
 export function getPrBodyStruct(
   input: string | undefined | null
 ): PrBodyStruct {
-  const body = input ?? '';
+  const body = getRenovateBody(input);
   const hash = hashBody(body);
   const result: PrBodyStruct = { hash };
 
