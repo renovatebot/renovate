@@ -6,6 +6,7 @@ import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
+  qPropertyAccessIdentifier,
   qTemplateString,
   qVariableAccessIdentifier,
   storeInTokenMap,
@@ -16,6 +17,22 @@ import {
   handlePredefinedRegistryUrl,
 } from './handlers';
 import { qPlugins } from './plugins';
+
+// uri("https://foo.bar/baz")
+// "https://foo.bar/baz"
+const qUri = q
+  .alt(
+    q.sym<Ctx>('uri').tree({
+      maxDepth: 1,
+      search: q.alt<Ctx>(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      ),
+    }),
+    q.alt(qTemplateString, qPropertyAccessIdentifier, qVariableAccessIdentifier)
+  )
+  .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
 
 // mavenCentral()
 // mavenCentral { ... }
@@ -48,17 +65,7 @@ const qCustomRegistryUrl = q
       maxDepth: 1,
       startsWith: '(',
       endsWith: ')',
-      search: q
-        .begin<Ctx>()
-        .opt(q.sym<Ctx>('url').op('='))
-        .alt(
-          q.sym<Ctx>('uri').tree({
-            maxDepth: 1,
-            search: q.alt<Ctx>(qTemplateString, qVariableAccessIdentifier),
-          }),
-          q.alt(qTemplateString, qVariableAccessIdentifier)
-        )
-        .end(),
+      search: q.begin<Ctx>().opt(q.sym<Ctx>('url').op('=')).join(qUri).end(),
     }),
     q.tree({
       type: 'wrapped-tree',
@@ -69,31 +76,22 @@ const qCustomRegistryUrl = q
         q
           .sym<Ctx>('name')
           .opt(q.op('='))
-          .alt(qTemplateString, qVariableAccessIdentifier)
-          .handler((ctx) => storeInTokenMap(ctx, 'name')),
-        q
-          .sym<Ctx>('url')
-          .opt(q.op('='))
           .alt(
-            q.sym<Ctx>('uri').tree({
-              maxDepth: 1,
-              search: q.alt<Ctx>(qTemplateString, qVariableAccessIdentifier),
-            }),
-            q.alt(qTemplateString, qVariableAccessIdentifier)
-          ),
+            qTemplateString,
+            qPropertyAccessIdentifier,
+            qVariableAccessIdentifier
+          )
+          .handler((ctx) => storeInTokenMap(ctx, 'name')),
+        q.sym<Ctx>('url').opt(q.op('=')).join(qUri),
         q.sym<Ctx>('setUrl').tree({
           maxDepth: 1,
           startsWith: '(',
           endsWith: ')',
-          search: q
-            .begin<Ctx>()
-            .alt(qTemplateString, qVariableAccessIdentifier)
-            .end(),
+          search: q.begin<Ctx>().join(qUri).end(),
         })
       ),
     })
   )
-  .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'))
   .handler(handleCustomRegistryUrl)
   .handler(cleanupTempVars);
 
