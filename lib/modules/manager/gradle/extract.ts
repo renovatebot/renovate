@@ -38,7 +38,9 @@ function getRegistryUrlsForDep(
     .filter((item) => item.scope === scope)
     .map((item) => item.registryUrl);
 
-  registryUrls.push(...(dep.registryUrls ?? []));
+  if (dep.registryUrls) {
+    registryUrls.push(...dep.registryUrls);
+  }
 
   if (!registryUrls.length && scope === 'plugin') {
     registryUrls.push(REGISTRY_URLS.gradlePluginPortal);
