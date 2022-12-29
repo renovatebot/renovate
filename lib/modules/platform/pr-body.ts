@@ -53,7 +53,7 @@ export function getRenovateConfigHashPayload(body: string): string | undefined {
   return match?.groups?.payload;
 }
 
-function getRenovateBodyIndexes(input: string | undefined | null): {
+function getRenovateBodyIndexes(input: string): {
   start: number;
   startBody: number;
   end: number;
@@ -70,10 +70,8 @@ function getRenovateBodyIndexes(input: string | undefined | null): {
     end: inputBody.length,
     endBody: inputBody.length,
   };
-  const [startMatch, endMatch] = [
-    startRegex.exec(inputBody),
-    endRegex.exec(inputBody),
-  ];
+  const startMatch = startRegex.exec(inputBody);
+  const endMatch = endRegex.exec(inputBody);
   if (startMatch) {
     renovateBodyIndexs.start = startMatch.index;
     renovateBodyIndexs.startBody = startMatch.index + startMatch[0].length;
@@ -85,7 +83,7 @@ function getRenovateBodyIndexes(input: string | undefined | null): {
   return renovateBodyIndexs;
 }
 
-function getRenovateBody(input: string | undefined | null): string {
+function getRenovateBody(input: string): string {
   const indexs = getRenovateBodyIndexes(input);
   const renovateBody = (input ?? '').substring(
     indexs.startBody,
@@ -98,8 +96,8 @@ export function updateRenovateBody(
   newBody: string | undefined | null,
   existingBody: string | undefined | null
 ): string {
-  const newBodyWithoutTags = getRenovateBody(newBody);
-  const indexes = getRenovateBodyIndexes(existingBody);
+  const newBodyWithoutTags = getRenovateBody(newBody ?? '');
+  const indexes = getRenovateBodyIndexes(existingBody ?? '');
   const existingBodyDefined = existingBody ?? '';
   const prefix = existingBodyDefined.substring(0, indexes.startBody);
   const suffix = existingBodyDefined.substring(indexes.endBody);
@@ -109,7 +107,7 @@ export function updateRenovateBody(
 export function getPrBodyStruct(
   input: string | undefined | null
 ): PrBodyStruct {
-  const body = getRenovateBody(input);
+  const body = getRenovateBody(input ?? '');
   const hash = hashBody(body);
   const result: PrBodyStruct = { hash };
 
