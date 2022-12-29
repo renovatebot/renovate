@@ -1,6 +1,8 @@
 import { query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
+import { qApplyFrom } from './apply-from';
+import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
@@ -13,6 +15,7 @@ import {
   handleCustomRegistryUrl,
   handlePredefinedRegistryUrl,
 } from './handlers';
+import { qPlugins } from './plugins';
 
 // mavenCentral()
 // mavenCentral { ... }
@@ -94,8 +97,38 @@ const qCustomRegistryUrl = q
   .handler(handleCustomRegistryUrl)
   .handler(cleanupTempVars);
 
+const qPluginManagement = q.sym<Ctx>('pluginManagement', storeVarToken).tree({
+  type: 'wrapped-tree',
+  startsWith: '{',
+  endsWith: '}',
+  preHandler: (ctx) => {
+    ctx.tmpTokenStore.registryScope = ctx.varTokens;
+    ctx.varTokens = [];
+    return ctx;
+  },
+  search: q
+    .handler<Ctx>((ctx) => {
+      if (ctx.tmpTokenStore.registryScope) {
+        ctx.tokenMap.registryScope = ctx.tmpTokenStore.registryScope;
+      }
+      return ctx;
+    })
+    .alt(
+      qAssignments,
+      qApplyFrom,
+      qPlugins,
+      qPredefinedRegistries,
+      qCustomRegistryUrl
+    ),
+  postHandler: (ctx) => {
+    delete ctx.tmpTokenStore.registryScope;
+    return ctx;
+  },
+});
+
 export const qRegistryUrls = q.alt<Ctx>(
   q.sym<Ctx>('publishing').tree(),
+  qPluginManagement,
   qPredefinedRegistries,
   qCustomRegistryUrl
 );
