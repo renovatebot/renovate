@@ -83,7 +83,7 @@ Renovate tags are only available on platforms that support HTML tags:
 
 #### renovate:start and renovate:end
 
-The Renovate specific description is wrapped between the `<!!-renovate:start-->` and `<!--renovate:end` tags in the body text of the PR, like this:
+The Renovate specific description is placed between the `<!--renovate:start-->` and `<!--renovate:end-->` tags in the body text of the PR, like this:
 
 ```md
 <!--renovate:start-->
@@ -93,7 +93,4 @@ Renovate specific body
 <!--renovate:end-->
 ```
 
-This allows users to extend the description outside of this tags with custom information without losing the changes in the pull request description upon an automated pull request update by Renovate bot.
-Only the part between the two tags will be replaced with an updated Renovate body.
-
-If only one of the two tags is available then either all text after `renovate:start` or before `renovate:end` is replaced with the Renovate specific body.
+The section is updated by the Renovate bot and must not be modified.
