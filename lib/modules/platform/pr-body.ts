@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { stripEmojis } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import { fromBase64 } from '../../util/string';
-import type { PrBodyStruct } from './types';
+import type { PrBodyStruct, RenovateBodyIndexes } from './types';
 
 export const prDebugDataRe = regEx(
   /\n?<!--renovate-debug:(?<payload>.*?)-->\n?/
@@ -53,54 +53,44 @@ export function getRenovateConfigHashPayload(body: string): string | undefined {
   return match?.groups?.payload;
 }
 
-function getRenovateBodyIndexes(input: string): {
-  start: number;
-  startBody: number;
-  end: number;
-  endBody: number;
-} {
-  const inputBody = input ?? '';
+function getRenovateBodyIndexes(input: string): RenovateBodyIndexes {
   // we want to remove all the new lines and spaces after the start tag and also before the end tag (\s*).
   // use dedicated regular expressions for that
   const startRegex = regEx(/<!--renovate:start-->\s*/);
   const endRegex = regEx(/\s*<!--renovate:end-->/);
-  const renovateBodyIndexs: ReturnType<typeof getRenovateBodyIndexes> = {
+  const renovateBodyIndexes: RenovateBodyIndexes = {
     start: 0,
     startBody: 0,
-    end: inputBody.length,
-    endBody: inputBody.length,
+    end: input.length,
+    endBody: input.length,
   };
-  const startMatch = startRegex.exec(inputBody);
-  const endMatch = endRegex.exec(inputBody);
+  const startMatch = startRegex.exec(input);
+  const endMatch = endRegex.exec(input);
   if (startMatch) {
-    renovateBodyIndexs.start = startMatch.index;
-    renovateBodyIndexs.startBody = startMatch.index + startMatch[0].length;
+    renovateBodyIndexes.start = startMatch.index;
+    renovateBodyIndexes.startBody = startMatch.index + startMatch[0].length;
   }
   if (endMatch) {
-    renovateBodyIndexs.endBody = endMatch.index;
-    renovateBodyIndexs.end = endMatch.index + endMatch[0].length;
+    renovateBodyIndexes.endBody = endMatch.index;
+    renovateBodyIndexes.end = endMatch.index + endMatch[0].length;
   }
-  return renovateBodyIndexs;
+  return renovateBodyIndexes;
 }
 
 function getRenovateBody(input: string): string {
-  const indexs = getRenovateBodyIndexes(input);
-  const renovateBody = (input ?? '').substring(
-    indexs.startBody,
-    indexs.endBody
-  );
+  const indexes = getRenovateBodyIndexes(input);
+  const renovateBody = input.substring(indexes.startBody, indexes.endBody);
   return renovateBody.trim();
 }
 
 export function updateRenovateBody(
-  newBody: string | undefined | null,
-  existingBody: string | undefined | null
+  newBody: string,
+  existingBody: string
 ): string {
-  const newBodyWithoutTags = getRenovateBody(newBody ?? '');
-  const indexes = getRenovateBodyIndexes(existingBody ?? '');
-  const existingBodyDefined = existingBody ?? '';
-  const prefix = existingBodyDefined.substring(0, indexes.startBody);
-  const suffix = existingBodyDefined.substring(indexes.endBody);
+  const newBodyWithoutTags = getRenovateBody(newBody);
+  const indexes = getRenovateBodyIndexes(existingBody);
+  const prefix = existingBody.substring(0, indexes.startBody);
+  const suffix = existingBody.substring(indexes.endBody);
   return prefix + newBodyWithoutTags + suffix;
 }
 

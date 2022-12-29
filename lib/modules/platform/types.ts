@@ -56,6 +56,13 @@ export interface PrBodyStruct {
   debugData?: PrDebugData;
 }
 
+export interface RenovateBodyIndexes {
+  start: number;
+  startBody: number;
+  end: number;
+  endBody: number;
+}
+
 /**
  *
  */

@@ -43,16 +43,23 @@ describe('modules/platform/pr-body', () => {
       ).toEqual(hash);
       expect(
         getPrBodyStruct(
+          'Some text before the renovate body \n <!--renovate:start-->\n\nThis is a RenovateBot PR body\n\n <!--renovate:end-->\n\n Some text after the renovate body'
+        )
+      ).toEqual(hash);
+      expect(
+        getPrBodyStruct(
           '<!--renovate:start-->\n\n    This is a RenovateBot PR body\n\n<!--renovate:end-->'
         )
       ).toEqual(hash);
       expect(
         getPrBodyStruct(
-          '<!--renovate:start-->\n\n    This is a RenovateBot PR body\n\n'
+          'Some text before the renovate body <!--renovate:start-->\n\n    This is a RenovateBot PR body\n\n'
         )
       ).toEqual(hash);
       expect(
-        getPrBodyStruct('This is a RenovateBot PR body<!--renovate:end-->')
+        getPrBodyStruct(
+          'This is a RenovateBot PR body<!--renovate:end-->\n\n some text after the renovate body'
+        )
       ).toEqual(hash);
     });
 
@@ -132,8 +139,6 @@ describe('modules/platform/pr-body', () => {
   describe('updateRenovateBody', () => {
     test.each([
       ['', ''],
-      ['', null],
-      [null, ''],
       ['', 'any value'],
     ])('updateRenovateBody(%p, %p) = ""', (newBody, existingBody) => {
       expect(updateRenovateBody(newBody, existingBody)).toBe('');

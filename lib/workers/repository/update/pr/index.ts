@@ -328,7 +328,7 @@ export async function ensurePr(
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        const newPrBody = updateRenovateBody(prBody, existingPr.body);
+        const newPrBody = updateRenovateBody(prBody, existingPr.body ?? '');
         await platform.updatePr({
           number: existingPr.number,
           prTitle,
