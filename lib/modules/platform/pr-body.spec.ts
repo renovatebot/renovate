@@ -137,12 +137,16 @@ describe('modules/platform/pr-body', () => {
   });
 
   describe('updateRenovateBody', () => {
-    test.each([
-      ['', ''],
-      ['', 'any value'],
-    ])('updateRenovateBody(%p, %p) = ""', (newBody, existingBody) => {
-      expect(updateRenovateBody(newBody, existingBody)).toBe('');
-    });
+    it.each`
+      newBody | existingBody
+      ${''}   | ${''}
+      ${''}   | ${'any value'}
+    `(
+      'updateRenovateBody($newBody, $existingBody) = ""',
+      ({ newBody, existingBody }) => {
+        expect(updateRenovateBody(newBody, existingBody)).toBe('');
+      }
+    );
 
     it('original use case', () => {
       const newBody = 'my new body';
