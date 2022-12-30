@@ -76,4 +76,45 @@ describe('modules/platform/index', () => {
       platform: 'bitbucket',
     });
   });
+
+  it('merges config hostRules with platform hostRules', async () => {
+    httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+
+    const config = {
+      platform: 'github' as PlatformId,
+      endpoint: 'https://ghe.renovatebot.com',
+      gitAuthor: 'user@domain.com',
+      username: 'abc',
+      token: '123',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+      ],
+    };
+
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://ghe.renovatebot.com/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+        {
+          hostType: 'github',
+          matchHost: 'ghe.renovatebot.com',
+          token: '123',
+          username: 'abc',
+        },
+      ],
+      platform: 'github',
+      renovateUsername: 'abc',
+    });
+  });
 });

@@ -37,27 +37,16 @@ function canBeSolvedByShrinking(err: Error): boolean {
   );
 }
 
-export class GithubGraphqlDatasourceHelper<
+export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
   ResultItem extends GithubDatasourceItem
 > {
-  static prepareQuery(payloadQuery: string): string {
-    return `
-      query($owner: String!, $name: String!, $cursor: String, $count: Int!) {
-        repository(owner: $owner, name: $name) {
-          isRepoPrivate: isPrivate
-          payload: ${payloadQuery}
-        }
-      }
-    `;
-  }
-
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,
     adapter: GithubGraphqlDatasourceAdapter<T, U>
   ): Promise<U[]> {
-    const instance = new GithubGraphqlDatasourceHelper<T, U>(
+    const instance = new GithubGraphqlDatasourceFetcher<T, U>(
       config,
       http,
       adapter

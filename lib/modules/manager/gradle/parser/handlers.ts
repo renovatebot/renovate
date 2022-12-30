@@ -5,7 +5,7 @@ import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import { parseGradle } from '../parser';
-import type { Ctx, GradleManagerData, VariableData } from '../types';
+import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
   ANNOYING_METHODS,
@@ -36,13 +36,12 @@ export function handleAssignment(ctx: Ctx): Ctx {
       ctx.deps.push(dep);
     }
 
-    const varData: VariableData = {
+    ctx.globalVars[key] = {
       key,
       value: valTokens[0].value,
       fileReplacePosition: valTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-    ctx.globalVars[key] = varData;
   }
 
   return ctx;
@@ -217,7 +216,6 @@ export function handlePlugin(ctx: Ctx): Ctx {
     depType: 'plugin',
     depName,
     packageName,
-    registryUrls: ['https://plugins.gradle.org/m2/'],
     commitMessageTopic: `plugin ${depName}`,
     currentValue: pluginVersion[0].value,
     managerData: {
@@ -247,11 +245,22 @@ export function handlePlugin(ctx: Ctx): Ctx {
   return ctx;
 }
 
+function isPluginRegistry(ctx: Ctx): boolean {
+  if (ctx.tokenMap.registryScope) {
+    const registryScope = loadFromTokenMap(ctx, 'registryScope')[0].value;
+    return registryScope === 'pluginManagement';
+  }
+
+  return false;
+}
+
 export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   const registryName = loadFromTokenMap(ctx, 'registryUrl')[0].value;
-  ctx.depRegistryUrls.push(
-    REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS]
-  );
+
+  ctx.registryUrls.push({
+    registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
+    scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+  });
 
   return ctx;
 }
@@ -282,7 +291,10 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     try {
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
-        ctx.depRegistryUrls.push(registryUrl);
+        ctx.registryUrls.push({
+          registryUrl,
+          scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+        });
       }
     } catch (e) {
       // no-op
@@ -304,13 +316,13 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
 
   const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
   const key = `libs.${aliasToken.value.replace(regEx(/[-_]/g), '.')}`;
-  const varData: VariableData = {
+
+  ctx.globalVars[key] = {
     key,
     value: `${groupId}:${artifactId}`,
     fileReplacePosition: aliasToken.offset,
     packageFile: ctx.packageFile,
   };
-  ctx.globalVars = { ...ctx.globalVars, [key]: varData };
 
   if (ctx.tokenMap.version) {
     const version = interpolateString(
@@ -371,7 +383,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   ctx.deps.push(...matchResult.deps);
   ctx.globalVars = { ...ctx.globalVars, ...matchResult.vars };
-  ctx.depRegistryUrls.push(...matchResult.urls);
+  ctx.registryUrls.push(...matchResult.urls);
 
   return ctx;
 }
