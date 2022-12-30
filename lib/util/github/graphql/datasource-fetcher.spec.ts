@@ -1,12 +1,11 @@
 import AggregateError from 'aggregate-error';
-import { parse as graphqlParse } from 'graphql';
 import * as httpMock from '../../../../test/http-mock';
 import { GithubGraphqlResponse, GithubHttp } from '../../http/github';
 import { range } from '../../range';
 import {
-  GithubGraphqlDatasourceHelper as Datasource,
-  GithubGraphqlDatasourceHelper,
-} from './datasource-helper';
+  GithubGraphqlDatasourceFetcher as Datasource,
+  GithubGraphqlDatasourceFetcher,
+} from './datasource-fetcher';
 import type {
   GithubDatasourceItem,
   GithubGraphqlDatasourceAdapter,
@@ -91,25 +90,7 @@ async function catchError<T>(cb: () => Promise<T>): Promise<Error> {
   }
 }
 
-describe('util/github/graphql/datasource-helper', () => {
-  describe('prepareQuery', () => {
-    it('returns valid query for valid payload query', () => {
-      const payloadQuery = adapter.query;
-      expect(() => graphqlParse(`query { ${payloadQuery} }`)).not.toThrow();
-      expect(() =>
-        graphqlParse(Datasource.prepareQuery(payloadQuery))
-      ).not.toThrow();
-    });
-
-    it('returns invalid query for invalid payload query', () => {
-      const payloadQuery = '!@#';
-      expect(() => graphqlParse(`query { ${payloadQuery} }`)).toThrow();
-      expect(() =>
-        graphqlParse(Datasource.prepareQuery(payloadQuery))
-      ).toThrow();
-    });
-  });
-
+describe('util/github/graphql/datasource-fetcher', () => {
   describe('query', () => {
     let http = new GithubHttp();
 
@@ -405,7 +386,7 @@ describe('util/github/graphql/datasource-helper', () => {
             .post('/graphql')
             .reply(200, resp(data, undefined, isPrivate));
 
-          const instance = new GithubGraphqlDatasourceHelper(
+          const instance = new GithubGraphqlDatasourceFetcher(
             { packageName: 'foo/bar' },
             http,
             adapter

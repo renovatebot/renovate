@@ -103,6 +103,22 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toEqual(srcAlreadyUpdated);
     });
 
+    it('handles no work', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      const src = `     ${script}   `;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = '7.0.9';
+      upgrade.newValue = '7.1.0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
+      reuseExistingBranch = false;
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch, false);
+      expect(res).toEqual(src);
+    });
+
     it('returns existing content if replaceString mismatch', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
