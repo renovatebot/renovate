@@ -1,7 +1,7 @@
 import type { GithubHttp } from '../../http/github';
 import { GithubGraphqlDatasourceFetcher } from './datasource-fetcher';
-import { adapter as releasesAdapter } from './releases-adapter';
-import { adapter as tagsAdapter } from './tags-adapter';
+import { adapter as releasesAdapter } from './query-adapters/releases-query-adapter';
+import { adapter as tagsAdapter } from './query-adapters/tags-query-adapter';
 import type {
   GithubPackageConfig,
   GithubReleaseItem,

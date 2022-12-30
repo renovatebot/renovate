@@ -147,9 +147,7 @@ export async function updateArtifacts({
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv,
       toolConstraints: [
         {
