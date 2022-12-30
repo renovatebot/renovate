@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getDatasources } from '../../lib/modules/datasource';
 import { readFile, updateFile } from '../utils';
 import {
@@ -25,11 +26,14 @@ export async function generateDatasources(dist: string): Promise<void> {
       datasource,
       `\`${datasource}\``
     )}\n`;
-    let md = `---
-title: ${displayName} Datasource
-sidebar_label: ${displayName}
----
-`;
+    let md = codeBlock`
+      ---
+      title: ${displayName}
+      ---
+
+      # ${displayName} Datasource
+      `;
+    md += '\n\n';
     md += `**Identifier**: \`${id}\`\n\n`;
     if (defaultVersioning) {
       md += `**Default versioning**: \`${defaultVersioning}\`\n\n`;
@@ -53,11 +57,8 @@ sidebar_label: ${displayName}
     }
 
     await updateFile(`${dist}/modules/datasource/${datasource}/index.md`, md);
-    await updateFile(
-      `${dist}/modules/datasource/${datasource}/.pages`,
-      `title: ${displayName}\n`
-    );
   }
+
   let indexContent = await readFile(`docs/usage/modules/datasource/index.md`);
   indexContent = replaceContent(indexContent, datasourceContent);
   await updateFile(`${dist}/modules/datasource/index.md`, indexContent);
