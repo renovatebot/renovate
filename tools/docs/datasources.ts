@@ -11,7 +11,6 @@ import {
 export async function generateDatasources(dist: string): Promise<void> {
   const dsList = getDatasources();
   let datasourceContent = '\nSupported values for `datasource` are:\n\n';
-  let navContent = '';
 
   for (const [datasource, definition] of dsList) {
     const {
@@ -26,7 +25,6 @@ export async function generateDatasources(dist: string): Promise<void> {
       datasource,
       `\`${datasource}\``
     )}\n`;
-    navContent += `  - ${displayName}: ${datasource}/\n`;
     let md = `---
 title: ${displayName} Datasource
 sidebar_label: ${displayName}
@@ -55,12 +53,12 @@ sidebar_label: ${displayName}
     }
 
     await updateFile(`${dist}/modules/datasource/${datasource}/index.md`, md);
+    await updateFile(
+      `${dist}/modules/datasource/${datasource}/.pages`,
+      `title: ${displayName}\n`
+    );
   }
   let indexContent = await readFile(`docs/usage/modules/datasource/index.md`);
   indexContent = replaceContent(indexContent, datasourceContent);
   await updateFile(`${dist}/modules/datasource/index.md`, indexContent);
-
-  let nav = await readFile(`docs/usage/modules/datasource/.pages`);
-  nav = nav.replace('  - ...\n', navContent);
-  await updateFile(`${dist}/modules/datasource/.pages`, nav);
 }
