@@ -1212,15 +1212,13 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toMatchInlineSnapshot(`
-        "
+      expect(res.commitMessage).toBe(`
 
         | datasource | package     | from  | to    |
         | ---------- | ----------- | ----- | ----- |
         | npm        | another-dep | 5.1.1 | 5.1.2 |
         | npm        | some-dep    | 5.1.0 | 5.1.2 |
         | docker     | some-dep    | 5.1.0 | 5.1.2 |
-        "
       `);
       expect([
         ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
@@ -1228,7 +1226,8 @@ describe('workers/repository/updates/generate', () => {
       expect([
         ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
       ]).toBeArrayOfSize(2);
-    
+    });
+
     it('using commitMessagePrefix without separator', () => {
       const branch: BranchUpgradeConfig[] = [
         {
