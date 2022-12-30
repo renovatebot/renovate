@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import { Http, HttpError } from '../../../util/http';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
@@ -121,9 +121,7 @@ export async function getReleases(
   const catalogPagesQueue = catalogPages.map(
     (page) => (): Promise<CatalogEntry[]> => getCatalogEntry(http, page)
   );
-  const catalogEntries = (
-    await pAll(catalogPagesQueue, { concurrency: 5 })
-  ).flat();
+  const catalogEntries = (await p.all(catalogPagesQueue)).flat();
 
   let homepage: string | null = null;
   let latestStable: string | null = null;

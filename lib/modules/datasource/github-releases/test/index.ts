@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
-import type { GithubRelease } from '../types';
+import type { GithubRestRelease } from '../../../../util/github/types';
 
 export class GitHubReleaseMocker {
   constructor(
@@ -8,15 +8,15 @@ export class GitHubReleaseMocker {
     private readonly packageName: string
   ) {}
 
-  release(version: string): GithubRelease {
+  release(version: string): GithubRestRelease {
     return this.withAssets(version, {});
   }
 
   withAssets(
     version: string,
     assets: { [key: string]: string }
-  ): GithubRelease {
-    const releaseData = partial<GithubRelease>({
+  ): GithubRestRelease {
+    const releaseData = partial<GithubRestRelease>({
       tag_name: version,
       published_at: '2020-03-09T11:00:00Z',
       prerelease: false,
@@ -46,7 +46,10 @@ export class GitHubReleaseMocker {
     return releaseData;
   }
 
-  withDigestFileAsset(version: string, ...digests: string[]): GithubRelease {
+  withDigestFileAsset(
+    version: string,
+    ...digests: string[]
+  ): GithubRestRelease {
     return this.withAssets(version, { 'SHASUMS.txt': digests.join('\n') });
   }
 }

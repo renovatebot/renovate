@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 import extract from 'extract-zip';
-import pMap from 'p-map';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { cache } from '../../../../util/cache/package/decorator';
 import * as fs from '../../../../util/fs';
 import { ensureCacheDir } from '../../../../util/fs';
 import { Http } from '../../../../util/http';
+import * as p from '../../../../util/promises';
 import { regEx } from '../../../../util/regex';
 import { TerraformProviderDatasource } from '../../../datasource/terraform-provider';
 import type { TerraformBuild } from '../../../datasource/terraform-provider/types';
@@ -94,11 +94,9 @@ export class TerraformProviderHash {
     const cacheDir = await ensureCacheDir('./others/terraform');
 
     // for each build download ZIP, extract content and generate hash for all containing files
-    return pMap(
-      builds,
-      (build) => this.calculateSingleHash(build, cacheDir),
-      { concurrency: 4 } // allow to look up 4 builds for this version in parallel
-    );
+    return p.map(builds, (build) => this.calculateSingleHash(build, cacheDir), {
+      concurrency: 4,
+    });
   }
 
   static async createHashes(

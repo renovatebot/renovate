@@ -37,7 +37,7 @@ export class HelmDatasource extends Datasource {
       res = await this.http.get('index.yaml', {
         baseUrl: ensureTrailingSlash(helmRepository),
       });
-      if (!res || !res.body) {
+      if (!res?.body) {
         logger.warn(
           { helmRepository },
           `Received invalid response from helm repository`
@@ -61,11 +61,10 @@ export class HelmDatasource extends Datasource {
       const result: HelmRepositoryData = {};
       for (const [name, releases] of Object.entries(doc.entries)) {
         const latestRelease = releases[0];
-        const { sourceUrl, sourceDirectory } = findSourceUrl(latestRelease);
+        const sourceUrl = findSourceUrl(latestRelease);
         result[name] = {
           homepage: latestRelease.home,
           sourceUrl,
-          sourceDirectory,
           releases: releases.map((release) => ({
             version: release.version,
             releaseTimestamp: release.created ?? null,

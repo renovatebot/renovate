@@ -1,7 +1,7 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../../test/http-mock';
+import type { GithubDigestFile } from '../../../util/github/types';
 import { GitHubReleaseMocker } from './test';
-import type { DigestAsset } from './types';
 
 import { GithubReleasesDatasource } from '.';
 
@@ -77,7 +77,7 @@ describe('modules/datasource/github-releases/digest', () => {
 
   describe('mapDigestAssetToRelease', () => {
     describe('with digest file', () => {
-      const digestAsset: DigestAsset = {
+      const digestAsset: GithubDigestFile = {
         assetName: 'SHASUMS.txt',
         currentVersion: 'v1.0.0',
         currentDigest: 'old-digest',
@@ -136,7 +136,7 @@ describe('modules/datasource/github-releases/digest', () => {
     });
 
     describe('with digested file', () => {
-      const digestAsset: DigestAsset = {
+      const digestAsset: GithubDigestFile = {
         assetName: 'asset.zip',
         currentVersion: 'v1.0.0',
         currentDigest: '0'.repeat(64),

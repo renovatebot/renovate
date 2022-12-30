@@ -32,7 +32,7 @@ export async function getTags(
     const tags = res.body;
 
     if (!tags.length) {
-      logger.debug({ sourceRepo: repository }, 'repository has no Gitlab tags');
+      logger.debug(`No Gitlab tags found for ${repository}`);
     }
 
     return tags.map((tag) => tag.name).filter(Boolean);

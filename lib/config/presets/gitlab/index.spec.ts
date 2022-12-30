@@ -43,14 +43,14 @@ describe('config/presets/gitlab/index', () => {
         .get(`${basePath}/branches`)
         .reply(200, [
           {
-            name: 'devel',
+            name: 'main',
+            default: true,
           },
           {
             name: 'master',
-            default: true,
           },
         ])
-        .get(`${basePath}/files/default.json/raw?ref=master`)
+        .get(`${basePath}/files/default.json/raw?ref=main`)
         .reply(200, { foo: 'bar' }, {});
 
       const content = await gitlab.getPreset({ repo: 'some/repo' });

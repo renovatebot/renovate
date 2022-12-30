@@ -4,7 +4,6 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
-import { PrState } from '../../../types';
 import {
   deleteBranch,
   getBranchList,
@@ -23,7 +22,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PrState.Open,
+        state: 'open',
       });
       const branchIsModified = await isBranchModified(branchName);
       if (pr) {
@@ -33,8 +32,17 @@ async function cleanUpBranches(
             'Branch is modified - skipping PR autoclosing'
           );
           if (GlobalConfig.get('dryRun')) {
-            logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
+            logger.info(`DRY-RUN: Would update PR title and ensure comment.`);
           } else {
+            if (!pr.title.endsWith('- abandoned')) {
+              const newPrTitle = pr.title + ' - abandoned';
+              await platform.updatePr({
+                number: pr.number,
+                prTitle: newPrTitle,
+                state: 'open',
+              });
+            }
+
             await ensureComment({
               number: pr.number,
               topic: 'Autoclosing Skipped',
@@ -59,7 +67,7 @@ async function cleanUpBranches(
           await platform.updatePr({
             number: pr.number,
             prTitle: newPrTitle,
-            state: PrState.Closed,
+            state: 'closed',
           });
           await deleteBranch(branchName);
         }

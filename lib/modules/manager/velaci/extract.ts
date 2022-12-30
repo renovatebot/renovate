@@ -1,5 +1,6 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
 import type { VelaPipelineConfiguration } from './types';
@@ -17,14 +18,14 @@ export function extractPackageFile(file: string): PackageFile | null {
   const deps: PackageDependency[] = [];
 
   // iterate over steps
-  for (const step of doc.steps ?? []) {
+  for (const step of coerceArray(doc.steps)) {
     const dep = getDep(step.image);
 
     deps.push(dep);
   }
 
   // iterate over services
-  for (const service of doc.services ?? []) {
+  for (const service of coerceArray(doc.services)) {
     const dep = getDep(service.image);
 
     deps.push(dep);
@@ -32,7 +33,7 @@ export function extractPackageFile(file: string): PackageFile | null {
 
   // iterate over stages
   for (const stage of Object.values(doc.stages ?? {})) {
-    for (const step of stage.steps ?? []) {
+    for (const step of coerceArray(stage.steps)) {
       const dep = getDep(step.image);
 
       deps.push(dep);

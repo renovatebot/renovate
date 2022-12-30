@@ -91,6 +91,7 @@ function genTable(obj: [string, string][], type: string, def: any): string {
     'experimental',
     'experimentalDescription',
     'experimentalIssues',
+    'advancedUse',
   ];
   obj.forEach(([key, val]) => {
     const el = [key, val];
@@ -233,10 +234,21 @@ export async function generateConfig(dist: string, bot = false): Promise<void> {
         `\n${option.description}\n\n` +
         genTable(Object.entries(el), option.type, option.default);
 
+      if (el.advancedUse) {
+        configOptionsRaw[headerIndex] += generateAdvancedUse();
+      }
+
       if (el.experimental) {
         configOptionsRaw[footerIndex] += genExperimentalMsg(el);
       }
     });
 
   await updateFile(`${dist}/${configFile}`, configOptionsRaw.join('\n'));
+}
+
+function generateAdvancedUse(): string {
+  return (
+    '\n<!-- prettier-ignore -->\n!!! warning\n' +
+    '    For advanced use only! Use at your own risk!\n'
+  );
 }

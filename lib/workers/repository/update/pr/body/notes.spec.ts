@@ -15,6 +15,7 @@ describe('workers/repository/update/pr/body/notes', () => {
     const res = getPrNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         {
           manager: 'some-manager',
@@ -33,21 +34,23 @@ describe('workers/repository/update/pr/body/notes', () => {
     const res = getPrNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         {
           manager: 'some-manager',
           branchName: 'branch',
-          prBodyNotes: ['NOTE'],
+          prBodyNotes: ['{{NOTE}}'],
         },
       ],
     });
-    expect(res).not.toContain('NOTE');
+    expect(res).toContain('{{NOTE}}');
   });
 
   it('handles extra notes', () => {
     const res = getPrExtraNotes({
       manager: 'some-manager',
       branchName: 'branch',
+      baseBranch: 'base',
       upgrades: [
         { manager: 'some-manager', branchName: 'branch', gitRef: true },
       ],

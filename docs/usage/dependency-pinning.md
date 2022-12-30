@@ -102,7 +102,7 @@ There are some dependencies that either (a) don't have the potential to break so
 
 For example, it's very hard for `eslint` to break anything in production.
 If your build/tests pass, then you are fine.
-Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+Consider enabling automerge for all lint packages to save yourself the work of manually approving the update each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
@@ -142,7 +142,7 @@ You can add a package rule in our Renovate configuration to group these together
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?".
 It's a good question!
 
-![broken-lockfile](assets/images/broken-lockfile.jpg)
+![broken-lockfile](assets/images/broken-lockfile.jpg){ loading=lazy }
 
 Lock files are a great companion to SemVer ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -158,7 +158,7 @@ If a lock file gets out of sync with its `package.json`, it can no longer be gua
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](assets/images/all-dead.jpg)
+![all-dead](assets/images/all-dead.jpg){ loading=lazy }
 
 If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 

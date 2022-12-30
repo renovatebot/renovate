@@ -2,6 +2,7 @@ import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import { DotnetDatasource } from '../../datasource/dotnet';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
@@ -36,6 +37,20 @@ describe('modules/manager/nuget/extract', () => {
       expect(res?.deps).toHaveLength(1);
     });
 
+    it('extracts package file version', async () => {
+      const packageFile = 'sample.csproj';
+      const sample = Fixtures.get(packageFile);
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.packageFileVersion).toBe('0.1.0');
+    });
+
+    it('does not fail on package file without version', async () => {
+      const packageFile = 'single-project-file/single.csproj';
+      const sample = Fixtures.get(packageFile);
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res?.packageFileVersion).toBeUndefined();
+    });
+
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
       const sample = Fixtures.get(packageFile);
@@ -68,6 +83,7 @@ describe('modules/manager/nuget/extract', () => {
             ],
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -88,6 +104,7 @@ describe('modules/manager/nuget/extract', () => {
             ],
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -108,6 +125,7 @@ describe('modules/manager/nuget/extract', () => {
             ],
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -124,6 +142,7 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'nuget',
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -140,6 +159,7 @@ describe('modules/manager/nuget/extract', () => {
             depType: 'nuget',
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -176,6 +196,7 @@ describe('modules/manager/nuget/extract', () => {
             registryUrls: ['https://contoso.com/packages/'],
           },
         ],
+        packageFileVersion: '0.1.0',
       });
     });
 
@@ -197,6 +218,7 @@ describe('modules/manager/nuget/extract', () => {
             ],
           },
         ],
+        packageFileVersion: '0.1.0',
       });
       expect(
         await extractPackageFile(otherContents, otherPackageFile, config)
@@ -213,6 +235,7 @@ describe('modules/manager/nuget/extract', () => {
             ],
           },
         ],
+        packageFileVersion: '0.2.0',
       });
     });
 
@@ -227,7 +250,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            skipReason: 'unsupported-datasource',
+            datasource: DotnetDatasource.id,
           },
           {
             currentValue: '0.2.0',
@@ -250,7 +273,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            skipReason: 'unsupported-datasource',
+            datasource: DotnetDatasource.id,
           },
         ],
       });

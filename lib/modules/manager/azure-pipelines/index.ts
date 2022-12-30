@@ -4,6 +4,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['azure.*pipelines?.*\\.ya?ml$'],
+  enabled: false,
 };
 
 export const supportedDatasources = [

@@ -13,14 +13,9 @@ describe('modules/manager/kubernetes/extract', () => {
       expect(extractPackageFile('', 'file.yaml', {})).toBeNull();
     });
 
-    it('returns only API version', () => {
+    it('does not return unknown kind', () => {
       const res = extractPackageFile(kubernetesConfigMapFile, 'file.yaml', {});
-      expect(res?.deps).toStrictEqual([
-        {
-          currentValue: 'v1',
-          depName: 'ConfigMap',
-        },
-      ]);
+      expect(res).toBeNull();
     });
 
     it('extracts multiple Kubernetes configurations', () => {
@@ -46,11 +41,15 @@ describe('modules/manager/kubernetes/extract', () => {
         },
         {
           currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
           depName: 'Deployment',
+          versioning: 'kubernetes-api',
         },
         {
           currentValue: 'extensions/v1beta1',
+          datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
         },
       ]);
     });
@@ -74,7 +73,9 @@ describe('modules/manager/kubernetes/extract', () => {
         },
         {
           currentValue: 'apps/v1',
+          datasource: 'kubernetes-api',
           depName: 'DaemonSet',
+          versioning: 'kubernetes-api',
         },
       ]);
     });

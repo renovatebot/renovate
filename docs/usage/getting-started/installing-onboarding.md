@@ -15,19 +15,19 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 Installing/enabling Mend's Renovate GitHub App is simple.
 
-First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
+First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 
-![Github App Install button](../assets/images/github-app-install.png)
+![Github App Install button](../assets/images/github-app-install.png){ loading=lazy }
 
 The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
 
-![Github App repositories](../assets/images/github-app-choose-repos.png)
+![Github App repositories](../assets/images/github-app-choose-repos.png){ loading=lazy }
 
 Renovate will ignore any repositories that don't have known package files, as well as any forks, so you can enable Renovate for all your repositories with no problems.
 That said, most people run Renovate on selected repositories.
 Unfortunately GitHub doesn't offer a "select all except X, Y, Z" option, so you must select each repository where you want Renovate to run.
 
-Once you're done selecting repositories for Renovate to run on, click the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
+Once you're done selecting repositories for Renovate to run on, select the green Install button at the bottom of the page and Renovate will be enabled for those repositories and start the onboarding process.
 
 <!-- prettier-ignore -->
 !!! note
@@ -55,7 +55,7 @@ You can also set the line endings in your repository by adding `* text=auto eol=
 
 Once you have enabled Renovate on a repository, you will get a "Configure Renovate" Pull Request looking something like this:
 
-![Onboarding](../assets/images/onboarding.png)
+![Onboarding](../assets/images/onboarding.png){ loading=lazy }
 
 ### No risk onboarding
 
@@ -81,6 +81,7 @@ If you don't want a `renovate.json` file in your repository you can use one of t
 - `.gitlab/renovate.json5`
 - `.renovaterc`
 - `.renovaterc.json`
+- `.renovaterc.json5`
 - `package.json` (deprecated)
 
 #### package.json
@@ -94,7 +95,7 @@ The `package.json` file must be located at the root of your repository.
 This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
 
-### Customised defaults
+### Customized defaults
 
 Renovate provides a `renovate.json` file, with default settings that will work for most cases.
 Sometimes Renovate detects that an override to these defaults is needed, and will add this override automatically, such as:
@@ -107,7 +108,7 @@ Sometimes Renovate detects that an override to these defaults is needed, and wil
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
+- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. Some prefer `"bump"`.
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub user(s) to assign the Pull Requests to
 

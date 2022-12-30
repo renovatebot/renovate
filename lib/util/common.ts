@@ -20,7 +20,7 @@ export function detectPlatform(url: string): 'gitlab' | 'github' | null {
     return 'gitlab';
   }
 
-  const hostType = hostRules.hostType({ url: url });
+  const hostType = hostRules.hostType({ url });
 
   if (!hostType) {
     return null;

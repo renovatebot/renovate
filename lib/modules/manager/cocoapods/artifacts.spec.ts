@@ -18,12 +18,14 @@ jest.mock('../../datasource');
 const datasource = mocked(_datasource);
 
 delete process.env.CP_HOME_DIR;
+process.env.CONTAINERBASE = 'true';
 
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 describe('modules/manager/cocoapods/artifacts', () => {
@@ -36,6 +38,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
 
     GlobalConfig.set(adminConfig);
 
+    // ruby
     datasource.getPkgReleases.mockResolvedValue({
       releases: [
         { version: '2.7.4' },
@@ -143,7 +146,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
-    ).toMatchSnapshot([{ file: { contents: 'New Podfile' } }]);
+    ).toMatchObject([{ file: { contents: 'New Podfile' } }]);
     expect(execSnapshots).toMatchSnapshot();
   });
 
@@ -169,7 +172,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
         newPackageFileContent: '',
         config,
       })
-    ).toMatchSnapshot([
+    ).toMatchObject([
       { file: { type: 'addition', path: 'Podfile.lock' } },
       { file: { type: 'addition', path: 'Pods/Manifest.lock' } },
       { file: { type: 'addition', path: 'Pods/New' } },
@@ -240,17 +243,20 @@ describe('modules/manager/cocoapods/artifacts', () => {
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot([
-      { cmd: 'docker pull renovate/ruby:2.7.4' },
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
       {
         cmd:
-          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/ruby:2.7.4' +
+          'renovate/sidecar' +
           ' bash -l -c "' +
+          'install-tool ruby 3.1.0' +
+          ' && ' +
           'install-tool cocoapods 1.2.4' +
           ' && ' +
           'pod install' +
@@ -259,17 +265,13 @@ describe('modules/manager/cocoapods/artifacts', () => {
     ]);
   });
 
-  it('falls back to the `latest` Docker image tag', async () => {
+  it('supports install mode', async () => {
     const execSnapshots = mockExecAll();
 
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
 
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [],
-    });
-
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
@@ -283,22 +285,10 @@ describe('modules/manager/cocoapods/artifacts', () => {
       newPackageFileContent: '',
       config,
     });
-    expect(execSnapshots).toMatchSnapshot([
-      { cmd: 'docker pull renovate/ruby:latest' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_ruby --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/cache":"/tmp/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/ruby:latest' +
-          ' bash -l -c "' +
-          'install-tool cocoapods 1.2.4' +
-          ' && ' +
-          'pod install' +
-          '"',
-      },
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool ruby 3.1.0' },
+      { cmd: 'install-tool cocoapods 1.2.4' },
+      { cmd: 'pod install' },
     ]);
   });
 });

@@ -101,9 +101,7 @@ export async function updateArtifacts({
         PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
       toolConstraints: [
         {
@@ -112,7 +110,7 @@ export async function updateArtifacts({
         },
       ],
     };
-    logger.debug({ cmd }, 'pipenv lock command');
+    logger.trace({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
     if (!status?.modified.includes(lockFileName)) {

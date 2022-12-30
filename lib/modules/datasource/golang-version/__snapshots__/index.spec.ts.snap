@@ -3,7 +3,7 @@
 exports[`modules/datasource/golang-version/index getReleases parses real data 1`] = `
 {
   "homepage": "https://go.dev/",
-  "registryUrl": "https://raw.githubusercontent.com/golang/website/",
+  "registryUrl": "https://raw.githubusercontent.com/golang/website",
   "releases": [
     {
       "releaseTimestamp": "2012-03-28T00:00:00.000Z",

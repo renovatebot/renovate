@@ -6,6 +6,7 @@
   },
   "require": {
     "php": ">=5.3.2",
+    "ext-intl": "*",
     "symfony/assetic-bundle": "dev-master",
     "symfony/monolog-bundle": "dev-master",
     "symfony/swiftmailer-bundle": "dev-master",

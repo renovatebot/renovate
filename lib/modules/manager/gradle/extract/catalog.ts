@@ -88,7 +88,7 @@ function extractVersion({
     });
   } else {
     return extractLiteralVersion({
-      version: version,
+      version,
       depStartIndex,
       depSubContent,
       sectionKey: depName,
@@ -276,7 +276,6 @@ export function parseCatalog(
       depType: 'plugin',
       depName,
       packageName: `${depName}:${depName}.gradle.plugin`,
-      registryUrls: ['https://plugins.gradle.org/m2/'],
       currentValue,
       commitMessageTopic: `plugin ${pluginName}`,
       managerData: { fileReplacePosition },

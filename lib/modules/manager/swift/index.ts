@@ -12,4 +12,5 @@ export const defaultConfig = {
   fileMatch: ['(^|/)Package\\.swift'],
   versioning: swiftVersioning.id,
   rangeStrategy: 'bump',
+  pinDigests: false,
 };

@@ -33,6 +33,26 @@ describe('modules/datasource/golang-version/index', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('supports custom registry URL', async () => {
+      httpMock
+        .scope('https://custom-registry/website')
+        .get('/HEAD/internal/history/release.go')
+        .reply(200, golangReleasesContent);
+      const config = {
+        registryUrls: ['https://custom-registry/website'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        depName: 'golang',
+      });
+      expect(res?.releases).toHaveLength(132);
+      expect(res?.releases[0]).toEqual({
+        releaseTimestamp: '2012-03-28T00:00:00.000Z',
+        version: '1.0.0',
+      });
+    });
+
     it('throws ExternalHostError for invalid release with no versions', async () => {
       httpMock
         .scope('https://raw.githubusercontent.com')

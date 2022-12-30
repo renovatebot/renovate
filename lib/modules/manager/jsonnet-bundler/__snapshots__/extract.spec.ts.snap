@@ -5,7 +5,7 @@ exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts d
   "deps": [
     {
       "currentValue": "v0.50.0",
-      "depName": "prometheus-operator",
+      "depName": "github.com/prometheus-operator/prometheus-operator/jsonnet/prometheus-operator",
       "managerData": {
         "subdir": "jsonnet/prometheus-operator",
       },
@@ -13,7 +13,7 @@ exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts d
     },
     {
       "currentValue": "v0.9.0",
-      "depName": "kube-prometheus",
+      "depName": "github.com/prometheus-operator/kube-prometheus/jsonnet/kube-prometheus",
       "managerData": {
         "subdir": "jsonnet/kube-prometheus",
       },
@@ -28,7 +28,7 @@ exports[`modules/manager/jsonnet-bundler/extract extractPackageFile() extracts d
   "deps": [
     {
       "currentValue": "v0.50.0",
-      "depName": "prometheus-operator-mixin",
+      "depName": "github.com/prometheus-operator/prometheus-operator/jsonnet/mixin",
       "managerData": {
         "subdir": "jsonnet/mixin",
       },

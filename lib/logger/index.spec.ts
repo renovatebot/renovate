@@ -65,7 +65,7 @@ describe('logger/index', () => {
     logger.error({ some: 'meta' }, 'message');
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
-    expect(getProblems()).toMatchSnapshot([
+    expect(getProblems()).toMatchObject([
       { msg: 'some meta' },
       { some: 'meta', password: '***********' },
       { some: 'meta', msg: 'message' },

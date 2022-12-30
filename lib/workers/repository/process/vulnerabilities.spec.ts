@@ -1,4 +1,4 @@
-import type { Ecosystem, OsvOffline } from '@jamiemagee/osv-offline';
+import type { Ecosystem, OsvOffline } from '@renovatebot/osv-offline';
 import { mockFn } from 'jest-mock-extended';
 import { getConfig } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -8,7 +8,7 @@ const getVulnerabilitiesMock =
   mockFn<typeof OsvOffline.prototype.getVulnerabilities>();
 const createMock = jest.fn();
 
-jest.mock('@jamiemagee/osv-offline', () => {
+jest.mock('@renovatebot/osv-offline', () => {
   return {
     __esModule: true,
     OsvOffline: class {

@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
-import { PlatformId } from '../../../../constants';
 import { logger } from '../../../../logger';
+import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 
 function normalizePrefixes(
@@ -74,14 +74,6 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
 
   config.hostRules ||= [];
 
-  const coersions = {
-    boolean: (val: string): boolean => val === 'true',
-    array: (val: string): string[] => val.split(',').map((el) => el.trim()),
-    string: (val: string): string => val.replace(/\\n/g, '\n'),
-    object: (val: string): any => JSON5.parse(val),
-    integer: parseInt,
-  };
-
   options.forEach((option) => {
     if (option.env !== false) {
       const envName = getEnvName(option);
@@ -143,7 +135,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   if (env.GITHUB_COM_TOKEN) {
     logger.debug(`Converting GITHUB_COM_TOKEN into a global host rule`);
     config.hostRules.push({
-      hostType: PlatformId.Github,
+      hostType: 'github',
       matchHost: 'github.com',
       token: env.GITHUB_COM_TOKEN,
     });

@@ -26,6 +26,7 @@ const hostRules = mocked(_hostRules);
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/cache'),
+  containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
 const config: UpdateArtifactsConfig = {};
@@ -271,6 +272,7 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +
@@ -329,6 +331,7 @@ describe('modules/manager/poetry/artifacts', () => {
           '-v "/tmp/cache":"/tmp/cache" ' +
           '-e PIP_CACHE_DIR ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +

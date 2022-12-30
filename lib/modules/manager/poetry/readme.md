@@ -7,3 +7,4 @@ The following `depTypes` are supported by the Poetry manager:
 - `dependencies`
 - `dev-dependencies`
 - `extras`
+- `<group-name>` (dynamic, based on the group name, per [dependency groups documentation](https://python-poetry.org/docs/managing-dependencies/#dependency-groups))

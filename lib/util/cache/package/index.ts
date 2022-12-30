@@ -18,10 +18,19 @@ export async function get<T = any>(
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
+  let start = 0;
   if (memCache.get(globalKey) === undefined) {
     memCache.set(globalKey, cacheProxy.get(namespace, key));
+    start = Date.now();
   }
   const result = await memCache.get(globalKey);
+  if (start) {
+    // Only count duration if it's not a duplicate
+    const durationMs = Math.round(Date.now() - start);
+    const cacheDurations = memCache.get<number[]>('package-cache-gets') ?? [];
+    cacheDurations.push(durationMs);
+    memCache.set('package-cache-gets', cacheDurations);
+  }
   return result;
 }
 
@@ -36,7 +45,12 @@ export async function set(
   }
   const globalKey = getGlobalKey(namespace, key);
   memCache.set(globalKey, value);
+  const start = Date.now();
   await cacheProxy.set(namespace, key, value, minutes);
+  const durationMs = Math.round(Date.now() - start);
+  const cacheDurations = memCache.get<number[]>('package-cache-sets') ?? [];
+  cacheDurations.push(durationMs);
+  memCache.set('package-cache-sets', cacheDurations);
 }
 
 export async function init(config: AllConfig): Promise<void> {

@@ -1,13 +1,13 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
+import type { GithubRestRelease } from '../../../util/github/types';
+import { getApiBaseUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { streamToString } from '../../../util/streams';
 import { parseUrl } from '../../../util/url';
 import { id } from '../../versioning/hermit';
 import { Datasource } from '../datasource';
-import { getApiBaseUrl } from '../github-releases/common';
-import type { GithubRelease } from '../github-releases/types';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import type { HermitSearchResult } from './types';
 
@@ -73,7 +73,9 @@ export class HermitDatasource extends Datasource {
     const res = items.find((i) => i.Name === packageName);
 
     if (!res) {
-      logger.debug({ packageName, registryUrl }, 'cannot find hermit package');
+      logger.debug(
+        `Could not find hermit package ${packageName} at URL ${registryUrl}`
+      );
       return null;
     }
 
@@ -118,7 +120,7 @@ export class HermitDatasource extends Datasource {
 
     const apiBaseUrl = getApiBaseUrl(`https://${host}`);
 
-    const indexRelease = await this.http.getJson<GithubRelease>(
+    const indexRelease = await this.http.getJson<GithubRestRelease>(
       `${apiBaseUrl}repos/${owner}/${repo}/releases/tags/index`
     );
 

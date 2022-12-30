@@ -81,12 +81,20 @@ function getNewValue({
       );
     }
   }
-  return npm.getNewValue({
+  let npmNewVersion = npm.getNewValue({
     currentValue,
     rangeStrategy,
     currentVersion,
     newVersion,
   });
+  if (
+    npmNewVersion &&
+    currentValue.startsWith('v') &&
+    !npmNewVersion.startsWith('v')
+  ) {
+    npmNewVersion = `v${npmNewVersion}`;
+  }
+  return npmNewVersion;
 }
 
 export const api: VersioningApi = {

@@ -1,9 +1,11 @@
-import hasha from 'hasha';
-import { git, mocked } from '../../../../test/util';
+import { git, logger, mocked } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
+import type { BaseBranchCache } from '../../../util/cache/repository/types';
+import { fingerprint } from '../../../util/fingerprint';
+import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
 import * as _branchify from '../updates/branchify';
-import { extract, lookup, update } from './extract-update';
+import { extract, isCacheExtractValid, lookup, update } from './extract-update';
 
 jest.mock('./write');
 jest.mock('./sort');
@@ -18,7 +20,12 @@ const repositoryCache = mocked(_repositoryCache);
 
 branchify.branchifyUpgrades.mockResolvedValueOnce({
   branches: [
-    { manager: 'some-manager', branchName: 'some-branch', upgrades: [] },
+    {
+      manager: 'some-manager',
+      branchName: 'some-branch',
+      baseBranch: 'base',
+      upgrades: [],
+    },
   ],
   branchList: ['branchName'],
 });
@@ -40,6 +47,7 @@ describe('workers/repository/process/extract-update', () => {
           {
             branchName: 'some-branch',
             manager: 'some-manager',
+            baseBranch: 'base',
             upgrades: [],
           },
         ],
@@ -53,6 +61,13 @@ describe('workers/repository/process/extract-update', () => {
         baseBranches: ['master', 'dev'],
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
+        enabledManagers: ['npm'],
+        javascript: {
+          labels: ['js'],
+        },
+        npm: {
+          addLabels: 'npm',
+        },
       };
       git.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
@@ -71,7 +86,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: hasha(JSON.stringify(config)),
+            configHash: fingerprint(generateFingerprintConfig(config)),
             packageFiles,
           },
         },
@@ -80,6 +95,54 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
+    });
+  });
+
+  describe('isCacheExtractValid()', () => {
+    let cachedExtract: BaseBranchCache = undefined as never;
+
+    it('undefined cache', () => {
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(0);
+    });
+
+    it('partial cache', () => {
+      cachedExtract = {
+        sha: 'sha',
+        configHash: undefined as never,
+        packageFiles: {},
+      };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(0);
+    });
+
+    it('sha mismatch', () => {
+      cachedExtract.configHash = 'hash';
+      expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`
+      );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('config change', () => {
+      cachedExtract.sha = 'sha';
+      cachedExtract.configHash = 'hash';
+      expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract result cannot be used due to config change'
+      );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('valid cache and config', () => {
+      cachedExtract.sha = 'sha';
+      cachedExtract.configHash = 'hash';
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract for sha=sha is valid and can be used'
+      );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
   });
 });

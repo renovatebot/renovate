@@ -105,7 +105,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
@@ -147,7 +147,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     );
     expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.lockFile).toBe('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot([
+    expect(execSnapshots).toMatchObject([
       {
         cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
         options: {
@@ -209,6 +209,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp":"/tmp" ' +
           '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
           'renovate/sidecar ' +
           'bash -l -c "' +

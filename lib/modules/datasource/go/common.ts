@@ -1,16 +1,14 @@
+import { getSourceUrl as githubSourceUrl } from '../../../util/github/url';
 import { BitBucketTagsDatasource } from '../bitbucket-tags';
-import { getSourceUrl as githubSourceUrl } from '../github-releases/common';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import { getSourceUrl as gitlabSourceUrl } from '../gitlab-tags/util';
 
 import type { DataSource } from './types';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum GoproxyFallback {
-  WhenNotFoundOrGone = ',',
-  Always = '|',
-}
+export type GoproxyFallback =
+  | ',' // WhenNotFoundOrGone
+  | '|'; // Always
 
 export function getSourceUrl(
   dataSource?: DataSource | null

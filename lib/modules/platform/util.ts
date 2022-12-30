@@ -8,3 +8,10 @@ export function repoFingerprint(
   const fingerprint = hasha(input);
   return fingerprint;
 }
+
+export function getNewBranchName(branchName?: string): string | undefined {
+  if (branchName && !branchName.startsWith('refs/heads/')) {
+    return `refs/heads/${branchName}`;
+  }
+  return branchName;
+}

@@ -43,7 +43,7 @@ export async function generateLockFiles(
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
   const toolConstraints: ToolConstraint[] = [
-    await getNodeToolConstraint(config, []),
+    await getNodeToolConstraint(config, [], lockFileDir),
   ];
   const cmd: string[] = [];
   let cmdOptions = '';
@@ -79,7 +79,7 @@ export async function generateLockFiles(
       return { error: false };
     }
     let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
-    if (GlobalConfig.get('allowScripts') && config.ignoreScripts !== false) {
+    if (GlobalConfig.get('allowScripts') && !config.ignoreScripts) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
@@ -91,9 +91,7 @@ export async function generateLockFiles(
     const execOptions: ExecOptions = {
       cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if

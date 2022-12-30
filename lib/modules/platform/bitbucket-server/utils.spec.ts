@@ -120,8 +120,8 @@ describe('modules/platform/bitbucket-server/utils', () => {
         const username = 'abc';
         const password = '123';
         const opts = {
-          username: username,
-          password: password,
+          username,
+          password,
         };
 
         it('works gitUrl:undefined generate endpoint', () => {

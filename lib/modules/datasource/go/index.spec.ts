@@ -11,11 +11,13 @@ const getReleasesDirectMock = jest.fn();
 
 const getDigestGithubMock = jest.fn();
 const getDigestGitlabMock = jest.fn();
+const getDigestGitMock = jest.fn();
 const getDigestBitbucketMock = jest.fn();
 jest.mock('./releases-direct', () => {
   return {
     GoDirectDatasource: jest.fn().mockImplementation(() => {
       return {
+        git: { getDigest: () => getDigestGitMock() },
         github: { getDigest: () => getDigestGithubMock() },
         gitlab: { getDigest: () => getDigestGitlabMock() },
         bitbucket: { getDigest: () => getDigestBitbucketMock() },
@@ -124,6 +126,19 @@ describe('modules/datasource/go/index', () => {
       getDigestGitlabMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
       const res = await datasource.getDigest(
         { packageName: 'gitlab.com/group/subgroup' },
+        null
+      );
+      expect(res).toBe('abcdefabcdefabcdefabcdef');
+    });
+
+    it('supports git digest', async () => {
+      httpMock
+        .scope('https://renovatebot.com/')
+        .get('/abc/def?go-get=1')
+        .reply(200, Fixtures.get('go-get-git-digest.html'));
+      getDigestGitMock.mockResolvedValue('abcdefabcdefabcdefabcdef');
+      const res = await datasource.getDigest(
+        { packageName: 'renovatebot.com/abc/def' },
         null
       );
       expect(res).toBe('abcdefabcdefabcdefabcdef');

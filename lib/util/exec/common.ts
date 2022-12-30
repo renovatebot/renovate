@@ -122,31 +122,30 @@ export function exec(cmd: string, opts: RawExecOptions): Promise<ExecResult> {
 
 function kill(cp: ChildProcess, signal: NodeJS.Signals): boolean {
   try {
-    // TODO: will be enabled in #16654
-    /**
-     * If `pid` is negative, but not `-1`, signal shall be sent to all processes
-     * (excluding an unspecified set of system processes),
-     * whose process group ID (pgid) is equal to the absolute value of pid,
-     * and for which the process has permission to send a signal.
-     */
-    // process.kill(-(cp.pid as number), signal);
-
-    // destroying stdio is needed for unref to work
-    // https://nodejs.org/api/child_process.html#subprocessunref
-    // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
-    cp.stderr?.destroy();
-    cp.stdout?.destroy();
-    cp.unref();
-    return cp.kill(signal);
+    if (cp.pid && process.env.RENOVATE_X_EXEC_GPID_HANDLE) {
+      /**
+       * If `pid` is negative, but not `-1`, signal shall be sent to all processes
+       * (excluding an unspecified set of system processes),
+       * whose process group ID (pgid) is equal to the absolute value of pid,
+       * and for which the process has permission to send a signal.
+       */
+      return process.kill(-cp.pid, signal);
+    } else {
+      // destroying stdio is needed for unref to work
+      // https://nodejs.org/api/child_process.html#subprocessunref
+      // https://github.com/nodejs/node/blob/4d5ff25a813fd18939c9f76b17e36291e3ea15c3/lib/child_process.js#L412-L426
+      cp.stderr?.destroy();
+      cp.stdout?.destroy();
+      cp.unref();
+      return cp.kill(signal);
+    }
   } catch (err) {
     // cp is a single node tree, therefore -pid is invalid as there is no such pgid,
-    // istanbul ignore next: will be covered once we use process.kill
     return false;
   }
 }
 
-// TODO: rename #16653
 export const rawExec: (
   cmd: string,
   opts: RawExecOptions
-) => Promise<ExecResult> = exec; // TODO: rename #16653
+) => Promise<ExecResult> = exec;

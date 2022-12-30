@@ -1,4 +1,4 @@
-import { defaultConfig } from '../../test/util';
+import { getConfig } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
@@ -8,7 +8,7 @@ import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 describe('config/secrets', () => {
   describe('validateConfigSecrets(config)', () => {
     it('works with default config', () => {
-      expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();
+      expect(() => validateConfigSecrets(getConfig())).not.toThrow();
     });
 
     it('returns if no secrets', () => {
@@ -46,7 +46,7 @@ describe('config/secrets', () => {
 
   describe('applySecretsToConfig(config)', () => {
     it('works with default config', () => {
-      expect(() => applySecretsToConfig(defaultConfig)).not.toThrow();
+      expect(() => applySecretsToConfig(getConfig())).not.toThrow();
     });
 
     it('throws if disallowed field is used', () => {

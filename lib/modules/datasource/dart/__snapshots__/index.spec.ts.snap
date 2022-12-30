@@ -2,6 +2,7 @@
 
 exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
 {
+  "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences/shared_preferences",
   "registryUrl": "https://pub.dartlang.org/",
   "releases": [
     {
@@ -181,6 +182,6 @@ exports[`modules/datasource/dart/index getReleases processes real data 1`] = `
       "version": "0.5.8",
     },
   ],
-  "sourceUrl": "http://example.com",
+  "sourceUrl": "https://github.com/flutter/plugins",
 }
 `;

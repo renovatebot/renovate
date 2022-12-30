@@ -79,4 +79,20 @@ describe('modules/versioning/hashicorp/index', () => {
       expect(res).toEqual(expected);
     }
   );
+
+  test.each`
+    currentValue | rangeStrategy | currentVersion | newVersion   | expected
+    ${'v0.14'}   | ${'replace'}  | ${'v0.14.2'}   | ${'v0.15.0'} | ${'v0.15'}
+  `(
+    'getNewValue("$currentValue", "$rangeStrategy", "$currentVersion", "$newVersion") === "$expected"',
+    ({ currentValue, rangeStrategy, currentVersion, newVersion, expected }) => {
+      const res = semver.getNewValue({
+        currentValue,
+        rangeStrategy,
+        currentVersion,
+        newVersion,
+      });
+      expect(res).toEqual(expected);
+    }
+  );
 });

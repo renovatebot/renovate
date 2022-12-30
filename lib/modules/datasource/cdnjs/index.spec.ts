@@ -13,10 +13,6 @@ const pathFor = (s: string): string =>
 
 describe('modules/datasource/cdnjs/index', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('throws for empty result', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, '}');
       await expect(

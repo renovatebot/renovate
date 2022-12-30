@@ -10,7 +10,7 @@ import { platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
-import { isOnboarded, onboardingPrExists } from './check';
+import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
 import { rebaseOnboardingBranch } from './rebase';
@@ -32,7 +32,8 @@ export async function checkOnboardingBranch(
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
-  if (await onboardingPrExists(config)) {
+  const onboardingPr = await getOnboardingPr(config);
+  if (onboardingPr) {
     logger.debug('Onboarding PR already exists');
     const commit = await rebaseOnboardingBranch(config);
     if (commit) {
@@ -44,8 +45,7 @@ export async function checkOnboardingBranch(
     // istanbul ignore if
     if (platform.refreshPr) {
       // TODO #7154
-      const onboardingPr = await platform.getBranchPr(config.onboardingBranch!);
-      await platform.refreshPr(onboardingPr!.number);
+      await platform.refreshPr(onboardingPr.number);
     }
   } else {
     logger.debug('Onboarding PR does not exist');

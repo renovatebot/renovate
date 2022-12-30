@@ -6,6 +6,7 @@ These branches will be created by Renovate only once you click their checkbox be
 
  - [ ] <!-- approve-branch=branchName1 -->pr1
  - [ ] <!-- approve-branch=branchName2 -->pr2
+ - [ ] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐
 
 ## Awaiting Schedule
 
@@ -14,12 +15,13 @@ These updates are awaiting their schedule. Click on a checkbox to get an update 
  - [ ] <!-- unschedule-branch=branchName3 -->pr3
  - [ ] <!-- unschedule-branch=branchName4 -->pr4
 
-## Rate Limited
+## Rate-Limited
 
-These updates are currently rate limited. Click on a checkbox below to force their creation now.
+These updates are currently rate-limited. Click on a checkbox below to force their creation now.
 
  - [ ] <!-- unlimit-branch=branchName5 -->pr5
  - [ ] <!-- unlimit-branch=branchName6 -->pr6
+ - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐
 
 ## Errored
 

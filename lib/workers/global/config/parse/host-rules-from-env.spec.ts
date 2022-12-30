@@ -6,7 +6,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       DOCKER_USERNAME: 'some-username',
       DOCKER_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       {
         hostType: 'docker',
         password: 'some-password',
@@ -19,7 +19,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     const envParam: NodeJS.ProcessEnv = {
       NPM_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'npm', password: 'some-password' },
     ]);
   });
@@ -30,7 +30,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       pypi_my_CUSTOM_HOST_passWORD: 'some-password',
     };
 
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { matchHost: 'github.com', token: 'some-token' },
       { matchHost: 'my.custom.host', password: 'some-password' },
     ]);
@@ -41,7 +41,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
       GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_USERNAME: 'some-user',
       GIT__TAGS_GITLAB_EXAMPLE__DOMAIN_NET_PASSWORD: 'some-password',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       {
         hostType: 'git-tags',
         matchHost: 'gitlab.example-domain.net',
@@ -55,7 +55,7 @@ describe('workers/global/config/parse/host-rules-from-env', () => {
     const envParam: NodeJS.ProcessEnv = {
       PYPI_TOKEN: 'some-token',
     };
-    expect(hostRulesFromEnv(envParam)).toMatchSnapshot([
+    expect(hostRulesFromEnv(envParam)).toMatchObject([
       { hostType: 'pypi', token: 'some-token' },
     ]);
   });

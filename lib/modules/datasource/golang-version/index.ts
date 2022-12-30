@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { isVersion, id as semverVersioningId } from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -24,10 +25,10 @@ export class GolangVersionDatasource extends Datasource {
   }
 
   override readonly defaultRegistryUrls = [
-    'https://raw.githubusercontent.com/golang/website/',
+    'https://raw.githubusercontent.com/golang/website',
   ];
 
-  override readonly customRegistrySupport = false;
+  override readonly customRegistrySupport = true;
 
   override readonly defaultVersioning = semverVersioningId;
 
@@ -35,14 +36,21 @@ export class GolangVersionDatasource extends Datasource {
   async getReleases({
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     const res: ReleaseResult = {
       homepage: 'https://go.dev/',
       sourceUrl: 'https://github.com/golang/go',
       releases: [],
     };
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const golangVersionsUrl = `${registryUrl}HEAD/internal/history/release.go`;
+
+    const golangVersionsUrl = joinUrlParts(
+      registryUrl,
+      '/HEAD/internal/history/release.go'
+    );
 
     const response = await this.http.get(golangVersionsUrl);
 

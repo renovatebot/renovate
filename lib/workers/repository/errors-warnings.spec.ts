@@ -2,6 +2,7 @@ import { RenovateConfig, getConfig } from '../../../test/util';
 import type { PackageFile } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
+  getDepWarningsOnboardingPR,
   getDepWarningsPR,
   getErrors,
   getWarnings,
@@ -49,7 +50,8 @@ describe('workers/repository/errors-warnings', () => {
       jest.resetAllMocks();
     });
 
-    it('returns pr warning text', () => {
+    it('returns 2 pr warnings text dependencyDashboard true', () => {
+      const dependencyDashboard = true;
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
@@ -82,19 +84,61 @@ describe('workers/repository/errors-warnings', () => {
         ],
       };
 
-      const res = getDepWarningsPR(packageFiles);
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
       expect(res).toMatchInlineSnapshot(`
         "
         ---
 
         ### ⚠ Dependency Lookup Warnings ⚠
 
-        Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+        Warnings were logged while processing this repo. Please check the Dependency Dashboard for more information.
 
-        -   \`Warning 1\`
-        -   \`Warning 2\`
+        "
+      `);
+    });
 
-        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+    it('returns 2 pr warnings text dependencyDashboard false', () => {
+      const dependencyDashboard = false;
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 2', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+
+      const res = getDepWarningsPR(packageFiles, dependencyDashboard);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        Warnings were logged while processing this repo. Please check the logs for more information.
 
         "
       `);
@@ -201,6 +245,58 @@ describe('workers/repository/errors-warnings', () => {
       config.errors = [];
       const res = getErrors(config);
       expect(res).toBe('');
+    });
+  });
+
+  describe('getDepWarningsOnboardingPR()', () => {
+    it('returns onboarding warning text', () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            packageFile: 'package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+              {},
+            ],
+          },
+          {
+            packageFile: 'backend/package.json',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 1', topic: '' }],
+              },
+            ],
+          },
+        ],
+        dockerfile: [
+          {
+            packageFile: 'Dockerfile',
+            deps: [
+              {
+                warnings: [{ message: 'Warning 2', topic: '' }],
+              },
+            ],
+          },
+        ],
+      };
+      const res = getDepWarningsOnboardingPR(packageFiles);
+      expect(res).toMatchInlineSnapshot(`
+        "
+        ---
+
+        ### ⚠ Dependency Lookup Warnings ⚠
+
+        Please correct - or verify that you can safely ignore - these lookup failures before you merge this PR.
+
+        -   \`Warning 1\`
+        -   \`Warning 2\`
+
+        Files affected: \`package.json\`, \`backend/package.json\`, \`Dockerfile\`
+
+        "
+      `);
     });
   });
 });

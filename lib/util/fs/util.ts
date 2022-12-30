@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 
 function assertBaseDir(path: string, baseDir: string): void {
   if (!path.startsWith(upath.resolve(baseDir))) {
-    logger.warn(
+    logger.debug(
       { path, baseDir },
       'Preventing access to file outside the base directory'
     );

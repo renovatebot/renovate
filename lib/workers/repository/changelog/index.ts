@@ -1,4 +1,4 @@
-import pMap from 'p-map';
+import * as p from '../../../util/promises';
 import {
   containsTemplates,
   exposedConfigOptions,
@@ -19,7 +19,7 @@ export async function embedChangelog(
 export async function embedChangelogs(
   branches: BranchUpgradeConfig[]
 ): Promise<void> {
-  await pMap(branches, embedChangelog, { concurrency: 10 });
+  await p.map(branches, embedChangelog, { concurrency: 10 });
 }
 
 export function needsChangelogs(

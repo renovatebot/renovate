@@ -18,6 +18,8 @@ const pyproject9toml = Fixtures.get('pyproject.9.toml');
 const pyproject11toml = Fixtures.get('pyproject.11.toml');
 const pyproject11tomlLock = Fixtures.get('pyproject.11.toml.lock');
 
+const pyproject12toml = Fixtures.get('pyproject.12.toml');
+
 describe('modules/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
@@ -65,6 +67,12 @@ describe('modules/manager/poetry/extract', () => {
       const res = await extractPackageFile(pyproject4toml, filename);
       expect(res).toMatchSnapshot();
       expect(res?.deps).toHaveLength(1);
+    });
+
+    it('can parse TOML v1 heterogeneous arrays', async () => {
+      const res = await extractPackageFile(pyproject12toml, filename);
+      expect(res).not.toBeNull();
+      expect(res?.deps).toHaveLength(2);
     });
 
     it('extracts registries', async () => {
@@ -130,6 +138,32 @@ describe('modules/manager/poetry/extract', () => {
           { depName: 'dep34', currentValue: '<2.0' },
         ],
       });
+    });
+
+    it('extracts dependencies from dependency groups', async () => {
+      const content =
+        '[tool.poetry.dependencies]\ndep = "^2.0"\n\n[tool.poetry.group.dev.dependencies]\ndev_dep = "^3.0"\n\n[tool.poetry.group.typing.dependencies]\ntyping_dep = "^4.0"';
+      const res = await extractPackageFile(content, filename);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '^2.0',
+          datasource: 'pypi',
+          depName: 'dep',
+          depType: 'dependencies',
+        },
+        {
+          currentValue: '^3.0',
+          datasource: 'pypi',
+          depName: 'dev_dep',
+          depType: 'dev',
+        },
+        {
+          currentValue: '^4.0',
+          datasource: 'pypi',
+          depName: 'typing_dep',
+          depType: 'typing',
+        },
+      ]);
     });
 
     it('resolves lockedVersions from the lockfile', async () => {
