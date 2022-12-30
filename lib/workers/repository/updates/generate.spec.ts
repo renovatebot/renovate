@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../test/util';
 import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
@@ -1212,8 +1213,7 @@ describe('workers/repository/updates/generate', () => {
         },
       ];
       const res = generateBranchConfig(branch);
-      expect(res.commitMessage).toBe(`
-
+      expect(res.commitMessage?.trim()).toBe(codeBlock`
         | datasource | package     | from  | to    |
         | ---------- | ----------- | ----- | ----- |
         | npm        | another-dep | 5.1.1 | 5.1.2 |
