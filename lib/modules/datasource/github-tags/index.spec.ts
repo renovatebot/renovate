@@ -122,6 +122,10 @@ describe('modules/datasource/github-tags/index', () => {
           hash: 'abc',
         },
       ]);
+      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+        { version: 'v1.0.0', releaseTimestamp: '2021-01-01', isStable: true },
+        { version: 'v2.0.0', releaseTimestamp: '2022-01-01', isStable: false },
+      ] as never);
 
       const res = await getPkgReleases({ datasource: github.id, depName });
 
@@ -132,11 +136,13 @@ describe('modules/datasource/github-tags/index', () => {
             gitRef: 'v1.0.0',
             version: 'v1.0.0',
             releaseTimestamp: '2021-01-01T00:00:00.000Z',
+            isStable: true,
           },
           {
             gitRef: 'v2.0.0',
             version: 'v2.0.0',
             releaseTimestamp: '2022-01-01T00:00:00.000Z',
+            isStable: false,
           },
         ],
 
