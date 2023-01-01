@@ -86,6 +86,12 @@ describe('modules/datasource/github-tags/index', () => {
       const res = await github.getDigest({ packageName }, 'v3.0.0');
       expect(res).toBeNull();
     });
+
+    it('returns null for error', async () => {
+      jest.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce('error');
+      const res = await github.getDigest({ packageName }, 'v3.0.0');
+      expect(res).toBeNull();
+    });
   });
 
   describe('getReleases', () => {
