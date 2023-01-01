@@ -158,4 +158,22 @@ describe('util/template/index', () => {
       expect(template.containsTemplates('{{body}}', ['logJSON'])).toBeFalse();
     });
   });
+
+  describe('percent encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeURIComponent "@fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('%40fsouza%2Fprettierd');
+    });
+
+    it('decodes values', () => {
+      const output = template.compile(
+        '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+  });
 });
