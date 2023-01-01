@@ -1,6 +1,7 @@
 // TODO: types (#7154)
 import hasha from 'hasha';
 import { logger } from '../../../logger';
+import { queryReleases } from '../../../util/github/graphql';
 import type {
   GithubDigestFile,
   GithubRestAsset,
@@ -10,7 +11,12 @@ import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 
 export const cacheNamespace = 'datasource-github-releases';
 
@@ -213,24 +219,21 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Return a dependency object containing sourceUrl string and releases array
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
-    const { packageName: repo, registryUrl } = config;
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
-    const res = await this.http.getJson<GithubRestRelease[]>(url, {
-      paginate: true,
-    });
-    const githubReleases = res.body;
-    const dependency: ReleaseResult = {
-      sourceUrl: getSourceUrl(repo, registryUrl),
-      releases: githubReleases
-        .filter(({ draft }) => draft !== true)
-        .map(({ tag_name, published_at, prerelease }) => ({
-          version: tag_name,
-          gitRef: tag_name,
-          releaseTimestamp: published_at,
-          isStable: prerelease ? false : undefined,
-        })),
+    const releasesResult = await queryReleases(config, this.http);
+    return {
+      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
+      releases: releasesResult.map((item) => {
+        const { version, releaseTimestamp, isStable } = item;
+        const result: Release = {
+          version,
+          gitRef: version,
+          releaseTimestamp,
+        };
+        if (isStable !== undefined) {
+          result.isStable = isStable;
+        }
+        return result;
+      }),
     };
-    return dependency;
   }
 }
