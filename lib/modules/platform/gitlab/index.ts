@@ -697,7 +697,9 @@ export function massageMarkdown(input: string): string {
   let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
     .replace(regEx(/PR/g), 'MR')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    // Strip unicode null characters as GitLab markdown does not permit them
+    .replace(regEx(/\u0000/g), "");
 
   if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(

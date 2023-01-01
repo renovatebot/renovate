@@ -2050,6 +2050,12 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(smartTruncate).toHaveBeenCalledTimes(1);
       expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
     });
+
+    it('strips invalid unicode null characters', async () => {
+      expect(
+        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
+      ).toBe("The source contains 'Ruby' at: 2.7.6.219");
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {
