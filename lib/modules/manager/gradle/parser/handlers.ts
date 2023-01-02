@@ -216,7 +216,6 @@ export function handlePlugin(ctx: Ctx): Ctx {
     depType: 'plugin',
     depName,
     packageName,
-    registryUrls: [REGISTRY_URLS.gradlePluginPortal],
     commitMessageTopic: `plugin ${depName}`,
     currentValue: pluginVersion[0].value,
     managerData: {
@@ -246,11 +245,22 @@ export function handlePlugin(ctx: Ctx): Ctx {
   return ctx;
 }
 
+function isPluginRegistry(ctx: Ctx): boolean {
+  if (ctx.tokenMap.registryScope) {
+    const registryScope = loadFromTokenMap(ctx, 'registryScope')[0].value;
+    return registryScope === 'pluginManagement';
+  }
+
+  return false;
+}
+
 export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   const registryName = loadFromTokenMap(ctx, 'registryUrl')[0].value;
-  ctx.depRegistryUrls.push(
-    REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS]
-  );
+
+  ctx.registryUrls.push({
+    registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
+    scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+  });
 
   return ctx;
 }
@@ -281,7 +291,10 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     try {
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
-        ctx.depRegistryUrls.push(registryUrl);
+        ctx.registryUrls.push({
+          registryUrl,
+          scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+        });
       }
     } catch (e) {
       // no-op
@@ -370,7 +383,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   ctx.deps.push(...matchResult.deps);
   ctx.globalVars = { ...ctx.globalVars, ...matchResult.vars };
-  ctx.depRegistryUrls.push(...matchResult.urls);
+  ctx.registryUrls.push(...matchResult.urls);
 
   return ctx;
 }

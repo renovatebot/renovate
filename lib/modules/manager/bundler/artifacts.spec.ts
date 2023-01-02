@@ -31,6 +31,8 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('./host-rules');
 
+process.env.CONTAINERBASE = 'true';
+
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
@@ -205,6 +207,38 @@ describe('modules/manager/bundler/artifacts', () => {
       ]);
     });
 
+    it('supports install mode', async () => {
+      GlobalConfig.set({
+        ...adminConfig,
+        binarySource: 'install',
+      });
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+      // bundler
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
+      });
+      const execSnapshots = mockExecAll();
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['Gemfile.lock'],
+      } as StatusResult);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock');
+      expect(
+        await updateArtifacts({
+          packageFileName: 'Gemfile',
+          updatedDeps: [{ depName: 'foo' }, { depName: 'bar' }],
+          newPackageFileContent: 'Updated Gemfile content',
+          config,
+        })
+      ).toEqual([updatedGemfileLock]);
+      expect(execSnapshots).toMatchObject([
+        { cmd: 'install-tool ruby 1.2.0' },
+        { cmd: 'install-tool bundler 2.3.5' },
+        { cmd: 'ruby --version' },
+        { cmd: 'bundler lock --update foo bar' },
+      ]);
+    });
+
     describe('Docker', () => {
       beforeEach(() => {
         GlobalConfig.set({
@@ -216,15 +250,9 @@ describe('modules/manager/bundler/artifacts', () => {
       it('.ruby-version', async () => {
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+        // bundler
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
-        });
-        datasource.getPkgReleases.mockResolvedValueOnce({
-          releases: [
-            { version: '1.0.0' },
-            { version: '1.2.0' },
-            { version: '1.3.0' },
-          ],
         });
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce({
@@ -240,10 +268,27 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:1.2.0' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.0' +
+              ' && ' +
+              'install-tool bundler 2.3.5' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -281,10 +326,27 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:latest' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:latest bash -l -c "install-tool bundler 3.2.1 && ruby --version && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.5' +
+              ' && ' +
+              'install-tool bundler 3.2.1' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -292,15 +354,17 @@ describe('modules/manager/bundler/artifacts', () => {
       it('invalid constraints options', async () => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
-        datasource.getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
-        });
+        // ruby
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '1.0.0' },
             { version: '1.2.0' },
             { version: '1.3.0' },
           ],
+        });
+        // bundler
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
         });
         const execSnapshots = mockExecAll();
         git.getRepoStatus.mockResolvedValueOnce({
@@ -322,10 +386,27 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:latest' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:latest bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.3.0' +
+              ' && ' +
+              'install-tool bundler 2.3.5' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -334,15 +415,9 @@ describe('modules/manager/bundler/artifacts', () => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+        // bundler
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
-        });
-        datasource.getPkgReleases.mockResolvedValueOnce({
-          releases: [
-            { version: '1.0.0' },
-            { version: '1.2.0' },
-            { version: '1.3.0' },
-          ],
         });
         bundlerHostRules.findAllAuthenticatable.mockReturnValue([
           {
@@ -370,10 +445,28 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:1.2.0' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e BUNDLE_GEMS__PRIVATE__COM ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.0' +
+              ' && ' +
+              'install-tool bundler 2.3.5' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -382,6 +475,7 @@ describe('modules/manager/bundler/artifacts', () => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+        // ruby
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '1.0.0' },
@@ -420,10 +514,29 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:1.2.0' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 1.2 && ruby --version && bundler config --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.0' +
+              ' && ' +
+              'install-tool bundler 1.2' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler config --local gems-private.com some-user:some-password' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -432,6 +545,7 @@ describe('modules/manager/bundler/artifacts', () => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         fs.readLocalFile.mockResolvedValueOnce('1.2.0');
+        // ruby
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '1.0.0' },
@@ -470,10 +584,29 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:1.2.0' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.1 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.0' +
+              ' && ' +
+              'install-tool bundler 2.1' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler config set --local gems-private.com some-user:some-password' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
@@ -482,15 +615,17 @@ describe('modules/manager/bundler/artifacts', () => {
         GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
         fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
         fs.readLocalFile.mockResolvedValueOnce('1.2.0');
-        datasource.getPkgReleases.mockResolvedValueOnce({
-          releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
-        });
+        // ruby
         datasource.getPkgReleases.mockResolvedValueOnce({
           releases: [
             { version: '1.0.0' },
             { version: '1.2.0' },
             { version: '1.3.0' },
           ],
+        });
+        // bundler
+        datasource.getPkgReleases.mockResolvedValueOnce({
+          releases: [{ version: '1.17.2' }, { version: '2.3.5' }],
         });
         bundlerHostRules.findAllAuthenticatable.mockReturnValue([
           {
@@ -518,10 +653,29 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/ruby:1.2.0' },
-          { cmd: 'docker ps --filter name=renovate_ruby -aq' },
+          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
-            cmd: 'docker run --rm --name=renovate_ruby --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e GEM_HOME -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" renovate/ruby:1.2.0 bash -l -c "install-tool bundler 2.3.5 && ruby --version && bundler config set --local gems-private.com some-user:some-password && bundler lock --update foo bar"',
+            cmd:
+              'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+              '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+              '-v "/tmp/cache":"/tmp/cache" ' +
+              '-e GEM_HOME ' +
+              '-e BUILDPACK_CACHE_DIR ' +
+              '-e CONTAINERBASE_CACHE_DIR ' +
+              '-w "/tmp/github/some/repo" ' +
+              'renovate/sidecar' +
+              ' bash -l -c "' +
+              'install-tool ruby 1.2.0' +
+              ' && ' +
+              'install-tool bundler 1.3.0' +
+              ' && ' +
+              'ruby --version' +
+              ' && ' +
+              'bundler config set --local gems-private.com some-user:some-password' +
+              ' && ' +
+              'bundler lock --update foo bar' +
+              '"',
           },
         ]);
       });
