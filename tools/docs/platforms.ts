@@ -1,10 +1,6 @@
 import { getPlatformList } from '../../lib/modules/platform';
 import { readFile, updateFile } from '../utils';
-import { replaceContent } from './utils';
-
-function getModuleLink(module: string, title: string): string {
-  return `[${title ?? module}](${module}/)`;
-}
+import { getModuleLink, replaceContent } from './utils';
 
 export async function generatePlatforms(dist: string): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
