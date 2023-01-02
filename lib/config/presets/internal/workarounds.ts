@@ -79,7 +79,7 @@ export const presets: Record<string, Preset> = {
     description: 'Limit Java runtime versions to LTS releases',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
+        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
         matchDatasources: ['docker', 'adoptium-java'],

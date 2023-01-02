@@ -10,8 +10,10 @@ import {
   usesGcv,
 } from './extract/consistent-versions-plugin';
 import { parseGradle, parseProps } from './parser';
+import { REGISTRY_URLS } from './parser/common';
 import type {
   GradleManagerData,
+  PackageRegistry,
   PackageVariables,
   VariableRegistry,
 } from './types';
@@ -26,6 +28,23 @@ import {
 
 const datasource = MavenDatasource.id;
 
+function getRegistryUrlsForDep(
+  packageRegistries: PackageRegistry[],
+  dep: PackageDependency<GradleManagerData>
+): string[] {
+  const scope = dep.depType === 'plugin' ? 'plugin' : 'dep';
+
+  const registryUrls = packageRegistries
+    .filter((item) => item.scope === scope)
+    .map((item) => item.registryUrl);
+
+  if (!registryUrls.length && scope === 'plugin') {
+    registryUrls.push(REGISTRY_URLS.gradlePluginPortal);
+  }
+
+  return [...new Set(registryUrls)];
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
@@ -33,7 +52,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const varRegistry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
-  const packageRegistries: string[] = [];
+  const packageRegistries: PackageRegistry[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   const fileContents = await getFileContentMap(packageFiles, true);
 
@@ -75,7 +94,11 @@ export async function extractAllPackageFiles(
           vars: gradleVars,
         } = parseGradle(content, vars, packageFile, fileContents);
         for (const url of urls) {
-          if (!packageRegistries.includes(url)) {
+          const registryAlreadyKnown = packageRegistries.some(
+            (item) =>
+              item.registryUrl === url.registryUrl && item.scope === url.scope
+          );
+          if (!registryAlreadyKnown) {
             packageRegistries.push(url);
           }
         }
@@ -114,9 +137,7 @@ export async function extractAllPackageFiles(
         };
       }
 
-      dep.registryUrls = [
-        ...new Set([...packageRegistries, ...(dep.registryUrls ?? [])]),
-      ];
+      dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
       if (!dep.depType) {
         dep.depType = key.startsWith('buildSrc')

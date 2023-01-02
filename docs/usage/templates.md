@@ -49,6 +49,16 @@ In the example above `baseDir` is the string you want to transform into a valid 
 
 Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
 
+### decodeURIComponent
+
+If you want to decode a percent-encoded string, use the built-in function `decodeURIComponent` like this:
+
+`{{{decodeURIComponent depName}}}`
+
+In the example above `depName` is the string you want to decode.
+
+Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to learn more.
+
 ### replace
 
 The `replace` helper replaces _all_ found strings with the replacement string.

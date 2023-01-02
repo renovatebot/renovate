@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { getChildEnv } from '../exec';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
+handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2)

@@ -242,11 +242,7 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depType: 'plugin',
-              registryUrls: [
-                'https://repo.maven.apache.org/maven2',
-                'https://example.com',
-                'https://plugins.gradle.org/m2/',
-              ],
+              registryUrls: ['https://plugins.gradle.org/m2/'],
             },
             {
               registryUrls: [
@@ -308,6 +304,65 @@ describe('modules/manager/gradle/extract', () => {
                 'https://repo.maven.apache.org/maven2',
                 'https://dummy.org/whatever/repository-build',
                 'https://dummy.org/whatever/baz',
+              ],
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('supports separate registry URLs for plugins', async () => {
+      const settingsFile = codeBlock`
+        pluginManagement {
+          repositories {
+            mavenLocal()
+            maven { url = "https://foo.bar/plugins" }
+          }
+        }
+      `;
+
+      const buildFile = codeBlock`
+        plugins {
+          id "foo.bar" version "1.2.3"
+        }
+        repositories {
+          maven { url = "https://foo.bar/deps" }
+          mavenCentral()
+        }
+        dependencies {
+          classpath "io.jsonwebtoken:jjwt-api:0.11.2"
+        }
+      `;
+
+      const fsMock = {
+        'build.gradle': buildFile,
+        'settings.gradle': settingsFile,
+      };
+      mockFs(fsMock);
+
+      const res = await extractAllPackageFiles(
+        {} as ExtractConfig,
+        Object.keys(fsMock)
+      );
+
+      expect(res).toMatchObject([
+        {
+          packageFile: 'settings.gradle',
+          deps: [],
+        },
+        {
+          packageFile: 'build.gradle',
+          deps: [
+            {
+              depName: 'foo.bar',
+              depType: 'plugin',
+              registryUrls: ['https://foo.bar/plugins'],
+            },
+            {
+              depName: 'io.jsonwebtoken:jjwt-api',
+              registryUrls: [
+                'https://foo.bar/deps',
+                'https://repo.maven.apache.org/maven2',
               ],
             },
           ],
