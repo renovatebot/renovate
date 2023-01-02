@@ -1013,7 +1013,7 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await p.all(
+    newReviewerIDs = (await p.all(
       newReviewers.map((r) => async () => {
         try {
           return [await getUserID(r)]
