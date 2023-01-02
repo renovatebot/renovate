@@ -163,6 +163,7 @@ Supported tools for dynamic install are:
 - `flux`
 - `golang`
 - `gradle-wrapper`
+- `helm`
 - `jb`
 - `jsonnet-bundler`
 - `lerna`

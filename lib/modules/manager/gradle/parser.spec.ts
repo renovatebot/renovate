@@ -366,7 +366,7 @@ describe('modules/manager/gradle/parser', () => {
       `('$accessor', ({ accessor }) => {
         const input = `
           baz = "1.2.3"
-          api("foo:bar:$\{${String(accessor)}("baz")}")
+          api("foo:bar:$\{${String(accessor)}("baz") as String}")
         `;
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([
@@ -545,7 +545,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'jcenter()'}                                 | ${REGISTRY_URLS.jcenter}
       `('$input', ({ input, output }) => {
         const { urls } = parseGradle(input);
-        expect(urls).toStrictEqual([output].filter(Boolean));
+        expect(urls).toMatchObject([{ registryUrl: output }]);
       });
     });
 
@@ -562,6 +562,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}                       | ${'maven(url = uri("https://foo.bar/baz"))'}                     | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven(uri("https://foo.bar/baz"))'}                           | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven(uri("${base}/baz"))'}                                   | ${'https://foo.bar/baz'}
+        ${'base="https://foo.bar"'} | ${'maven(uri(property("base")))'}                                | ${'https://foo.bar'}
         ${'base="https://foo.bar"'} | ${'maven(uri(base))'}                                            | ${'https://foo.bar'}
         ${''}                       | ${'maven(uri(["https://foo.bar/baz"]))'}                         | ${null}
         ${''}                       | ${'maven { ["https://foo.bar/baz"] }'}                           | ${null}
@@ -571,6 +572,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven { url uri("${base}/baz") }'}                            | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven { url = "https://foo.bar/baz" }'}                       | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url = "${base}/baz" }'}                               | ${'https://foo.bar/baz'}
+        ${'base="https://foo.bar"'} | ${'maven { url = property("base") }'}                            | ${'https://foo.bar'}
         ${'base="https://foo.bar"'} | ${'maven { url = base }'}                                        | ${'https://foo.bar'}
         ${''}                       | ${'maven { url = uri("https://foo.bar/baz") }'}                  | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { url = uri("${base}/baz") }'}                          | ${'https://foo.bar/baz'}
@@ -579,18 +581,70 @@ describe('modules/manager/gradle/parser', () => {
         ${'base="https://foo.bar"'} | ${'maven { name "baz"\nurl = "${base}/${name}" }'}               | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { name = "baz"\nurl = "${base}/${name}" }'}             | ${'https://foo.bar/baz'}
         ${'some="baz"'}             | ${'maven { name = "${some}"\nurl = "https://foo.bar/${name}" }'} | ${'https://foo.bar/baz'}
+        ${'some="foo.bar/baz"'}     | ${'maven { name = property("some")\nurl = "https://${name}" }'}  | ${'https://foo.bar/baz'}
         ${'some="baz"'}             | ${'maven { name = some\nurl = "https://foo.bar/${name}" }'}      | ${'https://foo.bar/baz'}
         ${''}                       | ${'maven { setUrl("https://foo.bar/baz") }'}                     | ${'https://foo.bar/baz'}
+        ${''}                       | ${'maven { setUrl(uri("https://foo.bar/baz")) }'}                | ${'https://foo.bar/baz'}
         ${'base="https://foo.bar"'} | ${'maven { setUrl("${base}/baz") }'}                             | ${'https://foo.bar/baz'}
+        ${'base="https://foo.bar"'} | ${'maven { setUrl(project.property("base")) }'}                  | ${'https://foo.bar'}
         ${'base="https://foo.bar"'} | ${'maven { setUrl(base) }'}                                      | ${'https://foo.bar'}
         ${''}                       | ${'maven { setUrl(["https://foo.bar/baz"]) }'}                   | ${null}
         ${''}                       | ${'maven { setUrl("foo", "bar") }'}                              | ${null}
         ${'base="https://foo.bar"'} | ${'publishing { repositories { maven("${base}/baz") } }'}        | ${null}
       `('$def | $input', ({ def, input, url }) => {
-        const expected = [url].filter(Boolean);
+        const expected = url ? [{ registryUrl: url }] : [];
         const { urls } = parseGradle([def, input].join('\n'));
-        expect(urls).toStrictEqual(expected);
+        expect(urls).toMatchObject(expected);
       });
+    });
+
+    it('pluginManagement', () => {
+      const input = codeBlock`
+          pluginManagement {
+            def fooVersion = "1.2.3"
+            repositories {
+              mavenLocal()
+              maven { url = "https://foo.bar/plugins" }
+              gradlePluginPortal()
+            }
+            plugins {
+              id("foo.bar") version "$fooVersion"
+            }
+          }
+          dependencyResolutionManagement {
+            repositories {
+              maven { url = "https://foo.bar/deps" }
+              mavenCentral()
+            }
+          }
+        `;
+
+      const { deps, urls } = parseGradle(input);
+      expect(deps).toMatchObject([
+        {
+          depType: 'plugin',
+          depName: 'foo.bar',
+          currentValue: '1.2.3',
+        },
+      ]);
+      expect(urls).toMatchObject([
+        {
+          registryUrl: 'https://foo.bar/plugins',
+          scope: 'plugin',
+        },
+        {
+          registryUrl: REGISTRY_URLS.gradlePluginPortal,
+          scope: 'plugin',
+        },
+        {
+          registryUrl: 'https://foo.bar/deps',
+          scope: 'dep',
+        },
+        {
+          registryUrl: REGISTRY_URLS.mavenCentral,
+          scope: 'dep',
+        },
+      ]);
     });
   });
 

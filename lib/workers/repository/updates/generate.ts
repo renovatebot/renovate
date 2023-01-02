@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
@@ -8,6 +7,7 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
@@ -387,10 +387,21 @@ export function generateBranchConfig(
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
+
   if (tableRows.length) {
-    let table: string[][] = [];
+    const table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    table = table.concat(tableRows!);
+
+    const seenRows = new Set<string>();
+
+    for (const row of tableRows) {
+      const key = safeStringify(row);
+      if (seenRows.has(key)) {
+        continue;
+      }
+      seenRows.add(key);
+      table.push(row);
+    }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;

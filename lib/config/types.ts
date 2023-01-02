@@ -301,9 +301,13 @@ export interface PackageRule
   matchManagers?: string | string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
+  matchDepNames?: string[];
+  matchDepPatterns?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  excludeDepNames?: string[];
+  excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
