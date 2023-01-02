@@ -1022,7 +1022,7 @@ export async function addReviewers(
           return getMemberUserIDs(r)
         }
       }),
-    ).flat();
+    )).flat();
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
