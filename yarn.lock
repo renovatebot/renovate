@@ -2449,6 +2449,7 @@
 
 "@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.5":
   version "0.0.5"
+  uid "1923e2e2776549cb25a2c6ea09915ee31bff6d05"
   resolved "https://github.com/renovatebot/eslint-plugin#1923e2e2776549cb25a2c6ea09915ee31bff6d05"
 
 "@renovatebot/osv-offline-db@1.0.1":
