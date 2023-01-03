@@ -1,4 +1,4 @@
-import { lang, query as q } from 'good-enough-parser';
+import { lang as l, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -10,6 +10,7 @@ import {
 } from '../../datasource/sbt-plugin';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
+import { lang } from './scala';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -32,7 +33,7 @@ interface Ctx {
   groupName?: string;
 }
 
-const scala = lang.createLang('scala');
+const scala = new l.Language(lang);
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
@@ -149,6 +150,13 @@ const versionedDependencyMatch = groupIdMatch
   .op('%')
   .join(versionMatch);
 
+const crossDependencyMatch = groupIdMatch
+  .op('%%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
 function depHandler(ctx: Ctx): Ctx {
   const {
     scalaVersion,
@@ -200,7 +208,7 @@ function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
 
 const sbtPackageMatch = q
   .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
-  .alt(simpleDependencyMatch, versionedDependencyMatch)
+  .alt(crossDependencyMatch, simpleDependencyMatch, versionedDependencyMatch)
   .opt(
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),
