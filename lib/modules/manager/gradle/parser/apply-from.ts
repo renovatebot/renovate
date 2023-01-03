@@ -3,6 +3,7 @@ import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qConcatExpr,
   qPropertyAccessIdentifier,
   qTemplateString,
   qVariableAccessIdentifier,
@@ -10,16 +11,16 @@ import {
 } from './common';
 import { handleApplyFrom } from './handlers';
 
-const qFilePath = q.alt(
+const qFilePath = qConcatExpr(
   qTemplateString,
   qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 );
 
+// apply from: 'foo.gradle'
+// apply(from = property("foo"))
 const qApplyFromFile = q
   .alt(
-    qTemplateString, // apply from: 'foo.gradle'
-    qPropertyAccessIdentifier, // apply(from = property("foo"))
     q
       .alt(
         q
@@ -40,7 +41,8 @@ const qApplyFromFile = q
           )
           .join(qFilePath)
           .end(),
-      })
+      }),
+    qFilePath
   )
   .handler((ctx) => storeInTokenMap(ctx, 'scriptFile'));
 
