@@ -17,7 +17,6 @@ import {
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
 import type {
   UpdateArtifact,
@@ -146,8 +145,6 @@ export async function updateArtifacts(
           // TODO: fix me, hostrules can missing all auth
           const creds = getAuthenticationHeaderValue(hostRule);
           authCommands.push(`${hostRule.resolvedHost} ${creds}`);
-          // sanitize the authentication
-          addSecretForSanitizing(creds);
         }
         return authCommands;
       },
