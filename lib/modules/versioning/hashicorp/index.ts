@@ -2,6 +2,7 @@ import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
+import { hashicorp2npm, npm2hashicorp } from './convertor';
 
 export const id = 'hashicorp';
 export const displayName = 'Hashicorp';
@@ -16,17 +17,20 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-function hashicorp2npm(input: string): string {
-  // The only case incompatible with semver is a "short" ~>, e.g. ~> 1.2
-  return input.replace(regEx(/~>(\s*\d+\.\d+$)/), '^$1').replace(',', '');
-}
-
 function isLessThanRange(version: string, range: string): boolean {
   return !!npm.isLessThanRange?.(hashicorp2npm(version), hashicorp2npm(range));
 }
 
-export const isValid = (input: string): boolean =>
-  !!input && npm.isValid(hashicorp2npm(input));
+export const isValid = (input: string): boolean => {
+  if (input) {
+    try {
+      return npm.isValid(hashicorp2npm(input));
+    } catch (err) {
+      return false;
+    }
+  }
+  return false;
+};
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
@@ -82,17 +86,17 @@ function getNewValue({
     }
   }
   let npmNewVersion = npm.getNewValue({
-    currentValue,
+    currentValue: hashicorp2npm(currentValue),
     rangeStrategy,
-    currentVersion,
-    newVersion,
+    currentVersion:
+      currentVersion === undefined ? undefined : hashicorp2npm(currentVersion),
+    newVersion: hashicorp2npm(newVersion),
   });
-  if (
-    npmNewVersion &&
-    currentValue.startsWith('v') &&
-    !npmNewVersion.startsWith('v')
-  ) {
-    npmNewVersion = `v${npmNewVersion}`;
+  if (npmNewVersion) {
+    npmNewVersion = npm2hashicorp(npmNewVersion);
+    if (currentValue.startsWith('v') && !npmNewVersion.startsWith('v')) {
+      npmNewVersion = `v${npmNewVersion}`;
+    }
   }
   return npmNewVersion;
 }
