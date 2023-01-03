@@ -1013,16 +1013,18 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = (await p.all(
-      newReviewers.map((r) => async () => {
-        try {
-          return [await getUserID(r)]
-        } catch (err) {
-          // Unable to fetch userId, try resolve as a group
-          return getMemberUserIDs(r)
-        }
-      }),
-    )).flat();
+    newReviewerIDs = (
+      await p.all(
+        newReviewers.map((r) => async () => {
+          try {
+            return [await getUserID(r)];
+          } catch (err) {
+            // Unable to fetch userId, try resolve as a group
+            return getMemberUserIDs(r);
+          }
+        })
+      )
+    ).flat();
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
@@ -1030,7 +1032,7 @@ export async function addReviewers(
 
   // Multiple groups may have the same members, so
   // filter out non-distinct values
-  newReviewerIDs = [...new Set(newReviewerIDs)]
+  newReviewerIDs = [...new Set(newReviewerIDs)];
 
   try {
     await updateMR(config.repository, iid, {

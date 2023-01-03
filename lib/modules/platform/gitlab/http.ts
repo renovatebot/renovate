@@ -12,8 +12,10 @@ export async function getUserID(username: string): Promise<number> {
 
 export async function getMemberUserIDs(group: string): Promise<number[]> {
   const groupEncoded = encodeURIComponent(group);
-  const members = (await gitlabApi.getJson<GitLabUser[]>(`groups/${groupEncoded}/members`)).body;
-  return members.map((u) => u.id)
+  const members = (
+    await gitlabApi.getJson<GitLabUser[]>(`groups/${groupEncoded}/members`)
+  ).body;
+  return members.map((u) => u.id);
 }
 
 export async function isUserBusy(user: string): Promise<boolean> {
