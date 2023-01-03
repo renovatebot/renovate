@@ -1321,6 +1321,18 @@ For example, consider this config:
 
 It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
+## ignoreReviewers
+
+List users that should be ignored when the Renovate determines whether the reviewers were already assigned or not. This is useful if you are using renovate-approve.
+By default in case of PR commit status checks are failing, reviewers are not assigned, because PR already contains one `renovate-approve`
+
+```json
+{
+  "reviewers": ["foo"],
+  "ignoreReviewers": ["renovate-approve"]
+}
+```
+
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.

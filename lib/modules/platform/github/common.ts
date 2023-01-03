@@ -39,6 +39,9 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
 
   if (pr.requested_reviewers) {
     result.hasReviewers = true;
+    result.reviewers = pr.requested_reviewers
+      .map(({ login }) => login)
+      .filter<string>(is.nonEmptyString);
   }
 
   if (pr.created_at) {

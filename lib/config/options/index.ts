@@ -1882,6 +1882,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'ignoreReviewers',
+    description:
+      'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
+    type: 'array',
+    subType: 'string',
+  },
+  {
     name: 'reviewers',
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',

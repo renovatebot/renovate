@@ -281,9 +281,23 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
+
+      const hasNotIgnoredReviewers = (pr: Pr): boolean => {
+        if (
+          is.nonEmptyArray(config.ignoreReviewers) &&
+          is.nonEmptyArray(pr.reviewers)
+        ) {
+          return (
+            pr.reviewers.filter(
+              (reviewer) => !config.ignoreReviewers!.includes(reviewer)
+            ).length > 0
+          );
+        }
+        return !!pr.hasReviewers;
+      };
       if (
         !existingPr.hasAssignees &&
-        !existingPr.hasReviewers &&
+        !hasNotIgnoredReviewers(existingPr) &&
         config.automerge &&
         !config.assignAutomerge &&
         (await getBranchStatus()) === 'red'
