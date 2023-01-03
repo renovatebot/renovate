@@ -19,7 +19,11 @@ import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { isValid } from '../../versioning/ruby';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import { getBundlerConstraint, getRubyConstraint } from './common';
 import {
   findAllAuthenticatable,
@@ -27,6 +31,26 @@ import {
 } from './host-rules';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
+
+export function buildArgs(config: UpdateArtifactsConfig): string[] {
+  const args: string[] = [];
+  // --major is the default and does not need to be handled separately.
+  switch (config.updateType) {
+    case 'patch':
+      args.push('--patch', '--strict');
+      break;
+    case 'minor':
+      args.push('--minor', '--strict');
+      break;
+  }
+
+  if (config.postUpdateOptions?.includes('bundlerConservative')) {
+    args.push('--conservative');
+  }
+
+  args.push('--update');
+  return args;
+}
 
 function buildBundleHostVariable(hostRule: HostRule): Record<string, string> {
   if (!hostRule.resolvedHost || hostRule.resolvedHost.includes('-')) {
@@ -81,11 +105,7 @@ export async function updateArtifacts(
     return null;
   }
 
-  const args = [
-    config.postUpdateOptions?.includes('bundlerConservative') &&
-      '--conservative',
-    '--update',
-  ].filter(is.nonEmptyString);
+  const args = buildArgs(config);
 
   const updatedDepNames = updatedDeps
     .map(({ depName }) => depName)
