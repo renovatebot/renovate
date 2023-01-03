@@ -35,6 +35,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'!=4.0'}              | ${false}
     ${'>=4.1'}              | ${true}
     ${'<=4.1.2'}            | ${true}
+    ${''}                   | ${false}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     const res = !!semver.isValid(input);
     expect(res).toBe(expected);

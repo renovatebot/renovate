@@ -5,7 +5,7 @@ export function hashicorp2npm(input: string): string {
     .split(',')
     .map((single) => {
       const r = single.match(
-        regEx(/(|=|!=|>|<|>=|<=|~>)\s*((\d+)(\.\d+){0,2}[\w-+]*)/)
+        regEx(/^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*)\s*$/)
       );
       if (!r) {
         throw new Error('invalid hashicorp constraint');
@@ -42,7 +42,7 @@ export function npm2hashicorp(input: string): string {
     .split(' ')
     .map((single) => {
       const r = single.match(
-        regEx(/(|>|<|>=|<=|~|\^)((\d+)(\.\d+){0,2}[\w-]*)/)
+        regEx(/^(|>|<|>=|<=|~|\^)((\d+)(\.\d+){0,2}[\w-]*)$/)
       );
       if (!r) {
         throw new Error('invalid npm constraint');
