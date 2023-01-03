@@ -263,6 +263,7 @@ const patternGroups = {
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 

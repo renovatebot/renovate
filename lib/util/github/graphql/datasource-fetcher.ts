@@ -41,17 +41,6 @@ export class GithubGraphqlDatasourceFetcher<
   GraphqlItem,
   ResultItem extends GithubDatasourceItem
 > {
-  static prepareQuery(payloadQuery: string): string {
-    return `
-      query($owner: String!, $name: String!, $cursor: String, $count: Int!) {
-        repository(owner: $owner, name: $name) {
-          isRepoPrivate: isPrivate
-          payload: ${payloadQuery}
-        }
-      }
-    `;
-  }
-
   static async query<T, U extends GithubDatasourceItem>(
     config: GithubPackageConfig,
     http: GithubHttp,

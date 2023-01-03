@@ -10,6 +10,7 @@ import { qVersionCatalogs } from './parser/version-catalogs';
 import type {
   Ctx,
   GradleManagerData,
+  PackageRegistry,
   PackageVariables,
   ParseGradleResult,
 } from './types';
@@ -26,7 +27,7 @@ export function parseGradle(
 ): ParseGradleResult {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
-  const urls: string[] = [];
+  const urls: PackageRegistry[] = [];
 
   const query = q.tree<Ctx>({
     type: 'root-tree',
@@ -49,7 +50,7 @@ export function parseGradle(
 
     globalVars: initVars,
     deps: [],
-    depRegistryUrls: [],
+    registryUrls: [],
 
     varTokens: [],
     tmpTokenStore: {},
@@ -59,7 +60,7 @@ export function parseGradle(
   if (parsedResult) {
     deps.push(...parsedResult.deps);
     vars = { ...vars, ...parsedResult.globalVars };
-    urls.push(...parsedResult.depRegistryUrls);
+    urls.push(...parsedResult.registryUrls);
   }
 
   return { deps, urls, vars };

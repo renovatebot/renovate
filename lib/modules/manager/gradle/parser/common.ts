@@ -166,7 +166,8 @@ export const qPropertyAccessIdentifier = q
     startsWith: '(',
     endsWith: ')',
     search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
-  });
+  })
+  .opt(q.sym<Ctx>('as').sym('String'));
 
 // "foo${bar}baz"
 export const qTemplateString = q

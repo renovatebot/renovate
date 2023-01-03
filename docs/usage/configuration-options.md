@@ -1421,6 +1421,7 @@ Supported lock files are:
 - `poetry.lock`
 - `Cargo.lock`
 - `jsonnetfile.lock.json`
+- `pubspec.lock`
 
 Others may be added via feature request.
 
@@ -1606,6 +1607,10 @@ Use the syntax `!/ /` like the following:
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
+
+### excludeDepNames
+
+### excludeDepPatterns
 
 ### excludePackageNames
 
@@ -1837,6 +1842,10 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchDepNames
+
+### matchDepPatterns
 
 ### matchPackageNames
 
