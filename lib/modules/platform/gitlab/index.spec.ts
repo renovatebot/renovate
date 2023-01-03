@@ -1118,6 +1118,8 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someuser')
           .reply(200, [{ id: 10 }])
           .get('/api/v4/users?username=someotheruser')
+          .reply(404)
+          .get('/api/v4/groups/someotheruser/members')
           .reply(404);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
