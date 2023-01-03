@@ -10,6 +10,12 @@ import {
 } from './common';
 import { handleApplyFrom } from './handlers';
 
+const qFilePath = q.alt(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+);
+
 const qApplyFromFile = q
   .alt(
     qTemplateString, // apply from: 'foo.gradle'
@@ -28,20 +34,11 @@ const qApplyFromFile = q
         search: q
           .begin<Ctx>()
           .opt(
-            q
-              .alt<Ctx>(
-                qTemplateString,
-                qPropertyAccessIdentifier,
-                qVariableAccessIdentifier
-              )
+            qFilePath
               .op(',')
               .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
           )
-          .alt(
-            qTemplateString,
-            qPropertyAccessIdentifier,
-            qVariableAccessIdentifier
-          )
+          .join(qFilePath)
           .end(),
       })
   )
