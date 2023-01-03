@@ -50,7 +50,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getUserID, getMemberUserIDs, gitlabApi, isUserBusy } from './http';
+import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
