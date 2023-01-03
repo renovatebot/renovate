@@ -319,6 +319,8 @@ describe('modules/manager/gradle/parser', () => {
         input                          | output
         ${'"foo:bar:1.2.3"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'"foo:bar:1.2.3@zip"'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3', dataType: 'zip' }}
+        ${'"foo:bar1:1"'}              | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 10 } }}
+        ${'"foo:bar:x86@x86"'}         | ${{ depName: 'foo:bar', currentValue: 'x86', managerData: { fileReplacePosition: 9 } }}
         ${'foo.bar = "foo:bar:1.2.3"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
@@ -335,6 +337,8 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                   | ${'"foo:bar:$baz"'}                    | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'foo.bar = "1.2.3"'}               | ${'"foo:bar:$foo.bar"'}                | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'foo.bar' }}
         ${'foo = "1.2.3"'}                   | ${'"foo:bar_$foo:4.5.6"'}              | ${{ depName: 'foo:bar_1.2.3', managerData: { fileReplacePosition: 28 } }}
+        ${'foo = "bar"'}                     | ${'"foo:${foo}1:1"'}                   | ${{ depName: 'foo:bar1', currentValue: '1', managerData: { fileReplacePosition: 25 } }}
+        ${'bar = "bar:1.2.3"'}               | ${'"foo:$bar"'}                        | ${{ depName: 'foo:bar', currentValue: '1.2.3', skipReason: 'contains-variable' }}
         ${'baz = "1.2.3"'}                   | ${'foobar = "foo:bar:$baz"'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'foo = "${bar}"; baz = "1.2.3"'}   | ${'"foo:bar:${baz}"'}                  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext[\'baz\']}"'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
