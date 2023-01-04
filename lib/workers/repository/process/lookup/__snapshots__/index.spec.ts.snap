@@ -581,7 +581,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
   "fixedVersion": "8.1",
   "homepage": undefined,
   "isSingleVersion": true,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
@@ -598,6 +598,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
       "newMinor": 0,
       "newValue": "9.0",
       "newVersion": "9.0",
+      "registryUrl": "https://other.registry",
       "updateType": "major",
     },
   ],
