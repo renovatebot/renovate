@@ -1426,7 +1426,7 @@ Supported lock files are:
 - `poetry.lock`
 - `pyproject.toml`
 - `Chart.lock`
-- `requirements.txt` // pipenv lockfile?
+- `requirements.txt`
 - `yarn.lock`
 
 Others may be added via feature request.
