@@ -1,5 +1,13 @@
 import { regEx } from '../../../util/regex';
 
+/**
+ * This can convert most hashicorp ranges to valid npm syntax
+ * The `!=` syntax is currently unsupported as there is no direct
+ * equivalent in npm and isn't widely used
+ * Also prerelease syntax is less well-defined for hashicorp and will
+ * cause issues if it is not semvar compatible as no attempts to convert it
+ * are made
+ */
 export function hashicorp2npm(input: string): string {
   return input
     .split(',')
@@ -37,6 +45,11 @@ export function hashicorp2npm(input: string): string {
     .join(' ');
 }
 
+/**
+ * This can convert a limited set of npm range syntax to hashicorp,
+ * it supports all the syntax that hashicorp2npm can output
+ * It cannot handle `*`, `1.x.x`, range with `-`, `||`
+ */
 export function npm2hashicorp(input: string): string {
   return input
     .split(' ')
