@@ -1,4 +1,4 @@
-import { lexer, query as q } from 'good-enough-parser';
+import { lexer, parser, query as q } from 'good-enough-parser';
 import type { SeqBuilder } from 'good-enough-parser/dist/cjs/query/builder';
 import { regEx } from '../../../../util/regex';
 import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
@@ -219,6 +219,6 @@ export const qTemplateString = q
 // foo = "bar"
 // foo + foo + "${foo}" + "foo" => "barbarbarfoo"
 export const qConcatExpr = (
-  ...matchers: q.QueryBuilder<Ctx>[]
-): SeqBuilder<Ctx> =>
+  ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
+): SeqBuilder<Ctx, parser.Node> =>
   q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
