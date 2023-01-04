@@ -42,14 +42,14 @@ describe('modules/versioning/hashicorp/convertor', () => {
 
   // These are non-reflective cases for npm2hashicorp
   test.each`
-    hashicorp             | npm
-    ${'~> 4.0'}           | ${'^4'}
-    ${'~> 4.0'}           | ${'^4.0.0'}
-    ${'~> 4.1'}           | ${'^4.1.0'}
-    ${'~> 4.1, >= 4.1.1'} | ${'^4.1.1'}
-    ${'~> 4.0'}           | ${'~4'}
-    ${'~> 4.0.0'}         | ${'~4.0'}
-    ${'~> 4.1.0'}         | ${'~4.1'}
+    hashicorp     | npm
+    ${'~> 4.0'}   | ${'^4'}
+    ${'~> 4.0'}   | ${'^4.0.0'}
+    ${'~> 4.1'}   | ${'^4.1.0'}
+    ${'~> 4.1'}   | ${'^4.1.1'}
+    ${'~> 4.0'}   | ${'~4'}
+    ${'~> 4.0.0'} | ${'~4.0'}
+    ${'~> 4.1.0'} | ${'~4.1'}
   `('npm2hashicorp("$npm") === $hashicorp', ({ hashicorp, npm }) => {
     expect(npm2hashicorp(npm)).toBe(hashicorp);
   });

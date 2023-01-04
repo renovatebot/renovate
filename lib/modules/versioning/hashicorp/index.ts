@@ -1,5 +1,4 @@
 import type { RangeStrategy } from '../../../types/versioning';
-import { regEx } from '../../../util/regex';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { hashicorp2npm, npm2hashicorp } from './convertor';
@@ -18,7 +17,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
 ];
 
 function isLessThanRange(version: string, range: string): boolean {
-  return !!npm.isLessThanRange?.(hashicorp2npm(version), hashicorp2npm(range));
+  return !!npm.isLessThanRange?.(version, hashicorp2npm(range));
 }
 
 export const isValid = (input: string): boolean => {
@@ -33,26 +32,20 @@ export const isValid = (input: string): boolean => {
 };
 
 const matches = (version: string, range: string): boolean =>
-  npm.matches(hashicorp2npm(version), hashicorp2npm(range));
+  npm.matches(version, hashicorp2npm(range));
 
 function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.getSatisfyingVersion(
-    versions.map(hashicorp2npm),
-    hashicorp2npm(range)
-  );
+  return npm.getSatisfyingVersion(versions, hashicorp2npm(range));
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.minSatisfyingVersion(
-    versions.map(hashicorp2npm),
-    hashicorp2npm(range)
-  );
+  return npm.minSatisfyingVersion(versions, hashicorp2npm(range));
 }
 
 function getNewValue({
@@ -61,36 +54,11 @@ function getNewValue({
   currentVersion,
   newVersion,
 }: NewValueConfig): string | null {
-  if (['replace', 'update-lockfile'].includes(rangeStrategy)) {
-    const minor = npm.getMinor(newVersion);
-    const major = npm.getMajor(newVersion);
-    if (regEx(/~>\s*0\.\d+/).test(currentValue) && major === 0 && minor) {
-      const testFullVersion = regEx(/(~>\s*0\.)(\d+)\.\d$/);
-      let replaceValue = '';
-      if (testFullVersion.test(currentValue)) {
-        replaceValue = `$<prefix>${minor}.0`;
-      } else {
-        replaceValue = `$<prefix>${minor}$<suffix>`;
-      }
-      return currentValue.replace(
-        regEx(`(?<prefix>~>\\s*0\\.)\\d+(?<suffix>.*)$`),
-        replaceValue
-      );
-    }
-    // handle special ~> 1.2 case
-    if (major && regEx(/(~>\s*)\d+\.\d+$/).test(currentValue)) {
-      return currentValue.replace(
-        regEx(`(?<prefix>~>\\s*)\\d+\\.\\d+$`),
-        `$<prefix>${major}.0`
-      );
-    }
-  }
   let npmNewVersion = npm.getNewValue({
     currentValue: hashicorp2npm(currentValue),
     rangeStrategy,
-    currentVersion:
-      currentVersion === undefined ? undefined : hashicorp2npm(currentVersion),
-    newVersion: hashicorp2npm(newVersion),
+    currentVersion,
+    newVersion,
   });
   if (npmNewVersion) {
     npmNewVersion = npm2hashicorp(npmNewVersion);

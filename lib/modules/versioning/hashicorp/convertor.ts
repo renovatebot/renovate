@@ -77,7 +77,9 @@ export function npm2hashicorp(input: string): string {
           }
           const nonZero = version.match(regEx(/^(\d+\.\d+)\.\d+$/));
           if (nonZero) {
-            return `~> ${nonZero[1]}, >= ${version}`;
+            // not including`>= ${version}`, which makes this less accurate
+            // but makes the results cleaner
+            return `~> ${nonZero[1]}`;
           }
           return `~> ${version}`;
         }
