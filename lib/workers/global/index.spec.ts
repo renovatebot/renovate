@@ -6,6 +6,7 @@ import * as _presets from '../../config/presets';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as _platform from '../../modules/platform';
+import * as secrets from '../../util/sanitize';
 import * as _repositoryWorker from '../repository';
 import * as _configParser from './config/parse';
 import * as _limits from './limits';
@@ -25,12 +26,16 @@ const platform: jest.Mocked<typeof _platform> = _platform as never;
 const presets = mocked(_presets);
 const limits = _limits;
 
+const addSecretForSanitizing = jest.spyOn(secrets, 'addSecretForSanitizing');
+
 describe('workers/global/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);
     configParser.parseConfigs = jest.fn();
     platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+    delete process.env.AWS_SESSION_TOKEN;
   });
 
   it('handles config warnings and errors', async () => {
@@ -39,7 +44,10 @@ describe('workers/global/index', () => {
       maintainYarnLock: true,
       foo: 1,
     });
+    process.env.AWS_SECRET_ACCESS_KEY = 'key';
+    process.env.AWS_SESSION_TOKEN = 'token';
     await expect(globalWorker.start()).resolves.toBe(0);
+    expect(addSecretForSanitizing).toHaveBeenCalledTimes(2);
   });
 
   it('resolves global presets immediately', async () => {
