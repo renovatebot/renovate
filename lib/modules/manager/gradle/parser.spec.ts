@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
@@ -324,7 +325,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'foo.bar = "foo:bar:1.2.3"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$input', ({ input, output }) => {
         const { deps } = parseGradle(input);
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output]);
       });
     });
 
@@ -347,7 +348,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${property("c")}"'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output].filter(is.truthy));
       });
     });
 
@@ -368,7 +369,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'foo.bar = "bar"; baz = "1.2.3"'}  | ${'"foo:bar_${foo.bar}:" + baz'}  | ${{ depName: 'foo:bar_bar', currentValue: '1.2.3', managerData: { fileReplacePosition: 24 } }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output]);
       });
     });
 
@@ -424,7 +425,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'kotlin("foo", "1.2.3@@@")'}        | ${null}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output].filter(is.truthy));
       });
     });
 
@@ -453,7 +454,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'(group = "foo", name = "bar", version = "1.2.3", changing: true)'}             | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output].filter(is.truthy));
       });
     });
 
@@ -558,7 +559,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.3.71"'} | ${'kotlin("jvm") version baz'}             | ${{ depName: 'org.jetbrains.kotlin.jvm', packageName: 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin', currentValue: '1.3.71' }}
       `('$def | $input', ({ def, input, output }) => {
         const { deps } = parseGradle([def, input].join('\n'));
-        expect(deps).toMatchObject([output].filter(Boolean));
+        expect(deps).toMatchObject([output].filter(is.truthy));
       });
     });
   });
@@ -707,7 +708,7 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $str', ({ def, str, output }) => {
       const input = [def, str].join('\n');
       const { deps } = parseGradle(input);
-      expect(deps).toMatchObject([output].filter(Boolean));
+      expect(deps).toMatchObject([output].filter(is.truthy));
     });
   });
 
@@ -730,7 +731,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'mapScalar("foo", "bar", "baz")'}                          | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
-      expect(deps).toMatchObject([output].filter(Boolean));
+      expect(deps).toMatchObject([output].filter(is.truthy));
     });
   });
 
@@ -904,7 +905,7 @@ describe('modules/manager/gradle/parser', () => {
       ${''}              | ${'unknown { toolVersion = "1.2.3" }'}          | ${null}
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
-      expect(deps).toMatchObject([output].filter(Boolean));
+      expect(deps).toMatchObject([output].filter(is.truthy));
     });
   });
 });
