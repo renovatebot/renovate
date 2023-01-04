@@ -15,13 +15,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in helm chart Chart.yaml.',
+    description: 'Update `appVersion` value in Helm chart Chart.yaml.',
     regexManagers: [
       {
         datasourceTemplate: 'docker',
         fileMatch: ['(^|/)Chart\\.yaml$'],
         matchStrings: [
-          '#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\"?(?<currentValue>[\\w+\\.\\-]*)',
+          '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\\"\\']?(?<currentValue>[\\w+\\.\\-]*)',
         ],
       },
     ],

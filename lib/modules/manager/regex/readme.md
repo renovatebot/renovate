@@ -131,10 +131,11 @@ The `Dockerfile` is documented better as well.
 The syntax in the example is arbitrary, and you can set your own syntax.
 If you do, update your `matchStrings` regex!
 
-Simplified version of such comments can be used to increase to readability.
+You can use simple versions of such comments to increase readability.
 
-For example the `appVersion` property in a Chart.yaml of a helm chart is always referenced to an docker image. In such scenarios, some values
-can be hard-coded. For example:
+For example the `appVersion` property in a `Chart.yaml` of a Helm chart is always referenced to an Docker image.
+In such scenarios, some values can be hard-coded.
+For example:
 
 ```yaml
 apiVersion: v2
@@ -146,7 +147,7 @@ type: application
 appVersion: 'v0.4.0'
 ```
 
-Using the regexManagers below, renovate will look for available docker tag of the image `amazon/amazon-eks-pod-identity-webhook`.
+Using the `regexManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
 
 ```json
 {
