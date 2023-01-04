@@ -1,5 +1,5 @@
 import { RANGE_PATTERN } from '@renovatebot/pep440';
-import { lang, lexer, query as q } from 'good-enough-parser';
+import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
@@ -79,6 +79,6 @@ export function extractPackageFile(
   _packageFile: string,
   _config: ExtractConfig
 ): PackageFile | null {
-  const res = python.query<Context>(content, query, { deps: [] });
+  const res = python.query<Context, parser.Node>(content, query, { deps: [] });
   return res?.deps?.length ? res : null;
 }
