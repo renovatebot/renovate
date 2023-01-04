@@ -28,9 +28,10 @@ const qArtifactId = qConcatExpr(
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
-const qVersion = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'version'));
+const qVersion = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
@@ -121,10 +122,12 @@ const qKotlinShortNotationDependencies = q
       .join(qArtifactId)
       .op(',')
       .opt(q.sym<Ctx>('version').op('='))
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
+      .join(
+        qConcatExpr(
+          qTemplateString,
+          qPropertyAccessIdentifier,
+          qVariableAccessIdentifier
+        )
       )
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
@@ -192,10 +195,12 @@ const qImplicitGradlePlugin = q
     search: q
       .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
       .op('=')
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
+      .join(
+        qConcatExpr(
+          qTemplateString,
+          qPropertyAccessIdentifier,
+          qVariableAccessIdentifier
+        )
       ),
   })
   .handler((ctx) => storeInTokenMap(ctx, 'version'))

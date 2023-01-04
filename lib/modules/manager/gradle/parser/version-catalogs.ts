@@ -39,7 +39,7 @@ const qVersionCatalogVersion = q
       endsWith: ')',
       search: q
         .begin<Ctx>()
-        .alt(qTemplateString, qVariableAccessIdentifier)
+        .join(qConcatExpr(qTemplateString, qVariableAccessIdentifier))
         .end(),
     })
   )

@@ -3,6 +3,7 @@ import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qConcatExpr,
   qPropertyAccessIdentifier,
   qStringValue,
   qTemplateString,
@@ -12,9 +13,11 @@ import {
 } from './common';
 import { handlePlugin } from './handlers';
 
-const qVersion = q
-  .alt(qTemplateString, qPropertyAccessIdentifier, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'version'));
+const qVersion = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // kotlin("jvm") version "1.3.71"
 export const qPlugins = q
