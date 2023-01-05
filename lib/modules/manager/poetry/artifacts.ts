@@ -184,9 +184,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints: [{ toolName: 'python', constraint }],
       preCommands: [
         `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,

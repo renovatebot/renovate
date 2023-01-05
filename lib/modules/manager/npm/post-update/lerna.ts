@@ -91,9 +91,7 @@ export async function generateLockFiles(
     const execOptions: ExecOptions = {
       cwdFile: upath.join(lockFileDir, 'package.json'),
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if
