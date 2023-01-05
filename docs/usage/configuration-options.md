@@ -1422,6 +1422,7 @@ Supported lock files are:
 - `gradle.lockfile`
 - `jsonnetfile.lock.json`
 - `package-lock.json`
+- `packages.lock.json`
 - `Pipfile.lock`
 - `pnpm-lock.yaml`
 - `poetry.lock`
