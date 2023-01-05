@@ -385,6 +385,18 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('hasDiff(sourceRef, targetRef)', () => {
+    it('compare without changes', () => {
+      return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();
+    });
+
+    it('compare with changes', () => {
+      return expect(
+        git.hasDiff('origin/master', 'origin/renovate/future_branch')
+      ).resolves.toBeTrue();
+    });
+  });
+
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file: FileChange = {
