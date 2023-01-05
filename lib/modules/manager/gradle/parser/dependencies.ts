@@ -4,6 +4,7 @@ import type { Ctx } from '../types';
 import {
   GRADLE_PLUGINS,
   cleanupTempVars,
+  qConcatExpr,
   qPropertyAccessIdentifier,
   qTemplateString,
   qVariableAccessIdentifier,
@@ -17,21 +18,36 @@ import {
   handleLongFormDep,
 } from './handlers';
 
-const qGroupId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'groupId'));
+const qGroupId = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'groupId'));
 
-const qArtifactId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
+const qArtifactId = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
-const qVersion = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'version'));
+const qVersion = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
+// "foo" + "${bar}" + baz
 const qDependencyStrings = qTemplateString
+  .many(
+    q
+      .op<Ctx>('+')
+      .alt(
+        qTemplateString,
+        qPropertyAccessIdentifier,
+        qVariableAccessIdentifier
+      ),
+    0,
+    32
+  )
   .handler((ctx: Ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
   .handler(handleDepString)
   .handler(cleanupTempVars);
@@ -106,10 +122,12 @@ const qKotlinShortNotationDependencies = q
       .join(qArtifactId)
       .op(',')
       .opt(q.sym<Ctx>('version').op('='))
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
+      .join(
+        qConcatExpr(
+          qTemplateString,
+          qPropertyAccessIdentifier,
+          qVariableAccessIdentifier
+        )
       )
       .handler((ctx) => storeInTokenMap(ctx, 'version'))
       .end(),
@@ -177,10 +195,12 @@ const qImplicitGradlePlugin = q
     search: q
       .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
       .op('=')
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
+      .join(
+        qConcatExpr(
+          qTemplateString,
+          qPropertyAccessIdentifier,
+          qVariableAccessIdentifier
+        )
       ),
   })
   .handler((ctx) => storeInTokenMap(ctx, 'version'))
