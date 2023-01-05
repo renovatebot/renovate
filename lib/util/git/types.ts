@@ -81,7 +81,7 @@ export interface CommitFilesConfig {
 
 export interface PushFilesConfig {
   sourceRef: string;
-  targetRef: string;
+  targetRef?: string;
   files: FileChange[];
 }
 
