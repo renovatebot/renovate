@@ -155,6 +155,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nextra: 'https://github.com/shuding/nextra',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
@@ -263,6 +264,7 @@ const patternGroups = {
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 
