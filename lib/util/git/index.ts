@@ -1030,7 +1030,7 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
