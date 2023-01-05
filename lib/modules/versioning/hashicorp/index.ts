@@ -31,8 +31,9 @@ export function isValid(input: string): boolean {
   return false;
 }
 
-const matches = (version: string, range: string): boolean =>
-  npm.matches(version, hashicorp2npm(range));
+function matches(version: string, range: string): boolean {
+  return npm.matches(version, hashicorp2npm(range));
+}
 
 function getSatisfyingVersion(
   versions: string[],
