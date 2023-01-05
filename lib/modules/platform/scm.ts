@@ -1,7 +1,7 @@
 import * as _git from '../../util/git';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
-import { platform } from './index';
+import { platform } from '.';
 
 export const platformScmImpls = new Map<string, Partial<PlatformScm>>();
 //here you can register additional custom implementations..
