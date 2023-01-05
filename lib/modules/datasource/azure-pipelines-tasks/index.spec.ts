@@ -20,7 +20,7 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
-  it('supports built-in tasks', async () => {
+  it('supports marketplace tasks', async () => {
     expect(
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
