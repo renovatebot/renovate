@@ -27,7 +27,7 @@ export const defaultGitScm: PlatformScm = {
 };
 
 const scmProxy: ProxyHandler<PlatformScm> = {
-  get(_target: PlatformScm, prop: keyof PlatformScm, receiver: any) {
+  get(target: PlatformScm, prop: keyof PlatformScm, receiver: unknown) {
     if (typeof _scm[prop] !== 'undefined') {
       return _scm[prop];
     }
