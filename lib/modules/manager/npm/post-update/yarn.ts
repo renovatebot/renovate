@@ -187,9 +187,7 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if

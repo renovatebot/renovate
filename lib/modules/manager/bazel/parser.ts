@@ -125,7 +125,9 @@ const kwParams = q
  *
  * @param search something to match inside parens
  */
-function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
+function ruleCall(
+  search: q.QueryBuilder<Ctx, parser.Node>
+): q.QueryBuilder<Ctx, parser.Node> {
   return q.tree({
     type: 'wrapped-tree',
     maxDepth: 1,

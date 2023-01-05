@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../test/util';
 import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
@@ -1162,6 +1163,69 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toBe(
         'PATCH: Update dependency some-dep to 1.2.0'
       );
+    });
+
+    it('dedupes duplicate table rows', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.0',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: 'docker',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.0',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.1',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.1',
+          newVersion: '5.1.2',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage?.trim()).toBe(codeBlock`
+        | datasource | package     | from  | to    |
+        | ---------- | ----------- | ----- | ----- |
+        | npm        | another-dep | 5.1.1 | 5.1.2 |
+        | npm        | some-dep    | 5.1.0 | 5.1.2 |
+        | docker     | some-dep    | 5.1.0 | 5.1.2 |
+      `);
+      expect([
+        ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
+      ]).toBeArrayOfSize(1);
+      expect([
+        ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
+      ]).toBeArrayOfSize(2);
     });
 
     it('using commitMessagePrefix without separator', () => {

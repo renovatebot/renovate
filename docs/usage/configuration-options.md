@@ -1415,6 +1415,7 @@ Supported lock files are:
 
 - `.terraform.lock.hcl`
 - `Cargo.lock`
+- `Chart.lock`
 - `composer.lock`
 - `flake.lock`
 - `Gemfile.lock`
@@ -1424,8 +1425,8 @@ Supported lock files are:
 - `Pipfile.lock`
 - `pnpm-lock.yaml`
 - `poetry.lock`
+- `pubspec.lock`
 - `pyproject.toml`
-- `Chart.lock`
 - `requirements.txt`
 - `yarn.lock`
 
@@ -1613,6 +1614,10 @@ Use the syntax `!/ /` like the following:
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
+
+### excludeDepNames
+
+### excludeDepPatterns
 
 ### excludePackageNames
 
@@ -1844,6 +1849,10 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchDepNames
+
+### matchDepPatterns
 
 ### matchPackageNames
 
@@ -2089,14 +2098,18 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
-- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
-- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
-- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
-- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 

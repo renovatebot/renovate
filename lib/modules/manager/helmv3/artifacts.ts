@@ -157,9 +157,7 @@ export async function updateArtifacts({
     };
 
     const execOptions: ExecOptions = {
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv: {
         HELM_EXPERIMENTAL_OCI: '1',
       },
