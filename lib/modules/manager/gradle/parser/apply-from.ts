@@ -35,8 +35,8 @@ const qApplyFromFile = q
         search: q
           .begin<Ctx>()
           .opt(
-            qFilePath
-              .op(',')
+            q
+              .join(qFilePath, q.op(','))
               .handler((ctx) => storeInTokenMap(ctx, 'parentPath'))
           )
           .join(qFilePath)
