@@ -21,7 +21,7 @@ export const presets: Record<string, Preset> = {
       {
         fileMatch: ['^.github/workflows/[^/]+\\.ya?ml$'],
         matchStrings: [
-          '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s  .+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+          '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+\\S+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
       },
     ],
