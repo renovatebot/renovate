@@ -20,7 +20,7 @@ function isLessThanRange(version: string, range: string): boolean {
   return !!npm.isLessThanRange?.(version, hashicorp2npm(range));
 }
 
-export const isValid = (input: string): boolean => {
+export function isValid(input: string): boolean {
   if (input) {
     try {
       return npm.isValid(hashicorp2npm(input));
@@ -29,7 +29,7 @@ export const isValid = (input: string): boolean => {
     }
   }
   return false;
-};
+}
 
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, hashicorp2npm(range));
