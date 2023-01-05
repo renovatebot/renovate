@@ -1,4 +1,4 @@
-import { lang as l, query as q } from 'good-enough-parser';
+import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
@@ -10,7 +10,6 @@ import {
 } from '../../datasource/sbt-plugin';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
-import { lang } from './scala';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -33,7 +32,7 @@ interface Ctx {
   groupName?: string;
 }
 
-const scala = new l.Language(lang);
+const scala = lang.createLang('scala');
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
