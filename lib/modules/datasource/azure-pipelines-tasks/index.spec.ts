@@ -20,6 +20,15 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
     ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
   });
 
+  it('supports built-in tasks', async () => {
+    expect(
+      await getPkgReleases({
+        datasource: AzurePipelinesTasksDatasource.id,
+        depName: 'AutomatedAnalysis-Marketplace',
+      })
+    ).toEqual({ releases: [{ version: '0.171.0' }, { version: '0.198.0' }] });
+  });
+
   it('is case insensitive', async () => {
     expect(
       await getPkgReleases({
