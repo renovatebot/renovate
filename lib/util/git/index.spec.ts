@@ -623,6 +623,22 @@ describe('util/git/index', () => {
       const result = await repo.raw(['ls-tree', 'HEAD', 'some-executable']);
       expect(result).toStartWith('100755');
     });
+
+    it('push to different target branch', async () => {
+      const file: FileChange = {
+        type: 'addition',
+        path: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const commit = await git.commitFiles({
+        targetBranch: 'otherBranch',
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+      });
+      expect(commit).not.toBeNull();
+      return expect(git.checkoutBranch('otherBranch')).resolves.toBe(commit);
+    });
   });
 
   describe('getCommitMessages()', () => {
