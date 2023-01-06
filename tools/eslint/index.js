@@ -4,6 +4,9 @@ module.exports = {
       meta: {
         fixable: 'code',
       },
+      /**
+       * @param {{ getFilename: () => any; report: (arg0: { node: any; message: string; fix(fixer: any): any; }) => void; }} context
+       */
       create(context) {
         const absoluteFileName = context.getFilename();
         if (!absoluteFileName.endsWith('.spec.ts')) {
@@ -15,6 +18,9 @@ module.exports = {
           .replace(/^(?:\/(?:lib|src|test))?\//, '');
         const testName = String(relativeFileName.replace(/\.spec\.ts$/, ''));
         return {
+          /**
+           * @param {{ parent?: any; arguments?: any; callee?: any; }} node
+           */
           CallExpression(node) {
             const { callee } = node;
             if (
