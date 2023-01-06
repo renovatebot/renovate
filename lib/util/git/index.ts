@@ -857,10 +857,13 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -987,7 +990,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
