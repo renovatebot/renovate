@@ -1033,4 +1033,15 @@ describe('util/git/index', () => {
       expect(await git.getSubmodules()).toHaveLength(0);
     });
   });
+
+  describe('fetchRevSpec()', () => {
+    it('fetchRevSpec()', async () => {
+      await git.fetchRevSpec(
+        `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`
+      );
+      //checkout this duplicate
+      const sha = await git.checkoutBranch(`other/${defaultBranch}`);
+      expect(sha).toBe(git.getBranchCommit(defaultBranch));
+    });
+  });
 });
