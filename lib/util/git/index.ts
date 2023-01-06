@@ -249,6 +249,17 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   await fetchBranchCommits();
 }
 
+export async function installHook(
+  name: string,
+  hookSource: string
+): Promise<void> {
+  await syncGit();
+  const localDir = GlobalConfig.get('localDir')!;
+  const gitHooks = upath.join(localDir, '.git/hooks');
+  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
+  await fs.chmod(`${gitHooks}/${name}`, 0o500);
+}
+
 async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
   await git.raw(['reset', '--hard']);
@@ -857,10 +868,13 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -987,7 +1001,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
