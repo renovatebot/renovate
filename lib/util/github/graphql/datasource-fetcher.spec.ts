@@ -206,9 +206,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .reply(
           200,
           resp([
-            { version: v1, releaseTimestamp: t1, foo: '1' },
-            { version: v2, releaseTimestamp: t2, foo: '2' },
             { version: v3, releaseTimestamp: t3, foo: '3' },
+            { version: v2, releaseTimestamp: t2, foo: '2' },
+            { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );
 
@@ -219,22 +219,22 @@ describe('util/github/graphql/datasource-fetcher', () => {
       );
 
       expect(res).toEqual([
-        { version: v1, releaseTimestamp: t1, bar: '1' },
-        { version: v2, releaseTimestamp: t2, bar: '2' },
         { version: v3, releaseTimestamp: t3, bar: '3' },
+        { version: v2, releaseTimestamp: t2, bar: '2' },
+        { version: v1, releaseTimestamp: t1, bar: '1' },
       ]);
     });
 
     it('handles paginated data', async () => {
       const page1 = resp(
-        [{ version: v1, releaseTimestamp: t1, foo: '1' }],
+        [{ version: v3, releaseTimestamp: t3, foo: '3' }],
         'aaa'
       );
       const page2 = resp(
         [{ version: v2, releaseTimestamp: t2, foo: '2' }],
         'bbb'
       );
-      const page3 = resp([{ version: v3, releaseTimestamp: t3, foo: '3' }]);
+      const page3 = resp([{ version: v1, releaseTimestamp: t1, foo: '1' }]);
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
@@ -251,9 +251,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
       );
 
       expect(res).toEqual([
-        { version: v1, releaseTimestamp: t1, bar: '1' },
-        { version: v2, releaseTimestamp: t2, bar: '2' },
         { version: v3, releaseTimestamp: t3, bar: '3' },
+        { version: v2, releaseTimestamp: t2, bar: '2' },
+        { version: v1, releaseTimestamp: t1, bar: '1' },
       ]);
     });
 
@@ -369,9 +369,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
     describe('Cacheable flag', () => {
       const data = [
-        { version: v1, releaseTimestamp: t1, foo: '1' },
-        { version: v2, releaseTimestamp: t2, foo: '2' },
         { version: v3, releaseTimestamp: t3, foo: '3' },
+        { version: v2, releaseTimestamp: t2, foo: '2' },
+        { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
       test.each`
