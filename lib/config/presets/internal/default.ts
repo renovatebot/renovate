@@ -85,6 +85,17 @@ export const presets: Record<string, Preset> = {
     description: 'Require all status checks to pass before any automerging.',
     ignoreTests: false,
   },
+  automergeStableMinor: {
+    description:
+      'Automerge `minor` upgrades for semver stable packages if they pass tests.',
+    packageRules: [
+      {
+        automerge: true,
+        matchCurrentVersion: '>= 1.0.0',
+        matchUpdateTypes: ['minor'],
+      },
+    ],
+  },
   automergeTesters: {
     description: 'Update testing packages automatically if tests pass.',
     packageRules: [
