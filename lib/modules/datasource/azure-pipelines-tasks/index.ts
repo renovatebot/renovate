@@ -27,9 +27,10 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const versions = this.builtInTasks[packageName.toLowerCase()] 
-      || this.marketplaceTasks[packageName.toLowerCase()];
-      
+    const versions =
+      this.builtInTasks[packageName.toLowerCase()] ||
+      this.marketplaceTasks[packageName.toLowerCase()];
+
     if (versions) {
       const releases = versions.map((version) => ({ version }));
       return Promise.resolve({ releases });
