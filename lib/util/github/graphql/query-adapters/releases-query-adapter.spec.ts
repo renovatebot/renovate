@@ -1,5 +1,5 @@
-import { adapter } from './releases-adapter';
-import type { GithubGraphqlRelease } from './types';
+import type { GithubGraphqlRelease } from '../types';
+import { adapter } from './releases-query-adapter';
 
 const item: GithubGraphqlRelease = {
   version: '1.2.3',
@@ -12,7 +12,7 @@ const item: GithubGraphqlRelease = {
   description: 'description',
 };
 
-describe('util/github/graphql/releases-adapter', () => {
+describe('util/github/graphql/query-adapters/releases-query-adapter', () => {
   it('transforms items', () => {
     expect(adapter.transform(item)).toEqual({
       description: 'description',

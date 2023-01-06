@@ -18,10 +18,6 @@ export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
 
 export interface DockerOptions {
-  image: string;
-  tag?: Opt<string>;
-  tagScheme?: Opt<string>;
-  tagConstraint?: Opt<string>;
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
