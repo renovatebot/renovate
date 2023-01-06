@@ -1,4 +1,5 @@
 // TODO: types (#7154)
+import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import { queryReleases } from '../../../util/github/graphql';
@@ -220,20 +221,19 @@ export class GithubReleasesDatasource extends Datasource {
    */
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult> {
     const releasesResult = await queryReleases(config, this.http);
-    return {
-      sourceUrl: getSourceUrl(config.packageName, config.registryUrl),
-      releases: releasesResult.map((item) => {
-        const { version, releaseTimestamp, isStable } = item;
-        const result: Release = {
-          version,
-          gitRef: version,
-          releaseTimestamp,
-        };
-        if (isStable !== undefined) {
-          result.isStable = isStable;
-        }
-        return result;
-      }),
-    };
+    const releases = releasesResult.map((item) => {
+      const { version, releaseTimestamp, isStable } = item;
+      const result: Release = {
+        version,
+        gitRef: version,
+        releaseTimestamp,
+      };
+      if (is.boolean(isStable)) {
+        result.isStable = isStable;
+      }
+      return result;
+    });
+    const sourceUrl = getSourceUrl(config.packageName, config.registryUrl);
+    return { sourceUrl, releases };
   }
 }
