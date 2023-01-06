@@ -1,9 +1,16 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { queryTags } from '../../../util/github/graphql';
+import { queryReleases, queryTags } from '../../../util/github/graphql';
+import type { GithubReleaseItem } from '../../../util/github/graphql/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 
 export class GithubTagsDatasource extends Datasource {
   static readonly id = 'github-tags';
@@ -77,13 +84,37 @@ export class GithubTagsDatasource extends Datasource {
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
-    const tags = await queryTags(config, this.http);
-    const releases = tags.map(({ version, releaseTimestamp, gitRef }) => ({
-      version,
-      releaseTimestamp,
-      gitRef,
-    }));
-    const dependency: ReleaseResult = { sourceUrl, releases };
+    const tagsResult = await queryTags(config, this.http);
+    const releases: Release[] = tagsResult.map(
+      ({ version, releaseTimestamp, gitRef }) => ({
+        version,
+        releaseTimestamp,
+        gitRef,
+      })
+    );
+
+    try {
+      // Fetch additional data from releases endpoint when possible
+      const releasesResult = await queryReleases(config, this.http);
+      const releasesMap = new Map<string, GithubReleaseItem>();
+      for (const release of releasesResult) {
+        releasesMap.set(release.version, release);
+      }
+
+      for (const release of releases) {
+        const isReleaseStable = releasesMap.get(release.version)?.isStable;
+        if (is.boolean(isReleaseStable)) {
+          release.isStable = isReleaseStable;
+        }
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
+    }
+
+    const dependency: ReleaseResult = {
+      sourceUrl,
+      releases,
+    };
     return dependency;
   }
 }
