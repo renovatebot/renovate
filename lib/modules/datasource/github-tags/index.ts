@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../util/github/graphql/types';
-import type { GithubRestRef } from '../../../util/github/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
@@ -27,29 +26,22 @@ export class GithubTagsDatasource extends Datasource {
 
   async getTagCommit(
     registryUrl: string | undefined,
-    githubRepo: string,
+    packageName: string,
     tag: string
   ): Promise<string | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    let digest: string | null = null;
     try {
-      const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
-      const res = (await this.http.getJson<GithubRestRef>(url)).body.object;
-      if (res.type === 'commit') {
-        digest = res.sha;
-      } else if (res.type === 'tag') {
-        digest = (await this.http.getJson<GithubRestRef>(res.url)).body.object
-          .sha;
-      } else {
-        logger.warn({ res }, 'Unknown git tag refs type');
+      const tags = await queryTags({ packageName, registryUrl }, this.http);
+      const tagItem = tags.find(({ version }) => version === tag);
+      if (tagItem) {
+        return tagItem.hash;
       }
     } catch (err) {
       logger.debug(
-        { githubRepo, err },
+        { githubRepo: packageName, err },
         'Error getting tag commit from GitHub repo'
       );
     }
-    return digest;
+    return null;
   }
 
   async getCommit(
