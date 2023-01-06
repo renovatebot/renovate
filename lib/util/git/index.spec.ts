@@ -1058,5 +1058,16 @@ describe('util/git/index', () => {
       const messages = await git.getCommitMessages();
       expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
     });
+  });      
+
+  describe('fetchRevSpec()', () => {
+    it('fetchRevSpec()', async () => {
+      await git.fetchRevSpec(
+        `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`
+      );
+      //checkout this duplicate
+      const sha = await git.checkoutBranch(`other/${defaultBranch}`);
+      expect(sha).toBe(git.getBranchCommit(defaultBranch));
+    });
   });
 });

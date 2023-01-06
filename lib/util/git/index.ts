@@ -229,6 +229,10 @@ async function fetchBranchCommits(): Promise<void> {
   }
 }
 
+export async function fetchRevSpec(revSpec: string): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', revSpec]));
+}
+
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.ignoredAuthors = [];
