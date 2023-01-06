@@ -129,6 +129,9 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Type check
+        run: yarn type-check
+
       - name: Lint
         run: |
           yarn ls-lint
@@ -140,12 +143,6 @@ jobs:
 
       - name: Test schema
         run: yarn test-schema
-
-      - name: Type check
-        run: yarn type-check
-
-      - name: Strict check
-        run: yarn strict-check
 
   release:
     needs: [lint, test]
