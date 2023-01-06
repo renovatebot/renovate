@@ -2,6 +2,7 @@ import { query as q } from 'good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qConcatExpr,
   qStringValue,
   qStringValueAsSymbol,
   qTemplateString,
@@ -11,13 +12,15 @@ import {
 } from './common';
 import { handleLibraryDep } from './handlers';
 
-const qGroupId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'groupId'));
+const qGroupId = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'groupId'));
 
-const qArtifactId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
+const qArtifactId = qConcatExpr(
+  qTemplateString,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
@@ -36,7 +39,7 @@ const qVersionCatalogVersion = q
       endsWith: ')',
       search: q
         .begin<Ctx>()
-        .alt(qTemplateString, qVariableAccessIdentifier)
+        .join(qConcatExpr(qTemplateString, qVariableAccessIdentifier))
         .end(),
     })
   )
