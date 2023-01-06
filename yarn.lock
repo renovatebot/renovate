@@ -2447,10 +2447,8 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.0.4.tgz#af85eb080f6934580e4d3b58046026b6c2b18717"
   integrity sha512-ThUIgo2U/g7cCuZavucQTQzA9g9JbDDY2f64u3AbAoz/8vE2lt2U37LamDUVChhaDA3IRT9R6VvJwqnUfTJzng==
 
-"@renovate/eslint-plugin@https://github.com/renovatebot/eslint-plugin#v0.0.5":
+"@renovate/eslint-plugin@file:./tools/eslint":
   version "0.0.5"
-  uid "1923e2e2776549cb25a2c6ea09915ee31bff6d05"
-  resolved "https://github.com/renovatebot/eslint-plugin#1923e2e2776549cb25a2c6ea09915ee31bff6d05"
 
 "@renovatebot/osv-offline-db@1.0.1":
   version "1.0.1"
