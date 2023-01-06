@@ -21,16 +21,48 @@ describe('modules/datasource/github-releases/index', () => {
   describe('getReleases', () => {
     it('returns releases', async () => {
       jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
-        { version: 'a', releaseTimestamp: '2020-03-09T13:00:00Z' },
-        { version: 'v', releaseTimestamp: '2020-03-09T12:00:00Z' },
-        { version: '1.0.0', releaseTimestamp: '2020-03-09T11:00:00Z' },
-        { version: 'v1.1.0', releaseTimestamp: '2020-03-09T10:00:00Z' },
         {
+          id: 1,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
+          version: 'a',
+          releaseTimestamp: '2020-03-09T13:00:00Z',
+        },
+        {
+          id: 2,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
+          version: 'v',
+          releaseTimestamp: '2020-03-09T12:00:00Z',
+        },
+        {
+          id: 3,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
+          version: '1.0.0',
+          releaseTimestamp: '2020-03-09T11:00:00Z',
+        },
+        {
+          id: 4,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
+          version: 'v1.1.0',
+          releaseTimestamp: '2020-03-09T10:00:00Z',
+        },
+        {
+          id: 5,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
           version: '2.0.0',
           releaseTimestamp: '2020-04-09T10:00:00Z',
           isStable: false,
         },
-      ] as never);
+      ]);
 
       const res = await getPkgReleases({
         datasource: GithubReleasesDatasource.id,
