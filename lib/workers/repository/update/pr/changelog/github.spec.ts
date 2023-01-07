@@ -1,6 +1,7 @@
 import * as httpMock from '../../../../../../test/http-mock';
 import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
+import * as githubGraphql from '../../../../../util/github/graphql';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getChangeLogJSON } from '.';
@@ -356,15 +357,13 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      httpMock
-        .scope('https://api.github.com/')
-        .get('/repos/chalk/chalk/tags?per_page=100')
-        .reply(200, [
-          { name: 'v1.0.1' },
-          { name: '1.0.1' },
-          { name: 'correctPrefix/target@1.0.1' },
-          { name: 'wrongPrefix/target-1.0.1' },
-        ]);
+      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      githubTagsMock.mockResolvedValue([
+        { version: 'v1.0.1' },
+        { version: '1.0.1' },
+        { version: 'correctPrefix/target@1.0.1' },
+        { version: 'wrongPrefix/target-1.0.1' },
+      ] as never);
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
