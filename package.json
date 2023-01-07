@@ -310,7 +310,7 @@
     "jest-junit": "15.0.0",
     "jest-mock-extended": "3.0.1",
     "lint-staged": "13.1.0",
-    "markdownlint-cli2": "0.5.1",
+    "markdownlint-cli2": "0.6.0",
     "memfs": "3.4.12",
     "mock-fs": "5.2.0",
     "mockdate": "3.0.5",
