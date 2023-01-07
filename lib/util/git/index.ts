@@ -1018,7 +1018,7 @@ export async function pushCommit({
   files,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1068,7 +1068,7 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
-        targetRef: commitConfig.targetBranch ?? commitConfig.branchName,
+        targetRef: commitConfig.branchName,
         files: commitConfig.files,
       });
       if (pushResult) {

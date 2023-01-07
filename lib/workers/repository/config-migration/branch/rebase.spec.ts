@@ -97,7 +97,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         ],
         message: 'Migrate config renovate.json',
         platformCommit: false,
-        targetBranch: 'dev',
+        targetBranch: 'master',
       });
     });
 
