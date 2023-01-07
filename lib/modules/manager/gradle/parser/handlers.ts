@@ -5,10 +5,11 @@ import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
 import { parseGradle } from '../parser';
-import type { Ctx, GradleManagerData, VariableData } from '../types';
+import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
   ANNOYING_METHODS,
+  GRADLE_PLUGINS,
   REGISTRY_URLS,
   interpolateString,
   loadFromTokenMap,
@@ -21,7 +22,7 @@ export function handleAssignment(ctx: Ctx): Ctx {
   if (valTokens.length > 1) {
     // = template string with multiple variables
     ctx.tokenMap.templateStringTokens = valTokens;
-    handleDepInterpolation(ctx);
+    handleDepString(ctx);
     delete ctx.tokenMap.templateStringTokens;
   } else {
     // = string value
@@ -35,34 +36,18 @@ export function handleAssignment(ctx: Ctx): Ctx {
       ctx.deps.push(dep);
     }
 
-    const varData: VariableData = {
+    ctx.globalVars[key] = {
       key,
       value: valTokens[0].value,
       fileReplacePosition: valTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-    ctx.globalVars[key] = varData;
   }
 
   return ctx;
 }
 
-export function handleDepSimpleString(ctx: Ctx): Ctx {
-  const stringToken = loadFromTokenMap(ctx, 'stringToken')[0];
-
-  const dep = parseDependencyString(stringToken.value);
-  if (dep) {
-    dep.managerData = {
-      fileReplacePosition: stringToken.offset + dep.depName!.length + 1,
-      packageFile: ctx.packageFile,
-    };
-    ctx.deps.push(dep);
-  }
-
-  return ctx;
-}
-
-export function handleDepInterpolation(ctx: Ctx): Ctx {
+export function handleDepString(ctx: Ctx): Ctx {
   const stringTokens = loadFromTokenMap(ctx, 'templateStringTokens');
 
   const templateString = interpolateString(stringTokens, ctx.globalVars);
@@ -78,13 +63,15 @@ export function handleDepInterpolation(ctx: Ctx): Ctx {
   let packageFile: string | undefined;
   let fileReplacePosition: number | undefined;
   for (const token of stringTokens) {
-    const varData = ctx.globalVars[token.value];
-    if (token.type === 'symbol' && varData) {
-      packageFile = varData.packageFile;
-      fileReplacePosition = varData.fileReplacePosition;
-      if (varData.value === dep.currentValue) {
-        dep.managerData = { fileReplacePosition, packageFile };
-        dep.groupName = varData.key;
+    if (token.type === 'symbol') {
+      const varData = ctx.globalVars[token.value];
+      if (varData) {
+        packageFile = varData.packageFile;
+        fileReplacePosition = varData.fileReplacePosition;
+        if (varData.value === dep.currentValue) {
+          dep.managerData = { fileReplacePosition, packageFile };
+          dep.groupName = varData.key;
+        }
       }
     }
   }
@@ -94,15 +81,62 @@ export function handleDepInterpolation(ctx: Ctx): Ctx {
     if (
       lastToken?.type === 'string-value' &&
       dep.currentValue &&
-      lastToken.value.startsWith(`:${dep.currentValue}`)
+      lastToken.value.includes(dep.currentValue)
     ) {
       packageFile = ctx.packageFile;
-      fileReplacePosition = lastToken.offset + 1;
+      if (stringTokens.length === 1) {
+        fileReplacePosition = lastToken.offset + dep.depName!.length + 1;
+      } else {
+        fileReplacePosition =
+          lastToken.offset + lastToken.value.lastIndexOf(dep.currentValue);
+      }
       delete dep.groupName;
     } else {
       dep.skipReason = 'contains-variable';
     }
     dep.managerData = { fileReplacePosition, packageFile };
+  }
+
+  ctx.deps.push(dep);
+
+  return ctx;
+}
+
+export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
+  const moduleNameTokens = loadFromTokenMap(ctx, 'artifactId');
+  const versionTokens = loadFromTokenMap(ctx, 'version');
+
+  const moduleName = interpolateString(moduleNameTokens, ctx.globalVars);
+  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  if (!moduleName || !versionValue) {
+    return ctx;
+  }
+
+  const groupIdArtifactId = `org.jetbrains.kotlin:kotlin-${moduleName}`;
+  const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
+  if (!dep) {
+    return ctx;
+  }
+
+  dep.depName = moduleName;
+  dep.packageName = groupIdArtifactId;
+  dep.managerData = {
+    fileReplacePosition: versionTokens[0].offset,
+    packageFile: ctx.packageFile,
+  };
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    const varData = ctx.globalVars[versionTokens[0].value];
+    if (varData) {
+      dep.currentValue = varData.value;
+      dep.managerData = {
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
+    }
   }
 
   ctx.deps.push(dep);
@@ -142,6 +176,9 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     }
   } else {
     // = string value
+    if (methodName?.[0]?.value === 'dependencySet') {
+      dep.groupName = `${groupId}:${version}`;
+    }
     dep.managerData = {
       fileReplacePosition: versionTokens[0].offset,
       packageFile: ctx.packageFile,
@@ -171,7 +208,6 @@ export function handlePlugin(ctx: Ctx): Ctx {
     depType: 'plugin',
     depName,
     packageName,
-    registryUrls: ['https://plugins.gradle.org/m2/'],
     commitMessageTopic: `plugin ${depName}`,
     currentValue: pluginVersion[0].value,
     managerData: {
@@ -201,11 +237,22 @@ export function handlePlugin(ctx: Ctx): Ctx {
   return ctx;
 }
 
+function isPluginRegistry(ctx: Ctx): boolean {
+  if (ctx.tokenMap.registryScope) {
+    const registryScope = loadFromTokenMap(ctx, 'registryScope')[0].value;
+    return registryScope === 'pluginManagement';
+  }
+
+  return false;
+}
+
 export function handlePredefinedRegistryUrl(ctx: Ctx): Ctx {
   const registryName = loadFromTokenMap(ctx, 'registryUrl')[0].value;
-  ctx.depRegistryUrls.push(
-    REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS]
-  );
+
+  ctx.registryUrls.push({
+    registryUrl: REGISTRY_URLS[registryName as keyof typeof REGISTRY_URLS],
+    scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+  });
 
   return ctx;
 }
@@ -236,7 +283,10 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
     try {
       const { host, protocol } = url.parse(registryUrl);
       if (host && protocol) {
-        ctx.depRegistryUrls.push(registryUrl);
+        ctx.registryUrls.push({
+          registryUrl,
+          scope: isPluginRegistry(ctx) ? 'plugin' : 'dep',
+        });
       }
     } catch (e) {
       // no-op
@@ -258,13 +308,13 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
 
   const aliasToken = loadFromTokenMap(ctx, 'alias')[0];
   const key = `libs.${aliasToken.value.replace(regEx(/[-_]/g), '.')}`;
-  const varData: VariableData = {
+
+  ctx.globalVars[key] = {
     key,
     value: `${groupId}:${artifactId}`,
     fileReplacePosition: aliasToken.offset,
     packageFile: ctx.packageFile,
   };
-  ctx.globalVars = { ...ctx.globalVars, [key]: varData };
 
   if (ctx.tokenMap.version) {
     const version = interpolateString(
@@ -325,7 +375,48 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
 
   ctx.deps.push(...matchResult.deps);
   ctx.globalVars = { ...ctx.globalVars, ...matchResult.vars };
-  ctx.depRegistryUrls.push(...matchResult.urls);
+  ctx.registryUrls.push(...matchResult.urls);
+
+  return ctx;
+}
+
+export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
+  const pluginName = loadFromTokenMap(ctx, 'pluginName')[0].value;
+  const versionTokens = loadFromTokenMap(ctx, 'version');
+  const versionValue = interpolateString(versionTokens, ctx.globalVars);
+  if (!versionValue) {
+    return ctx;
+  }
+
+  const groupIdArtifactId =
+    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS];
+  const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
+  if (!dep) {
+    return ctx;
+  }
+
+  dep.depName = pluginName;
+  dep.packageName = groupIdArtifactId;
+  dep.managerData = {
+    fileReplacePosition: versionTokens[0].offset,
+    packageFile: ctx.packageFile,
+  };
+
+  if (versionTokens.length > 1) {
+    // = template string with multiple variables
+    dep.skipReason = 'unknown-version';
+  } else if (versionTokens[0].type === 'symbol') {
+    const varData = ctx.globalVars[versionTokens[0].value];
+    if (varData) {
+      dep.currentValue = varData.value;
+      dep.managerData = {
+        fileReplacePosition: varData.fileReplacePosition,
+        packageFile: varData.packageFile,
+      };
+    }
+  }
+
+  ctx.deps.push(dep);
 
   return ctx;
 }

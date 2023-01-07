@@ -163,6 +163,7 @@ Supported tools for dynamic install are:
 - `flux`
 - `golang`
 - `gradle-wrapper`
+- `helm`
 - `jb`
 - `jsonnet-bundler`
 - `lerna`
@@ -362,8 +363,15 @@ If this option is not set, Renovate will fallback to 15 minutes.
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
-Confidential data can be leaked if a malicious script enumerates all environment variables.
+If you must expose all environment variables to package managers, you can set this option to `true`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Always consider the security implications of using `exposeAllEnv`!
+    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -512,6 +520,17 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
 ## optimizeForDisabled
+
+When this option is `true`, Renovate will do the following during repository initialization:
+
+- Attempt to fetch the default config file (`renovate.json`)
+- Check if the file contains `"enabled": false`
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+This option is only useful where the ratio of disabled repos is quite high.
+It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
 
 ## password
 
@@ -763,7 +782,11 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+By default, Renovate processes each repository that it finds.
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
+
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

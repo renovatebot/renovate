@@ -28,6 +28,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -228,6 +229,10 @@ async function fetchBranchCommits(): Promise<void> {
   }
 }
 
+export async function fetchRevSpec(revSpec: string): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', revSpec]));
+}
+
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.ignoredAuthors = [];
@@ -242,6 +247,17 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   gitInitialized = false;
   submodulesInitizialized = false;
   await fetchBranchCommits();
+}
+
+export async function installHook(
+  name: string,
+  hookSource: string
+): Promise<void> {
+  await syncGit();
+  const localDir = GlobalConfig.get('localDir')!;
+  const gitHooks = upath.join(localDir, '.git/hooks');
+  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
+  await fs.chmod(`${gitHooks}/${name}`, 0o500);
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -460,6 +476,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
 }
 
 // istanbul ignore next
@@ -493,7 +510,7 @@ export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
-    n: 10,
+    n: 20,
     format: { message: '%s' },
   });
   return res.all.map((commit) => commit.message);
@@ -503,11 +520,9 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName])
-    ).trim();
     await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    config.currentBranch = branchName;
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -853,10 +868,13 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -983,7 +1001,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'

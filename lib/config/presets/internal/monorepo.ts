@@ -124,6 +124,7 @@ const repoGroups = {
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   mailing: 'https://github.com/sofn-xyz/mailing',
+  mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -154,6 +155,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nextra: 'https://github.com/shuding/nextra',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
@@ -217,6 +219,7 @@ const repoGroups = {
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
+  'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -225,6 +228,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -248,6 +252,8 @@ const orgGroups = {
   'semantic-release': 'https://github.com/semantic-release/',
 };
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'apache-camel': '^org.apache.camel:',
@@ -258,6 +264,7 @@ const patternGroups = {
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 

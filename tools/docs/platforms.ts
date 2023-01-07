@@ -1,10 +1,6 @@
 import { getPlatformList } from '../../lib/modules/platform';
 import { readFile, updateFile } from '../utils';
-import { replaceContent } from './utils';
-
-function getModuleLink(module: string, title: string): string {
-  return `[${title ?? module}](${module}/)`;
-}
+import { getModuleLink, replaceContent } from './utils';
 
 export async function generatePlatforms(dist: string): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
@@ -20,8 +16,8 @@ export async function generatePlatforms(dist: string): Promise<void> {
 
   platformContent += '.\n';
 
-  const indexFileName = `docs/usage/modules/platform.md`;
+  const indexFileName = `docs/usage/modules/platform/index.md`;
   let indexContent = await readFile(indexFileName);
   indexContent = replaceContent(indexContent, platformContent);
-  await updateFile(`${dist}/modules/platform.md`, indexContent);
+  await updateFile(`${dist}/modules/platform/index.md`, indexContent);
 }

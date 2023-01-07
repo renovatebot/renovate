@@ -279,7 +279,7 @@ If you are using the main npmjs registry then you can configure just the `npmTok
 
 If you don't want all users of the repository to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, click "Encrypt", then copy the encrypted result.
+Go to <https://app.renovatebot.com/encrypt>, paste in your npm token, select "Encrypt", then copy the encrypted result.
 
 Paste the encrypted result inside an `encrypted` object like this:
 
@@ -389,6 +389,25 @@ hostRules: [
     password: '<PAT>',
   },
 ];
+```
+
+### pip
+
+If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
+This is because `packageRules` are applied _after_ package file extraction.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["pip_requirements"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
 ```
 
 ### poetry

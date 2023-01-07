@@ -84,6 +84,11 @@ export function parseDependencyString(
 const gradleVersionsFileRegex = regEx('^versions\\.gradle(?:\\.kts)?$', 'i');
 const gradleBuildFileRegex = regEx('^build\\.gradle(?:\\.kts)?$', 'i');
 
+export function isGradleScriptFile(path: string): boolean {
+  const filename = upath.basename(path).toLowerCase();
+  return filename.endsWith('.gradle.kts') || filename.endsWith('.gradle');
+}
+
 export function isGradleVersionsFile(path: string): boolean {
   const filename = upath.basename(path);
   return gradleVersionsFileRegex.test(filename);
