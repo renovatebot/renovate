@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../../../test/http-mock';
+import { partial } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
@@ -359,12 +360,14 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
     it('works with same version releases but different prefix', async () => {
       const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
-      githubTagsMock.mockResolvedValue([
-        { version: 'v1.0.1' },
-        { version: '1.0.1' },
-        { version: 'correctPrefix/target@1.0.1' },
-        { version: 'wrongPrefix/target-1.0.1' },
-      ] as Partial<GithubTagItem[]> as never);
+      githubTagsMock.mockResolvedValue(
+        partial<GithubTagItem>([
+          { version: 'v1.0.1' },
+          { version: '1.0.1' },
+          { version: 'correctPrefix/target@1.0.1' },
+          { version: 'wrongPrefix/target-1.0.1' },
+        ])
+      );
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
