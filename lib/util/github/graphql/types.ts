@@ -91,13 +91,13 @@ export interface GithubGraphqlTag {
   target:
     | {
         type: 'Commit';
-        newDigest: string;
+        oid: string;
         releaseTimestamp: string;
       }
     | {
         type: 'Tag';
         target: {
-          newDigest: string;
+          oid: string;
         };
         tagger: {
           releaseTimestamp: string;
@@ -109,7 +109,7 @@ export interface GithubGraphqlTag {
  * Result of GraphQL response transformation for tags (via tags)
  */
 export interface GithubTagItem extends GithubDatasourceItem {
-  newDigest: string;
+  hash: string;
   gitRef: string;
 }
 
@@ -121,4 +121,19 @@ export interface GithubGraphqlRepoParams {
   name: string;
   cursor: string | null;
   count: number;
+}
+
+export interface GithubGraphqlCacheRecord<
+  GithubItem extends GithubDatasourceItem
+> {
+  items: Record<string, GithubItem>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GithubGraphqlCacheStrategy<
+  GithubItem extends GithubDatasourceItem
+> {
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
 }

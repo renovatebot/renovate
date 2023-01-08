@@ -8,6 +8,7 @@ import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
+import { detectSemanticCommits } from '../../util/git/semantic';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -54,6 +55,9 @@ export async function renovateRepository(
     const { branches, branchList, packageFiles } = performExtract
       ? await instrument('extract', () => extractDependencies(config))
       : emptyExtract(config);
+    if (config.semanticCommits === 'auto') {
+      config.semanticCommits = await detectSemanticCommits();
+    }
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'

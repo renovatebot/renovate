@@ -245,6 +245,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
       method,
       responseType: 'json',
     };
+    // signal that we expect a json response
+    opts.headers = {
+      accept: 'application/json',
+      ...opts.headers,
+    };
     if (body) {
       opts.json = body;
     }

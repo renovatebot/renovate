@@ -182,7 +182,7 @@ export interface RegexManagerTemplates {
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
-  matchStringsStrategy?: string;
+  matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
 }
 
@@ -232,6 +232,7 @@ export interface RenovateConfig
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
+  registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -247,6 +248,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
+  skipInstalls?: boolean;
 }
 
 export interface AllConfig
@@ -300,9 +302,13 @@ export interface PackageRule
   matchManagers?: string | string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
+  matchDepNames?: string[];
+  matchDepPatterns?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  excludeDepNames?: string[];
+  excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];

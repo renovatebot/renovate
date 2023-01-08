@@ -21,14 +21,6 @@ export interface GithubRestAsset {
   size: number;
 }
 
-export interface GithubRestRef {
-  object: {
-    type: string;
-    url: string;
-    sha: string;
-  };
-}
-
 export interface GithubRestTag {
   name: string;
 }
