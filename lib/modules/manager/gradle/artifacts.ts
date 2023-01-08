@@ -136,9 +136,7 @@ export async function updateArtifacts({
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv,
       toolConstraints: [
         {

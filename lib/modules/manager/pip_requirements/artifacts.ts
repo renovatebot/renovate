@@ -68,9 +68,7 @@ export async function updateArtifacts({
     }
     const execOptions: ExecOptions = {
       cwdFile: '.',
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       preCommands: ['pip install --user hashin'],
       toolConstraints: [
         { toolName: 'python', constraint: config.constraints?.python },
