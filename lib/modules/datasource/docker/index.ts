@@ -21,6 +21,7 @@ import type {
 } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { addSecretForSanitizing } from '../../../util/sanitize';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
@@ -181,6 +182,8 @@ export async function getAuthHeaders(
       logger.warn('Failed to obtain docker registry token');
       return null;
     }
+    // sanitize token
+    addSecretForSanitizing(token);
     return {
       authorization: `Bearer ${token}`,
     };
@@ -247,6 +250,8 @@ async function getECRAuthToken(
     const data = await ecr.getAuthorizationToken({});
     const authorizationToken = data?.authorizationData?.[0]?.authorizationToken;
     if (authorizationToken) {
+      // sanitize token
+      addSecretForSanitizing(authorizationToken);
       return authorizationToken;
     }
     logger.warn(

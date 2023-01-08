@@ -228,6 +228,10 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
+      if (rangeStrategy === 'pin') {
+        // Fall back to replace once pinning logic is done
+        rangeStrategy = 'replace';
+      }
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -396,6 +400,7 @@ export async function lookupUpdates(
     }
     // Strip out any non-changed ones
     res.updates = res.updates
+      .filter((update) => update.newValue !== null || currentValue === null)
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
