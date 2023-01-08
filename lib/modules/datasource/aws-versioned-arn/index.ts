@@ -8,6 +8,12 @@ import { Lazy } from '../../../util/lazy';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+interface AwsVersionedArnFilter {
+  depName: string;
+  runtime: string;
+  architecture: string;
+}
+
 export class AwsVersionedArnDataSource extends Datasource {
   static readonly id = 'aws-versioned-arn';
 
@@ -28,8 +34,12 @@ export class AwsVersionedArnDataSource extends Datasource {
   async getSortedLambdaLayerVersions(
     serializedLambdaLayerFilter: string
   ): Promise<LayerVersionsListItem[]> {
+    const filter: AwsVersionedArnFilter = JSON.parse(serializedLambdaLayerFilter);
+
     const cmd = new ListLayerVersionsCommand({
-      LayerName: JSON.parse(serializedLambdaLayerFilter),
+      LayerName: filter.depName,
+      CompatibleArchitecture: filter.architecture,
+      CompatibleRuntime: filter.runtime,
     });
 
     const matchingLayerVersions = await this.lambda.getValue().send(cmd);
