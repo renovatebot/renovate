@@ -5047,19 +5047,19 @@ exit@^0.1.2:
   resolved "https://registry.yarnpkg.com/exit/-/exit-0.1.2.tgz#0632638f8d877cc82107d30a0fff1a17cba1cd0c"
   integrity sha512-Zk/eNKV2zbjpKzrsQ+n1G6poVbErQxJ0LBOJXaKZ1EViLzH+hrLu9cdXI4zw9dBQJslwBEpbQ2P1oS7nDxs6jQ==
 
-expect-more-jest@5.4.1:
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/expect-more-jest/-/expect-more-jest-5.4.1.tgz#5352c9fa9481a6b08f5eb8c37c8d90bd4aa2db09"
-  integrity sha512-+9FiotIgWnZOaZj8e8maR7LESNST88P9lgakL4xFSXPwhKLQz2koSqoSGyXJDdbu85xO6mV/Cnm8pNYjqtN9rg==
+expect-more-jest@5.4.2:
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/expect-more-jest/-/expect-more-jest-5.4.2.tgz#531178430320c8e537d32f56cb0272025fdf319f"
+  integrity sha512-+jjGGSpAlt0U/zT0V6Fj+a0UUGKQSka+PmPmCZSx/nGmCLH0nW79Zf6467kGiZr/FH8IchK5JzllUEcmFGMH6Q==
   dependencies:
     "@jest/expect-utils" "28.1.0"
-    expect-more "1.2.0"
+    expect-more "1.2.1"
     jest-matcher-utils "28.1.0"
 
-expect-more@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/expect-more/-/expect-more-1.2.0.tgz#cc7b3b6ad194ee54deaf601cf5c80449ed7a276d"
-  integrity sha512-AVnjc5oh2jgiJjOrjbiKxbwLlNA/zsl2044Nbd09H4+2KwThtSLYKhdOusLYOrcToFAa2uBOWR1ExCN4kOWgbQ==
+expect-more@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/expect-more/-/expect-more-1.2.1.tgz#62e7414bafef4b2b3630c098a276eb961e29657f"
+  integrity sha512-rkt/y2x4e6sNDvFUqv5pdVOcOg4NWb/prSzCBth1KAD2oxXkSyeisCJ9+RHfigTLkuHRoxHUF6DEQ2/o9hEG4A==
 
 expect@^29.3.1:
   version "29.3.1"
