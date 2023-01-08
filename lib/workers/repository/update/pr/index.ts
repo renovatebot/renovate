@@ -17,6 +17,7 @@ import {
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import type { PrCache } from '../../../../util/cache/repository/types';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
@@ -76,6 +77,21 @@ export function updatePrDebugData(
   };
 }
 
+function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
+  if (prCache.fingerprint !== prFingerprint) {
+    logger.debug('PR fingerprints mismatch, processing PR');
+    logger.debug({ prFingerprint }, 'prFingerprint');
+    return false;
+  }
+
+  if (getElapsedHours(prCache.lastEdited) < 24) {
+    logger.debug('Processing PR as it has been recently edited'); // edited within 24 hours
+    return false;
+  }
+
+  return true;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -98,16 +114,12 @@ export async function ensurePr(
     const prCache = getPrCache(branchName);
     if (prCache) {
       logger.debug({ prCache }, 'Found existing Pr cache');
-      const lastEditTime = prCache.lastEdited;
       // return if pr cache is valid and pr was last edited before a day
-      if (
-        prFingerprint === prCache.fingerprint &&
-        getElapsedHours(lastEditTime) > 24
-      ) {
+      if (validatePrCache(prCache, prFingerprint)) {
         logger.debug('Cache is valid, skipping PR update');
         return { type: 'with-pr', pr: existingPr };
       }
-      logger.debug('Invaild cache, processing PR');
+      setPrCache(branchName, prFingerprint);
     } else {
       logger.debug('Pr cache not found, creating new');
       setPrCache(branchName, prFingerprint);
@@ -343,7 +355,6 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prFingerprint);
       }
       return { type: 'with-pr', pr: existingPr };
     }
