@@ -2,6 +2,7 @@ import * as httpMock from '../../../../../../test/http-mock';
 import { GlobalConfig } from '../../../../../config/global';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as githubGraphql from '../../../../../util/github/graphql';
+import type { GithubTagItem } from '../../../../../util/github/graphql/types';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getChangeLogJSON } from '.';
@@ -363,7 +364,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         { version: '1.0.1' },
         { version: 'correctPrefix/target@1.0.1' },
         { version: 'wrongPrefix/target-1.0.1' },
-      ] as Partial<ReturnType<typeof githubGraphql.queryTags>> as never);
+      ] as Partial<GithubTagItem[]> as never);
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
