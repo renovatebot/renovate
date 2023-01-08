@@ -4,30 +4,30 @@ import { Matcher } from './base';
 
 export class PackagePrefixesMatcher extends Matcher {
   override matches(
-    { depName }: PackageRuleInputConfig,
+    { depName, packageName }: PackageRuleInputConfig,
     { matchPackagePrefixes }: PackageRule
   ): boolean | null {
     if (is.undefined(matchPackagePrefixes)) {
       return null;
     }
-    if (is.undefined(depName)) {
-      return false;
-    }
 
-    return matchPackagePrefixes.some((prefix) => depName.startsWith(prefix));
+    return matchPackagePrefixes.some(
+      (prefix) =>
+        !!depName?.startsWith(prefix) || !!packageName?.startsWith(prefix)
+    );
   }
 
   override excludes(
-    { depName }: PackageRuleInputConfig,
+    { depName, packageName }: PackageRuleInputConfig,
     { excludePackagePrefixes }: PackageRule
   ): boolean | null {
     if (is.undefined(excludePackagePrefixes)) {
       return null;
     }
-    if (is.undefined(depName)) {
-      return false;
-    }
 
-    return excludePackagePrefixes.some((prefix) => depName.startsWith(prefix));
+    return excludePackagePrefixes.some(
+      (prefix) =>
+        !!depName?.startsWith(prefix) || !!packageName?.startsWith(prefix)
+    );
   }
 }

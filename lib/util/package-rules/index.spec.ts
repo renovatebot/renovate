@@ -1075,124 +1075,81 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
-  it('checks if matchPackageNames selector works for both depName & packageName', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchPackageNames: ['test1'],
-          x: 1,
-        },
-      ],
-    };
+  it.each`
+    matcherName
+    ${'matchPackageNames'}
+    ${'matchPackagePatterns'}
+    ${'matchPackagePrefixes'}
+  `(
+    'checks if $matcherName selector works for both depName & packageName',
+    ({ matcherName }) => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            [matcherName]: ['test1'],
+            x: 1,
+          },
+        ],
+      };
 
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      packageName: 'test1',
-    });
-    const res3 = applyPackageRules({
-      ...config,
-      depName: 'test2',
-      packageName: 'test2',
-    });
-    applyPackageRules(config); // coverage
+      const res1 = applyPackageRules({
+        ...config,
+        depName: 'test1',
+      });
+      const res2 = applyPackageRules({
+        ...config,
+        packageName: 'test1',
+      });
+      const res3 = applyPackageRules({
+        ...config,
+        depName: 'test2',
+        packageName: 'test2',
+      });
+      applyPackageRules(config); // coverage
 
-    expect(res1.x).toBe(1);
-    expect(res2.x).toBe(1);
-    expect(res3.x).toBeUndefined();
-  });
+      expect(res1.x).toBe(1);
+      expect(res2.x).toBe(1);
+      expect(res3.x).toBeUndefined();
+    }
+  );
 
-  it('checks if excludePackageNames selector works for both depName & packageName', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          excludePackageNames: ['test1'],
-          x: 1,
-        },
-      ],
-    };
+  it.each`
+    matcherName
+    ${'excludePackageNames'}
+    ${'excludePackagePatterns'}
+    ${'excludePackagePrefixes'}
+  `(
+    'checks if $matcherName excluding selector works for both depName & packageName',
+    ({ matcherName }) => {
+      const config: TestConfig = {
+        packageRules: [
+          {
+            [matcherName]: ['test1'],
+            x: 1,
+          },
+        ],
+      };
 
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      packageName: 'test1',
-    });
-    const res3 = applyPackageRules({
-      ...config,
-      depName: 'test2',
-      packageName: 'test2',
-    });
-    applyPackageRules(config); // coverage
+      const res1 = applyPackageRules({
+        ...config,
+        depName: 'test1',
+      });
+      const res2 = applyPackageRules({
+        ...config,
+        packageName: 'test1',
+      });
+      const res3 = applyPackageRules({
+        ...config,
+        depName: 'test2',
+        packageName: 'test2',
+      });
+      applyPackageRules(config); // coverage
 
-    expect(res1.x).toBeUndefined();
-    expect(res2.x).toBeUndefined();
-    expect(res3.x).toBe(1);
-  });
-
-  it('checks if matchPackagePatterns selector works for both depName & packageName', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          matchPackagePatterns: ['^test[1|2]'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      packageName: 'test2',
-    });
-    const res3 = applyPackageRules({
-      ...config,
-      depName: 'test3',
-      packageName: 'test3',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBe(1);
-    expect(res2.x).toBe(1);
-    expect(res3.x).toBeUndefined();
-  });
-
-  it('checks if excludePackagePatterns selector works for both depName & packageName', () => {
-    const config: TestConfig = {
-      packageRules: [
-        {
-          excludePackagePatterns: ['^test[1|2]'],
-          x: 1,
-        },
-      ],
-    };
-
-    const res1 = applyPackageRules({
-      ...config,
-      depName: 'test1',
-    });
-    const res2 = applyPackageRules({
-      ...config,
-      packageName: 'test2',
-    });
-    const res3 = applyPackageRules({
-      ...config,
-      packageName: 'test3',
-    });
-    applyPackageRules(config); // coverage
-
-    expect(res1.x).toBeUndefined();
-    expect(res2.x).toBeUndefined();
-    expect(res3.x).toBe(1);
-  });
+      expect(res1.x).toBeUndefined();
+      expect(res2.x).toBeUndefined();
+      expect(res3.x).toBe(1);
+    }
+  );
 
   it('matches matchDepNames(depName)', () => {
     const config: TestConfig = {
