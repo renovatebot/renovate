@@ -1,16 +1,16 @@
-import { PackagePrefixesMatcher } from './package-prefixes';
+import { DepPrefixesMatcher } from './dep-prefixes';
 
 describe('util/package-rules/dep-prefixes', () => {
-  const packagePrefixesMatcher = new PackagePrefixesMatcher();
+  const depPrefixesMatcher = new DepPrefixesMatcher();
 
   describe('match', () => {
     it('should return false if depName is not defined', () => {
-      const result = packagePrefixesMatcher.matches(
+      const result = depPrefixesMatcher.matches(
         {
           depName: undefined,
         },
         {
-          matchPackagePrefixes: ['@opentelemetry'],
+          matchDepPrefixes: ['@opentelemetry'],
         }
       );
       expect(result).toBeFalse();
@@ -19,12 +19,12 @@ describe('util/package-rules/dep-prefixes', () => {
 
   describe('exclude', () => {
     it('should return false if depName is not defined', () => {
-      const result = packagePrefixesMatcher.excludes(
+      const result = depPrefixesMatcher.excludes(
         {
           depName: undefined,
         },
         {
-          excludePackagePrefixes: ['@opentelemetry'],
+          excludeDepPrefixes: ['@opentelemetry'],
         }
       );
       expect(result).toBeFalse();
