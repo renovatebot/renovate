@@ -41,8 +41,7 @@ export async function getTags(
       logger.debug(`No Github tags found for repository:${repository}`);
     }
 
-    const versions = tags.map(({ version }) => version);
-    return versions;
+    return tags.map(({ version }) => version);
   } catch (err) {
     logger.debug(
       { sourceRepo: repository, err },

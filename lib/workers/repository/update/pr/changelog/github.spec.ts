@@ -363,7 +363,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         { version: '1.0.1' },
         { version: 'correctPrefix/target@1.0.1' },
         { version: 'wrongPrefix/target-1.0.1' },
-      ] as never);
+      ] as Partial<ReturnType<typeof githubGraphql.queryTags>> as never);
 
       const upgradeData: BranchUpgradeConfig = {
         manager: 'some-manager',
