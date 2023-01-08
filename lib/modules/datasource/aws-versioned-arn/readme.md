@@ -1,4 +1,5 @@
 This datasource returns releases from a versioned AWS ARN.
+
 It currently supports Lambda Layer ARNs only.
 
 **AWS API configuration**
@@ -29,28 +30,6 @@ Read the [AWS Lambda IAM reference](https://docs.aws.amazon.com/service-authoriz
 
 Because Renovate has no manager for the AWS Lambda Layer datasource, you need to help Renovate by configuring the regex manager to identify the layer dependencies you want updated.
 
-When configuring the regex manager, you have to pass a [filter](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-rds/interfaces/describedbengineversionscommandinput.html#filters) as minified JSON as the `packageName`.
-For example:
-
-```yaml
-# Getting the latest supported MySQL 5.7 version from RDS as a filter would look like:
-
-[
-  {
-    "Name": "engine",
-    "Values": [ "mysql" ]
-  },
-  {
-    "Name": "engine-version",
-    "Values": [ "5.7" ]
-  }
-]
-
-# In order to use it with this datasource, you have to minify it:
-
-[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
-```
-
 Here's an example of using the regex manager to configure this datasource:
 
 ```json
@@ -59,9 +38,9 @@ Here's an example of using the regex manager to configure this datasource:
     {
       "fileMatch": ["\\.tf$"],
       "matchStrings": [
-        ".*layerFilter=(?<lookupName>.+?)[ ]*\n[ ]*(?<depName>[a-zA-Z0-9-_:]*)[ ]*?:[ ]*?[\"|']?(?<currentValue>[.\\d]+)[\"|']?.*"
+        ".*renovate: datasource=aws-versioned-arn architecture=(?<architecture>.*) runtime=(?<runtime>.*)\\s+.* = \"(?<depName>.*):(?<currentValue>\\d+)\""
       ],
-      "datasourceTemplate": "aws-versioned-arn"
+      "versioningTemplate": "loose"
     }
   ]
 }
@@ -70,7 +49,14 @@ Here's an example of using the regex manager to configure this datasource:
 The configuration above matches every Terraform file, and recognizes these lines:
 
 ```yaml
-spec:
-  # amiFilter=[{"Name":"engine","Values":["mysql"]},{"Name":"engine-version","Values":["5.7"]}]
-  engineVersion: 5.7.34
+locals {
+  # renovate: datasource=aws-versioned-arn architecture=x86_64 runtime=python37
+  insight_layer_arn = "arn:aws:lambda:us-east-1:580247275435:layer:LambdaInsightsExtension:21"
+}
+
+resource "aws_lambda_function" "example" {
+  # ... other configuration ...
+
+  layers = [local.insight_layer_arn]
+}
 ```
