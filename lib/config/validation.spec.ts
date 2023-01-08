@@ -253,11 +253,13 @@ describe('config/validation', () => {
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
         matchDepNames: ['angular'],
+        matchDepPrefixes: ['prefix'],
         matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
               matchDepNames: ['meteor'],
+              matchDepPrefixes: ['prefix'],
               matchPackageNames: ['meteor'],
               enabled: true,
             },
@@ -273,9 +275,9 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(4);
+      expect(warnings).toHaveLength(5);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(4);
+      expect(errors).toHaveLength(5);
     });
 
     it('ignore packageRule nesting validation for presets', async () => {

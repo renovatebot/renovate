@@ -4,6 +4,7 @@ import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
+import { DepPrefixesMatcher } from './dep-prefixes';
 import { DepTypesMatcher } from './dep-types';
 import { FilesMatcher } from './files';
 import { LanguagesMatcher } from './languages';
@@ -24,6 +25,7 @@ export default matchers;
 matchers.push([
   new DepNameMatcher(),
   new DepPatternsMatcher(),
+  new DepPrefixesMatcher(),
   new PackageNameMatcher(),
   new PackagePatternsMatcher(),
   new PackagePrefixesMatcher(),

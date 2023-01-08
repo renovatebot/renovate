@@ -1112,4 +1112,38 @@ describe('util/package-rules/index', () => {
     expect(res1.x).toBeUndefined();
     expect(res2.x).toBe(1);
   });
+
+  it('matches matchDepPrefixes', () => {
+    const config1: TestConfig = {
+      packageRules: [
+        {
+          matchDepPrefixes: ['xyz/'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({ ...config1, depName: 'xyz/depMame' });
+    const res2 = applyPackageRules({ ...config1, depName: 'wxy/depMame' });
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepPrefixes', () => {
+    const config1: TestConfig = {
+      packageRules: [
+        {
+          excludeDepPrefixes: ['xyz/'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({ ...config1, depName: 'xyz/depMame' });
+    const res2 = applyPackageRules({ ...config1, depName: 'wxy/depMame' });
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
 });

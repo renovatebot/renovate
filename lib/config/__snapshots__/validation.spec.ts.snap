@@ -245,6 +245,10 @@ exports[`config/validation validateConfig(config) selectors outside packageRules
     "topic": "Configuration Error",
   },
   {
+    "message": "matchDepPrefixes: matchDepPrefixes should be inside a \`packageRule\` only",
+    "topic": "Configuration Error",
+  },
+  {
     "message": "matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
     "topic": "Configuration Error",
   },

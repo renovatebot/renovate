@@ -1633,6 +1633,8 @@ Invalid if used outside of a `packageRule`.
 
 ### excludeDepPatterns
 
+### excludeDepPrefixes
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -1867,6 +1869,8 @@ Use `matchPaths` instead if you need more flexible matching.
 ### matchDepNames
 
 ### matchDepPatterns
+
+### matchDepPrefixes
 
 ### matchPackageNames
 

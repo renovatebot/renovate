@@ -303,11 +303,13 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchDepNames?: string[];
   matchDepPatterns?: string[];
+  matchDepPrefixes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
   excludeDepNames?: string[];
   excludeDepPatterns?: string[];
+  excludeDepPrefixes?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
