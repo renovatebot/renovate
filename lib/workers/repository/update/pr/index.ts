@@ -113,15 +113,17 @@ export async function ensurePr(
     logger.debug('Found existing PR');
     const prCache = getPrCache(branchName);
     if (prCache) {
-      logger.debug({ prCache }, 'Found existing Pr cache');
+      logger.debug({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was last edited before a day
       if (validatePrCache(prCache, prFingerprint)) {
-        logger.debug('Cache is valid, skipping PR update');
+        logger.debug(
+          'PR cache matches, and no PR changes in last 24h, so skipping PR body check'
+        );
         return { type: 'with-pr', pr: existingPr };
       }
       setPrCache(branchName, prFingerprint);
     } else {
-      logger.debug('Pr cache not found, creating new');
+      logger.debug('PR cache not found, creating new');
       setPrCache(branchName, prFingerprint);
     }
   }
