@@ -98,7 +98,7 @@ function cronMatches(cron: string, now: DateTime): boolean {
     return false;
   }
 
-  if (parsedCron.weekDays.indexOf(now.weekday) === -1) {
+  if (parsedCron.weekDays.indexOf(now.weekday % 7) === -1) {
     // Weekdays mismatch
     return false;
   }
