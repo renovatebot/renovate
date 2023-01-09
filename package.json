@@ -166,6 +166,7 @@
     "auth-header": "1.0.0",
     "aws4": "1.11.0",
     "azure-devops-node-api": "11.2.0",
+    "hcl2-parser": "1.0.3",
     "bunyan": "1.8.15",
     "cacache": "17.0.4",
     "cacheable-lookup": "5.0.4",
