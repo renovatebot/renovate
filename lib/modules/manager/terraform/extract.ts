@@ -14,25 +14,33 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
 
-  const contentCheckList = [];
+  const passedExtractors = [];
   for (const extractor of resourceExtractors) {
-    contentCheckList.push(...extractor.getCheckList());
+    if (checkFileContainsDependency(content, extractor.getCheckList())) {
+      passedExtractors.push(extractor);
+    }
   }
 
-  if (!checkFileContainsDependency(content, contentCheckList)) {
+  if (!passedExtractors.length) {
     logger.trace(
       { fileName },
       'preflight content check has not found any relevant content'
     );
     return null;
   }
+  logger.trace(
+    { fileName },
+    `preflight content check passed for extractors: [${passedExtractors
+      .map((value) => value.constructor.name)
+      .toString()}]`
+  );
 
   const dependencies = [];
   const hclMap = hcl.parseHCL(content);
 
   const locks = await extractLocksForPackageFile(fileName);
 
-  for (const extractor of resourceExtractors) {
+  for (const extractor of passedExtractors) {
     const deps = extractor.extract(hclMap, locks);
     dependencies.push(...deps);
   }
