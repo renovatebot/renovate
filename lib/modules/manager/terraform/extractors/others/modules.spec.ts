@@ -1,11 +1,19 @@
 import {
+  ModuleExtractor,
   azureDevOpsSshRefMatchRegex,
   bitbucketRefMatchRegex,
   gitTagsRefMatchRegex,
   githubRefMatchRegex,
 } from './modules';
 
-describe('modules/manager/terraform/modules', () => {
+describe('modules/manager/terraform/extractors/others/modules', () => {
+  const extractor = new ModuleExtractor();
+
+  it('return empty array if no module is found', () => {
+    const res = extractor.extract({});
+    expect(res).toBeArrayOfSize(0);
+  });
+
   describe('githubRefMatchRegex', () => {
     it('should split project and tag from source', () => {
       const groups = githubRefMatchRegex.exec(
