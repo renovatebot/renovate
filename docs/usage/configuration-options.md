@@ -18,6 +18,7 @@ You can store your Renovate configuration file in one of these locations:
 1. `.gitlab/renovate.json5`
 1. `.renovaterc`
 1. `.renovaterc.json`
+1. `.renovaterc.json5`
 1. `package.json` _(within a `"renovate"` section)_
 
 <!-- prettier-ignore -->
@@ -407,8 +408,21 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 
 ## commitMessageTopic
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
+You can use `commitMessageTopic` to change the `commitMessage` and `prTitle` without copy/pasting the whole string.
+The "topic" usually refers to the dependency being updated, for example: `"dependency react"`.
+
+We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules` array to set the commit message topic, like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "commitMessageTopic": "{{depName}}"
+    }
+  ]
+}
+```
 
 ## composerIgnorePlatformReqs
 
@@ -1412,14 +1426,23 @@ This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
 Supported lock files are:
 
-- `package-lock.json`
-- `yarn.lock`
-- `pnpm-lock.yaml`
-- `composer.lock`
-- `Gemfile.lock`
-- `poetry.lock`
+- `.terraform.lock.hcl`
 - `Cargo.lock`
+- `Chart.lock`
+- `composer.lock`
+- `flake.lock`
+- `Gemfile.lock`
+- `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `package-lock.json`
+- `packages.lock.json`
+- `Pipfile.lock`
+- `pnpm-lock.yaml`
+- `poetry.lock`
+- `pubspec.lock`
+- `pyproject.toml`
+- `requirements.txt`
+- `yarn.lock`
 
 Others may be added via feature request.
 
@@ -1605,6 +1628,10 @@ Use the syntax `!/ /` like the following:
 
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
+
+### excludeDepNames
+
+### excludeDepPatterns
 
 ### excludePackageNames
 
@@ -1836,6 +1863,10 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchDepNames
+
+### matchDepPatterns
 
 ### matchPackageNames
 
@@ -2081,14 +2112,18 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
-- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
-- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
-- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
-- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 

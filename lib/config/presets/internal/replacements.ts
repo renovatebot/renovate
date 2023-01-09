@@ -23,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'replacements:parcel-css-to-lightningcss',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
+      'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
       'replacements:xmldom-to-scoped',
@@ -569,6 +570,17 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['react-query'],
         replacementName: '@tanstack/react-query',
         replacementVersion: '4.0.5',
+      },
+    ],
+  },
+  'react-scripts-ts-to-react-scripts': {
+    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['react-scripts-ts'],
+        replacementName: 'react-scripts',
+        replacementVersion: '2.1.8',
       },
     ],
   },

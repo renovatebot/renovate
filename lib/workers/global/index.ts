@@ -20,6 +20,7 @@ import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -109,6 +110,13 @@ export async function resolveGlobalExtends(
 export async function start(): Promise<number> {
   let config: AllConfig;
   try {
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
+      addSecretForSanitizing(process.env.AWS_SECRET_ACCESS_KEY, 'global');
+    }
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SESSION_TOKEN)) {
+      addSecretForSanitizing(process.env.AWS_SESSION_TOKEN, 'global');
+    }
+
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();

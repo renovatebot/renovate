@@ -7,6 +7,12 @@ spec:
 ---
 kind: Pipeline
 spec:
+  finally:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-finally:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
   tasks:
   - taskRef:
       resolver: bundles
@@ -87,6 +93,13 @@ spec:
     params:
     - name: bundle
       value: gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver
+---
+kind: PipelineRun
+spec:
+  pipelineSpec:
+    tasks:
+    - taskRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/inline-pipeline
 ---
 kind: Pipeline
 spec:

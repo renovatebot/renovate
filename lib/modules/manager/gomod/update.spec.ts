@@ -362,5 +362,29 @@ describe('modules/manager/gomod/update', () => {
       });
       expect(res).toBeNull();
     });
+
+    it('should perform indirect upgrades when top-level', () => {
+      const upgrade = {
+        depName: 'github.com/davecgh/go-spew',
+        managerData: { lineNumber: 4 },
+        newValue: 'v1.1.1',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
+
+    it('should perform indirect upgrades when in require blocks', () => {
+      const upgrade = {
+        depName: 'github.com/go-ole/go-ole',
+        managerData: { lineNumber: 23, multiLine: true },
+        newValue: 'v1.5.0',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod3, upgrade });
+      expect(res).not.toEqual(gomod2);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
   });
 });

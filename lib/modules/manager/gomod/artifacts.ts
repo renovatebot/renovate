@@ -259,9 +259,7 @@ export async function updateArtifacts({
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints: [
         {
           toolName: 'golang',

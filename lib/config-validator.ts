@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // istanbul ignore file
+import 'source-map-support/register';
 import { dequal } from 'dequal';
 import { pathExists, readFile } from 'fs-extra';
 import { configFileNames } from './config/app-strings';

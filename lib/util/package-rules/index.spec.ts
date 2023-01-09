@@ -727,6 +727,7 @@ describe('util/package-rules/index', () => {
           x: 1,
         },
       ],
+      versioning: 'npm',
     };
     const res1 = applyPackageRules({
       ...config,
@@ -1015,5 +1016,101 @@ describe('util/package-rules/index', () => {
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
+  });
+
+  it('matches matchDepNames(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepNames: ['test1'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test2',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepNames(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepNames: ['test1'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test2',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
+  });
+
+  it('matches matchDepPatterns(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchDepPatterns: ['^test$'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBe(1);
+    expect(res2.x).toBeUndefined();
+  });
+
+  it('matches excludeDepPatterns(depName)', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          excludeDepPatterns: ['^test$'],
+          x: 1,
+        },
+      ],
+    };
+
+    const res1 = applyPackageRules({
+      ...config,
+      depName: 'test',
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      depName: 'test1',
+    });
+    applyPackageRules(config); // coverage
+
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBe(1);
   });
 });
