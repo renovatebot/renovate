@@ -727,6 +727,7 @@ describe('util/package-rules/index', () => {
           x: 1,
         },
       ],
+      versioning: 'npm',
     };
     const res1 = applyPackageRules({
       ...config,
