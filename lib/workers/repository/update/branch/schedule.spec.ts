@@ -244,19 +244,19 @@ describe('workers/repository/update/branch/schedule', () => {
         mockDate.set('2023-01-08T10:50:00.000'); // Locally Sunday 8 January 2023 10:50am
       });
 
-      it('approves on Sundays if the weekday is *', () => {
+      it('approves if the weekday is *', () => {
         config.schedule = ['* * * * *'];
         const res = schedule.isScheduledNow(config);
         expect(res).toBeTrue();
       });
 
-      it('approves on Sundays if the weekday is 0', () => {
+      it('approves if the weekday is 0', () => {
         config.schedule = ['* * * * 0'];
         const res = schedule.isScheduledNow(config);
         expect(res).toBeTrue();
       });
 
-      it('rejects on Sundays if the weekday is 1', () => {
+      it('rejects if the weekday is 1', () => {
         config.schedule = ['* * * * 1'];
         const res = schedule.isScheduledNow(config);
         expect(res).toBeFalse();
