@@ -23,9 +23,7 @@ async function swiftPackageResolve(
   const cmd = `swift package resolve`;
   const execOptions: ExecOptions = {
     cwdFile: packageFile,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [
       {
         toolName: 'swift',
