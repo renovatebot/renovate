@@ -101,9 +101,7 @@ export async function updateArtifacts({
         PIPENV_CACHE_DIR: await ensureCacheDir('pipenv'),
         PIP_CACHE_DIR: await ensureCacheDir('pip'),
       },
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
       toolConstraints: [
         {

@@ -18,7 +18,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   bundler: {
     datasource: 'rubygems',
     depName: 'bundler',
-    versioning: 'ruby',
+    versioning: rubyVersioningId,
   },
   cocoapods: {
     datasource: 'rubygems',
@@ -116,6 +116,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
   },
+  ruby: {
+    datasource: 'github-releases',
+    depName: 'containerbase/ruby-prebuild',
+    versioning: rubyVersioningId,
+  },
   rust: {
     datasource: 'docker',
     depName: 'rust',
@@ -135,6 +140,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     depName: 'yarn',
     versioning: npmVersioningId,
+  },
+  dart: {
+    datasource: 'dart-version',
+    depName: 'dart',
+    versioning: semverVersioningId,
+  },
+  flutter: {
+    datasource: 'flutter-version',
+    depName: 'flutter',
+    versioning: semverVersioningId,
   },
 };
 
