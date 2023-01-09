@@ -49,6 +49,16 @@ In the example above `baseDir` is the string you want to transform into a valid 
 
 Read the [MDN Web Docs, encodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) to learn more.
 
+### decodeURIComponent
+
+If you want to decode a percent-encoded string, use the built-in function `decodeURIComponent` like this:
+
+`{{{decodeURIComponent depName}}}`
+
+In the example above `depName` is the string you want to decode.
+
+Read the [MDN Web Docs, decodeURIComponent()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/decodeURIComponent) to learn more.
+
 ### replace
 
 The `replace` helper replaces _all_ found strings with the replacement string.
@@ -85,3 +95,14 @@ In the example above, it will only show a text if `isMajor=true` and `hasRelease
 Returns `true` if at least one expression is `true`.
 
 `{{#if (or isPatch isSingleVersion}}Small update, safer to merge and release.{{else}}Check out the changelog for all versions before merging!{{/if}}`
+
+## Environment variables
+
+By default, you can only access a handful of basic environment variables like `HOME` or `PATH`.
+This is for security reasons.
+
+`HOME is {{env.HOME}}`
+
+If you're self-hosting Renovate, you can expose additional variables with the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option.
+
+You can also use the [`exposeAllEnv`](https://docs.renovatebot.com/self-hosted-configuration/#exposeallenv) config option to allow all environment variables in templates, but make sure to consider the security implications of giving the scripts unrestricted access to all variables.

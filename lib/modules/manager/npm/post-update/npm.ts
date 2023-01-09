@@ -66,9 +66,7 @@ export async function generateLockFile(
         await getNodeToolConstraint(config, upgrades, lockFileDir),
         npmToolConstraint,
       ],
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
     };
     // istanbul ignore if
     if (GlobalConfig.get('exposeAllEnv')) {

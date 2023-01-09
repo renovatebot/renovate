@@ -45,3 +45,13 @@ export function uniqueStrings(
 ): boolean {
   return elements.indexOf(element) === index;
 }
+
+export function looseEquals(
+  a: string | null | undefined,
+  b: string | null | undefined
+): boolean {
+  if (!(a && b)) {
+    return a === b;
+  }
+  return a.localeCompare(b, undefined, { sensitivity: 'base' }) === 0;
+}

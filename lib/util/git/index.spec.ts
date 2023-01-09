@@ -385,6 +385,18 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('hasDiff(sourceRef, targetRef)', () => {
+    it('compare without changes', () => {
+      return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();
+    });
+
+    it('compare with changes', () => {
+      return expect(
+        git.hasDiff('origin/master', 'origin/renovate/future_branch')
+      ).resolves.toBeTrue();
+    });
+  });
+
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file: FileChange = {
@@ -1035,6 +1047,17 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('fetchRevSpec()', () => {
+    it('fetchRevSpec()', async () => {
+      await git.fetchRevSpec(
+        `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`
+      );
+      //checkout this duplicate
+      const sha = await git.checkoutBranch(`other/${defaultBranch}`);
+      expect(sha).toBe(git.getBranchCommit(defaultBranch));
+    });
+  });
+
   describe('installHook()', () => {
     it('installHook()', async () => {
       //git.getCommitMessages() only returns the first line (i.e. subject) of each msg
@@ -1058,38 +1081,6 @@ describe('util/git/index', () => {
 
       const messages = await git.getCommitMessages();
       expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
-    });
-  });
-
-  describe('fetchRevSpec()', () => {
-    it('fetchRevSpec()', async () => {
-      //duplicate defaultBranch as local branch with prefix "origin/"
-      await git.fetchRevSpec(
-        `refs/heads/${defaultBranch}:refs/heads/origin/${defaultBranch}`
-      );
-      //checkout this duplicate
-      const sha = await git.checkoutBranch(`origin/${defaultBranch}`);
-      expect(sha).toBe(git.getBranchCommit(defaultBranch));
-    });
-  });
-
-  describe('hasDiff()', () => {
-    it('hasDiff() - src == dst should always be equal', () => {
-      return expect(
-        git.hasDiff(
-          'remotes/origin/renovate/equal_branch',
-          'remotes/origin/renovate/equal_branch'
-        )
-      ).resolves.toBeFalse();
-    });
-
-    it('hasDiff() - compare with modified branch should return true', () => {
-      return expect(
-        git.hasDiff(
-          `remotes/origin/${defaultBranch}`,
-          'remotes/origin/renovate/modified_branch'
-        )
-      ).resolves.toBeTrue();
     });
   });
 });

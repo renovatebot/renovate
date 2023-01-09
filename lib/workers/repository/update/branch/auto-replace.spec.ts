@@ -103,6 +103,22 @@ describe('workers/repository/update/branch/auto-replace', () => {
       expect(res).toEqual(srcAlreadyUpdated);
     });
 
+    it('handles no work', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      const src = `     ${script}   `;
+      upgrade.baseDeps = extractPackageFile(src)?.deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.packageName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = '7.0.9';
+      upgrade.newValue = '7.1.0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = script;
+      reuseExistingBranch = false;
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch, false);
+      expect(res).toEqual(src);
+    });
+
     it('returns existing content if replaceString mismatch', async () => {
       const script =
         '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
@@ -160,6 +176,42 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
         `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+      );
+    });
+
+    it('succeeds when using autoReplaceStringTemplate to update depName when using regex', async () => {
+      const yml =
+        "- project: 'pipeline-fragments/docker-test'\n" +
+        'ref: 3-0-0\n' +
+        "file: 'ci-include-docker-test-base.yml'\n" +
+        "- project: 'pipeline-fragments/docker-lint'\n" +
+        'ref: 2-4-0\n' +
+        "file: 'ci-include-docker-lint-base.yml'";
+      upgrade.manager = 'regex';
+      upgrade.depName = 'pipeline-solutions/gitlab/fragments/docker-lint';
+      upgrade.currentValue = '2-4-0';
+      upgrade.newValue = '2-4-1';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = "'pipeline-fragments/docker-lint'\nref: 2-4-0";
+      upgrade.packageFile = '.gitlab-ci.yml';
+      upgrade.autoReplaceStringTemplate =
+        "'{{{depName}}}'\nref: {{{newValue}}}";
+      upgrade.matchStringsStrategy = 'combination';
+
+      // If the new "name" is not added to the matchStrings, the regex matcher fails to extract from `newContent` as
+      // there's nothing defined in there anymore that it can match
+      upgrade.matchStrings = [
+        '[\'"]?(?<depName>pipeline-fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
+        '[\'"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/docker-lint)[\'"]?\\s*ref:\\s[\'"]?(?<currentValue>[\\d-]*)[\'"]?',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        "- project: 'pipeline-fragments/docker-test'\n" +
+          'ref: 3-0-0\n' +
+          "file: 'ci-include-docker-test-base.yml'\n" +
+          "- project: 'pipeline-solutions/gitlab/fragments/docker-lint'\n" +
+          'ref: 2-4-1\n' +
+          "file: 'ci-include-docker-lint-base.yml'"
       );
     });
 

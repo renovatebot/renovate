@@ -23,7 +23,7 @@ describe('modules/manager/gradle/parser/common', () => {
 
       globalVars: {},
       deps: [],
-      depRegistryUrls: [],
+      registryUrls: [],
 
       varTokens: [],
       tmpTokenStore: {},

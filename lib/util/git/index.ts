@@ -28,6 +28,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -256,9 +257,8 @@ export async function installHook(
   await syncGit();
   const localDir = GlobalConfig.get('localDir')!;
   const gitHooks = upath.join(localDir, '.git/hooks');
-  await fs.mkdir(gitHooks, { recursive: true });
   await fs.writeFile(`${gitHooks}/${name}`, hookSource);
-  await fs.chmod(`${gitHooks}/${name}`, fs.constants.S_IRWXU);
+  await fs.chmod(`${gitHooks}/${name}`, 0o500);
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -477,6 +477,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
 }
 
 // istanbul ignore next
@@ -510,7 +511,7 @@ export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
-    n: 10,
+    n: 20,
     format: { message: '%s' },
   });
   return res.all.map((commit) => commit.message);

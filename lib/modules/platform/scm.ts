@@ -31,7 +31,7 @@ const scmProxy: ProxyHandler<PlatformScm> = {
     if (typeof _scm[prop] !== 'undefined') {
       return _scm[prop];
     }
-    return Reflect.get(_target, prop, receiver);
+    return Reflect.get(target, prop, receiver);
   },
 };
 
