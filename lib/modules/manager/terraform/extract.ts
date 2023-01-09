@@ -38,10 +38,5 @@ export async function extractPackageFile(
   }
 
   dependencies.forEach((value) => delete value.managerData);
-  if (dependencies.length) {
-    return { deps: dependencies };
-  }
-
-  /* istanbul ignore next */
-  return null;
+  return { deps: dependencies };
 }
