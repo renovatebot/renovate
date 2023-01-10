@@ -2046,6 +2046,12 @@ These updates have all been created already. Click a checkbox below to force a r
 `;
 
   describe('massageMarkdown(input)', () => {
+    it('strips invalid unicode null characters', () => {
+      expect(
+        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
+      ).toBe("The source contains 'Ruby' at: 2.7.6.219");
+    });
+
     it('returns updated pr body', async () => {
       jest.mock('../utils/pr-body');
       const { smartTruncate } = require('../utils/pr-body');
@@ -2073,12 +2079,6 @@ These updates have all been created already. Click a checkbox below to force a r
       gitlab.massageMarkdown(prBody);
       expect(smartTruncate).toHaveBeenCalledTimes(1);
       expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
-    });
-
-    it('strips invalid unicode null characters', () => {
-      expect(
-        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
-      ).toBe("The source contains 'Ruby' at: 2.7.6.219");
     });
   });
 
