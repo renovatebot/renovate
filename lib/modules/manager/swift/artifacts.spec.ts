@@ -273,6 +273,69 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
+  it('returns updated Package.resolved with install binarySource & constraints', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '5.0.0' },
+        { version: '5.7.0' },
+        { version: '5.7.1' },
+      ],
+    });
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
+    fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.getParentDir.mockReturnValueOnce('');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('New Package.resolved');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await swift.updateArtifacts({
+        packageFileName: 'Package.swift',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          constraints: {
+            swift: '5.4.0',
+          },
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'Package.resolved',
+          contents: 'New Package.resolved',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool swift 5.4.0',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
+          },
+        },
+      },
+      {
+        cmd: 'swift package resolve',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
+  });
+
   it('returns updated Package.resolved with docker binarySource', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     datasource.getPkgReleases.mockResolvedValueOnce({
