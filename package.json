@@ -156,7 +156,7 @@
     "@opentelemetry/semantic-conventions": "1.8.0",
     "@renovatebot/osv-offline": "1.1.0",
     "@renovatebot/pep440": "2.1.6",
-    "@renovatebot/ruby-semver": "1.1.7",
+    "@renovatebot/ruby-semver": "1.1.8",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
     "@yarnpkg/core": "3.3.1",
