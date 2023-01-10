@@ -699,7 +699,7 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/PR/g), 'MR')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
     // Strip unicode null characters as GitLab markdown does not permit them
-    .replace(regEx(/\u0000/g), "");
+    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
 
   if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
