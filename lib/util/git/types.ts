@@ -74,7 +74,7 @@ export interface CommitFilesConfig {
   targetBranch?: string;
   branchName: string;
   files: FileChange[];
-  message: string;
+  message: string | string[];
   force?: boolean;
   platformCommit?: boolean;
 }
