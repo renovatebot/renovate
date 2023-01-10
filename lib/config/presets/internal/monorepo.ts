@@ -7,7 +7,10 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
-  'algolia-instantsearch': 'https://github.com/algolia/instantsearch',
+  'algolia-instantsearch': [
+    'https://github.com/algolia/instantsearch',
+    'https://github.com/algolia/instantsearch.js',
+  ],
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
