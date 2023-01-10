@@ -215,8 +215,15 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
-  it('returns updated Package.resolved with global binarySource', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
+  it('returns updated Package.resolved with install binarySource', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '5.0.0' },
+        { version: '5.7.0' },
+        { version: '5.7.1' },
+      ],
+    });
     swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
@@ -246,6 +253,17 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'install-tool swift 5.7.1',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          encoding: 'utf-8',
+          env: {
+            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
+            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
+          },
+        },
+      },
       {
         cmd: 'swift package resolve',
         options: {
