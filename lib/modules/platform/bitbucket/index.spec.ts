@@ -985,6 +985,20 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
     });
+
+    it('hasReviewers', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, {
+        ...pr,
+        reviewers: [reviewer],
+      });
+      expect(await bitbucket.getPr(5)).toMatchSnapshot();
+    });
   });
 
   describe('massageMarkdown()', () => {
