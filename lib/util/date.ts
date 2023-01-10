@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 const ONE_MINUTE_MS = 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * ONE_MINUTE_MS;
 
@@ -12,10 +14,10 @@ export function getElapsedMinutes(date: Date): number {
 }
 
 export function getElapsedHours(time: Date | string): number {
-  const pastTime = typeof time === 'string' ? new Date(time) : time;
-  const currentTime = new Date();
-  const millisecondsPerHour = 1000 * 60 * 60;
-  return Math.round(
-    (currentTime.getTime() - pastTime.getTime()) / millisecondsPerHour
-  );
+  const pastTime =
+    typeof time === 'string'
+      ? DateTime.fromISO(time)
+      : DateTime.fromJSDate(time);
+  const diff = DateTime.now().diff(pastTime, 'hours');
+  return diff.hours;
 }
