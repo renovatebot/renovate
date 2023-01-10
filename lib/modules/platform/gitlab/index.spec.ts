@@ -1895,6 +1895,33 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr?.hasAssignees).toBeTrue();
     });
+
+    it('returns the PR with reviewers', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'do something',
+          description: 'a merge request',
+          state: 'merged',
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          assignees: [],
+          reviewers: [
+            { id: 1, username: 'foo' },
+            { id: 2, username: 'bar' },
+          ],
+        });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+      expect(pr?.hasReviewers).toBeTrue();
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
