@@ -9,7 +9,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
   }
 
   extract(hclRoot: any, locks: ProviderLock[]): PackageDependency[] {
-    const providerTypes = hclRoot.provider;
+    const providerTypes = hclRoot?.provider;
     if (is.nullOrUndefined(providerTypes)) {
       return [];
     }
