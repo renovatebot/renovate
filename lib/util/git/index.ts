@@ -1195,11 +1195,16 @@ export async function clearRenovateRefs(): Promise<void> {
       /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
         for (const ref of obsoleteRefs) {
-          const pushOpts = ['--delete', 'origin', ref];
-          await git.push(pushOpts);
+          try {
+            const pushOpts = ['--delete', 'origin', ref];
+            await git.push(pushOpts);
+          } catch (err) /* istanbul ignore next */ {
+            logger.debug({ err }, 'Error deleting obsolete refs');
+            break;
+          }
         }
       } else {
-        throw err;
+        logger.warn({ err }, 'Error deleting obsolete refs');
       }
     }
   }

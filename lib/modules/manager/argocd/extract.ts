@@ -81,6 +81,7 @@ export function extractPackageFile(
   }
 
   const deps = definitions
+    .filter(is.plainObject)
     .map((definition) => createDependency(definition))
     .filter(is.truthy);
 
