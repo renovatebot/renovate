@@ -2573,7 +2573,6 @@ describe('modules/platform/github/index', () => {
         },
         displayNumber: 'Pull Request #1234',
         hasAssignees: true,
-        hasReviewers: true,
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',

@@ -1944,7 +1944,6 @@ describe('modules/platform/gitlab/index', () => {
         });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
-      expect(pr?.hasReviewers).toBeTrue();
     });
   });
 

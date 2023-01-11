@@ -986,7 +986,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
     });
 
-    it('hasReviewers', async () => {
+    it('reviewers', async () => {
       const reviewer = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',

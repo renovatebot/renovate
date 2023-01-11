@@ -11,7 +11,6 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
   const bodyStruct = pr.bodyStruct ?? getPrBodyStruct(pr.body);
   const result: GhPr = {
     displayNumber: `Pull Request #${pr.number}`,
-    hasReviewers: false,
     number: pr.number,
     sourceBranch: pr.head?.ref,
     title: pr.title,
@@ -39,7 +38,6 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
   }
 
   if (pr.requested_reviewers) {
-    result.hasReviewers = true;
     result.reviewers = pr.requested_reviewers
       .map(({ login }) => login)
       .filter<string>(is.nonEmptyString);

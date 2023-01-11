@@ -292,12 +292,10 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 
   const res: Pr = {
     displayNumber: `Pull Request #${pr.id}`,
-    hasReviewers: false,
     ...utils.prInfo(pr),
   };
 
   if (is.nonEmptyArray(pr.reviewers)) {
-    res.hasReviewers = true;
     res.reviewers = pr.reviewers
       .map(({ uuid }) => uuid)
       .filter(is.nonEmptyString);

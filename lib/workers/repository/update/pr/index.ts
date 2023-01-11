@@ -293,7 +293,7 @@ export async function ensurePr(
             ).length > 0
           );
         }
-        return !!pr.hasReviewers;
+        return pr.reviewers ? pr.reviewers.length > 0 : false;
       };
       if (
         !existingPr.hasAssignees &&
