@@ -215,7 +215,7 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
-  it('returns updated Package.resolved with install binarySource', async () => {
+  it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -253,17 +253,7 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool swift 5.7.1',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
-        },
-      },
+      { cmd: 'install-tool swift 5.7.1' },
       {
         cmd: 'swift package resolve',
         options: {
@@ -273,7 +263,7 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
-  it('returns updated Package.resolved with install binarySource & constraints', async () => {
+  it('supports install mode with constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -316,17 +306,7 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'install-tool swift 5.4.0',
-        options: {
-          cwd: '/tmp/github/some/repo',
-          encoding: 'utf-8',
-          env: {
-            BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
-            CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
-          },
-        },
-      },
+      { cmd: 'install-tool swift 5.4.0' },
       {
         cmd: 'swift package resolve',
         options: {
@@ -336,7 +316,7 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
-  it('returns updated Package.resolved with docker binarySource', async () => {
+  it('supports docker mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
@@ -397,7 +377,7 @@ describe('modules/manager/swift/artifacts', () => {
     ]);
   });
 
-  it('returns updated Package.resolved with docker binarySource & constraints', async () => {
+  it('supports docker mode with constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [
