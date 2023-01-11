@@ -16,6 +16,8 @@ jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
 jest.mock('./util');
 
+process.env.BUILDPACK = 'true';
+
 const config: UpdateArtifactsConfig = {};
 
 const adminConfig: RepoGlobalConfig = {
