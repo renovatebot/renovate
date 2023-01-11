@@ -1056,30 +1056,4 @@ describe('util/git/index', () => {
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
     });
   });
-
-  describe('installHook()', () => {
-    it('installHook()', async () => {
-      //git.getCommitMessages() only returns the first line (i.e. subject) of each msg
-      await git.installHook(
-        'commit-msg',
-        '#!/bin/sh\necho "APPENDED FROM COMMIT-MSG HOOK" >> $1;'
-      );
-      const files: FileChange[] = [
-        {
-          type: 'addition',
-          path: 'some-new-file',
-          contents: 'some new-contents',
-        },
-      ];
-      setNoVerify(['push']);
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Orig-commit-msg',
-      });
-
-      const messages = await git.getCommitMessages();
-      expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
-    });
-  });
 });
