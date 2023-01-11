@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type { ExtractConfig, PackageFile } from '../types';
 import { resourceExtractors } from './extractors';
@@ -37,6 +38,10 @@ export async function extractPackageFile(
 
   const dependencies = [];
   const hclMap = hcl.parseHCL(content);
+  if (is.nullOrUndefined(hclMap)) {
+    logger.trace({ fileName }, 'failed to parse HCL file');
+    return null;
+  }
 
   const locks = await extractLocksForPackageFile(fileName);
 
