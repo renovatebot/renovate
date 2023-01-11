@@ -137,7 +137,8 @@ If you have enabled branch protection which prevents Renovate from automerging d
 When automerge is enabled on a PR, Renovate will _not_ add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
 If tests subsequently _fail_, making automerge not possible, then Renovate will add the configured assignees and/or reviewers.
 
-Note: Revovate won't add reviewers if they are already present. If for some reason you want to override such behavior, you can use `ignoreReviewers` to specify those which should be filtered out in such consideration.
+Note: Renovate won't add assignees and reviewers to a PR with failing checks if the PR already has assignees or reviewers present.
+If there are accounts you wish to ignore (i.e. add assignees and reviewers regardless) then add them to  `ignoreReviewers` to specify those which should be filtered out in such consideration.
 
 ## Frequent problems and how to resolve them
 
