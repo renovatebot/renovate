@@ -26,7 +26,7 @@ export function isValid(input: string): boolean {
     try {
       return npm.isValid(hashicorp2npm(input));
     } catch (err) {
-      logger.debug({ value: input }, 'Unsupported hashicorp versioning value');
+      logger.trace({ value: input }, 'Unsupported hashicorp versioning value');
       return false;
     }
   }
