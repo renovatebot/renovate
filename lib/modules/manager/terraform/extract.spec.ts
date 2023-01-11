@@ -708,5 +708,16 @@ describe('modules/manager/terraform/extract', () => {
         },
       ]);
     });
+
+    it('return null if invalid HCL file', async () => {
+      const res = await extractPackageFile(
+        `
+          resource my provider
+        `,
+        'tfeWorkspace.tf',
+        {}
+      );
+      expect(res).toBeNull();
+    });
   });
 });

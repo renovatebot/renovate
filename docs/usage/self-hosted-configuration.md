@@ -519,6 +519,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingRebaseCheckbox
+
 ## optimizeForDisabled
 
 When this option is `true`, Renovate will do the following during repository initialization:
