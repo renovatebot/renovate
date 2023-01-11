@@ -1018,7 +1018,10 @@ export class DockerDatasource extends Datasource {
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
-      if (currentDigest) {
+      if (
+        currentDigest &&
+        regEx(/^sha256:[0-9a-f]{64}$/i).test(currentDigest)
+      ) {
         architecture = await this.getImageArchitecture(
           registryHost,
           dockerRepository,
