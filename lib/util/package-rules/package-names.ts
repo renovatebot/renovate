@@ -18,11 +18,10 @@ export class PackageNameMatcher extends Matcher {
       return true;
     }
 
-    if (is.nullOrUndefined(packageName)) {
-      return false;
-    }
-
-    if (process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE) {
+    if (
+      is.string(packageName) &&
+      process.env.RENOVATE_X_MATCH_PACKAGE_NAMES_MORE
+    ) {
       return matchPackageNames.includes(packageName);
     }
 
