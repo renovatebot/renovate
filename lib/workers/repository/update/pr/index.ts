@@ -80,12 +80,13 @@ export function updatePrDebugData(
 function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
   if (prCache.fingerprint !== prFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
-    logger.debug({ prFingerprint }, 'prFingerprint');
     return false;
   }
 
   if (getElapsedHours(prCache.lastEdited) < 24) {
-    logger.debug('Processing PR as it has been recently edited'); // edited within 24 hours
+    logger.debug(
+      'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+    );
     return false;
   }
 
@@ -117,7 +118,7 @@ export async function ensurePr(
       // return if pr cache is valid and pr was last edited before a day
       if (validatePrCache(prCache, prFingerprint)) {
         logger.debug(
-          'PR cache matches, and no PR changes in last 24h, so skipping PR body check'
+          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
         return { type: 'with-pr', pr: existingPr };
       }
