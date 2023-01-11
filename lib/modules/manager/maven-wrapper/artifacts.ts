@@ -16,11 +16,11 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-type MavenWrapperPaths = {
+interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
   wrapperFullyQualifiedPath: string;
-};
+}
 
 async function addIfUpdated(
   status: StatusResult,
@@ -139,9 +139,7 @@ async function executeWrapperCommand(
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
-    docker: {
-      image: 'sidecar',
-    },
+    docker: {},
     toolConstraints: [
       {
         toolName: 'java',

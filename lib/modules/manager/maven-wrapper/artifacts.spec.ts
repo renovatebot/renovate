@@ -1,6 +1,7 @@
 import type { Stats } from 'fs';
 import os from 'os';
 import type { StatusResult } from 'simple-git';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -55,7 +56,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   });
 
   it('Should not update if there is no dep with maven:wrapper', async () => {
-    mockExecAll({ stdout: '', stderr: '' });
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven-wrapper',
       newPackageFileContent: '',
@@ -63,6 +64,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       config: {},
     });
     expect(updatedDeps).toBeNull();
+    expect(execSnapshots).toBeEmptyArray();
   });
 
   it('Docker should use java 8 if version is lower then 2.0.0', async () => {
@@ -96,7 +98,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
   it('Should update when it is maven wrapper', async () => {
     mockMavenFileChangedInGit();
-    mockExecAll({ stdout: '', stderr: '' });
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -114,11 +116,31 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ];
     expect(updatedDeps).toEqual(expected);
+    expect(execSnapshots).toEqual([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '../..',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
     mockMavenFileChangedInGit('not-maven-wrapper.properties');
-    mockExecAll({ stdout: '', stderr: '' });
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -126,6 +148,26 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       config: { newValue: '3.3.1' },
     });
     expect(updatedDeps).toEqual([]);
+    expect(execSnapshots).toEqual([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '../..',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
   });
 
   it('updates with docker', async () => {
@@ -159,8 +201,12 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-v "./":"./" ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "../.." renovate/sidecar bash ' +
-          '-l -c "install-tool java 17.0.0 && ./mvnw wrapper:wrapper"',
+          '-w "../.." ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool java 17.0.0 ' +
+          '&& ' +
+          './mvnw wrapper:wrapper"',
         options: {
           cwd: '../..',
           encoding: 'utf-8',
@@ -218,7 +264,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('updates with binarySource install', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
-    GlobalConfig.set({ localDir: './', binarySource: 'install' });
+    GlobalConfig.set({
+      localDir: join('/tmp/github/some/repo'),
+      binarySource: 'install',
+    });
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
       newPackageFileContent: '',
@@ -230,7 +279,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       {
         cmd: './mvnw wrapper:wrapper',
         options: {
-          cwd: '../..',
+          cwd: '/tmp/github',
           encoding: 'utf-8',
           env: {
             HOME: '/home/user',
