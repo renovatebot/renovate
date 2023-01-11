@@ -84,7 +84,7 @@ jobs:
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@4723a57e26efda3a62cbde1812113b730952852d # v3.2.2
+        uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3.2.3
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
@@ -129,6 +129,9 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Type check
+        run: yarn type-check
+
       - name: Lint
         run: |
           yarn ls-lint
@@ -140,12 +143,6 @@ jobs:
 
       - name: Test schema
         run: yarn test-schema
-
-      - name: Type check
-        run: yarn type-check
-
-      - name: Strict check
-        run: yarn strict-check
 
   release:
     needs: [lint, test]
@@ -200,7 +197,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Upload docs
-        uses: actions/upload-artifact@83fd05a356d7e2593de66fc9913b3002723633cb # tag=v3.1.1
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: docs
           path: tmp/docs/

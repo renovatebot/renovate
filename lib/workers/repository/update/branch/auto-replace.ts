@@ -1,4 +1,5 @@
 // TODO #7154
+import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { get } from '../../../../modules/manager';
@@ -45,7 +46,10 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (upgrade.depName !== newUpgrade.depName) {
+  if (
+    upgrade.depName !== newUpgrade.depName &&
+    upgrade.newName !== newUpgrade.depName
+  ) {
     logger.debug(
       {
         manager,
@@ -139,18 +143,36 @@ export async function doAutoReplace(
   const {
     packageFile,
     depName,
+    newName,
     currentValue,
     newValue,
     currentDigest,
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
+  /*
+    If replacement support for more managers is added,
+    please also update the list in docs/usage/configuration-options.md
+    at replacementName and replacementVersion
+  */
   if (reuseExistingBranch) {
     return await checkExistingBranch(upgrade, existingContent);
   }
+  const replaceWithoutReplaceString =
+    is.string(newName) &&
+    newName !== depName &&
+    (is.undefined(upgrade.replaceString) ||
+      !upgrade.replaceString?.includes(depName!));
   const replaceString = upgrade.replaceString ?? currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
-  let searchIndex = existingContent.indexOf(replaceString!);
+  let searchIndex: number;
+  if (replaceWithoutReplaceString) {
+    const depIndex = existingContent.indexOf(depName!);
+    const valIndex = existingContent.indexOf(currentValue!);
+    searchIndex = depIndex < valIndex ? depIndex : valIndex;
+  } else {
+    searchIndex = existingContent.indexOf(replaceString!);
+  }
   if (searchIndex === -1) {
     logger.info(
       { packageFile, depName, existingContent, replaceString },
@@ -160,7 +182,7 @@ export async function doAutoReplace(
   }
   try {
     let newString: string;
-    if (autoReplaceStringTemplate) {
+    if (autoReplaceStringTemplate && !newName) {
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
@@ -168,6 +190,12 @@ export async function doAutoReplace(
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), 'g'),
           newValue
+        );
+      }
+      if (depName && newName) {
+        newString = newString.replace(
+          regEx(escapeRegExp(depName), 'g'),
+          newName
         );
       }
       if (currentDigest && newDigest) {
@@ -189,10 +217,60 @@ export async function doAutoReplace(
       `Starting search at index ${searchIndex}`
     );
     let newContent = existingContent;
+    let nameReplaced = !newName;
+    let valueReplaced = !newValue;
+    let startIndex = searchIndex;
     // Iterate through the rest of the file
     for (; searchIndex < newContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
-      if (matchAt(existingContent, searchIndex, replaceString!)) {
+      if (replaceWithoutReplaceString) {
+        // look for depName and currentValue
+        if (newName && matchAt(newContent, searchIndex, depName!)) {
+          logger.debug(
+            { packageFile, depName },
+            `Found depName at index ${searchIndex}`
+          );
+          if (nameReplaced) {
+            startIndex += 1;
+            searchIndex = startIndex;
+            await writeLocalFile(upgrade.packageFile!, existingContent);
+            newContent = existingContent;
+            nameReplaced = false;
+            valueReplaced = false;
+            continue;
+          }
+          // replace with newName
+          newContent = replaceAt(newContent, searchIndex, depName!, newName);
+          await writeLocalFile(upgrade.packageFile!, newContent);
+          nameReplaced = true;
+        } else if (
+          newValue &&
+          matchAt(newContent, searchIndex, currentValue!)
+        ) {
+          logger.debug(
+            { packageFile, currentValue },
+            `Found currentValue at index ${searchIndex}`
+          );
+          // Now test if the result matches
+          newContent = replaceAt(
+            newContent,
+            searchIndex,
+            currentValue!,
+            newValue
+          );
+          await writeLocalFile(upgrade.packageFile!, newContent);
+          valueReplaced = true;
+        }
+        if (nameReplaced && valueReplaced) {
+          if (await confirmIfDepUpdated(upgrade, newContent)) {
+            return newContent;
+          }
+          await writeLocalFile(upgrade.packageFile!, existingContent);
+          newContent = existingContent;
+          nameReplaced = false;
+          valueReplaced = false;
+        }
+      } else if (matchAt(newContent, searchIndex, replaceString!)) {
         logger.debug(
           { packageFile, depName },
           `Found match at index ${searchIndex}`
