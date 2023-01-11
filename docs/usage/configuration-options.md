@@ -1336,8 +1336,9 @@ It would take the entire `"config:base"` preset - which has a lot of sub-presets
 
 ## ignoreReviewers
 
-List users that should be ignored when the Renovate determines whether the reviewers were already assigned or not. This is useful if you are using renovate-approve.
-By default in case of PR commit status checks are failing, reviewers are not assigned, because PR already contains one `renovate-approve`
+By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
+If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
+In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
 
 ```json
 {
