@@ -32,6 +32,7 @@ export async function getUpdatedPackageFiles(
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, PackageDependency[]> = {};
   const lockFileMaintenanceFiles = [];
+  let firstUpdate = true;
   for (const upgrade of config.upgrades) {
     const manager = upgrade.manager!;
     const packageFile = upgrade.packageFile!;
@@ -167,8 +168,10 @@ export async function getUpdatedPackageFiles(
         let res = await doAutoReplace(
           upgrade,
           packageFileContent!,
-          reuseExistingBranch
+          reuseExistingBranch,
+          firstUpdate
         );
+        firstUpdate = false;
         if (res) {
           if (bumpPackageVersion && upgrade.bumpVersion) {
             const { bumpedContent } = await bumpPackageVersion(
