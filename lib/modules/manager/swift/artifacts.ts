@@ -27,7 +27,7 @@ async function swiftPackageResolve(
     toolConstraints: [
       {
         toolName: 'swift',
-        constraint: config.constraints?.swift ?? '^' + toolsVersion,
+        constraint: config.constraints?.swift ?? toolsVersion,
       },
     ],
   };
