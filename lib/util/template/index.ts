@@ -228,7 +228,12 @@ export function compile(
       }
     }
   }
-  return handlebars.compile(template)(filteredInput);
+  try {
+    return handlebars.compile(template)(filteredInput);
+  } catch (err) {
+    logger.warn({ err }, 'Error compiling template');
+    return template;
+  }
 }
 
 export function containsTemplates(
