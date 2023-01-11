@@ -194,7 +194,6 @@ export function prInfo(pr: PrResponse): Pr {
 export interface Account {
   display_name?: string;
   uuid: string;
-  username?: string;
   nickname?: string;
   account_status?: string;
 }
