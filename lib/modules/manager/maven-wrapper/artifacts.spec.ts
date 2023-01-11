@@ -25,7 +25,7 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
-    GlobalConfig.set({ localDir: './' });
+    GlobalConfig.set({ localDir: join('/tmp/github/some/repo') });
     jest.resetAllMocks();
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
@@ -120,7 +120,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       {
         cmd: './mvnw wrapper:wrapper',
         options: {
-          cwd: '../..',
+          cwd: '/tmp/github',
           encoding: 'utf-8',
           env: {
             HOME: '/home/user',
@@ -152,7 +152,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       {
         cmd: './mvnw wrapper:wrapper',
         options: {
-          cwd: '../..',
+          cwd: '/tmp/github',
           encoding: 'utf-8',
           env: {
             HOME: '/home/user',
