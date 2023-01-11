@@ -217,13 +217,6 @@ describe('modules/manager/swift/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '5.0.0' },
-        { version: '5.7.0' },
-        { version: '5.7.1' },
-      ],
-    });
     swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
@@ -253,7 +246,7 @@ describe('modules/manager/swift/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool swift 5.7.1' },
+      { cmd: 'install-tool swift 5.0' },
       {
         cmd: 'swift package resolve',
         options: {
@@ -265,13 +258,6 @@ describe('modules/manager/swift/artifacts', () => {
 
   it('supports install mode with constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '5.0.0' },
-        { version: '5.7.0' },
-        { version: '5.7.1' },
-      ],
-    });
     swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
@@ -318,13 +304,6 @@ describe('modules/manager/swift/artifacts', () => {
 
   it('supports docker mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '5.0.0' },
-        { version: '5.7.0' },
-        { version: '5.7.1' },
-      ],
-    });
     swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce('5.0');
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
@@ -366,7 +345,7 @@ describe('modules/manager/swift/artifacts', () => {
           '-w "/tmp/github/some/repo" ' +
           'renovate/sidecar' +
           ' bash -l -c "' +
-          'install-tool swift 5.7.1' +
+          'install-tool swift 5.0' +
           ' && ' +
           'swift package resolve' +
           '"',
@@ -379,13 +358,6 @@ describe('modules/manager/swift/artifacts', () => {
 
   it('supports docker mode with constraints', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [
-        { version: '5.0.0' },
-        { version: '5.7.0' },
-        { version: '5.7.1' },
-      ],
-    });
     fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
     fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
