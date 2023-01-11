@@ -1,5 +1,4 @@
 import { logger } from '../logger';
-import { regEx } from './regex';
 
 // Return true if the match string is found at index in content
 export function matchAt(
@@ -58,5 +57,5 @@ export function looseEquals(
 }
 
 export function isDockerDigest(input: string): boolean {
-  return regEx(/^sha256:[a-f0-9]{64}$/i).test(input);
+  return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
