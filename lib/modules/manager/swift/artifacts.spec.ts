@@ -14,7 +14,6 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/http');
 jest.mock('../../../util/fs');
-jest.mock('../../datasource');
 jest.mock('./util');
 
 const config: UpdateArtifactsConfig = {};
