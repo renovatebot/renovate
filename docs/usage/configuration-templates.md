@@ -79,7 +79,7 @@ Renovate tags are only available on platforms that support HTML tags:
 
 - GitHub
 - GitLab
-- ...
+- Gitea
 
 #### renovate:start and renovate:end
 
