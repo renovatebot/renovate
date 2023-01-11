@@ -4,12 +4,10 @@ import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
-import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as _swiftUtil from './util';
 import * as swift from '.';
 
-const datasource = mocked(_datasource);
 const swiftUtil = mocked(_swiftUtil);
 
 jest.mock('../../../util/exec/env');
