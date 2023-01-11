@@ -54,6 +54,8 @@ function extractFromSection(
       continue;
     }
 
+    let pep503NormalizeRegex = /[-_.]+/g;
+    let depNameNormalized = str.replace(pep503NormalizeRegex, "-");
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
@@ -79,14 +81,14 @@ function extractFromSection(
       }
     }
     const dep: PackageDependency = {
-      depName,
+      depName: depNameNormalized,
       depType,
       currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[depName];
+    if (depNameNormalized in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[depNameNormalized];
     }
     if (skipReason) {
       dep.skipReason = skipReason;
