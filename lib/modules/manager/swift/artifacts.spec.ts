@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, mocked } from '../../../../test/util';
+import { env, fs, logger, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -455,5 +455,22 @@ describe('modules/manager/swift/artifacts', () => {
     ).toEqual([
       { artifactError: { lockFile: 'Package.resolved', stderr: 'not found' } },
     ]);
+  });
+
+  it('logs warning on tool version extraction failure', async () => {
+    swiftUtil.extractSwiftToolsVersion.mockReturnValueOnce(null);
+    fs.getSiblingFileName.mockReturnValueOnce('Package.resolved');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    fs.getParentDir.mockReturnValueOnce('');
+    mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('Old Package.resolved');
+    await swift.updateArtifacts({
+      packageFileName: 'Package.swift',
+      updatedDeps: [{ depName: 'dep1' }],
+      newPackageFileContent: '{}',
+      config,
+    });
+    expect(logger.logger.warn).toHaveBeenCalled();
   });
 });
