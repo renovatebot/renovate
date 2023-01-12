@@ -8,10 +8,12 @@ export interface PackageMeta {
   'providers-lazy-url'?: string;
   'providers-url'?: string;
 }
+
 export interface RegistryFile {
   key: string;
   sha256: string;
 }
+
 export interface RegistryMeta {
   files?: RegistryFile[];
   providerPackages: Record<string, string>;
@@ -33,4 +35,8 @@ export interface AllPackages {
   providerPackages: Record<string, string>;
 
   includesPackages: Record<string, ReleaseResult>;
+}
+
+export interface PackagistResult {
+  releases: Record<string, ReleaseResult>;
 }
