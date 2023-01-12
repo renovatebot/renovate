@@ -142,6 +142,7 @@ export interface LegacyAdminConfig {
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
   onboardingNoDeps?: boolean;
+  onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -441,6 +442,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depType?: string;
   depTypes?: string[];
   depName?: string;
+  packageName?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;
