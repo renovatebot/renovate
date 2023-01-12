@@ -16,7 +16,7 @@ describe('util/template/index', () => {
   });
 
   it('returns same if cannot compile', () => {
-    expect(template.compile('{{abc', {})).toBe('{{abc');
+    expect(template.compile('{{abc', {})).toBeNull();
   });
 
   it('has valid exposed config options', () => {
