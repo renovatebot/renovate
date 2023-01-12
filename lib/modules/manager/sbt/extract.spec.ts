@@ -54,6 +54,7 @@ describe('modules/manager/sbt/extract', () => {
           },
           { packageName: 'org.example:quux', currentValue: '0.0.5' },
           { packageName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
+          { packageName: 'org.example:abc_2.9.10', currentValue: '0.0.42' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
           { packageName: 'org.example:waldo', currentValue: '0.0.9' },
@@ -96,6 +97,21 @@ describe('modules/manager/sbt/extract', () => {
       `;
       expect(extractPackageFile(content)).toMatchObject({
         packageFileVersion: '1.2.3',
+      });
+    });
+
+    it('extracts typed variables', () => {
+      const content = `
+        val version: String = "1.2.3"
+        libraryDependencies += "foo" % "bar" % version
+      `;
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            currentValue: '1.2.3',
+            groupName: 'version',
+          },
+        ],
       });
     });
 

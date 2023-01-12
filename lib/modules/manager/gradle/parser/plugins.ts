@@ -3,6 +3,7 @@ import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qConcatExpr,
   qPropertyAccessIdentifier,
   qStringValue,
   qTemplateString,
@@ -11,6 +12,12 @@ import {
   storeVarToken,
 } from './common';
 import { handlePlugin } from './handlers';
+
+const qVersion = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'version'));
 
 // kotlin("jvm") version "1.3.71"
 export const qPlugins = q
@@ -21,11 +28,7 @@ export const qPlugins = q
     qStringValue
       .handler((ctx: Ctx) => storeInTokenMap(ctx, 'pluginName'))
       .sym('version')
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      ),
+      .join(qVersion),
     q
       .tree({
         type: 'wrapped-tree',
@@ -37,13 +40,7 @@ export const qPlugins = q
       .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
       .alt(
         // id("foo.bar") version "1.2.3"
-        q
-          .sym<Ctx>('version')
-          .alt(
-            qTemplateString,
-            qPropertyAccessIdentifier,
-            qVariableAccessIdentifier
-          ),
+        q.sym<Ctx>('version').join(qVersion),
         // id("foo.bar").version("1.2.3")
         q
           .op<Ctx>('.')
@@ -52,18 +49,9 @@ export const qPlugins = q
             maxDepth: 1,
             startsWith: '(',
             endsWith: ')',
-            search: q
-              .begin<Ctx>()
-              .alt(
-                qTemplateString,
-                qPropertyAccessIdentifier,
-                qVariableAccessIdentifier
-              )
-              .end(),
+            search: q.begin<Ctx>().join(qVersion).end(),
           })
       )
   )
-
-  .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handlePlugin)
   .handler(cleanupTempVars);

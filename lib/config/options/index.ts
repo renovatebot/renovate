@@ -400,6 +400,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'onboardingRebaseCheckbox',
+    description:
+      'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['github', 'gitlab', 'gitea'],
+    globalOnly: true,
+    experimental: true,
+    experimentalIssues: [17633],
+  },
+  {
     name: 'includeForks',
     description:
       'Whether to process forked repositories. By default, all forked repositories are skipped.',
@@ -1018,6 +1029,34 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchDepNames',
+    description:
+      'Dep names to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'excludeDepNames',
+    description:
+      'Dep names to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
     name: 'matchPackagePrefixes',
     description:
       'Package name prefixes to match. Valid only within a `packageRules` object.',
@@ -1070,6 +1109,36 @@ const options: RenovateOptions[] = [
     mergeable: true,
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchDepPatterns',
+    description:
+      'Dep name patterns to match. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
+  },
+  {
+    name: 'excludeDepPatterns',
+    description:
+      'Dep name patterns to exclude. Valid only within a `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    format: 'regex',
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    advancedUse: true,
   },
   {
     name: 'matchCurrentValue',

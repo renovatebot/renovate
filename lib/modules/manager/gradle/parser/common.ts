@@ -1,4 +1,4 @@
-import { lexer, query as q } from 'good-enough-parser';
+import { lexer, parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
 
@@ -147,8 +147,22 @@ export const qVariableAssignmentIdentifier = q
   .handler(stripReservedPrefixFromKeyTokens);
 
 // foo.bar["baz"] -> "foo.bar.baz"
-export const qVariableAccessIdentifier =
-  qVariableAssignmentIdentifier.handler(coalesceVariable);
+export const qVariableAccessIdentifier = q
+  .handler<Ctx>((ctx) => {
+    ctx.tmpTokenStore.backupVarAccessTokens = ctx.varTokens;
+    ctx.varTokens = [];
+    return ctx;
+  })
+  .join(qVariableAssignmentIdentifier)
+  .handler(coalesceVariable)
+  .handler((ctx) => {
+    ctx.varTokens = [
+      ...ctx.tmpTokenStore.backupVarAccessTokens!,
+      ...ctx.varTokens,
+    ];
+    delete ctx.tmpTokenStore.backupVarAccessTokens;
+    return ctx;
+  });
 
 // project.ext.getProperty(...)
 // extra.get(...)
@@ -166,7 +180,8 @@ export const qPropertyAccessIdentifier = q
     startsWith: '(',
     endsWith: ')',
     search: q.begin<Ctx>().join(qStringValueAsSymbol).end(),
-  });
+  })
+  .opt(q.sym<Ctx>('as').sym('String'));
 
 // "foo${bar}baz"
 export const qTemplateString = q
@@ -199,3 +214,10 @@ export const qTemplateString = q
     ctx.varTokens = ctx.tmpTokenStore.templateTokens!;
     return ctx;
   });
+
+// foo = "bar"
+// foo + foo + "${foo}" + "foo" => "barbarbarfoo"
+export const qConcatExpr = (
+  ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
+): q.QueryBuilder<Ctx, parser.Node> =>
+  q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
