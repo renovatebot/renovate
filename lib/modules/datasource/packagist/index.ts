@@ -221,13 +221,7 @@ export class PackagistDatasource extends Datasource {
     const pkgUrl = joinUrlParts(regUrl, `/p2/${name}.json`);
     const devUrl = joinUrlParts(regUrl, `/p2/${name}~dev.json`);
     const results = await p.map([pkgUrl, devUrl], (url) =>
-      this.http
-        .getJson(
-          url,
-          { onSchemaError: 'throw' },
-          schema.ComposerV2PackageResponse
-        )
-        .then(({ body }) => body)
+      this.http.getJson(url).then(({ body }) => body)
     );
     return schema.ComposerV2ReleaseResult.parse(results);
   }
