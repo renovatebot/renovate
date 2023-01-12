@@ -1,10 +1,10 @@
+import { isVersion as isSemverVersion } from '../../../modules/versioning/semver';
 import { regEx } from '../../../util/regex';
 
+// Ignore (truncate) any pre-release component for now since SPM is currently documented to ignore them as well
 const SWIFT_TOOLS_VERSION_REGEX = regEx(
   /^\s*\/\/\s*swift-tools-version:\s*(?<version>\d+\.\d+(?:\.\d+)?)/
 );
-
-const SWIFT_TOOLS_SEMVER_REGEX = regEx(/\d+\.\d+\.\d+/);
 
 /**
  * Extracts the Swift tools version from the given package file contents as a semver version.
@@ -22,11 +22,7 @@ export function extractSwiftToolsVersion(
 
     // The version is either '<major>.<minor>.<patch>' or '<major>.<minor>'
     // Ensure we always return a semver compatible version.
-    if (version.match(SWIFT_TOOLS_SEMVER_REGEX)) {
-      return version;
-    } else {
-      return version + '.0';
-    }
+    return isSemverVersion(version) ? version : `${version}.0`;
   }
 
   return null;
