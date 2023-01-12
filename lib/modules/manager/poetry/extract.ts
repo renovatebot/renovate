@@ -13,6 +13,7 @@ import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
+import { regEx } from '../../../util/regex';
 
 function extractFromDependenciesSection(
   parsedFile: PoetryFile,
@@ -54,8 +55,8 @@ function extractFromSection(
       continue;
     }
 
-    let pep503NormalizeRegex = /[-_.]+/g;
-    let depNameNormalized = depName.toLowerCase().replace(pep503NormalizeRegex, "-");
+    let pep503NormalizeRegex = regEx(/[-_.]+/g);
+    let packageName = depName.toLowerCase().replace(pep503NormalizeRegex, "-");
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
@@ -81,14 +82,15 @@ function extractFromSection(
       }
     }
     const dep: PackageDependency = {
-      depName: depNameNormalized,
+      depName,
       depType,
       currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
+      packageName,
     };
-    if (depNameNormalized in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[depNameNormalized];
+    if (packageName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[packageName];
     }
     if (skipReason) {
       dep.skipReason = skipReason;
