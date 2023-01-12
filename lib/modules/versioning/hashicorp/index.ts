@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import type { RangeStrategy } from '../../../types/versioning';
 import { api as npm } from '../npm';
 import type { NewValueConfig, VersioningApi } from '../types';
@@ -25,6 +26,7 @@ export function isValid(input: string): boolean {
     try {
       return npm.isValid(hashicorp2npm(input));
     } catch (err) {
+      logger.trace({ value: input }, 'Unsupported hashicorp versioning value');
       return false;
     }
   }
@@ -32,7 +34,7 @@ export function isValid(input: string): boolean {
 }
 
 function matches(version: string, range: string): boolean {
-  return npm.matches(version, hashicorp2npm(range));
+  return isValid(range) && npm.matches(version, hashicorp2npm(range));
 }
 
 function getSatisfyingVersion(

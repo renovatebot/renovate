@@ -124,6 +124,14 @@ exports[`modules/manager/pip_setup/extract extractPackageFile() returns found de
         "lineNumber": 79,
       },
     },
+    {
+      "currentValue": ">=5.5.2,<6.0.0",
+      "datasource": "pypi",
+      "depName": "zope.interface",
+      "managerData": {
+        "lineNumber": 80,
+      },
+    },
   ],
 }
 `;
