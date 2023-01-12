@@ -4,7 +4,7 @@ describe('modules/manager/swift/util', () => {
   describe('extractSwiftToolsVersion()', () => {
     it('extracts 2-part version', () => {
       expect(extractSwiftToolsVersion('// swift-tools-version:5.0')).toBe(
-        '5.0'
+        '5.0.0'
       );
     });
 

@@ -108,6 +108,22 @@ describe('util/exec/containerbase', () => {
       expect(await resolveConstraint({ toolName: 'rust' })).toBe('1.65.0');
     });
 
+    it('supports swift docker tags', async () => {
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '5.7-slim' },
+          { version: '5.7' },
+          { version: '5.7.0-slim' },
+          { version: '5.7.0' },
+          { version: '5.7.2-slim' },
+          { version: '5.7.2' },
+          { version: '5.8-slim' },
+          { version: '5.8' },
+        ],
+      });
+      expect(await resolveConstraint({ toolName: 'swift' })).toBe('5.7.2');
+    });
+
     it('throws for unknown tools', async () => {
       await expect(resolveConstraint({ toolName: 'whoops' })).rejects.toThrow(
         'Invalid tool to install: whoops'

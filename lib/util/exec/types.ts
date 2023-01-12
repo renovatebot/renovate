@@ -10,7 +10,6 @@ export interface ToolConfig {
   depName: string;
   hash?: boolean;
   versioning: string;
-  extractVersion?: string;
 }
 
 export type Opt<T> = T | null | undefined;

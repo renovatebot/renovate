@@ -17,7 +17,6 @@ import { extractSwiftToolsVersion } from './util';
 
 async function swiftPackageResolve(
   packageFile: string,
-  toolsVersion: string,
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const cmd = `swift package resolve`;
@@ -27,7 +26,7 @@ async function swiftPackageResolve(
     toolConstraints: [
       {
         toolName: 'swift',
-        constraint: config.constraints?.swift ?? toolsVersion,
+        constraint: config.constraints?.swift,
       },
     ],
   };
@@ -64,14 +63,14 @@ export async function updateArtifacts({
   try {
     const toolsVersion = extractSwiftToolsVersion(newPackageFileContent);
     if (toolsVersion === null) {
-      throw new Error(
-        `${packageFileName} does not specify a valid swift tools version`
+      logger.warn(
+        `${packageFileName} does not specify a valid swift tools version - lockfile update will most likely fail.`
       );
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFile);
-    await swiftPackageResolve(packageFileName, toolsVersion, config);
+    await swiftPackageResolve(packageFileName, config);
     logger.debug('Returning updated Package.resolved file');
     const newLockFileContent = await readLocalFile(lockFile);
     if (existingLockFileContent === newLockFileContent) {

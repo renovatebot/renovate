@@ -127,10 +127,9 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   swift: {
-    datasource: 'github-releases',
-    depName: 'apple/swift',
-    versioning: semverCoercedVersioningId,
-    extractVersion: '^swift-(?<version>.*)-RELEASE$',
+    datasource: 'docker',
+    depName: 'swift',
+    versioning: semverVersioningId,
   },
   yarn: {
     datasource: 'npm',
