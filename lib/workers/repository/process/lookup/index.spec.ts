@@ -1796,6 +1796,49 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('handles replacements for unsupported values', async () => {
+      config.currentValue = 'inv';
+      config.depName = 'q';
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'r';
+      config.replacementVersion = '2.0.0';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toEqual({
+        updates: [
+          {
+            newName: 'r',
+            newValue: '2.0.0',
+            updateType: 'replacement',
+          },
+        ],
+        versioning: 'npm',
+        warnings: [],
+      });
+    });
+
+    it('handles lookup failure for replacements with unsupported values', async () => {
+      config.currentValue = 'inv';
+      config.depName = 'q';
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'r';
+      config.replacementVersion = '2.0.0';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(404, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toEqual({
+        updates: [],
+        versioning: 'npm',
+        warnings: [
+          {
+            message: 'Failed to look up dependency q',
+            topic: 'q',
+          },
+        ],
+      });
+    });
+
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.depName = 'vue';

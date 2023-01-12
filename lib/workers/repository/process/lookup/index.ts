@@ -348,23 +348,12 @@ export async function lookupUpdates(
         logger.debug(
           `Dependency ${depName} has unsupported value ${currentValue}, but will be replaced`
         );
-        const rangeStrategy = getRangeStrategy(config);
         res.updates.push({
           updateType: 'replacement',
           newName: dependency.replacementName,
-          newValue: versioning.getNewValue({
-            // TODO #7154
-            currentValue,
-            newVersion: dependency.replacementVersion,
-            rangeStrategy: rangeStrategy!,
-          })!,
+          newValue: dependency.replacementVersion,
         });
         return res;
-      } else {
-        logger.debug(
-          `Dependency ${depName} has unsupported value ${currentValue}`
-        );
-        res.skipReason = 'invalid-value';
       }
     } else if (currentValue) {
       logger.debug(
