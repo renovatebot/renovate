@@ -73,6 +73,20 @@ export function updatePrDebugData(
   };
 }
 
+const hasNotIgnoredReviewers = (pr: Pr, config: BranchConfig): boolean => {
+  if (
+    is.nonEmptyArray(config.ignoreReviewers) &&
+    is.nonEmptyArray(pr.reviewers)
+  ) {
+    return (
+      pr.reviewers.filter(
+        (reviewer) => !config.ignoreReviewers!.includes(reviewer)
+      ).length > 0
+    );
+  }
+  return pr.reviewers ? pr.reviewers.length > 0 : false;
+};
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -282,22 +296,9 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
 
-      const hasNotIgnoredReviewers = (pr: Pr): boolean => {
-        if (
-          is.nonEmptyArray(config.ignoreReviewers) &&
-          is.nonEmptyArray(pr.reviewers)
-        ) {
-          return (
-            pr.reviewers.filter(
-              (reviewer) => !config.ignoreReviewers!.includes(reviewer)
-            ).length > 0
-          );
-        }
-        return pr.reviewers ? pr.reviewers.length > 0 : false;
-      };
       if (
         !existingPr.hasAssignees &&
-        !hasNotIgnoredReviewers(existingPr) &&
+        !hasNotIgnoredReviewers(existingPr, config) &&
         config.automerge &&
         !config.assignAutomerge &&
         (await getBranchStatus()) === 'red'
