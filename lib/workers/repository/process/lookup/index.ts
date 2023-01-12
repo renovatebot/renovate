@@ -327,6 +327,45 @@ export async function lookupUpdates(
 
         res.updates.push(update);
       }
+    } else if (
+      is.string(currentValue) &&
+      config.replacementName &&
+      config.replacementVersion
+    ) {
+      config = mergeConfigConstraints(config);
+      const dependency = clone(await getPkgReleases(config));
+      if (!dependency) {
+        const warning: ValidationMessage = {
+          topic: depName,
+          message: `Failed to look up dependency ${depName}`,
+        };
+        logger.debug({ dependency: depName, packageFile }, warning.message);
+        // TODO: return warnings in own field
+        res.warnings.push(warning);
+        return res;
+      }
+      if (dependency.replacementName && dependency.replacementVersion) {
+        logger.debug(
+          `Dependency ${depName} has unsupported value ${currentValue}, but will be replaced`
+        );
+        const rangeStrategy = getRangeStrategy(config);
+        res.updates.push({
+          updateType: 'replacement',
+          newName: dependency.replacementName,
+          newValue: versioning.getNewValue({
+            // TODO #7154
+            currentValue,
+            newVersion: dependency.replacementVersion,
+            rangeStrategy: rangeStrategy!,
+          })!,
+        });
+        return res;
+      } else {
+        logger.debug(
+          `Dependency ${depName} has unsupported value ${currentValue}`
+        );
+        res.skipReason = 'invalid-value';
+      }
     } else if (currentValue) {
       logger.debug(
         `Dependency ${depName} has unsupported value ${currentValue}`
