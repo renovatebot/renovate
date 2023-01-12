@@ -361,7 +361,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -381,7 +380,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: true,
           reviewers: ['renovate-approve'],
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
@@ -501,7 +499,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -526,7 +523,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -555,7 +551,6 @@ describe('workers/repository/update/pr/index', () => {
           const changedPr: Pr = {
             ...pr,
             hasAssignees: false,
-            hasReviewers: false,
           };
           platform.getBranchPr.mockResolvedValueOnce(changedPr);
           checks.resolveBranchStatus.mockResolvedValueOnce('red');
