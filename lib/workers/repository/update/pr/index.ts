@@ -77,9 +77,14 @@ export function updatePrDebugData(
   };
 }
 
-function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
+function validatePrCache(
+  branchName: string,
+  prCache: PrCache,
+  prFingerprint: string
+): boolean {
   if (prCache.fingerprint !== prFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
+    setPrCache(branchName, prFingerprint);
     return false;
   }
 
@@ -110,20 +115,19 @@ export async function ensurePr(
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
-  if (existingPr && config.repositoryCache === 'enabled') {
+  if (existingPr) {
     logger.debug('Found existing PR');
     const prCache = getPrCache(branchName);
     if (prCache) {
       logger.debug({ prCache }, 'Found existing PR cache');
-      // return if pr cache is valid and pr was last edited before a day
-      if (validatePrCache(prCache, prFingerprint)) {
+      // return if pr cache is valid and pr was not changed in the past 24hrs
+      if (validatePrCache(branchName, prCache, prFingerprint)) {
         logger.debug(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
         return { type: 'with-pr', pr: existingPr };
       }
-      setPrCache(branchName, prFingerprint);
-    } else {
+    } else if (config.repositoryCache === 'enabled') {
       logger.debug('PR cache not found, creating new');
       setPrCache(branchName, prFingerprint);
     }
