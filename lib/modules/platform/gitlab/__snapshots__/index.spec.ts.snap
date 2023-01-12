@@ -205,28 +205,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisti
 }
 `;
 
-exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with reviewers 1`] = `
-{
-  "bodyStruct": {
-    "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
-  },
-  "displayNumber": "Merge Request #12345",
-  "hasAssignees": false,
-  "headPipelineStatus": undefined,
-  "labels": undefined,
-  "number": 12345,
-  "reviewers": [
-    "foo",
-    "bar",
-  ],
-  "sha": undefined,
-  "sourceBranch": "some-branch",
-  "state": "merged",
-  "targetBranch": "master",
-  "title": "do something",
-}
-`;
-
 exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] = `
 {
   "bodyStruct": {
