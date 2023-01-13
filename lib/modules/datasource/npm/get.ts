@@ -1,6 +1,7 @@
 import url from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
@@ -87,7 +88,10 @@ export async function getDependency(
     ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
     : 15;
   const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
-  const hardExpireMinutes = 24 * 60; // 1 day
+  let { cacheHardTtlMinutes } = GlobalConfig.get();
+  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+    cacheHardTtlMinutes = cacheMinutes;
+  }
 
   const uri = url.parse(packageUrl);
 
@@ -105,7 +109,7 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         cachedResult,
-        hardExpireMinutes
+        cacheHardTtlMinutes
       );
       delete cachedResult.cacheData;
       return cachedResult;
@@ -184,7 +188,7 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         { ...dep, cacheData },
-        etag ? hardExpireMinutes : cacheMinutes
+        etag ? cacheHardTtlMinutes : cacheMinutes
       );
     }
     return dep;
