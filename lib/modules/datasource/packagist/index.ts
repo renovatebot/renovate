@@ -1,6 +1,7 @@
 import URL from 'url';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
@@ -10,7 +11,6 @@ import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import * as schema from './schema';
 import type {
   AllPackages,
   PackageMeta,
@@ -31,18 +31,6 @@ export class PackagistDatasource extends Datasource {
   override readonly defaultVersioning = composerVersioning.id;
 
   override readonly registryStrategy = 'hunt';
-
-  public override getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.trace(`getReleases(${packageName})`);
-    // istanbul ignore if
-    if (!registryUrl) {
-      return Promise.resolve(null);
-    }
-    return this.packageLookup(registryUrl, packageName);
-  }
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
@@ -211,31 +199,54 @@ export class PackagistDatasource extends Datasource {
     return allPackages;
   }
 
-  @cache({
-    namespace: `datasource-${PackagistDatasource.id}-org`,
-    key: (regUrl: string) => regUrl,
-    ttlMinutes: 10,
-  })
   async packagistOrgLookup(name: string): Promise<ReleaseResult | null> {
-    const regUrl = 'https://packagist.org';
-    const pkgUrl = joinUrlParts(regUrl, `/p2/${name}.json`);
-    const devUrl = joinUrlParts(regUrl, `/p2/${name}~dev.json`);
-    const results = await p.map([pkgUrl, devUrl], (url) =>
-      this.http.getJson(url).then(({ body }) => body)
+    const cacheNamespace = 'datasource-packagist-org';
+    const cachedResult = await packageCache.get<ReleaseResult>(
+      cacheNamespace,
+      name
     );
-    return schema.ComposerV2ReleaseResult.parse(results);
+    // istanbul ignore if
+    if (cachedResult) {
+      return cachedResult;
+    }
+    let dep: ReleaseResult | null = null;
+    const regUrl = 'https://packagist.org';
+    const pkgUrl = [
+      joinUrlParts(regUrl, `/p2/${name}.json`),
+      joinUrlParts(regUrl, `/p2/${name}~dev.json`),
+    ];
+    // TODO: fix types (#9610)
+    let res = (await this.http.getJson<any>(pkgUrl[0])).body.packages[name];
+    res = [
+      ...res,
+      ...(await this.http.getJson<any>(pkgUrl[1])).body.packages[name],
+    ];
+    if (res) {
+      dep = PackagistDatasource.extractDepReleases(res);
+      logger.trace({ dep }, 'dep');
+    }
+    const cacheMinutes = 10;
+    await packageCache.set(cacheNamespace, name, dep, cacheMinutes);
+    return dep;
   }
 
-  private async packageLookup(
-    regUrl: string,
-    name: string
-  ): Promise<ReleaseResult | null> {
+  public override async getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    logger.trace(`getReleases(${packageName})`);
+
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     try {
-      if (regUrl === 'https://packagist.org') {
-        const packagistResult = await this.packagistOrgLookup(name);
+      if (registryUrl === 'https://packagist.org') {
+        const packagistResult = await this.packagistOrgLookup(packageName);
         return packagistResult;
       }
-      const allPackages = await this.getAllPackages(regUrl);
+      const allPackages = await this.getAllPackages(registryUrl);
       // istanbul ignore if: needs test
       if (!allPackages) {
         return null;
@@ -247,33 +258,35 @@ export class PackagistDatasource extends Datasource {
         providerPackages,
         includesPackages,
       } = allPackages;
-      if (packages?.[name]) {
-        const dep = PackagistDatasource.extractDepReleases(packages[name]);
+      if (packages?.[packageName]) {
+        const dep = PackagistDatasource.extractDepReleases(
+          packages[packageName]
+        );
         return dep;
       }
-      if (includesPackages?.[name]) {
-        return includesPackages[name];
+      if (includesPackages?.[packageName]) {
+        return includesPackages[packageName];
       }
       let pkgUrl: string;
-      if (name in providerPackages) {
+      if (packageName in providerPackages) {
         pkgUrl = URL.resolve(
-          regUrl,
+          registryUrl,
           providersUrl!
-            .replace('%package%', name)
-            .replace('%hash%', providerPackages[name])
+            .replace('%package%', packageName)
+            .replace('%hash%', providerPackages[packageName])
         );
       } else if (providersLazyUrl) {
         pkgUrl = URL.resolve(
-          regUrl,
-          providersLazyUrl.replace('%package%', name)
+          registryUrl,
+          providersLazyUrl.replace('%package%', packageName)
         );
       } else {
         return null;
       }
-      const opts = PackagistDatasource.getHostOpts(regUrl);
+      const opts = PackagistDatasource.getHostOpts(registryUrl);
       // TODO: fix types (#9610)
       const versions = (await this.http.getJson<any>(pkgUrl, opts)).body
-        .packages[name];
+        .packages[packageName];
       const dep = PackagistDatasource.extractDepReleases(versions);
       logger.trace({ dep }, 'dep');
       return dep;
