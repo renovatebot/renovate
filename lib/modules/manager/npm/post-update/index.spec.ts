@@ -219,6 +219,27 @@ describe('modules/manager/npm/post-update/index', () => {
       ]);
     });
 
+    it('writes .npmrc files', async () => {
+      await writeExistingFiles(updateConfig, additionalFiles);
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
+      );
+    });
+
+    it('only sources npmrc content from package config', async () => {
+      await writeExistingFiles(
+        { ...updateConfig, npmrc: '#foobar' },
+        additionalFiles
+      );
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
+      );
+    });
+
     it('works only on relevant folders', async () => {
       git.getFile.mockResolvedValueOnce(
         Fixtures.get('update-lockfile-massage-1/package-lock.json')

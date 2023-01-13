@@ -153,6 +153,31 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
     });
 
+    it('uses config.npmrc if no .npmrc exists', async () => {
+      fs.readLocalFile = jest.fn(() => null);
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { ...defaultConfig, npmrc: 'config-npmrc' }
+      );
+      expect(res?.npmrc).toBe('config-npmrc');
+    });
+
+    it('uses config.npmrc if .npmrc does exist but npmrcMerge=false', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'repo-npmrc\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { npmrc: 'config-npmrc' }
+      );
+      expect(res?.npmrc).toBe('config-npmrc');
+    });
+
     it('finds and filters .npmrc', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
@@ -165,25 +190,10 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res?.npmrc).toBeDefined();
+      expect(res?.npmrc).toBe('save-exact = true\n');
     });
 
-    it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
-        if (fileName === '.npmrc') {
-          return 'some-npmrc\n';
-        }
-        return null;
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        { npmrc: 'some-configured-npmrc' }
-      );
-      expect(res?.npmrc).toBeUndefined();
-    });
-
-    it('reads .npmrc when config.npmrc is merged', async () => {
+    it('merges config.npmrc and repo .npmrc when npmrcMerge=true', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'repo-npmrc\n';
