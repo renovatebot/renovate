@@ -2474,10 +2474,10 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.6.tgz#b04895bc83d9c5ec65a0ce3f51666bb21d69c0e1"
   integrity sha512-DpH0LvlRt4sDDTwVNEoen9ZaExigbBm2PPwOCBUqBSXxFGM0Ms9flzhdTRJLnmgdYLUcLcQ8zjyy+S1EnDFPnw==
 
-"@renovatebot/ruby-semver@1.1.7":
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.7.tgz#0f684158ace11b0c18ba40425c24169d1b81fc75"
-  integrity sha512-M07oVOD2pr+E0lopMgFVtDwUqJ5oTZD2QlrVT7yyZ3qW5/R1RQTGb6FwME2Iy+QNjfxYtvkCz1XS2LHZcOPyOw==
+"@renovatebot/ruby-semver@1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.8.tgz#1690f950ad13910d4bb12ad345708246df782b4d"
+  integrity sha512-e8eDI+Xq1mizLiQenjCqmG/cY739iY0SeY3u/3kHlhZsMo4D+htaKYOpHa8YfzSn3DvUmMMBpQQit4yOth/ksA==
   dependencies:
     tslib "2.4.1"
 
@@ -5824,10 +5824,10 @@ humanize-ms@^1.2.1:
   dependencies:
     ms "^2.0.0"
 
-husky@8.0.2:
-  version "8.0.2"
-  resolved "https://registry.yarnpkg.com/husky/-/husky-8.0.2.tgz#5816a60db02650f1f22c8b69b928fd6bcd77a236"
-  integrity sha512-Tkv80jtvbnkK3mYWxPZePGFpQ/tT3HNSs/sasF9P2YfkMezDl3ON37YN6jUUI4eTg5LcyVynlb6r4eyvOmspvg==
+husky@8.0.3:
+  version "8.0.3"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-8.0.3.tgz#4936d7212e46d1dea28fef29bb3a108872cd9184"
+  integrity sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg==
 
 iconv-lite@^0.6.2:
   version "0.6.3"
@@ -9831,10 +9831,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@3.5.0:
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.5.0.tgz#df7b2ef54ea775163c56d087b33e901ce9d657f7"
-  integrity sha512-bI3zRmZC8K0tUz1HjbIOAGQwR2CoPQG68N5IF7gm0LBl8QSNXzkmaWnkWccCUL5uG9mCsp4sBwC8SBrNSISWew==
+type-fest@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.5.1.tgz#9555ae435f560c1b4447b70bdd195bb2c86c6c92"
+  integrity sha512-70T99cpILFk2fzwuljwWxmazSphFrdOe3gRHbp6bqs71pxFBbJwFqnmkLO2lQL6aLHxHmYAnP/sL+AJWpT70jA==
 
 type-fest@^0.13.1:
   version "0.13.1"
