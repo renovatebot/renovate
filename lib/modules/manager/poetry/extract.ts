@@ -7,13 +7,13 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import type { PackageDependency, PackageFile } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
-import { regEx } from '../../../util/regex';
 
 function extractFromDependenciesSection(
   parsedFile: PoetryFile,
@@ -55,8 +55,8 @@ function extractFromSection(
       continue;
     }
 
-    let pep503NormalizeRegex = regEx(/[-_.]+/g);
-    let packageName = depName.toLowerCase().replace(pep503NormalizeRegex, "-");
+    const pep503NormalizeRegex = regEx(/[-_.]+/g);
+    const packageName = depName.toLowerCase().replace(pep503NormalizeRegex, "-");
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
