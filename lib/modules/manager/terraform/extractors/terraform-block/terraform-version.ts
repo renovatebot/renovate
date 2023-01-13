@@ -2,13 +2,14 @@ import is from '@sindresorhus/is';
 import { GithubReleasesDatasource } from '../../../../datasource/github-releases';
 import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
+import type { TerraformDefinitionFile } from '../../hcl/types';
 
 export class TerraformVersionExtractor extends DependencyExtractor {
   getCheckList(): string[] {
     return ['required_version'];
   }
 
-  extract(hclRoot: any): PackageDependency[] {
+  extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const terraformBlocks = hclRoot?.terraform;
     if (is.nullOrUndefined(terraformBlocks)) {
       return [];

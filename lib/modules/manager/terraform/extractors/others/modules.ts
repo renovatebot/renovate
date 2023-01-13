@@ -7,6 +7,7 @@ import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module';
 import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
+import type { TerraformDefinitionFile } from '../../hcl/types';
 
 export const githubRefMatchRegex = regEx(
   /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
@@ -27,7 +28,7 @@ export class ModuleExtractor extends DependencyExtractor {
     return ['module'];
   }
 
-  extract(hclRoot: any): PackageDependency[] {
+  extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const modules = hclRoot.module;
     if (is.nullOrUndefined(modules)) {
       return [];

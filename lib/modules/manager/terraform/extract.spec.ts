@@ -594,7 +594,6 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: './charts/example',
           depType: 'helm_release',
-          registryUrls: [undefined],
           skipReason: 'local-chart',
         },
         {
@@ -617,7 +616,6 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: 'redis',
           depType: 'helm_release',
-          registryUrls: [undefined],
         },
       ]);
     });
