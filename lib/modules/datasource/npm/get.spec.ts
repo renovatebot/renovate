@@ -485,7 +485,7 @@ describe('modules/datasource/npm/get', () => {
     expect(dep).toMatchObject({ some: 'result' });
   });
 
-  it('returns soft expired cache', async () => {
+  it('returns soft expired cache if revalidated', async () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
       cacheData: {
@@ -496,6 +496,24 @@ describe('modules/datasource/npm/get', () => {
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
     httpMock.scope('https://test.org').get('/@neutrinojs%2Freact').reply(304);
+    const registryUrl = resolveRegistryUrl('@neutrinojs/react');
+    const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
+    expect(dep).toMatchObject({ some: 'result' });
+  });
+
+  it('returns soft expired cache on npmjs error', async () => {
+    packageCache.get.mockResolvedValueOnce({
+      some: 'result',
+      cacheData: {
+        softExpireAt: new Date('2020').toISOString(),
+        etag: 'some-etag',
+      },
+    });
+
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/@neutrinojs%2Freact')
+      .reply(500);
     const registryUrl = resolveRegistryUrl('@neutrinojs/react');
     const dep = await getDependency(http, registryUrl, '@neutrinojs/react');
     expect(dep).toMatchObject({ some: 'result' });

@@ -197,6 +197,14 @@ export async function getDependency(
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
+      if (cachedResult) {
+        logger.warn(
+          { err },
+          'npmjs error, reusing expired cached result instead'
+        );
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
