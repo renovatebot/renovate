@@ -183,7 +183,7 @@ export async function getDependency(
         cacheNamespace,
         packageUrl,
         { ...dep, cacheData },
-        hardExpireMinutes
+        etag ? hardExpireMinutes : cacheMinutes
       );
     }
     return dep;
