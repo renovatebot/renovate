@@ -70,13 +70,13 @@ export async function getDependency(
     if (cachedResult.cacheData) {
       const softExpireAt = new Date(cachedResult.cacheData.softExpireAt);
       if (softExpireAt > new Date()) {
-        logger.debug('Cached result is not expired - reusing');
+        logger.trace('Cached result is not expired - reusing');
         delete cachedResult.cacheData;
         return cachedResult;
       }
-      logger.debug('Cached result is soft expired');
+      logger.trace('Cached result is soft expired');
     } else {
-      logger.debug('Reusing legacy cached result');
+      logger.trace('Reusing legacy cached result');
       return cachedResult;
     }
   }
@@ -98,7 +98,7 @@ export async function getDependency(
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.debug('Cached data is unchanged and can be reused');
+      logger.trace('Cached data is unchanged and can be reused');
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
