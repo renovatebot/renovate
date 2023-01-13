@@ -85,7 +85,7 @@ export async function getDependency(
   }
   const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
     ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-    : 1;
+    : 15;
   const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
   const hardExpireMinutes = 24 * 60; // 1 day
 
