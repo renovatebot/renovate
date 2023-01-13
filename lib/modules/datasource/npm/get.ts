@@ -4,10 +4,16 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
-import type { NpmDependency, NpmRelease, NpmResponse } from './types';
+import type {
+  CachedNpmDependency,
+  NpmDependency,
+  NpmRelease,
+  NpmResponse,
+} from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -56,19 +62,54 @@ export async function getDependency(
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await packageCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<CachedNpmDependency>(
     cacheNamespace,
     packageUrl
   );
-  // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    if (cachedResult.cacheData) {
+      const softExpireAt = new Date(cachedResult.cacheData.softExpireAt);
+      if (softExpireAt > new Date()) {
+        logger.debug('Cached result is not expired - reusing');
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
+      logger.debug('Cached result is soft expired');
+    } else {
+      logger.debug('Reusing legacy cached result');
+      return cachedResult;
+    }
   }
+  const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
+    ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
+    : 1;
+  const newDate = new Date();
+  newDate.setMinutes(newDate.getMinutes() + cacheMinutes);
+  const softExpireAt = newDate.toISOString();
+  const hardExpireMinutes = 24 * 60; // 1 day
 
   const uri = url.parse(packageUrl);
 
   try {
-    const raw = await http.getJson<NpmResponse>(packageUrl);
+    const options: HttpOptions = {};
+    if (cachedResult?.cacheData?.etag) {
+      logger.debug('Using cached etag');
+      options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
+    }
+    const raw = await http.getJson<NpmResponse>(packageUrl, options);
+    if (cachedResult?.cacheData && raw.statusCode === 304) {
+      logger.debug('Cached data is unchanged and can be reused');
+      cachedResult.cacheData.softExpireAt = softExpireAt;
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        cachedResult,
+        hardExpireMinutes
+      );
+      delete cachedResult.cacheData;
+      return cachedResult;
+    }
+    const etag = raw.headers.etag;
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
@@ -125,9 +166,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
-      ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 15;
     // TODO: use dynamic detection of public repos instead of a static list (#9587)
     const whitelistedPublicScopes = [
       '@graphql-codegen',
@@ -140,7 +178,13 @@ export async function getDependency(
       (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
         !packageName.startsWith('@'))
     ) {
-      await packageCache.set(cacheNamespace, packageUrl, dep, cacheMinutes);
+      const cacheData = { softExpireAt, etag };
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        { ...dep, cacheData },
+        hardExpireMinutes
+      );
     }
     return dep;
   } catch (err) {
