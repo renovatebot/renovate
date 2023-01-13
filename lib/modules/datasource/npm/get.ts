@@ -72,7 +72,7 @@ export async function getDependency(
       const softExpireAt = DateTime.fromISO(
         cachedResult.cacheData.softExpireAt
       );
-      if (softExpireAt > DateTime.local()) {
+      if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
         logger.trace('Cached result is not expired - reusing');
         delete cachedResult.cacheData;
         return cachedResult;
