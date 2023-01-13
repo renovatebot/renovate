@@ -5,7 +5,6 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
-import { regEx } from '../../../util/regex';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -117,15 +116,15 @@ export function findGithubToken(search: HostRuleSearch): string | undefined {
 }
 
 export function isGithubPersonalAccessToken(token: string): boolean {
-  return regEx(/^ghp_/).test(token);
+  return token.startsWith('ghp_');
 }
 
 export function isGithubServerToServerToken(token: string): boolean {
-  return regEx(/^ghs_/).test(token);
+  return token.startsWith('ghs_');
 }
 
 export function isGithubFineGrainedPersonalAccessToken(token: string): boolean {
-  return regEx(/^github_pat_/).test(token);
+  return token.startsWith('github_pat_');
 }
 
 export function takePersonalAccessTokenIfPossible(
@@ -133,10 +132,12 @@ export function takePersonalAccessTokenIfPossible(
   gitTagsGithubToken: string | undefined
 ): string | undefined {
   if (gitTagsGithubToken && isGithubPersonalAccessToken(gitTagsGithubToken)) {
+    logger.debug('Using GitHub Personal Access Token (git-tags)');
     return gitTagsGithubToken;
   }
 
   if (githubToken && isGithubPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Personal Access Token');
     return githubToken;
   }
 
@@ -144,15 +145,30 @@ export function takePersonalAccessTokenIfPossible(
     gitTagsGithubToken &&
     isGithubFineGrainedPersonalAccessToken(gitTagsGithubToken)
   ) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token (git-tags)');
     return gitTagsGithubToken;
   }
 
   if (githubToken && isGithubFineGrainedPersonalAccessToken(githubToken)) {
+    logger.debug('Using GitHub Fine-grained Personal Access Token');
     return githubToken;
   }
 
   if (gitTagsGithubToken) {
+    if (isGithubServerToServerToken(gitTagsGithubToken)) {
+      logger.debug('Using GitHub Server-to-Server token (git-tags)');
+    } else {
+      logger.debug('Using unknown GitHub token type (git-tags)');
+    }
     return gitTagsGithubToken;
+  }
+
+  if (githubToken) {
+    if (isGithubServerToServerToken(githubToken)) {
+      logger.debug('Using GitHub Server-to-Server token');
+    } else {
+      logger.debug('Using unknown GitHub token type');
+    }
   }
 
   return githubToken;

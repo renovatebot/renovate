@@ -470,5 +470,21 @@ describe('modules/manager/composer/utils', () => {
         takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
       ).toEqual(gitTagsGithubToken);
     });
+
+    it('take git-tags unknown token type when no other token is set', () => {
+      const githubToken = undefined;
+      const gitTagsGithubToken = 'unknownTokenType_gitTags';
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(gitTagsGithubToken);
+    });
+
+    it('take github unknown token type when no other token is set', () => {
+      const githubToken = 'unknownTokenType';
+      const gitTagsGithubToken = undefined;
+      expect(
+        takePersonalAccessTokenIfPossible(githubToken, gitTagsGithubToken)
+      ).toEqual(githubToken);
+    });
   });
 });
