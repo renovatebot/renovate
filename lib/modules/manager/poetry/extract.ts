@@ -87,10 +87,12 @@ function extractFromSection(
       currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
-      packageName,
     };
     if (packageName in poetryLockfile) {
       dep.lockedVersion = poetryLockfile[packageName];
+    }
+    if (depName !== packageName) {
+      dep.packageName = packageName;
     }
     if (skipReason) {
       dep.skipReason = skipReason;
