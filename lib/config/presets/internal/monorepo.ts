@@ -101,6 +101,7 @@ const repoGroups = {
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   graphqlcodegenerator: [
+    'https://github.com/dotansimha/graphql-code-generator-community',
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
