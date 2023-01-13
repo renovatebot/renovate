@@ -1,6 +1,9 @@
+import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   getSiblingFileName,
   readLocalFile,
@@ -26,32 +29,45 @@ export async function updateArtifacts({
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  if (
-    !(
-      config.updateType === 'lockFileMaintenance' ||
-      config.updateType === 'lockfileUpdate'
-    ) &&
-    updatedDeps.length < 1
-  ) {
+  logger.debug(`pub.updateArtifacts(${packageFileName})`);
+  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+
+  if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+    logger.debug('No updated pub deps - returning null');
     return null;
   }
 
   const lockFileName = getSiblingFileName(packageFileName, 'pubspec.lock');
   const oldLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!oldLockFileContent) {
+    logger.debug('No pubspec.lock found');
     return null;
   }
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+    logger.debug(`Updating ${lockFileName}`);
 
     const isFlutter = newPackageFileContent.includes('sdk: flutter');
     const toolName = isFlutter ? 'flutter' : 'dart';
+    const cmd: string[] = [];
+
+    if (isLockFileMaintenance) {
+      cmd.push(`${toolName} pub upgrade`);
+    } else {
+      cmd.push(
+        `${toolName} pub upgrade ${updatedDeps
+          .map((dep) => dep.depName)
+          .filter(is.string)
+          .map((dep) => quote(dep))
+          .join(' ')}`
+      );
+    }
 
     const constraint = isFlutter
       ? config.constraints?.flutter ?? getFlutterConstraint(oldLockFileContent)
       : config.constraints?.dart ?? getDartConstraint(oldLockFileContent);
-    await exec(`${toolName} pub upgrade`, {
+    const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {},
       toolConstraints: [
@@ -60,16 +76,15 @@ export async function updateArtifacts({
           constraint,
         },
       ],
-    });
+    };
 
+    await exec(cmd, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
-    if (
-      oldLockFileContent === newLockFileContent ||
-      newLockFileContent === undefined
-    ) {
+    if (oldLockFileContent === newLockFileContent) {
+      logger.debug(`${lockFileName} is unchanged`);
       return null;
     }
-
+    logger.debug(`Returning updated ${lockFileName}`);
     return [
       {
         file: {
