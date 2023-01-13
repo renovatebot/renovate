@@ -479,7 +479,7 @@ describe('modules/datasource/npm/get', () => {
   it('returns unexpired cache', async () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
-      cacheData: { softExpireAt: new Date('2099').toISOString() },
+      cacheData: { softExpireAt: '2099' },
     });
     const dep = await getDependency(http, 'https://some.url', 'some-package');
     expect(dep).toMatchObject({ some: 'result' });
@@ -489,7 +489,7 @@ describe('modules/datasource/npm/get', () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
       cacheData: {
-        softExpireAt: new Date('2020').toISOString(),
+        softExpireAt: '2020',
         etag: 'some-etag',
       },
     });
@@ -505,7 +505,7 @@ describe('modules/datasource/npm/get', () => {
     packageCache.get.mockResolvedValueOnce({
       some: 'result',
       cacheData: {
-        softExpireAt: new Date('2020').toISOString(),
+        softExpireAt: '2020',
         etag: 'some-etag',
       },
     });

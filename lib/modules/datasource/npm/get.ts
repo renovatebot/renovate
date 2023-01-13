@@ -1,5 +1,6 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
@@ -68,8 +69,10 @@ export async function getDependency(
   );
   if (cachedResult) {
     if (cachedResult.cacheData) {
-      const softExpireAt = new Date(cachedResult.cacheData.softExpireAt);
-      if (softExpireAt > new Date()) {
+      const softExpireAt = DateTime.fromISO(
+        cachedResult.cacheData.softExpireAt
+      );
+      if (softExpireAt > DateTime.local()) {
         logger.trace('Cached result is not expired - reusing');
         delete cachedResult.cacheData;
         return cachedResult;
@@ -83,9 +86,7 @@ export async function getDependency(
   const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
     ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
     : 1;
-  const newDate = new Date();
-  newDate.setMinutes(newDate.getMinutes() + cacheMinutes);
-  const softExpireAt = newDate.toISOString();
+  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
   const hardExpireMinutes = 24 * 60; // 1 day
 
   const uri = url.parse(packageUrl);
