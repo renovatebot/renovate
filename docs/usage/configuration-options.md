@@ -408,8 +408,21 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 
 ## commitMessageTopic
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
+You can use `commitMessageTopic` to change the `commitMessage` and `prTitle` without copy/pasting the whole string.
+The "topic" usually refers to the dependency being updated, for example: `"dependency react"`.
+
+We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules` array to set the commit message topic, like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "commitMessageTopic": "{{depName}}"
+    }
+  ]
+}
+```
 
 ## composerIgnorePlatformReqs
 
@@ -1413,15 +1426,23 @@ This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
 Supported lock files are:
 
-- `package-lock.json`
-- `yarn.lock`
-- `pnpm-lock.yaml`
-- `composer.lock`
-- `Gemfile.lock`
-- `poetry.lock`
+- `.terraform.lock.hcl`
 - `Cargo.lock`
+- `Chart.lock`
+- `composer.lock`
+- `flake.lock`
+- `Gemfile.lock`
+- `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `package-lock.json`
+- `packages.lock.json`
+- `Pipfile.lock`
+- `pnpm-lock.yaml`
+- `poetry.lock`
 - `pubspec.lock`
+- `pyproject.toml`
+- `requirements.txt`
+- `yarn.lock`
 
 Others may be added via feature request.
 
@@ -2005,19 +2026,31 @@ Example setting source URL for package "dummy":
 
 ### replacementName
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
-Use this field to define the name of a replacement package.
+Managers which do not support replacement:
+
+- `bazel`
+- `git-submodules`
+- `gomod`
+- `gradle`
+- `hermit`
+- `homebrew`
+- `maven`
+- `regex`
+
+Use the `replacementName` config option to set the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+For a list of managers which do not support replacement read the `replacementName` config option docs.
 
-Use this field to define the version of a replacement package.
+Use the `replacementVersion` config option to set the version of a replacement package.
 Must be used with `replacementName`.
 For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
 

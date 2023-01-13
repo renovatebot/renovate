@@ -52,9 +52,9 @@ const adapter: GithubGraphqlDatasourceAdapter<
 };
 
 function resp(
+  isRepoPrivate: boolean | undefined,
   nodes: TestAdapterInput[],
-  cursor: string | undefined = undefined,
-  isRepoPrivate = false
+  cursor: string | undefined = undefined
 ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>> {
   const data: GithubGraphqlRepoResponse<TestAdapterInput> = {
     repository: {
@@ -112,7 +112,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
-        .reply(200, resp([]));
+        .reply(200, resp(false, []));
 
       const res = await Datasource.query(
         { packageName: 'foo/bar' },
@@ -205,10 +205,10 @@ describe('util/github/graphql/datasource-fetcher', () => {
         .post('/graphql')
         .reply(
           200,
-          resp([
-            { version: v1, releaseTimestamp: t1, foo: '1' },
-            { version: v2, releaseTimestamp: t2, foo: '2' },
+          resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
+            { version: v2, releaseTimestamp: t2, foo: '2' },
+            { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );
 
@@ -219,22 +219,26 @@ describe('util/github/graphql/datasource-fetcher', () => {
       );
 
       expect(res).toEqual([
-        { version: v1, releaseTimestamp: t1, bar: '1' },
-        { version: v2, releaseTimestamp: t2, bar: '2' },
         { version: v3, releaseTimestamp: t3, bar: '3' },
+        { version: v2, releaseTimestamp: t2, bar: '2' },
+        { version: v1, releaseTimestamp: t1, bar: '1' },
       ]);
     });
 
     it('handles paginated data', async () => {
       const page1 = resp(
-        [{ version: v1, releaseTimestamp: t1, foo: '1' }],
+        false,
+        [{ version: v3, releaseTimestamp: t3, foo: '3' }],
         'aaa'
       );
       const page2 = resp(
+        false,
         [{ version: v2, releaseTimestamp: t2, foo: '2' }],
         'bbb'
       );
-      const page3 = resp([{ version: v3, releaseTimestamp: t3, foo: '3' }]);
+      const page3 = resp(false, [
+        { version: v1, releaseTimestamp: t1, foo: '1' },
+      ]);
       httpMock
         .scope('https://api.github.com/')
         .post('/graphql')
@@ -251,9 +255,9 @@ describe('util/github/graphql/datasource-fetcher', () => {
       );
 
       expect(res).toEqual([
-        { version: v1, releaseTimestamp: t1, bar: '1' },
-        { version: v2, releaseTimestamp: t2, bar: '2' },
         { version: v3, releaseTimestamp: t3, bar: '3' },
+        { version: v2, releaseTimestamp: t2, bar: '2' },
+        { version: v1, releaseTimestamp: t1, bar: '1' },
       ]);
     });
 
@@ -285,7 +289,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
       ): GithubGraphqlResponse<GithubGraphqlRepoResponse<TestAdapterInput>>[] {
         const partitions = partitionBy(items, perPage);
         const pages = partitions.map((nodes, idx) =>
-          resp(nodes, `page-${idx + 2}`)
+          resp(false, nodes, `page-${idx + 2}`)
         );
         delete pages[pages.length - 1].data?.repository.payload.pageInfo;
         return pages;
@@ -369,22 +373,23 @@ describe('util/github/graphql/datasource-fetcher', () => {
 
     describe('Cacheable flag', () => {
       const data = [
-        { version: v1, releaseTimestamp: t1, foo: '1' },
-        { version: v2, releaseTimestamp: t2, foo: '2' },
         { version: v3, releaseTimestamp: t3, foo: '3' },
+        { version: v2, releaseTimestamp: t2, foo: '2' },
+        { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
       test.each`
-        isPrivate | isCacheable
-        ${true}   | ${false}
-        ${false}  | ${true}
+        isPrivate    | isCacheable
+        ${undefined} | ${false}
+        ${true}      | ${false}
+        ${false}     | ${true}
       `(
         'private=$isPrivate => isCacheable=$isCacheable',
         async ({ isPrivate, isCacheable }) => {
           httpMock
             .scope('https://api.github.com/')
             .post('/graphql')
-            .reply(200, resp(data, undefined, isPrivate));
+            .reply(200, resp(isPrivate, data, undefined));
 
           const instance = new GithubGraphqlDatasourceFetcher(
             { packageName: 'foo/bar' },

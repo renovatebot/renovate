@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -159,7 +160,7 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && ifLine !== 'end') {
         lineNumber += 1;
         ifLine = lines[lineNumber];
-        if (ifLine !== 'end') {
+        if (is.string(ifLine) && ifLine !== 'end') {
           ifContent += formatContent(ifLine);
         }
       }

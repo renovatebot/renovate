@@ -26,6 +26,8 @@ export const presets: Record<string, Preset> = {
       'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:vso-task-lib-to-azure-pipelines-task-lib',
+      'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
   },
@@ -616,6 +618,30 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'vso-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vso-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
+      },
+    ],
+  },
+  'vsts-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vsts-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vsts-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
       },
     ],
   },

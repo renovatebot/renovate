@@ -122,3 +122,18 @@ export interface GithubGraphqlRepoParams {
   cursor: string | null;
   count: number;
 }
+
+export interface GithubGraphqlCacheRecord<
+  GithubItem extends GithubDatasourceItem
+> {
+  items: Record<string, GithubItem>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GithubGraphqlCacheStrategy<
+  GithubItem extends GithubDatasourceItem
+> {
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
+}
