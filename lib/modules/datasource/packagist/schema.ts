@@ -6,7 +6,7 @@ export const ComposerRelease = z.object({
   version: z
     .string()
     .refine((v) => versioning.isSingleVersion(v), 'Invalid version'),
-  homepage: z.string().url().nullable().catch(null),
+  homepage: z.string().nullable().catch(null),
   source: z
     .object({
       url: z.string(),

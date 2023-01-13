@@ -35,11 +35,8 @@ describe('modules/datasource/packagist/schema', () => {
       );
 
       expect(
-        ComposerRelease.parse({
-          version: '1.2.3',
-          homepage: '<script>alert("Hello");</script>',
-        })
-      ).toEqual(defaultResult);
+        ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' })
+      ).toEqual({ ...defaultResult, homepage: 'example.com' });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' })
