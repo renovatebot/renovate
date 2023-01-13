@@ -400,8 +400,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
-      "versioning": "poetry",
       "packageName": "extra-dep1",
+      "versioning": "poetry",
     },
     {
       "currentValue": "^0.9.4",
@@ -411,8 +411,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
-      "versioning": "poetry",
       "packageName": "extra-dep2",
+      "versioning": "poetry",
     },
     {
       "currentValue": "^0.4.0",
@@ -422,8 +422,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "managerData": {
         "nestedVersion": false,
       },
-      "versioning": "poetry",
       "packageName": "extra-dep3",
+      "versioning": "poetry",
     },
   ],
   "extractedConstraints": {},
@@ -441,8 +441,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "pep440",
     "packageName": "dep1-",
+    "versioning": "pep440",
   },
   {
     "currentValue": "0.0.0",
@@ -482,8 +482,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "poetry",
     "packageName": "dev-dep1",
+    "versioning": "poetry",
   },
   {
     "currentValue": "Invalid version.",
@@ -493,8 +493,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
+    "packageName": "dev-dep2",
     "skipReason": "unknown-version",
-    "packageName": "dev-dep1",
   },
   {
     "currentValue": "^0.8.3",
@@ -504,8 +504,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "poetry",
     "packageName": "extra-dep1",
+    "versioning": "poetry",
   },
   {
     "currentValue": "^0.9.4",
@@ -515,8 +515,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "poetry",
     "packageName": "extra-dep2",
+    "versioning": "poetry",
   },
   {
     "currentValue": "^0.4.0",
@@ -526,8 +526,8 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
     "managerData": {
       "nestedVersion": false,
     },
-    "versioning": "poetry",
     "packageName": "extra-dep3",
+    "versioning": "poetry",
   },
 ]
 `;
