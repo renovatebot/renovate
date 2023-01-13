@@ -401,6 +401,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
         "nestedVersion": false,
       },
       "versioning": "poetry",
+      "packageName": "extra-dep1",
     },
     {
       "currentValue": "^0.9.4",
@@ -411,6 +412,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
         "nestedVersion": false,
       },
       "versioning": "poetry",
+      "packageName": "extra-dep2",
     },
     {
       "currentValue": "^0.4.0",
@@ -421,6 +423,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
         "nestedVersion": false,
       },
       "versioning": "poetry",
+      "packageName": "extra-dep3",
     },
   ],
   "extractedConstraints": {},
@@ -439,6 +442,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "versioning": "pep440",
+    "packageName": "dep1-",
   },
   {
     "currentValue": "0.0.0",
@@ -479,6 +483,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "versioning": "poetry",
+    "packageName": "dev-dep1",
   },
   {
     "currentValue": "Invalid version.",
@@ -489,6 +494,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "skipReason": "unknown-version",
+    "packageName": "dev-dep1",
   },
   {
     "currentValue": "^0.8.3",
@@ -499,6 +505,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "versioning": "poetry",
+    "packageName": "extra-dep1",
   },
   {
     "currentValue": "^0.9.4",
@@ -509,6 +516,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "versioning": "poetry",
+    "packageName": "extra-dep2",
   },
   {
     "currentValue": "^0.4.0",
@@ -519,6 +527,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "versioning": "poetry",
+    "packageName": "extra-dep3",
   },
 ]
 `;
