@@ -670,7 +670,7 @@ const staticGroups = {
     ],
   },
   testContainers: {
-    description: 'Group Testcontainers packages.',
+    description: 'Group Java Testcontainers packages.',
     packageRules: [
       {
         groupName: 'testcontainers packages',
