@@ -77,14 +77,9 @@ export function updatePrDebugData(
   };
 }
 
-function validatePrCache(
-  branchName: string,
-  prCache: PrCache,
-  prFingerprint: string
-): boolean {
+function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
   if (prCache.fingerprint !== prFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
-    setPrCache(branchName, prFingerprint);
     return false;
   }
 
@@ -119,9 +114,9 @@ export async function ensurePr(
     logger.debug('Found existing PR');
     const prCache = getPrCache(branchName);
     if (prCache) {
-      logger.debug({ prCache }, 'Found existing PR cache');
+      logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
-      if (validatePrCache(branchName, prCache, prFingerprint)) {
+      if (validatePrCache(prCache, prFingerprint)) {
         logger.debug(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
@@ -363,6 +358,7 @@ export async function ensurePr(
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
+      setPrCache(branchName, prFingerprint);
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);

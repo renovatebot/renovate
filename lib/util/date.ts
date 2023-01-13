@@ -18,6 +18,11 @@ export function getElapsedHours(time: Date | string): number {
     typeof time === 'string'
       ? DateTime.fromISO(time)
       : DateTime.fromJSDate(time);
+
+  if (!pastTime.isValid) {
+    return 0;
+  }
+
   const diff = DateTime.now().diff(pastTime, 'hours');
   return diff.hours;
 }
