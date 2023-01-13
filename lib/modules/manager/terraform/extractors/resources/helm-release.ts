@@ -21,12 +21,12 @@ export class HelmReleaseExtractor extends DependencyExtractor {
       const dep: PackageDependency = {
         currentValue: helmRelease.version,
         depType: 'helm_release',
-        registryUrls: is.nonEmptyString(helmRelease?.repository)
-          ? [helmRelease.repository]
-          : null,
         depName: helmRelease.chart,
         datasource: HelmDatasource.id,
       };
+      if (is.nonEmptyString(helmRelease?.repository)) {
+        dep.registryUrls = [helmRelease.repository];
+      }
       if (!helmRelease.chart) {
         dep.skipReason = 'invalid-name';
       } else if (checkIfStringIsPath(helmRelease.chart)) {

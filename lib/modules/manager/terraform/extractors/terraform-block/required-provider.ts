@@ -21,7 +21,7 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
       return [];
     }
 
-    const deps: PackageDependency[] = [];
+    const dependencies: PackageDependency[] = [];
     for (const terraformBlock of terraformBlocks) {
       const requiredProviders = terraformBlock.required_providers;
       if (is.nullOrUndefined(requiredProviders)) {
@@ -32,28 +32,29 @@ export class RequiredProviderExtractor extends TerraformProviderExtractor {
         requiredProviders.flatMap(Object.entries);
       for (const [requiredProviderName, value] of entries) {
         // name = version declaration method
+        let dep: PackageDependency;
         if (is.string(value)) {
-          deps.push({
+          dep = {
             currentValue: value,
             managerData: {
               moduleName: requiredProviderName,
             },
-          });
-          continue;
+          };
+        } else {
+          // block declaration aws = { source = 'aws', version = '2.0.0' }
+          dep = {
+            currentValue: value['version'],
+            managerData: {
+              moduleName: requiredProviderName,
+              source: value['source'],
+            },
+          };
         }
-        // block declaration aws = { source = 'aws', version = '2.0.0' }
-        deps.push({
-          currentValue: value['version'],
-          managerData: {
-            moduleName: requiredProviderName,
-            source: value['source'],
-          },
-        });
+        dependencies.push(
+          this.analyzeTerraformProvider(dep, locks, 'required_provider')
+        );
       }
     }
-    const dependencies = deps.map((dep) =>
-      this.analyzeTerraformProvider(dep, locks, 'required_provider')
-    );
     return dependencies;
   }
 }
