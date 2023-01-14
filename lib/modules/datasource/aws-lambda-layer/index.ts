@@ -41,9 +41,12 @@ export class AwsLambdaLayerDataSource extends Datasource {
     });
 
     const matchingLayerVersions = await this.lambda.getValue().send(cmd);
+
     matchingLayerVersions.LayerVersions =
       matchingLayerVersions.LayerVersions ?? [];
 
+    // the API does not specify the sort order of the versions
+    // https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#listLayerVersions-property
     return matchingLayerVersions.LayerVersions.sort((layer1, layer2) => {
       return (layer1.Version ?? 0) - (layer2.Version ?? 0);
     });

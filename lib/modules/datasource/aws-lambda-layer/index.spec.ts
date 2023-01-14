@@ -4,7 +4,6 @@ import {
   ListLayerVersionsCommand,
   ListLayerVersionsCommandOutput,
 } from '@aws-sdk/client-lambda';
-
 import { mockClient } from 'aws-sdk-client-mock';
 import { AwsLambdaLayerDataSource, AwsLambdaLayerFilter } from './index';
 
@@ -31,7 +30,7 @@ const layer3: LayerVersionsListItem = {
 };
 
 const mock3Layers: ListLayerVersionsCommandOutput = {
-  LayerVersions: [layer3, layer2, layer1],
+  LayerVersions: [layer1, layer2, layer3],
   $metadata: {},
 };
 
@@ -70,8 +69,6 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       );
 
       expect(res).toEqual([]);
-      expect(lambdaClientMock.calls()).toHaveLength(1);
-      expect(lambdaClientMock.calls()[0].args[0]).toBe('my-layer');
     });
 
     it('should return array with one layer if one layer found', async () => {
@@ -82,8 +79,6 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       );
 
       expect(res).toEqual([layer3]);
-      expect(lambdaClientMock.calls()).toHaveLength(1);
-      expect(lambdaClientMock.calls()[0].args[0]).toBe('my-layer');
     });
 
     it('should return array with three layers if three layers found', async () => {
@@ -94,8 +89,40 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       );
 
       expect(res).toEqual([layer3, layer2, layer1]);
+    });
+
+    it('should have the filters for listLayerVersions set', async () => {
+      mockListLayerVersionsCommandOutput(mock3Layers);
+      const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
+
+      await lambdaLayerDatasource.getSortedLambdaLayerVersions({
+        arn: 'arn',
+        runtime: 'runtime',
+        architecture: 'architecture',
+      });
+
       expect(lambdaClientMock.calls()).toHaveLength(1);
-      expect(lambdaClientMock.calls()[0].args[0]).toBe('my-layer');
+      expect(lambdaClientMock.calls()[0].args).toMatchInlineSnapshot(`[
+  ListLayerVersionsCommand {
+    "input": {
+      "CompatibleArchitecture": "architecture",
+      "CompatibleRuntime": "runtime",
+      "LayerName": "arn",
+    },
+    "middlewareStack": {
+      "add": [Function],
+      "addRelativeTo": [Function],
+      "applyToStack": [Function],
+      "clone": [Function],
+      "concat": [Function],
+      "identify": [Function],
+      "remove": [Function],
+      "removeByTag": [Function],
+      "resolve": [Function],
+      "use": [Function],
+    },
+  },
+]`);
     });
   });
 });
