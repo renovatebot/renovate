@@ -20,7 +20,7 @@ import * as _prBody from './body';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
 import * as _prCache from './set-pr-cache';
-import { ensurePr } from '.';
+import { ensurePr, generatePrFingerprintConfig } from '.';
 
 jest.mock('../../../../util/git');
 jest.mock('../../changelog');
@@ -741,8 +741,22 @@ describe('workers/repository/update/pr/index', () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(config),
+          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
           lastEdited: new Date().toISOString(),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+        );
+      });
+
+      it('fetches changelogs when pr cache matches but lastEdited date string is invalid', async () => {
+        config.repositoryCache = 'enabled';
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        cachedPr = {
+          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
+          lastEdited: 'invalid string',
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
         await ensurePr(config);
@@ -755,7 +769,7 @@ describe('workers/repository/update/pr/index', () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: fingerprint(config),
+          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);

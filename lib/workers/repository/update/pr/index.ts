@@ -94,7 +94,7 @@ function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
   return true;
 }
 
-function generatePrFingerprintConfig(
+export function generatePrFingerprintConfig(
   config: BranchConfig
 ): prFingerprintConfig {
   const filteredUpgrades = config.upgrades.map((upgrade) => {
