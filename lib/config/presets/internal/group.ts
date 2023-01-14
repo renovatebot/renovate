@@ -669,15 +669,6 @@ const staticGroups = {
       },
     ],
   },
-  testContainers: {
-    description: 'Group Java Testcontainers packages.',
-    packageRules: [
-      {
-        groupName: 'testcontainers packages',
-        matchPackagePrefixes: ['org.testcontainers:'],
-      },
-    ],
-  },
   testNonMajor: {
     description: 'Group all non-major test package updates together.',
     packageRules: [
