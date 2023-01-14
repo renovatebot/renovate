@@ -201,7 +201,7 @@ export async function getDependency(
     ) {
       return null;
     }
-    if (uri.host === 'registry.npmjs.org') {
+    if (uri.host === 'registry.npmjs.org' && err.message !== 'host-disabled') {
       if (cachedResult) {
         logger.warn(
           { err },
