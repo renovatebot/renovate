@@ -225,7 +225,8 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
-  'testcontainers-java': 'https://github.com/testcontainers/testcontainers-java',
+  'testcontainers-java':
+    'https://github.com/testcontainers/testcontainers-java',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
