@@ -239,7 +239,7 @@ export function safeCompile(
   try {
     return compile(template, input, filterFields);
   } catch (err) {
-    logger.warn({ err }, 'Error compiling template');
+    logger.warn({ err, template }, 'Error compiling template');
     return '';
   }
 }
