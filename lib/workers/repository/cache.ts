@@ -84,10 +84,10 @@ async function generateBranchCache(
       isConflicted,
       isModified,
       pristine,
+      prCache,
       prNo,
       sha,
       upgrades,
-      prCache,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

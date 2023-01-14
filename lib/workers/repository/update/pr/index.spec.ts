@@ -71,7 +71,6 @@ describe('workers/repository/update/pr/index', () => {
       jest.resetAllMocks();
       GlobalConfig.reset();
       prBody.getPrBody.mockReturnValue(body);
-      git.isCloned.mockReturnValueOnce(false);
     });
 
     describe('Create', () => {

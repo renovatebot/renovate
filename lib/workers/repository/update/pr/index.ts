@@ -34,7 +34,7 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
-import type { prFingerprintConfig } from './pr-fingerprint';
+import type { PrFingerprintConfig } from './pr-fingerprint';
 import { getPrCache, setPrCache } from './set-pr-cache';
 
 export function getPlatformPrOptions(
@@ -96,36 +96,36 @@ function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
 
 export function generatePrFingerprintConfig(
   config: BranchConfig
-): prFingerprintConfig {
+): PrFingerprintConfig {
   const filteredUpgrades = config.upgrades.map((upgrade) => {
     return {
+      depName: upgrade.depName,
+      gitRef: upgrade.gitRef,
+      hasReleaseNotes: upgrade.hasReleaseNotes,
       prBodyDefinitions: upgrade.prBodyDefinitions,
       prBodyNotes: upgrade.prBodyNotes,
-      gitRef: upgrade.gitRef,
       repoName: upgrade.repoName,
-      depName: upgrade.depName,
-      hasReleaseNotes: upgrade.hasReleaseNotes,
     };
   });
 
   return {
-    pkgVersion: pkg.version,
-    prTitle: config.prTitle,
-    prHeader: config.prHeader,
-    prFooter: config.prFooter,
-    warnings: config.warnings,
-    updateType: config.updateType,
-    isPin: config.isPin,
-    hasReleaseNotes: config.hasReleaseNotes,
-    schedule: config.schedule,
-    automergeSchedule: config.automergeSchedule,
     automerge: config.automerge,
-    timezone: config.timezone,
-    recreateClosed: config.recreateClosed,
-    rebaseWhen: config.rebaseWhen,
-    stopUpdating: config.stopUpdating,
-    prBodyTemplate: config.prBodyTemplate,
+    automergeSchedule: config.automergeSchedule,
     filteredUpgrades,
+    hasReleaseNotes: config.hasReleaseNotes,
+    isPin: config.isPin,
+    pkgVersion: pkg.version,
+    prBodyTemplate: config.prBodyTemplate,
+    prFooter: config.prFooter,
+    prHeader: config.prHeader,
+    prTitle: config.prTitle,
+    rebaseWhen: config.rebaseWhen,
+    recreateClosed: config.recreateClosed,
+    schedule: config.schedule,
+    stopUpdating: config.stopUpdating,
+    timezone: config.timezone,
+    updateType: config.updateType,
+    warnings: config.warnings,
   };
 }
 
@@ -138,7 +138,8 @@ export async function ensurePr(
   );
 
   const config: BranchConfig = { ...prConfig };
-  const prFingerprint = fingerprint(generatePrFingerprintConfig(config));
+  const filteredPrConfig = generatePrFingerprintConfig(config);
+  const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
@@ -158,8 +159,10 @@ export async function ensurePr(
         );
         return { type: 'with-pr', pr: existingPr };
       }
-    } else if (config.repositoryCache === 'enabled') {
-      logger.debug('PR cache not found, creating new');
+    } else {
+      if (config.repositoryCache === 'enabled') {
+        logger.debug('PR cache not found, creating new');
+      }
       setPrCache(branchName, prFingerprint);
     }
   }
