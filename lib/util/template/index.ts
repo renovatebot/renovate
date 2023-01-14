@@ -228,11 +228,19 @@ export function compile(
       }
     }
   }
+  return handlebars.compile(template)(filteredInput);
+}
+
+export function safeCompile(
+  template: string,
+  input: CompileInput,
+  filterFields = true
+): string {
   try {
-    return handlebars.compile(template)(filteredInput);
+    return compile(template, input, filterFields);
   } catch (err) {
     logger.warn({ err }, 'Error compiling template');
-    return null;
+    return '';
   }
 }
 
