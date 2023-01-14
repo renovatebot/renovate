@@ -2,6 +2,7 @@ import url from 'url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
+import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
@@ -196,12 +197,13 @@ export async function getDependency(
     const ignoredStatusCodes = [401, 402, 403, 404];
     const ignoredResponseCodes = ['ENOTFOUND'];
     if (
+      err.message === HOST_DISABLED ||
       ignoredStatusCodes.includes(err.statusCode) ||
       ignoredResponseCodes.includes(err.code)
     ) {
       return null;
     }
-    if (uri.host === 'registry.npmjs.org' && err.message !== 'host-disabled') {
+    if (uri.host === 'registry.npmjs.org') {
       if (cachedResult) {
         logger.warn(
           { err },
