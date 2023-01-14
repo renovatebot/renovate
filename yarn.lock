@@ -4190,12 +4190,7 @@ columnify@^1.6.0:
     strip-ansi "^6.0.1"
     wcwidth "^1.0.0"
 
-commander@9.4.1:
-  version "9.4.1"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-9.4.1.tgz#d1dd8f2ce6faf93147295c0df13c7c21141cfbdd"
-  integrity sha512-5EEkTNyHNGFPD2H+c/dXXfQZYa/scCKasxWcXJaWnNJ99pnQN9Vnmqow+p+PlFPE63Q6mThaZws1T+HxfpgtPw==
-
-commander@^9.4.1:
+commander@9.5.0, commander@^9.4.1:
   version "9.5.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-9.5.0.tgz#bc08d1eb5cedf7ccb797a96199d41c7bc3e60d30"
   integrity sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==
@@ -6439,10 +6434,10 @@ jest-environment-node@^29.3.1:
     jest-mock "^29.3.1"
     jest-util "^29.3.1"
 
-jest-extended@3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.2.1.tgz#d1e7d7731cfa2174f48036822ee4ee5dfc09d44b"
-  integrity sha512-+c+jL/KI/3OsU+jTFa8HFtwBzWhFixFYfOEfFdPIACN97HdgEcjkzKnotQQPZidwU4B/VqgA7LTy0yhAxfSCIw==
+jest-extended@3.2.2:
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/jest-extended/-/jest-extended-3.2.2.tgz#5a1a60f3187428fbf60e10d2eb23b3fb8f848ccf"
+  integrity sha512-hjnKdy3xBUTbe3CH8nc5WDDvX2btn5x04XXcN1AGqUKT48dzqeF4oWvz+wW21N66lV5+OFmJB387dU3YRZfOSA==
   dependencies:
     jest-diff "^29.0.0"
     jest-get-type "^29.0.0"
