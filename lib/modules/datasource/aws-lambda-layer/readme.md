@@ -38,7 +38,7 @@ Here's an example of using the regex manager to configure this datasource:
     {
       "fileMatch": ["\\.tf$"],
       "matchStrings": [
-        ".*renovate: datasource=aws-versioned-arn architecture=(?<architecture>.*) runtime=(?<runtime>.*)\\s+.* = \"(?<depName>.*):(?<currentValue>\\d+)\""
+        ".*renovate: datasource=aws-lambda-layer filter=.*\\s+.* = \"(?<depName>.*):(?<currentValue>\\d+)\""
       ],
       "versioningTemplate": "loose"
     }
@@ -46,11 +46,11 @@ Here's an example of using the regex manager to configure this datasource:
 }
 ```
 
-The configuration above matches every Terraform file, and recognizes these lines:
+The configuration above matches every Terraform file, and recognizes these line:
 
 ```yaml
 locals {
-  # renovate: datasource=aws-versioned-arn architecture=x86_64 runtime=python37
+  # renovate: datasource=aws-lambda-layer filter={"arn": "arn:aws:lambda:us-east-1:580247275435:layer:LambdaInsightsExtension", "architecture": "x86_64", "runtime": "python37"}
   insight_layer_arn = "arn:aws:lambda:us-east-1:580247275435:layer:LambdaInsightsExtension:21"
 }
 

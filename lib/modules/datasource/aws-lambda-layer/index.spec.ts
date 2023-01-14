@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-lambda';
 
 import { mockClient } from 'aws-sdk-client-mock';
-import { AwsVersionedArnDataSource } from './index';
+import { AwsLambdaLayerDataSource, AwsLambdaLayerFilter } from './index';
 
 /**
  * Testdata for mock implementation of LambdaClient
@@ -45,6 +45,12 @@ const mockEmpty: ListLayerVersionsCommandOutput = {
   $metadata: {},
 };
 
+const lambdaFilter: AwsLambdaLayerFilter = {
+  arn: '',
+  architecture: '',
+  runtime: '',
+};
+
 const lambdaClientMock = mockClient(LambdaClient);
 
 function mockListLayerVersionsCommandOutput(
@@ -54,13 +60,13 @@ function mockListLayerVersionsCommandOutput(
   lambdaClientMock.on(ListLayerVersionsCommand).resolves(result);
 }
 
-describe('modules/datasource/aws-versioned-arn/index', () => {
+describe('modules/datasource/aws-lambda-layer/index', () => {
   describe('getSortedLambdaLayerVersions', () => {
     it('should return empty array if no layers found', async () => {
       mockListLayerVersionsCommandOutput(mockEmpty);
-      const lamdbaLayerDatasource = new AwsVersionedArnDataSource();
+      const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        'my-layer'
+        lambdaFilter
       );
 
       expect(res).toEqual([]);
@@ -70,9 +76,9 @@ describe('modules/datasource/aws-versioned-arn/index', () => {
 
     it('should return array with one layer if one layer found', async () => {
       mockListLayerVersionsCommandOutput(mock1Layer);
-      const lamdbaLayerDatasource = new AwsVersionedArnDataSource();
+      const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        'my-layer'
+        lambdaFilter
       );
 
       expect(res).toEqual([layer3]);
@@ -82,9 +88,9 @@ describe('modules/datasource/aws-versioned-arn/index', () => {
 
     it('should return array with three layers if three layers found', async () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
-      const lamdbaLayerDatasource = new AwsVersionedArnDataSource();
+      const lamdbaLayerDatasource = new AwsLambdaLayerDataSource();
       const res = await lamdbaLayerDatasource.getSortedLambdaLayerVersions(
-        'my-layer'
+        lambdaFilter
       );
 
       expect(res).toEqual([layer3, layer2, layer1]);
