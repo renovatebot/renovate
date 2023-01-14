@@ -1,13 +1,21 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
-import type { NpmDependency, NpmRelease, NpmResponse } from './types';
+import type {
+  CachedNpmDependency,
+  NpmDependency,
+  NpmRelease,
+  NpmResponse,
+} from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -56,19 +64,57 @@ export async function getDependency(
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await packageCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<CachedNpmDependency>(
     cacheNamespace,
     packageUrl
   );
-  // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    if (cachedResult.cacheData) {
+      const softExpireAt = DateTime.fromISO(
+        cachedResult.cacheData.softExpireAt
+      );
+      if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
+        logger.trace('Cached result is not expired - reusing');
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
+      logger.trace('Cached result is soft expired');
+    } else {
+      logger.trace('Reusing legacy cached result');
+      return cachedResult;
+    }
+  }
+  const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
+    ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
+    : 15;
+  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
+  let { cacheHardTtlMinutes } = GlobalConfig.get();
+  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+    cacheHardTtlMinutes = cacheMinutes;
   }
 
   const uri = url.parse(packageUrl);
 
   try {
-    const raw = await http.getJson<NpmResponse>(packageUrl);
+    const options: HttpOptions = {};
+    if (cachedResult?.cacheData?.etag) {
+      logger.debug('Using cached etag');
+      options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
+    }
+    const raw = await http.getJson<NpmResponse>(packageUrl, options);
+    if (cachedResult?.cacheData && raw.statusCode === 304) {
+      logger.trace('Cached data is unchanged and can be reused');
+      cachedResult.cacheData.softExpireAt = softExpireAt;
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        cachedResult,
+        cacheHardTtlMinutes
+      );
+      delete cachedResult.cacheData;
+      return cachedResult;
+    }
+    const etag = raw.headers.etag;
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
@@ -125,9 +171,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
-      ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 15;
     // TODO: use dynamic detection of public repos instead of a static list (#9587)
     const whitelistedPublicScopes = [
       '@graphql-codegen',
@@ -140,7 +183,13 @@ export async function getDependency(
       (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
         !packageName.startsWith('@'))
     ) {
-      await packageCache.set(cacheNamespace, packageUrl, dep, cacheMinutes);
+      const cacheData = { softExpireAt, etag };
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        { ...dep, cacheData },
+        etag ? cacheHardTtlMinutes : cacheMinutes
+      );
     }
     return dep;
   } catch (err) {
@@ -153,6 +202,14 @@ export async function getDependency(
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
+      if (cachedResult) {
+        logger.warn(
+          { err },
+          'npmjs error, reusing expired cached result instead'
+        );
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';

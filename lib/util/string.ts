@@ -55,3 +55,7 @@ export function looseEquals(
   }
   return a.localeCompare(b, undefined, { sensitivity: 'base' }) === 0;
 }
+
+export function isDockerDigest(input: string): boolean {
+  return /^sha256:[a-f0-9]{64}$/i.test(input);
+}
