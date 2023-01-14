@@ -34,6 +34,7 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
+import type { prFingerprintConfig } from './pr-fingerprint';
 import { getPrCache, setPrCache } from './set-pr-cache';
 
 export function getPlatformPrOptions(
@@ -93,6 +94,41 @@ function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
   return true;
 }
 
+function generatePrFingerprintConfig(
+  config: BranchConfig
+): prFingerprintConfig {
+  const filteredUpgrades = config.upgrades.map((upgrade) => {
+    return {
+      prBodyDefinitions: upgrade.prBodyDefinitions,
+      prBodyNotes: upgrade.prBodyNotes,
+      gitRef: upgrade.gitRef,
+      repoName: upgrade.repoName,
+      depName: upgrade.depName,
+      hasReleaseNotes: upgrade.hasReleaseNotes,
+    };
+  });
+
+  return {
+    pkgVersion: pkg.version,
+    prTitle: config.prTitle,
+    prHeader: config.prHeader,
+    prFooter: config.prFooter,
+    warnings: config.warnings,
+    updateType: config.updateType,
+    isPin: config.isPin,
+    hasReleaseNotes: config.hasReleaseNotes,
+    schedule: config.schedule,
+    automergeSchedule: config.automergeSchedule,
+    automerge: config.automerge,
+    timezone: config.timezone,
+    recreateClosed: config.recreateClosed,
+    rebaseWhen: config.rebaseWhen,
+    stopUpdating: config.stopUpdating,
+    prBodyTemplate: config.prBodyTemplate,
+    filteredUpgrades,
+  };
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -102,7 +138,7 @@ export async function ensurePr(
   );
 
   const config: BranchConfig = { ...prConfig };
-  const prFingerprint = fingerprint(config);
+  const prFingerprint = fingerprint(generatePrFingerprintConfig(config));
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
