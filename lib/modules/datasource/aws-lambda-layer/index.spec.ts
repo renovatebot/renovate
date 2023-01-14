@@ -5,28 +5,31 @@ import {
   ListLayerVersionsCommandOutput,
 } from '@aws-sdk/client-lambda';
 import { mockClient } from 'aws-sdk-client-mock';
+import { getPkgReleases } from '..';
 import { AwsLambdaLayerDataSource, AwsLambdaLayerFilter } from './index';
+
+const datasource = AwsLambdaLayerDataSource.id;
 
 /**
  * Testdata for mock implementation of LambdaClient
- * layer1 to layer3 from oldest to newest
+ * layer1 to layer3 from newest to oldest
  */
 const layer1: LayerVersionsListItem = {
   Version: 1,
-  CreatedDate: '2021-01-01T00:00:00.000Z',
-  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
+  CreatedDate: '2021-01-10T00:00:00.000Z',
+  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:3',
 };
 
 const layer2: LayerVersionsListItem = {
   Version: 2,
-  CreatedDate: '2021-02-01T00:00:00.000Z',
+  CreatedDate: '2021-02-05T00:00:00.000Z',
   LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:2',
 };
 
 const layer3: LayerVersionsListItem = {
   Version: 3,
   CreatedDate: '2021-03-01T00:00:00.000Z',
-  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:3',
+  LayerVersionArn: 'arn:aws:lambda:us-east-1:123456789012:layer:my-layer:1',
 };
 
 const mock3Layers: ListLayerVersionsCommandOutput = {
@@ -88,7 +91,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
         lambdaFilter
       );
 
-      expect(res).toEqual([layer3, layer2, layer1]);
+      expect(res).toEqual([layer1, layer2, layer3]);
     });
 
     it('should have the filters for listLayerVersions set', async () => {
@@ -102,27 +105,25 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       });
 
       expect(lambdaClientMock.calls()).toHaveLength(1);
-      expect(lambdaClientMock.calls()[0].args).toMatchInlineSnapshot(`[
-  ListLayerVersionsCommand {
-    "input": {
-      "CompatibleArchitecture": "architecture",
-      "CompatibleRuntime": "runtime",
-      "LayerName": "arn",
-    },
-    "middlewareStack": {
-      "add": [Function],
-      "addRelativeTo": [Function],
-      "applyToStack": [Function],
-      "clone": [Function],
-      "concat": [Function],
-      "identify": [Function],
-      "remove": [Function],
-      "removeByTag": [Function],
-      "resolve": [Function],
-      "use": [Function],
-    },
-  },
-]`);
+
+      expect(lambdaClientMock.calls()[0].args[0].input).toEqual({
+        CompatibleArchitecture: 'architecture',
+        CompatibleRuntime: 'runtime',
+        LayerName: 'arn',
+      });
+    });
+  });
+
+  describe('getPkgReleases', () => {
+    it('should return null if no releases found', async () => {
+      mockListLayerVersionsCommandOutput(mockEmpty);
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: '',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });
