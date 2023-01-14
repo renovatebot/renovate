@@ -56,7 +56,9 @@ function extractFromSection(
     }
 
     const pep503NormalizeRegex = regEx(/[-_.]+/g);
-    const packageName = depName.toLowerCase().replace(pep503NormalizeRegex, "-");
+    const packageName = depName
+      .toLowerCase()
+      .replace(pep503NormalizeRegex, '-');
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
