@@ -96,7 +96,9 @@ export async function extract(
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
-  const configHash = fingerprint(generateFingerprintConfig(config));
+  const configHash = fingerprint(
+    generateFingerprintConfig(config, cachedExtract?.packageFiles)
+  );
   // istanbul ignore if
   if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
     packageFiles = cachedExtract.packageFiles;

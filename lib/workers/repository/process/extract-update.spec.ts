@@ -76,7 +76,10 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('uses repository cache', async () => {
-      const packageFiles: Record<string, PackageFile[]> = {};
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [{ deps: [] }],
+      };
+
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
@@ -86,7 +89,9 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: '123test',
-            configHash: fingerprint(generateFingerprintConfig(config)),
+            configHash: fingerprint(
+              generateFingerprintConfig(config, packageFiles)
+            ),
             packageFiles,
           },
         },

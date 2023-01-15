@@ -3,13 +3,14 @@ import type {
   RegexManagerTemplates,
   RenovateConfig,
 } from '../../../config/types';
-import { getManagerList } from '../../../modules/manager';
+import { getManagerList, hashMap } from '../../../modules/manager';
 import { validMatchFields } from '../../../modules/manager/regex/utils';
 import type { CustomExtractConfig } from '../../../modules/manager/types';
+import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import type { WorkerExtractConfig } from '../../types';
 
 export interface FingerprintExtractConfig {
-  managerList: Set<string>;
+  managerFingerprints: Set<string>;
   managers: WorkerExtractConfig[];
 }
 
@@ -52,7 +53,8 @@ function getFilteredManagerConfig(
 }
 
 export function generateFingerprintConfig(
-  config: RenovateConfig
+  config: RenovateConfig,
+  cachedPackageFiles?: BaseBranchCache['packageFiles']
 ): FingerprintExtractConfig {
   const managerExtractConfigs: WorkerExtractConfig[] = [];
   let managerList: Set<string>;
@@ -60,9 +62,15 @@ export function generateFingerprintConfig(
   if (enabledManagers?.length) {
     managerList = new Set(enabledManagers);
   } else {
-    managerList = new Set(getManagerList());
+    // get managers with matching files if cache:enabled else get all managers
+    managerList = new Set(
+      cachedPackageFiles?.length
+        ? Object.keys(cachedPackageFiles)
+        : getManagerList()
+    );
   }
 
+  const managerFingerprints: Set<string> = new Set();
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     if (manager === 'regex') {
@@ -75,10 +83,11 @@ export function generateFingerprintConfig(
     } else {
       managerExtractConfigs.push({ ...managerConfig, fileList: [] });
     }
+    managerFingerprints.add(hashMap.get(manager) ?? manager);
   }
 
   return {
-    managerList,
+    managerFingerprints,
     managers: managerExtractConfigs.map(getFilteredManagerConfig),
   };
 }
