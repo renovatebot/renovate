@@ -17,7 +17,7 @@ const UserPolicy = {
   None: Infinity,
 } as const;
 
-type UserPolicy = typeof UserPolicy[keyof typeof UserPolicy];
+type UserPolicy = (typeof UserPolicy)[keyof typeof UserPolicy];
 
 /**
  * Calculate current update range precision.
