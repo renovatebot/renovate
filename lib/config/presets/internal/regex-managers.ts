@@ -21,7 +21,7 @@ export const presets: Record<string, Preset> = {
         datasourceTemplate: 'docker',
         fileMatch: ['(^|/)Chart\\.yaml$'],
         matchStrings: [
-          '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*[\\"\\']?(?<currentValue>[\\w+\\.\\-]*)',
+          '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*["\']?(?<currentValue>[\\w+\\.\\-]*)',
         ],
       },
     ],
