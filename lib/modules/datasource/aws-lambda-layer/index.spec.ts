@@ -12,7 +12,7 @@ const datasource = AwsLambdaLayerDataSource.id;
 
 /**
  * Testdata for mock implementation of LambdaClient
- * layer1 to layer3 from newest to oldest
+ * layer1 to layer3 from oldest to newest
  */
 const layer1: LayerVersionsListItem = {
   Version: 1,
@@ -94,7 +94,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       expect(res).toEqual([layer1, layer2, layer3]);
     });
 
-    it('should have the filters for listLayerVersions set', async () => {
+    it('should have the filters for listLayerVersions set calling the AWS API', async () => {
       mockListLayerVersionsCommandOutput(mock3Layers);
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
 
@@ -114,16 +114,65 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
     });
   });
 
-  describe('getPkgReleases', () => {
-    it('should return null if no releases found', async () => {
-      mockListLayerVersionsCommandOutput(mockEmpty);
+  describe('integration', () => {
+    describe('getPkgReleases', () => {
+      it('should return null if no releases found', async () => {
+        mockListLayerVersionsCommandOutput(mockEmpty);
 
-      const res = await getPkgReleases({
-        datasource,
-        depName: '',
+        const res = await getPkgReleases({
+          datasource,
+          depName:
+            '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
+        });
+
+        expect(res).toBeNull();
       });
 
-      expect(res).toBeNull();
+      it('should return one image', async () => {
+        mockListLayerVersionsCommandOutput(mock1Layer);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName:
+            '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
+        });
+
+        expect(res).toStrictEqual({
+          releases: [
+            {
+              isDeprecated: false,
+              version: layer1.Version,
+            },
+          ],
+        });
+      });
+
+      it('should return 3 images', async () => {
+        mockListLayerVersionsCommandOutput(mock3Layers);
+
+        const res = await getPkgReleases({
+          datasource,
+          depName:
+            '{"arn": "arn:aws:lambda:us-east-1:123456789012:layer:my-layer", "runtime": "python37", "architecture": "x86_64"}',
+        });
+
+        expect(res).toStrictEqual({
+          releases: [
+            {
+              isDeprecated: false,
+              version: layer1.Version,
+            },
+            {
+              isDeprecated: false,
+              version: layer2.Version,
+            },
+            {
+              isDeprecated: false,
+              version: layer3.Version,
+            },
+          ],
+        });
+      });
     });
   });
 });

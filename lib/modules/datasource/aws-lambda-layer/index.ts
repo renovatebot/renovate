@@ -74,6 +74,7 @@ export class AwsLambdaLayerDataSource extends Datasource {
         version: layer.Version?.toString() ?? '0',
         releaseTimestamp: layer.CreatedDate,
         newDigest: layer.LayerVersionArn,
+        isDeprecated: false,
       })),
     };
   }
