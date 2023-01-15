@@ -64,9 +64,7 @@ export function generateFingerprintConfig(
   } else {
     // get managers with matching files if cache:enabled else get all managers
     managerList = new Set(
-      cachedPackageFiles?.length
-        ? Object.keys(cachedPackageFiles)
-        : getManagerList()
+      cachedPackageFiles ? Object.keys(cachedPackageFiles) : getManagerList()
     );
   }
 
