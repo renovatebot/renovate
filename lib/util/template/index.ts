@@ -231,6 +231,19 @@ export function compile(
   return handlebars.compile(template)(filteredInput);
 }
 
+export function safeCompile(
+  template: string,
+  input: CompileInput,
+  filterFields = true
+): string {
+  try {
+    return compile(template, input, filterFields);
+  } catch (err) {
+    logger.warn({ err, template }, 'Error compiling template');
+    return '';
+  }
+}
+
 export function containsTemplates(
   value: unknown,
   templates: string | string[]

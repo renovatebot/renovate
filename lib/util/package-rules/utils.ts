@@ -8,7 +8,6 @@ export function matcherOR(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule
 ): boolean | null {
-  let positiveMatch = false;
   let matchApplied = false;
   for (const matcher of groupMatchers) {
     let isMatch;
@@ -29,10 +28,10 @@ export function matcherOR(
     matchApplied = true;
 
     if (is.truthy(isMatch)) {
-      positiveMatch = true;
+      return true;
     }
   }
-  return matchApplied ? positiveMatch : null;
+  return matchApplied ? false : null;
 }
 
 export function massagePattern(pattern: string): string {

@@ -200,6 +200,17 @@ For example:
 }
 ```
 
+## cacheHardTtlMinutes
+
+This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
+It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+
+When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
+Results which are soft expired are reused in the following manner:
+
+- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+
 ## containerbaseDir
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
@@ -519,6 +530,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingRebaseCheckbox
+
 ## optimizeForDisabled
 
 When this option is `true`, Renovate will do the following during repository initialization:
@@ -651,7 +664,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example URL: `redis://localhost`.
+Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
