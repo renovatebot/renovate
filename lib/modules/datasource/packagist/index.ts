@@ -34,15 +34,11 @@ export class PackagistDatasource extends Datasource {
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
-    let opts: HttpOptions = {};
     const { username, password } = hostRules.find({
       hostType: PackagistDatasource.id,
       url,
     });
-    if (username && password) {
-      opts = { ...opts, username, password };
-    }
-    return opts;
+    return username && password ? { username, password } : {};
   }
 
   private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
@@ -89,7 +85,7 @@ export class PackagistDatasource extends Datasource {
 
   private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    return !!opts.password || !!opts.headers?.authorization;
+    return !!opts.password;
   }
 
   private static getPackagistFileUrl(
