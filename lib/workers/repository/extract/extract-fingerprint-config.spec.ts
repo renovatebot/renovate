@@ -1,6 +1,6 @@
 import { mergeChildConfig } from '../../../config';
 import { getConfig } from '../../../config/defaults';
-import { getManagerList } from '../../../modules/manager';
+import { getManagerList, hashMap } from '../../../modules/manager';
 import { generateFingerprintConfig } from './extract-fingerprint-config';
 
 describe('workers/repository/extract/extract-fingerprint-config', () => {
@@ -31,8 +31,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
     });
 
     const fingerprintConfig = generateFingerprintConfig(config);
-
-    expect(fingerprintConfig.managerList).toEqual(new Set(['npm', 'regex']));
+    const managerFingerprints = new Set([
+      hashMap.get('npm'),
+      hashMap.get('regex'),
+    ]);
+    expect(fingerprintConfig.managerFingerprints).toEqual(managerFingerprints);
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
@@ -77,7 +80,11 @@ describe('workers/repository/extract/extract-fingerprint-config', () => {
       npm: { fileMatch: ['hero.json'] },
     });
     const fingerprintConfig = generateFingerprintConfig(config);
-    expect(fingerprintConfig.managerList).toEqual(new Set(getManagerList()));
+    const managers = getManagerList();
+    const managerFingerprints = new Set(
+      managers.map((manager) => hashMap.get(manager))
+    );
+    expect(fingerprintConfig.managerFingerprints).toEqual(managerFingerprints);
     expect(
       fingerprintConfig.managers.find((manager) => manager.manager === 'npm')
     ).toEqual({
