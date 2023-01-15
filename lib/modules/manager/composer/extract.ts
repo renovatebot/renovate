@@ -197,5 +197,10 @@ export async function extractPackageFile(
     };
     res.managerData = managerData;
   }
+
+  if (is.nonEmptyString(composerJson.require?.php)) {
+    res.extractedConstraints = { php: composerJson.require.php };
+  }
+
   return res;
 }

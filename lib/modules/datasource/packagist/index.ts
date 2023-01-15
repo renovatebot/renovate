@@ -102,6 +102,16 @@ export class PackagistDatasource extends Datasource {
     return url;
   }
 
+  private static minifyExpand(releases: any[]): any[] {
+    let expandedRelease: any;
+    return releases.map((release) => {
+      if (release.require) {
+        expandedRelease = release;
+      }
+      return { ...expandedRelease, ...release };
+    });
+  }
+
   @cache({
     namespace: `datasource-${PackagistDatasource.id}-public-files`,
     key: (regUrl: string, regFile: RegistryFile) =>
@@ -137,10 +147,16 @@ export class PackagistDatasource extends Datasource {
       if (release.source?.url) {
         dep.sourceUrl = release.source.url;
       }
+      const constraints: Record<string, string[]> = {};
+      if (release.require?.php) {
+        constraints.php = [release.require.php];
+      }
+
       return {
         version: parsedVersion.replace(regEx(/^v/), ''),
         gitRef: parsedVersion,
         releaseTimestamp: release.time,
+        constraints,
       };
     });
     return dep;
@@ -218,8 +234,10 @@ export class PackagistDatasource extends Datasource {
     // TODO: fix types (#9610)
     let res = (await this.http.getJson<any>(pkgUrl[0])).body.packages[name];
     res = [
-      ...res,
-      ...(await this.http.getJson<any>(pkgUrl[1])).body.packages[name],
+      ...PackagistDatasource.minifyExpand(res),
+      ...PackagistDatasource.minifyExpand(
+        (await this.http.getJson<any>(pkgUrl[1])).body.packages[name]
+      ),
     ];
     if (res) {
       dep = PackagistDatasource.extractDepReleases(res);

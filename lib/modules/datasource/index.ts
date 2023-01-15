@@ -10,6 +10,7 @@ import { regEx } from '../../util/regex';
 import { trimTrailingSlash } from '../../util/url';
 import * as allVersioning from '../versioning';
 import datasources from './api';
+import { GithubTagsDatasource } from './github-tags';
 import { addMetaData } from './metadata';
 import { setNpmrc } from './npm';
 import { resolveRegistryUrl } from './npm/npmrc';
@@ -415,6 +416,60 @@ export async function getPkgReleases(
             version.matches(constraintValue, releaseConstraint)
         );
       });
+    } else {
+      if (constraintName === 'php') {
+        const composerVersioning = allVersioning.get('composer');
+        if (composerVersioning.isValid(constraintValue)) {
+          const lookupConfig: GetPkgReleasesConfig = {
+            datasource: GithubTagsDatasource.id,
+            depName: 'php/php-src',
+            extractVersion: '^php-(?<version>\\S+)',
+          };
+          const phpVersions = (
+            await getPkgReleases(lookupConfig)
+          )?.releases.map((release) => release.version);
+          if (!phpVersions) {
+            logger.warn('Could not fetch php releases for compatibility check');
+            return null;
+          }
+          const matchingVersions = phpVersions.filter((version) =>
+            composerVersioning.matches(version, constraintValue)
+          );
+          logger.debug(
+            `Found ${matchingVersions.length} matching php versions`
+          );
+          if (matchingVersions.length) {
+            const originalReleaseCount = res.releases.length;
+            res.releases = res.releases.filter((release) => {
+              const constraint = release.constraints?.[constraintName];
+              if (!is.nonEmptyArray(constraint)) {
+                // A release with no constraints is OK
+                return true;
+              }
+              return constraint.some(
+                // If any of the release's constraints match, then it's OK
+                (releaseConstraint) => {
+                  const releaseMatchingVersions = phpVersions.filter(
+                    (version) =>
+                      composerVersioning.matches(version, releaseConstraint)
+                  );
+
+                  const isMatch = matchingVersions.every((version) =>
+                    releaseMatchingVersions.includes(version)
+                  );
+                  return isMatch;
+                }
+              );
+            });
+            const filteredReleaseCount = res.releases.length;
+            logger.debug(
+              `${filteredReleaseCount} of ${originalReleaseCount} releases have matching constraints`
+            );
+          }
+        } else {
+          logger.warn({ constraintValue }, 'Invalid php constraint');
+        }
+      }
     }
   }
   // Strip constraints from releases result
