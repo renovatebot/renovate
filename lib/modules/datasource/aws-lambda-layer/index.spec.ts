@@ -48,7 +48,7 @@ const mockEmpty: ListLayerVersionsCommandOutput = {
 };
 
 const lambdaFilter: AwsLambdaLayerFilter = {
-  arn: '',
+  name: '',
   architecture: '',
   runtime: '',
 };
@@ -99,7 +99,7 @@ describe('modules/datasource/aws-lambda-layer/index', () => {
       const lambdaLayerDatasource = new AwsLambdaLayerDataSource();
 
       await lambdaLayerDatasource.getSortedLambdaLayerVersions({
-        arn: 'arn',
+        name: 'arn',
         runtime: 'runtime',
         architecture: 'architecture',
       });

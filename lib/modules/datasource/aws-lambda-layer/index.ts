@@ -9,7 +9,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export interface AwsLambdaLayerFilter {
-  arn: string;
+  name: string;
   runtime: string;
   architecture: string;
 }
@@ -35,7 +35,7 @@ export class AwsLambdaLayerDataSource extends Datasource {
     filter: AwsLambdaLayerFilter
   ): Promise<LayerVersionsListItem[]> {
     const cmd = new ListLayerVersionsCommand({
-      LayerName: filter.arn,
+      LayerName: filter.name,
       CompatibleArchitecture: filter.architecture,
       CompatibleRuntime: filter.runtime,
     });
