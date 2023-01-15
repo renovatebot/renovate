@@ -3,7 +3,7 @@ import shell from 'shelljs';
 import { updateJsonFile } from './utils.mjs';
 
 const dataUrl =
-  'https://raw.githubusercontent.com/jessehouwing/renovate-azure-devops-marketplace/main/azure-pipelines-marketplace-tasks.json';
+  'https://raw.githubusercontent.com/renovatebot/azure-devops-marketplace/main/azure-pipelines-marketplace-tasks.json';
 
 await (async () => {
   shell.echo('Generating azure pipelines marketplace tasks');

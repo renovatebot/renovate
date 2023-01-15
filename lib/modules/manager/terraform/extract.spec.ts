@@ -401,8 +401,8 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts docker resources', async () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
-      expect(res?.deps).toHaveLength(8);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           autoReplaceStringTemplate:
@@ -414,6 +414,7 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          depType: 'docker_image',
           skipReason: 'invalid-dependency-specification',
         },
         {
@@ -434,6 +435,7 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          depType: 'docker_container',
           skipReason: 'invalid-dependency-specification',
         },
         {
@@ -445,12 +447,6 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'repo.mycompany.com:8080/foo-service',
           depType: 'docker_service',
           replaceString: 'repo.mycompany.com:8080/foo-service:v1',
-        },
-        {
-          skipReason: 'invalid-dependency-specification',
-        },
-        {
-          skipReason: 'invalid-value',
         },
       ]);
     });
@@ -504,7 +500,10 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.21.5',
           depType: 'kubernetes_job',
         },
-        { skipReason: 'invalid-value' },
+        {
+          depType: 'kubernetes_job',
+          skipReason: 'invalid-dependency-specification',
+        },
         {
           depName: 'nginx',
           currentValue: '1.21.6',
@@ -553,9 +552,20 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
-    it('returns null if only local deps', async () => {
+    it('returns dep with skipReason local', async () => {
       const src = codeBlock`
         module "relative" {
+          source = "../fe"
+        }
+      `;
+      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+        deps: [{ skipReason: 'local' }],
+      });
+    });
+
+    it('returns null with only not added resources', async () => {
+      const src = codeBlock`
+        resource "test_resource" "relative" {
           source = "../fe"
         }
       `;
@@ -697,6 +707,17 @@ describe('modules/manager/terraform/extract', () => {
           extractVersion: 'v(?<version>.*)$',
         },
       ]);
+    });
+
+    it('return null if invalid HCL file', async () => {
+      const res = await extractPackageFile(
+        `
+          resource my provider
+        `,
+        'tfeWorkspace.tf',
+        {}
+      );
+      expect(res).toBeNull();
     });
   });
 });

@@ -7,6 +7,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
@@ -54,6 +55,10 @@ function extractFromSection(
       continue;
     }
 
+    const pep503NormalizeRegex = regEx(/[-_.]+/g);
+    const packageName = depName
+      .toLowerCase()
+      .replace(pep503NormalizeRegex, '-');
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
@@ -85,8 +90,11 @@ function extractFromSection(
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[depName];
+    if (packageName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[packageName];
+    }
+    if (depName !== packageName) {
+      dep.packageName = packageName;
     }
     if (skipReason) {
       dep.skipReason = skipReason;
