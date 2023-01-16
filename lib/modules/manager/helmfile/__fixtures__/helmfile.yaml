@@ -1,0 +1,8 @@
+
+repositories:
+  - name: backstage
+    url: https://backstage.github.io/charts
+releases:
+  - name: backstage
+    chart: backstage/backstage
+    version: "0.12.0"
