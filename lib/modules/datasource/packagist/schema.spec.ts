@@ -59,9 +59,9 @@ describe('modules/datasource/packagist/schema', () => {
       expect(ComposerReleases.parse([null])).toEqual([]);
       expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
       expect(ComposerReleases.parse(['foobar'])).toEqual([]);
-      expect(ComposerReleases.parse([{ version: '1.2.3' }])).toEqual([
-        { version: '1.2.3' },
-      ]);
+      expect(
+        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
+      ).toEqual([{ version: '1.2.3' }]);
     });
   });
 
