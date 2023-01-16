@@ -781,7 +781,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -855,7 +856,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests without media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1005,7 +1007,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles error while retrieving image config blob', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1058,24 +1061,31 @@ describe('modules/datasource/docker/index', () => {
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, { token: 'some-token' })
-        .head('/library/some-dep/manifests/some-digest')
+        .head(
+          '/library/some-dep/manifests/sha256:0101010101010101010101010101010101010101010101010101010101010101'
+        )
         .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
+        .head(
+          '/library/some-dep/manifests/sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa',
+          undefined,
+          {
+            badheaders: ['authorization'],
+          }
+        )
         .reply(401);
 
       const res = await getDigest(
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentDigest: 'some-digest',
+          currentDigest:
+            'sha256:0101010101010101010101010101010101010101010101010101010101010101',
         },
-        'some-new-value'
+        'sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa'
       );
       expect(res).toBeNull();
     });

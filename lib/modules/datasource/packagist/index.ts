@@ -32,29 +32,13 @@ export class PackagistDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  public override getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.trace(`getReleases(${packageName})`);
-    // istanbul ignore if
-    if (!registryUrl) {
-      return Promise.resolve(null);
-    }
-    return this.packageLookup(registryUrl, packageName);
-  }
-
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
-    let opts: HttpOptions = {};
     const { username, password } = hostRules.find({
       hostType: PackagistDatasource.id,
       url,
     });
-    if (username && password) {
-      opts = { ...opts, username, password };
-    }
-    return opts;
+    return username && password ? { username, password } : {};
   }
 
   private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
@@ -101,7 +85,7 @@ export class PackagistDatasource extends Datasource {
 
   private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    return !!opts.password || !!opts.headers?.authorization;
+    return !!opts.password;
   }
 
   private static getPackagistFileUrl(
@@ -223,19 +207,26 @@ export class PackagistDatasource extends Datasource {
     const results = await p.map([pkgUrl, devUrl], (url) =>
       this.http.getJson(url).then(({ body }) => body)
     );
-    return schema.ComposerV2ReleaseResult.parse(results);
+    return schema.parsePackagesResponses(name, results);
   }
 
-  private async packageLookup(
-    regUrl: string,
-    name: string
-  ): Promise<ReleaseResult | null> {
+  public override async getReleases({
+    packageName,
+    registryUrl,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    logger.trace(`getReleases(${packageName})`);
+
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
     try {
-      if (regUrl === 'https://packagist.org') {
-        const packagistResult = await this.packagistOrgLookup(name);
+      if (registryUrl === 'https://packagist.org') {
+        const packagistResult = await this.packagistOrgLookup(packageName);
         return packagistResult;
       }
-      const allPackages = await this.getAllPackages(regUrl);
+      const allPackages = await this.getAllPackages(registryUrl);
       // istanbul ignore if: needs test
       if (!allPackages) {
         return null;
@@ -247,33 +238,35 @@ export class PackagistDatasource extends Datasource {
         providerPackages,
         includesPackages,
       } = allPackages;
-      if (packages?.[name]) {
-        const dep = PackagistDatasource.extractDepReleases(packages[name]);
+      if (packages?.[packageName]) {
+        const dep = PackagistDatasource.extractDepReleases(
+          packages[packageName]
+        );
         return dep;
       }
-      if (includesPackages?.[name]) {
-        return includesPackages[name];
+      if (includesPackages?.[packageName]) {
+        return includesPackages[packageName];
       }
       let pkgUrl: string;
-      if (name in providerPackages) {
+      if (packageName in providerPackages) {
         pkgUrl = URL.resolve(
-          regUrl,
+          registryUrl,
           providersUrl!
-            .replace('%package%', name)
-            .replace('%hash%', providerPackages[name])
+            .replace('%package%', packageName)
+            .replace('%hash%', providerPackages[packageName])
         );
       } else if (providersLazyUrl) {
         pkgUrl = URL.resolve(
-          regUrl,
-          providersLazyUrl.replace('%package%', name)
+          registryUrl,
+          providersLazyUrl.replace('%package%', packageName)
         );
       } else {
         return null;
       }
-      const opts = PackagistDatasource.getHostOpts(regUrl);
+      const opts = PackagistDatasource.getHostOpts(registryUrl);
       // TODO: fix types (#9610)
       const versions = (await this.http.getJson<any>(pkgUrl, opts)).body
-        .packages[name];
+        .packages[packageName];
       const dep = PackagistDatasource.extractDepReleases(versions);
       logger.trace({ dep }, 'dep');
       return dep;

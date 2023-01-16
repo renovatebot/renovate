@@ -2225,6 +2225,16 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'cacheHardTtlMinutes',
+    description:
+      'Maximum duration in minutes to keep datasource cache entries.',
+    type: 'integer',
+    stage: 'repository',
+    default: 0,
+    globalOnly: true,
+    experimental: true,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions to use in PR tables.',
     type: 'object',

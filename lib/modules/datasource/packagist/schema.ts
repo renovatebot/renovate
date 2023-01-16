@@ -2,66 +2,96 @@ import { z } from 'zod';
 import { api as versioning } from '../../versioning/composer';
 import type { Release, ReleaseResult } from '../types';
 
-export const PackageName = z
-  .string()
-  .refine((s) => s.split('/').length === 2, 'Invalid package name');
-
-export const ComposerV2Release = z.object({
-  version: z.string(),
-  homepage: z.optional(z.string().url()),
-  source: z.optional(
-    z.object({
-      url: z.string().url(),
+export const ComposerRelease = z.object({
+  version: z
+    .string()
+    .refine((v) => versioning.isSingleVersion(v), 'Invalid version'),
+  homepage: z.string().nullable().catch(null),
+  source: z
+    .object({
+      url: z.string(),
     })
-  ),
-  time: z.string().datetime({ offset: true }),
+    .transform((x) => x.url)
+    .nullable()
+    .catch(null),
+  time: z.string().nullable().catch(null),
 });
 
-export const ComposerV2PackageResponse = z.object({
-  packages: z.record(PackageName, z.array(ComposerV2Release)),
+export const ComposerReleaseArray = z
+  .array(ComposerRelease.nullable().catch(null))
+  .transform((xs) =>
+    xs.filter((x): x is z.infer<typeof ComposerRelease> => x !== null)
+  );
+export type ComposerReleaseArray = z.infer<typeof ComposerReleaseArray>;
+
+export const ComposerPackagesResponse = z.object({
+  packages: z.record(z.unknown()),
 });
 
-export const ComposerV2ReleaseResult = z
-  .array(ComposerV2PackageResponse)
-  .transform((responses): ReleaseResult => {
-    const releases: Release[] = [];
-    let maxVersion: string | undefined;
-    let homepage: string | undefined = undefined;
-    let sourceUrl: string | undefined = undefined;
+export function parsePackagesResponse(
+  packageName: string,
+  packagesResponse: unknown
+): ComposerReleaseArray {
+  const packagesResponseParsed =
+    ComposerPackagesResponse.safeParse(packagesResponse);
+  if (!packagesResponseParsed.success) {
+    return [];
+  }
 
-    for (const response of responses) {
-      for (const responsePackage of Object.values(response.packages)) {
-        for (const composerV2Release of responsePackage) {
-          const { version, time: releaseTimestamp } = composerV2Release;
-          const dep: Release = {
-            version: version.replace(/^v/, ''),
-            gitRef: version,
-            releaseTimestamp,
-          };
-          releases.push(dep);
+  const { packages } = packagesResponseParsed.data;
+  const releaseArray = packages[packageName];
+  const releaseArrayParsed = ComposerReleaseArray.safeParse(releaseArray);
+  if (!releaseArrayParsed.success) {
+    return [];
+  }
 
-          if (!versioning.isValid(version)) {
-            continue;
-          }
+  return releaseArrayParsed.data;
+}
 
-          if (!maxVersion || versioning.isGreaterThan(version, maxVersion)) {
-            maxVersion = version;
-            homepage = composerV2Release.homepage;
-            sourceUrl = composerV2Release.source?.url;
-          }
-        }
+export function parsePackagesResponses(
+  packageName: string,
+  packagesResponses: unknown[]
+): ReleaseResult | null {
+  const releases: Release[] = [];
+  let maxVersion: string | null = null;
+  let homepage: string | null = null;
+  let sourceUrl: string | null = null;
+
+  for (const packagesResponse of packagesResponses) {
+    const releaseArray = parsePackagesResponse(packageName, packagesResponse);
+    for (const composerRelease of releaseArray) {
+      const version = composerRelease.version.replace(/^v/, '');
+      const gitRef = composerRelease.version;
+
+      const dep: Release = { version, gitRef };
+
+      if (composerRelease.time) {
+        dep.releaseTimestamp = composerRelease.time;
+      }
+
+      releases.push(dep);
+
+      if (!maxVersion || versioning.isGreaterThan(version, maxVersion)) {
+        maxVersion = version;
+        homepage = composerRelease.homepage;
+        sourceUrl = composerRelease.source;
       }
     }
+  }
 
-    const result: ReleaseResult = { releases };
+  if (releases.length === 0) {
+    return null;
+  }
 
-    if (homepage) {
-      result.homepage = homepage;
-    }
+  const result: ReleaseResult = { releases };
 
-    if (sourceUrl) {
-      result.sourceUrl = sourceUrl;
-    }
+  if (homepage) {
+    result.homepage = homepage;
+  }
 
-    return result;
-  });
+  if (sourceUrl) {
+    result.sourceUrl = sourceUrl;
+  }
+
+  return result;
+}
