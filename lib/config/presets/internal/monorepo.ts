@@ -7,6 +7,10 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
+  'algolia-instantsearch': [
+    'https://github.com/algolia/instantsearch',
+    'https://github.com/algolia/instantsearch.js',
+  ],
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
@@ -97,6 +101,7 @@ const repoGroups = {
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   graphqlcodegenerator: [
+    'https://github.com/dotansimha/graphql-code-generator-community',
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
@@ -155,6 +160,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nextra: 'https://github.com/shuding/nextra',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
@@ -227,6 +233,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -262,6 +269,7 @@ const patternGroups = {
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 

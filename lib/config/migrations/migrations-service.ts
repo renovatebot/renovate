@@ -145,7 +145,7 @@ export class MigrationsService {
 
     for (const [key, value] of Object.entries(originalConfig)) {
       migratedConfig[key] ??= value;
-      const migration = MigrationsService.#getMigration(migrations, key);
+      const migration = MigrationsService.getMigration(migrations, key);
 
       if (migration) {
         migration.run(value, key);
@@ -203,7 +203,7 @@ export class MigrationsService {
     return migrations;
   }
 
-  static #getMigration(
+  private static getMigration(
     migrations: ReadonlyArray<Migration>,
     key: string
   ): Migration | undefined {

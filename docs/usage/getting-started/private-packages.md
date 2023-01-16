@@ -179,6 +179,25 @@ The following details the most common/popular manager artifacts updating and how
 
 Any `hostRules` token for `github.com` or `gitlab.com` are found and written out to `COMPOSER_AUTH` in env for Composer to parse.
 Any `hostRules` with `hostType=packagist` are also included.
+For dependencies on `github.com` without a Packagist server: use a Personal Access Token for `hostRule` with `hostType=git-tags`, do not use an application token.
+Avoid adding a `hostRule` with `hostType=github` because:
+
+- it overrides the default Renovate application token for everything else
+- it causes unwanted side effects
+
+The repository in `composer.json` should have the `vcs` type with a `https` URL.
+For example:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/organization/private-repository"
+    }
+  ]
+}
+```
 
 ### gomod
 
@@ -389,6 +408,25 @@ hostRules: [
     password: '<PAT>',
   },
 ];
+```
+
+### pip
+
+If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
+This is because `packageRules` are applied _after_ package file extraction.
+
+For example:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["pip_requirements"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
 ```
 
 ### poetry

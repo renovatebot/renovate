@@ -37,7 +37,7 @@ nav:
       - 'npm Presets': 'presets-npm.md'
       - 'Package Presets': 'presets-packages.md'
       - 'Preview Presets': 'presets-preview.md'
-      - 'Regex Manager Presets': 'presets-regexManagers.md'
+      - 'Custom Manager Presets': 'presets-customManagers.md'
       - 'Replacement Presets': 'presets-replacements.md'
       - 'Schedule Presets': 'presets-schedule.md'
       - 'Workaround Presets': 'presets-workarounds.md'

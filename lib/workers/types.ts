@@ -155,7 +155,6 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
-  updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
   enabledManagers?: string[];

@@ -142,7 +142,7 @@ If you do, update your `matchStrings` regex!
 
 #### Updating `gitlab-ci include` dep names
 
-You can use the regex manager to update the `depName` and the version.
+You can use the custom manager regex to update the `depName` and the version.
 This can be handy when the location of files referenced in gitlab-ci `includes:` fields has changed.
 
 You may need to set a second `matchString` for the new name to ensure the regex manager can detect the new value.
@@ -150,7 +150,7 @@ For example:
 
 ```json
 {
-  "regexManagers": [
+  "customManagers": [
     {
       "customType": "regex",
       "fileMatch": [".*y[a]?ml$"],

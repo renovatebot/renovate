@@ -115,6 +115,8 @@ describe('modules/versioning/maven/index', () => {
     ${'0'}           | ${''}                              | ${false}
     ${'1'}           | ${'1'}                             | ${true}
     ${'1'}           | ${'(1'}                            | ${false}
+    ${'2.4.2'}       | ${'2.4.2'}                         | ${true}
+    ${'2.4.2'}       | ${'= 2.4.2'}                       | ${false}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
