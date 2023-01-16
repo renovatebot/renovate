@@ -27,7 +27,9 @@ export const ComposerRelease = z
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
-export const ComposerReleases = z.array(ComposerRelease);
+export const ComposerReleases = z
+  .array(ComposerRelease.nullable().catch(null))
+  .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
 export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
 export const ComposerPackagesResponse = z.object({

@@ -52,13 +52,13 @@ describe('modules/datasource/packagist/schema', () => {
       expect(() => ComposerReleases.parse(undefined)).toThrow();
       expect(() => ComposerReleases.parse('')).toThrow();
       expect(() => ComposerReleases.parse({})).toThrow();
-      expect(() => ComposerReleases.parse([null])).toThrow();
-      expect(() => ComposerReleases.parse([1, 2, 3])).toThrow();
-      expect(() => ComposerReleases.parse(['foobar'])).toThrow();
     });
 
     it('parses', () => {
       expect(ComposerReleases.parse([])).toEqual([]);
+      expect(ComposerReleases.parse([null])).toEqual([]);
+      expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
+      expect(ComposerReleases.parse(['foobar'])).toEqual([]);
       expect(ComposerReleases.parse([{ version: '1.2.3' }])).toEqual([
         { version: '1.2.3' },
       ]);
