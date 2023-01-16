@@ -344,6 +344,39 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       ]);
     });
 
+    it('skips augmenting v2 lock file constraint', async () => {
+      npm.getNpmLock.mockReturnValue({
+        lockedVersions: { a: '1.0.0', b: '2.0.0', c: '3.0.0' },
+        lockfileVersion: 2,
+      });
+      const packageFiles = [
+        {
+          npmLock: 'package-lock.json',
+          constraints: {
+            npm: '>=9.0.0',
+          },
+          deps: [
+            { depName: 'a', currentValue: '1.0.0' },
+            { depName: 'b', currentValue: '2.0.0' },
+          ],
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          constraints: {
+            npm: '>=9.0.0',
+          },
+          deps: [
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+          ],
+          lockFiles: ['package-lock.json'],
+          npmLock: 'package-lock.json',
+        },
+      ]);
+    });
+
     it('appends <7 to npm constraints', async () => {
       npm.getNpmLock.mockReturnValue({
         lockedVersions: {
@@ -375,6 +408,47 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       expect(packageFiles).toEqual([
         {
           constraints: { npm: '>=6.0.0 <7' },
+          deps: [
+            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+          ],
+          lockFiles: ['package-lock.json'],
+          npmLock: 'package-lock.json',
+        },
+      ]);
+    });
+
+    it('skips appending <7 to npm constraints', async () => {
+      npm.getNpmLock.mockReturnValue({
+        lockedVersions: {
+          a: '1.0.0',
+          b: '2.0.0',
+          c: '3.0.0',
+        },
+        lockfileVersion: 1,
+      });
+      const packageFiles = [
+        {
+          npmLock: 'package-lock.json',
+          constraints: {
+            npm: '^8.0.0',
+          },
+          deps: [
+            {
+              depName: 'a',
+              currentValue: '1.0.0',
+            },
+            {
+              depName: 'b',
+              currentValue: '2.0.0',
+            },
+          ],
+        },
+      ];
+      await getLockedVersions(packageFiles);
+      expect(packageFiles).toEqual([
+        {
+          constraints: { npm: '^8.0.0' },
           deps: [
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
