@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type * as _git from '../../../util/git';
 import type * as _hostRules from '../../../util/host-rules';
 import { toBase64 } from '../../../util/string';
@@ -533,7 +533,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('returns success if no results but head pipeline success', async () => {
@@ -575,7 +575,7 @@ describe('modules/platform/gitlab/index', () => {
           },
         });
       const res = await gitlab.getBranchStatus('some-branch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('returns success if all are success', async () => {
@@ -590,7 +590,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('returns success if optional jobs fail', async () => {
@@ -608,7 +608,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('returns success if all are optional', async () => {
@@ -623,7 +623,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('returns success if job is skipped', async () => {
@@ -638,7 +638,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
 
     it('returns yellow if there are no jobs expect skipped', async () => {
@@ -653,7 +653,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('returns failure if any mandatory jobs fails and one job is skipped', async () => {
@@ -668,7 +668,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('returns failure if any mandatory jobs fails', async () => {
@@ -687,7 +687,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.red);
+      expect(res).toBe('red');
     });
 
     it('maps custom statuses to yellow', async () => {
@@ -702,7 +702,7 @@ describe('modules/platform/gitlab/index', () => {
         )
         .reply(200, []);
       const res = await gitlab.getBranchStatus('somebranch');
-      expect(res).toEqual(BranchStatus.yellow);
+      expect(res).toBe('yellow');
     });
 
     it('throws repository-changed', async () => {
@@ -759,36 +759,35 @@ describe('modules/platform/gitlab/index', () => {
         'somebranch',
         'some-context'
       );
-      expect(res).toEqual(BranchStatus.green);
+      expect(res).toBe('green');
     });
   });
 
   describe('setBranchStatus', () => {
-    it.each([BranchStatus.green, BranchStatus.yellow, BranchStatus.red])(
-      'sets branch status %s',
-      async (state) => {
-        const scope = await initRepo();
-        scope
-          .post(
-            '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-          )
-          .reply(200, {})
-          .get(
-            '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-          )
-          .reply(200, []);
+    const states: BranchStatus[] = ['green', 'yellow', 'red'];
 
-        await expect(
-          gitlab.setBranchStatus({
-            branchName: 'some-branch',
-            context: 'some-context',
-            description: 'some-description',
-            state,
-            url: 'some-url',
-          })
-        ).toResolve();
-      }
-    );
+    it.each(states)('sets branch status %s', async (state) => {
+      const scope = await initRepo();
+      scope
+        .post(
+          '/api/v4/projects/some%2Frepo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+        )
+        .reply(200, {})
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, []);
+
+      await expect(
+        gitlab.setBranchStatus({
+          branchName: 'some-branch',
+          context: 'some-context',
+          description: 'some-description',
+          state,
+          url: 'some-url',
+        })
+      ).toResolve();
+    });
   });
 
   describe('findIssue()', () => {
@@ -1119,9 +1118,33 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someuser')
           .reply(200, [{ id: 10 }])
           .get('/api/v4/users?username=someotheruser')
+          .reply(404)
+          .get('/api/v4/groups/someotheruser/members')
           .reply(404);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should add gitlab group members as reviewers to MR', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 10 }])
+          .get('/api/v4/users?username=somegroup')
+          .reply(404)
+          .get('/api/v4/groups/somegroup/members')
+          .reply(200, [{ id: 11 }, { id: 12 }])
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10, 11, 12],
+          })
+          .reply(200);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'somegroup']);
         expect(scope.isDone()).toBeTrue();
       });
 
@@ -2023,6 +2046,12 @@ These updates have all been created already. Click a checkbox below to force a r
 `;
 
   describe('massageMarkdown(input)', () => {
+    it('strips invalid unicode null characters', () => {
+      expect(
+        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
+      ).toBe("The source contains 'Ruby' at: 2.7.6.219");
+    });
+
     it('returns updated pr body', async () => {
       jest.mock('../utils/pr-body');
       const { smartTruncate } = require('../utils/pr-body');

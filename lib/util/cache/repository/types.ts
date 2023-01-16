@@ -59,11 +59,11 @@ export interface BranchCache {
    */
   isModified?: boolean;
   /**
-   * Parent commit of branch sha
+   *
    */
-  parentSha?: string | null;
+  pristine?: boolean;
   /**
-   * Pr nunber of PR created from this branch
+   * Pr number of PR created from this branch
    */
   prNo: number | null;
   /**

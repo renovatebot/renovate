@@ -16,7 +16,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -50,7 +50,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getUserID, gitlabApi, isUserBusy } from './http';
+import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
@@ -382,16 +382,16 @@ async function getStatus(
 }
 
 const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
-  pending: BranchStatus.yellow,
-  created: BranchStatus.yellow,
-  manual: BranchStatus.yellow,
-  running: BranchStatus.yellow,
-  waiting_for_resource: BranchStatus.yellow,
-  success: BranchStatus.green,
-  failed: BranchStatus.red,
-  canceled: BranchStatus.red,
-  skipped: BranchStatus.red,
-  scheduled: BranchStatus.yellow,
+  pending: 'yellow',
+  created: 'yellow',
+  manual: 'yellow',
+  running: 'yellow',
+  waiting_for_resource: 'yellow',
+  success: 'green',
+  failed: 'red',
+  canceled: 'red',
+  skipped: 'red',
+  scheduled: 'yellow',
 };
 
 // Returns the combined status for a branch.
@@ -411,7 +411,7 @@ export async function getBranchStatus(
       { branchName, branchStatuses },
       'Empty or unexpected branch statuses'
     );
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   logger.debug(`Got res with ${branchStatuses.length} results`);
 
@@ -426,13 +426,13 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  let status: BranchStatus = BranchStatus.green; // default to green
+  let status: BranchStatus = 'green'; // default to green
   res
     .filter((check) => !check.allow_failure)
     .forEach((check) => {
-      if (status !== BranchStatus.red) {
+      if (status !== 'red') {
         // if red, stay red
         let mappedStatus: BranchStatus =
           gitlabToRenovateStatusMapping[check.status];
@@ -441,9 +441,9 @@ export async function getBranchStatus(
             { check },
             'Could not map GitLab check.status to Renovate status'
           );
-          mappedStatus = BranchStatus.yellow;
+          mappedStatus = 'yellow';
         }
-        if (mappedStatus !== BranchStatus.green) {
+        if (mappedStatus !== 'green') {
           logger.trace({ check }, 'Found non-green check');
           status = mappedStatus;
         }
@@ -697,7 +697,9 @@ export function massageMarkdown(input: string): string {
   let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
     .replace(regEx(/PR/g), 'MR')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    // Strip unicode null characters as GitLab markdown does not permit them
+    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
 
   if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
@@ -763,7 +765,7 @@ export async function getBranchStatusCheck(
   logger.debug(`Got res with ${res.length} results`);
   for (const check of res) {
     if (check.name === context) {
-      return gitlabToRenovateStatusMapping[check.status] || BranchStatus.yellow;
+      return gitlabToRenovateStatusMapping[check.status] || 'yellow';
     }
   }
   return null;
@@ -782,9 +784,9 @@ export async function setBranchStatus({
   // TODO: types (#7154)
   const url = `projects/${config.repository}/statuses/${branchSha!}`;
   let state = 'success';
-  if (renovateState === BranchStatus.yellow) {
+  if (renovateState === 'yellow') {
     state = 'pending';
-  } else if (renovateState === BranchStatus.red) {
+  } else if (renovateState === 'red') {
     state = 'failed';
   }
   const options: any = {
@@ -1013,11 +1015,26 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await p.all(newReviewers.map((r) => () => getUserID(r)));
+    newReviewerIDs = (
+      await p.all(
+        newReviewers.map((r) => async () => {
+          try {
+            return [await getUserID(r)];
+          } catch (err) {
+            // Unable to fetch userId, try resolve as a group
+            return getMemberUserIDs(r);
+          }
+        })
+      )
+    ).flat();
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
   }
+
+  // Multiple groups may have the same members, so
+  // filter out non-distinct values
+  newReviewerIDs = [...new Set(newReviewerIDs)];
 
   try {
     await updateMR(config.repository, iid, {

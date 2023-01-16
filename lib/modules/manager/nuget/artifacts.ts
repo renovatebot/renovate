@@ -68,10 +68,14 @@ async function runDotnetRestore(
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'dotnet',
+    docker: {},
+    extraEnv: {
+      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      MSBUILDDISABLENODEREUSE: '1',
     },
-    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
+    toolConstraints: [
+      { toolName: 'dotnet', constraint: config.constraints?.dotnet },
+    ],
   };
 
   const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
@@ -126,21 +130,19 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
-  ];
-
-  if (!isCentralManament) {
-    packageFiles.push(packageFileName);
-  }
+  const deps = await getDependentPackageFiles(
+    packageFileName,
+    isCentralManament
+  );
+  const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
     `Found ${packageFiles.length} dependent package files`
   );
 
-  const lockFileNames = packageFiles.map((f) =>
-    getSiblingFileName(f, 'packages.lock.json')
+  const lockFileNames = deps.map((f) =>
+    getSiblingFileName(f.name, 'packages.lock.json')
   );
 
   const existingLockFileContentMap = await getFileContentMap(lockFileNames);

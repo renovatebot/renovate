@@ -31,6 +31,7 @@ body:
     attributes:
       label: If you're self-hosting Renovate, select which platform you are using.
       options:
+        - 'AWS CodeCommit'
         - 'Azure DevOps (dev.azure.com)'
         - 'Azure DevOps Server'
         - 'Bitbucket Cloud (bitbucket.org)'
@@ -49,12 +50,14 @@ body:
       label: If you're self-hosting Renovate, tell us what version of the platform you run.
       description: |
         This field is for the version number of your _platform_, so one of these:
-          - GitHub (.com and Enterprise Server)
-          - GitLab (.com and CE/EE)
+          - AWS CodeCommit
+          - Azure DevOps
           - Bitbucket Cloud
           - Bitbucket Server
           - Azure DevOps
           - Gitea
+          - GitHub (.com and Enterprise Server)
+          - GitLab (.com and CE/EE)
     validations:
       required: false
 
@@ -104,8 +107,8 @@ body:
       label: Have you created a minimal reproduction repository?
       description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
       options:
-        - 'I have linked to a minimal reproduction repository in the bug description'
-        - 'No reproduction, but I have linked to a public repo where it occurs'
         - 'No reproduction repository'
+        - 'No reproduction, but I have linked to a public repo where it occurs'
+        - 'I have linked to a minimal reproduction repository in the bug description'
     validations:
       required: true

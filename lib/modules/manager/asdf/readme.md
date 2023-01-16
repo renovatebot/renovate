@@ -3,7 +3,8 @@ Keeps the [asdf](https://asdf-vm.com/manage/configuration.html#tool-versions) `.
 Because `asdf` supports versioning for many different tools, specific tool support must be added one-by-one.
 The following tools are currently supported:
 
-- [nodejs](https://github.com/asdf-vm/asdf-nodejs)
+<!-- Autogenerate in https://github.com/renovatebot/renovate -->
+<!-- Autogenerate end -->
 
 <!-- prettier-ignore -->
 !!! note

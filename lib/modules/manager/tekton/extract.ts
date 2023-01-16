@@ -4,7 +4,11 @@ import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { TektonBundle, TektonResource } from './types';
+import type {
+  TektonBundle,
+  TektonResolverParamsField,
+  TektonResource,
+} from './types';
 
 export function extractPackageFile(
   content: string,
@@ -43,8 +47,19 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
 
-  // Handle Pipeline resource
+  // Handle PipelineRun resource with inline Pipeline definition
+  const pipelineSpec = doc.spec?.pipelineSpec;
+  if (is.truthy(pipelineSpec)) {
+    deps.push(...getDeps({ spec: pipelineSpec }));
+  }
+
+  // Handle regular tasks of Pipeline resource
   for (const task of coerceArray(doc.spec?.tasks)) {
+    addDep(task.taskRef, deps);
+  }
+
+  // Handle finally tasks of Pipeline resource
+  for (const task of coerceArray(doc.spec?.finally)) {
     addDep(task.taskRef, deps);
   }
 
@@ -67,13 +82,13 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     return;
   }
   let imageRef: string | undefined;
-  // Find a bundle reference from the Bundle resolver
+
+  // First, find a bundle reference from the Bundle resolver
   if (ref.resolver === 'bundles') {
-    for (const field of coerceArray(ref.resource)) {
-      if (field.name === 'bundle') {
-        imageRef = field.value;
-        break;
-      }
+    imageRef = getBundleValue(ref.params);
+    if (is.nullOrUndefined(imageRef)) {
+      // Fallback to the deprecated Bundle resolver attribute
+      imageRef = getBundleValue(ref.resource);
     }
   }
 
@@ -93,4 +108,15 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     'Tekton bundle dependency found'
   );
   deps.push(dep);
+}
+
+function getBundleValue(
+  fields: TektonResolverParamsField[] | undefined
+): string | undefined {
+  for (const field of coerceArray(fields)) {
+    if (field.name === 'bundle') {
+      return field.value;
+    }
+  }
+  return undefined;
 }

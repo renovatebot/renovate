@@ -58,7 +58,6 @@ describe('util/cache/repository/impl/s3', () => {
 
   beforeEach(() => {
     GlobalConfig.set({ platform: 'github' });
-    jest.clearAllMocks();
     s3Mock.reset();
     s3Cache = new RepoCacheS3(repository, '0123456789abcdef', url);
     getObjectCommandInput = createGetObjectCommandInput(repository, url);
@@ -73,7 +72,7 @@ describe('util/cache/repository/impl/s3', () => {
     const json = '{}';
     s3Mock
       .on(GetObjectCommand, getObjectCommandInput)
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
@@ -92,7 +91,7 @@ describe('util/cache/repository/impl/s3', () => {
         GetObjectCommand,
         createGetObjectCommandInput(repository, url, folder)
       )
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.warn).toHaveBeenCalledTimes(0);
     expect(logger.error).toHaveBeenCalledTimes(0);
@@ -112,7 +111,7 @@ describe('util/cache/repository/impl/s3', () => {
         GetObjectCommand,
         createGetObjectCommandInput(repository, url, pathname + '/')
       )
-      .resolvesOnce({ Body: Readable.from([json]) });
+      .resolvesOnce({ Body: Readable.from([json]) as never });
     await expect(s3Cache.read()).resolves.toBe(json);
     expect(logger.debug).toHaveBeenCalledWith('RepoCacheS3.read() - success');
     expect(logger.warn).toHaveBeenCalledTimes(1);

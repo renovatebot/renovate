@@ -13,7 +13,6 @@ import {
 } from '../../../constants/error-messages';
 import * as _hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
-import { MediaType } from './types';
 import { DockerDatasource, getAuthHeaders, getRegistryRepository } from '.';
 
 const hostRules = mocked(_hostRules);
@@ -616,11 +615,14 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.manifestV2 })
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/library/some-dep/blobs/some-config-digest')
@@ -637,7 +639,8 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-new-value')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [
             {
               digest:
@@ -704,11 +707,14 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.manifestV2 })
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/library/some-dep/blobs/some-config-digest')
@@ -726,7 +732,8 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-new-value')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [
             {
               digest:
@@ -774,7 +781,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -792,11 +800,13 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestV1,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/library/some-dep/blobs/some-config-digest')
@@ -815,7 +825,7 @@ describe('modules/datasource/docker/index', () => {
           200,
           {
             schemaVersion: 2,
-            mediaType: MediaType.ociManifestIndexV1,
+            mediaType: 'application/vnd.oci.image.index.v1+json',
             manifests: [
               {
                 digest: 'some-new-image-digest',
@@ -846,7 +856,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests without media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -864,7 +875,9 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
@@ -929,7 +942,10 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.manifestV2 })
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.v2+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(404, {});
       httpMock
@@ -945,7 +961,8 @@ describe('modules/datasource/docker/index', () => {
         .get('/library/some-dep/manifests/some-new-value')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [
             {
               digest:
@@ -990,7 +1007,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles error while retrieving image config blob', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1008,7 +1026,9 @@ describe('modules/datasource/docker/index', () => {
             'Bearer realm="https://auth.docker.io/token",service="registry.docker.io",scope="repository:library/some-dep:pull"',
         })
         .head('/library/some-dep/manifests/' + currentDigest)
-        .reply(200, '', { 'content-type': MediaType.ociManifestV1 })
+        .reply(200, '', {
+          'content-type': 'application/vnd.oci.image.manifest.v1+json',
+        })
         .get('/library/some-dep/manifests/' + currentDigest)
         .reply(200, {
           schemaVersion: 2,
@@ -1041,24 +1061,31 @@ describe('modules/datasource/docker/index', () => {
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, { token: 'some-token' })
-        .head('/library/some-dep/manifests/some-digest')
+        .head(
+          '/library/some-dep/manifests/sha256:0101010101010101010101010101010101010101010101010101010101010101'
+        )
         .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
+        .head(
+          '/library/some-dep/manifests/sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa',
+          undefined,
+          {
+            badheaders: ['authorization'],
+          }
+        )
         .reply(401);
 
       const res = await getDigest(
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentDigest: 'some-digest',
+          currentDigest:
+            'sha256:0101010101010101010101010101010101010101010101010101010101010101',
         },
-        'some-new-value'
+        'sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa'
       );
       expect(res).toBeNull();
     });
@@ -1298,7 +1325,7 @@ describe('modules/datasource/docker/index', () => {
           .get('/node/manifests/some')
           .reply(200, {
             schemaVersion: 2,
-            mediaType: MediaType.manifestV2,
+            mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
             config: { digest: 'some-config-digest' },
           })
           .get('/')
@@ -1698,7 +1725,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1758,7 +1785,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/2-alpine')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1798,13 +1825,14 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/abc')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1839,7 +1867,8 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestListV2,
+          mediaType:
+            'application/vnd.docker.distribution.manifest.list.v2+json',
           manifests: [],
         });
       const res = await getPkgReleases({
@@ -1864,7 +1893,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV1,
+          mediaType: 'application/vnd.docker.distribution.manifest.v1+json',
         });
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
@@ -1910,13 +1939,13 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestV1,
+          mediaType: 'application/vnd.oci.image.manifest.v1+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -1956,7 +1985,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/1')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [{ digest: 'some-image-digest' }],
         })
         .get('/node/manifests/some-image-digest')
@@ -2000,7 +2029,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.ociManifestIndexV1,
+          mediaType: 'application/vnd.oci.image.index.v1+json',
           manifests: [],
         });
       const res = await getPkgReleases({
@@ -2038,7 +2067,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/node/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/node/blobs/some-config-digest')
@@ -2096,7 +2125,7 @@ describe('modules/datasource/docker/index', () => {
         .get('/visualon/drone-git/manifests/latest')
         .reply(200, {
           schemaVersion: 2,
-          mediaType: MediaType.manifestV2,
+          mediaType: 'application/vnd.docker.distribution.manifest.v2+json',
           config: { digest: 'some-config-digest' },
         })
         .get('/visualon/drone-git/blobs/some-config-digest')

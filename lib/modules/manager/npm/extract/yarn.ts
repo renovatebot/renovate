@@ -23,12 +23,19 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
         lockfileVersion = parseInt(val.cacheKey, 10);
       } else {
         for (const entry of key.split(', ')) {
-          const { scope, name, range } = structUtils.parseDescriptor(entry);
-          const packageName = scope ? `@${scope}/${name}` : name;
-          const { selector } = structUtils.parseRange(range);
+          try {
+            const { scope, name, range } = structUtils.parseDescriptor(entry);
+            const packageName = scope ? `@${scope}/${name}` : name;
+            const { selector } = structUtils.parseRange(range);
 
-          logger.trace({ entry, version: val.version });
-          lockedVersions[packageName + '@' + selector] = parsed[key].version;
+            logger.trace({ entry, version: val.version });
+            lockedVersions[packageName + '@' + selector] = parsed[key].version;
+          } catch (err) {
+            logger.debug(
+              { entry, err },
+              'Invalid descriptor or range found in yarn.lock'
+            );
+          }
         }
       }
     }
@@ -44,14 +51,22 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
-  const conf = parseSyml(yarnrcYml);
+  let conf: any;
+  try {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error parsing .yarnrc.yml');
+  }
   const paths = [
-    conf.cacheFolder || './.yarn/cache',
+    conf?.cacheFolder || './.yarn/cache',
     '.pnp.cjs',
     '.pnp.js',
     '.pnp.loader.mjs',
   ];
-  if (miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false) {
+  if (
+    conf &&
+    miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false
+  ) {
     paths.push(conf.pnpDataPath || './.pnp.data.json');
   }
   return paths;

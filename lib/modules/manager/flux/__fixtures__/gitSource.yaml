@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: renovate-repo
+  namespace: renovate-system
+spec:
+  interval: 1h0m0s
+  url: https://github.com/renovatebot/renovate
+  ref:
+    tag: v11.35.4

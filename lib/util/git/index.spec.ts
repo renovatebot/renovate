@@ -11,7 +11,6 @@ import { newlineRegex, regEx } from '../regex';
 import * as _behindBaseCache from './behind-base-branch-cache';
 import * as _conflictsCache from './conflicts-cache';
 import * as _modifiedCache from './modified-cache';
-import * as _parentShaCache from './parent-sha-cache';
 import type { FileChange } from './types';
 import * as git from '.';
 import { setNoVerify } from '.';
@@ -19,13 +18,11 @@ import { setNoVerify } from '.';
 jest.mock('./conflicts-cache');
 jest.mock('./behind-base-branch-cache');
 jest.mock('./modified-cache');
-jest.mock('./parent-sha-cache');
 jest.mock('delay');
 jest.mock('../cache/repository');
 const behindBaseCache = mocked(_behindBaseCache);
 const conflictsCache = mocked(_conflictsCache);
 const modifiedCache = mocked(_modifiedCache);
-const parentShaCache = mocked(_parentShaCache);
 // Class is no longer exported
 const SimpleGit = Git().constructor as { prototype: ReturnType<typeof Git> };
 
@@ -116,7 +113,6 @@ describe('util/git/index', () => {
     // override some local git settings for better testing
     const local = Git(tmpDir.path);
     await local.addConfig('commit.gpgsign', 'false');
-    parentShaCache.getCachedBranchParentShaResult.mockReturnValue(null);
     behindBaseCache.getCachedBehindBaseResult.mockReturnValue(null);
   });
 
@@ -386,6 +382,18 @@ describe('util/git/index', () => {
 
     it('returns null for 404', async () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
+    });
+  });
+
+  describe('hasDiff(sourceRef, targetRef)', () => {
+    it('compare without changes', () => {
+      return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();
+    });
+
+    it('compare with changes', () => {
+      return expect(
+        git.hasDiff('origin/master', 'origin/renovate/future_branch')
+      ).resolves.toBeTrue();
     });
   });
 
@@ -1035,6 +1043,17 @@ describe('util/git/index', () => {
   describe('getSubmodules', () => {
     it('should return empty array', async () => {
       expect(await git.getSubmodules()).toHaveLength(0);
+    });
+  });
+
+  describe('fetchRevSpec()', () => {
+    it('fetchRevSpec()', async () => {
+      await git.fetchRevSpec(
+        `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`
+      );
+      //checkout this duplicate
+      const sha = await git.checkoutBranch(`other/${defaultBranch}`);
+      expect(sha).toBe(git.getBranchCommit(defaultBranch));
     });
   });
 });

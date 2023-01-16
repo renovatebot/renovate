@@ -6,7 +6,6 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { BranchStatus } from '../../../../types';
 import {
   deleteBranch,
   isBranchConflicted,
@@ -76,7 +75,7 @@ export async function checkAutoMerge(
     config.branchName,
     config.ignoreTests
   );
-  if (branchStatus !== BranchStatus.green) {
+  if (branchStatus !== 'green') {
     logger.debug(
       `PR is not ready for merge (branch status is ${branchStatus})`
     );

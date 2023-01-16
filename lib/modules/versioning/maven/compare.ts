@@ -174,7 +174,7 @@ export const QualifierTypes = {
   Snapshot: 5,
   Release: 6,
   SP: 7,
-};
+} as const;
 
 export function qualifierType(token: Token): number | null {
   const val = token.val;

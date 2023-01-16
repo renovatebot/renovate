@@ -21,7 +21,16 @@ import {
   prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import {
+  isGcvLockFile,
+  isGcvPropsFile,
+} from './extract/consistent-versions-plugin';
 import { isGradleBuildFile } from './utils';
+
+// .lockfile is gradle default lockfile, /versions.lock is gradle-consistent-versions plugin lockfile
+function isLockFile(fileName: string): boolean {
+  return fileName.endsWith('.lockfile') || isGcvLockFile(fileName);
+}
 
 async function getUpdatedLockfiles(
   oldLockFileContentMap: Record<string, string | null>
@@ -31,7 +40,7 @@ async function getUpdatedLockfiles(
   const status = await getRepoStatus();
 
   for (const modifiedFile of status.modified) {
-    if (modifiedFile.endsWith('.lockfile')) {
+    if (isLockFile(modifiedFile)) {
       const newContent = await readLocalFile(modifiedFile, 'utf8');
       if (oldLockFileContentMap[modifiedFile] !== newContent) {
         res.push({
@@ -90,7 +99,7 @@ export async function updateArtifacts({
   logger.debug(`gradle.updateArtifacts(${packageFileName})`);
 
   const fileList = await getFileList();
-  const lockFiles = fileList.filter((file) => file.endsWith('.lockfile'));
+  const lockFiles = fileList.filter((file) => isLockFile(file));
   if (!lockFiles.length) {
     logger.debug('No Gradle dependency lockfiles found - skipping update');
     return null;
@@ -127,9 +136,7 @@ export async function updateArtifacts({
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv,
       toolConstraints: [
         {
@@ -147,7 +154,7 @@ export async function updateArtifacts({
       .map(quote)
       .join(' ')}`;
 
-    if (config.isLockFileMaintenance) {
+    if (config.isLockFileMaintenance || isGcvPropsFile(packageFileName)) {
       cmd += ' --write-locks';
     } else {
       const updatedDepNames = updatedDeps

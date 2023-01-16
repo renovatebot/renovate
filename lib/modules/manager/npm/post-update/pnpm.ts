@@ -42,11 +42,9 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints: [
-        await getNodeToolConstraint(config, upgrades),
+        await getNodeToolConstraint(config, upgrades, lockFileDir),
         pnpmToolConstraint,
       ],
     };

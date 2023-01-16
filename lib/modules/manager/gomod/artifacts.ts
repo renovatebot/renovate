@@ -259,11 +259,13 @@ export async function updateArtifacts({
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
-      docker: {
-        image: 'go',
-        tagConstraint: goConstraints,
-        tagScheme: 'npm',
-      },
+      docker: {},
+      toolConstraints: [
+        {
+          toolName: 'golang',
+          constraint: goConstraints,
+        },
+      ],
     };
 
     const execCommands: string[] = [];

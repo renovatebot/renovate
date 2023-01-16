@@ -5,7 +5,6 @@ import * as hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
 
 const githubApiHost = 'https://api.github.com';
-const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
 describe('modules/datasource/github-tags/index', () => {
   const github = new GithubTagsDatasource();
@@ -20,7 +19,6 @@ describe('modules/datasource/github-tags/index', () => {
 
   describe('getDigest', () => {
     const packageName = 'some/dep';
-    const tag = 'v1.2.0';
 
     it('returns commit digest', async () => {
       httpMock
@@ -42,7 +40,7 @@ describe('modules/datasource/github-tags/index', () => {
       expect(res).toBeNull();
     });
 
-    it('returns digest', async () => {
+    it('returns untagged commit digest', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`/repos/${packageName}/commits?per_page=1`)
@@ -52,55 +50,47 @@ describe('modules/datasource/github-tags/index', () => {
     });
 
     it('returns tagged commit digest', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${packageName}/git/refs/tags/${tag}`)
-        .reply(200, {
-          object: { type: 'tag', url: `${githubApiHost}/some-url` },
-        })
-        .get('/some-url')
-        .reply(200, { object: { type: 'commit', sha: 'ddd111' } });
-      const res = await github.getDigest({ packageName }, tag);
-      expect(res).toBe('ddd111');
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          hash: '123',
+        },
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          hash: 'abc',
+        },
+      ]);
+      const res = await github.getDigest({ packageName }, 'v2.0.0');
+      expect(res).toBe('abc');
     });
 
-    it('warns if unknown ref', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${packageName}/git/refs/tags/${tag}`)
-        .reply(200, { object: { sha: 'ddd111' } });
-      const res = await github.getDigest({ packageName }, tag);
+    it('returns null for missing tagged commit digest', async () => {
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          hash: '123',
+        },
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          hash: 'abc',
+        },
+      ]);
+      const res = await github.getDigest({ packageName }, 'v3.0.0');
       expect(res).toBeNull();
     });
 
-    it('returns null for missed tagged digest', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get(`/repos/${packageName}/git/refs/tags/${tag}`)
-        .reply(200, {});
-      const res = await github.getDigest({ packageName: 'some/dep' }, 'v1.2.0');
+    it('returns null for error', async () => {
+      jest.spyOn(githubGraphql, 'queryTags').mockRejectedValueOnce('error');
+      const res = await github.getDigest({ packageName }, 'v3.0.0');
       expect(res).toBeNull();
-    });
-
-    it('supports GHE', async () => {
-      httpMock
-        .scope(githubEnterpriseApiHost)
-        .get(`/api/v3/repos/${packageName}/git/refs/tags/${tag}`)
-        .reply(200, { object: { type: 'commit', sha: 'ddd111' } })
-        .get(`/api/v3/repos/${packageName}/commits?per_page=1`)
-        .reply(200, [{ sha: 'abcdef' }]);
-
-      const sha1 = await github.getDigest(
-        { packageName, registryUrl: githubEnterpriseApiHost },
-        undefined
-      );
-      const sha2 = await github.getDigest(
-        { packageName: 'some/dep', registryUrl: githubEnterpriseApiHost },
-        'v1.2.0'
-      );
-
-      expect(sha1).toBe('abcdef');
-      expect(sha2).toBe('ddd111');
     });
   });
 
@@ -113,13 +103,33 @@ describe('modules/datasource/github-tags/index', () => {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
           releaseTimestamp: '2021-01-01',
-          newDigest: '123',
+          hash: '123',
         },
         {
           version: 'v2.0.0',
           gitRef: 'v2.0.0',
           releaseTimestamp: '2022-01-01',
-          newDigest: 'abc',
+          hash: 'abc',
+        },
+      ]);
+      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([
+        {
+          id: 1,
+          version: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          isStable: true,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
+        },
+        {
+          id: 2,
+          version: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          isStable: false,
+          url: 'https://example.com',
+          name: 'some/dep2',
+          description: 'some description',
         },
       ]);
 
@@ -132,11 +142,13 @@ describe('modules/datasource/github-tags/index', () => {
             gitRef: 'v1.0.0',
             version: 'v1.0.0',
             releaseTimestamp: '2021-01-01T00:00:00.000Z',
+            isStable: true,
           },
           {
             gitRef: 'v2.0.0',
             version: 'v2.0.0',
             releaseTimestamp: '2022-01-01T00:00:00.000Z',
+            isStable: false,
           },
         ],
 

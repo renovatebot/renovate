@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -5,7 +6,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFile } from '../types';
-import type { Container, Workflow } from './types';
+import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
 const actionRe = regEx(
@@ -13,7 +14,8 @@ const actionRe = regEx(
 );
 
 // SHA1 or SHA256, see https://github.blog/2020-10-19-git-2-29-released/
-const shaRe = regEx(/^(?:[a-f0-9]{6,7}|[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaRe = regEx(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+const shaShortRe = regEx(/^[a-f0-9]{6,7}$/);
 
 function extractWithRegex(content: string): PackageDependency[] {
   logger.trace('github-actions.extractWithRegex()');
@@ -60,6 +62,9 @@ function extractWithRegex(content: string): PackageDependency[] {
       if (shaRe.test(currentValue)) {
         dep.currentValue = tag;
         dep.currentDigest = currentValue;
+      } else if (shaShortRe.test(currentValue)) {
+        dep.currentValue = tag;
+        dep.currentDigestShort = currentValue;
       } else {
         dep.currentValue = currentValue;
         if (!dockerVersioning.api.isValid(currentValue)) {
@@ -72,14 +77,13 @@ function extractWithRegex(content: string): PackageDependency[] {
   return deps;
 }
 
-function extractContainer(container: string | Container): PackageDependency {
-  let dep: PackageDependency;
-  if (typeof container === 'string') {
-    dep = getDep(container);
-  } else {
-    dep = getDep(container?.image);
+function extractContainer(container: unknown): PackageDependency | undefined {
+  if (is.string(container)) {
+    return getDep(container);
+  } else if (is.plainObject(container) && is.string(container.image)) {
+    return getDep(container.image);
   }
-  return dep;
+  return undefined;
 }
 
 function extractWithYAMLParser(
@@ -101,16 +105,18 @@ function extractWithYAMLParser(
   }
 
   for (const job of Object.values(pkg?.jobs ?? {})) {
-    if (job.container !== undefined) {
-      const dep = extractContainer(job.container);
+    const dep = extractContainer(job.container);
+    if (dep) {
       dep.depType = 'container';
       deps.push(dep);
     }
 
     for (const service of Object.values(job.services ?? {})) {
       const dep = extractContainer(service);
-      dep.depType = 'service';
-      deps.push(dep);
+      if (dep) {
+        dep.depType = 'service';
+        deps.push(dep);
+      }
     }
   }
 

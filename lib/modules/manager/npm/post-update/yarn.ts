@@ -99,7 +99,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades),
+      await getNodeToolConstraint(config, upgrades, lockFileDir),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
@@ -187,9 +187,7 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if

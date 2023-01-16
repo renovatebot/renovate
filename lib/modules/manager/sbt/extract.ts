@@ -8,7 +8,7 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
-import { MAVEN_REPO } from '../gradle/common';
+import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
 import { normalizeScalaVersion } from './util';
 
@@ -79,10 +79,12 @@ const packageFileVersionMatch = q
     })
   );
 
-const variableNameMatch = q.sym<Ctx>((ctx, { value: varName }) => ({
-  ...ctx,
-  currentVarName: varName,
-}));
+const variableNameMatch = q
+  .sym<Ctx>((ctx, { value: varName }) => ({
+    ...ctx,
+    currentVarName: varName,
+  }))
+  .opt(q.op<Ctx>(':').sym('String'));
 
 const variableValueMatch = q.str<Ctx>((ctx, { value }) => {
   ctx.vars[ctx.currentVarName!] = value;
@@ -147,6 +149,13 @@ const versionedDependencyMatch = groupIdMatch
   .op('%')
   .join(versionMatch);
 
+const crossDependencyMatch = groupIdMatch
+  .op('%%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
 function depHandler(ctx: Ctx): Ctx {
   const {
     scalaVersion,
@@ -198,7 +207,7 @@ function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
 
 const sbtPackageMatch = q
   .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
-  .alt(simpleDependencyMatch, versionedDependencyMatch)
+  .alt(crossDependencyMatch, simpleDependencyMatch, versionedDependencyMatch)
   .opt(
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),
@@ -274,7 +283,7 @@ export function extractPackageFile(
     parsedResult = scala.query(content, query, {
       vars: {},
       deps: [],
-      registryUrls: [MAVEN_REPO],
+      registryUrls: [REGISTRY_URLS.mavenCentral],
     });
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Sbt parsing error');

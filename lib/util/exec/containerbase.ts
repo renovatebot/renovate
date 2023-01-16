@@ -18,7 +18,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   bundler: {
     datasource: 'rubygems',
     depName: 'bundler',
-    versioning: 'ruby',
+    versioning: rubyVersioningId,
   },
   cocoapods: {
     datasource: 'rubygems',
@@ -35,6 +35,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'corepack',
     versioning: npmVersioningId,
   },
+  dotnet: {
+    datasource: 'dotnet',
+    depName: 'dotnet-sdk',
+    versioning: semverVersioningId,
+  },
   erlang: {
     datasource: 'github-releases',
     depName: 'containerbase/erlang-prebuild',
@@ -49,6 +54,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     depName: 'fluxcd/flux2',
     versioning: semverVersioningId,
+  },
+  golang: {
+    datasource: 'golang-version',
+    depName: 'golang',
+    versioning: npmVersioningId,
   },
   helm: {
     datasource: 'github-releases',
@@ -106,6 +116,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'containerbase/python-prebuild',
     versioning: pythonVersioningId,
   },
+  ruby: {
+    datasource: 'github-releases',
+    depName: 'containerbase/ruby-prebuild',
+    versioning: rubyVersioningId,
+  },
+  rust: {
+    datasource: 'docker',
+    depName: 'rust',
+    versioning: semverVersioningId,
+  },
   yarn: {
     datasource: 'npm',
     depName: 'yarn',
@@ -115,6 +135,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     depName: 'yarn',
     versioning: npmVersioningId,
+  },
+  dart: {
+    datasource: 'dart-version',
+    depName: 'dart',
+    versioning: semverVersioningId,
+  },
+  flutter: {
+    datasource: 'flutter-version',
+    depName: 'flutter',
+    versioning: semverVersioningId,
   },
 };
 

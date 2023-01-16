@@ -4,18 +4,19 @@ import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { getFileList } from '../../../util/git';
+import type { ProjectFile } from './types';
 import { readFileAsXmlDocument } from './util';
 
 export const NUGET_CENTRAL_FILE = 'Directory.Packages.props';
 export const MSBUILD_CENTRAL_FILE = 'Packages.props';
 
 /**
- * Get all package files at any level of ancestry that depend on packageFileName
+ * Get all leaf package files of ancestry that depend on packageFileName.
  */
 export async function getDependentPackageFiles(
   packageFileName: string,
   isCentralManament = false
-): Promise<string[]> {
+): Promise<ProjectFile[]> {
   const packageFiles = await getAllPackageFiles();
   const graph: ReturnType<typeof Graph> = Graph();
 
@@ -66,13 +67,16 @@ export async function getDependentPackageFiles(
     }
   }
 
-  const dependents = recursivelyGetDependentPackageFiles(
-    packageFileName,
-    graph
-  );
+  const deps = new Map<string, boolean>();
+  recursivelyGetDependentPackageFiles(packageFileName, graph, deps);
+
+  if (isCentralManament) {
+    // remove props file, as we don't need it
+    deps.delete(packageFileName);
+  }
 
   // deduplicate
-  return Array.from(new Set(dependents.reverse())).reverse();
+  return Array.from(deps).map(([name, isLeaf]) => ({ name, isLeaf }));
 }
 
 /**
@@ -80,17 +84,21 @@ export async function getDependentPackageFiles(
  */
 function recursivelyGetDependentPackageFiles(
   packageFileName: string,
-  graph: ReturnType<typeof Graph>
-): string[] {
+  graph: ReturnType<typeof Graph>,
+  deps: Map<string, boolean>
+): void {
   const dependents = graph.adjacent(packageFileName);
 
   if (dependents.length === 0) {
-    return [];
+    deps.set(packageFileName, true);
+    return;
   }
 
-  return dependents.concat(
-    dependents.map((d) => recursivelyGetDependentPackageFiles(d, graph)).flat()
-  );
+  deps.set(packageFileName, false);
+
+  for (const dep of dependents) {
+    recursivelyGetDependentPackageFiles(dep, graph, deps);
+  }
 }
 
 /**

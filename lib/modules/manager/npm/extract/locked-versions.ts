@@ -60,11 +60,20 @@ export async function getLockedVersions(
       if (lockfileVersion === 1) {
         if (packageFile.constraints?.npm) {
           // Add a <7 constraint if it's not already a fixed version
-          if (!semver.valid(packageFile.constraints.npm)) {
+          if (semver.satisfies('6.14.18', packageFile.constraints.npm)) {
             packageFile.constraints.npm += ' <7';
           }
         } else {
           packageFile.constraints!.npm = '<7';
+        }
+      } else if (lockfileVersion === 2) {
+        if (packageFile.constraints?.npm) {
+          // Add a <9 constraint if the latest 8.x is compatible
+          if (semver.satisfies('8.19.3', packageFile.constraints.npm)) {
+            packageFile.constraints.npm += ' <9';
+          }
+        } else {
+          packageFile.constraints!.npm = '<9';
         }
       }
       for (const dep of packageFile.deps) {
