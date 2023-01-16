@@ -15,11 +15,14 @@ describe('modules/datasource/packagist/schema', () => {
       expect(() => ComposerRelease.parse({})).toThrow();
       expect(() => ComposerRelease.parse({ version: null })).toThrow();
       expect(() => ComposerRelease.parse({ version: null })).toThrow();
-      expect(() => ComposerRelease.parse({ version: '' })).toThrow();
-      expect(() => ComposerRelease.parse({ version: 'dev-main' })).toThrow();
     });
 
     it('parses', () => {
+      expect(ComposerRelease.parse({ version: '' })).toEqual({ version: '' });
+      expect(ComposerRelease.parse({ version: 'dev-main' })).toEqual({
+        version: 'dev-main',
+      });
+
       expect(ComposerRelease.parse({ version: '1.2.3' })).toEqual({
         version: '1.2.3',
       });
@@ -61,7 +64,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(ComposerReleases.parse(['foobar'])).toEqual([]);
       expect(
         ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
-      ).toEqual([{ version: '1.2.3' }]);
+      ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
     });
   });
 
@@ -134,8 +137,8 @@ describe('modules/datasource/packagist/schema', () => {
           },
         ] satisfies { packages: Record<string, ComposerRelease[]> }[])
       ).toEqual({
-        homepage: 'https://example.com/3',
-        sourceUrl: 'git@example.com:foo/bar-3',
+        homepage: 'https://example.com/1',
+        sourceUrl: 'git@example.com:foo/bar-1',
         releases: [
           { version: '1.1.1', gitRef: 'v1.1.1', releaseTimestamp: '111' },
           { version: '3.3.3', gitRef: 'v3.3.3', releaseTimestamp: '333' },

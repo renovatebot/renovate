@@ -1,15 +1,10 @@
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { api as versioning } from '../../versioning/composer';
 import type { Release, ReleaseResult } from '../types';
-
-const Version = z
-  .string()
-  .refine((v) => versioning.isSingleVersion(v), 'Invalid version');
 
 export const ComposerRelease = z
   .object({
-    version: Version,
+    version: z.string(),
   })
   .merge(
     z
@@ -58,7 +53,6 @@ export function parsePackagesResponses(
   packagesResponses: unknown[]
 ): ReleaseResult | null {
   const releases: Release[] = [];
-  let maxVersion: string | null | undefined;
   let homepage: string | null | undefined;
   let sourceUrl: string | null | undefined;
 
@@ -76,10 +70,12 @@ export function parsePackagesResponses(
 
       releases.push(dep);
 
-      if (!maxVersion || versioning.isGreaterThan(version, maxVersion)) {
-        maxVersion = version;
+      if (!homepage && composerRelease.homepage) {
         homepage = composerRelease.homepage;
-        sourceUrl = composerRelease.source?.url;
+      }
+
+      if (!sourceUrl && composerRelease.source?.url) {
+        sourceUrl = composerRelease.source.url;
       }
     }
   }
