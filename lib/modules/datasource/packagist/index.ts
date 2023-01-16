@@ -1,7 +1,6 @@
 import URL from 'url';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as packageCache from '../../../util/cache/package';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
@@ -11,6 +10,7 @@ import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import * as schema from './schema';
 import type {
   AllPackages,
   PackageMeta,
@@ -34,15 +34,11 @@ export class PackagistDatasource extends Datasource {
 
   // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
   private static getHostOpts(url: string): HttpOptions {
-    let opts: HttpOptions = {};
     const { username, password } = hostRules.find({
       hostType: PackagistDatasource.id,
       url,
     });
-    if (username && password) {
-      opts = { ...opts, username, password };
-    }
-    return opts;
+    return username && password ? { username, password } : {};
   }
 
   private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
@@ -89,7 +85,7 @@ export class PackagistDatasource extends Datasource {
 
   private static isPrivatePackage(regUrl: string): boolean {
     const opts = PackagistDatasource.getHostOpts(regUrl);
-    return !!opts.password || !!opts.headers?.authorization;
+    return !!opts.password;
   }
 
   private static getPackagistFileUrl(
@@ -100,16 +96,6 @@ export class PackagistDatasource extends Datasource {
     const fileName = key.replace('%hash%', sha256);
     const url = `${regUrl}/${fileName}`;
     return url;
-  }
-
-  private static minifyExpand(releases: any[]): any[] {
-    let expandedRelease: any;
-    return releases.map((release) => {
-      if (release.require) {
-        expandedRelease = release;
-      }
-      return { ...expandedRelease, ...release };
-    });
   }
 
   @cache({
@@ -215,37 +201,19 @@ export class PackagistDatasource extends Datasource {
     return allPackages;
   }
 
+  @cache({
+    namespace: `datasource-${PackagistDatasource.id}-org`,
+    key: (regUrl: string) => regUrl,
+    ttlMinutes: 10,
+  })
   async packagistOrgLookup(name: string): Promise<ReleaseResult | null> {
-    const cacheNamespace = 'datasource-packagist-org';
-    const cachedResult = await packageCache.get<ReleaseResult>(
-      cacheNamespace,
-      name
-    );
-    // istanbul ignore if
-    if (cachedResult) {
-      return cachedResult;
-    }
-    let dep: ReleaseResult | null = null;
     const regUrl = 'https://packagist.org';
-    const pkgUrl = [
-      joinUrlParts(regUrl, `/p2/${name}.json`),
-      joinUrlParts(regUrl, `/p2/${name}~dev.json`),
-    ];
-    // TODO: fix types (#9610)
-    let res = (await this.http.getJson<any>(pkgUrl[0])).body.packages[name];
-    res = [
-      ...PackagistDatasource.minifyExpand(res),
-      ...PackagistDatasource.minifyExpand(
-        (await this.http.getJson<any>(pkgUrl[1])).body.packages[name]
-      ),
-    ];
-    if (res) {
-      dep = PackagistDatasource.extractDepReleases(res);
-      logger.trace({ dep }, 'dep');
-    }
-    const cacheMinutes = 10;
-    await packageCache.set(cacheNamespace, name, dep, cacheMinutes);
-    return dep;
+    const pkgUrl = joinUrlParts(regUrl, `/p2/${name}.json`);
+    const devUrl = joinUrlParts(regUrl, `/p2/${name}~dev.json`);
+    const results = await p.map([pkgUrl, devUrl], (url) =>
+      this.http.getJson(url).then(({ body }) => body)
+    );
+    return schema.parsePackagesResponses(name, results);
   }
 
   public override async getReleases({
