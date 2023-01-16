@@ -55,7 +55,7 @@ export function npm2hashicorp(input: string): string {
     .split(' ')
     .map((single) => {
       const r = single.match(
-        regEx(/^(|>|<|>=|<=|~|\^)((\d+)(\.\d+){0,2}[\w-]*)$/)
+        regEx(/^(|>|<|>=|<=|~|\^)v?((\d+)(\.\d+){0,2}[\w-]*)$/)
       );
       if (!r) {
         throw new Error('invalid npm constraint');
