@@ -153,6 +153,21 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
     });
 
+    it('finds and filters .npmrc', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.npmrc') {
+          return 'save-exact = true\npackage-lock = false\n';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        {}
+      );
+      expect(res?.npmrc).toBe('save-exact = true\n');
+    });
+
     it('uses config.npmrc if no .npmrc exists', async () => {
       fs.readLocalFile = jest.fn(() => null);
       const res = await npmExtract.extractPackageFile(
@@ -176,21 +191,6 @@ describe('modules/manager/npm/extract/index', () => {
         { npmrc: 'config-npmrc' }
       );
       expect(res?.npmrc).toBe('config-npmrc');
-    });
-
-    it('finds and filters .npmrc', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
-        if (fileName === '.npmrc') {
-          return 'save-exact = true\npackage-lock = false\n';
-        }
-        return null;
-      });
-      const res = await npmExtract.extractPackageFile(
-        input01Content,
-        'package.json',
-        {}
-      );
-      expect(res?.npmrc).toBe('save-exact = true\n');
     });
 
     it('merges config.npmrc and repo .npmrc when npmrcMerge=true', async () => {
