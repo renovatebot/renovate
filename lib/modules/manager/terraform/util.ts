@@ -18,6 +18,13 @@ export function checkIfStringIsPath(path: string): boolean {
   return !!match;
 }
 
+const ociRegex = /^oci:\/\//;
+export { ociRegex };
+export function checkIfChartIsOCI(chart: string): boolean {
+  const match = ociRegex.exec(chart);
+  return !!match;
+}
+
 export function massageProviderLookupName(dep: PackageDependency): void {
   if (!dep.packageName) {
     dep.packageName = dep.depName;

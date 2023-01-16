@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
+import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
 import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
-import { checkIfStringIsPath } from '../../util';
+import { checkIfChartIsOCI, checkIfStringIsPath, ociRegex } from '../../util';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -25,9 +26,18 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           depName: helmRelease.chart,
           datasource: HelmDatasource.id,
         };
+
+        // For oci charts, we remove the oci:// and use the docker datasource
+        const isOciChart = checkIfChartIsOCI(helmRelease.chart);
+        if (isOciChart) {
+          dep.depName = helmRelease.chart.replace(ociRegex, '');
+          dep.datasource = DockerDatasource.id;
+        }
+
         if (!helmRelease.chart) {
           dep.skipReason = 'invalid-name';
-        } else if (checkIfStringIsPath(helmRelease.chart)) {
+          // OCI charts strings are valid paths, therefore we exclude them here
+        } else if (!isOciChart && checkIfStringIsPath(helmRelease.chart)) {
           dep.skipReason = 'local-chart';
         }
         dependencies.push(dep);
