@@ -50,6 +50,7 @@ describe('modules/versioning/hashicorp/convertor', () => {
     ${'~> 4.0'}   | ${'~4'}
     ${'~> 4.0.0'} | ${'~4.0'}
     ${'~> 4.1.0'} | ${'~4.1'}
+    ${'4.1.0'}    | ${'v4.1.0'}
   `('npm2hashicorp("$npm") === $hashicorp', ({ hashicorp, npm }) => {
     expect(npm2hashicorp(npm)).toBe(hashicorp);
   });

@@ -7,6 +7,10 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
+  'algolia-instantsearch': [
+    'https://github.com/algolia/instantsearch',
+    'https://github.com/algolia/instantsearch.js',
+  ],
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
@@ -97,6 +101,7 @@ const repoGroups = {
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   graphqlcodegenerator: [
+    'https://github.com/dotansimha/graphql-code-generator-community',
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
@@ -220,6 +225,8 @@ const repoGroups = {
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
   'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-java':
+    'https://github.com/testcontainers/testcontainers-java',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',

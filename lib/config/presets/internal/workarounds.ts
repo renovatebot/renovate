@@ -76,7 +76,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   javaLTSVersions: {
-    description: 'Limit Java runtime versions to LTS releases',
+    description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
         allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
@@ -119,7 +119,7 @@ export const presets: Record<string, Preset> = {
   },
   supportRedHatImageVersion: {
     description:
-      'Use specific versioning for Red Hat-maintained container images',
+      'Use specific versioning for Red Hat-maintained container images.',
     packageRules: [
       {
         matchDatasources: ['docker'],

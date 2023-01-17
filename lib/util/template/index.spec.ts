@@ -15,6 +15,10 @@ describe('util/template/index', () => {
     });
   });
 
+  it('returns empty string if cannot compile', () => {
+    expect(template.safeCompile('{{abc', {})).toBe('');
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(

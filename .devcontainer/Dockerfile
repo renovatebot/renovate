@@ -1,4 +1,4 @@
-FROM containerbase/node:18.12.1@sha256:d3a2960fe8c07584f85d974071c0b8687288bdac0d3dede088ff52a1ffff1a45
+FROM containerbase/node:18.13.0@sha256:bbbf1b8d76f3f508bf4dd9f0b723904153df67597bc2d02189a15cb3052ccccc
 
 USER root
 

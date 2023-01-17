@@ -18,7 +18,7 @@ export const validMatchFields = [
   'depType',
 ] as const;
 
-type ValidMatchFields = typeof validMatchFields[number];
+type ValidMatchFields = (typeof validMatchFields)[number];
 
 function updateDependency(
   dependency: PackageDependency,
