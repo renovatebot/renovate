@@ -26,7 +26,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-const chartFile = Fixtures.get('helmfile.yaml');
+const helmfileFile = Fixtures.get('helmfile.yaml');
 const lockFile = Fixtures.get('helmfile.lock');
 const lockFileTwo = Fixtures.get('helmfile-two.lock');
 
@@ -80,11 +80,11 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: chartFile,
+        newPackageFileContent: helmfileFile,
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([]);
   });
 
   it('returns updated helmfile.lock', async () => {
@@ -101,7 +101,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: chartFile,
+        newPackageFileContent: helmfileFile,
         config,
       })
     ).toMatchObject([
@@ -114,10 +114,10 @@ describe('modules/manager/helmfile/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([{ cmd: "helmfile deps ''" }]);
   });
 
-  it('returns updated Chart.lock with docker', async () => {
+  it('returns updated helmfile.lock with docker', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
@@ -135,7 +135,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: chartFile,
+        newPackageFileContent: helmfileFile,
         config,
       })
     ).toMatchObject([
@@ -148,7 +148,25 @@ describe('modules/manager/helmfile/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(3);
-    expect(execSnapshots).toMatchSnapshot();
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar ' +
+          'bash -l -c "' +
+          'install-tool helmfile v0.129.0' +
+          ' &&' +
+          " helmfile deps ''" +
+          '"',
+      },
+    ]);
   });
 
   it('catches errors', async () => {
@@ -165,7 +183,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: chartFile,
+        newPackageFileContent: helmfileFile,
         config,
       })
     ).toMatchObject([
