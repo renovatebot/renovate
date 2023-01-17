@@ -83,18 +83,13 @@ export function isAlias(repository: string): boolean {
 }
 
 export function isOCIRegistry(
-  repository: Repository | string | undefined
+  repository: Repository | string | null | undefined
 ): boolean {
-  if (typeof repository === 'undefined') {
+  if (is.nullOrUndefined(repository)) {
     return false;
   }
-
-  let string = repository;
-  if (typeof repository === 'object') {
-    string = repository.repository;
-  }
-
-  return (string as string).startsWith('oci://');
+  const repo = is.string(repository) ? repository : repository.repository;
+  return repo.startsWith('oci://');
 }
 
 export function aliasRecordToRepositories(
