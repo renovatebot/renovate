@@ -1,6 +1,43 @@
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import type { Release, ReleaseResult } from '../types';
+
+export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
+  // Ported from: https://github.com/composer/metadata-minifier/blob/main/src/MetadataMinifier.php#L17
+  if (xs.length === 0) {
+    return xs;
+  }
+
+  const prevVals: Record<string, unknown> = {};
+  for (const x of xs) {
+    for (const key of Object.keys(x)) {
+      prevVals[key] ??= undefined;
+    }
+
+    for (const key of Object.keys(prevVals)) {
+      const val = x[key];
+      if (val === '__unset') {
+        delete x[key];
+        prevVals[key] = undefined;
+        continue;
+      }
+
+      if (!is.undefined(val)) {
+        prevVals[key] = val;
+        continue;
+      }
+
+      if (!is.undefined(prevVals[key])) {
+        x[key] = prevVals[key];
+        continue;
+      }
+    }
+  }
+
+  return xs;
+});
+export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z
   .object({
@@ -37,7 +74,8 @@ export function parsePackagesResponse(
 ): ComposerReleases {
   try {
     const { packages } = ComposerPackagesResponse.parse(packagesResponse);
-    const releases = ComposerReleases.parse(packages[packageName]);
+    const array = MinifiedArray.parse(packages[packageName]);
+    const releases = ComposerReleases.parse(array);
     return releases;
   } catch (err) {
     logger.debug(
