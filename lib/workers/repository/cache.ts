@@ -1,5 +1,6 @@
 /* istanbul ignore file */
 
+import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { getCache } from '../../util/cache/repository';
@@ -93,6 +94,9 @@ async function generateBranchCache(
     if (errCodes.includes(err.response?.statusCode)) {
       logger.warn({ err, branchName }, 'HTTP error generating branch cache');
       return null;
+    }
+    if (err.message === REPOSITORY_CHANGED) {
+      throw err;
     }
     logger.error({ err, branchName }, 'Error generating branch cache');
     return null;
