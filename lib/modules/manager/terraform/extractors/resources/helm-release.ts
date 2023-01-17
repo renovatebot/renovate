@@ -28,12 +28,12 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         };
         if (!helmRelease.chart) {
           dep.skipReason = 'invalid-name';
-        } else if (checkIfStringIsPath(helmRelease.chart)) {
-          dep.skipReason = 'local-chart';
         } else if (checkIfChartIsOCI(helmRelease.chart)) {
-        // For oci charts, we remove the oci:// and use the docker datasource
+          // For oci charts, we remove the oci:// and use the docker datasource
           dep.depName = helmRelease.chart.replace(ociRegex, '');
           dep.datasource = DockerDatasource.id;
+        } else if (checkIfStringIsPath(helmRelease.chart)) {
+          dep.skipReason = 'local-chart';
         }
 
         dependencies.push(dep);
