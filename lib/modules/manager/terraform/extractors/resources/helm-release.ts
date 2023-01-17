@@ -34,8 +34,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         }
 
         // For oci charts, we remove the oci:// and use the docker datasource
-        const isOciChart = checkIfChartIsOCI(helmRelease.chart);
-        if (isOciChart) {
+        if (checkIfChartIsOCI(helmRelease.chart)) {
           dep.depName = helmRelease.chart.replace(ociRegex, '');
           dep.datasource = DockerDatasource.id;
 
