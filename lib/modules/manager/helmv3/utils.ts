@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { DockerDatasource } from '../../datasource/docker';

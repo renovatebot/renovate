@@ -1,10 +1,13 @@
 import is from '@sindresorhus/is';
+import { regEx } from '../../../../../util/regex';
 import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
 import { isOCIRegistry } from '../../../helmv3/utils';
 import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
-import { checkIfStringIsPath, ociRegex } from '../../util';
+import { checkIfStringIsPath } from '../../util';
+
+const ociRegex = regEx(/^oci:\/\//);
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
