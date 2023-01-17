@@ -54,6 +54,12 @@ export const ComposerRelease = z
           .nullable()
           .catch(null),
         time: z.string().nullable().catch(null),
+        require: z
+          .object({
+            php: z.string(),
+          })
+          .nullable()
+          .catch(null),
       })
       .partial()
   );
@@ -104,6 +110,10 @@ export function parsePackagesResponses(
 
       if (composerRelease.time) {
         dep.releaseTimestamp = composerRelease.time;
+      }
+
+      if (composerRelease.require?.php) {
+        dep.constraints = { php: [composerRelease.require.php] };
       }
 
       releases.push(dep);
