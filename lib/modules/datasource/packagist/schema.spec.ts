@@ -144,32 +144,6 @@ describe('modules/datasource/packagist/schema', () => {
         })
       ).toEqual([{ version: '1.2.3' }]);
     });
-
-    it('expands minified fields', () => {
-      expect(
-        parsePackagesResponse('foo/bar', {
-          packages: {
-            'foo/bar': [
-              { version: '3.3.3', require: { php: '^8.0' } },
-              { version: '2.2.2' },
-              { version: '1.1.1' },
-              { version: '0.0.4', require: { php: '^7.0' } },
-              { version: '0.0.3' },
-              { version: '0.0.2', require: '__unset' },
-              { version: '0.0.1' },
-            ],
-          },
-        })
-      ).toEqual([
-        { version: '3.3.3', require: { php: '^8.0' } },
-        { version: '2.2.2', require: { php: '^8.0' } },
-        { version: '1.1.1', require: { php: '^8.0' } },
-        { version: '0.0.4', require: { php: '^7.0' } },
-        { version: '0.0.3', require: { php: '^7.0' } },
-        { version: '0.0.2' },
-        { version: '0.0.1' },
-      ] satisfies ComposerRelease[]);
-    });
   });
 
   describe('parsePackagesResponses', () => {
@@ -190,7 +164,6 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '111',
                   homepage: 'https://example.com/1',
                   source: { url: 'git@example.com:foo/bar-1' },
-                  require: { php: '^8.0' },
                 },
               ],
               'baz/qux': [
@@ -211,7 +184,6 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '333',
                   homepage: 'https://example.com/3',
                   source: { url: 'git@example.com:foo/bar-3' },
-                  require: { php: '^7.0' },
                 },
               ],
               'baz/qux': [

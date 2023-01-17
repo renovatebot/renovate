@@ -54,12 +54,6 @@ export const ComposerRelease = z
           .nullable()
           .catch(null),
         time: z.string().nullable().catch(null),
-        require: z
-          .object({
-            php: z.string(),
-          })
-          .nullable()
-          .catch(null),
       })
       .partial()
   );
