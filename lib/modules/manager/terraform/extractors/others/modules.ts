@@ -35,18 +35,15 @@ export class ModuleExtractor extends DependencyExtractor {
     }
 
     const dependencies = [];
-    for (const moduleKeys of Object.keys(modules)) {
-      const module = modules[moduleKeys];
-      for (const moduleElement of module) {
-        const dep = {
-          currentValue: moduleElement.version,
-          managerData: {
-            source: moduleElement.source,
-          },
-        };
-        const massagedDep = this.analyseTerraformModule(dep);
-        dependencies.push(massagedDep);
-      }
+    for (const moduleElement of Object.values(modules).flat()) {
+      const dep = {
+        currentValue: moduleElement.version,
+        managerData: {
+          source: moduleElement.source,
+        },
+      };
+      const massagedDep = this.analyseTerraformModule(dep);
+      dependencies.push(massagedDep);
     }
     return dependencies;
   }
