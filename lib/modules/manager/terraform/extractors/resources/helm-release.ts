@@ -40,7 +40,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
 
           // checkIfStringIsPath above is true,
           // we need to override that
-          dep.skipReason = 'empty';
+          dep.skipReason = undefined;
         }
 
         dependencies.push(dep);
