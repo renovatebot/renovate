@@ -1,6 +1,7 @@
+import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
-  ComposerReleaseArray,
+  ComposerReleases,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
@@ -14,60 +15,56 @@ describe('modules/datasource/packagist/schema', () => {
       expect(() => ComposerRelease.parse({})).toThrow();
       expect(() => ComposerRelease.parse({ version: null })).toThrow();
       expect(() => ComposerRelease.parse({ version: null })).toThrow();
-      expect(() => ComposerRelease.parse({ version: '' })).toThrow();
-      expect(() => ComposerRelease.parse({ version: 'dev-main' })).toThrow();
     });
 
     it('parses', () => {
-      const defaultResult = {
-        version: '1.2.3',
-        homepage: null,
-        source: null,
-        time: null,
-      };
+      expect(ComposerRelease.parse({ version: '' })).toEqual({ version: '' });
+      expect(ComposerRelease.parse({ version: 'dev-main' })).toEqual({
+        version: 'dev-main',
+      });
 
-      expect(ComposerRelease.parse({ version: '1.2.3' })).toEqual(
-        defaultResult
-      );
+      expect(ComposerRelease.parse({ version: '1.2.3' })).toEqual({
+        version: '1.2.3',
+      });
 
       expect(ComposerRelease.parse({ version: '1.2.3', homepage: 42 })).toEqual(
-        defaultResult
+        { version: '1.2.3', homepage: null }
       );
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' })
-      ).toEqual({ ...defaultResult, homepage: 'example.com' });
+      ).toEqual({ version: '1.2.3', homepage: 'example.com' });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' })
-      ).toEqual(defaultResult);
+      ).toEqual({ version: '1.2.3', source: null });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: { url: 'foobar' } })
-      ).toEqual({ ...defaultResult, source: 'foobar' });
+      ).toEqual({ version: '1.2.3', source: { url: 'foobar' } });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', time: '12345' })
-      ).toEqual({ ...defaultResult, time: '12345' });
+      ).toEqual({ version: '1.2.3', time: '12345' });
     });
   });
 
-  describe('ComposerReleaseArray', () => {
+  describe('ComposerReleases', () => {
     it('rejects', () => {
-      expect(() => ComposerReleaseArray.parse(null)).toThrow();
-      expect(() => ComposerReleaseArray.parse(undefined)).toThrow();
-      expect(() => ComposerReleaseArray.parse('')).toThrow();
-      expect(() => ComposerReleaseArray.parse({})).toThrow();
+      expect(() => ComposerReleases.parse(null)).toThrow();
+      expect(() => ComposerReleases.parse(undefined)).toThrow();
+      expect(() => ComposerReleases.parse('')).toThrow();
+      expect(() => ComposerReleases.parse({})).toThrow();
     });
 
     it('parses', () => {
-      expect(ComposerReleaseArray.parse([])).toEqual([]);
-      expect(ComposerReleaseArray.parse([null])).toEqual([]);
-      expect(ComposerReleaseArray.parse([1, 2, 3])).toEqual([]);
-      expect(ComposerReleaseArray.parse(['foobar'])).toEqual([]);
-      expect(ComposerReleaseArray.parse([{ version: '1.2.3' }])).toEqual([
-        { version: '1.2.3', homepage: null, source: null, time: null },
-      ]);
+      expect(ComposerReleases.parse([])).toEqual([]);
+      expect(ComposerReleases.parse([null])).toEqual([]);
+      expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
+      expect(ComposerReleases.parse(['foobar'])).toEqual([]);
+      expect(
+        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
+      ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
     });
   });
 
@@ -84,9 +81,7 @@ describe('modules/datasource/packagist/schema', () => {
             'baz/qux': [{ version: '4.5.6' }],
           },
         })
-      ).toEqual([
-        { version: '1.2.3', homepage: null, source: null, time: null },
-      ]);
+      ).toEqual([{ version: '1.2.3' }]);
     });
   });
 
@@ -140,15 +135,15 @@ describe('modules/datasource/packagist/schema', () => {
               ],
             },
           },
-        ])
+        ] satisfies { packages: Record<string, ComposerRelease[]> }[])
       ).toEqual({
-        homepage: 'https://example.com/3',
-        sourceUrl: 'git@example.com:foo/bar-3',
+        homepage: 'https://example.com/1',
+        sourceUrl: 'git@example.com:foo/bar-1',
         releases: [
           { version: '1.1.1', gitRef: 'v1.1.1', releaseTimestamp: '111' },
           { version: '3.3.3', gitRef: 'v3.3.3', releaseTimestamp: '333' },
         ],
-      });
+      } satisfies ReleaseResult);
     });
   });
 });

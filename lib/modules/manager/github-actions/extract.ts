@@ -105,7 +105,7 @@ function extractWithYAMLParser(
   }
 
   for (const job of Object.values(pkg?.jobs ?? {})) {
-    const dep = extractContainer(job.container);
+    const dep = extractContainer(job?.container);
     if (dep) {
       dep.depType = 'container';
       deps.push(dep);
