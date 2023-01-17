@@ -18,7 +18,7 @@ export function checkIfStringIsPath(path: string): boolean {
   return !!match;
 }
 
-const ociRegex = /^oci:\/\//;
+const ociRegex = regEx(/^oci:\/\//);
 export { ociRegex };
 export function checkIfChartIsOCI(chart: string): boolean {
   return ociRegex.test(chart);
