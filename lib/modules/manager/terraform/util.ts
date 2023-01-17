@@ -18,9 +18,6 @@ export function checkIfStringIsPath(path: string): boolean {
   return !!match;
 }
 
-const ociRegex = regEx(/^oci:\/\//);
-export { ociRegex };
-
 export function massageProviderLookupName(dep: PackageDependency): void {
   if (!dep.packageName) {
     dep.packageName = dep.depName;
