@@ -1,28 +1,31 @@
 import { z } from 'zod';
-import { api as versioning } from '../../versioning/composer';
+import { logger } from '../../../logger';
 import type { Release, ReleaseResult } from '../types';
 
-export const ComposerRelease = z.object({
-  version: z
-    .string()
-    .refine((v) => versioning.isSingleVersion(v), 'Invalid version'),
-  homepage: z.string().nullable().catch(null),
-  source: z
-    .object({
-      url: z.string(),
-    })
-    .transform((x) => x.url)
-    .nullable()
-    .catch(null),
-  time: z.string().nullable().catch(null),
-});
-
-export const ComposerReleaseArray = z
-  .array(ComposerRelease.nullable().catch(null))
-  .transform((xs) =>
-    xs.filter((x): x is z.infer<typeof ComposerRelease> => x !== null)
+export const ComposerRelease = z
+  .object({
+    version: z.string(),
+  })
+  .merge(
+    z
+      .object({
+        homepage: z.string().nullable().catch(null),
+        source: z
+          .object({
+            url: z.string(),
+          })
+          .nullable()
+          .catch(null),
+        time: z.string().nullable().catch(null),
+      })
+      .partial()
   );
-export type ComposerReleaseArray = z.infer<typeof ComposerReleaseArray>;
+export type ComposerRelease = z.infer<typeof ComposerRelease>;
+
+export const ComposerReleases = z
+  .array(ComposerRelease.nullable().catch(null))
+  .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
+export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
 export const ComposerPackagesResponse = z.object({
   packages: z.record(z.unknown()),
@@ -31,21 +34,18 @@ export const ComposerPackagesResponse = z.object({
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
-): ComposerReleaseArray {
-  const packagesResponseParsed =
-    ComposerPackagesResponse.safeParse(packagesResponse);
-  if (!packagesResponseParsed.success) {
+): ComposerReleases {
+  try {
+    const { packages } = ComposerPackagesResponse.parse(packagesResponse);
+    const releases = ComposerReleases.parse(packages[packageName]);
+    return releases;
+  } catch (err) {
+    logger.debug(
+      { packageName, err },
+      `Error parsing packagist response for ${packageName}`
+    );
     return [];
   }
-
-  const { packages } = packagesResponseParsed.data;
-  const releaseArray = packages[packageName];
-  const releaseArrayParsed = ComposerReleaseArray.safeParse(releaseArray);
-  if (!releaseArrayParsed.success) {
-    return [];
-  }
-
-  return releaseArrayParsed.data;
 }
 
 export function parsePackagesResponses(
@@ -53,9 +53,8 @@ export function parsePackagesResponses(
   packagesResponses: unknown[]
 ): ReleaseResult | null {
   const releases: Release[] = [];
-  let maxVersion: string | null = null;
-  let homepage: string | null = null;
-  let sourceUrl: string | null = null;
+  let homepage: string | null | undefined;
+  let sourceUrl: string | null | undefined;
 
   for (const packagesResponse of packagesResponses) {
     const releaseArray = parsePackagesResponse(packageName, packagesResponse);
@@ -71,10 +70,12 @@ export function parsePackagesResponses(
 
       releases.push(dep);
 
-      if (!maxVersion || versioning.isGreaterThan(version, maxVersion)) {
-        maxVersion = version;
+      if (!homepage && composerRelease.homepage) {
         homepage = composerRelease.homepage;
-        sourceUrl = composerRelease.source;
+      }
+
+      if (!sourceUrl && composerRelease.source?.url) {
+        sourceUrl = composerRelease.source.url;
       }
     }
   }
