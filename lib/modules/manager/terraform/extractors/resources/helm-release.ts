@@ -30,10 +30,8 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           dep.skipReason = 'invalid-name';
         } else if (checkIfStringIsPath(helmRelease.chart)) {
           dep.skipReason = 'local-chart';
-        }
-
+        } else if (checkIfChartIsOCI(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
-        if (checkIfChartIsOCI(helmRelease.chart)) {
           dep.depName = helmRelease.chart.replace(ociRegex, '');
           dep.datasource = DockerDatasource.id;
 
