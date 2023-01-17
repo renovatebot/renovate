@@ -112,10 +112,6 @@ export function parsePackagesResponses(
         dep.releaseTimestamp = composerRelease.time;
       }
 
-      if (composerRelease.require?.php) {
-        dep.constraints = { php: [composerRelease.require.php] };
-      }
-
       releases.push(dep);
 
       if (!homepage && composerRelease.homepage) {

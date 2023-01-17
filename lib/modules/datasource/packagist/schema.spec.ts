@@ -229,18 +229,8 @@ describe('modules/datasource/packagist/schema', () => {
         homepage: 'https://example.com/1',
         sourceUrl: 'git@example.com:foo/bar-1',
         releases: [
-          {
-            version: '1.1.1',
-            gitRef: 'v1.1.1',
-            releaseTimestamp: '111',
-            constraints: { php: ['^8.0'] },
-          },
-          {
-            version: '3.3.3',
-            gitRef: 'v3.3.3',
-            releaseTimestamp: '333',
-            constraints: { php: ['^7.0'] },
-          },
+          { version: '1.1.1', gitRef: 'v1.1.1', releaseTimestamp: '111' },
+          { version: '3.3.3', gitRef: 'v3.3.3', releaseTimestamp: '333' },
         ],
       } satisfies ReleaseResult);
     });
