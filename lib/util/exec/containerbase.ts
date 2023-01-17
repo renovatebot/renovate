@@ -129,7 +129,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   swift: {
     datasource: 'docker',
     depName: 'swift',
-    versioning: semverVersioningId,
+    versioning: npmVersioningId,
   },
   yarn: {
     datasource: 'npm',

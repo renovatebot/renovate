@@ -17,16 +17,19 @@ import { extractSwiftToolsVersion } from './util';
 
 async function swiftPackageResolve(
   packageFile: string,
+  toolsVersion: string | null,
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const cmd = `swift package resolve`;
+  const versionRange =
+    toolsVersion === null ? toolsVersion : `>=${toolsVersion}`;
   const execOptions: ExecOptions = {
     cwdFile: packageFile,
     docker: {},
     toolConstraints: [
       {
         toolName: 'swift',
-        constraint: config.constraints?.swift,
+        constraint: config.constraints?.swift ?? versionRange,
       },
     ],
   };
@@ -70,7 +73,7 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFile);
-    await swiftPackageResolve(packageFileName, config);
+    await swiftPackageResolve(packageFileName, toolsVersion, config);
     logger.debug('Returning updated Package.resolved file');
     const newLockFileContent = await readLocalFile(lockFile);
     if (existingLockFileContent === newLockFileContent) {
