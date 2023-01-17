@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
 import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
+import { isOCIRegistry } from '../../../helmv3/utils';
 import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
-import { checkIfChartIsOCI, checkIfStringIsPath, ociRegex } from '../../util';
+import { checkIfStringIsPath, ociRegex } from '../../util';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
@@ -28,7 +29,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         };
         if (!helmRelease.chart) {
           dep.skipReason = 'invalid-name';
-        } else if (checkIfChartIsOCI(helmRelease.chart)) {
+        } else if (isOCIRegistry(helmRelease.chart)) {
           // For oci charts, we remove the oci:// and use the docker datasource
           dep.depName = helmRelease.chart.replace(ociRegex, '');
           dep.datasource = DockerDatasource.id;

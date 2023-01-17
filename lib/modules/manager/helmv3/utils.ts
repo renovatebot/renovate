@@ -82,8 +82,19 @@ export function isAlias(repository: string): boolean {
   return repository.startsWith('@') || repository.startsWith('alias:');
 }
 
-export function isOCIRegistry(repository: Repository): boolean {
-  return repository.repository.startsWith('oci://');
+export function isOCIRegistry(
+  repository: Repository | string | undefined
+): boolean {
+  if (typeof repository === 'undefined') {
+    return false;
+  }
+
+  let string = repository;
+  if (typeof repository === 'object') {
+    string = repository.repository;
+  }
+
+  return (string as string).startsWith('oci://');
 }
 
 export function aliasRecordToRepositories(
