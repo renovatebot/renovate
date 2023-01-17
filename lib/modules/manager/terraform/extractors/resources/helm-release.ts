@@ -26,7 +26,6 @@ export class HelmReleaseExtractor extends DependencyExtractor {
           depName: helmRelease.chart,
           datasource: HelmDatasource.id,
         };
-
         if (!helmRelease.chart) {
           dep.skipReason = 'invalid-name';
         } else if (checkIfStringIsPath(helmRelease.chart)) {
