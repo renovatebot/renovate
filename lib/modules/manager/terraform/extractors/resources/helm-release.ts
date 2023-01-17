@@ -34,10 +34,6 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         // For oci charts, we remove the oci:// and use the docker datasource
           dep.depName = helmRelease.chart.replace(ociRegex, '');
           dep.datasource = DockerDatasource.id;
-
-          // checkIfStringIsPath above is true,
-          // we need to override that
-          dep.skipReason = undefined;
         }
 
         dependencies.push(dep);
