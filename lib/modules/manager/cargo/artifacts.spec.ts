@@ -112,6 +112,35 @@ describe('modules/manager/cargo/artifacts', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('passes customEnvVariables through while updating the cargo lock', async () => {
+    GlobalConfig.set({
+      customEnvVariables: {
+        FOO_ENV: 'bar',
+      },
+    });
+
+    fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll();
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
+    fs.readLocalFile.mockResolvedValueOnce('New Cargo.lock');
+    const updatedDeps = [
+      {
+        depName: 'dep1',
+      },
+    ];
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('updates Cargo.lock based on the packageName, when given', async () => {
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
@@ -217,6 +246,13 @@ describe('modules/manager/cargo/artifacts', () => {
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/cache":"/tmp/cache" ' +
+          '-e HTTP_PROXY ' +
+          '-e HTTPS_PROXY ' +
+          '-e NO_PROXY ' +
+          '-e HOME ' +
+          '-e PATH ' +
+          '-e LANG ' +
+          '-e LC_ALL ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +

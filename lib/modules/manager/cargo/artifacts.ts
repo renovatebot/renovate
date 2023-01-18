@@ -2,6 +2,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   findLocalSiblingOrParent,
@@ -24,6 +25,9 @@ async function cargoUpdate(
 
   const execOptions: ExecOptions = {
     docker: {},
+    extraEnv: {
+      ...getChildProcessEnv(),
+    },
     toolConstraints: [{ toolName: 'rust', constraint }],
   };
   await exec(cmd, execOptions);
