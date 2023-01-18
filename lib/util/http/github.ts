@@ -259,6 +259,11 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
+function replaceUrlBase(url: URL, baseUrl: string): URL {
+  const relativeUrl = `${url.pathname}${url.search}`;
+  return new URL(relativeUrl, baseUrl);
+}
+
 export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
@@ -315,11 +320,15 @@ export class GithubHttp extends Http<GithubHttpOptions> {
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
+          const baseUrl = opts.baseUrl;
+          const rebasePaginationLinks =
+            baseUrl && process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const parsedUrl = new URL(linkHeader.next.url, opts.baseUrl);
-              const relativeUrl = `${parsedUrl.pathname}${parsedUrl.search}`
-              const nextUrl = new URL(relativeUrl, opts.baseUrl);
+              const parsedUrl = new URL(linkHeader.next.url, baseUrl);
+              const nextUrl = rebasePaginationLinks
+                ? replaceUrlBase(parsedUrl, baseUrl)
+                : parsedUrl;
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
