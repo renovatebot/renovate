@@ -317,7 +317,9 @@ export class GithubHttp extends Http<GithubHttpOptions> {
           }
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
+              const parsedUrl = new URL(linkHeader.next.url, opts.baseUrl);
+              const relativeUrl = `${parsedUrl.pathname}${parsedUrl.search}`
+              const nextUrl = new URL(relativeUrl, opts.baseUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
