@@ -1,19 +1,14 @@
 name: Mend Renovate App Support
 description: Get support for the Mend Renovate hosted app.
 body:
-  - type: markdown
+  - type: checkboxes
+    id: hosted-app-checkbox
     attributes:
-      value: |
-        Only use this form if you're using the Mend Renovate hosted app. Use the Ideas & General discussion if your self-hosting.
-
-  - type: dropdown
-    id: how-are-you-running-renovate
-    attributes:
-      label: How are you running Renovate?
+      label: I'm using the Mend Renovate hosted app.
+      description: Only use this discussion if you're using the Mend Renovate hosted app.
       options:
-        - 'Mend Renovate hosted app on github.com'
-    validations:
-      required: true
+        - label: I'm using the Mend Renovate hosted app.
+          required: true
 
   - type: dropdown
     id: regression-error
