@@ -105,13 +105,13 @@ function extractWithYAMLParser(
   }
 
   for (const job of Object.values(pkg?.jobs ?? {})) {
-    const dep = extractContainer(job.container);
+    const dep = extractContainer(job?.container);
     if (dep) {
       dep.depType = 'container';
       deps.push(dep);
     }
 
-    for (const service of Object.values(job.services ?? {})) {
+    for (const service of Object.values(job?.services ?? {})) {
       const dep = extractContainer(service);
       if (dep) {
         dep.depType = 'service';

@@ -2,13 +2,74 @@ import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
   ComposerReleases,
+  MinifiedArray,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
 
 describe('modules/datasource/packagist/schema', () => {
+  describe('MinifiedArray', () => {
+    it('parses MinifiedArray', () => {
+      expect(MinifiedArray.parse([])).toEqual([]);
+
+      // Source: https://github.com/composer/metadata-minifier/blob/1.0.0/tests/MetadataMinifierTest.php
+      expect(
+        MinifiedArray.parse([
+          {
+            name: 'foo/bar',
+            version: '2.0.0',
+            version_normalized: '2.0.0.0',
+            type: 'library',
+            scripts: {
+              foo: 'bar',
+            },
+            license: ['MIT'],
+          },
+          {
+            version: '1.2.0',
+            version_normalized: '1.2.0.0',
+            license: ['GPL'],
+            homepage: 'https://example.org',
+            scripts: '__unset',
+          },
+          {
+            version: '1.0.0',
+            version_normalized: '1.0.0.0',
+            homepage: '__unset',
+          },
+        ])
+      ).toEqual([
+        {
+          name: 'foo/bar',
+          version: '2.0.0',
+          version_normalized: '2.0.0.0',
+          type: 'library',
+          scripts: {
+            foo: 'bar',
+          },
+          license: ['MIT'],
+        },
+        {
+          name: 'foo/bar',
+          version: '1.2.0',
+          version_normalized: '1.2.0.0',
+          type: 'library',
+          license: ['GPL'],
+          homepage: 'https://example.org',
+        },
+        {
+          name: 'foo/bar',
+          version: '1.0.0',
+          version_normalized: '1.0.0.0',
+          type: 'library',
+          license: ['GPL'],
+        },
+      ]);
+    });
+  });
+
   describe('ComposerRelease', () => {
-    it('rejects', () => {
+    it('rejects ComposerRelease', () => {
       expect(() => ComposerRelease.parse(null)).toThrow();
       expect(() => ComposerRelease.parse(undefined)).toThrow();
       expect(() => ComposerRelease.parse('')).toThrow();
@@ -17,7 +78,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(() => ComposerRelease.parse({ version: null })).toThrow();
     });
 
-    it('parses', () => {
+    it('parses ComposerRelease', () => {
       expect(ComposerRelease.parse({ version: '' })).toEqual({ version: '' });
       expect(ComposerRelease.parse({ version: 'dev-main' })).toEqual({
         version: 'dev-main',
@@ -50,14 +111,14 @@ describe('modules/datasource/packagist/schema', () => {
   });
 
   describe('ComposerReleases', () => {
-    it('rejects', () => {
+    it('rejects ComposerReleases', () => {
       expect(() => ComposerReleases.parse(null)).toThrow();
       expect(() => ComposerReleases.parse(undefined)).toThrow();
       expect(() => ComposerReleases.parse('')).toThrow();
       expect(() => ComposerReleases.parse({})).toThrow();
     });
 
-    it('parses', () => {
+    it('parses ComposerReleases', () => {
       expect(ComposerReleases.parse([])).toEqual([]);
       expect(ComposerReleases.parse([null])).toEqual([]);
       expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
@@ -69,7 +130,7 @@ describe('modules/datasource/packagist/schema', () => {
   });
 
   describe('parsePackageResponse', () => {
-    it('parses', () => {
+    it('parses package response', () => {
       expect(parsePackagesResponse('foo/bar', null)).toEqual([]);
       expect(parsePackagesResponse('foo/bar', {})).toEqual([]);
       expect(parsePackagesResponse('foo/bar', { packages: '123' })).toEqual([]);
@@ -83,10 +144,36 @@ describe('modules/datasource/packagist/schema', () => {
         })
       ).toEqual([{ version: '1.2.3' }]);
     });
+
+    it('expands minified fields', () => {
+      expect(
+        parsePackagesResponse('foo/bar', {
+          packages: {
+            'foo/bar': [
+              { version: '3.3.3', require: { php: '^8.0' } },
+              { version: '2.2.2' },
+              { version: '1.1.1' },
+              { version: '0.0.4', require: { php: '^7.0' } },
+              { version: '0.0.3' },
+              { version: '0.0.2', require: '__unset' },
+              { version: '0.0.1' },
+            ],
+          },
+        })
+      ).toEqual([
+        { version: '3.3.3', require: { php: '^8.0' } },
+        { version: '2.2.2', require: { php: '^8.0' } },
+        { version: '1.1.1', require: { php: '^8.0' } },
+        { version: '0.0.4', require: { php: '^7.0' } },
+        { version: '0.0.3', require: { php: '^7.0' } },
+        { version: '0.0.2' },
+        { version: '0.0.1' },
+      ] satisfies ComposerRelease[]);
+    });
   });
 
   describe('parsePackagesResponses', () => {
-    it('parses', () => {
+    it('parses array of responses', () => {
       expect(parsePackagesResponses('foo/bar', [null])).toBeNull();
       expect(parsePackagesResponses('foo/bar', [{}])).toBeNull();
       expect(
@@ -103,6 +190,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '111',
                   homepage: 'https://example.com/1',
                   source: { url: 'git@example.com:foo/bar-1' },
+                  require: { php: '^8.0' },
                 },
               ],
               'baz/qux': [
@@ -123,6 +211,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '333',
                   homepage: 'https://example.com/3',
                   source: { url: 'git@example.com:foo/bar-3' },
+                  require: { php: '^7.0' },
                 },
               ],
               'baz/qux': [
@@ -140,8 +229,18 @@ describe('modules/datasource/packagist/schema', () => {
         homepage: 'https://example.com/1',
         sourceUrl: 'git@example.com:foo/bar-1',
         releases: [
-          { version: '1.1.1', gitRef: 'v1.1.1', releaseTimestamp: '111' },
-          { version: '3.3.3', gitRef: 'v3.3.3', releaseTimestamp: '333' },
+          {
+            version: '1.1.1',
+            gitRef: 'v1.1.1',
+            releaseTimestamp: '111',
+            constraints: { php: ['^8.0'] },
+          },
+          {
+            version: '3.3.3',
+            gitRef: 'v3.3.3',
+            releaseTimestamp: '333',
+            constraints: { php: ['^7.0'] },
+          },
         ],
       } satisfies ReleaseResult);
     });
