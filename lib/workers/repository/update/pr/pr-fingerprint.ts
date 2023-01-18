@@ -2,6 +2,11 @@
 // https://github.com/renovatebot/renovate/blob/3d85b6048d6a8c57887b64ed4929e2e02ea41aa0/lib/workers/repository/update/pr/index.ts#L294-L306
 
 import type { UpdateType, ValidationMessage } from '../../../../config/types';
+import { pkg } from '../../../../expose.cjs';
+import { logger } from '../../../../logger';
+import type { PrCache } from '../../../../util/cache/repository/types';
+import { getElapsedHours } from '../../../../util/date';
+import type { BranchConfig } from '../../../types';
 
 // BranchUpgradeConfig - filtered
 interface FilteredBranchUpgradeConfig {
@@ -35,4 +40,58 @@ export interface PrFingerprintConfig {
   warnings?: ValidationMessage[];
 
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
+}
+
+export function generatePrFingerprintConfig(
+  config: BranchConfig
+): PrFingerprintConfig {
+  const filteredUpgrades = config.upgrades.map((upgrade) => {
+    return {
+      depName: upgrade.depName,
+      gitRef: upgrade.gitRef,
+      hasReleaseNotes: upgrade.hasReleaseNotes,
+      prBodyDefinitions: upgrade.prBodyDefinitions,
+      prBodyNotes: upgrade.prBodyNotes,
+      repoName: upgrade.repoName,
+    };
+  });
+
+  return {
+    automerge: config.automerge,
+    automergeSchedule: config.automergeSchedule,
+    filteredUpgrades,
+    hasReleaseNotes: config.hasReleaseNotes,
+    isPin: config.isPin,
+    pkgVersion: pkg.version,
+    prBodyTemplate: config.prBodyTemplate,
+    prFooter: config.prFooter,
+    prHeader: config.prHeader,
+    prTitle: config.prTitle,
+    rebaseWhen: config.rebaseWhen,
+    recreateClosed: config.recreateClosed,
+    schedule: config.schedule,
+    stopUpdating: config.stopUpdating,
+    timezone: config.timezone,
+    updateType: config.updateType,
+    warnings: config.warnings,
+  };
+}
+
+export function validatePrCache(
+  prCache: PrCache,
+  prFingerprint: string
+): boolean {
+  if (prCache.fingerprint !== prFingerprint) {
+    logger.debug('PR fingerprints mismatch, processing PR');
+    return false;
+  }
+
+  if (getElapsedHours(prCache.lastEdited) < 24) {
+    logger.debug(
+      'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+    );
+    return false;
+  }
+
+  return true;
 }

@@ -15,7 +15,7 @@ import {
 } from '../../util/git';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { getPrCache } from './update/pr/set-pr-cache';
+import { getPrCache } from './update/pr/pr-cache';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
