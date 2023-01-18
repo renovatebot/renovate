@@ -128,8 +128,40 @@ This is because Handlebars escapes special characters with double braces (by def
 By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `regexManager` instead of _four_.
 The `Dockerfile` is documented better as well.
 
-The syntax in the example is arbitrary and you can set your own syntax.
+The syntax in the example is arbitrary, and you can set your own syntax.
 If you do, update your `matchStrings` regex!
+
+You can use simple versions of such comments to increase readability.
+
+For example the `appVersion` property in a `Chart.yaml` of a Helm chart is always referenced to an Docker image.
+In such scenarios, some values can be hard-coded.
+For example:
+
+```yaml
+apiVersion: v2
+name: amazon-eks-pod-identity-webhook
+description: A Kubernetes webhook for pods that need AWS IAM access
+version: 1.0.3
+type: application
+# renovate: image=amazon/amazon-eks-pod-identity-webhook
+appVersion: 'v0.4.0'
+```
+
+Using the `regexManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
+
+```json
+{
+  "regexManagers": [
+    {
+      "datasourceTemplate": "docker",
+      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "matchStrings": [
+        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+      ]
+    }
+  ]
+}
+```
 
 ### Using regexManager to update the dependency name in addition to version
 
