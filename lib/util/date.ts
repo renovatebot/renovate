@@ -10,9 +10,7 @@ export function getElapsedDays(timestamp: string): number {
 }
 
 export function getElapsedMinutes(date: Date): number {
-  return Math.floor(
-    (new Date().getTime() - new Date(date).getTime()) / ONE_MINUTE_MS
-  );
+  return Math.floor((new Date().getTime() - date.getTime()) / ONE_MINUTE_MS);
 }
 
 export function getElapsedHours(date: Date | string): number {
