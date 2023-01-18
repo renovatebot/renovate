@@ -1,5 +1,5 @@
 name: Mend Renovate App Support
-description: Get support for the Mend Renovate hosted app.
+description: Related specifically to uptime or performance of the Mend Renovate hosted app.
 body:
   - type: checkboxes
     id: hosted-app-checkbox
