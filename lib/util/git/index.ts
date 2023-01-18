@@ -1073,7 +1073,6 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
-        targetRef: commitConfig.branchName,
         files: commitConfig.files,
       });
       if (pushResult) {

@@ -34,7 +34,7 @@ export async function createOnboardingBranch(
   }
 
   return commitAndPush({
-    targetBranch: config.baseBranch,
+    baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
       {

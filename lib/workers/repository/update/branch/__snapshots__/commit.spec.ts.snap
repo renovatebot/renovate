@@ -4,6 +4,7 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
 [
   [
     {
+      "baseBranch": undefined,
       "branchName": "renovate/some-branch",
       "files": [
         {
@@ -15,7 +16,6 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
       "force": false,
       "message": "some commit message",
       "platformCommit": false,
-      "targetBranch": undefined,
     },
   ],
 ]
@@ -25,6 +25,7 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits via
 [
   [
     {
+      "baseBranch": undefined,
       "branchName": "renovate/some-branch",
       "files": [
         {
@@ -36,7 +37,6 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits via
       "force": false,
       "message": "some commit message",
       "platformCommit": true,
-      "targetBranch": undefined,
     },
   ],
 ]

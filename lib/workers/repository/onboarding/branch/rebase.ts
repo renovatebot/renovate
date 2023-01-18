@@ -62,7 +62,7 @@ export async function rebaseOnboardingBranch(
 
   // TODO #7154
   return commitAndPush({
-    targetBranch: config.baseBranch,
+    baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
       {

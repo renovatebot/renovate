@@ -34,7 +34,7 @@ export async function createConfigMigrationBranch(
     migratedConfigData
   );
   return commitAndPush({
-    targetBranch: config.defaultBranch!,
+    baseBranch: config.defaultBranch!,
     branchName: getMigrationBranchName(config),
     files: [
       {
