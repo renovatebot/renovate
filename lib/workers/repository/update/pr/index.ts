@@ -17,7 +17,6 @@ import {
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import type { PrCache } from '../../../../util/cache/repository/types';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
@@ -34,8 +33,8 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
-import type { PrFingerprintConfig } from './pr-fingerprint';
-import { getPrCache, setPrCache } from './set-pr-cache';
+import { getPrCache, setPrCache } from './pr-cache';
+import { generatePrFingerprintConfig, validatePrCache } from './pr-fingerprint';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -78,57 +77,6 @@ export function updatePrDebugData(
   };
 }
 
-function validatePrCache(prCache: PrCache, prFingerprint: string): boolean {
-  if (prCache.fingerprint !== prFingerprint) {
-    logger.debug('PR fingerprints mismatch, processing PR');
-    return false;
-  }
-
-  if (getElapsedHours(prCache.lastEdited) < 24) {
-    logger.debug(
-      'PR cache matches but it has been edited in the past 24hrs, so processing PR'
-    );
-    return false;
-  }
-
-  return true;
-}
-
-export function generatePrFingerprintConfig(
-  config: BranchConfig
-): PrFingerprintConfig {
-  const filteredUpgrades = config.upgrades.map((upgrade) => {
-    return {
-      depName: upgrade.depName,
-      gitRef: upgrade.gitRef,
-      hasReleaseNotes: upgrade.hasReleaseNotes,
-      prBodyDefinitions: upgrade.prBodyDefinitions,
-      prBodyNotes: upgrade.prBodyNotes,
-      repoName: upgrade.repoName,
-    };
-  });
-
-  return {
-    automerge: config.automerge,
-    automergeSchedule: config.automergeSchedule,
-    filteredUpgrades,
-    hasReleaseNotes: config.hasReleaseNotes,
-    isPin: config.isPin,
-    pkgVersion: pkg.version,
-    prBodyTemplate: config.prBodyTemplate,
-    prFooter: config.prFooter,
-    prHeader: config.prHeader,
-    prTitle: config.prTitle,
-    rebaseWhen: config.rebaseWhen,
-    recreateClosed: config.recreateClosed,
-    schedule: config.schedule,
-    stopUpdating: config.stopUpdating,
-    timezone: config.timezone,
-    updateType: config.updateType,
-    warnings: config.warnings,
-  };
-}
-
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -159,11 +107,8 @@ export async function ensurePr(
         );
         return { type: 'with-pr', pr: existingPr };
       }
-    } else {
-      if (config.repositoryCache === 'enabled') {
-        logger.debug('PR cache not found, creating new');
-      }
-      setPrCache(branchName, prFingerprint);
+    } else if (config.repositoryCache === 'enabled') {
+      logger.debug('PR cache not found, creating new');
     }
   }
   config.upgrades = [];
@@ -510,3 +455,5 @@ export async function ensurePr(
   }
   return { type: 'without-pr', prBlockedBy: 'Error' };
 }
+
+export { generatePrFingerprintConfig };

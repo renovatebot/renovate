@@ -19,8 +19,9 @@ import * as _statusChecks from '../branch/status-checks';
 import * as _prBody from './body';
 import type { ChangeLogChange, ChangeLogRelease } from './changelog/types';
 import * as _participants from './participants';
-import * as _prCache from './set-pr-cache';
-import { ensurePr, generatePrFingerprintConfig } from '.';
+import * as _prCache from './pr-cache';
+import { generatePrFingerprintConfig } from './pr-fingerprint';
+import { ensurePr } from '.';
 
 jest.mock('../../../../util/git');
 jest.mock('../../changelog');
@@ -40,7 +41,7 @@ const participants = mocked(_participants);
 jest.mock('../../../../modules/platform/comment');
 const comment = mocked(_comment);
 
-jest.mock('./set-pr-cache');
+jest.mock('./pr-cache');
 const prCache = mocked(_prCache);
 
 describe('workers/repository/update/pr/index', () => {
@@ -710,17 +711,6 @@ describe('workers/repository/update/pr/index', () => {
         ...pr,
       };
       let cachedPr: PrCache | null = null;
-
-      it('creates new cache if not found', async () => {
-        config.repositoryCache = 'enabled';
-        platform.getBranchPr.mockResolvedValue(existingPr);
-        prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        await ensurePr(config);
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR cache not found, creating new'
-        );
-        expect(prCache.setPrCache).toHaveBeenCalled();
-      });
 
       it('fetches changelogs when pr cache does not match ', async () => {
         config.repositoryCache = 'enabled';
