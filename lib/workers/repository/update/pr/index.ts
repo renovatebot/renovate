@@ -108,7 +108,7 @@ export async function ensurePr(
         return { type: 'with-pr', pr: existingPr };
       }
     } else if (config.repositoryCache === 'enabled') {
-      logger.debug('PR cache not found, creating new');
+      logger.debug('PR cache not found');
     }
   }
   config.upgrades = [];

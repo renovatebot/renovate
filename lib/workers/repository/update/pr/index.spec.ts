@@ -712,6 +712,14 @@ describe('workers/repository/update/pr/index', () => {
       };
       let cachedPr: PrCache | null = null;
 
+      it('logs when cache is enabled but pr-cache is absent', async () => {
+        config.repositoryCache = 'enabled';
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        prCache.getPrCache.mockReturnValueOnce(null);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith('PR cache not found');
+      });
+
       it('fetches changelogs when pr cache does not match ', async () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
