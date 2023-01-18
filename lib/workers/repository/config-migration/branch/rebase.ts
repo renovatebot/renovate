@@ -1,3 +1,4 @@
+import JSON5 from 'json5';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
@@ -78,5 +79,5 @@ export function jsonStripWhitespaces(json: string | null): string | null {
    *
    * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
    */
-  return quickStringify(JSON.parse(json)) ?? null;
+  return quickStringify(JSON5.parse(json)) ?? null;
 }

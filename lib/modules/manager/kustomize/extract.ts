@@ -132,7 +132,7 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  if (!pkg) {
+  if (!pkg || is.string(pkg)) {
     return null;
   }
 
