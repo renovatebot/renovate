@@ -100,6 +100,14 @@ Allowed values:
 
 Default value: `asc`.
 
+## `RENOVATE_X_REBASE_PAGINATION_LINKS`
+
+<!-- prettier-ignore -->
+!!! note
+  For the GitHub Enterprise Server platform only.
+
+If set, Renovate will rewrite GitHub's pagination responses to use the base URL from the Renovate config.
+
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
 If set, Renovate will export OpenTelemetry data to the supplied endpoint.
