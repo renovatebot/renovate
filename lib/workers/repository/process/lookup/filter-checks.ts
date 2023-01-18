@@ -60,12 +60,19 @@ export async function filterInternalChecks(
         updateType,
       } = releaseConfig;
       if (is.integer(stabilityDays) && releaseTimestamp) {
-        if (getElapsedDays(releaseTimestamp) < stabilityDays) {
-          // Skip it if it doesn't pass checks
-          logger.debug(
-            { depName, check: 'stabilityDays' },
-            `Release ${candidateRelease.version} is pending status checks`
-          );
+        try {
+          const elapsedDays = getElapsedDays(releaseTimestamp);
+          if (elapsedDays < stabilityDays) {
+            // Skip it if it doesn't pass checks
+            logger.debug(
+              { depName, check: 'stabilityDays' },
+              `Release ${candidateRelease.version} is pending status checks`
+            );
+            pendingReleases.unshift(candidateRelease);
+            continue;
+          }
+        } catch (err) {
+          logger.debug('Invalid releaseTimestamp - skipping');
           pendingReleases.unshift(candidateRelease);
           continue;
         }

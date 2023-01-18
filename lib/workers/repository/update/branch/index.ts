@@ -296,16 +296,22 @@ export async function processBranch(
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
         if (is.number(upgrade.stabilityDays) && upgrade.releaseTimestamp) {
-          const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
-          if (daysElapsed < upgrade.stabilityDays) {
-            logger.debug(
-              {
-                depName: upgrade.depName,
-                daysElapsed,
-                stabilityDays: upgrade.stabilityDays,
-              },
-              'Update has not passed stability days'
-            );
+          try {
+            const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
+            if (daysElapsed < upgrade.stabilityDays) {
+              logger.debug(
+                {
+                  depName: upgrade.depName,
+                  daysElapsed,
+                  stabilityDays: upgrade.stabilityDays,
+                },
+                'Update has not passed stability days'
+              );
+              config.stabilityStatus = 'yellow';
+              continue;
+            }
+          } catch (err) {
+            logger.debug('releaseTimestamp is invalid');
             config.stabilityStatus = 'yellow';
             continue;
           }
