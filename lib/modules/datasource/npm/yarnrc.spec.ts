@@ -1,107 +1,70 @@
-import { convertYarnrcYmlToRules } from './yarnrc';
+import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  describe('convertYarnrcYmlToRules()', () => {
-    it('handles registry url', () => {
-      const res = convertYarnrcYmlToRules(
-        'npmRegistryServer: https://private.example.com/npm'
-      );
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
-              "hostType": "npm",
-              "matchHost": "https://private.example.com/npm",
-            },
-          ],
-          "packageRules": Array [],
-        }
-      `);
+  describe('resolveRegistryUrl()', () => {
+    it('considers default registry', () => {
+      const registryUrl = resolveRegistryUrl('a-package', {
+        npmRegistryServer: 'https://private.example.com/npm',
+      });
+      expect(registryUrl).toBe('https://private.example.com/npm');
     });
 
-    it('handles registry url and auth token', () => {
-      const res = convertYarnrcYmlToRules(
-        `npmAuthToken: foobar
-npmRegistryServer: https://private.example.com/npm`
-      );
-
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
-              "hostType": "npm",
-              "matchHost": "https://private.example.com/npm",
-              "token": "foobar",
-            },
-          ],
-          "packageRules": Array [],
-        }
-      `);
+    it('chooses matching scoped registry over default registry', () => {
+      const registryUrl = resolveRegistryUrl('@scope/a-package', {
+        npmRegistryServer: 'https://private.example.com/npm',
+        npmScopes: {
+          scope: {
+            npmRegistryServer: 'https://scope.example.com/npm',
+          },
+        },
+      });
+      expect(registryUrl).toBe('https://scope.example.com/npm');
     });
 
-    it('handles scoped options', () => {
-      const res = convertYarnrcYmlToRules(
-        `npmAuthToken: default-token
-npmRegistryServer: https://private.example.com/npm-default
+    it('ignores non matching scoped registry', () => {
+      const registryUrl = resolveRegistryUrl('@scope/a-package', {
+        npmScopes: {
+          'other-scope': {
+            npmRegistryServer: 'https://other-scope.example.com/npm',
+          },
+        },
+      });
+      expect(registryUrl).toBeNull();
+    });
+  });
+
+  describe('loadConfigFromYarnrcYml()', () => {
+    it('reads valid file', () => {
+      const res = loadConfigFromYarnrcYml(
+        `npmRegistryServer: https://private.example.com/npm
 npmScopes:
   foo:
-    npmAuthToken: foo-token
     npmRegistryServer: https://private.example.com/npm-foo
   bar:
-    npmAuthToken: bar-token
     npmRegistryServer: https://private.example.com/npm-bar`
       );
 
-      expect(res).toMatchInlineSnapshot(`
-        Object {
-          "hostRules": Array [
-            Object {
-              "hostType": "npm",
-              "matchHost": "https://private.example.com/npm-default",
-              "token": "default-token",
-            },
-            Object {
-              "hostType": "npm",
-              "matchHost": "https://private.example.com/npm-foo",
-              "token": "foo-token",
-            },
-            Object {
-              "hostType": "npm",
-              "matchHost": "https://private.example.com/npm-bar",
-              "token": "bar-token",
-            },
-          ],
-          "packageRules": Array [
-            Object {
-              "matchDatasources": Array [
-                "npm",
-              ],
-              "matchPackagePrefixes": Array [
-                "foo/",
-              ],
-              "registryUrls": Array [
-                "https://private.example.com/npm-foo",
-              ],
-            },
-            Object {
-              "matchDatasources": Array [
-                "npm",
-              ],
-              "matchPackagePrefixes": Array [
-                "bar/",
-              ],
-              "registryUrls": Array [
-                "https://private.example.com/npm-bar",
-              ],
-            },
-          ],
-        }
-      `);
+      expect(res).toEqual({
+        npmRegistryServer: 'https://private.example.com/npm',
+        npmScopes: {
+          foo: {
+            npmRegistryServer: 'https://private.example.com/npm-foo',
+          },
+          bar: {
+            npmRegistryServer: 'https://private.example.com/npm-bar',
+          },
+        },
+      });
+    });
+
+    it('ignores malformed file', () => {
+      const res = loadConfigFromYarnrcYml(`not a config`);
+
+      expect(res).toBeNull();
     });
   });
 });

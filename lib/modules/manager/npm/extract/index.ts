@@ -7,9 +7,9 @@ import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
-import type { NpmrcRules } from '../../../datasource/npm/types';
 import {
-  convertYarnrcYmlToRules,
+  YarnConfig,
+  loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from '../../../datasource/npm/yarnrc';
 import * as nodeVersioning from '../../../versioning/node';
@@ -140,7 +140,7 @@ export async function extractPackageFile(
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
-  let yarnRules: NpmrcRules;
+  let yarnConfig: YarnConfig | null;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
   if (is.string(repoYarnrcYml)) {
     if (is.string(config.npmrc) && !config.npmrcMerge) {
@@ -149,7 +149,7 @@ export async function extractPackageFile(
         'Repo .yarnrc.yml file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
     } else {
-      yarnRules = convertYarnrcYmlToRules(repoYarnrcYml);
+      yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
     }
   }
 
@@ -287,8 +287,11 @@ export async function extractPackageFile(
       hasFancyRefs = true;
       return dep;
     }
-    if (yarnRules) {
-      dep.registryUrls = [resolveRegistryUrl(depName, yarnRules)];
+    if (yarnConfig) {
+      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
+      if (registryUrlFromYarnConfig) {
+        dep.registryUrls = [registryUrlFromYarnConfig];
+      }
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
