@@ -148,12 +148,7 @@ export class VersionsDatasource extends Datasource {
   }
 
   private isDataStale(): boolean {
-    try {
-      const elapsedMinutes = getElapsedMinutes(this.registryCache.lastSync);
-      return elapsedMinutes >= 15;
-    } catch (err) {
-      return true;
-    }
+    return getElapsedMinutes(this.registryCache.lastSync) >= 15;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
