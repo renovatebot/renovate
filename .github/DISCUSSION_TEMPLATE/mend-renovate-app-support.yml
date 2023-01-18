@@ -1,6 +1,11 @@
 name: Mend Renovate App Support
 description: Get support for the Mend Renovate hosted app.
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Only use this form if you're using the Mend Renovate hosted app. Use the Ideas & General discussion if your self-hosting.
+
   - type: dropdown
     id: how-are-you-running-renovate
     attributes:
