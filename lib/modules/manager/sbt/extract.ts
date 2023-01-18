@@ -49,10 +49,16 @@ const scalaVersionMatch = q
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
+      let packageName = 'org.scala-lang:scala-library';
+
+      if (ctx.scalaVersion.startsWith('3')) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
       const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
+        packageName,
         currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
