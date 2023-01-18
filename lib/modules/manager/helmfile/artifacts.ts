@@ -39,10 +39,11 @@ export async function updateArtifacts({
   const lockFileName = getSiblingFileName(packageFileName, 'helmfile.lock');
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
 
-  if (!existingLockFileContent) {
+  if (is.falsy(existingLockFileContent)) {
     logger.debug('No helmfile.lock found');
     return null;
   }
+
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Helmfile artifacts');
@@ -59,25 +60,21 @@ export async function updateArtifacts({
     await helmCommands(execOptions, packageFileName);
     logger.debug('Returning updated Helmfile artifacts');
 
-    const fileChanges: UpdateArtifactsResult[] = [];
-
-    if (is.truthy(existingLockFileContent)) {
-      const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
-      const isLockFileChanged = existingLockFileContent !== newHelmLockContent;
-      if (isLockFileChanged) {
-        fileChanges.push({
-          file: {
-            type: 'addition',
-            path: lockFileName,
-            contents: newHelmLockContent,
-          },
-        });
-      } else {
-        logger.debug('helmfile.lock is unchanged');
-      }
+    const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
+    if (existingLockFileContent === newHelmLockContent) {
+      logger.debug('helmfile.lock is unchanged');
+      return null;
     }
 
-    return fileChanges.length > 0 ? fileChanges : null;
+    return [
+      {
+        file: {
+          type: 'addition',
+          path: lockFileName,
+          contents: newHelmLockContent,
+        },
+      },
+    ];
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
