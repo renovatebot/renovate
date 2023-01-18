@@ -1,4 +1,4 @@
-name: Questions & Answers 
+name: Questions & Answers
 description: Ask the community for help.
 body:
   - type: dropdown
@@ -74,8 +74,8 @@ body:
   - type: textarea
     id: describe-what-you-tried
     attributes:
-      label: What you've tried so far.
-      description: 'Tell us what you've tried so far, what worked, what didn't work, and so on.'
+      label: What you tried so far.
+      description: 'Tell us what you tried so far, what worked, what did not work, and so on.'
     validations:
       required: true
 

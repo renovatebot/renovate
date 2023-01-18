@@ -4,7 +4,7 @@ body:
   - type: dropdown
     id: type-of-discussion
     attributes:
-      label: Type of discussion
+      label: Type of discussion.
       description: Are you proposing an idea, or do you just want to chat?
       options:
         - I'm proposing an idea

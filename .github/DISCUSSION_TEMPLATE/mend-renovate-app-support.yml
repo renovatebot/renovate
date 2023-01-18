@@ -31,7 +31,7 @@ body:
   - type: textarea
     id: debug-logs
     attributes:
-      label: Relevant debug logs
+      label: Relevant debug logs.
       description: |
         Log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
         Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
