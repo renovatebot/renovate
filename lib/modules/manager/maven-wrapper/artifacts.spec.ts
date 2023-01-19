@@ -277,6 +277,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
 
     expect(execSnapshots).toMatchObject([
+      { cmd: 'install-tool java 17.0.0' },
       {
         cmd: './mvnw wrapper:wrapper',
         options: {
