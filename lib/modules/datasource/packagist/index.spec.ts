@@ -53,30 +53,6 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toBeNull();
     });
 
-    it('supports plain packages', async () => {
-      const packagesOnly = {
-        packages: {
-          'vendor/package-name': {
-            'dev-master': {},
-            '1.0.x-dev': {},
-            '0.0.1': {},
-            '1.0.0': {},
-          },
-        },
-      };
-      httpMock
-        .scope('https://composer.renovatebot.com')
-        .get('/packages.json')
-        .reply(200, packagesOnly);
-      const res = await getPkgReleases({
-        ...config,
-        datasource,
-        versioning,
-        depName: 'vendor/package-name',
-      });
-      expect(res).toMatchSnapshot();
-    });
-
     it('handles timeouts', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')
@@ -146,7 +122,7 @@ describe('modules/datasource/packagist/index', () => {
         packages: [],
         includes: {
           'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
-            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
+            sha256: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
           },
         },
       };

@@ -144,3 +144,80 @@ export function parsePackagesResponses(
 
   return result;
 }
+
+const RegistryFile = z.object({
+  key: z.string(),
+  sha256: z.string(),
+});
+export type RegistryFile = z.infer<typeof RegistryFile>;
+
+const RegistryMetaFile = z.object({
+  sha256: z.string().nullable(),
+});
+type RegistryMetaFile = z.infer<typeof RegistryMetaFile>;
+
+const RegistryMetaFiles = z
+  .record(RegistryMetaFile.nullable().catch(null))
+  .transform((obj) => {
+    const result: Record<string, RegistryMetaFile> = {};
+    for (const [key, val] of Object.entries(obj)) {
+      if (val !== null) {
+        result[key] = val;
+      }
+    }
+    return result;
+  });
+
+export const RegistryMeta = z
+  .object({
+    ['includes']: RegistryMetaFiles.transform((obj): RegistryFile[] => {
+      const result: RegistryFile[] = [];
+      for (const [name, { sha256 }] of Object.entries(obj)) {
+        if (sha256) {
+          const key = name.replace(sha256, '%hash%');
+          result.push({ key, sha256 });
+        }
+      }
+      return result;
+    })
+      .nullable()
+      .catch(null),
+    ['providers']: RegistryMetaFiles.transform((obj) => {
+      const result: Record<string, string | null> = {};
+      for (const [key, { sha256 }] of Object.entries(obj)) {
+        result[key] = sha256;
+      }
+      return result;
+    }).catch({}),
+    ['provider-includes']: RegistryMetaFiles.transform(
+      (obj): RegistryFile[] => {
+        const result: RegistryFile[] = [];
+        for (const [key, { sha256 }] of Object.entries(obj)) {
+          if (sha256) {
+            result.push({ key, sha256 });
+          }
+        }
+        return result;
+      }
+    )
+      .nullable()
+      .catch(null),
+    ['providers-url']: z.string().nullable().catch(null),
+    ['providers-lazy-url']: z.string().optional().nullable().catch(null),
+  })
+  .transform(
+    ({
+      ['includes']: includesFiles,
+      ['providers']: providerPackages,
+      ['provider-includes']: files,
+      ['providers-url']: providersUrl,
+      ['providers-lazy-url']: providersLazyUrl,
+    }) => ({
+      includesFiles,
+      providerPackages,
+      files,
+      providersUrl,
+      providersLazyUrl,
+    })
+  );
+export type RegistryMeta = z.infer<typeof RegistryMeta>;
