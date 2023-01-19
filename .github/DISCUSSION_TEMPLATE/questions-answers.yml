@@ -1,5 +1,3 @@
-name: Questions & Answers
-description: Ask the community for help.
 body:
   - type: dropdown
     id: how-are-you-running-renovate
