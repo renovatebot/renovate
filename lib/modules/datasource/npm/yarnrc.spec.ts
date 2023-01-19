@@ -61,8 +61,32 @@ npmScopes:
       });
     });
 
-    it('ignores malformed file', () => {
-      const res = loadConfigFromYarnrcYml(`not a config`);
+    it.each([
+      [
+        'malformed json',
+        `npmRegistryServer: https://private.example.com/npm
+      invalidIndent: true
+      `,
+      ],
+      ['npmRegistryServer not a string', 'npmRegistryServer: 42'],
+      ['npmScopes not an object', 'npmScopes: 42'],
+      [
+        'npmScopes/foo not an object',
+        `
+npmScopes:
+  foo: 42
+      `,
+      ],
+      [
+        'npmScopes/foo/npmRegistryServer not a string',
+        `
+npmScopes:
+  foo:
+    npmRegistryServer: 42
+      `,
+      ],
+    ])('ignores invalid file (%s)', (_, yarnrcYml) => {
+      const res = loadConfigFromYarnrcYml(yarnrcYml);
 
       expect(res).toBeNull();
     });
