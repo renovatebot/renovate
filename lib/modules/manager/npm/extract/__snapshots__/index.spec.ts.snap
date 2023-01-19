@@ -1151,33 +1151,33 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
 `;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() reads config .yarnrc.yml when config.npmrc is merged 1`] = `
-Object {
-  "constraints": Object {},
-  "deps": Array [
-    Object {
+{
+  "constraints": {},
+  "deps": [
+    {
       "currentValue": "7.0.0",
       "datasource": "npm",
       "depName": "@babel/core",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://registry.babel.com",
       ],
     },
-    Object {
+    {
       "currentValue": "1.21.0",
       "datasource": "npm",
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
+      "registryUrls": [
         "https://registry.example.com",
       ],
     },
   ],
   "lernaClient": undefined,
   "lernaPackages": undefined,
-  "managerData": Object {
+  "managerData": {
     "hasPackageManager": false,
     "lernaJsonFile": undefined,
     "yarnZeroInstall": false,
@@ -1186,7 +1186,6 @@ Object {
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
   "packageJsonName": "renovate",
-  "packageJsonType": "app",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": undefined,
   "yarnLock": undefined,
@@ -1458,9 +1457,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "autoprefixer",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "~1.6.0",
@@ -1468,9 +1464,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "bower",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "13.1.0",
@@ -1478,9 +1471,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "browserify",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "0.9.2",
@@ -1488,9 +1478,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "browserify-css",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "=0.22.0",
@@ -1498,9 +1485,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "cheerio",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.21.0",
@@ -1508,9 +1492,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "config",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "depName": "enabled",
@@ -1524,9 +1505,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "angular",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.5.8",
@@ -1534,9 +1512,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "angular-touch",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.5.8",
@@ -1544,9 +1519,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "angular-sanitize",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "4.0.0-beta.1",
@@ -1554,9 +1526,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "@angular/core",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.21.0",
@@ -1564,9 +1533,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
       "depName": "config",
       "depType": "resolutions",
       "prettyDepType": "resolutions",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "8.0.0",
@@ -1577,9 +1543,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
         "key": "**/@angular/cli",
       },
       "prettyDepType": "resolutions",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.33.0",
@@ -1590,9 +1553,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
         "key": "**/angular",
       },
       "prettyDepType": "resolutions",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
     {
       "currentValue": "1.0.0",
@@ -1603,9 +1563,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
         "key": "config/glob",
       },
       "prettyDepType": "resolutions",
-      "registryUrls": Array [
-        "https://registry.npmjs.org",
-      ],
     },
   ],
   "lernaClient": undefined,
