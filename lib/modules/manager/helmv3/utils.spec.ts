@@ -78,8 +78,7 @@ describe('modules/manager/helmv3/utils', () => {
     });
 
     it('return false if repository is undefined', () => {
-      // TODO #7154
-      const repository = isOCIRegistry(undefined as never);
+      const repository = isOCIRegistry(undefined);
       expect(repository).toBeFalse();
     });
   });
