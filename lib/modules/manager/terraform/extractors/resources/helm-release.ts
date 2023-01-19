@@ -7,8 +7,6 @@ import type { PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 import { checkIfStringIsPath } from '../../util';
 
-const ociRegex = regEx(/^oci:\/\//);
-
 export class HelmReleaseExtractor extends DependencyExtractor {
   getCheckList(): string[] {
     return [`"helm_release"`];
