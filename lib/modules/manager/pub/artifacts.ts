@@ -46,7 +46,6 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug(`Updating ${lockFileName}`);
 
     const isFlutter = newPackageFileContent.includes('sdk: flutter');
     const toolName = isFlutter ? 'flutter' : 'dart';
@@ -81,10 +80,8 @@ export async function updateArtifacts({
     await exec(cmd, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (oldLockFileContent === newLockFileContent) {
-      logger.debug(`${lockFileName} is unchanged`);
       return null;
     }
-    logger.debug(`Returning updated ${lockFileName}`);
     return [
       {
         file: {
