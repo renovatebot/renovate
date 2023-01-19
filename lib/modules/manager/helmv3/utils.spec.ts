@@ -73,8 +73,7 @@ describe('modules/manager/helmv3/utils', () => {
 
   describe('.isOCIRegistry()', () => {
     it('return false if repository is null', () => {
-      // TODO #7154
-      const repository = isOCIRegistry(null as never);
+      const repository = isOCIRegistry(null);
       expect(repository).toBeFalse();
     });
 
