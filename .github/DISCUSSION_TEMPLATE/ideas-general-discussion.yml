@@ -1,5 +1,3 @@
-name: Ideas & General Discussion
-description: Chat about anything else here.
 body:
   - type: dropdown
     id: type-of-discussion
