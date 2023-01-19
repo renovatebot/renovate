@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -72,8 +73,16 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && groupLine !== 'end') {
         lineNumber += 1;
         groupLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(groupLine)) {
+          logger.warn(
+            { content, fileName, type: 'groupLine' },
+            'Bundler parsing error'
+          );
+          groupLine = 'end';
+        }
         if (groupLine !== 'end') {
-          groupContent += formatContent(groupLine || '');
+          groupContent += formatContent(groupLine);
         }
       }
       const groupRes = await extractPackageFile(groupContent);
@@ -103,8 +112,11 @@ export async function extractPackageFile(
           lineNumber += 1;
           sourceLine = lines[lineNumber];
           // istanbul ignore if
-          if (sourceLine === null || sourceLine === undefined) {
-            logger.info({ content, fileName }, 'Undefined sourceLine');
+          if (!is.string(sourceLine)) {
+            logger.warn(
+              { content, fileName, type: 'sourceLine' },
+              'Bundler parsing error'
+            );
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {
@@ -134,6 +146,14 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && platformsLine !== 'end') {
         lineNumber += 1;
         platformsLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(platformsLine)) {
+          logger.warn(
+            { content, fileName, type: 'platformsLine' },
+            'Bundler parsing error'
+          );
+          platformsLine = 'end';
+        }
         if (platformsLine !== 'end') {
           platformsContent += formatContent(platformsLine);
         }
@@ -159,6 +179,14 @@ export async function extractPackageFile(
       while (lineNumber < lines.length && ifLine !== 'end') {
         lineNumber += 1;
         ifLine = lines[lineNumber];
+        // istanbul ignore if
+        if (!is.string(ifLine)) {
+          logger.warn(
+            { content, fileName, type: 'ifLine' },
+            'Bundler parsing error'
+          );
+          ifLine = 'end';
+        }
         if (ifLine !== 'end') {
           ifContent += formatContent(ifLine);
         }

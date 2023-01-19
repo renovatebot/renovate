@@ -22,6 +22,7 @@ import type {
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
+import { isDockerDigest } from '../../../util/string';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
@@ -1018,7 +1019,7 @@ export class DockerDatasource extends Datasource {
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
-      if (currentDigest) {
+      if (currentDigest && isDockerDigest(currentDigest)) {
         architecture = await this.getImageArchitecture(
           registryHost,
           dockerRepository,
