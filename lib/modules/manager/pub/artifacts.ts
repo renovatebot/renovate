@@ -32,7 +32,7 @@ export async function updateArtifacts({
   logger.debug(`pub.updateArtifacts(${packageFileName})`);
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
-  if (!is.nonEmptyArray(updatedDeps) && !isLockFileMaintenance) {
+  if (is.emptyArray(updatedDeps) && !isLockFileMaintenance) {
     logger.debug('No updated pub deps - returning null');
     return null;
   }
