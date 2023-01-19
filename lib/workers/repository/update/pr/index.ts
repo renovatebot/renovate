@@ -73,7 +73,7 @@ export function updatePrDebugData(
   };
 }
 
-const hasNotIgnoredReviewers = (pr: Pr, config: BranchConfig): boolean => {
+function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
   if (
     is.nonEmptyArray(config.ignoreReviewers) &&
     is.nonEmptyArray(pr.reviewers)
@@ -85,7 +85,7 @@ const hasNotIgnoredReviewers = (pr: Pr, config: BranchConfig): boolean => {
     );
   }
   return pr.reviewers ? pr.reviewers.length > 0 : false;
-};
+}
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(

@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
