@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../../../../util/regex';
 import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
 import { isOCIRegistry } from '../../../helmv3/utils';
