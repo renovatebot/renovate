@@ -14,6 +14,7 @@ jest.mock('../../../util/git');
 jest.spyOn(os, 'platform').mockImplementation(() => 'darwin');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
+process.env.CONTAINERBASE = 'true';
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
