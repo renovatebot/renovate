@@ -426,8 +426,6 @@ export async function syncGit(): Promise<void> {
       const emptyDirAndClone = async (): Promise<void> => {
         await fs.emptyDir(localDir);
         await git.clone(config.url, '.', opts);
-        // unset hooks to avoid post-checkout hooks, etc.
-        await git.raw(['config', '--unset', 'core.hooksPath']);
       };
       await gitRetry(() => emptyDirAndClone());
     } catch (err) /* istanbul ignore next */ {
