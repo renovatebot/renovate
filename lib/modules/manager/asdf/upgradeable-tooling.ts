@@ -42,7 +42,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/beardix/asdf-argocd',
     config: {
       datasource: GithubReleasesDatasource.id,
-      packageName: 'argocd',
+      packageName: 'argoproj/argo-cd',
       versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
