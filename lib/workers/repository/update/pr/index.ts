@@ -311,6 +311,7 @@ export async function ensurePr(
       ) {
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        setPrCache(branchName, prFingerprint);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -455,5 +456,3 @@ export async function ensurePr(
   }
   return { type: 'without-pr', prBlockedBy: 'Error' };
 }
-
-export { generatePrFingerprintConfig };
