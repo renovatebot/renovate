@@ -214,34 +214,56 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
-    it('reads config .yarnrc.yml when config.npmrc is merged', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
-        if (fileName === '.yarnrc.yml') {
-          return `npmRegistryServer: https://registry.example.com
-npmScopes:
-  babel:
-    npmRegistryServer: https://registry.babel.com`;
-        }
-        return null;
+    describe('yarnrc support', () => {
+      it('reads .yarnrc.yml', async () => {
+        fs.readLocalFile = jest.fn((fileName) => {
+          if (fileName === '.yarnrc.yml') {
+            return 'npmRegistryServer: https://registry.example.com';
+          }
+          return null;
+        });
+        const res = await npmExtract.extractPackageFile(
+          input02Content,
+          'package.json',
+          {}
+        );
+        expect(
+          res?.deps.flatMap((dep) => dep.registryUrls)
+        ).toBeArrayIncludingOnly(['https://registry.example.com']);
       });
-      const res = await npmExtract.extractPackageFile(
-        input02Content,
-        'package.json',
-        { npmrcMerge: true }
-      );
-      expect(res).toMatchSnapshot({
-        deps: [
-          {
-            depName: '@babel/core',
-            currentValue: '7.0.0',
-            registryUrls: ['https://registry.babel.com'],
-          },
-          {
-            depName: 'config',
-            currentValue: '1.21.0',
-            registryUrls: ['https://registry.example.com'],
-          },
-        ],
+
+      it('ignores .yarnrc.yml when config.npmrc is defined and npmrcMerge=false', async () => {
+        fs.readLocalFile = jest.fn((fileName) => {
+          if (fileName === '.yarnrc.yml') {
+            return 'npmRegistryServer: https://registry.example.com';
+          }
+          return null;
+        });
+        const res = await npmExtract.extractPackageFile(
+          input02Content,
+          'package.json',
+          { npmrc: 'something', npmrcMerge: false }
+        );
+        expect(
+          res?.deps.flatMap((dep) => dep.registryUrls)
+        ).toBeArrayIncludingOnly([undefined]);
+      });
+
+      it('reads .yarnrc.yml when config.npmrc is defined and npmrcMerge=true', async () => {
+        fs.readLocalFile = jest.fn((fileName) => {
+          if (fileName === '.yarnrc.yml') {
+            return 'npmRegistryServer: https://registry.example.com';
+          }
+          return null;
+        });
+        const res = await npmExtract.extractPackageFile(
+          input02Content,
+          'package.json',
+          { npmrc: 'something', npmrcMerge: true }
+        );
+        expect(
+          res?.deps.flatMap((dep) => dep.registryUrls)
+        ).toBeArrayIncludingOnly(['https://registry.example.com']);
       });
     });
 

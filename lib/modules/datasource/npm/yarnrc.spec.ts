@@ -38,27 +38,36 @@ describe('modules/datasource/npm/yarnrc', () => {
   });
 
   describe('loadConfigFromYarnrcYml()', () => {
-    it('reads valid file', () => {
-      const res = loadConfigFromYarnrcYml(
+    it.each([
+      [
+        'default registry only',
+        'npmRegistryServer: https://private.example.com/npm',
+        {
+          npmRegistryServer: 'https://private.example.com/npm',
+        },
+        'multiple scopes',
         `npmRegistryServer: https://private.example.com/npm
 npmScopes:
   foo:
     npmRegistryServer: https://private.example.com/npm-foo
   bar:
-    npmRegistryServer: https://private.example.com/npm-bar`
-      );
-
-      expect(res).toEqual({
-        npmRegistryServer: 'https://private.example.com/npm',
-        npmScopes: {
-          foo: {
-            npmRegistryServer: 'https://private.example.com/npm-foo',
-          },
-          bar: {
-            npmRegistryServer: 'https://private.example.com/npm-bar',
+    npmRegistryServer: https://private.example.com/npm-bar`,
+        {
+          npmRegistryServer: 'https://private.example.com/npm',
+          npmScopes: {
+            foo: {
+              npmRegistryServer: 'https://private.example.com/npm-foo',
+            },
+            bar: {
+              npmRegistryServer: 'https://private.example.com/npm-bar',
+            },
           },
         },
-      });
+      ],
+    ])('reads valid file (%s)', (_, yarnrcYml, expected) => {
+      const res = loadConfigFromYarnrcYml(yarnrcYml);
+
+      expect(res).toEqual(expected);
     });
 
     it.each([

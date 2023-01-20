@@ -22,17 +22,34 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
     logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     return null;
   }
+
+  function areScopesValid(scopeEntries: any): boolean {
+    if (is.nullOrUndefined(scopeEntries)) {
+      return true;
+    }
+    if (!is.plainObject(scopeEntries)) {
+      return false;
+    }
+    const scopeValues = Object.values(scopeEntries);
+    if (scopeValues.some((scopeValue) => !is.plainObject(scopeValue))) {
+      return false;
+    }
+    if (
+      scopeValues.some(
+        (scopeValue: any) =>
+          !is.nullOrUndefined(scopeValue.npmRegistryServer) &&
+          !is.string(scopeValue.npmRegistryServer)
+      )
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   if (
     !is.plainObject(yarnConfig) ||
     !is.string(yarnConfig.npmRegistryServer) ||
-    !is.plainObject(yarnConfig.npmScopes) ||
-    Object.values(yarnConfig.npmScopes).some(
-      (npmScope) => !is.plainObject(npmScope)
-    ) ||
-    Object.values(yarnConfig.npmScopes).some(
-      (npmScope) =>
-        is.plainObject(npmScope) && !is.string(npmScope.npmRegistryServer)
-    )
+    !areScopesValid(yarnConfig.npmScopes)
   ) {
     logger.warn({ yarnrcYml }, `Malformed yarnrc file`);
     return null;

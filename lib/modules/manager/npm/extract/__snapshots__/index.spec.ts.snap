@@ -1150,48 +1150,6 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() reads config .yarnrc.yml when config.npmrc is merged 1`] = `
-{
-  "constraints": {},
-  "deps": [
-    {
-      "currentValue": "7.0.0",
-      "datasource": "npm",
-      "depName": "@babel/core",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-      "registryUrls": [
-        "https://registry.babel.com",
-      ],
-    },
-    {
-      "currentValue": "1.21.0",
-      "datasource": "npm",
-      "depName": "config",
-      "depType": "dependencies",
-      "prettyDepType": "dependency",
-      "registryUrls": [
-        "https://registry.example.com",
-      ],
-    },
-  ],
-  "lernaClient": undefined,
-  "lernaPackages": undefined,
-  "managerData": {
-    "hasPackageManager": false,
-    "lernaJsonFile": undefined,
-    "yarnZeroInstall": false,
-  },
-  "npmLock": undefined,
-  "npmrc": undefined,
-  "packageFileVersion": "1.0.0",
-  "packageJsonName": "renovate",
-  "pnpmShrinkwrap": undefined,
-  "skipInstalls": undefined,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
-}
-`;
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 {
