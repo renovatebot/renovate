@@ -1,5 +1,5 @@
 import type { RangeConfig } from '../types';
-import { getRangeStrategy } from './range';
+import { getRangeStrategy } from '.';
 
 describe('modules/manager/swift/range', () => {
   describe('getRangeStrategy()', () => {

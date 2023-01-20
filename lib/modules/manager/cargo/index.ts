@@ -3,12 +3,12 @@ import { CrateDatasource } from '../../datasource/crate';
 import * as cargoVersioning from '../../versioning/cargo';
 import { updateArtifacts } from './artifacts';
 import { extractPackageFile } from './extract';
-import { getRangeStrategy } from './range';
+export { getRangeStrategy } from './range';
 
 export const language: ProgrammingLanguage = 'rust';
 export const supportsLockFileMaintenance = true;
 
-export { extractPackageFile, getRangeStrategy, updateArtifacts };
+export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',

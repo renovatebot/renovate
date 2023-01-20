@@ -1,9 +1,9 @@
 import { DockerDatasource } from '../../datasource/docker';
 import { OrbDatasource } from '../../datasource/orb';
 import { extractPackageFile } from './extract';
-import type { getRangeStrategy } from './range';
+export { getRangeStrategy } from './range';
 
-export { extractPackageFile, getRangeStrategy };
+export { extractPackageFile };
 
 export const displayName = 'CircleCI';
 export const url = 'https://circleci.com/docs/configuration-reference';
