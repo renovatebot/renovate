@@ -87,7 +87,7 @@ describe('workers/repository/update/pr/index', () => {
           { pr: pr.number, prTitle },
           'PR created'
         );
-        expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('aborts PR creation once limit is exceeded', async () => {
@@ -100,6 +100,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'RateLimited' });
         expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('ignores PR limits on vulnerability alert', async () => {
@@ -110,6 +111,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('creates rollback PR', async () => {
@@ -119,6 +121,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(logger.logger.info).toHaveBeenCalledWith('Creating Rollback PR');
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('skips PR creation due to non-green branch check', async () => {
@@ -130,6 +133,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
         });
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('creates PR for green branch checks', async () => {
@@ -140,6 +144,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('skips PR creation for unapproved dependencies', async () => {
@@ -151,6 +156,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'without-pr',
           prBlockedBy: 'NeedsApproval',
         });
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('skips PR creation before prNotPendingHours is hit', async () => {
@@ -170,6 +176,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
         });
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('skips PR creation due to stabilityStatus', async () => {
@@ -189,6 +196,7 @@ describe('workers/repository/update/pr/index', () => {
           type: 'without-pr',
           prBlockedBy: 'AwaitingTests',
         });
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('creates PR after prNotPendingHours is hit', async () => {
@@ -206,6 +214,7 @@ describe('workers/repository/update/pr/index', () => {
         });
 
         expect(res).toEqual({ type: 'with-pr', pr });
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       describe('Error handling', () => {
@@ -216,6 +225,7 @@ describe('workers/repository/update/pr/index', () => {
           const res = await ensurePr(config);
 
           expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'Error' });
+          expect(prCache.setPrCache).not.toHaveBeenCalled();
         });
 
         it('handles error for PR that already exists', async () => {
@@ -232,6 +242,7 @@ describe('workers/repository/update/pr/index', () => {
           expect(logger.logger.warn).toHaveBeenCalledWith(
             'A pull requests already exists'
           );
+          expect(prCache.setPrCache).not.toHaveBeenCalled();
         });
 
         it('deletes branch on 502 error', async () => {
@@ -242,6 +253,7 @@ describe('workers/repository/update/pr/index', () => {
           const res = await ensurePr(config);
 
           expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'Error' });
+          expect(prCache.setPrCache).not.toHaveBeenCalled();
           expect(git.deleteBranch).toHaveBeenCalledWith('renovate-branch');
         });
       });
@@ -261,6 +273,7 @@ describe('workers/repository/update/pr/index', () => {
           { pr: changedPr.number, prTitle },
           `PR updated`
         );
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('updates PR due to body change', async () => {
@@ -275,6 +288,11 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(logger.logger.info).toHaveBeenCalledWith(
+          { pr: changedPr.number, prTitle },
+          `PR updated`
+        );
       });
 
       it('ignores reviewable content ', async () => {
@@ -284,6 +302,7 @@ describe('workers/repository/update/pr/index', () => {
           '<!-- Reviewable:start -->something<!-- Reviewable:end -->';
         const changedPr: Pr = {
           ...pr,
+          displayNumber: 'PR1',
           bodyStruct: getPrBodyStruct(`${body}${reviewableContent}`),
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
@@ -293,6 +312,10 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR1 does not need updating'
+        );
       });
     });
 
@@ -364,6 +387,7 @@ describe('workers/repository/update/pr/index', () => {
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
       });
 
       it('adds assignees for PR automerge with red status', async () => {
@@ -384,6 +408,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(participants.addParticipants).toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('skips branch automerge and forces PR creation due to artifact errors', async () => {
@@ -399,6 +424,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
         expect(participants.addParticipants).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('skips branch automerge and forces PR creation due to prNotPendingHours exceeded', async () => {
@@ -419,6 +445,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalled();
       });
 
       it('automerges branch when prNotPendingHours are not exceeded', async () => {
@@ -720,7 +747,17 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith('PR cache not found');
       });
 
-      it('fetches changelogs when pr cache does not match ', async () => {
+      it('does not log when cache is disabled and pr-cache is absent', async () => {
+        config.repositoryCache = 'disabled';
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        prCache.getPrCache.mockReturnValueOnce(null);
+        await ensurePr(config);
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          'PR cache not found'
+        );
+      });
+
+      it('logs when pr cache does not match', async () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
@@ -728,13 +765,17 @@ describe('workers/repository/update/pr/index', () => {
           lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        await ensurePr(config);
+        const res = await ensurePr(config);
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR fingerprints mismatch, processing PR'
         );
       });
 
-      it('fetches changelogs when pr cache matches but pr was edited within 24 hours', async () => {
+      it('logs when pr cache matches but pr was edited within 24 hours', async () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
@@ -748,7 +789,7 @@ describe('workers/repository/update/pr/index', () => {
         );
       });
 
-      it('fetches changelogs when pr cache matches but lastEdited date string is invalid', async () => {
+      it('logs when pr cache matches but lastEdited date string is invalid', async () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
@@ -770,7 +811,11 @@ describe('workers/repository/update/pr/index', () => {
           lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        await ensurePr(config);
+        const res = await ensurePr(config);
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
