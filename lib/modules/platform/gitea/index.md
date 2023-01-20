@@ -1,8 +1,7 @@
-# Gitea
+# Gitea and Forgejo
 
-Renovate uses modern Git upload filters to suppress large blob downloads.
-For Gitea you need to manually enable upload filters.
-Read the official [Gitea docs](https://docs.gitea.io/en-us/clone-filters/) for more information.
+Renovate supports [Gitea](https://gitea.io) and the new fork [Forgejo](https://forgejo.org).
+Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
 
 ## Authentication
 
