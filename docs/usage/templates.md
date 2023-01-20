@@ -1,4 +1,4 @@
----
+Encode URI---
 title: Template fields
 description: Explain Renovate template fields
 ---
