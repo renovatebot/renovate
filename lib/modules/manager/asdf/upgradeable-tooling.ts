@@ -38,6 +38,15 @@ const hugoDefinition: ToolingDefinition = {
 };
 
 export const upgradeableTooling: Record<string, ToolingDefinition> = {
+  argocd: {
+    asdfPluginUrl: 'https://github.com/beardix/asdf-argocd',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'argocd',
+      versioning: semverVersioning.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   awscli: {
     asdfPluginUrl: 'https://github.com/MetricMike/asdf-awscli',
     config: {
