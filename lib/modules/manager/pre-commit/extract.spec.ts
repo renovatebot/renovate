@@ -95,6 +95,9 @@ describe('modules/manager/pre-commit/extract', () => {
     });
 
     it('can handle private git repos', () => {
+      // hostType=github
+      hostRules.find.mockReturnValue({});
+      // hostType=gitlab
       hostRules.find.mockReturnValue({ token: 'value' });
       const result = extractPackageFile(enterpriseGitPrecommitConfig, filename);
       expect(result).toEqual({
