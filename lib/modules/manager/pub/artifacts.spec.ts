@@ -19,6 +19,7 @@ process.env.BUILDPACK = 'true';
 const lockFile = 'pubspec.lock';
 const oldLockFileContent = 'Old pubspec.lock';
 const newLockFileContent = 'New pubspec.lock';
+const depName = 'depName';
 
 const datasource = mocked(_datasource);
 
@@ -32,7 +33,7 @@ const config: UpdateArtifactsConfig = {};
 
 const updateArtifact: UpdateArtifact = {
   packageFileName: 'pubspec.yaml',
-  updatedDeps: [{ depName: 'dep1' }],
+  updatedDeps: [{ depName }],
   newPackageFileContent: '',
   config,
 };
@@ -81,7 +82,7 @@ describe('modules/manager/pub/artifacts', () => {
       ).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade`,
+          cmd: `${params.sdk} pub upgrade ${depName}`,
         },
       ]);
     });
@@ -107,7 +108,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: `${params.sdk} pub upgrade`,
+          cmd: `${params.sdk} pub upgrade ${depName}`,
         },
       ]);
     });
@@ -178,7 +179,7 @@ describe('modules/manager/pub/artifacts', () => {
             'bash -l -c "' +
             `install-tool ${params.sdk} 3.3.9` +
             ' && ' +
-            `${params.sdk} pub upgrade` +
+            `${params.sdk} pub upgrade ${depName}` +
             '"',
         },
       ]);
@@ -207,7 +208,7 @@ describe('modules/manager/pub/artifacts', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         { cmd: `install-tool ${params.sdk} 3.3.9` },
-        { cmd: `${params.sdk} pub upgrade` },
+        { cmd: `${params.sdk} pub upgrade ${depName}` },
       ]);
     });
 

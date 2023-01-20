@@ -109,6 +109,7 @@ export async function extractPackageFile(
         { npmrcFileName },
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
+      npmrc = config.npmrc;
     } else {
       npmrc = config.npmrc ?? '';
       if (npmrc.length) {
@@ -135,6 +136,8 @@ export async function extractPackageFile(
       }
       npmrc += repoNpmrc;
     }
+  } else if (is.string(config.npmrc)) {
+    npmrc = config.npmrc;
   }
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
