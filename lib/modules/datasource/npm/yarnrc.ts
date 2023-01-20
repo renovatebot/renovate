@@ -12,6 +12,36 @@ export interface YarnConfig {
   >;
 }
 
+function isRegistryServerValid(registryServer: any): boolean {
+  if (is.nullOrUndefined(registryServer)) {
+    return true;
+  }
+  return is.string(registryServer);
+}
+
+function areScopesValid(scopeEntries: any): boolean {
+  if (is.nullOrUndefined(scopeEntries)) {
+    return true;
+  }
+  if (!is.plainObject(scopeEntries)) {
+    return false;
+  }
+  const scopeValues = Object.values(scopeEntries);
+  if (scopeValues.some((scopeValue) => !is.plainObject(scopeValue))) {
+    return false;
+  }
+  if (
+    scopeValues.some(
+      (scopeValue: any) =>
+        !is.nullOrUndefined(scopeValue.npmRegistryServer) &&
+        !is.string(scopeValue.npmRegistryServer)
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
   let yarnConfig: YarnConfig;
   try {
@@ -21,36 +51,6 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
   } catch (err) {
     logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     return null;
-  }
-
-  function isRegistryServerValid(registryServer: any): boolean {
-    if (is.nullOrUndefined(registryServer)) {
-      return true;
-    }
-    return is.string(yarnConfig.npmRegistryServer);
-  }
-
-  function areScopesValid(scopeEntries: any): boolean {
-    if (is.nullOrUndefined(scopeEntries)) {
-      return true;
-    }
-    if (!is.plainObject(scopeEntries)) {
-      return false;
-    }
-    const scopeValues = Object.values(scopeEntries);
-    if (scopeValues.some((scopeValue) => !is.plainObject(scopeValue))) {
-      return false;
-    }
-    if (
-      scopeValues.some(
-        (scopeValue: any) =>
-          !is.nullOrUndefined(scopeValue.npmRegistryServer) &&
-          !is.string(scopeValue.npmRegistryServer)
-      )
-    ) {
-      return false;
-    }
-    return true;
   }
 
   if (
