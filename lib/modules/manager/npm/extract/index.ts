@@ -143,7 +143,7 @@ export async function extractPackageFile(
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
 
-  let yarnConfig: YarnConfig | null;
+  let yarnConfig: YarnConfig | null = null;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
   if (is.string(repoYarnrcYml)) {
     if (is.string(config.npmrc) && !config.npmrcMerge) {
