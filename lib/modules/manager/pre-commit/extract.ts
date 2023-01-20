@@ -50,7 +50,6 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    ['gitea', GitlabTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
