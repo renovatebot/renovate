@@ -674,8 +674,8 @@ This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
-    This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 

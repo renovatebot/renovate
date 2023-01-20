@@ -71,7 +71,7 @@ If set, Renovate will try to match against `packageName` after trying `depName` 
 
 <!-- prettier-ignore -->
 !!! note
-    For the Forgejo and Gitea platform only.
+    For the Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
@@ -89,7 +89,7 @@ Default value: `alpha`.
 
 <!-- prettier-ignore -->
 !!! note
-    For the Forgejo and Gitea platform only.
+    For the Gitea platform only.
 
 The order method for autodiscover server side repository search.
 

@@ -1,7 +1,6 @@
-# Gitea and Forgejo
+# Gitea
 
-Renovate supports [Gitea](https://gitea.io) and the new fork [Forgejo](https://forgejo.org).
-Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
+Renovate supports [Gitea](https://gitea.io).
 
 ## Authentication
 
@@ -19,6 +18,7 @@ Either the account should have full name and email address set to allow Renovate
 
 - **Adding reviewers to PRs not supported**: Gitea versions older than v1.14.0 do not have the required API.
 - **Setting `platformAutomerge` to use platform-native automerge for PRs not supported**: Gitea versions older than v1.17.0 do not have the required API.
+- **Git upload filters**: On Gitea versions older than v1.17.0 you need to manually enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation
 
