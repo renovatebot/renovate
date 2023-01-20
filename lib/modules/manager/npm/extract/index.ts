@@ -146,14 +146,7 @@ export async function extractPackageFile(
   let yarnConfig: YarnConfig | null = null;
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
   if (is.string(repoYarnrcYml)) {
-    if (is.string(config.npmrc) && !config.npmrcMerge) {
-      logger.debug(
-        { yarnrcYmlFileName },
-        'Repo .yarnrc.yml file is ignored due to config.npmrc with config.npmrcMerge=false'
-      );
-    } else {
-      yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
-    }
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
   }
 
   let lernaJsonFile: string | undefined;

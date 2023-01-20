@@ -224,57 +224,21 @@ describe('modules/manager/npm/extract/index', () => {
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
     });
 
-    describe('yarnrc support', () => {
-      it('reads .yarnrc.yml', async () => {
-        fs.readLocalFile = jest.fn((fileName) => {
-          if (fileName === '.yarnrc.yml') {
-            return 'npmRegistryServer: https://registry.example.com';
-          }
-          return null;
-        });
-        const res = await npmExtract.extractPackageFile(
-          input02Content,
-          'package.json',
-          {}
-        );
-        expect(
-          res?.deps.flatMap((dep) => dep.registryUrls)
-        ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.yarnrc.yml') {
+          return 'npmRegistryServer: https://registry.example.com';
+        }
+        return null;
       });
-
-      it('ignores .yarnrc.yml when config.npmrc is defined and npmrcMerge=false', async () => {
-        fs.readLocalFile = jest.fn((fileName) => {
-          if (fileName === '.yarnrc.yml') {
-            return 'npmRegistryServer: https://registry.example.com';
-          }
-          return null;
-        });
-        const res = await npmExtract.extractPackageFile(
-          input02Content,
-          'package.json',
-          { npmrc: 'something', npmrcMerge: false }
-        );
-        expect(
-          res?.deps.flatMap((dep) => dep.registryUrls)
-        ).toBeArrayIncludingOnly([undefined]);
-      });
-
-      it('reads .yarnrc.yml when config.npmrc is defined and npmrcMerge=true', async () => {
-        fs.readLocalFile = jest.fn((fileName) => {
-          if (fileName === '.yarnrc.yml') {
-            return 'npmRegistryServer: https://registry.example.com';
-          }
-          return null;
-        });
-        const res = await npmExtract.extractPackageFile(
-          input02Content,
-          'package.json',
-          { npmrc: 'something', npmrcMerge: true }
-        );
-        expect(
-          res?.deps.flatMap((dep) => dep.registryUrls)
-        ).toBeArrayIncludingOnly(['https://registry.example.com']);
-      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {}
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls)
+      ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
     it('finds lerna', async () => {
