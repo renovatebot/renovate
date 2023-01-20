@@ -839,7 +839,7 @@ describe('config/presets/index', () => {
           ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
           ':ignoreModulesAndTests',
-          ':autodetectPinVersions',
+          ':autodetectRangeStrategy',
           ':prHourlyLimit2',
           ':prConcurrentLimit10',
           'group:monorepos',
