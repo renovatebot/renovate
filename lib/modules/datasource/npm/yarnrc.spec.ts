@@ -1,3 +1,4 @@
+import { Fixtures } from '../../../../test/fixtures';
 import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
@@ -40,20 +41,13 @@ describe('modules/datasource/npm/yarnrc', () => {
   describe('loadConfigFromYarnrcYml()', () => {
     it.each([
       [
-        'default registry only',
-        'npmRegistryServer: https://private.example.com/npm',
+        'registry-only.yarnrc.yml',
         {
           npmRegistryServer: 'https://private.example.com/npm',
         },
       ],
       [
-        'multiple scopes',
-        `npmRegistryServer: https://private.example.com/npm
-npmScopes:
-  foo:
-    npmRegistryServer: https://private.example.com/npm-foo
-  bar:
-    npmRegistryServer: https://private.example.com/npm-bar`,
+        'multiple-scopes.yarnrc.yml',
         {
           npmRegistryServer: 'https://private.example.com/npm',
           npmScopes: {
@@ -66,40 +60,15 @@ npmScopes:
           },
         },
       ],
-    ])('reads valid file (%s)', (_, yarnrcYml, expected) => {
-      const res = loadConfigFromYarnrcYml(yarnrcYml);
+      ['malformed.yarnrc.yml', null],
+      ['registry-not-a-string.yarnrc.yml', null],
+      ['scoped-registry-not-a-string.yarnrc.yml', null],
+      ['scopes-not-an-object.yarnrc.yml', null],
+      ['single-scope-not-an-object.yarnrc.yml', null],
+    ])('produces expected config (%s)', (yarnrcFile, expectedConfig) => {
+      const config = loadConfigFromYarnrcYml(Fixtures.get(yarnrcFile));
 
-      expect(res).toEqual(expected);
-    });
-
-    it.each([
-      [
-        'malformed json',
-        `npmRegistryServer: https://private.example.com/npm
-      invalidIndent: true
-      `,
-      ],
-      ['npmRegistryServer not a string', 'npmRegistryServer: 42'],
-      ['npmScopes not an object', 'npmScopes: 42'],
-      [
-        'npmScopes/foo not an object',
-        `
-npmScopes:
-  foo: 42
-      `,
-      ],
-      [
-        'npmScopes/foo/npmRegistryServer not a string',
-        `
-npmScopes:
-  foo:
-    npmRegistryServer: 42
-      `,
-      ],
-    ])('ignores invalid file (%s)', (_, yarnrcYml) => {
-      const res = loadConfigFromYarnrcYml(yarnrcYml);
-
-      expect(res).toBeNull();
+      expect(config).toEqual(expectedConfig);
     });
   });
 });

@@ -1,0 +1,3 @@
+npmScopes:
+  foo:
+    npmRegistryServer: 42
