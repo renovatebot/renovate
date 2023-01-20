@@ -26,7 +26,8 @@ describe('util/date', () => {
       const elapsedHours = Math.floor(
         (new Date().getTime() - new Date(Jan1).getTime()) / ONE_HOUR_MS
       );
-      expect(getElapsedHours(Jan1)).toBe(elapsedHours);
+      expect(getElapsedHours(Jan1.toISOString())).toBe(elapsedHours); // ISOstring
+      expect(getElapsedHours(Jan1)).toBe(elapsedHours); // JS Date
     });
 
     it('throws when invalid date is passed', () => {
