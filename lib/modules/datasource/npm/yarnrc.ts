@@ -66,17 +66,17 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
 
 export function resolveRegistryUrl(
   packageName: string,
-  rules: YarnConfig
+  yarnConfig: YarnConfig
 ): string | null {
-  if (rules.npmScopes) {
-    for (const scope in rules.npmScopes) {
+  if (yarnConfig.npmScopes) {
+    for (const scope in yarnConfig.npmScopes) {
       if (packageName.startsWith(`@${scope}`)) {
-        return rules.npmScopes[scope].npmRegistryServer ?? null;
+        return yarnConfig.npmScopes[scope].npmRegistryServer ?? null;
       }
     }
   }
-  if (rules.npmRegistryServer) {
-    return rules.npmRegistryServer;
+  if (yarnConfig.npmRegistryServer) {
+    return yarnConfig.npmRegistryServer;
   }
   return null;
 }
