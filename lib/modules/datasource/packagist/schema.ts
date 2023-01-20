@@ -159,6 +159,8 @@ type RegistryMetaFile = z.infer<typeof RegistryMetaFile>;
 const RegistryMetaFiles = z
   .record(RegistryMetaFile.nullable().catch(null))
   .transform((obj) => {
+    // Remove all null values
+    // TODO: extract as schema utility
     const result: Record<string, RegistryMetaFile> = {};
     for (const [key, val] of Object.entries(obj)) {
       if (val !== null) {
