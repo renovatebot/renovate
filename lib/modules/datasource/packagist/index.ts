@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -199,8 +200,8 @@ export class PackagistDatasource extends Datasource {
         return includesPackages[packageName];
       }
       let pkgUrl: string;
-      if (providersUrl) {
-        const hash = providerPackages[packageName];
+      const hash = providerPackages[packageName];
+      if (providersUrl && !is.undefined(hash)) {
         let url = providersUrl.replace('%package%', packageName);
         if (hash) {
           url = url.replace('%hash%', hash);
