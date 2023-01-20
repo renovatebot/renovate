@@ -23,6 +23,13 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
     return null;
   }
 
+  function isRegistryServerValid(registryServer: any): boolean {
+    if (is.nullOrUndefined(registryServer)) {
+      return true;
+    }
+    return is.string(yarnConfig.npmRegistryServer);
+  }
+
   function areScopesValid(scopeEntries: any): boolean {
     if (is.nullOrUndefined(scopeEntries)) {
       return true;
@@ -48,7 +55,7 @@ export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
 
   if (
     !is.plainObject(yarnConfig) ||
-    !is.string(yarnConfig.npmRegistryServer) ||
+    !isRegistryServerValid(yarnConfig.npmRegistryServer) ||
     !areScopesValid(yarnConfig.npmScopes)
   ) {
     logger.warn({ yarnrcYml }, `Malformed yarnrc file`);

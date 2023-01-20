@@ -45,6 +45,8 @@ describe('modules/datasource/npm/yarnrc', () => {
         {
           npmRegistryServer: 'https://private.example.com/npm',
         },
+      ],
+      [
         'multiple scopes',
         `npmRegistryServer: https://private.example.com/npm
 npmScopes:
