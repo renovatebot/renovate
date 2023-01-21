@@ -839,8 +839,6 @@ describe('config/presets/index', () => {
           ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
           ':ignoreModulesAndTests',
-          ':prHourlyLimit2',
-          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',
