@@ -1,5 +1,5 @@
 import type { RangeConfig } from '../types';
-import { getRangeStrategy } from '.';
+import { getRangeStrategy } from './range';
 
 describe('modules/manager/cargo/range', () => {
   it('returns same if not auto', () => {
@@ -8,7 +8,7 @@ describe('modules/manager/cargo/range', () => {
   });
 
   it('defaults to bump', () => {
-    const config: RangeConfig = { rangeStrategy: 'auto', depType: 'require' };
+    const config: RangeConfig = { rangeStrategy: 'auto' };
     expect(getRangeStrategy(config)).toBe('bump');
   });
 });
