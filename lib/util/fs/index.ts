@@ -28,19 +28,19 @@ export async function readLocalFile(
   fileName: string,
   encoding: 'utf8'
 ): Promise<string | null>;
-export async function readLocalFile(
+export function readLocalFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
     const fileContent = encoding
-      ? await fs.readFile(localFileName, encoding)
-      : await fs.readFile(localFileName);
+      ? fs.readFile(localFileName, encoding)
+      : fs.readFile(localFileName);
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
-    return null;
+    return Promise.resolve(null);
   }
 }
 
@@ -264,13 +264,13 @@ export async function readCacheFile(
 ): Promise<string>;
 export function readCacheFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   const fullPath = ensureCachePath(fileName);
   return encoding ? fs.readFile(fullPath, encoding) : fs.readFile(fullPath);
 }
 
-export function outputCacheFile(file: string, data: unknown): Promise<void> {
+export function outputCacheFile(file: string, data: string): Promise<void> {
   const filePath = ensureCachePath(file);
   return fs.outputFile(filePath, data);
 }
@@ -282,7 +282,7 @@ export async function readSystemFile(
 ): Promise<string>;
 export function readSystemFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
