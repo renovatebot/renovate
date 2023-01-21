@@ -19,6 +19,7 @@ export interface PackagistFile {
 }
 
 export interface AllPackages {
+  packages: Record<string, RegistryFile>;
   providersUrl: string | null;
   providersLazyUrl: string | null;
   providerPackages: Record<string, string | null>;

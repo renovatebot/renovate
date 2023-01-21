@@ -170,20 +170,27 @@ const RegistryMetaFiles = z
     return result;
   });
 
+const RegistryMetaIncludes = RegistryMetaFiles.transform(
+  (obj): RegistryFile[] => {
+    const result: RegistryFile[] = [];
+    for (const [key, { sha256 }] of Object.entries(obj)) {
+      if (sha256) {
+        result.push({ key, sha256 });
+      }
+    }
+    return result;
+  }
+)
+  .nullable()
+  .catch(null);
+
 export const RegistryMeta = z
   .object({
-    ['includes']: RegistryMetaFiles.transform((obj): RegistryFile[] => {
-      const result: RegistryFile[] = [];
-      for (const [name, { sha256 }] of Object.entries(obj)) {
-        if (sha256) {
-          const key = name.replace(sha256, '%hash%');
-          result.push({ key, sha256 });
-        }
-      }
-      return result;
-    })
-      .nullable()
-      .catch(null),
+    ['packages']: z.record(z.record(ComposerRelease)).nullable().catch(null),
+    ['includes']: RegistryMetaIncludes,
+    ['provider-includes']: RegistryMetaIncludes,
+    ['providers-url']: z.string().nullable().catch(null),
+    ['providers-lazy-url']: z.string().optional().nullable().catch(null),
     ['providers']: RegistryMetaFiles.transform((obj) => {
       const result: Record<string, string | null> = {};
       for (const [key, { sha256 }] of Object.entries(obj)) {
@@ -191,30 +198,17 @@ export const RegistryMeta = z
       }
       return result;
     }).catch({}),
-    ['provider-includes']: RegistryMetaFiles.transform(
-      (obj): RegistryFile[] => {
-        const result: RegistryFile[] = [];
-        for (const [key, { sha256 }] of Object.entries(obj)) {
-          if (sha256) {
-            result.push({ key, sha256 });
-          }
-        }
-        return result;
-      }
-    )
-      .nullable()
-      .catch(null),
-    ['providers-url']: z.string().nullable().catch(null),
-    ['providers-lazy-url']: z.string().optional().nullable().catch(null),
   })
   .transform(
     ({
+      ['packages']: packages,
       ['includes']: includesFiles,
       ['providers']: providerPackages,
       ['provider-includes']: files,
       ['providers-url']: providersUrl,
       ['providers-lazy-url']: providersLazyUrl,
     }) => ({
+      packages,
       includesFiles,
       providerPackages,
       files,

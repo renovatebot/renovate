@@ -53,6 +53,30 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).toBeNull();
     });
 
+    it('supports plain packages', async () => {
+      const packagesOnly = {
+        packages: {
+          'vendor/package-name': {
+            'dev-master': { version: 'dev-master' },
+            '1.0.x-dev': { version: '1.0.x-dev' },
+            '0.0.1': { version: '0.0.1' },
+            '1.0.0': { version: '1.0.0' },
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesOnly);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'vendor/package-name',
+      });
+      expect(res).toMatchSnapshot();
+    });
+
     it('handles timeouts', async () => {
       httpMock
         .scope('https://composer.renovatebot.com')

@@ -115,6 +115,7 @@ export class PackagistDatasource extends Datasource {
     }
 
     const {
+      packages,
       providersUrl,
       providersLazyUrl,
       files,
@@ -146,6 +147,7 @@ export class PackagistDatasource extends Datasource {
       }
     }
     const allPackages: AllPackages = {
+      packages: packages as never, // TODO: fix types (#9610)
       providersUrl,
       providersLazyUrl,
       providerPackages,
@@ -191,11 +193,18 @@ export class PackagistDatasource extends Datasource {
         return null;
       }
       const {
+        packages,
         providersUrl,
         providersLazyUrl,
         providerPackages,
         includesPackages,
       } = allPackages;
+      if (packages?.[packageName]) {
+        const dep = PackagistDatasource.extractDepReleases(
+          packages[packageName]
+        );
+        return dep;
+      }
       if (includesPackages?.[packageName]) {
         return includesPackages[packageName];
       }

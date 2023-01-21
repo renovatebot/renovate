@@ -369,6 +369,26 @@ exports[`modules/datasource/packagist/index getReleases supports lazy repositori
 }
 `;
 
+exports[`modules/datasource/packagist/index getReleases supports plain packages 1`] = `
+{
+  "registryUrl": "https://composer.renovatebot.com",
+  "releases": [
+    {
+      "gitRef": "0.0.1",
+      "version": "0.0.1",
+    },
+    {
+      "gitRef": "1.0.x-dev",
+      "version": "1.0.x-dev",
+    },
+    {
+      "gitRef": "1.0.0",
+      "version": "1.0.0",
+    },
+  ],
+}
+`;
+
 exports[`modules/datasource/packagist/index getReleases supports provider-includes 1`] = `
 {
   "homepage": "https://wordpress.org/plugins/1beyt/",
