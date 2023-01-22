@@ -1,9 +1,0 @@
-apiVersion: v1
-name: a-chart
-version: "1"
-# renovate: image=node
-appVersion: 19.4.0
-# renovate: image=python
-appVersion: "3.11.1"
-# renovate: image=postgres
-appVersion: '15.1'
