@@ -187,7 +187,9 @@ export async function updateArtifacts({
       docker: {},
       toolConstraints: [{ toolName: 'python', constraint }],
       preCommands: [
-        `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,
+        `pip install --user ${quote(
+          `poetry${poetryVersion ? `===${poetryVersion}` : ''}`
+        )}`,
       ],
     };
     await exec(cmd, execOptions);
