@@ -17,7 +17,7 @@ FROM node:\${NODE_VERSION}
 ENV PNPM_VERSION="7.25.1"
 
 # renovate: datasource=npm depName=yarn
-ARG YARN_VERSION='3.3.1'
+ENV YARN_VERSION 3.3.1
       `;
 
       const res = await extractPackageFile(
@@ -45,11 +45,11 @@ ENV PNPM_VERSION="7.25.1"
 `,
         },
         {
-          currentValue: "'3.3.1'",
+          currentValue: '3.3.1',
           datasource: 'npm',
           depName: 'yarn',
           replaceString: `# renovate: datasource=npm depName=yarn
-ARG YARN_VERSION='3.3.1'
+ENV YARN_VERSION 3.3.1
 `,
         },
       ]);
