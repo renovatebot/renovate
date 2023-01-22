@@ -16,7 +16,7 @@ export const presets: Record<string, Preset> = {
   },
   githubActionsVersions: {
     description:
-      'Update `_VERSION` environment variables in GitHub Actions files.',
+      'Update `_VERSION` environment variables in GitHub Action files.',
     regexManagers: [
       {
         fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],

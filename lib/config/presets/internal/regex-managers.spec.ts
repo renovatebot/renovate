@@ -71,7 +71,7 @@ ARG YARN_VERSION='3.3.1'
     });
   });
 
-  describe('Update `_VERSION` environment variables in GitHub Actions files', () => {
+  describe('Update `_VERSION` environment variables in GitHub Action files', () => {
     const regexManager = presets['githubActionsVersions'].regexManagers?.[0];
 
     it(`find dependencies in file`, async () => {
