@@ -228,7 +228,7 @@ describe('modules/manager/sbt/extract', () => {
         scalaVersion := "3.1.1"
       `;
 
-      expect(extractPackageFile(content)).toMatchSnapshot({
+      expect(extractPackageFile(content)). toMatchObject({
         deps: [
           {
             packageName: 'org.scala-lang:scala3-library_3',
