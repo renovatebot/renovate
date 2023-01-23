@@ -3,6 +3,7 @@ import type { Ctx } from '../types';
 import {
   cleanupTempVars,
   qConcatExpr,
+  qPropertyAccessIdentifier,
   qStringValue,
   qStringValueAsSymbol,
   qTemplateString,
@@ -14,11 +15,13 @@ import { handleLibraryDep } from './handlers';
 
 const qGroupId = qConcatExpr(
   qTemplateString,
+  qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'groupId'));
 
 const qArtifactId = qConcatExpr(
   qTemplateString,
+  qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
@@ -39,7 +42,13 @@ const qVersionCatalogVersion = q
       endsWith: ')',
       search: q
         .begin<Ctx>()
-        .join(qConcatExpr(qTemplateString, qVariableAccessIdentifier))
+        .join(
+          qConcatExpr(
+            qTemplateString,
+            qPropertyAccessIdentifier,
+            qVariableAccessIdentifier
+          )
+        )
         .end(),
     })
   )

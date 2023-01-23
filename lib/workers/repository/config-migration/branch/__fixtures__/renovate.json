@@ -8,7 +8,7 @@
     ":updateNotScheduled",
     ":automergeDisabled",
     ":maintainLockFilesDisabled",
-    ":autodetectPinVersions",
+    ":autodetectRangeStrategy",
     "group:monorepos",
     "helpers:oddIsUnstablePackages"
   ],
