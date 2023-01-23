@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
@@ -44,7 +45,7 @@ describe('modules/datasource/npm/yarnrc', () => {
         { npmRegistryServer: 'https://npm.example.com' },
       ],
       [
-        `
+        codeBlock`
           npmRegistryServer: https://npm.example.com
           npmScopes:
             foo:
@@ -62,14 +63,14 @@ describe('modules/datasource/npm/yarnrc', () => {
       ['npmRegistryServer: 42', null],
       ['npmScopes: 42', null],
       [
-        `
+        codeBlock`
           npmScopes:
             foo: 42
         `,
         null,
       ],
       [
-        `
+        codeBlock`
           npmScopes:
             foo:
               npmRegistryServer: 42
