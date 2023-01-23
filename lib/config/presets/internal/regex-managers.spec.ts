@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { regexMatches } from '../../../../test/util';
 import { extractPackageFile } from '../../../modules/manager/regex';
 import { presets } from './regex-managers';
@@ -7,17 +8,19 @@ describe('config/presets/internal/regex-managers', () => {
     const regexManager = presets['dockerfileVersions'].regexManagers?.[0];
 
     it(`find dependencies in file`, async () => {
-      const fileContent = `
-# renovate: datasource=docker depName=node versioning=docker
-ARG NODE_VERSION=18
+      const fileContent = codeBlock`
+        # renovate: datasource=docker depName=node versioning=docker
+        ARG NODE_VERSION=18
 
-FROM node:\${NODE_VERSION}
+        FROM node:\${NODE_VERSION}
 
-# renovate: datasource=npm depName=pnpm
-ENV PNPM_VERSION="7.25.1"
+        # renovate: datasource=npm depName=pnpm
+        ENV PNPM_VERSION="7.25.1"
 
-# renovate: datasource=npm depName=yarn
-ENV YARN_VERSION 3.3.1
+        # renovate: datasource=npm depName=yarn
+        ENV YARN_VERSION 3.3.1
+
+        RUN echo "FOO"
       `;
 
       const res = await extractPackageFile(
@@ -31,26 +34,23 @@ ENV YARN_VERSION 3.3.1
           currentValue: '18',
           datasource: 'docker',
           depName: 'node',
-          replaceString: `# renovate: datasource=docker depName=node versioning=docker
-ARG NODE_VERSION=18
-`,
+          replaceString:
+            '# renovate: datasource=docker depName=node versioning=docker\nARG NODE_VERSION=18\n',
           versioning: 'docker',
         },
         {
           currentValue: '7.25.1',
           datasource: 'npm',
           depName: 'pnpm',
-          replaceString: `# renovate: datasource=npm depName=pnpm
-ENV PNPM_VERSION="7.25.1"
-`,
+          replaceString:
+            '# renovate: datasource=npm depName=pnpm\nENV PNPM_VERSION="7.25.1"\n',
         },
         {
           currentValue: '3.3.1',
           datasource: 'npm',
           depName: 'yarn',
-          replaceString: `# renovate: datasource=npm depName=yarn
-ENV YARN_VERSION 3.3.1
-`,
+          replaceString:
+            '# renovate: datasource=npm depName=yarn\nENV YARN_VERSION 3.3.1\n',
         },
       ]);
     });
@@ -75,7 +75,7 @@ ENV YARN_VERSION 3.3.1
     const regexManager = presets['githubActionsVersions'].regexManagers?.[0];
 
     it(`find dependencies in file`, async () => {
-      const fileContent = `
+      const fileContent = codeBlock`
         name: CI
 
         on:
@@ -112,26 +112,23 @@ ENV YARN_VERSION 3.3.1
           currentValue: '18.13.0',
           datasource: 'node',
           depName: 'node',
-          replaceString: `# renovate: datasource=node depName=node versioning=node
-          NODE_VERSION: 18.13.0
-`,
+          replaceString:
+            '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
           versioning: 'node',
         },
         {
           currentValue: '7.25.1',
           datasource: 'npm',
           depName: 'pnpm',
-          replaceString: `# renovate: datasource=npm depName=pnpm
-          PNPM_VERSION: "7.25.1"
-`,
+          replaceString:
+            '# renovate: datasource=npm depName=pnpm\n  PNPM_VERSION: "7.25.1"\n',
         },
         {
           currentValue: '3.3.1',
           datasource: 'npm',
           depName: 'yarn',
-          replaceString: `# renovate: datasource=npm depName=yarn
-          YARN_VERSION: '3.3.1'
-`,
+          replaceString:
+            "# renovate: datasource=npm depName=yarn\n  YARN_VERSION: '3.3.1'\n",
         },
       ]);
     });
@@ -161,17 +158,17 @@ ENV YARN_VERSION 3.3.1
     const regexManager = presets['helmChartYamlAppVersions'].regexManagers?.[0];
 
     it(`find dependencies in file`, async () => {
-      const fileContent = `
-      apiVersion: v1
-      name: a-chart
-      version: "1"
-      # renovate: image=node
-      appVersion: 19.4.0
-      # renovate: image=python
-      appVersion: "3.11.1"
-      # renovate: image=postgres
-      appVersion: '15.1'
-    `;
+      const fileContent = codeBlock`
+        apiVersion: v1
+        name: a-chart
+        version: "1"
+        # renovate: image=node
+        appVersion: 19.4.0
+        # renovate: image=python
+        appVersion: "3.11.1"
+        # renovate: image=postgres
+        appVersion: '15.1'
+      `;
 
       const res = await extractPackageFile(
         fileContent,
@@ -184,22 +181,19 @@ ENV YARN_VERSION 3.3.1
           currentValue: '19.4.0',
           datasource: 'docker',
           depName: 'node',
-          replaceString: `# renovate: image=node
-      appVersion: 19.4.0`,
+          replaceString: '# renovate: image=node\nappVersion: 19.4.0',
         },
         {
           currentValue: '3.11.1',
           datasource: 'docker',
           depName: 'python',
-          replaceString: `# renovate: image=python
-      appVersion: "3.11.1`,
+          replaceString: '# renovate: image=python\nappVersion: "3.11.1',
         },
         {
           currentValue: '15.1',
           datasource: 'docker',
           depName: 'postgres',
-          replaceString: `# renovate: image=postgres
-      appVersion: '15.1`,
+          replaceString: "# renovate: image=postgres\nappVersion: '15.1",
         },
       ]);
     });
