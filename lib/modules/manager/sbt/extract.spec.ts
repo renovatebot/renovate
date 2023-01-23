@@ -223,6 +223,21 @@ describe('modules/manager/sbt/extract', () => {
       });
     });
 
+    it('extracts correct scala library when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.1.1"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.1.1',
+          },
+        ],
+      });
+    });
+
     it('extracts deps when scala version is defined in a variable with ThisBuild scope', () => {
       const content = `
         val ScalaVersion = "2.12.10"
