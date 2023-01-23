@@ -118,39 +118,40 @@ export class PackagistDatasource extends Datasource {
       packages,
       providersUrl,
       providersLazyUrl,
-      files,
-      includesFiles,
-      providerPackages,
+      providerIncludes,
+      includes,
+      providers,
     } = registryMeta;
-    if (files) {
-      const queue = files.map(
-        (file) => (): Promise<PackagistFile> =>
-          this.getPackagistFile(regUrl, file)
-      );
-      const resolvedFiles = await p.all(queue);
-      for (const res of resolvedFiles) {
-        for (const [name, val] of Object.entries(res.providers)) {
-          providerPackages[name] = val.sha256;
-        }
-      }
-    }
+
     const includesPackages: Record<string, ReleaseResult> = {};
-    if (includesFiles) {
-      for (const file of includesFiles) {
+
+    const tasks: (() => Promise<void>)[] = [];
+
+    for (const file of providerIncludes) {
+      tasks.push(async () => {
         const res = await this.getPackagistFile(regUrl, file);
-        if (res.packages) {
-          for (const [key, val] of Object.entries(res.packages)) {
-            const dep = PackagistDatasource.extractDepReleases(val);
-            includesPackages[key] = dep;
-          }
+        for (const [name, val] of Object.entries(res.providers)) {
+          providers[name] = val.sha256;
         }
-      }
+      });
     }
+
+    for (const file of includes) {
+      tasks.push(async () => {
+        const res = await this.getPackagistFile(regUrl, file);
+        for (const [key, val] of Object.entries(res.packages ?? {})) {
+          includesPackages[key] = PackagistDatasource.extractDepReleases(val);
+        }
+      });
+    }
+
+    await p.all(tasks);
+
     const allPackages: AllPackages = {
       packages: packages as never, // TODO: fix types (#9610)
       providersUrl,
       providersLazyUrl,
-      providerPackages,
+      providers,
       includesPackages,
     };
     return allPackages;
@@ -196,7 +197,7 @@ export class PackagistDatasource extends Datasource {
         packages,
         providersUrl,
         providersLazyUrl,
-        providerPackages,
+        providers,
         includesPackages,
       } = allPackages;
       if (packages?.[packageName]) {
@@ -209,7 +210,7 @@ export class PackagistDatasource extends Datasource {
         return includesPackages[packageName];
       }
       let pkgUrl: string;
-      const hash = providerPackages[packageName];
+      const hash = providers[packageName];
       if (providersUrl && !is.undefined(hash)) {
         let url = providersUrl.replace('%package%', packageName);
         if (hash) {
