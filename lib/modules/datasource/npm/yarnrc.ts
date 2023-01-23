@@ -12,14 +12,14 @@ export interface YarnConfig {
   >;
 }
 
-function isRegistryServerValid(registryServer: any): boolean {
+function isRegistryServerValid(registryServer: unknown): boolean {
   if (is.nullOrUndefined(registryServer)) {
     return true;
   }
   return is.string(registryServer);
 }
 
-function areScopesValid(scopeEntries: any): boolean {
+function areScopesValid(scopeEntries: unknown): boolean {
   if (is.nullOrUndefined(scopeEntries)) {
     return true;
   }
@@ -32,7 +32,7 @@ function areScopesValid(scopeEntries: any): boolean {
   }
   if (
     scopeValues.some(
-      (scopeValue: any) =>
+      (scopeValue: unknown) =>
         !is.nullOrUndefined(scopeValue.npmRegistryServer) &&
         !is.string(scopeValue.npmRegistryServer)
     )
