@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/asdf/extract', () => {
@@ -46,7 +47,7 @@ describe('modules/manager/asdf/extract', () => {
 
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
-        `argocd 2.5.4
+        codeBlock`argocd 2.5.4
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
