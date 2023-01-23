@@ -271,6 +271,7 @@ describe('modules/datasource/pypi/index', () => {
           datasource,
           constraints: { python: '2.7' },
           depName: 'doit',
+          releaseConstraintFiltering: 'strict',
         })
       ).toMatchSnapshot();
     });
@@ -518,6 +519,7 @@ describe('modules/datasource/pypi/index', () => {
           constraints: { python: '2.7' },
           ...config,
           depName: 'dj-database-url',
+          releaseConstraintFiltering: 'strict',
         })
       ).toMatchSnapshot();
     });
