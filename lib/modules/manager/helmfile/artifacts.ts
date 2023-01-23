@@ -11,20 +11,13 @@ import {
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-async function helmfileCommand(
-  execOptions: ExecOptions,
-  helmfileYamlPath: string
-): Promise<void> {
-  await exec(`helmfile deps -f ${quote(helmfileYamlPath)}`, execOptions);
-}
-
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  logger.debug(`helmfile.updateArtifacts(${packageFileName})`);
+  logger.trace(`helmfile.updateArtifacts(${packageFileName})`);
 
   const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
   if (
@@ -45,7 +38,6 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    logger.debug('Updating Helmfile artifacts');
     const helmfileToolConstraint: ToolConstraint = {
       toolName: 'helmfile',
       constraint: config.constraints?.helmfile,
@@ -56,8 +48,7 @@ export async function updateArtifacts({
       extraEnv: {},
       toolConstraints: [helmfileToolConstraint],
     };
-    await helmfileCommand(execOptions, packageFileName);
-    logger.debug('Returning updated Helmfile artifacts');
+    await exec(`helmfile deps -f ${quote(packageFileName)}`, execOptions);
 
     const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newHelmLockContent) {

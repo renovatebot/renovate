@@ -116,7 +116,6 @@ describe('modules/manager/helmfile/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeArrayOfSize(1);
     expect(execSnapshots).toMatchObject([
       { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
@@ -143,7 +142,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         newPackageFileContent: helmfileYaml,
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -167,8 +166,8 @@ describe('modules/manager/helmfile/artifacts', () => {
           'renovate/sidecar ' +
           'bash -l -c "' +
           'install-tool helmfile v0.129.0' +
-          ' &&' +
-          ' helmfile deps -f helmfile.yaml' +
+          ' && ' +
+          'helmfile deps -f helmfile.yaml' +
           '"',
       },
     ]);
