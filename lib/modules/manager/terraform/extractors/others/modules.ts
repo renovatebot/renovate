@@ -42,8 +42,7 @@ export class ModuleExtractor extends DependencyExtractor {
           source: moduleElement.source,
         },
       };
-      const massagedDep = this.analyseTerraformModule(dep);
-      dependencies.push(massagedDep);
+      dependencies.push(this.analyseTerraformModule(dep));
     }
     return dependencies;
   }
