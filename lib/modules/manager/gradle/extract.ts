@@ -137,12 +137,18 @@ export async function extractAllPackageFiles(
         };
       }
 
-      dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
+      if (!dep.datasource) {
+        dep.datasource = datasource;
+      }
 
-      if (!dep.depType) {
-        dep.depType = key.startsWith('buildSrc')
-          ? 'devDependencies'
-          : 'dependencies';
+      if (dep.datasource === datasource) {
+        dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
+
+        if (!dep.depType) {
+          dep.depType = key.startsWith('buildSrc')
+            ? 'devDependencies'
+            : 'dependencies';
+        }
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(
