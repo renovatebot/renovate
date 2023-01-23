@@ -1,7 +1,10 @@
-version: 0.149.0
+version: 0.150.0
 dependencies:
-  - name: backstage
-    repository: https://backstage.github.io/charts
-    version: 0.12.0
-digest: sha256:a10ec3e6864c90aa6ac0d8b16bfaa7befc5cab4c9194d8001dcf6ba8bf100c3b
-generated: "2023-01-09T16:48:42.175128+01:00"
+- name: backstage
+  repository: https://backstage.github.io/charts
+  version: 0.12.0
+- name: oauth2-proxy
+  repository: https://oauth2-proxy.github.io/manifests
+  version: 6.8.0
+digest: sha256:8ceea14d17c0f3c108a26ba341c63380e2426db66484d2b2876ab6e636e52af4
+generated: "2023-01-23T12:16:41.881988+01:00"

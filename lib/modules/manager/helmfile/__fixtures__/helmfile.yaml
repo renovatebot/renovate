@@ -2,7 +2,12 @@
 repositories:
   - name: backstage
     url: https://backstage.github.io/charts
+  - name: oauth2-proxy
+    url: https://oauth2-proxy.github.io/manifests
 releases:
   - name: backstage
     chart: backstage/backstage
-    version: "0.12.0"
+    version: 0.12.0
+  - name: oauth-proxy
+    chart: oauth2-proxy/oauth2-proxy
+    version: 6.8.0
