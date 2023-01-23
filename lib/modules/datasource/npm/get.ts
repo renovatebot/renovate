@@ -1,13 +1,22 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
+import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
 import { id } from './common';
-import type { NpmDependency, NpmRelease, NpmResponse } from './types';
+import type {
+  CachedNpmDependency,
+  NpmDependency,
+  NpmRelease,
+  NpmResponse,
+} from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -41,19 +50,6 @@ function getPackageSource(repository: any): PackageSource {
     if (is.nonEmptyString(repository.directory)) {
       res.sourceDirectory = repository.directory;
     }
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const sourceUrlCopy = `${res.sourceUrl}`;
-    const sourceUrlSplit: string[] = sourceUrlCopy.split('/');
-    if (sourceUrlSplit.length > 7 && sourceUrlSplit[2] === 'github.com') {
-      // Massage the repository URL for non-compliant strings for github (see issue #4610)
-      // Remove the non-compliant segments of path, so the URL looks like "<scheme>://<domain>/<vendor>/<repo>"
-      // and add directory to the repository
-      res.sourceUrl = sourceUrlSplit.slice(0, 5).join('/');
-      res.sourceDirectory ||= sourceUrlSplit
-        .slice(7, sourceUrlSplit.length)
-        .join('/');
-    }
   }
   return res;
 }
@@ -69,19 +65,57 @@ export async function getDependency(
 
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await packageCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<CachedNpmDependency>(
     cacheNamespace,
     packageUrl
   );
-  // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    if (cachedResult.cacheData) {
+      const softExpireAt = DateTime.fromISO(
+        cachedResult.cacheData.softExpireAt
+      );
+      if (softExpireAt.isValid && softExpireAt > DateTime.local()) {
+        logger.trace('Cached result is not expired - reusing');
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
+      logger.trace('Cached result is soft expired');
+    } else {
+      logger.trace('Reusing legacy cached result');
+      return cachedResult;
+    }
+  }
+  const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
+    ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
+    : 15;
+  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
+  let { cacheHardTtlMinutes } = GlobalConfig.get();
+  if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
+    cacheHardTtlMinutes = cacheMinutes;
   }
 
   const uri = url.parse(packageUrl);
 
   try {
-    const raw = await http.getJson<NpmResponse>(packageUrl);
+    const options: HttpOptions = {};
+    if (cachedResult?.cacheData?.etag) {
+      logger.debug('Using cached etag');
+      options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
+    }
+    const raw = await http.getJson<NpmResponse>(packageUrl, options);
+    if (cachedResult?.cacheData && raw.statusCode === 304) {
+      logger.debug({ packageName }, 'Cached npm result is revalidated');
+      cachedResult.cacheData.softExpireAt = softExpireAt;
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        cachedResult,
+        cacheHardTtlMinutes
+      );
+      delete cachedResult.cacheData;
+      return cachedResult;
+    }
+    const etag = raw.headers.etag;
     const res = raw.body;
     if (!res.versions || !Object.keys(res.versions).length) {
       // Registry returned a 200 OK but with no versions
@@ -138,9 +172,6 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     // serialize first before saving
-    const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
-      ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 15;
     // TODO: use dynamic detection of public repos instead of a static list (#9587)
     const whitelistedPublicScopes = [
       '@graphql-codegen',
@@ -153,19 +184,34 @@ export async function getDependency(
       (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
         !packageName.startsWith('@'))
     ) {
-      await packageCache.set(cacheNamespace, packageUrl, dep, cacheMinutes);
+      const cacheData = { softExpireAt, etag };
+      await packageCache.set(
+        cacheNamespace,
+        packageUrl,
+        { ...dep, cacheData },
+        etag ? cacheHardTtlMinutes : cacheMinutes
+      );
     }
     return dep;
   } catch (err) {
     const ignoredStatusCodes = [401, 402, 403, 404];
     const ignoredResponseCodes = ['ENOTFOUND'];
     if (
+      err.message === HOST_DISABLED ||
       ignoredStatusCodes.includes(err.statusCode) ||
       ignoredResponseCodes.includes(err.code)
     ) {
       return null;
     }
     if (uri.host === 'registry.npmjs.org') {
+      if (cachedResult) {
+        logger.warn(
+          { err },
+          'npmjs error, reusing expired cached result instead'
+        );
+        delete cachedResult.cacheData;
+        return cachedResult;
+      }
       // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';

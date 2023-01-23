@@ -57,10 +57,10 @@ describe('modules/datasource/packagist/index', () => {
       const packagesOnly = {
         packages: {
           'vendor/package-name': {
-            'dev-master': {},
-            '1.0.x-dev': {},
-            '0.0.1': {},
-            '1.0.0': {},
+            'dev-master': { version: 'dev-master' },
+            '1.0.x-dev': { version: '1.0.x-dev' },
+            '0.0.1': { version: '0.0.1' },
+            '1.0.0': { version: '1.0.0' },
           },
         },
       };
@@ -82,7 +82,12 @@ describe('modules/datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .replyWithError({ code: 'ETIMEDOUT' });
-      httpMock.scope(baseUrl).get('/p2/vendor/package-name2.json').reply(200);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/vendor/package-name2.json')
+        .reply(200)
+        .get('/p2/vendor/package-name2~dev.json')
+        .reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -97,7 +102,12 @@ describe('modules/datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(403);
-      httpMock.scope(baseUrl).get('/p2/vendor/package-name.json').reply(200);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/vendor/package-name.json')
+        .reply(200)
+        .get('/p2/vendor/package-name~dev.json')
+        .reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -112,7 +122,12 @@ describe('modules/datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(404);
-      httpMock.scope(baseUrl).get('/p2/drewm/mailchimp-api.json').reply(200);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/drewm/mailchimp-api.json')
+        .reply(200)
+        .get('/p2/drewm/mailchimp-api~dev.json')
+        .reply(200);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -131,7 +146,7 @@ describe('modules/datasource/packagist/index', () => {
         packages: [],
         includes: {
           'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
-            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
+            sha256: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
           },
         },
       };
@@ -266,7 +281,12 @@ describe('modules/datasource/packagist/index', () => {
           '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
         )
         .reply(200, fileJson);
-      httpMock.scope(baseUrl).get('/p2/some/other.json').reply(200, beytJson);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/some/other.json')
+        .reply(200, beytJson)
+        .get('/p2/some/other~dev.json')
+        .reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
@@ -357,7 +377,12 @@ describe('modules/datasource/packagist/index', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesJson);
-      httpMock.scope(baseUrl).get('/p2/some/other.json').reply(200, beytJson);
+      httpMock
+        .scope(baseUrl)
+        .get('/p2/some/other.json')
+        .reply(200, beytJson)
+        .get('/p2/some/other~dev.json')
+        .reply(200, beytJson);
       const res = await getPkgReleases({
         ...config,
         datasource,
