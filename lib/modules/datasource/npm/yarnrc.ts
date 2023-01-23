@@ -2,16 +2,6 @@ import { load } from 'js-yaml';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 
-export interface YarnConfig {
-  npmRegistryServer?: string;
-  npmScopes?: Record<
-    string,
-    {
-      npmRegistryServer?: string;
-    }
-  >;
-}
-
 const YarnrcYmlSchema = z.object({
   npmRegistryServer: z.string().optional(),
   npmScopes: z
@@ -22,6 +12,8 @@ const YarnrcYmlSchema = z.object({
     )
     .optional(),
 });
+
+export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
 
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
   try {
