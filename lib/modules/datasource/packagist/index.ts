@@ -125,24 +125,27 @@ export class PackagistDatasource extends Datasource {
 
     const includesPackages: Record<string, ReleaseResult> = {};
 
-    const providerIncludesTasks = providerIncludes.map((file) => async () => {
-      const packagistFile = await this.getPackagistFile(regUrl, file);
-      for (const [name, val] of Object.entries(packagistFile.providers)) {
-        providers[name] = val.sha256;
-      }
-    });
+    const tasks: (() => Promise<void>)[] = [];
 
-    const includesTasks = includes.map((file) => async () => {
-      const res = await this.getPackagistFile(regUrl, file);
-      if (res.packages) {
-        for (const [key, val] of Object.entries(res.packages)) {
-          const dep = PackagistDatasource.extractDepReleases(val);
-          includesPackages[key] = dep;
+    for (const file of providerIncludes) {
+      tasks.push(async () => {
+        const res = await this.getPackagistFile(regUrl, file);
+        for (const [name, val] of Object.entries(res.providers)) {
+          providers[name] = val.sha256;
         }
-      }
-    });
+      });
+    }
 
-    await p.all([...providerIncludesTasks, ...includesTasks]);
+    for (const file of includes) {
+      tasks.push(async () => {
+        const res = await this.getPackagistFile(regUrl, file);
+        for (const [key, val] of Object.entries(res.packages ?? {})) {
+          includesPackages[key] = PackagistDatasource.extractDepReleases(val);
+        }
+      });
+    }
+
+    await p.all(tasks);
 
     const allPackages: AllPackages = {
       packages: packages as never, // TODO: fix types (#9610)
