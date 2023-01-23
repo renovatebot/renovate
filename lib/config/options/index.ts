@@ -218,6 +218,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'releaseConstraintFiltering',
+    description:
+      'This option decides if Renovate filters dependency releases based on constraints.',
+    type: 'string',
+    allowedValues: ['none', 'some', 'all'],
+    stage: 'repository',
+    default: 'none',
+    experimental: true,
+  },
+  {
     name: 'repositoryCache',
     description:
       'This option decides if Renovate uses a JSON cache to speed up extractions.',

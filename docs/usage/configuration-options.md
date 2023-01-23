@@ -2748,6 +2748,10 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
+## releaseConstraintFiltering
+
+This option allows you to select the type of release filtering you want. Currently we only support no release filtering and plan to add more options in the future. The default option is no filtering.
+
 ## replacement
 
 Add to this object if you wish to define rules that apply only to PRs that replace dependencies.
