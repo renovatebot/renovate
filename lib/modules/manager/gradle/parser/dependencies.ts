@@ -20,16 +20,19 @@ import {
 
 const qGroupId = qConcatExpr(
   qTemplateString,
+  qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'groupId'));
 
 const qArtifactId = qConcatExpr(
   qTemplateString,
+  qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
 const qVersion = qConcatExpr(
   qTemplateString,
+  qPropertyAccessIdentifier,
   qVariableAccessIdentifier
 ).handler((ctx) => storeInTokenMap(ctx, 'version'));
 
@@ -122,14 +125,7 @@ const qKotlinShortNotationDependencies = q
       .join(qArtifactId)
       .op(',')
       .opt(q.sym<Ctx>('version').op('='))
-      .join(
-        qConcatExpr(
-          qTemplateString,
-          qPropertyAccessIdentifier,
-          qVariableAccessIdentifier
-        )
-      )
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .join(qVersion)
       .end(),
   })
   .handler(handleKotlinShortNotationDep)
@@ -195,15 +191,8 @@ const qImplicitGradlePlugin = q
     search: q
       .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
       .op('=')
-      .join(
-        qConcatExpr(
-          qTemplateString,
-          qPropertyAccessIdentifier,
-          qVariableAccessIdentifier
-        )
-      ),
+      .join(qVersion),
   })
-  .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleImplicitGradlePlugin)
   .handler(cleanupTempVars);
 
