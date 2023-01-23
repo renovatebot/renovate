@@ -26,7 +26,7 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-const helmfileFile = Fixtures.get('helmfile.yaml');
+const helmfileYaml = Fixtures.get('helmfile.yaml');
 const lockFile = Fixtures.get('helmfile.lock');
 const lockFileTwo = Fixtures.get('helmfile-two.lock');
 
@@ -81,11 +81,13 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps: [{ depName: 'dep1' }],
-        newPackageFileContent: helmfileFile,
+        newPackageFileContent: helmfileYaml,
         config,
       })
     ).toBeNull();
-    expect(execSnapshots).toMatchObject([{ cmd: "helmfile deps ''" }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
   });
 
   it('returns updated helmfile.lock', async () => {
@@ -102,7 +104,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: helmfileFile,
+        newPackageFileContent: helmfileYaml,
         config,
       })
     ).toMatchObject([
@@ -115,7 +117,9 @@ describe('modules/manager/helmfile/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toBeArrayOfSize(1);
-    expect(execSnapshots).toMatchObject([{ cmd: "helmfile deps ''" }]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'helmfile deps -f helmfile.yaml' },
+    ]);
   });
 
   it('returns updated helmfile.lock with docker', async () => {
@@ -136,7 +140,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: helmfileFile,
+        newPackageFileContent: helmfileYaml,
         config,
       })
     ).toMatchObject([
@@ -164,7 +168,7 @@ describe('modules/manager/helmfile/artifacts', () => {
           'bash -l -c "' +
           'install-tool helmfile v0.129.0' +
           ' &&' +
-          " helmfile deps ''" +
+          ' helmfile deps -f helmfile.yaml' +
           '"',
       },
     ]);
@@ -184,7 +188,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
         updatedDeps,
-        newPackageFileContent: helmfileFile,
+        newPackageFileContent: helmfileYaml,
         config,
       })
     ).toMatchObject([

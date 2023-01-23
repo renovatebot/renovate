@@ -5,18 +5,17 @@ import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
-  getParentDir,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
-async function helmCommands(
+async function helmfileCommand(
   execOptions: ExecOptions,
-  manifestPath: string
+  helmfileYamlPath: string
 ): Promise<void> {
-  await exec(`helmfile deps ${quote(getParentDir(manifestPath))}`, execOptions);
+  await exec(`helmfile deps -f ${quote(helmfileYamlPath)}`, execOptions);
 }
 
 export async function updateArtifacts({
@@ -47,17 +46,17 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Helmfile artifacts');
-    const helmToolConstraint: ToolConstraint = {
+    const helmfileToolConstraint: ToolConstraint = {
       toolName: 'helmfile',
-      constraint: config.constraints?.helm,
+      constraint: config.constraints?.helmfile,
     };
 
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},
-      toolConstraints: [helmToolConstraint],
+      toolConstraints: [helmfileToolConstraint],
     };
-    await helmCommands(execOptions, packageFileName);
+    await helmfileCommand(execOptions, packageFileName);
     logger.debug('Returning updated Helmfile artifacts');
 
     const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
