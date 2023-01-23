@@ -1,8 +1,9 @@
 import detectIndent from 'detect-indent';
 import JSON5 from 'json5';
-import prettier, { BuiltInParserName } from 'prettier';
+import type { BuiltInParserName } from 'prettier';
 import upath from 'upath';
 import { migrateConfig } from '../../../../config/migration';
+import { prettier } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
 import { getFileList } from '../../../../util/git';
@@ -68,7 +69,7 @@ export async function applyPrettierFormatting(
       useTabs: indent?.type === 'tab',
     };
 
-    return prettier.format(content, options);
+    return prettier().format(content, options);
   } finally {
     logger.trace('applyPrettierFormatting - END');
   }
