@@ -104,24 +104,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
 }
 `;
 
-exports[`modules/manager/sbt/extract extractPackageFile() extracts correct scala library when dealing with scala 3 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "3.1.1",
-      "datasource": "maven",
-      "depName": "scala",
-      "packageName": "org.scala-lang:scala3-library_3",
-      "registryUrls": [
-        "https://repo.maven.apache.org/maven2",
-      ],
-      "separateMinorPatch": true,
-    },
-  ],
-  "packageFileVersion": undefined,
-}
-`;
-
 exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for generic use-cases 1`] = `
 {
   "deps": [
