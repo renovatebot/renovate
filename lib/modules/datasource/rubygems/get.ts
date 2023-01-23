@@ -1,4 +1,4 @@
-import Marshal from 'marshal';
+import { Marshal } from '@qnighy/marshal';
 import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
@@ -180,6 +180,6 @@ export class InternalRubyGemsDatasource extends Datasource {
       return null;
     }
 
-    return new Marshal(response.body).parsed as T;
+    return Marshal.parse(response.body) as T;
   }
 }
