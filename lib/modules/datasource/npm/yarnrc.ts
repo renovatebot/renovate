@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
+import { z } from 'zod';
 import { logger } from '../../../logger';
 
 export interface YarnConfig {
@@ -12,56 +12,28 @@ export interface YarnConfig {
   >;
 }
 
-function isRegistryServerValid(registryServer: unknown): boolean {
-  if (is.nullOrUndefined(registryServer)) {
-    return true;
-  }
-  return is.string(registryServer);
-}
-
-function areScopesValid(scopeEntries: unknown): boolean {
-  if (is.nullOrUndefined(scopeEntries)) {
-    return true;
-  }
-  if (!is.plainObject(scopeEntries)) {
-    return false;
-  }
-  const scopeValues = Object.values(scopeEntries);
-  if (scopeValues.some((scopeValue) => !is.plainObject(scopeValue))) {
-    return false;
-  }
-  if (
-    scopeValues.some(
-      (scopeValue: unknown) =>
-        !is.nullOrUndefined(scopeValue.npmRegistryServer) &&
-        !is.string(scopeValue.npmRegistryServer)
+const YarnrcYmlSchema = z.object({
+  npmRegistryServer: z.string().optional(),
+  npmScopes: z
+    .record(
+      z.object({
+        npmRegistryServer: z.string().optional(),
+      })
     )
-  ) {
-    return false;
-  }
-  return true;
-}
+    .optional(),
+});
 
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
-  let yarnConfig: YarnConfig;
   try {
-    yarnConfig = load(yarnrcYml, {
-      json: true,
-    }) as YarnConfig;
+    return YarnrcYmlSchema.parse(
+      load(yarnrcYml, {
+        json: true,
+      })
+    );
   } catch (err) {
     logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     return null;
   }
-
-  if (
-    !is.plainObject(yarnConfig) ||
-    !isRegistryServerValid(yarnConfig.npmRegistryServer) ||
-    !areScopesValid(yarnConfig.npmScopes)
-  ) {
-    logger.warn({ yarnrcYml }, `Malformed yarnrc file`);
-    return null;
-  }
-  return yarnConfig;
 }
 
 export function resolveRegistryUrl(
