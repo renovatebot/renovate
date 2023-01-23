@@ -436,6 +436,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}              | ${'group: "foo", name: "bar", version: baz'}                                      | ${null}
         ${''}              | ${'group: "foo", name: "bar", version: "1.2.3@@@"'}                               | ${null}
         ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: baz'}                                      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
+        ${'some = "foo"'}  | ${'group: property("some"), name: property("some"), version: "1.2.3"'}            | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: some, name: some, version: "1.2.3"'}                                    | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'some = "foo"'}  | ${'group: "${some}", name: "${some}", version: "1.2.3"'}                          | ${{ depName: 'foo:foo', currentValue: '1.2.3' }}
         ${'baz = "1.2.3"'} | ${'group: "foo", name: "bar", version: "${baz}"'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
@@ -520,6 +521,7 @@ describe('modules/manager/gradle/parser', () => {
           ${''}                             | ${'dependencySet(group: "foo", version: "1.2.3") { entry "bar1"; entry ("bar2") }'}                 | ${validOutput}
           ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: baz) { entry "bar1"; entry ("bar2") }'}                     | ${validOutput1}
           ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: "${baz}") { entry "bar1"; entry ("bar2") }'}                | ${validOutput1}
+          ${'baz = "1.2.3"'}                | ${'dependencySet(group: "foo", version: property("baz")) { entry "bar1"; entry ("bar2") }'}         | ${validOutput1}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry other; entry "bar2" }'}                     | ${validOutput}
           ${'some = "foo"; baz = "1.2.3"'}  | ${'dependencySet(group: some, version: "${baz}456") { entry "bar1"; entry "bar2" }'}                | ${{}}
           ${'some = "foo"; other = "bar1"'} | ${'dependencySet(group: some, version: "1.2.3") { entry(other); entry "bar2" }'}                    | ${validOutput}
@@ -687,10 +689,12 @@ describe('modules/manager/gradle/parser', () => {
       ${''}                                         | ${'library("foo.bar", "foo", "bar").version("1.2.3")'}          | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz)'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(property("baz"))'}  | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version("${baz}xy")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3xy', skipReason: 'unknown-version' }}
       ${'baz = "1.2.3"'}                            | ${'library("foo.bar", "foo", "bar").version(baz + ".45")'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3.45', skipReason: 'unknown-version' }}
       ${'group = "foo"; artifact = "bar"'}          | ${'library("foo.bar", group, artifact).version("1.2.3")'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}", "${b}").version("1.2.3")'}        | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'f = "foo"; b = "bar"; v = "1.2.3"'}        | ${'library("foo.bar", property("f"), "${b}").version(v)'}       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
       ${'f = "foo"; b = "bar"'}                     | ${'library("foo.bar", "${f}" + f, "${b}").version("1.2.3")'}    | ${{ depName: 'foofoo:bar', currentValue: '1.2.3' }}
       ${'version("baz", "1.2.3")'}                  | ${'library("foo.bar", "foo", "bar").versionRef("baz")'}         | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
       ${'library("foo-bar_baz-qux", "foo", "bar")'} | ${'"${libs.foo.bar.baz.qux}:1.2.3"'}                            | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
