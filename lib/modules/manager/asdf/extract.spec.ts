@@ -46,7 +46,8 @@ describe('modules/manager/asdf/extract', () => {
 
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
-        `awscli 2.8.6
+        `argocd 2.5.4
+awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
 clojure 1.11.1.1182
@@ -90,6 +91,14 @@ dummy 1.2.3
       );
       expect(res).toEqual({
         deps: [
+          {
+            currentValue: '2.5.4',
+            datasource: 'github-releases',
+            packageName: 'argoproj/argo-cd',
+            versioning: 'semver',
+            depName: 'argocd',
+            extractVersion: '^v(?<version>\\S+)',
+          },
           {
             currentValue: '2.8.6',
             datasource: 'github-tags',
