@@ -8,6 +8,8 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
+import { get } from '../../versioning';
+import * as mavenVersioning from '../../versioning/maven';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
 import { normalizeScalaVersion } from './util';
@@ -49,10 +51,17 @@ const scalaVersionMatch = q
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
+      const version = get(mavenVersioning.id);
+
+      let packageName = 'org.scala-lang:scala-library';
+      if (version.getMajor(ctx.scalaVersion) === 3) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
       const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
+        packageName,
         currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
