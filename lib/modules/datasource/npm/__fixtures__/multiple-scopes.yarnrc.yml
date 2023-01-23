@@ -1,6 +1,0 @@
-npmRegistryServer: https://private.example.com/npm
-npmScopes:
-  foo:
-    npmRegistryServer: https://private.example.com/npm-foo
-  bar:
-    npmRegistryServer: https://private.example.com/npm-bar

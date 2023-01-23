@@ -1,4 +1,3 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
@@ -41,32 +40,44 @@ describe('modules/datasource/npm/yarnrc', () => {
   describe('loadConfigFromYarnrcYml()', () => {
     it.each([
       [
-        'registry-only.yarnrc.yml',
-        {
-          npmRegistryServer: 'https://private.example.com/npm',
-        },
+        'npmRegistryServer: https://npm.example.com',
+        { npmRegistryServer: 'https://npm.example.com' },
       ],
       [
-        'multiple-scopes.yarnrc.yml',
+        `
+          npmRegistryServer: https://npm.example.com
+          npmScopes:
+            foo:
+              npmRegistryServer: https://npm-foo.example.com
+        `,
         {
-          npmRegistryServer: 'https://private.example.com/npm',
+          npmRegistryServer: 'https://npm.example.com',
           npmScopes: {
             foo: {
-              npmRegistryServer: 'https://private.example.com/npm-foo',
-            },
-            bar: {
-              npmRegistryServer: 'https://private.example.com/npm-bar',
+              npmRegistryServer: 'https://npm-foo.example.com',
             },
           },
         },
       ],
-      ['malformed.yarnrc.yml', null],
-      ['registry-not-a-string.yarnrc.yml', null],
-      ['scoped-registry-not-a-string.yarnrc.yml', null],
-      ['scopes-not-an-object.yarnrc.yml', null],
-      ['single-scope-not-an-object.yarnrc.yml', null],
-    ])('produces expected config (%s)', (yarnrcFile, expectedConfig) => {
-      const config = loadConfigFromYarnrcYml(Fixtures.get(yarnrcFile));
+      ['npmRegistryServer: 42', null],
+      ['npmScopes: 42', null],
+      [
+        `
+          npmScopes:
+            foo: 42
+        `,
+        null,
+      ],
+      [
+        `
+          npmScopes:
+            foo:
+              npmRegistryServer: 42
+        `,
+        null,
+      ],
+    ])('produces expected config (%s)', (yarnrcYml, expectedConfig) => {
+      const config = loadConfigFromYarnrcYml(yarnrcYml);
 
       expect(config).toEqual(expectedConfig);
     });
