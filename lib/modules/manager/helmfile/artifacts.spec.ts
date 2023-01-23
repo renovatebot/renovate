@@ -99,7 +99,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       '/tmp/renovate/cache/__renovate-private-cache'
     );
     fs.getParentDir.mockReturnValue('');
-    const updatedDeps = [{ depName: 'dep1' }];
+    const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
     expect(
       await helmfile.updateArtifacts({
         packageFileName: 'helmfile.yaml',
@@ -174,14 +174,17 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
-  it('catches errors', async () => {
+  it.each([
+    'not found',
+    "Error: cannot load Chart.lock: error converting YAML to JSON: yaml: line 1: did not find expected ',' or '}'",
+  ])('catches error: %s', async (errorMessage) => {
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     fs.readLocalFile.mockResolvedValueOnce(lockFile as any);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
     fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error('not found');
+      throw new Error(errorMessage);
     });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -195,7 +198,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       {
         artifactError: {
           lockFile: 'helmfile.lock',
-          stderr: 'not found',
+          stderr: errorMessage,
         },
       },
     ]);
