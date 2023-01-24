@@ -2520,12 +2520,12 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.6.tgz#b04895bc83d9c5ec65a0ce3f51666bb21d69c0e1"
   integrity sha512-DpH0LvlRt4sDDTwVNEoen9ZaExigbBm2PPwOCBUqBSXxFGM0Ms9flzhdTRJLnmgdYLUcLcQ8zjyy+S1EnDFPnw==
 
-"@renovatebot/ruby-semver@1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-1.1.8.tgz#1690f950ad13910d4bb12ad345708246df782b4d"
-  integrity sha512-e8eDI+Xq1mizLiQenjCqmG/cY739iY0SeY3u/3kHlhZsMo4D+htaKYOpHa8YfzSn3DvUmMMBpQQit4yOth/ksA==
+"@renovatebot/ruby-semver@2.1.4":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-2.1.4.tgz#96b79cfdbcc52fe86350b4068cd1af4a1cad9c66"
+  integrity sha512-HskQQ+g7ZdZO1L+3j8+z3e5o+cS2tb5UETW4Zh4wdhEZ/as8vaSJ2noARVwZuNimBUSyAi79j4UDGv8XlbFdag==
   dependencies:
-    tslib "2.4.1"
+    tslib "^2.4.1"
 
 "@seald-io/binary-search-tree@^1.0.2":
   version "1.0.3"
@@ -9816,7 +9816,7 @@ tsconfig-paths@^3.14.1:
     minimist "^1.2.6"
     strip-bom "^3.0.0"
 
-tslib@2.4.1, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0:
+tslib@2.4.1, tslib@^2.1.0, tslib@^2.3.1, tslib@^2.4.0, tslib@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.1.tgz#0d0bfbaac2880b91e22df0768e55be9753a5b17e"
   integrity sha512-tGyy4dAjRIEwI7BzsB0lynWgOpfqjUdq91XXAlIWD2OwKBH7oCl/GZG/HT4BOHrTlPMOASlMQ7veyTqpmRcrNA==
