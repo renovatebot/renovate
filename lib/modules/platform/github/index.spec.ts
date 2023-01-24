@@ -275,7 +275,7 @@ describe('modules/platform/github/index', () => {
     repository: string,
     forkExisted: boolean,
     forkResult = 200,
-    forkDefaulBranch = 'master'
+    forkDefaultBranch = 'master'
   ): void {
     scope
       // repo info
@@ -308,7 +308,7 @@ describe('modules/platform/github/index', () => {
               {
                 full_name: 'forked/repo',
                 owner: { login: 'forked' },
-                default_branch: forkDefaulBranch,
+                default_branch: forkDefaultBranch,
               },
             ]
           : []
@@ -2179,6 +2179,92 @@ describe('modules/platform/github/index', () => {
         draftPR: true,
       });
       expect(pr).toMatchObject({ number: 123 });
+    });
+
+    describe('with forkToken', () => {
+      let scope: httpMock.Scope;
+
+      beforeEach(async () => {
+        scope = httpMock.scope(githubApiHost);
+        forkInitRepoMock(scope, 'some/repo', false);
+        scope.get('/user').reply(200, {
+          login: 'forked',
+        });
+        scope.post('/repos/some/repo/forks').reply(200, {
+          full_name: 'forked/repo',
+          default_branch: 'master',
+        });
+
+        await github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        });
+      });
+
+      it('should allow maintainer edits if enabled via options', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is set in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR can be edited by maintainers.',
+          labels: null,
+          allowMaintainerEdits: true,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should not allow maintainer edits if not explicitly set', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === false
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should not allow maintainer edits if explicitly disabled', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === false
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+          allowMaintainerEdits: false,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
     });
 
     describe('automerge', () => {
