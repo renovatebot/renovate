@@ -56,6 +56,13 @@ describe('modules/datasource/npm/yarnrc', () => {
           },
         },
       ],
+      [
+        codeBlock`
+          npmRegistryServer: https://npm.example.com
+          nodeLinker: pnp
+        `,
+        { npmRegistryServer: 'https://npm.example.com' },
+      ],
       ['npmRegistryServer: 42', null],
       ['npmScopes: 42', null],
       [
