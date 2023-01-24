@@ -220,12 +220,11 @@ const options: RenovateOptions[] = [
   {
     name: 'constraintsFiltering',
     description:
-      'This option allows you to select the type of release filtering.',
+      'Perform release filtering based on language constraints.',
     type: 'string',
     allowedValues: ['none', 'strict'],
     stage: 'repository',
     default: 'none',
-    experimental: true,
   },
   {
     name: 'repositoryCache',

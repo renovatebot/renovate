@@ -527,9 +527,10 @@ If you need to _override_ constraints that Renovate detects from the repository,
 
 ## constraintsFiltering
 
-This option allows you to select the type of release filtering you want. Currently we have these two options:
-`none`: No release filtering
-`strict`: If any of the release's constraints match, then it's included
+This option controls whether Renovate filters new releases based on configured or detected `constraints`.
+Renovate supports two options:
+ - `none`: No release filtering (all releases allowed)
+ - `strict`: If the release's constraints match the package file constraints, then it's included
 
 We are working on adding more advanced filtering options.
 
