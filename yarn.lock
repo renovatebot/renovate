@@ -7529,10 +7529,10 @@ minimatch@5.1.0:
   dependencies:
     brace-expansion "^2.0.1"
 
-minimatch@5.1.4:
-  version "5.1.4"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.4.tgz#4e2d39d872684e97b309a9104251c3f1aa4e9d1c"
-  integrity sha512-U0iNYXt9wALljzfnGkhFSy5sAC6/SCR3JrHrlsdJz4kF8MvhTRQNiC59iUi1iqsitV7abrNAJWElVL9pdnoUgw==
+minimatch@5.1.5:
+  version "5.1.5"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.5.tgz#cabd894be2c2091e01fd09211326dfd996ee022d"
+  integrity sha512-CI8wwdrll4ehjPAqs8TL8lBPyNnpZlQI02Wn8C1weNz/QbUbjh3OMxgMKSnvqfKFdLlks3EzHB9tO0BqGc3phQ==
   dependencies:
     brace-expansion "^2.0.1"
 
