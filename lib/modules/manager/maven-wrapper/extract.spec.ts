@@ -5,7 +5,7 @@ const onlyWrapperProperties =
 const onlyMavenProperties =
   'distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.5.4/apache-maven-3.5.4-bin.zip';
 
-const wrapperAndMavenProperties = `distributionUrl=https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip\nwrapperUrl=https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar`;
+const wrapperAndMavenProperties = `distributionUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip\nwrapperUrl=https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar`;
 
 describe('modules/manager/maven-wrapper/extract', () => {
   describe('extractPackageFile()', () => {
@@ -15,7 +15,7 @@ describe('modules/manager/maven-wrapper/extract', () => {
         {
           currentValue: '3.8.4',
           replaceString:
-            'https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip',
+            'https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/apache-maven/3.8.4/apache-maven-3.8.4-bin.zip',
           datasource: 'maven',
           depName: 'maven',
           packageName: 'org.apache.maven:apache-maven',
@@ -24,7 +24,7 @@ describe('modules/manager/maven-wrapper/extract', () => {
         {
           currentValue: '3.1.0',
           replaceString:
-            'https://artifactory.tools.bol.com/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar',
+            'https://internal.artifactory.acme.org/artifactory/maven-bol/org/apache/maven/wrapper/maven-wrapper/3.1.0/maven-wrapper-3.1.0.jar',
           datasource: 'maven',
           depName: 'maven-wrapper',
           packageName: 'org.apache.maven.wrapper:maven-wrapper',

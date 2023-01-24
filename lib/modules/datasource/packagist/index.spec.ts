@@ -57,10 +57,10 @@ describe('modules/datasource/packagist/index', () => {
       const packagesOnly = {
         packages: {
           'vendor/package-name': {
-            'dev-master': { version: 'dev-master' },
-            '1.0.x-dev': { version: '1.0.x-dev' },
-            '0.0.1': { version: '0.0.1' },
-            '1.0.0': { version: '1.0.0' },
+            'dev-master': {},
+            '1.0.x-dev': {},
+            '0.0.1': {},
+            '1.0.0': {},
           },
         },
       };
@@ -146,7 +146,7 @@ describe('modules/datasource/packagist/index', () => {
         packages: [],
         includes: {
           'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
-            sha256: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
+            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
           },
         },
       };

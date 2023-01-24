@@ -1,5 +1,6 @@
 export type PlatformId =
   | 'azure'
+  | 'codecommit'
   | 'bitbucket'
   | 'bitbucket-server'
   | 'gitea'
