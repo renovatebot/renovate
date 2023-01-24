@@ -525,6 +525,16 @@ If you need to _override_ constraints that Renovate detects from the repository,
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
+## constraintsFiltering
+
+This option allows you to select the type of release filtering you want. Currently we have these two options:
+`none`: No release filtering
+`strict`: If any of the release's constraints match, then it's included
+
+We are working on adding more advanced filtering options.
+
+Note: There must be a `constraints` object present in your renovate config for this to work.
+
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
@@ -2747,16 +2757,6 @@ In case there is a need to configure them manually, it can be done using this `r
 ```
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
-
-## constraintsFiltering
-
-This option allows you to select the type of release filtering you want. Currently we have these two options:
-`none`: No release filtering
-`strict`: If any of the release's constraints match, then it's included
-
-We are working on adding more advanced filtering options.
-
-Note: There must be a `constraints` object present in your renovate config for this to work.
 
 ## replacement
 
