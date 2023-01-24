@@ -51,6 +51,7 @@ export async function rebaseMigrationBranch(
     migratedConfigData
   );
   return commitAndPush({
+    baseBranch: config.defaultBranch!,
     branchName,
     files: [
       {
