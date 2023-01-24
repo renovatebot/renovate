@@ -2,10 +2,6 @@ import { codeBlock } from 'common-tags';
 import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
 describe('modules/datasource/npm/yarnrc', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('resolveRegistryUrl()', () => {
     it('considers default registry', () => {
       const registryUrl = resolveRegistryUrl('a-package', {
