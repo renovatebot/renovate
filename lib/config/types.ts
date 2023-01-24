@@ -252,7 +252,7 @@ export interface RenovateConfig
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
 
-  constraintsFiltering?: ReleaseConstraintFilter;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig

@@ -1,4 +1,4 @@
-import type { ReleaseConstraintFilter } from '../../config/types';
+import type { ConstraintsFilter } from '../../config/types';
 import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
@@ -38,7 +38,7 @@ export interface GetPkgReleasesConfig {
   constraints?: Record<string, string>;
   replacementName?: string;
   replacementVersion?: string;
-  constraintsFiltering?: ReleaseConstraintFilter;
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface Release {

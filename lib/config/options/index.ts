@@ -219,11 +219,10 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'constraintsFiltering',
-    description:
-      'Perform release filtering based on language constraints.',
+    description: 'Perform release filtering based on language constraints.',
     type: 'string',
     allowedValues: ['none', 'strict'],
-    stage: 'repository',
+    cli: false,
     default: 'none',
   },
   {
