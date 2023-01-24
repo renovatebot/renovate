@@ -6,7 +6,6 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { getFile } from '../git';
 import { ensureCachePath, ensureLocalPath } from './util';
 
 export const pipeline = util.promisify(stream.pipeline);
@@ -30,7 +29,7 @@ export async function readLocalFile(
 ): Promise<string | null>;
 export async function readLocalFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
@@ -264,13 +263,16 @@ export async function readCacheFile(
 ): Promise<string>;
 export function readCacheFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   const fullPath = ensureCachePath(fileName);
   return encoding ? fs.readFile(fullPath, encoding) : fs.readFile(fullPath);
 }
 
-export function outputCacheFile(file: string, data: unknown): Promise<void> {
+export function outputCacheFile(
+  file: string,
+  data: string | NodeJS.ArrayBufferView
+): Promise<void> {
   const filePath = ensureCachePath(file);
   return fs.outputFile(filePath, data);
 }
@@ -282,21 +284,18 @@ export async function readSystemFile(
 ): Promise<string>;
 export function readSystemFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
 }
 
-export async function getFileContentMap(
-  fileNames: string[],
-  local = false
+export async function getLocalFiles(
+  fileNames: string[]
 ): Promise<Record<string, string | null>> {
   const fileContentMap: Record<string, string | null> = {};
 
   for (const fileName of fileNames) {
-    fileContentMap[fileName] = local
-      ? await readLocalFile(fileName, 'utf8')
-      : await getFile(fileName);
+    fileContentMap[fileName] = await readLocalFile(fileName, 'utf8');
   }
 
   return fileContentMap;

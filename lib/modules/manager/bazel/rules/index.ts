@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import { extract } from '../parser';
 import type { Fragment, FragmentData, Target } from '../types';
 import { DockerTarget, dockerRules } from './docker';
 import { GitTarget, gitRules } from './git';
@@ -32,4 +31,21 @@ export function extractDepFromFragment(
 ): PackageDependency | null {
   const fragmentData = extract(fragment);
   return extractDepFromFragmentData(fragmentData);
+}
+
+export function extract(fragment: Fragment): FragmentData {
+  if (fragment.type === 'string') {
+    return fragment.value;
+  }
+
+  if (fragment.type === 'record') {
+    const { children } = fragment;
+    const result: Record<string, FragmentData> = {};
+    for (const [key, value] of Object.entries(children)) {
+      result[key] = extract(value);
+    }
+    return result;
+  }
+
+  return fragment.children.map(extract);
 }
