@@ -22,7 +22,7 @@ export interface AllPackages {
   packages: Record<string, RegistryFile>;
   providersUrl: string | null;
   providersLazyUrl: string | null;
-  providers: Record<string, string | null>;
+  providerPackages: Record<string, string | null>;
 
   includesPackages: Record<string, ReleaseResult>;
 }
