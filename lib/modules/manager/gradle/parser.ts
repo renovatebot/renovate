@@ -4,6 +4,7 @@ import type { PackageDependency } from '../types';
 import { qApplyFrom } from './parser/apply-from';
 import { qAssignments } from './parser/assignments';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
+import { setParseGradleFunc } from './parser/handlers';
 import { qPlugins } from './parser/plugins';
 import { qRegistryUrls } from './parser/registry-urls';
 import { qVersionCatalogs } from './parser/version-catalogs';
@@ -17,6 +18,8 @@ import type {
 import { isDependencyString, parseDependencyString } from './utils';
 
 const groovy = lang.createLang('groovy');
+
+setParseGradleFunc(parseGradle);
 
 export function parseGradle(
   input: string,
