@@ -182,7 +182,8 @@ const RegistryMetaIncludes = RegistryMetaFiles.transform(
   }
 )
   .nullable()
-  .catch(null);
+  .catch(null)
+  .transform((xs) => xs ?? []);
 
 export const RegistryMeta = z
   .object({
@@ -201,17 +202,17 @@ export const RegistryMeta = z
   })
   .transform(
     ({
-      ['packages']: packages,
-      ['includes']: includesFiles,
-      ['providers']: providerPackages,
-      ['provider-includes']: files,
-      ['providers-url']: providersUrl,
-      ['providers-lazy-url']: providersLazyUrl,
+      packages,
+      includes,
+      providers,
+      'provider-includes': providerIncludes,
+      'providers-url': providersUrl,
+      'providers-lazy-url': providersLazyUrl,
     }) => ({
       packages,
-      includesFiles,
-      providerPackages,
-      files,
+      includes,
+      providers,
+      providerIncludes,
       providersUrl,
       providersLazyUrl,
     })
