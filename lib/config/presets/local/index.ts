@@ -38,7 +38,7 @@ export function getPreset({
   }
   const resolver = resolvers[platform];
   if (!resolver) {
-    throw new Error(`Unsupported platform '${platform}' for local preset.`);
+    throw new Error(`The platform you're using ($platform) does not support local presets.`);
   }
   return resolver.getPresetFromEndpoint(
     repo,
