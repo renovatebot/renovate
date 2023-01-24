@@ -18,6 +18,8 @@ jest.mock('../../../util/git');
 
 const datasource = mocked(_datasource);
 
+process.env.CONTAINERBASE = 'true';
+
 const adminConfig: RepoGlobalConfig = {
   localDir: join('/tmp/github/some/repo'), // `join` fixes Windows CI
   cacheDir: join('/tmp/renovate/cache'),
@@ -156,57 +158,72 @@ describe('modules/manager/helmfile/artifacts', () => {
     ]);
   });
 
-  it('returns updated helmfile.lock with docker', async () => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
-    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
-    fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
-    );
-    fs.getParentDir.mockReturnValue('');
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v0.129.0' }],
-    });
-    const updatedDeps = [{ depName: 'dep1' }];
-    expect(
-      await helmfile.updateArtifacts({
-        packageFileName: 'helmfile.yaml',
-        updatedDeps,
-        newPackageFileContent: helmfileYaml,
-        config,
-      })
-    ).toEqual([
-      {
-        file: {
-          type: 'addition',
-          path: 'helmfile.lock',
-          contents: lockFileTwo,
+  it.each([
+    {
+      binarySource: 'docker',
+      expectedCommands: [
+        { cmd: 'docker pull renovate/sidecar' },
+        { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
+        {
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+            '-e BUILDPACK_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'renovate/sidecar ' +
+            'bash -l -c "' +
+            'install-tool helmfile v0.129.0' +
+            ' && ' +
+            'helmfile deps -f helmfile.yaml' +
+            '"',
         },
-      },
-    ]);
-    expect(execSnapshots).toBeArrayOfSize(3);
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
-      { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
-      {
-        cmd:
-          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
-          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
-          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
-          '-e BUILDPACK_CACHE_DIR ' +
-          '-e CONTAINERBASE_CACHE_DIR ' +
-          '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
-          'bash -l -c "' +
-          'install-tool helmfile v0.129.0' +
-          ' && ' +
-          'helmfile deps -f helmfile.yaml' +
-          '"',
-      },
-    ]);
-  });
+      ],
+    },
+    {
+      binarySource: 'install',
+      expectedCommands: [
+        { cmd: 'install-tool helmfile v0.129.0' },
+        { cmd: 'helmfile deps -f helmfile.yaml' },
+      ],
+    },
+  ])(
+    'returns updated helmfile.lock with binarySource=$binarySource',
+    async ({ binarySource, expectedCommands }) => {
+      GlobalConfig.set({ ...adminConfig, binarySource });
+      fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
+      fs.privateCacheDir.mockReturnValue(
+        '/tmp/renovate/cache/__renovate-private-cache'
+      );
+      fs.getParentDir.mockReturnValue('');
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v0.129.0' }],
+      });
+      const updatedDeps = [{ depName: 'dep1' }];
+      expect(
+        await helmfile.updateArtifacts({
+          packageFileName: 'helmfile.yaml',
+          updatedDeps,
+          newPackageFileContent: helmfileYaml,
+          config,
+        })
+      ).toEqual([
+        {
+          file: {
+            type: 'addition',
+            path: 'helmfile.lock',
+            contents: lockFileTwo,
+          },
+        },
+      ]);
+      expect(execSnapshots).toBeArrayOfSize(expectedCommands.length);
+      expect(execSnapshots).toMatchObject(expectedCommands);
+    }
+  );
 
   it.each([
     'not found',
