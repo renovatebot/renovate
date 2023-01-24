@@ -353,6 +353,7 @@ export async function ensurePr(
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
+          allowMaintainerEdits: config.prAllowMaintainerEdits,
         });
 
         incLimitedValue('PullRequests');

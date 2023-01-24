@@ -2181,6 +2181,17 @@ Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
 
+## prAllowMaintainerEdits
+
+Use `prAllowMaintainerEdits` to control if maintainers can edit Renovate's pull requests.
+
+When Renovate runs in a fork, this allows project maintainers to make manual changes to the
+Renovate PR branch, without needing to create another new PR.
+
+<!-- prettier-ignore -->
+!!! note
+    This option is only relevant if you set `forkToken`.
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.

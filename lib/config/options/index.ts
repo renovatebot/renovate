@@ -1556,6 +1556,13 @@ const options: RenovateOptions[] = [
     default: 'strict',
   },
   {
+    name: 'prAllowMaintainerEdits',
+    description: 'Decides if maintainers can edit Renovate pull requests.',
+    type: 'boolean',
+    supportedPlatforms: ['github'],
+    default: true,
+  },
+  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
