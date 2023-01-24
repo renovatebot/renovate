@@ -220,9 +220,9 @@ const options: RenovateOptions[] = [
   {
     name: 'releaseConstraintFiltering',
     description:
-      'This option decides if Renovate filters dependency releases based on constraints.',
+      'This option allows you to select the type of release filtering.',
     type: 'string',
-    allowedValues: ['none', 'some', 'all'],
+    allowedValues: ['none', 'strict'],
     stage: 'repository',
     default: 'none',
     experimental: true,

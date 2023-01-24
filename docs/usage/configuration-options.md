@@ -2750,7 +2750,13 @@ The field supports multiple URLs but it is datasource-dependent on whether only 
 
 ## releaseConstraintFiltering
 
-This option allows you to select the type of release filtering you want. Currently we only support no release filtering and plan to add more options in the future. The default option is no filtering.
+This option allows you to select the type of release filtering you want. Currently we have these two options:
+`none`: No release filtering
+`strict`: If any of the release's constraints match, then it's included
+
+We are working on adding more advanced filtering options.
+
+Note: There must be a `constraints` object present in your renovate config for this to work.
 
 ## replacement
 
