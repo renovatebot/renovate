@@ -1,6 +1,6 @@
+import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { Fixtures } from '../../../../test/fixtures';
 import { env, fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -26,9 +26,44 @@ const adminConfig: RepoGlobalConfig = {
 
 const config: UpdateArtifactsConfig = {};
 
-const helmfileYaml = Fixtures.get('helmfile.yaml');
-const lockFile = Fixtures.get('helmfile.lock');
-const lockFileTwo = Fixtures.get('helmfile-two.lock');
+const helmfileYaml = codeBlock`
+repositories:
+  - name: backstage
+    url: https://backstage.github.io/charts
+  - name: oauth2-proxy
+    url: https://oauth2-proxy.github.io/manifests
+releases:
+  - name: backstage
+    chart: backstage/backstage
+    version: 0.12.0
+  - name: oauth-proxy
+    chart: oauth2-proxy/oauth2-proxy
+    version: 6.8.0
+`;
+const lockFile = codeBlock`
+version: 0.150.0
+dependencies:
+- name: backstage
+  repository: https://backstage.github.io/charts
+  version: 0.11.0
+- name: oauth2-proxy
+  repository: https://oauth2-proxy.github.io/manifests
+  version: 6.2.1
+digest: sha256:98c605fc3de51960ad1eb022f01dfae3bb0a1a06549e56fa39ec86db2a9a072d
+generated: "2023-01-23T12:13:46.487247+01:00"
+`;
+const lockFileTwo = codeBlock`
+version: 0.150.0
+dependencies:
+- name: backstage
+  repository: https://backstage.github.io/charts
+  version: 0.12.0
+- name: oauth2-proxy
+  repository: https://oauth2-proxy.github.io/manifests
+  version: 6.8.0
+digest: sha256:8ceea14d17c0f3c108a26ba341c63380e2426db66484d2b2876ab6e636e52af4
+generated: "2023-01-23T12:16:41.881988+01:00"
+`;
 
 describe('modules/manager/helmfile/artifacts', () => {
   beforeEach(() => {
