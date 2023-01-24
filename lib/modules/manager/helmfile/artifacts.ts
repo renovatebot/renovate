@@ -9,6 +9,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { getFile } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 export async function updateArtifacts({
@@ -29,7 +30,7 @@ export async function updateArtifacts({
   }
 
   const lockFileName = getSiblingFileName(packageFileName, 'helmfile.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const existingLockFileContent = await getFile(lockFileName);
 
   if (is.falsy(existingLockFileContent)) {
     logger.debug('No helmfile.lock found');

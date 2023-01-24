@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, mocked } from '../../../../test/util';
+import { env, fs, git, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -106,7 +106,7 @@ describe('modules/manager/helmfile/artifacts', () => {
   });
 
   it('returns null if unchanged', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
@@ -128,7 +128,7 @@ describe('modules/manager/helmfile/artifacts', () => {
   });
 
   it('returns updated helmfile.lock', async () => {
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile as never);
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
@@ -193,7 +193,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     async ({ binarySource, expectedCommands }) => {
       GlobalConfig.set({ ...adminConfig, binarySource });
       fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-      fs.readLocalFile.mockResolvedValueOnce(lockFile as never);
+      git.getFile.mockResolvedValueOnce(lockFile as never);
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
       fs.privateCacheDir.mockReturnValue(
@@ -230,7 +230,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     "Error: cannot load Chart.lock: error converting YAML to JSON: yaml: line 1: did not find expected ',' or '}'",
   ])('catches error: %s', async (errorMessage) => {
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-    fs.readLocalFile.mockResolvedValueOnce(lockFile as any);
+    git.getFile.mockResolvedValueOnce(lockFile as never);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
