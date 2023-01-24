@@ -1714,14 +1714,14 @@ The categories can be found in the [manager documentation](./modules/manager/ind
 <!-- prettier-ignore -->
 !!! note
     Rules with `matchCategories` are only applied _after_ extraction of dependencies.
-    You can't use `matchCategories` to prevent particular categories from being extracted, but you can use it after extraction to prevent them from being looked up or updated.
+    If you want to configure which managers are being extracted at all, use `enabledManagers` instead.
 
 ```json
 {
   "packageRules": [
     {
       "matchCategories": ["python"],
-      "enabled": false
+      "addLabels": ["py"]
     }
   ]
 }
