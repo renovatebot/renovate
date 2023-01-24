@@ -26,7 +26,7 @@ import {
   toAbsolutePath,
 } from './utils';
 
-const datasource = MavenDatasource.id;
+const mavenDatasource = MavenDatasource.id;
 
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
@@ -59,7 +59,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
-      datasource,
+      datasource: mavenDatasource,
       deps: [],
     };
 
@@ -132,16 +132,16 @@ export async function extractAllPackageFiles(
       if (!pkgFile) {
         pkgFile = {
           packageFile: key,
-          datasource,
+          datasource: mavenDatasource,
           deps: [],
         };
       }
 
       if (!dep.datasource) {
-        dep.datasource = datasource;
+        dep.datasource = mavenDatasource;
       }
 
-      if (dep.datasource === datasource) {
+      if (dep.datasource === mavenDatasource) {
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
         if (!dep.depType) {
