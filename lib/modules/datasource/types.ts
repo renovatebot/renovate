@@ -38,7 +38,7 @@ export interface GetPkgReleasesConfig {
   constraints?: Record<string, string>;
   replacementName?: string;
   replacementVersion?: string;
-  releaseConstraintFiltering?: ReleaseConstraintFilter;
+  constraintsFiltering?: ReleaseConstraintFilter;
 }
 
 export interface Release {

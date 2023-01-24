@@ -395,7 +395,7 @@ export async function getPkgReleases(
         (findRelease) => findRelease.version === filterRelease.version
       ) === filterIndex
   );
-  if (config?.releaseConstraintFiltering === 'strict') {
+  if (config?.constraintsFiltering === 'strict') {
     // Filter releases for compatibility
     for (const [constraintName, constraintValue] of Object.entries(
       config.constraints ?? {}

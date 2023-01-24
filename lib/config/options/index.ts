@@ -218,7 +218,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'releaseConstraintFiltering',
+    name: 'constraintsFiltering',
     description:
       'This option allows you to select the type of release filtering.',
     type: 'string',

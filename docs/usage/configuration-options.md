@@ -2748,7 +2748,7 @@ In case there is a need to configure them manually, it can be done using this `r
 
 The field supports multiple URLs but it is datasource-dependent on whether only the first is used or multiple.
 
-## releaseConstraintFiltering
+## constraintsFiltering
 
 This option allows you to select the type of release filtering you want. Currently we have these two options:
 `none`: No release filtering
