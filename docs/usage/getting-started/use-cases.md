@@ -177,9 +177,9 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
+- Gitea
 - GitHub
 - GitLab
-- Gitea
 
 When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.
