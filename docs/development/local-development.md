@@ -59,7 +59,7 @@ If you already installed a part, skip the corresponding step.
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
-- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
+- Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
