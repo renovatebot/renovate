@@ -535,7 +535,7 @@ Renovate supports two options:
 
 We are working on adding more advanced filtering options.
 
-Note: There must be a `constraints` object present in your renovate config for this to work.
+Note: There must be a `constraints` object in your Renovate config for this to work.
 This feature is limited to `pypi` datasource only.
 
 ## defaultRegistryUrls
