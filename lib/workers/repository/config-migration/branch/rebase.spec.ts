@@ -126,6 +126,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
           ],
           message: `Migrate config ${filename}`,
           platformCommit: false,
+          baseBranch: 'master',
         });
       }
     );
