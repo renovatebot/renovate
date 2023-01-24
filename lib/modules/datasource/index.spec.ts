@@ -635,7 +635,7 @@ describe('modules/datasource/index', () => {
 
       describe('relaseConstraintFiltering', () => {
         it('keeps all releases by default', async () => {
-          const registries: RegistriesMock = {
+          const registries = {
             'https://foo.bar': {
               releases: [
                 {
@@ -649,7 +649,7 @@ describe('modules/datasource/index', () => {
                 },
               ],
             },
-          };
+          } satisfies RegistriesMock;
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
@@ -662,7 +662,7 @@ describe('modules/datasource/index', () => {
         });
 
         it('keeps all releases if constraints is set but no value defined for releaseConstraintFiltering', async () => {
-          const registries: RegistriesMock = {
+          const registries = {
             'https://foo.bar': {
               releases: [
                 {
@@ -676,7 +676,7 @@ describe('modules/datasource/index', () => {
                 },
               ],
             },
-          };
+          } satisfies RegistriesMock;
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
@@ -692,7 +692,7 @@ describe('modules/datasource/index', () => {
         });
 
         it('filters releases if value is strict', async () => {
-          const registries: RegistriesMock = {
+          const registries = {
             'https://foo.bar': {
               releases: [
                 {
@@ -709,15 +709,13 @@ describe('modules/datasource/index', () => {
                 },
               ],
             },
-          };
+          } satisfies RegistriesMock;
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
             depName,
             defaultRegistryUrls: ['https://foo.bar'],
-            constraints: {
-              python: '2.7.0',
-            },
+            constraints: { python: '2.7.0' },
             releaseConstraintFiltering: 'strict',
           });
           expect(res).toMatchObject({
