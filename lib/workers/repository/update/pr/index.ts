@@ -79,10 +79,10 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
     is.nonEmptyArray(config.ignoreReviewers) &&
     is.nonEmptyArray(pr.reviewers)
   ) {
+    const ignoreReviewers = new Set(config.ignoreReviewers);
     return (
-      pr.reviewers.filter(
-        (reviewer) => !config.ignoreReviewers!.includes(reviewer)
-      ).length > 0
+      pr.reviewers.filter((reviewer) => !ignoreReviewers.has(reviewer)).length >
+      0
     );
   }
   return pr.reviewers ? pr.reviewers.length > 0 : false;
