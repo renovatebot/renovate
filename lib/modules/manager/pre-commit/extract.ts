@@ -63,7 +63,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
+    'Provided hostname did not match any of the hostRules of hostType github nor gitlab'
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
