@@ -41,6 +41,8 @@ module.exports = {
     ],
     'import/prefer-default-export': 0, // no benefit
 
+    'import/no-cycle': 2, // cycles don't work when moving to esm
+
     /*
      * This rule is not needed since the project uses typescript and the rule
      * `@typescript-eslint/explicit-function-return-type`.

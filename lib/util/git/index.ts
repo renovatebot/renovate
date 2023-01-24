@@ -857,6 +857,18 @@ export async function getFile(
   }
 }
 
+export async function getFiles(
+  fileNames: string[]
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = await getFile(fileName);
+  }
+
+  return fileContentMap;
+}
+
 export async function hasDiff(
   sourceRef: string,
   targetRef: string
