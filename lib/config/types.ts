@@ -301,7 +301,6 @@ export interface PackageRule
   description?: string | string[];
   matchFiles?: string[];
   matchPaths?: string[];
-  matchLanguages?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
   matchDatasources?: string[];

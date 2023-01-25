@@ -946,19 +946,6 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchLanguages',
-    description:
-      'List of languages to match (e.g. `["python"]`). Valid only within a `packageRules` object.',
-    type: 'array',
-    subType: 'string',
-    allowString: true,
-    parent: 'packageRules',
-    stage: 'package',
-    mergeable: true,
-    cli: false,
-    env: false,
-  },
-  {
     name: 'matchCategories',
     description:
       'List of categories to match (for example: `["python"]`). Valid only within a `packageRules` object.',

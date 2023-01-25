@@ -327,7 +327,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: ['js', 'node'],
+          matchCategories: ['js', 'node'],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -347,7 +347,7 @@ describe('util/package-rules/index', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchLanguages: ['docker'],
+          matchCategories: ['docker'],
           matchPackageNames: ['node'],
           x: 1,
         },
@@ -1032,7 +1032,7 @@ describe('util/package-rules/index', () => {
       packageRules: [
         {
           matchPackageNames: ['abc'],
-          matchLanguages: ['js'],
+          matchCategories: ['js'],
           x: 1,
         },
       ],

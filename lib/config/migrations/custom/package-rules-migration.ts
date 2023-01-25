@@ -3,7 +3,6 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export const renameMap = {
   paths: 'matchPaths',
-  languages: 'matchLanguages',
   baseBranchList: 'matchBaseBranches',
   managers: 'matchManagers',
   datasources: 'matchDatasources',

@@ -7,7 +7,6 @@ import { DepNameMatcher } from './dep-names';
 import { DepPatternsMatcher } from './dep-patterns';
 import { DepTypesMatcher } from './dep-types';
 import { FilesMatcher } from './files';
-import { LanguagesMatcher } from './languages';
 import { ManagersMatcher } from './managers';
 import { PackageNameMatcher } from './package-names';
 import { PackagePatternsMatcher } from './package-patterns';
@@ -32,7 +31,6 @@ matchers.push([
 matchers.push([new FilesMatcher()]);
 matchers.push([new PathsMatcher()]);
 matchers.push([new DepTypesMatcher()]);
-matchers.push([new LanguagesMatcher()]);
 matchers.push([new BaseBranchesMatcher()]);
 matchers.push([new ManagersMatcher()]);
 matchers.push([new DatasourcesMatcher()]);
