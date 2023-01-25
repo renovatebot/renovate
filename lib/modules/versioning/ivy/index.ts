@@ -25,7 +25,7 @@ export const supportedRangeStrategies: RangeStrategy[] = [
   'replace',
 ];
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
+/* eslint-disable @typescript-eslint/unbound-method */
 const {
   equals,
   getMajor,
@@ -36,6 +36,7 @@ const {
   matches: mavenMatches,
   sortVersions,
 } = maven;
+/* eslint-enable @typescript-eslint/unbound-method */
 
 function isValid(str: string): boolean {
   if (!str) {

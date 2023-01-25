@@ -12,7 +12,9 @@ exports[`config/presets/index getPreset gets linters 1`] = `
     "packages:tslint",
   ],
   "matchPackageNames": [
+    "prettier",
     "remark-lint",
+    "standard",
   ],
 }
 `;
@@ -133,7 +135,9 @@ exports[`config/presets/index resolvePreset resolves linters 1`] = `
     "@types/eslint",
     "babel-eslint",
     "codelyzer",
+    "prettier",
     "remark-lint",
+    "standard",
   ],
   "matchPackagePatterns": [
     "\\btslint\\b",
@@ -162,7 +166,9 @@ exports[`config/presets/index resolvePreset resolves nested groups 1`] = `
         "@types/eslint",
         "babel-eslint",
         "codelyzer",
+        "prettier",
         "remark-lint",
+        "standard",
       ],
       "matchPackagePatterns": [
         "\\btslint\\b",

@@ -111,7 +111,7 @@ function extractWithYAMLParser(
       deps.push(dep);
     }
 
-    for (const service of Object.values(job.services ?? {})) {
+    for (const service of Object.values(job?.services ?? {})) {
       const dep = extractContainer(service);
       if (dep) {
         dep.depType = 'service';
