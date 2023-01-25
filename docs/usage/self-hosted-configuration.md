@@ -417,9 +417,16 @@ Read the documentation for [git commit --no-verify](https://git-scm.com/docs/git
 To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
 
 ## gitPrivateKey
+This property is used for [GPG/PGP signing](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work). 
+To generate a GPG key, run the following commands in terminal:
+`gpg --gen-key`
+For the following prompts, enter the following:
+Real Name: `Renovate Bot`
+Email Address: `bot@renovateapp.com`
 
-This should be an armored private key, so the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`.
-Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+Next, we want to save the private key into an environment variable. The following command will copy the private key to the clipboard while replacing all new lines with `\n`.
+`gpg --export-secret-keys --armor [your public key] | awk -v ORS='\\n' '1' | pbcopy`
+Finally, store this file in a variable called `RENOVATE_GIT_PRIVATE_KEY` in your CI settings. 
 
 <!-- prettier-ignore -->
 !!! note
