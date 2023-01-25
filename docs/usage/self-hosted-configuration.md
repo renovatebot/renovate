@@ -418,7 +418,7 @@ To learn more about Git hooks, read the [Pro Git 2 book, section on Git Hooks](h
 
 ## gitPrivateKey
 This property is used for [GPG/PGP signing](https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work). 
-To generate a GPG key, run the following commands in terminal:
+To generate a GPG key, run the following commands in the terminal:
 `gpg --gen-key`
 For the following prompts, enter the following:
 Real Name: `Renovate Bot`
