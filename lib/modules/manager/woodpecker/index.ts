@@ -10,7 +10,6 @@ export const defaultConfig = {
   fileMatch: ['^\\.woodpecker(?:/[^/]+)?\\.ya?ml$'],
 };
 
-//TODO remove "docker" in major version, as this is no longer fitting the category concept
-export const categories: Category[] = ['ci', 'docker'];
+export const categories: Category[] = ['ci'];
 
 export const supportedDatasources = [DockerDatasource.id];
