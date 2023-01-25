@@ -424,7 +424,8 @@ For the following prompts, enter the following:
 Real Name: `Renovate Bot`
 Email Address: `bot@renovateapp.com`
 
-Next, we want to save the private key into an environment variable. The following command will copy the private key to the clipboard while replacing all new lines with `\n`.
+Next, we want to save the private key into an environment variable.
+The following command will copy the private key to the clipboard while replacing all new lines with `\n`.
 `gpg --export-secret-keys --armor [your public key] | awk -v ORS='\\n' '1' | pbcopy`
 Finally, store this file in a variable called `RENOVATE_GIT_PRIVATE_KEY` in your CI settings. 
 
