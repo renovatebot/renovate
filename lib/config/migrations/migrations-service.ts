@@ -165,7 +165,7 @@ export class MigrationsService {
     return !dequal(originalConfig, migratedConfig);
   }
 
-  protected static getMigrations(
+  public static getMigrations(
     originalConfig: RenovateConfig,
     migratedConfig: RenovateConfig
   ): ReadonlyArray<Migration> {
