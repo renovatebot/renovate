@@ -178,14 +178,13 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (releaseMatch.url && !baseUrl.includes('gitlab')) {
-    // there is a ready link
-    releaseNotes.url = releaseMatch.url;
+  if (baseUrl.includes('gitlab')) {
+    releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
-    // TODO: types (#7154)
-    releaseNotes.url = baseUrl.includes('gitlab')
-      ? `${baseUrl}${repository}/tags/${releaseMatch.tag!}`
-      : `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
+    releaseNotes.url = releaseMatch.url
+      ? releaseMatch.url
+      : /* istanbul ignore next */
+        `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
