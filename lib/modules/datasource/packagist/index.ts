@@ -157,34 +157,35 @@ export class PackagistDatasource extends Datasource {
       packages,
       providersUrl,
       providersLazyUrl,
-      files,
-      includesFiles,
+      files = [],
+      includesFiles = [],
       providerPackages,
     } = registryMeta;
-    if (files) {
-      const queue = files.map(
-        (file) => (): Promise<PackagistFile> =>
-          this.getPackagistFile(regUrl, file)
-      );
-      const resolvedFiles = await p.all(queue);
-      for (const res of resolvedFiles) {
+
+    const includesPackages: Record<string, ReleaseResult> = {};
+
+    const tasks: (() => Promise<void>)[] = [];
+
+    for (const file of files) {
+      tasks.push(async () => {
+        const res = await this.getPackagistFile(regUrl, file);
         for (const [name, val] of Object.entries(res.providers)) {
           providerPackages[name] = val.sha256;
         }
-      }
+      });
     }
-    const includesPackages: Record<string, ReleaseResult> = {};
-    if (includesFiles) {
-      for (const file of includesFiles) {
+
+    for (const file of includesFiles) {
+      tasks.push(async () => {
         const res = await this.getPackagistFile(regUrl, file);
-        if (res.packages) {
-          for (const [key, val] of Object.entries(res.packages)) {
-            const dep = PackagistDatasource.extractDepReleases(val);
-            includesPackages[key] = dep;
-          }
+        for (const [key, val] of Object.entries(res.packages ?? {})) {
+          includesPackages[key] = PackagistDatasource.extractDepReleases(val);
         }
-      }
+      });
     }
+
+    await p.all(tasks);
+
     const allPackages: AllPackages = {
       packages,
       providersUrl,
