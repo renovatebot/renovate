@@ -2511,22 +2511,22 @@
 "@renovate/eslint-plugin@file:./tools/eslint":
   version "0.0.0"
 
-"@renovatebot/osv-offline-db@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.1.0.tgz#08d876ecc013bedb723c309ef905e30c49ef27f4"
-  integrity sha512-svr4WbqUnL9XBMPYQxHDX5ev/V7b3TouXHNbdoKAKzUSw1cDOkZpxUWfawuG9YxXhLiZdI2KtSORwuohUYK+7Q==
+"@renovatebot/osv-offline-db@1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.3.1.tgz#ce9db5e49cd37549afba874a89e56ae6c758cd83"
+  integrity sha512-DnNPBY0nCDRKF2yF4nfcRpj5IpWYsM9iLAc5bTyYVNGsMAnjThkpwkDi9dhG3Hf7pY2PWn7Aj2A704hq9b/MtQ==
   dependencies:
-    "@seald-io/nedb" "^3.1.0"
+    "@seald-io/nedb" "^4.0.0"
 
-"@renovatebot/osv-offline@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.1.0.tgz#7bee8f0d95c7c2299cde74bda3f9b245c2ea8958"
-  integrity sha512-e6+p2dtqe0HOK7v2E4Nl7FZK1ghT4MQi6/gP2FsYehcRnxfZgVCcrgzEvWCKZR5a1+VMvHsVlmOdwt/vmNFrgQ==
+"@renovatebot/osv-offline@1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.1.4.tgz#a72a00c8a2fc5afb1892cc3d061104590af5a555"
+  integrity sha512-zhOf0LxraC0nGAZMoTzL1t3PCsjK5p8pATQDuVCN05D3gXUuo4lIJOXEe7VZMdes3mUVqWt5KCUqU0cGh6d3Gg==
   dependencies:
     "@octokit/rest" "^19.0.5"
-    "@renovatebot/osv-offline-db" "1.1.0"
+    "@renovatebot/osv-offline-db" "1.3.1"
     adm-zip "~0.5.10"
-    fs-extra "^10.1.0"
+    fs-extra "^11.1.0"
     got "^11.8.6"
     luxon "^3.2.1"
 
@@ -2542,17 +2542,17 @@
   dependencies:
     tslib "^2.4.1"
 
-"@seald-io/binary-search-tree@^1.0.2":
+"@seald-io/binary-search-tree@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@seald-io/binary-search-tree/-/binary-search-tree-1.0.3.tgz#165a9a456eaa30d15885b25db83861bcce2c6a74"
   integrity sha512-qv3jnwoakeax2razYaMsGI/luWdliBLHTdC6jU55hQt1hcFqzauH/HsBollQ7IR4ySTtYhT+xyHoijpA16C+tA==
 
-"@seald-io/nedb@^3.1.0":
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-3.1.0.tgz#6105345a18596f6f9d69f46d7f572efdae32af8e"
-  integrity sha512-5G0hCQGJjOelOutvW1l4VD581XMhTPxpj1BUaCWTEM2MPXR9TzIr0MKMnEjnTA5nEKfujPyvVW7iF3etm1/gKQ==
+"@seald-io/nedb@^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-4.0.0.tgz#875595cbdf3e5b781bb15190e40b6e0606159b04"
+  integrity sha512-2hIBCoXn2O6fkUd7CeevtLdiK4WbAsE2wVhM6+CVG0Ub45aoyCC83P9ikUNcL5HytZA6gLRWc+1Eseio9ctfCQ==
   dependencies:
-    "@seald-io/binary-search-tree" "^1.0.2"
+    "@seald-io/binary-search-tree" "^1.0.3"
     localforage "^1.9.0"
     util "^0.12.4"
 
@@ -5360,19 +5360,10 @@ from2@^2.3.0:
     inherits "^2.0.1"
     readable-stream "^2.0.0"
 
-fs-extra@11.1.0, fs-extra@^11.0.0:
+fs-extra@11.1.0, fs-extra@^11.0.0, fs-extra@^11.1.0:
   version "11.1.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-11.1.0.tgz#5784b102104433bb0e090f48bfc4a30742c357ed"
   integrity sha512-0rcTq621PD5jM/e0a3EJoGC/1TC5ZBCERW82LQuwfGnCa1V8w7dpYH1yNu+SLb6E5dkeCBzKEyLGlFrnr+dUyw==
-  dependencies:
-    graceful-fs "^4.2.0"
-    jsonfile "^6.0.1"
-    universalify "^2.0.0"
-
-fs-extra@^10.1.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-10.1.0.tgz#02873cfbc4084dde127eaa5f9905eef2325d1abf"
-  integrity sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==
   dependencies:
     graceful-fs "^4.2.0"
     jsonfile "^6.0.1"
