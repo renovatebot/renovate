@@ -81,16 +81,27 @@ describe('modules/versioning/hermit/index', () => {
   );
 
   test.each`
-    version      | other        | expected
-    ${'@1'}      | ${'@1.2'}    | ${false}
-    ${'@1.2'}    | ${'@1.2'}    | ${true}
-    ${'@1.2.3'}  | ${'@1.2'}    | ${false}
-    ${'@latest'} | ${'@1'}      | ${false}
-    ${'@stable'} | ${'@stable'} | ${true}
+    version      | range              | expected
+    ${'0.6.1'}   | ${'>0.6.0 <0.7.0'} | ${true}
+    ${'0.6.1'}   | ${'<0.7.0'}        | ${true}
+    ${'0.6.1'}   | ${'<=0.7.0'}       | ${true}
+    ${'0.6.1'}   | ${'>=0.6.0'}       | ${true}
+    ${'0.6.1'}   | ${'>0.6.0'}        | ${true}
+    ${'0.6.1'}   | ${'0.6.x'}         | ${true}
+    ${'0.6.1'}   | ${'0.6.*'}         | ${true}
+    ${'0.6.1'}   | ${'0.6.0 - 0.6.3'} | ${true}
+    ${'0.6.1'}   | ${'~0.6'}          | ${true}
+    ${'0.6.1'}   | ${'0.6.1'}         | ${true}
+    ${'0.0.6'}   | ${'^0.0.6'}        | ${true}
+    ${'@1'}      | ${'@1.2'}          | ${false}
+    ${'@1.2'}    | ${'@1.2'}          | ${true}
+    ${'@1.2.3'}  | ${'@1.2'}          | ${false}
+    ${'@latest'} | ${'@1'}            | ${false}
+    ${'@stable'} | ${'@stable'}       | ${true}
   `(
-    'matches("$version", "$other") === $expected',
-    ({ version, other, expected }) => {
-      expect(versioning.matches(version, other)).toBe(expected);
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(versioning.matches(version, range)).toBe(expected);
     }
   );
 

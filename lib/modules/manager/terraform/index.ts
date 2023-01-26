@@ -8,6 +8,7 @@ import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 import { TerraformProviderDatasource } from '../../datasource/terraform-provider';
 
 export { updateArtifacts } from './lockfile';
+export { updateLockedDependency } from './lockfile/update-locked';
 export { extractPackageFile } from './extract';
 
 export const supportedDatasources = [
