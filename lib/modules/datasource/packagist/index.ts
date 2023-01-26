@@ -136,7 +136,7 @@ export class PackagistDatasource extends Datasource {
       return schema.extractReleaseResult(parsedArray.data);
     }
 
-    logger.warn(
+    logger.trace(
       { composerReleases },
       'Packagist: unknown format to extract from'
     );
