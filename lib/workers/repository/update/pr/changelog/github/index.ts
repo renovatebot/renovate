@@ -11,7 +11,7 @@ import {
 } from '../../../../../../util/github/graphql';
 import { GithubHttp } from '../../../../../../util/http/github';
 import { fromBase64 } from '../../../../../../util/string';
-import { ensureTrailingSlash } from '../../../../../../util/url';
+import { ensureTrailingSlash, joinUrlParts } from '../../../../../../util/url';
 import type {
   ChangeLogFile,
   ChangeLogNotes,
@@ -121,9 +121,12 @@ export async function getReleaseList(
   logger.trace('github.getReleaseList()');
   const apiBaseUrl = project.apiBaseUrl!; // TODO #7154
   const repository = project.repository;
-  const notesSourceUrl = `${ensureTrailingSlash(
-    apiBaseUrl
-  )}repos/${repository}/releases`;
+  const notesSourceUrl = joinUrlParts(
+    apiBaseUrl,
+    'repos',
+    repository,
+    'releases'
+  );
   const releases = await queryReleases(
     {
       registryUrl: apiBaseUrl,

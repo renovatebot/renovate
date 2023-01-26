@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
+import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -178,7 +179,7 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (baseUrl.includes('gitlab')) {
+  if (detectPlatform(baseUrl) === 'gitlab') {
     releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
     releaseNotes.url = releaseMatch.url
