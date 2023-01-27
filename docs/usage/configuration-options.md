@@ -1727,29 +1727,6 @@ The categories can be found in the [manager documentation](./modules/manager/ind
 }
 ```
 
-### matchLanguages
-
-Use this field to restrict rules to a particular language. e.g.
-
-<!-- prettier-ignore -->
-!!! warning
-    `matchLanguages` is deprecated and will be removed in the future.
-    Use `matchCategories` which provides a more fine-grained and broad matching possibility.
-```json
-{
-  "packageRules": [
-    {
-      "matchPackageNames": ["request"],
-      "matchLanguages": ["python"],
-      "enabled": false
-    }
-  ]
-}
-```
-
-In the above example, this rule will not prevent Renovate from extracting Python dependencies, but it will stop them from being updated.
-If you wish to skip extraction altogether, use a feature like `enabledManagers` instead.
-
 ### matchBaseBranches
 
 Use this field to restrict rules to a particular branch. e.g.

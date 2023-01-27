@@ -313,7 +313,6 @@ export async function validateConfig(
             const selectors = [
               'matchFiles',
               'matchPaths',
-              'matchLanguages',
               'matchCategories',
               'matchBaseBranches',
               'matchManagers',
