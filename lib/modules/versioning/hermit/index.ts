@@ -175,7 +175,7 @@ export class HermitVersioning extends RegExpVersioningApi {
 
   override matches(version: string, range: string): boolean {
     if (
-      HermitVersioning._isChannel(version) &&
+      HermitVersioning._isChannel(version) ||
       HermitVersioning._isChannel(range)
     ) {
       return this.equals(version, range);
