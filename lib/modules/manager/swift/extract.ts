@@ -16,7 +16,7 @@ const regExps = {
   comma: regEx(/,/),
   from: regEx(/from/),
   rangeOp: regEx(/\.\.[.<]/),
-  exactVersion: regEx(/\.\s*exact\s*\(\s*/),
+  exactVersion: regEx(/(\.\s*exact\s*\(|\s*exact:)\s*/),
 };
 
 const WILDCARD = 'wildcard';
