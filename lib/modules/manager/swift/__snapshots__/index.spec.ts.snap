@@ -142,3 +142,17 @@ exports[`modules/manager/swift/index extractPackageFile() parses package descrip
   "packageFile": null,
 }
 `;
+
+exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 7`] = `
+{
+  "deps": [
+    {
+      "currentValue": "1.2.3",
+      "datasource": "git-tags",
+      "depName": "vapor/vapor",
+      "packageName": "https://github.com/vapor/vapor.git",
+    },
+  ],
+  "packageFile": null,
+}
+`;

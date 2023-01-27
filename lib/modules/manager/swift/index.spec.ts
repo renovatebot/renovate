@@ -127,6 +127,11 @@ describe('modules/manager/swift/index', () => {
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",..<"1.2.3")]`
         )
       ).toMatchSnapshot({ deps: [{ currentValue: '..<"1.2.3"' }] });
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3"))]`
+        )
+      ).toMatchSnapshot({ deps: [{ currentValue: '1.2.3' }] });
     });
 
     it('parses multiple packages', () => {
