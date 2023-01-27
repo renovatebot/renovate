@@ -16,7 +16,8 @@ const regExps = {
   comma: regEx(/,/),
   from: regEx(/from/),
   rangeOp: regEx(/\.\.[.<]/),
-  exactVersion: regEx(/(\.\s*exact\s*\(|\s*exact:)\s*/),
+  exactVersion: regEx(/\.\s*exact\s*\(\s*/),
+  exactVersionLabel: regEx(/\s*exact:/),
 };
 
 const WILDCARD = 'wildcard';
@@ -32,6 +33,7 @@ const COMMA = 'comma';
 const FROM = 'from';
 const RANGE_OP = 'rangeOp';
 const EXACT_VERSION = 'exactVersion';
+const EXACT_VERSION_LABEL = 'exactVersionLabel';
 
 const searchLabels = {
   wildcard: WILDCARD,
@@ -47,6 +49,7 @@ const searchLabels = {
   from: FROM,
   rangeOp: RANGE_OP,
   exactVersion: EXACT_VERSION,
+  exactVersionLabel: EXACT_VERSION_LABEL,
 };
 
 function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
@@ -72,10 +75,13 @@ function searchKeysForState(state: string | null): (keyof typeof regExps)[] {
         STRING_LITERAL,
         RANGE_OP,
         EXACT_VERSION,
+        EXACT_VERSION_LABEL,
         PACKAGE,
         END_SECTION,
       ];
     case '.package(url: [depName], .exact(':
+      return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
+    case '.package(url: [depName], exact:':
       return [SPACE, STRING_LITERAL, PACKAGE, END_SECTION];
     case '.package(url: [depName], from':
       return [SPACE, COLON, PACKAGE, END_SECTION];
@@ -263,6 +269,8 @@ export function extractPackageFile(
           state = '.package(url: [depName], [rangeFrom][rangeOp]';
         } else if (label === EXACT_VERSION) {
           state = '.package(url: [depName], .exact(';
+        } else if (label === EXACT_VERSION_LABEL) {
+          state = '.package(url: [depName], exact:';
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
@@ -275,6 +283,19 @@ export function extractPackageFile(
         } else if (label === STRING_LITERAL) {
           currentValue = substr.slice(1, substr.length - 1);
           yieldDep();
+        } else if (label === PACKAGE) {
+          yieldDep();
+          state = '.package(';
+        }
+        break;
+      case '.package(url: [depName], exact:':
+        if (label === END_SECTION) {
+          yieldDep();
+          state = null;
+        } else if (label === STRING_LITERAL) {
+          currentValue = substr.slice(1, substr.length - 1);
+          yieldDep();
+          state = 'dependencies: [';
         } else if (label === PACKAGE) {
           yieldDep();
           state = '.package(';
