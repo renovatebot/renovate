@@ -1,6 +1,6 @@
 import { load } from 'js-yaml';
 import { z } from 'zod';
-import { logger } from '../../../logger';
+import { logger } from '../../../../logger';
 
 const YarnrcYmlSchema = z.object({
   npmRegistryServer: z.string().optional(),

@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
 
-describe('modules/datasource/npm/yarnrc', () => {
+describe('modules/manager/npm/extract/yarnrc', () => {
   describe('resolveRegistryUrl()', () => {
     it('considers default registry', () => {
       const registryUrl = resolveRegistryUrl('a-package', {

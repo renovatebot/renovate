@@ -7,11 +7,6 @@ import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
-import {
-  YarnConfig,
-  loadConfigFromYarnrcYml,
-  resolveRegistryUrl,
-} from '../../../datasource/npm/yarnrc';
 import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
@@ -25,6 +20,11 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import {
+  YarnConfig,
+  loadConfigFromYarnrcYml,
+  resolveRegistryUrl,
+} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
