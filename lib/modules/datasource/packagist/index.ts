@@ -163,7 +163,7 @@ export class PackagistDatasource extends Datasource {
       providerPackages,
     } = registryMeta;
 
-    const includesPackages: Record<string, ReleaseResult> = {};
+    const includesPackages: Record<string, ReleaseResult | null> = {};
 
     const tasks: (() => Promise<void>)[] = [];
 
