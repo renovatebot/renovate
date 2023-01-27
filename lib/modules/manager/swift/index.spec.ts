@@ -66,6 +66,11 @@ describe('modules/manager/swift/index', () => {
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", .exact(]`
         )
       ).toBeNull();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:]`
+        )
+      ).toBeNull();
     });
 
     it('parses packages with invalid versions', () => {
@@ -130,6 +135,11 @@ describe('modules/manager/swift/index', () => {
       expect(
         extractPackageFile(
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git",.exact("1.2.3"))]`
+        )
+      ).toMatchSnapshot({ deps: [{ currentValue: '1.2.3' }] });
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git",exact:"1.2.3"))]`
         )
       ).toMatchSnapshot({ deps: [{ currentValue: '1.2.3' }] });
     });
