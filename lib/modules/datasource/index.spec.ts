@@ -628,6 +628,97 @@ describe('modules/datasource/index', () => {
           expect(res).toBeNull();
         });
       });
+
+      describe('relaseConstraintFiltering', () => {
+        it('keeps all releases by default', async () => {
+          const registries = {
+            'https://foo.bar': {
+              releases: [
+                {
+                  version: '0.0.1',
+                  constraints: {
+                    python: ['2.7'],
+                  },
+                },
+                {
+                  version: '0.0.2',
+                },
+              ],
+            },
+          } satisfies RegistriesMock;
+          datasources.set(datasource, new DummyDatasource(registries));
+          const res = await getPkgReleases({
+            datasource,
+            depName,
+            defaultRegistryUrls: ['https://foo.bar'],
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+          });
+        });
+
+        it('keeps all releases if constraints is set but no value defined for constraintsFiltering', async () => {
+          const registries = {
+            'https://foo.bar': {
+              releases: [
+                {
+                  version: '0.0.1',
+                  constraints: {
+                    python: ['2.7'],
+                  },
+                },
+                {
+                  version: '0.0.2',
+                },
+              ],
+            },
+          } satisfies RegistriesMock;
+          datasources.set(datasource, new DummyDatasource(registries));
+          const res = await getPkgReleases({
+            datasource,
+            depName,
+            defaultRegistryUrls: ['https://foo.bar'],
+            constraints: {
+              python: '2.7.0',
+            },
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }, { version: '0.0.2' }],
+          });
+        });
+
+        it('filters releases if value is strict', async () => {
+          const registries = {
+            'https://foo.bar': {
+              releases: [
+                {
+                  version: '0.0.1',
+                  constraints: {
+                    python: ['2.7'],
+                  },
+                },
+                {
+                  version: '0.0.2',
+                  constraints: {
+                    python: ['1.0'],
+                  },
+                },
+              ],
+            },
+          } satisfies RegistriesMock;
+          datasources.set(datasource, new DummyDatasource(registries));
+          const res = await getPkgReleases({
+            datasource,
+            depName,
+            defaultRegistryUrls: ['https://foo.bar'],
+            constraints: { python: '2.7.0' },
+            constraintsFiltering: 'strict',
+          });
+          expect(res).toMatchObject({
+            releases: [{ version: '0.0.1' }],
+          });
+        });
+      });
     });
   });
 });
