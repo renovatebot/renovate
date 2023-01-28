@@ -525,6 +525,19 @@ If you need to _override_ constraints that Renovate detects from the repository,
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
+## constraintsFiltering
+
+This option controls whether Renovate filters new releases based on configured or detected `constraints`.
+Renovate supports two options:
+
+- `none`: No release filtering (all releases allowed)
+- `strict`: If the release's constraints match the package file constraints, then it's included
+
+We are working on adding more advanced filtering options.
+
+Note: There must be a `constraints` object in your Renovate config for this to work.
+This feature is limited to `pypi` datasource only.
+
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
@@ -674,8 +687,8 @@ This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
