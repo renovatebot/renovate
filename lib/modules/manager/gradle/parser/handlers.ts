@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import { parseGradle } from '../parser';
+import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
@@ -14,6 +14,12 @@ import {
   interpolateString,
   loadFromTokenMap,
 } from './common';
+
+// needed to break circular dependency
+let parseGradle: typeof parseGradleCallback;
+export function setParseGradleFunc(func: typeof parseGradleCallback): void {
+  parseGradle = func;
+}
 
 export function handleAssignment(ctx: Ctx): Ctx {
   const key = loadFromTokenMap(ctx, 'keyToken')[0].value;
