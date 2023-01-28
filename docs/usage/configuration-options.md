@@ -821,7 +821,10 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract. `fileMatch` is a mergeable field, i.e., patterns can be added to the default patterns of a manager. The default patterns cannot be removed. If you need to include or exclude specific paths use the `ignorePaths` or `includePaths` configuration options.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
+`fileMatch` is a mergeable field, i.e., patterns can be added to the default patterns of a manager.
+The default patterns cannot be removed.
+If you need to include or exclude specific paths use the `ignorePaths` or `includePaths` configuration options.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
