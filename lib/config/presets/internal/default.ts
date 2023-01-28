@@ -10,10 +10,6 @@ export const presets: Record<string, Preset> = {
     assignees: ['{{arg0}}'],
     description: 'Assign PRs to `{{arg0}}`.',
   },
-  autodetectRangeStrategy: {
-    description: 'Automatically detect the best rangeStrategy to use.',
-    rangeStrategy: 'auto',
-  },
   automergeAll: {
     automerge: true,
     description:
