@@ -25,5 +25,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (isComplexRange) {
     return 'widen';
   }
-  return 'replace';
+  return 'update-lockfile';
 }
