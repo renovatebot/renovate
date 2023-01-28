@@ -152,7 +152,7 @@ sidebar_label: ${displayName}
           md += '\n```\n\n';
         }
       }
-      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
+      md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching). To have the manager ignore specific paths use the [\`ignorePaths\`](/configuration-options/#ignorepaths) configuration option.\n\n`;
       md += '## Supported datasources\n\n';
       const escapedDatasources = (supportedDatasources || [])
         .map(
