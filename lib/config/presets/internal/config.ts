@@ -9,7 +9,6 @@ export const presets: Record<string, Preset> = {
       ':dependencyDashboard',
       ':semanticPrefixFixDepsChoreOthers',
       ':ignoreModulesAndTests',
-      ':autodetectRangeStrategy',
       ':prHourlyLimit2',
       ':prConcurrentLimit10',
       'group:monorepos',
