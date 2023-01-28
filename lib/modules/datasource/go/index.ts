@@ -36,9 +36,8 @@ export class GoDatasource extends Datasource {
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return process.env.GOPROXY
-      ? this.goproxy.getReleases(config)
-      : this.direct.getReleases(config);
+    process.env.GOPROXY ??= 'https://proxy.golang.org,direct';
+    return this.goproxy.getReleases(config);
   }
 
   /**
