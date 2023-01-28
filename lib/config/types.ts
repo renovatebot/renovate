@@ -187,6 +187,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -251,6 +252,8 @@ export interface RenovateConfig
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
