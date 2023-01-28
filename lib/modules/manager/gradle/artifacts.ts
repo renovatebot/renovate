@@ -5,13 +5,8 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  findUpLocal,
-  getFileContentMap,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
-import { getFileList, getRepoStatus } from '../../../util/git';
+import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
+import { getFileList, getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import {
   extraEnv,
@@ -128,7 +123,7 @@ export async function updateArtifacts({
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
-    const oldLockFileContentMap = await getFileContentMap(lockFiles);
+    const oldLockFileContentMap = await getFiles(lockFiles);
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     await prepareGradleCommand(gradlewFile);
@@ -136,9 +131,7 @@ export async function updateArtifacts({
     let cmd = `${gradlewName} --console=plain -q`;
     const execOptions: ExecOptions = {
       cwdFile: gradlewFile,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       extraEnv,
       toolConstraints: [
         {

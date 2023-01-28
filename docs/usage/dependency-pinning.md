@@ -184,7 +184,7 @@ Meanwhile you could be upgrading all the other essential fixes of other dependen
 You could even be running `yarn upgrade` regularly to be getting _indirect_ package updates in the lockfile and seeing if everything still passes.
 
 So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
-For this reason our usual recommendation using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
+For this reason our usual recommendation is using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
 
 Don't forget though that our motto is "Flexible, so you don't need to be", so go ahead and configure however you want.
 Also, we're open to ideas for how to make lock file updates more "visible" too.

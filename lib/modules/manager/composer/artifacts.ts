@@ -18,26 +18,39 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
   extractConstraints,
+  findGithubToken,
   getComposerArguments,
   getPhpConstraint,
   requireComposerDependencyInstallation,
+  takePersonalAccessTokenIfPossible,
 } from './utils';
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubCredentials = hostRules.find({
+  const githubToken = findGithubToken({
     hostType: 'github',
     url: 'https://api.github.com/',
   });
-  if (githubCredentials?.token) {
+
+  const gitTagsGithubToken = findGithubToken({
+    hostType: GitTagsDatasource.id,
+    url: 'https://github.com',
+  });
+
+  const selectedGithubToken = takePersonalAccessTokenIfPossible(
+    githubToken,
+    gitTagsGithubToken
+  );
+  if (selectedGithubToken) {
     authJson['github-oauth'] = {
-      'github.com': githubCredentials.token.replace('x-access-token:', ''),
+      'github.com': selectedGithubToken,
     };
   }
 
@@ -117,9 +130,7 @@ export async function updateArtifacts({
         COMPOSER_AUTH: getAuthJson(),
       },
       toolConstraints: [phpToolConstraint, composerToolConstraint],
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
     };
 
     const commands: string[] = [];

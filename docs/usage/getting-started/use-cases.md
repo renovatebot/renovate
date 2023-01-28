@@ -127,7 +127,7 @@ To learn more about "automerge" read the [key concepts, automerge](https://docs.
 We use these Renovate features to automerge an internal dependency:
 
 - [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
-- [`automerge`](https://docs.renovatebot.com/configuration-options/#automerge) set to `true
+- [`automerge`](https://docs.renovatebot.com/configuration-options/#automerge) set to `true`
 - [`automergeType`](https://docs.renovatebot.com/configuration-options/#automergetype) set to `branch`
 
 ##### Background information
@@ -177,9 +177,9 @@ You can set the time ranges during which Renovate creates updates in the `schedu
 
 You can use Renovate's "Dependency Dashboard" on platforms which support dynamic Markdown checkboxes:
 
+- Gitea and Forgejo
 - GitHub
 - GitLab
-- Gitea
 
 When you enable the Dependency Dashboard, Renovate creates a "Dependency Dashboard" issue.
 This issue lists all updates which are pending, in progress, or were previously closed ignored.

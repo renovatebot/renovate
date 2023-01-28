@@ -54,6 +54,7 @@ describe('modules/manager/sbt/extract', () => {
           },
           { packageName: 'org.example:quux', currentValue: '0.0.5' },
           { packageName: 'org.example:quuz_2.9.10', currentValue: '0.0.6' },
+          { packageName: 'org.example:abc_2.9.10', currentValue: '0.0.42' },
           { packageName: 'org.example:corge', currentValue: '0.0.7' },
           { packageName: 'org.example:grault', currentValue: '0.0.8' },
           { packageName: 'org.example:waldo', currentValue: '0.0.9' },
@@ -218,6 +219,21 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts correct scala library when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.1.1"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.1.1',
           },
         ],
       });

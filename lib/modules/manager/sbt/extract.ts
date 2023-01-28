@@ -8,6 +8,8 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
+import { get } from '../../versioning';
+import * as mavenVersioning from '../../versioning/maven';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
 import { normalizeScalaVersion } from './util';
@@ -49,10 +51,17 @@ const scalaVersionMatch = q
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
+      const version = get(mavenVersioning.id);
+
+      let packageName = 'org.scala-lang:scala-library';
+      if (version.getMajor(ctx.scalaVersion) === 3) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
       const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
+        packageName,
         currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
@@ -149,6 +158,13 @@ const versionedDependencyMatch = groupIdMatch
   .op('%')
   .join(versionMatch);
 
+const crossDependencyMatch = groupIdMatch
+  .op('%%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
 function depHandler(ctx: Ctx): Ctx {
   const {
     scalaVersion,
@@ -201,7 +217,7 @@ function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
 
 const sbtPackageMatch = q
   .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
-  .alt(simpleDependencyMatch, versionedDependencyMatch)
+  .alt(crossDependencyMatch, simpleDependencyMatch, versionedDependencyMatch)
   .opt(
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),

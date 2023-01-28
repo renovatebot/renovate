@@ -2,6 +2,8 @@ import { query as q } from 'good-enough-parser';
 import type { Ctx } from '../types';
 import {
   cleanupTempVars,
+  qConcatExpr,
+  qPropertyAccessIdentifier,
   qStringValue,
   qStringValueAsSymbol,
   qTemplateString,
@@ -10,6 +12,18 @@ import {
   storeVarToken,
 } from './common';
 import { handleLibraryDep } from './handlers';
+
+const qGroupId = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'groupId'));
+
+const qArtifactId = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+).handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
@@ -28,7 +42,13 @@ const qVersionCatalogVersion = q
       endsWith: ')',
       search: q
         .begin<Ctx>()
-        .alt(qTemplateString, qVariableAccessIdentifier)
+        .join(
+          qConcatExpr(
+            qTemplateString,
+            qPropertyAccessIdentifier,
+            qVariableAccessIdentifier
+          )
+        )
         .end(),
     })
   )
@@ -48,11 +68,9 @@ const qVersionCatalogDependencies = q
       .join(qStringValue)
       .handler((ctx) => storeInTokenMap(ctx, 'alias'))
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .join(qGroupId)
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .join(qArtifactId)
       .end(),
   })
   .opt(qVersionCatalogVersion)
@@ -80,14 +98,7 @@ const qVersionCatalogAliasDependencies = q
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
-      .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
-      .end(),
+    search: q.begin<Ctx>().join(qGroupId).op(',').join(qArtifactId).end(),
   })
   .opt(qVersionCatalogVersion)
   .handler(handleLibraryDep)

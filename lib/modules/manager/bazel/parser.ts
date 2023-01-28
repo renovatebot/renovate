@@ -2,13 +2,8 @@ import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
-import { supportedRulesRegex } from './rules/index';
-import type {
-  Fragment,
-  FragmentData,
-  NestedFragment,
-  RecordFragment,
-} from './types';
+import { supportedRulesRegex } from './rules';
+import type { NestedFragment, RecordFragment } from './types';
 
 interface Ctx {
   readonly source: string;
@@ -125,7 +120,9 @@ const kwParams = q
  *
  * @param search something to match inside parens
  */
-function ruleCall(search: q.QueryBuilder<Ctx>): q.QueryBuilder<Ctx> {
+function ruleCall(
+  search: q.QueryBuilder<Ctx, parser.Node>
+): q.QueryBuilder<Ctx, parser.Node> {
   return q.tree({
     type: 'wrapped-tree',
     maxDepth: 1,
@@ -228,21 +225,4 @@ export function parse(
 
   memCache.set(cacheKey, result);
   return result;
-}
-
-export function extract(fragment: Fragment): FragmentData {
-  if (fragment.type === 'string') {
-    return fragment.value;
-  }
-
-  if (fragment.type === 'record') {
-    const { children } = fragment;
-    const result: Record<string, FragmentData> = {};
-    for (const [key, value] of Object.entries(children)) {
-      result[key] = extract(value);
-    }
-    return result;
-  }
-
-  return fragment.children.map(extract);
 }
