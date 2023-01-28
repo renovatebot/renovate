@@ -2240,9 +2240,8 @@ const options: RenovateOptions[] = [
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 0,
+    default: 24 * 60,
     globalOnly: true,
-    experimental: true,
   },
   {
     name: 'prBodyDefinitions',
