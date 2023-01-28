@@ -23,5 +23,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   ) {
     return 'widen';
   }
-  return 'replace';
+  return 'update-lockfile';
 }
