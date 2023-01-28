@@ -395,26 +395,28 @@ export async function getPkgReleases(
         (findRelease) => findRelease.version === filterRelease.version
       ) === filterIndex
   );
-  // Filter releases for compatibility
-  for (const [constraintName, constraintValue] of Object.entries(
-    config.constraints ?? {}
-  )) {
-    // Currently we only support if the constraint is a plain version
-    // TODO: Support range/range compatibility filtering #8476
-    if (version.isVersion(constraintValue)) {
-      res.releases = res.releases.filter((release) => {
-        const constraint = release.constraints?.[constraintName];
-        if (!is.nonEmptyArray(constraint)) {
-          // A release with no constraints is OK
-          return true;
-        }
-        return constraint.some(
-          // If any of the release's constraints match, then it's OK
-          (releaseConstraint) =>
-            !releaseConstraint ||
-            version.matches(constraintValue, releaseConstraint)
-        );
-      });
+  if (config?.constraintsFiltering === 'strict') {
+    // Filter releases for compatibility
+    for (const [constraintName, constraintValue] of Object.entries(
+      config.constraints ?? {}
+    )) {
+      // Currently we only support if the constraint is a plain version
+      // TODO: Support range/range compatibility filtering #8476
+      if (version.isVersion(constraintValue)) {
+        res.releases = res.releases.filter((release) => {
+          const constraint = release.constraints?.[constraintName];
+          if (!is.nonEmptyArray(constraint)) {
+            // A release with no constraints is OK
+            return true;
+          }
+          return constraint.some(
+            // If any of the release's constraints match, then it's OK
+            (releaseConstraint) =>
+              !releaseConstraint ||
+              version.matches(constraintValue, releaseConstraint)
+          );
+        });
+      }
     }
   }
   // Strip constraints from releases result
