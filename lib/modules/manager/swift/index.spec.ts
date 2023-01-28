@@ -71,6 +71,11 @@ describe('modules/manager/swift/index', () => {
           `dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:]`
         )
       ).toBeNull();
+      expect(
+        extractPackageFile(
+          `dependencies:[.package(url:"https://github.com/vapor/vapor.git", exact:.package()]`
+        )
+      ).toBeNull();
     });
 
     it('parses packages with invalid versions', () => {
