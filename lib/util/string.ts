@@ -1,5 +1,3 @@
-import { logger } from '../logger';
-
 // Return true if the match string is found at index in content
 export function matchAt(
   content: string,
@@ -16,7 +14,6 @@ export function replaceAt(
   oldString: string,
   newString: string
 ): string {
-  logger.trace(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substring(0, index) +
     newString +
