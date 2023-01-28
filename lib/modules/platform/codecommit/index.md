@@ -133,7 +133,6 @@ module.exports = {
   password: 'SECRET_ACCESS_KEY_GOES_HERE',
   token: 'AWS_SESSION_TOKEN_GOES_HERE',
   gitAuthor: 'your_email@domain',
-  prConcurrentLimit: 10,
   packageRules: [
     {
       matchPackageNames: ['package_name', 'package_name2'],
