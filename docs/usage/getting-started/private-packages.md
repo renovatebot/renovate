@@ -394,6 +394,21 @@ npmRegistries:
     # this will not be overwritten and may conflict
 ```
 
+### maven
+
+Gilab package registry can be authorized using `Authorization: Bearer <token>`.
+In Gitlab Pipelines authorization can be achieved using following config:
+
+```js
+hostRules: [
+  {
+    hostType: 'maven',
+    matchHost: 'https://gitlab.host.com/api/v4',
+    token: process.env.CI_JOB_TOKEN,
+  },
+];
+```
+
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
