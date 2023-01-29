@@ -397,7 +397,7 @@ npmRegistries:
 ### maven
 
 GitLab package registry can be authorized using `Authorization: Bearer <token>`.
-In Gitlab Pipelines authorization can be achieved using following config:
+In GitLab Pipelines authorization can be achieved using following config:
 
 ```js
 hostRules: [
