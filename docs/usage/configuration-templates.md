@@ -77,9 +77,9 @@ You can change the PR body in the following ways:
 
 Renovate tags are only available on platforms that support HTML tags:
 
+- Gitea
 - GitHub
 - GitLab
-- Gitea
 
 #### renovate:start and renovate:end
 
