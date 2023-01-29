@@ -32,8 +32,10 @@ export class GoProxyDatasource extends Datasource {
   async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
     const { packageName } = config;
     logger.trace(`goproxy.getReleases(${packageName})`);
-
-    const goproxy = process.env.GOPROXY;
+    const goproxy = process.env.GOPROXY ?? 'https://proxy.golang.org,direct';
+    if (goproxy === 'direct') {
+      return this.direct.getReleases(config);
+    }
     const proxyList = this.parseGoproxy(goproxy);
     const noproxy = GoProxyDatasource.parseNoproxy();
 

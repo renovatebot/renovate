@@ -6,12 +6,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
-  getFileContentMap,
+  getLocalFiles,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
 } from '../../../util/fs';
+import { getFiles } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -145,7 +146,7 @@ export async function updateArtifacts({
     getSiblingFileName(f.name, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -170,7 +171,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
+    const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

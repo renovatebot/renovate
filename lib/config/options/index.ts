@@ -218,6 +218,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'constraintsFiltering',
+    description: 'Perform release filtering based on language constraints.',
+    type: 'string',
+    allowedValues: ['none', 'strict'],
+    cli: false,
+    default: 'none',
+  },
+  {
     name: 'repositoryCache',
     description:
       'This option decides if Renovate uses a JSON cache to speed up extractions.',
@@ -405,7 +413,7 @@ const options: RenovateOptions[] = [
       'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'gitea'],
+    supportedPlatforms: ['gitea', 'github', 'gitlab'],
     globalOnly: true,
     experimental: true,
     experimentalIssues: [17633],
@@ -1334,7 +1342,7 @@ const options: RenovateOptions[] = [
     name: 'rangeStrategy',
     description: 'Determines how to modify or update existing ranges.',
     type: 'string',
-    default: 'replace',
+    default: 'auto',
     allowedValues: [
       'auto',
       'pin',
@@ -1528,7 +1536,7 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'stabilityDays',
@@ -1571,16 +1579,16 @@ const options: RenovateOptions[] = [
   {
     name: 'prHourlyLimit',
     description:
-      'Rate limit PRs to maximum x created per hour. 0 (default) means no limit.',
+      'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 2,
   },
   {
     name: 'prConcurrentLimit',
     description:
-      'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
+      'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 10,
   },
   {
     name: 'branchConcurrentLimit',
@@ -2223,9 +2231,8 @@ const options: RenovateOptions[] = [
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 0,
+    default: 24 * 60,
     globalOnly: true,
-    experimental: true,
   },
   {
     name: 'prBodyDefinitions',

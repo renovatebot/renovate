@@ -1,4 +1,5 @@
-import { extract, parse } from './parser';
+import { parse } from './parser';
+import { extract } from './rules';
 
 describe('modules/manager/bazel/parser', () => {
   it('parses rules input', () => {
