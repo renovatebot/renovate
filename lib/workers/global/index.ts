@@ -64,7 +64,7 @@ function checkEnv(): void {
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
     if (!process.env.RENOVATE_X_IGNORE_NODE_WARN) {
-      logger.warn(
+      logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
         { release: process.release, versions: process.versions },
         'Unknown node environment detected.'
       );
@@ -78,7 +78,7 @@ function checkEnv(): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger.warn(
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
     );
