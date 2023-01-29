@@ -134,3 +134,18 @@ module.exports = {
   ],
 };
 ```
+
+This example shows how you can use a `config.js` file to configure Renovate for use with Gitlab pipelines.
+
+```js
+module.exports = {
+  hostRules: [
+    {
+      hostType: 'maven',
+      matchHost: 'https://artifactory.yourcompany.com/',
+      matchHost: "https://gitlab.cdn77.eu/api/v4",
+      token: process.env.CI_JOB_TOKEN
+    },
+  ],
+};
+```
