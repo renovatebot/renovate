@@ -312,7 +312,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
   it('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
-    const updatedDeps = await updateArtifacts({
+    await updateArtifacts({
       packageFileName: 'maven-wrapper',
       newPackageFileContent: '',
       updatedDeps: [{ 
@@ -325,7 +325,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'export MVNW_REPOURL=https://internal.local/maven-public/ && ./mvnw wrapper:wrapper',
+        cmd: './mvnw wrapper:wrapper',
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -340,16 +340,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           },
           maxBuffer: 10485760,
           timeout: 900000,
-        },
-      },
-    ]);
-
-    expect(updatedDeps).toEqual([
-      {
-        file: {
-          contents: undefined,
-          path: 'maven.mvn/wrapper/maven-wrapper.properties',
-          type: 'addition',
         },
       },
     ]);

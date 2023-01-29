@@ -141,9 +141,12 @@ async function executeWrapperCommand(
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
+  const customArtifactoryUrl = getCustomMavenWrapperUrl(deps);
+  const extraEnv = customArtifactoryUrl ? { MVNW_REPOURL: customArtifactoryUrl } : {};
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
+    extraEnv,
     toolConstraints: [
       {
         toolName: 'java',
@@ -154,12 +157,7 @@ async function executeWrapperCommand(
   };
 
   try {
-    let cmdToExecute = cmd;
-    const customArtifactoryUrl = getCustomMavenWrapperUrl(deps);
-    if (customArtifactoryUrl) {
-      cmdToExecute = `export MVNW_REPOURL=${customArtifactoryUrl} && ${cmd}`;
-    }
-    await exec(cmdToExecute, execOptions);
+    await exec(cmd, execOptions);
   } catch (err) {
     logger.error({ err }, 'Error executing maven wrapper update command.');
     throw err;
