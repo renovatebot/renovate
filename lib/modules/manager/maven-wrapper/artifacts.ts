@@ -139,6 +139,7 @@ async function executeWrapperCommand(
   packageFileName: string,
   deps: PackageDependency<Record<string, unknown>>[]
 ): Promise<void> {
+  logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
