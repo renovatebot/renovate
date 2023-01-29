@@ -11,11 +11,13 @@ import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
 import mavenVersioning from '../../versioning/maven';
 import type {
+  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 
+const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2/'
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
@@ -44,6 +46,7 @@ export async function updateArtifacts({
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
@@ -60,7 +63,7 @@ export async function updateArtifacts({
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
     }
-    await executeWrapperCommand(cmd, config, packageFileName);
+    await executeWrapperCommand(cmd, config, packageFileName, updatedDeps);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -84,6 +87,8 @@ export async function updateArtifacts({
     );
     return updateArtifactsResult;
   } catch (err) {
+  
+    console.log('CATCH', err);
     logger.debug({ err }, 'Error setting new Maven Wrapper release value');
     return [
       {
@@ -133,9 +138,9 @@ export function getJavaConstraint(
 async function executeWrapperCommand(
   cmd: string,
   config: UpdateArtifactsConfig,
-  packageFileName: string
+  packageFileName: string,
+  deps: PackageDependency<Record<string, unknown>>[]
 ): Promise<void> {
-  logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
@@ -150,11 +155,27 @@ async function executeWrapperCommand(
   };
 
   try {
-    await exec(cmd, execOptions);
+    let cmdToExecute = cmd;
+    const customArtifactoryUrl = getCustomMavenWrapperUrl(deps);
+    if (customArtifactoryUrl) {
+      cmdToExecute = `export MVNW_REPOURL=${customArtifactoryUrl} && ${cmd}`;
+    }
+    await exec(cmdToExecute, execOptions);
   } catch (err) {
+    console.log('CATCH', err, deps);
     logger.error({ err }, 'Error executing maven wrapper update command.');
     throw err;
   }
+}
+
+function getCustomMavenWrapperUrl(deps: PackageDependency<Record<string, unknown>>[]) : string | null {
+   const replaceString = deps.filter(dep => dep.depName === 'maven-wrapper').map(dep => dep.replaceString)[0];
+   console.log(replaceString);
+   const match = replaceString?.match(/^(.*?)org\/apache\/maven\/wrapper\//);
+   return match 
+            ? match[1] !== DEFAULT_MAVEN_REPO_URL 
+              ? match[1] : null 
+            : null;
 }
 
 async function createWrapperCommand(

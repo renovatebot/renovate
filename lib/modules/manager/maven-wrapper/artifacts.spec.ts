@@ -308,4 +308,50 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
   });
+
+  it.only('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    const updatedDeps = await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [{ 
+        depName: 'maven-wrapper',
+        replaceString: 'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar', 
+      }],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'export MVNW_REPOURL=https://internal.local/maven-public/ && ./mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+
+    expect(updatedDeps).toEqual([
+      {
+        file: {
+          contents: undefined,
+          path: 'maven.mvn/wrapper/maven-wrapper.properties',
+          type: 'addition',
+        },
+      },
+    ]);
+  });
 });
