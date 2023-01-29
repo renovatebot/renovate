@@ -87,8 +87,6 @@ export async function updateArtifacts({
     );
     return updateArtifactsResult;
   } catch (err) {
-  
-    console.log('CATCH', err);
     logger.debug({ err }, 'Error setting new Maven Wrapper release value');
     return [
       {
@@ -162,7 +160,6 @@ async function executeWrapperCommand(
     }
     await exec(cmdToExecute, execOptions);
   } catch (err) {
-    console.log('CATCH', err, deps);
     logger.error({ err }, 'Error executing maven wrapper update command.');
     throw err;
   }
@@ -170,7 +167,6 @@ async function executeWrapperCommand(
 
 function getCustomMavenWrapperUrl(deps: PackageDependency<Record<string, unknown>>[]) : string | null {
    const replaceString = deps.filter(dep => dep.depName === 'maven-wrapper').map(dep => dep.replaceString)[0];
-   console.log(replaceString);
    const match = replaceString?.match(/^(.*?)org\/apache\/maven\/wrapper\//);
    return match 
             ? match[1] !== DEFAULT_MAVEN_REPO_URL 

@@ -309,7 +309,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
   });
 
-  it.only('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
+  it('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     mockMavenFileChangedInGit();
     const updatedDeps = await updateArtifacts({
