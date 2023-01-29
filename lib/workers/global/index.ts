@@ -63,12 +63,10 @@ function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    if (!process.env.RENOVATE_X_IGNORE_NODE_WARN) {
-      logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
-        { release: process.release, versions: process.versions },
-        'Unknown node environment detected.'
-      );
-    }
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
+      { release: process.release, versions: process.versions },
+      'Unknown node environment detected.'
+    );
   } else if (!semver.satisfies(process.versions?.node, range)) {
     logger.error(
       { versions: process.versions, range },
