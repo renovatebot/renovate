@@ -13,6 +13,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:ignoreWeb3jCoreWithOldReleaseTimestamp',
       'workarounds:ignoreHttp4sDigestMilestones',
       'workarounds:typesNodeVersioning',
+      'workarounds:doNotExceedRubygemsRateLimit',
       'workarounds:reduceRepologyServerLoad',
       'workarounds:doNotUpgradeFromAlpineStableToEdge',
       'workarounds:supportRedHatImageVersion',
@@ -29,6 +30,16 @@ export const presets: Record<string, Preset> = {
         enabled: false,
         matchDepTypes: ['parent-root'],
         matchManagers: ['maven'],
+      },
+    ],
+  },
+  doNotExceedRubygemsRateLimit: {
+    description:
+      'Limit concurrent requests to not exceed the rubygems rate limit.',
+    hostRules: [
+      {
+        matchHost: 'rubygems.org',
+        maxRequestsPerSecond: 15,
       },
     ],
   },

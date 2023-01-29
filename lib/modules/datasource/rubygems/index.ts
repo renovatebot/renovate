@@ -1,11 +1,8 @@
-import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { cache } from '../../../util/cache/package/decorator';
-import { parseUrl } from '../../../util/url';
 import * as rubyVersioning from '../../versioning/ruby';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { InternalRubyGemsDatasource } from './get';
-import { VersionsDatasource } from './versions-datasource';
 
 export class RubyGemsDatasource extends Datasource {
   static readonly id = 'rubygems';
@@ -23,8 +20,6 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  private readonly versionsDatasources: Record<string, VersionsDatasource> = {};
-
   private readonly internalRubyGemsDatasource: InternalRubyGemsDatasource;
 
   @cache({
@@ -34,38 +29,13 @@ export class RubyGemsDatasource extends Datasource {
       /* eslint-disable @typescript-eslint/restrict-template-expressions */
       `${registryUrl}/${packageName}`,
   })
-  async getReleases({
+  getReleases({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
-
-    if (!this.versionsDatasources[registryUrl]) {
-      this.versionsDatasources[registryUrl] = new VersionsDatasource(
-        RubyGemsDatasource.id,
-        registryUrl
-      );
-    }
-
-    try {
-      return await this.versionsDatasources[registryUrl].getReleases({
-        packageName,
-        registryUrl,
-      });
-    } catch (error) {
-      if (
-        error.message === PAGE_NOT_FOUND_ERROR &&
-        parseUrl(registryUrl)?.hostname !== 'rubygems.org'
-      ) {
-        return this.internalRubyGemsDatasource.getReleases({
-          packageName,
-          registryUrl,
-        });
-      }
-      throw error;
-    }
+    return this.internalRubyGemsDatasource.getReleases({
+      packageName,
+      registryUrl,
+    });
   }
 }
