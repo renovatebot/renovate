@@ -5,9 +5,6 @@ Follow these best practices when you're working on our code.
 
 ## Git branch names
 
-The Renovate maintainers checkout a lot of Git branches.
-When Git branches have names like `patch-1` it's hard to remember what each branch is about.
-You can help the maintainers by following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification when naming your Git branch.
 
 Branch names should start with a Conventional Commit scope like `feat/` or `fix/` for example:
 
