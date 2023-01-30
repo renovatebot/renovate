@@ -51,7 +51,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       getVulnerabilitiesMock.mockResolvedValue([
         {
           id: 'ABCD',
-          modified: new Date(),
+          modified: '',
           affected: [
             {
               ranges: [{ type: 'SEMVER', events: [{ fixed: '1.2.3' }] }],

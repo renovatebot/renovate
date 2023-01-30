@@ -148,6 +148,16 @@ describe('workers/global/config/parse/env', () => {
       });
     });
 
+    it('does not support GitHub fine-grained PATs', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        GITHUB_COM_TOKEN: 'github_pat_XXXXXX',
+        RENOVATE_TOKEN: 'a github.com token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot({
+        token: 'a github.com token',
+      });
+    });
+
     it('supports GitHub custom endpoint and gitlab.com', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_ENDPOINT: 'a ghe endpoint',
