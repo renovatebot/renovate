@@ -9,6 +9,7 @@ import type { ExecOptions } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
+import { regEx } from '../../../util/regex';
 import mavenVersioning from '../../versioning/maven';
 import type {
   PackageDependency,
@@ -171,7 +172,15 @@ function getCustomMavenWrapperUrl(
   const replaceString = deps
     .filter((dep) => dep.depName === 'maven-wrapper')
     .map((dep) => dep.replaceString)[0];
-  const match = replaceString?.match(/^(.*?)\/org\/apache\/maven\/wrapper\//);
+
+  if (!replaceString) {
+    return null;
+  }
+
+  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+    replaceString
+  );
+
   if (match) {
     return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
   }
