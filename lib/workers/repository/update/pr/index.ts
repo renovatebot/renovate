@@ -17,6 +17,7 @@ import {
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
@@ -114,12 +115,7 @@ export async function ensurePr(
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
-      if (elapsedHours >= config.prNotPendingHours) {
+      if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
         logger.debug('Branch exceeds prNotPending hours - forcing PR creation');
         config.forcePr = true;
       }
@@ -153,11 +149,7 @@ export async function ensurePr(
     if ((await getBranchStatus()) === 'yellow') {
       logger.debug(`Branch status is yellow - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
+      const elapsedHours = getElapsedHours(lastCommitTime);
       if (
         !dependencyDashboardCheck &&
         ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||

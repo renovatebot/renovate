@@ -9,16 +9,14 @@ jest.mock('../../../util/fs');
 
 function mockFs(files: Record<string, string>): void {
   // TODO: fix types, jest is using wrong overload (#7154)
-  fs.getFileContentMap.mockImplementation(
-    (fileNames: string[]): Promise<any> => {
-      const fileContentMap: Record<string, string | null> = {};
-      for (const fileName of fileNames) {
-        fileContentMap[fileName] = files?.[fileName];
-      }
-
-      return Promise.resolve(fileContentMap);
+  fs.getLocalFiles.mockImplementation((fileNames: string[]): Promise<any> => {
+    const fileContentMap: Record<string, string | null> = {};
+    for (const fileName of fileNames) {
+      fileContentMap[fileName] = files?.[fileName];
     }
-  );
+
+    return Promise.resolve(fileContentMap);
+  });
 
   fs.getSiblingFileName.mockImplementation(
     (existingFileNameWithPath: string, otherFileName: string) => {
