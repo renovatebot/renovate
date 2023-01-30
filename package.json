@@ -157,7 +157,7 @@
     "@qnighy/marshal": "0.1.3",
     "@renovatebot/osv-offline": "1.1.5",
     "@renovatebot/pep440": "2.1.11",
-    "@renovatebot/ruby-semver": "2.1.4",
+    "@renovatebot/ruby-semver": "2.1.5",
     "@sindresorhus/is": "4.6.0",
     "@types/tmp": "0.2.3",
     "@yarnpkg/core": "3.3.1",
