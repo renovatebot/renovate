@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { getFileContentMap } from '../../../util/fs';
+import { getLocalFiles } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
@@ -54,7 +54,7 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
-  const fileContents = await getFileContentMap(packageFiles, true);
+  const fileContents = await getLocalFiles(packageFiles);
 
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {

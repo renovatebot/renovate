@@ -385,6 +385,16 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('getFiles(filePath)', () => {
+    it('gets the file', async () => {
+      const res = await git.getFiles(['master_file', 'some_missing_path']);
+      expect(res).toEqual({
+        master_file: defaultBranch,
+        some_missing_path: null,
+      });
+    });
+  });
+
   describe('hasDiff(sourceRef, targetRef)', () => {
     it('compare without changes', () => {
       return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();

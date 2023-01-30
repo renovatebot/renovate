@@ -164,6 +164,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   separateMinorPatch?: boolean;
   extractVersion?: string;
   isInternal?: boolean;
+  variableName?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>
