@@ -84,7 +84,7 @@ export const presets: Record<string, Preset> = {
       'packages:stylelint',
       'packages:tslint',
     ],
-    matchPackageNames: ['remark-lint'],
+    matchPackageNames: ['prettier', 'remark-lint', 'standard'],
   },
   mapbox: {
     description: 'All Mapbox-related packages.',

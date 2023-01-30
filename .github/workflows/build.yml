@@ -24,7 +24,7 @@ concurrency:
 env:
   # Currently no way to detect automatically (#8153)
   DEFAULT_BRANCH: main
-  NODE_VERSION: 16
+  NODE_VERSION: 18
   DRY_RUN: true
 
 jobs:
@@ -77,7 +77,7 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --ignore-engines # semantic release will fail to install otherwise
 
       # build before tests to for static file check
       - name: Build
