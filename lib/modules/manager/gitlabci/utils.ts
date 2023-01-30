@@ -16,7 +16,7 @@ export function replaceReferenceTags(content: string): string {
 }
 
 const depProxyRe = regEx(
-  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)(?<depName>.+)`
+  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`
 );
 
 /**
