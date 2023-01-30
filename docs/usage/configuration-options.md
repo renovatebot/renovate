@@ -1809,7 +1809,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["/^release\\/.*/"],
+      "matchBaseBranches": ["/^release/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -2782,7 +2782,7 @@ regex definition:
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
       "depNameTemplate": "my.new.registry/aRepository/andImage",
       "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
