@@ -1832,7 +1832,7 @@ describe('workers/repository/process/lookup/index', () => {
         versioning: 'npm',
         warnings: [
           {
-            message: 'Failed to look up dependency q',
+            message: 'Failed to look up npm dependency q',
             topic: 'q',
           },
         ],
