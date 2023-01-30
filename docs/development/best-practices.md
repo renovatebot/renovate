@@ -3,6 +3,26 @@
 This document explains our best practices.
 Follow these best practices when you're working on our code.
 
+## Git branch names
+
+The Renovate maintainers checkout a lot of Git branches.
+When Git branches have names like `patch-1` it's hard to remember what each branch is about.
+You can help the maintainers by following the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification when naming your Git branch.
+
+Branch names should start with a Conventional Commit scope like `feat/` or `fix/` for example:
+
+- `feat/13732-cacache-cleanup`
+- `fix/gitea-automerge-strategy`
+- `refactor/jest-reset-mocks`
+- `docs/rewrite-packageRules-section`
+
+Avoid branch names like `patch-1`.
+
+If you don't know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
+
+If you forgot to pick a good branch name when you started work, then rename the branch before creating the pull request.
+Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch) to learn how to rename your branch on GitHub.
+
 ## General
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
