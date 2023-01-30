@@ -12,7 +12,7 @@ If you're closing an issue with your PR then put the issue number after that.
 For example:
 
 - `feat/13732-cacache-cleanup`
-- `fix/gitea-automerge-strategy`
+- `fix/15431-gitea-automerge-strategy`
 - `refactor/jest-reset-mocks`
 - `docs/rewrite-packageRules-section`
 
