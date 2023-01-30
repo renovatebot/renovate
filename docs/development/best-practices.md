@@ -6,7 +6,10 @@ Follow these best practices when you're working on our code.
 ## Git branch names
 
 
-Branch names should start with a Conventional Commit scope like `feat/` or `fix/` for example:
+Branch names must start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
+If you're closing an issue with your PR then put the issue number after that.
+
+For example:
 
 - `feat/13732-cacache-cleanup`
 - `fix/gitea-automerge-strategy`
