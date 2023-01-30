@@ -24,5 +24,5 @@ export function getElapsedHours(time: Date | string): number {
   }
 
   const diff = DateTime.now().diff(pastTime, 'hours');
-  return diff.hours;
+  return Math.floor(diff.hours);
 }
