@@ -315,13 +315,15 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     await updateArtifacts({
       packageFileName: 'maven-wrapper',
       newPackageFileContent: '',
-      updatedDeps: [{ 
-        depName: 'maven-wrapper',
-        replaceString: 'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar', 
-      }],
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString:
+            'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+        },
+      ],
       config: { currentValue: '3.0.0', newValue: '3.3.1' },
     });
-
 
     expect(execSnapshots).toMatchObject([
       {

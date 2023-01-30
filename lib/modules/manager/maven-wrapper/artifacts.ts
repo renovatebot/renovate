@@ -17,7 +17,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2/'
+const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2/';
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
@@ -46,7 +46,6 @@ export async function updateArtifacts({
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-
   try {
     logger.debug({ updatedDeps }, 'maven-wrapper.updateArtifacts()');
 
@@ -142,7 +141,9 @@ async function executeWrapperCommand(
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
   const customArtifactoryUrl = getCustomMavenWrapperUrl(deps);
-  const extraEnv = customArtifactoryUrl ? { MVNW_REPOURL: customArtifactoryUrl } : {};
+  const extraEnv = customArtifactoryUrl
+    ? { MVNW_REPOURL: customArtifactoryUrl }
+    : {};
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
@@ -164,11 +165,15 @@ async function executeWrapperCommand(
   }
 }
 
-function getCustomMavenWrapperUrl(deps: PackageDependency<Record<string, unknown>>[]) : string | null {
-  const replaceString = deps.filter(dep => dep.depName === 'maven-wrapper').map(dep => dep.replaceString)[0];
+function getCustomMavenWrapperUrl(
+  deps: PackageDependency<Record<string, unknown>>[]
+): string | null {
+  const replaceString = deps
+    .filter((dep) => dep.depName === 'maven-wrapper')
+    .map((dep) => dep.replaceString)[0];
   const match = replaceString?.match(/^(.*?)org\/apache\/maven\/wrapper\//);
   if (match) {
-   return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+    return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
   }
   return null;
 }
