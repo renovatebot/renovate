@@ -337,7 +337,7 @@ export async function lookupUpdates(
       if (!dependency) {
         const warning: ValidationMessage = {
           topic: depName,
-          message: `Failed to look up dependency ${depName}`,
+          message: `Failed to look up ${datasource} dependency ${depName}`,
         };
         logger.debug({ dependency: depName, packageFile }, warning.message);
         // TODO: return warnings in own field
