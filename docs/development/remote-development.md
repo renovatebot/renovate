@@ -28,7 +28,8 @@ You'll use the same code editor and have the same config as all other developers
 ### Drawbacks
 
 - Waiting for the remote container to start
-- If your internet is down or Gitpod or GitHub Codespaces are down then you can't work
+- If your internet is down you can't work
+- If Gitpod or Codespaces is down you can't work
 
 ## Gitpod
 
@@ -41,8 +42,7 @@ For proper development, use GitHub Codespaces.
 
 The config file for Gitpod is `.gitpod.yml` in the root of the repository.
 
-Gitpod comes with 50 free hours each month.
-If you need more hours you'll need to buy a plan with more hours.
+Gitpod gives you 500 free credits each month, which is enough for about 50 hours of work.
 
 ### Gitpod tips
 
@@ -105,5 +105,3 @@ Summary of all failing tests
 
 The Renovate developers use [GitHub Codespaces](https://github.com/features/codespaces).
 The config files are in the `.devcontainer` folder in the repository.
-
-You can only use GitHub Codespaces if you're invited into the beta by GitHub.
