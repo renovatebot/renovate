@@ -8,6 +8,7 @@ Follow these best practices when you're working on our code.
 
 Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
 If you're closing an issue with your PR then put the issue number after that.
+Finally, add some short human-readable text to make it easier to identify.
 
 For example:
 
