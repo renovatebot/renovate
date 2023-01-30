@@ -2530,10 +2530,10 @@
     got "^11.8.6"
     luxon "^3.2.1"
 
-"@renovatebot/pep440@2.1.10":
-  version "2.1.10"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.10.tgz#de0c4a57a3915f771737d28ae1895ff664e63f17"
-  integrity sha512-wGRb3lbStkAQMHP5BFiFAE4hjb4GbOB4zxzfQsHtpRQG4175ZTAxI5jiotXLR4n0PvPGIFjDZWUNdhue9ONs4Q==
+"@renovatebot/pep440@2.1.11":
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.11.tgz#332e24bb572f327f13f92f0e967a747acae5367b"
+  integrity sha512-w01DITR34gk8ZVL+bi5qorlJ/3ZuwP172l8+lMyv9YSkRfI+ah8kDkXeOAZj/Dk88YvbAMWnv+isSCd2Q20hkQ==
 
 "@renovatebot/ruby-semver@2.1.4":
   version "2.1.4"
