@@ -52,7 +52,7 @@ export function commitFilesToBranch(
 
   // API will know whether to create new branch or not
   return scm.commitAndPush({
-    targetBranch: config.baseBranch,
+    baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage!,

@@ -1,7 +1,8 @@
 import * as _git from '../../util/git';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 import type { PlatformScm } from './types';
-import { platform } from '.';
+// eslint-disable-next-line import/no-cycle
+import { platform } from '.'; //cycle because of "commitConfig.platformCommit && platform.commitFiles", but I think we don't need "platformCommit" anymore, it could be equal to scm="github" instead of "defaultGitScm"?
 
 export const platformScmImpls = new Map<string, Partial<PlatformScm>>();
 //here you can register additional custom implementations..

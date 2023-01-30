@@ -63,11 +63,15 @@ Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
+
+If set, Renovate will try to match against `packageName` after trying `depName` When using `matchPackageNames` & `matchPackagePatterns` matchers.
+
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
@@ -85,7 +89,7 @@ Default value: `alpha`.
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The order method for autodiscover server side repository search.
 

@@ -400,6 +400,17 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   {
+    name: 'onboardingRebaseCheckbox',
+    description:
+      'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['gitea', 'github', 'gitlab'],
+    globalOnly: true,
+    experimental: true,
+    experimentalIssues: [17633],
+  },
+  {
     name: 'includeForks',
     description:
       'Whether to process forked repositories. By default, all forked repositories are skipped.',
@@ -1517,7 +1528,7 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'stabilityDays',
@@ -2204,6 +2215,16 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
     env: false,
+    experimental: true,
+  },
+  {
+    name: 'cacheHardTtlMinutes',
+    description:
+      'Maximum duration in minutes to keep datasource cache entries.',
+    type: 'integer',
+    stage: 'repository',
+    default: 0,
+    globalOnly: true,
     experimental: true,
   },
   {

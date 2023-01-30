@@ -156,12 +156,14 @@ describe('modules/manager/poetry/extract', () => {
           datasource: 'pypi',
           depName: 'dev_dep',
           depType: 'dev',
+          packageName: 'dev-dep',
         },
         {
           currentValue: '^4.0',
           datasource: 'pypi',
           depName: 'typing_dep',
           depType: 'typing',
+          packageName: 'typing-dep',
         },
       ]);
     });

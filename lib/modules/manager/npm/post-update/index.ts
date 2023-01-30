@@ -144,7 +144,7 @@ export async function writeExistingFiles(
   for (const packageFile of npmFiles) {
     // TODO #7154
     const basedir = upath.dirname(packageFile.packageFile!);
-    const npmrc: string = packageFile.npmrc ?? config.npmrc;
+    const npmrc = packageFile.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (is.string(npmrc)) {
       try {

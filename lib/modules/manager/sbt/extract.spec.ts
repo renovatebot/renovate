@@ -136,6 +136,7 @@ describe('modules/manager/sbt/extract', () => {
               'https://repo.maven.apache.org/maven2',
               'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
             ],
+            variableName: 'sbtReleaseVersion',
           },
         ],
         packageFileVersion: '1.0.1',
@@ -218,6 +219,21 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageName: 'org.example:bar_2.12',
             currentValue: '0.0.2',
+          },
+        ],
+      });
+    });
+
+    it('extracts correct scala library when dealing with scala 3', () => {
+      const content = `
+        scalaVersion := "3.1.1"
+      `;
+
+      expect(extractPackageFile(content)).toMatchObject({
+        deps: [
+          {
+            packageName: 'org.scala-lang:scala3-library_3',
+            currentValue: '3.1.1',
           },
         ],
       });

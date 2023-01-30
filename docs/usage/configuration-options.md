@@ -674,8 +674,8 @@ This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -821,7 +821,9 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
+`fileMatch` patterns in the user config are added to the default values and do not replace them.
+The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
@@ -2026,19 +2028,31 @@ Example setting source URL for package "dummy":
 
 ### replacementName
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
-Use this field to define the name of a replacement package.
+Managers which do not support replacement:
+
+- `bazel`
+- `git-submodules`
+- `gomod`
+- `gradle`
+- `hermit`
+- `homebrew`
+- `maven`
+- `regex`
+
+Use the `replacementName` config option to set the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+For a list of managers which do not support replacement read the `replacementName` config option docs.
 
-Use this field to define the version of a replacement package.
+Use the `replacementVersion` config option to set the version of a replacement package.
 Must be used with `replacementName`.
 For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
 

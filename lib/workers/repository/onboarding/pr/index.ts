@@ -7,6 +7,8 @@ import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
+import { getFile } from '../../../../util/git';
+import { toSha256 } from '../../../../util/hasha';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 import {
@@ -17,6 +19,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getPrList } from './pr-list';
@@ -26,13 +29,18 @@ export async function ensureOnboardingPr(
   packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
-  if (config.repoIsOnboarded) {
+  if (
+    config.repoIsOnboarded ||
+    (config.onboardingRebaseCheckbox && !OnboardingState.prUpdateRequested)
+  ) {
     return;
   }
   logger.debug('ensureOnboardingPr()');
   logger.trace({ config });
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
+  const { rebaseCheckBox, renovateConfigHashComment } =
+    await getRebaseCheckboxComponents(config);
   logger.debug('Filling in onboarding PR template');
   let prTemplate = `Welcome to [Renovate](${
     config.productLinks!.homepage
@@ -67,6 +75,7 @@ If you need any further assistance then you can also [request help here](${
     }).
 `
   );
+  prTemplate += rebaseCheckBox;
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
     let files: string[] = [];
@@ -122,6 +131,9 @@ If you need any further assistance then you can also [request help here](${
   if (is.string(config.prFooter)) {
     prBody = `${prBody}\n---\n\n${template.compile(config.prFooter, config)}\n`;
   }
+
+  prBody += renovateConfigHashComment;
+
   logger.trace('prBody:\n' + prBody);
 
   prBody = platform.massageMarkdown(prBody);
@@ -181,4 +193,31 @@ If you need any further assistance then you can also [request help here](${
     }
     throw err;
   }
+}
+
+interface RebaseCheckboxComponents {
+  rebaseCheckBox: string;
+  renovateConfigHashComment: string;
+}
+
+async function getRebaseCheckboxComponents(
+  config: RenovateConfig
+): Promise<RebaseCheckboxComponents> {
+  let rebaseCheckBox = '';
+  let renovateConfigHashComment = '';
+  if (!config.onboardingRebaseCheckbox) {
+    return { rebaseCheckBox, renovateConfigHashComment };
+  }
+
+  // Create markdown checkbox
+  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+
+  // Create hashMeta
+  const configFile = defaultConfigFile(config);
+  const existingContents =
+    (await getFile(configFile, config.onboardingBranch)) ?? '';
+  const hash = toSha256(existingContents);
+  renovateConfigHashComment = `\n<!--renovate-config-hash:${hash}-->\n`;
+
+  return { rebaseCheckBox, renovateConfigHashComment };
 }

@@ -250,17 +250,6 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   await fetchBranchCommits();
 }
 
-export async function installHook(
-  name: string,
-  hookSource: string
-): Promise<void> {
-  await syncGit();
-  const localDir = GlobalConfig.get('localDir')!;
-  const gitHooks = upath.join(localDir, '.git/hooks');
-  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
-  await fs.chmod(`${gitHooks}/${name}`, 0o500);
-}
-
 async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
   await git.raw(['reset', '--hard']);
@@ -870,6 +859,18 @@ export async function getFile(
   }
 }
 
+export async function getFiles(
+  fileNames: string[]
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = await getFile(fileName);
+  }
+
+  return fileContentMap;
+}
+
 export async function hasDiff(
   sourceRef: string,
   targetRef: string
@@ -1035,7 +1036,7 @@ export async function pushCommit({
   files,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1047,7 +1048,7 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
@@ -1085,7 +1086,6 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
-        targetRef: commitConfig.targetBranch ?? commitConfig.branchName,
         files: commitConfig.files,
       });
       if (pushResult) {
@@ -1213,11 +1213,16 @@ export async function clearRenovateRefs(): Promise<void> {
       /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
         for (const ref of obsoleteRefs) {
-          const pushOpts = ['--delete', 'origin', ref];
-          await git.push(pushOpts);
+          try {
+            const pushOpts = ['--delete', 'origin', ref];
+            await git.push(pushOpts);
+          } catch (err) /* istanbul ignore next */ {
+            logger.debug({ err }, 'Error deleting obsolete refs');
+            break;
+          }
         }
       } else {
-        throw err;
+        logger.warn({ err }, 'Error deleting obsolete refs');
       }
     }
   }

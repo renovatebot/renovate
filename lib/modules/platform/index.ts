@@ -1,11 +1,13 @@
 import URL from 'url';
 import type { AllConfig } from '../../config/types';
+import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { HostRule } from '../../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import platforms from './api';
+// eslint-disable-next-line import/no-cycle
 import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 
@@ -27,7 +29,7 @@ const handler: ProxyHandler<Platform> = {
 
 export const platform = new Proxy<Platform>({} as any, handler);
 
-export function setPlatformApi(name: string): void {
+export function setPlatformApi(name: PlatformId): void {
   if (!platforms.has(name)) {
     throw new Error(
       `Init: Platform "${name}" not found. Must be one of: ${getPlatformList().join(

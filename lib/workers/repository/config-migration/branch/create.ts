@@ -34,7 +34,7 @@ export async function createConfigMigrationBranch(
     migratedConfigData
   );
   return scm.commitAndPush({
-    targetBranch: config.baseBranch,
+    baseBranch: config.baseBranch,
     branchName: getMigrationBranchName(config),
     files: [
       {
