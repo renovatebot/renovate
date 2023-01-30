@@ -167,10 +167,11 @@ async function executeWrapperCommand(
 function getCustomMavenWrapperUrl(deps: PackageDependency<Record<string, unknown>>[]) : string | null {
    const replaceString = deps.filter(dep => dep.depName === 'maven-wrapper').map(dep => dep.replaceString)[0];
    const match = replaceString?.match(/^(.*?)org\/apache\/maven\/wrapper\//);
-   return match 
-            ? match[1] !== DEFAULT_MAVEN_REPO_URL 
-              ? match[1] : null 
-            : null;
+
+   if (match) {
+    return match[1] !== DEFAULT_MAVEN_REPO_URL ? match[1] : null;
+   }
+   return null;
 }
 
 async function createWrapperCommand(

@@ -337,6 +337,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
             LC_ALL: 'en_US',
             NO_PROXY: 'localhost',
             PATH: '/tmp/path',
+            MVNW_REPOURL: 'https://internal.local/maven-public/',
           },
           maxBuffer: 10485760,
           timeout: 900000,
