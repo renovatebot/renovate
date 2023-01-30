@@ -17,7 +17,7 @@ import type {
   UpdateArtifactsResult,
 } from '../types';
 
-const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2/';
+const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
@@ -171,7 +171,7 @@ function getCustomMavenWrapperUrl(
   const replaceString = deps
     .filter((dep) => dep.depName === 'maven-wrapper')
     .map((dep) => dep.replaceString)[0];
-  const match = replaceString?.match(/^(.*?)org\/apache\/maven\/wrapper\//);
+  const match = replaceString?.match(/^(.*?)\/org\/apache\/maven\/wrapper\//);
   if (match) {
     return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
   }
