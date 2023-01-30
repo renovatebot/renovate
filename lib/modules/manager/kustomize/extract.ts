@@ -24,19 +24,20 @@ const dotGitRegex = regEx(
 const underscoreGitRegex = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
+// regex to match URLS having extra `//`
+const gitUrlWithPath = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/
+);
 
 export function extractResource(base: string): PackageDependency | null {
   let match: RegExpExecArray | null;
-  const includesDotGit = base.includes('.git');
-  const includesUnderscoreGit = base.includes('_git');
 
-  // Look for the _git delimiter, which by convention is expected to be ONE directory above the repo root.
-  if (includesUnderscoreGit) {
+  if (base.includes('_git')) {
     match = underscoreGitRegex.exec(base);
-  }
-  // Look for .git in the path, which if present is part of the directory name of the git repo.
-  else if (includesDotGit) {
+  } else if (base.includes('.git')) {
     match = dotGitRegex.exec(base);
+  } else if (gitUrlWithPath.test(base)) {
+    match = gitUrlWithPath.exec(base);
   } else {
     match = gitUrl.exec(base);
   }
@@ -45,30 +46,20 @@ export function extractResource(base: string): PackageDependency | null {
     return null;
   }
 
-  const { subdir } = match.groups;
-  let { url, path, project } = match.groups;
-
-  // Look for a double-slash in the path and confirm url doesn't have .git/_git delimeter so we do not accidentally merge the results of 2 matches
-  if (!includesDotGit && !includesUnderscoreGit && subdir.includes('//')) {
-    const extraRepoPath = subdir.slice(0, subdir.lastIndexOf('//'));
-    project += extraRepoPath;
-    url += extraRepoPath;
-    path += extraRepoPath;
-  }
-
+  const { path } = match.groups;
   if (path.includes('github.com')) {
     // changed this cause of this url -> ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git
     return {
       currentValue: match.groups.currentValue,
       datasource: GithubTagsDatasource.id,
-      depName: project.replace('.git', ''),
+      depName: match.groups.project.replace('.git', ''),
     };
   }
 
   return {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
-    packageName: url,
+    packageName: match.groups.url,
     currentValue: match.groups.currentValue,
   };
 }
