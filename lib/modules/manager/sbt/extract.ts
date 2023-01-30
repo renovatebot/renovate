@@ -8,6 +8,8 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
+import { get } from '../../versioning';
+import * as mavenVersioning from '../../versioning/maven';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFile } from '../types';
 import { normalizeScalaVersion } from './util';
@@ -29,7 +31,7 @@ interface Ctx {
   currentVarName?: string;
   depType?: string;
   useScalaVersion?: boolean;
-  groupName?: string;
+  variableName?: string;
 }
 
 const scala = lang.createLang('scala');
@@ -49,10 +51,17 @@ const scalaVersionMatch = q
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
+      const version = get(mavenVersioning.id);
+
+      let packageName = 'org.scala-lang:scala-library';
+      if (version.getMajor(ctx.scalaVersion) === 3) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
       const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
+        packageName,
         currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
@@ -129,7 +138,7 @@ const versionMatch = q.alt<Ctx>(
     const currentValue = ctx.vars[varName];
     if (currentValue) {
       ctx.currentValue = currentValue;
-      ctx.groupName = varName;
+      ctx.variableName = varName;
     }
     return ctx;
   }),
@@ -164,7 +173,7 @@ function depHandler(ctx: Ctx): Ctx {
     currentValue,
     useScalaVersion,
     depType,
-    groupName,
+    variableName,
   } = ctx;
 
   delete ctx.groupId;
@@ -172,7 +181,7 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.currentValue;
   delete ctx.useScalaVersion;
   delete ctx.depType;
-  delete ctx.groupName;
+  delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
 
@@ -192,8 +201,9 @@ function depHandler(ctx: Ctx): Ctx {
     dep.datasource = SbtPluginDatasource.id;
   }
 
-  if (groupName) {
-    dep.groupName = groupName;
+  if (variableName) {
+    dep.groupName = variableName;
+    dep.variableName = variableName;
   }
 
   ctx.deps.push(dep);

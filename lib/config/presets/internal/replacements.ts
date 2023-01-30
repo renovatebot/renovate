@@ -621,6 +621,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'spectre-cli-to-spectre-console-cli': {
+    description:
+      'The `Spectre.Cli` package was renamed to `Spectre.Console.Cli`.',
+    packageRules: [
+      {
+        matchDatasources: ['nuget'],
+        matchPackageNames: ['Spectre.Cli'],
+        replacementName: 'Spectre.Console.Cli',
+        replacementVersion: '0.45.0',
+      },
+    ],
+  },
   'vso-task-lib-to-azure-pipelines-task-lib': {
     description:
       'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',

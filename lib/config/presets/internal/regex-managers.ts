@@ -19,7 +19,7 @@ export const presets: Record<string, Preset> = {
       'Update `_VERSION` environment variables in GitHub Action files.',
     regexManagers: [
       {
-        fileMatch: ['^.github/workflows/[^/]+\\.ya?ml$'],
+        fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
         ],
