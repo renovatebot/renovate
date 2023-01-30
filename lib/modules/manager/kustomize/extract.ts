@@ -47,7 +47,7 @@ export function extractResource(base: string): PackageDependency | null {
   }
 
   const { path } = match.groups;
-  if (path.includes('github.com')) {
+  if (path.includes('github.com:') || path.includes('github.com/')) {
     // changed this cause of this url -> ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git
     return {
       currentValue: match.groups.currentValue,
