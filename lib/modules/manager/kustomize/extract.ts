@@ -16,27 +16,59 @@ import type { HelmChart, Image, Kustomize } from './types';
 const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
+// regex to match repositories with ".git"
+const dotGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
+// regex to match repositories with "_git"
+const underscoreGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
 
 export function extractResource(base: string): PackageDependency | null {
-  const match = gitUrl.exec(base);
+  let match: RegExpExecArray | null;
+  const includesDotGit = base.includes('.git');
+  const includesUnderscoreGit = base.includes('_git');
+
+  // Look for the _git delimiter, which by convention is expected to be ONE directory above the repo root.
+  if (includesUnderscoreGit) {
+    match = underscoreGitRegex.exec(base);
+  }
+  // Look for .git in the path, which if present is part of the directory name of the git repo.
+  else if (includesDotGit) {
+    match = dotGitRegex.exec(base);
+  } else {
+    match = gitUrl.exec(base);
+  }
 
   if (!match?.groups) {
     return null;
   }
 
-  const { path } = match.groups;
-  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
+  const { subdir } = match.groups;
+  let { url, path, project } = match.groups;
+
+  // Look for a double-slash in the path and confirm url doesn't have .git/_git delimeter so we do not accidentally merge the results of 2 matches
+  if (!includesDotGit && !includesUnderscoreGit && subdir.includes('//')) {
+    const extraRepoPath = subdir.slice(0, subdir.lastIndexOf('//'));
+    project += extraRepoPath;
+    url += extraRepoPath;
+    path += extraRepoPath;
+  }
+
+  if (path.includes('github.com')) {
+    // changed this cause of this url -> ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git
     return {
       currentValue: match.groups.currentValue,
       datasource: GithubTagsDatasource.id,
-      depName: match.groups.project.replace('.git', ''),
+      depName: project.replace('.git', ''),
     };
   }
 
   return {
     datasource: GitTagsDatasource.id,
     depName: path.replace('.git', ''),
-    packageName: match.groups.url,
+    packageName: url,
     currentValue: match.groups.currentValue,
   };
 }

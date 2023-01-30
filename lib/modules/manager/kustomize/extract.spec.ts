@@ -433,4 +433,259 @@ describe('modules/manager/kustomize/extract', () => {
       });
     });
   });
+
+  describe('extractResource', () => {
+    const urls = [
+      {
+        url: 'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir',
+        host: 'https://git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        url: 'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir',
+        host: 'https://git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        url: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+        host: 'https://fabrikops2.visualstudio.com/',
+        project: 'someorg/somerepo',
+        packageName: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+      },
+      {
+        url: 'http://github.com/someorg/somerepo/somedir',
+        host: 'https://github.com/',
+        project: 'someorg/somerepo',
+      },
+      {
+        url: 'git@github.com:someorg/somerepo/somedir',
+        host: 'git@github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        url: 'http://github.com/someorg/somerepo.git/somedir',
+        host: 'https://github.com/',
+        project: 'someorg/somerepo.git',
+      },
+      {
+        url: 'git@github.com:someorg/somerepo.git/somedir',
+        host: 'git@github.com:',
+        project: 'someorg/somerepo.git',
+      },
+      {
+        url: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+        host: 'git@gitlab2.sqtools.ru:',
+        project: 'infra/kubernetes/thanos-base.git',
+        packageName: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+      },
+      {
+        url: 'git@bitbucket.org:company/project.git//path',
+        host: 'git@bitbucket.org:',
+        project: 'company/project.git',
+        packageName: 'git@bitbucket.org:company/project.git',
+      },
+      {
+        url: 'git@bitbucket.org/company/project.git//path',
+        host: 'git@bitbucket.org/',
+        project: 'company/project.git',
+        packageName: 'git@bitbucket.org/company/project.git',
+      },
+      {
+        url: 'ssh://git@bitbucket.org/company/project.git//path',
+        host: 'ssh://git@bitbucket.org/',
+        project: 'company/project.git',
+        packageName: 'ssh://git@bitbucket.org/company/project.git',
+      },
+      {
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'https://itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'https://itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos/somedir',
+        host: 'https://itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        url: 'git::https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'https://itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        url: 'https://bitbucket.example.com/scm/project/repository.git',
+        host: 'https://bitbucket.example.com/',
+        project: 'scm/project/repository.git',
+        packageName: 'https://bitbucket.example.com/scm/project/repository.git',
+      },
+      {
+        url: 'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath',
+        host: 'ssh://git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        url: 'git@github.com/someorg/somerepo/somepath',
+        host: 'git@github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        url: 'https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/',
+        host: 'https://github.com/',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        url: 'ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev',
+        host: 'git@github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        url: 'https://example.org/path/to/repo//examples/multibases/dev',
+        host: 'https://example.org/',
+        project: 'path/to/repo',
+        packageName: 'https://example.org/path/to/repo',
+      },
+      {
+        url: 'https://example.org/path/to/repo.git/examples/multibases/dev',
+        host: 'https://example.org/',
+        project: 'path/to/repo.git',
+        packageName: 'https://example.org/path/to/repo.git',
+      },
+      {
+        url: 'ssh://alice@example.com/path/to/repo//examples/multibases/dev',
+        host: 'ssh://alice@example.com/',
+        project: 'path/to/repo',
+        packageName: 'ssh://alice@example.com/path/to/repo',
+      },
+      // {
+      //   url: 'https://authority/org/repo?ref=group/version',
+      //   host: 'https://authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   url: 'https://authority/org/repo/?ref=includes_git/for_some_reason',
+      //   host: 'https://authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   url: 'https://authority/org/repo/?ref=includes.git/for_some_reason',
+      //   host: 'https://authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      {
+        url: 'https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse',
+        host: 'https://authority/',
+        project: 'org/repo',
+        packageName: 'https://authority/org/repo',
+      },
+      {
+        url: 'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path',
+        host: 'ssh://myusername@bitbucket.org/',
+        project: 'ourteamname/ourrepositoryname.git',
+        packageName:
+          'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git',
+      },
+      {
+        url: 'http://git@home.com/path/to/repository.git//path',
+        host: 'http://git@home.com/',
+        project: 'path/to/repository.git',
+        packageName: 'http://git@home.com/path/to/repository.git',
+      },
+      {
+        url: 'https://git@home.com/path/to/repository.git//path',
+        host: 'https://git@home.com/',
+        project: 'path/to/repository.git',
+        packageName: 'https://git@home.com/path/to/repository.git',
+      },
+      {
+        url: 'ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git',
+        host: 'ssh://git@ssh.github.com:443/',
+        project: 'YOUR-USERNAME/YOUR-REPOSITORY.git',
+      },
+      {
+        url: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git/path',
+        host: 'git@gitlab.com/',
+        project: 'user:name/YOUR-REPOSITORY.git',
+        packageName: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git',
+      },
+      {
+        url: 'git@gitlab.com:gitlab-tests/sample-project.git',
+        host: 'git@gitlab.com:',
+        project: 'gitlab-tests/sample-project.git',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project.git',
+      },
+      {
+        url: 'git@gitlab.com:gitlab-tests/sample-project',
+        host: 'git@gitlab.com:',
+        project: 'gitlab-tests/sample-project',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project',
+      },
+      {
+        url: 'https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root',
+        host: 'https://username@dev.azure.com/',
+        project: 'org/project/_git/repo',
+        packageName: 'https://username@dev.azure.com/org/project/_git/repo',
+      },
+      {
+        url: 'https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root',
+        host: 'https://org.visualstudio.com/',
+        project: 'project/_git/repo',
+        packageName: 'https://org.visualstudio.com/project/_git/repo',
+      },
+      {
+        url: 'ssh://org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'org-12345@github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        url: 'org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'org-12345@github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+    ];
+
+    it('extraction test all possible urls', () => {
+      for (const urlObj of urls) {
+        const version = 'v1.0.0';
+        const sample: any = {
+          currentValue: version,
+        };
+        if (urlObj.url.includes('github.com')) {
+          sample.depName = urlObj.project.replace('.git', '');
+          sample.datasource = GithubTagsDatasource.id;
+        } else {
+          sample.depName =
+            urlObj.host.replace(
+              /(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?))/,
+              ''
+            ) + urlObj.project.replace('.git', '');
+          sample.packageName = urlObj.packageName;
+          sample.datasource = GitTagsDatasource.id;
+        }
+
+        const pkg = extractResource(`${urlObj.url}?ref=${version}`);
+        expect(pkg).toEqual(sample);
+      }
+    });
+  });
 });
