@@ -15,7 +15,6 @@ export const defaultGitScm: PlatformScm = {
   getBranchCommit: (branchName: string) =>
     Promise.resolve(_git.getBranchCommit(branchName)),
   deleteBranch: _git.deleteBranch,
-  //TODO: how to migrate the existing commitConfig.platformCommit to setPlatformScmApi('github')?
   commitAndPush: _git.commitFiles,
 };
 
