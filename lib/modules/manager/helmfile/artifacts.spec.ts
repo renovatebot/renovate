@@ -144,7 +144,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         newPackageFileContent: helmfileYaml,
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         file: {
           type: 'addition',
@@ -245,7 +245,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         newPackageFileContent: helmfileYaml,
         config,
       })
-    ).toMatchObject([
+    ).toEqual([
       {
         artifactError: {
           lockFile: 'helmfile.lock',
