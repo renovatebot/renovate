@@ -6,12 +6,13 @@ import {
   getConfig,
   git,
   partial,
-  platform,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import githubScm from '../../../../modules/platform/github/scm';
+import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
-import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 
 jest.mock('../../../../util/git');
@@ -55,6 +56,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
         baseBranch: 'dev',
         defaultBranch: 'master',
       };
+      setPlatformScmApi('default');
     });
 
     it('does not rebase modified branch', async () => {
@@ -154,8 +156,9 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     it.each([
       ['renovate.json', renovateConfigJson],
       ['renovate.json5', renovateConfigJson5],
-    ])('rebases via platform (%s)', async (filename, rawConfig) => {
-      config.platformCommit = true;
+    ])('rebases via github platform (%s)', async (filename, rawConfig) => {
+      githubScm.commitAndPush = jest.fn();
+      setPlatformScmApi('github');
       git.isBranchBehindBase.mockResolvedValueOnce(true);
       migratedConfigData.filename = filename;
       migratedConfigData.content = rawConfig;
@@ -163,7 +166,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       await rebaseMigrationBranch(config, migratedConfigData);
 
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(githubScm.commitAndPush).toHaveBeenCalledTimes(1);
     });
   });
 

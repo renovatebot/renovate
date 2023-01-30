@@ -1,15 +1,12 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-} from '../../../../../test/util';
+import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
+import githubScm from '../../../../modules/platform/github/scm';
+import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
-import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
+import { MigratedDataFactory } from './migrated-data';
 
 jest.mock('../../../../util/git');
 
@@ -36,6 +33,7 @@ describe('workers/repository/config-migration/branch/create', () => {
       indent: partial<Indent>({}),
     };
     prettierSpy.mockResolvedValueOnce(migratedConfigData.content);
+    setPlatformScmApi('default');
   });
 
   describe('createConfigMigrationBranch', () => {
@@ -57,13 +55,13 @@ describe('workers/repository/config-migration/branch/create', () => {
       });
     });
 
-    it('commits via platform', async () => {
-      config.platformCommit = true;
-
+    it('commits via github platform', async () => {
+      githubScm.commitAndPush = jest.fn();
+      setPlatformScmApi('github');
       await createConfigMigrationBranch(config, migratedConfigData);
 
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(platform.commitFiles).toHaveBeenCalledWith({
+      expect(githubScm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
         baseBranch: 'dev',
         files: [
@@ -74,7 +72,7 @@ describe('workers/repository/config-migration/branch/create', () => {
           },
         ],
         message: 'Migrate config renovate.json',
-        platformCommit: true,
+        platformCommit: false,
       });
     });
 

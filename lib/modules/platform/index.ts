@@ -7,7 +7,6 @@ import type { HostRule } from '../../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import platforms from './api';
-// eslint-disable-next-line import/no-cycle
 import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 

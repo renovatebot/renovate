@@ -1,5 +1,7 @@
-import { getConfig, git, platform } from '../../../../../test/util';
+import { getConfig, git } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
+import githubScm from '../../../../modules/platform/github/scm';
+import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
 
@@ -24,6 +26,7 @@ describe('workers/repository/update/branch/commit', () => {
       } as BranchConfig;
       jest.resetAllMocks();
       git.commitFiles.mockResolvedValueOnce('123test');
+      setPlatformScmApi('default');
       GlobalConfig.reset();
     });
 
@@ -43,16 +46,29 @@ describe('workers/repository/update/branch/commit', () => {
       expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
 
-    it('commits via platform', async () => {
+    it('commits via github platform', async () => {
       config.updatedPackageFiles?.push({
         type: 'addition',
         path: 'package.json',
         contents: 'some contents',
       });
-      config.platformCommit = true;
+      githubScm.commitAndPush = jest.fn();
+      setPlatformScmApi('github');
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
+      expect(githubScm.commitAndPush).toHaveBeenCalledWith({
+        baseBranch: undefined,
+        branchName: 'renovate/some-branch',
+        files: [
+          {
+            contents: 'some contents',
+            path: 'package.json',
+            type: 'addition',
+          },
+        ],
+        force: false,
+        message: 'some commit message',
+        platformCommit: false,
+      });
     });
 
     it('dry runs', async () => {
