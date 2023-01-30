@@ -185,7 +185,10 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      toolConstraints: [{ toolName: 'python', constraint }, { toolName: 'poetry', constraint: poetryVersion }],
+      toolConstraints: [
+        { toolName: 'python', constraint },
+        { toolName: 'poetry', constraint: poetryVersion },
+      ],
     };
     await exec(cmd, execOptions);
     const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
