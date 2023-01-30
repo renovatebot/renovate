@@ -32,6 +32,17 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       });
       expect(registryUrl).toBeNull();
     });
+
+    it('ignores partial scope match', () => {
+      const registryUrl = resolveRegistryUrl('@scope-2/a-package', {
+        npmScopes: {
+          scope: {
+            npmRegistryServer: 'https://scope.example.com/npm',
+          },
+        },
+      });
+      expect(registryUrl).toBeNull();
+    });
   });
 
   describe('loadConfigFromYarnrcYml()', () => {

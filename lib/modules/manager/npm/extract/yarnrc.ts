@@ -34,7 +34,7 @@ export function resolveRegistryUrl(
 ): string | null {
   if (yarnConfig.npmScopes) {
     for (const scope in yarnConfig.npmScopes) {
-      if (packageName.startsWith(`@${scope}`)) {
+      if (packageName.startsWith(`@${scope}/`)) {
         return yarnConfig.npmScopes[scope].npmRegistryServer ?? null;
       }
     }
