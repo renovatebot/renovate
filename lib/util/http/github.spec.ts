@@ -52,6 +52,7 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
+    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
@@ -257,7 +258,6 @@ describe('util/http/github', () => {
     });
 
     it('preserves pagination links', async () => {
-      delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
       const apiUrl = '/some-url?per_page=2';
