@@ -23,6 +23,24 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const statusResult: StatusResult = {
+  modified: ['flake.lock'],
+  not_added: [],
+  deleted: [],
+  conflicted: [],
+  created: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
 
 process.env.BUILDPACK = 'true';
 
@@ -66,8 +84,9 @@ describe('modules/manager/nix/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('content');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue({
+      ...statusResult,
       modified: [''],
-    } as StatusResult);
+    });
 
     const res = await updateArtifacts({
       packageFileName: 'flake.nix',
@@ -83,9 +102,7 @@ describe('modules/manager/nix/artifacts', () => {
   it('returns updated flake.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['flake.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
     const res = await updateArtifacts({
@@ -110,9 +127,7 @@ describe('modules/manager/nix/artifacts', () => {
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['flake.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
     const res = await updateArtifacts({
@@ -154,9 +169,7 @@ describe('modules/manager/nix/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['flake.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
     const res = await updateArtifacts({
@@ -205,9 +218,7 @@ describe('modules/manager/nix/artifacts', () => {
   it('returns updated flake.lock when doing lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current flake.lock');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['flake.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new flake.lock');
 
     const res = await updateArtifacts({
@@ -232,9 +243,7 @@ describe('modules/manager/nix/artifacts', () => {
   it('uses nix from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['flake.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new lock');
 
     const res = await updateArtifacts({

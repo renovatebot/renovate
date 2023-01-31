@@ -24,6 +24,24 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
+const statusResult: StatusResult = {
+  modified: ['requirements.txt'],
+  not_added: [],
+  deleted: [],
+  conflicted: [],
+  created: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
 
 process.env.BUILDPACK = 'true';
 
@@ -75,9 +93,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('returns updated requirements.txt', async () => {
     fs.readLocalFile.mockResolvedValueOnce('current requirements.txt');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
@@ -95,9 +111,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('supports docker mode', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(
@@ -136,9 +150,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await updateArtifacts({
@@ -183,9 +195,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('returns updated requirements.txt when doing lockfile maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New requirements.txt');
     expect(
       await updateArtifacts({
@@ -203,9 +213,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('uses pip-compile version from config', async () => {
     GlobalConfig.set(dockerAdminConfig);
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['requirements.txt'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     expect(

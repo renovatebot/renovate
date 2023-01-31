@@ -34,6 +34,25 @@ const ociLockFile1Alias = Fixtures.get('oci_1_alias.lock');
 const ociLockFile2Alias = Fixtures.get('oci_2_alias.lock');
 const chartFileAlias = Fixtures.get('ChartAlias.yaml');
 
+const statusResult: StatusResult = {
+  modified: [],
+  not_added: [],
+  deleted: [],
+  conflicted: [],
+  created: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
+
 describe('modules/manager/helmv3/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -226,6 +245,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['charts/example-1.9.2.tgz'],
       deleted: ['charts/example-1.6.2.tgz'],
     } as StatusResult);
@@ -283,6 +303,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['charts/example-1.9.2.tgz'],
       deleted: ['charts/example-1.6.2.tgz'],
     } as StatusResult);
@@ -334,6 +355,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['charts/example-1.9.2.tgz'],
     } as StatusResult);
     const updatedDeps = [{ depName: 'dep1' }];
@@ -378,9 +400,10 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
       deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
-    } as StatusResult);
+    });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -429,6 +452,7 @@ describe('modules/manager/helmv3/artifacts', () => {
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['example/example.tgz'],
     } as StatusResult);
     const updatedDeps = [{ depName: 'dep1' }];

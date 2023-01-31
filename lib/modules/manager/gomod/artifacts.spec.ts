@@ -65,6 +65,25 @@ const goEnv = {
   CGO_ENABLED: '1',
 };
 
+const statusResult: StatusResult = {
+  modified: ['go.sum'],
+  not_added: [],
+  conflicted: [],
+  created: [],
+  deleted: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
+
 describe('modules/manager/gomod/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -99,8 +118,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
-      modified: [] as string[],
-    } as StatusResult);
+      ...statusResult,
+      modified: [],
+    });
 
     expect(
       await gomod.updateArtifacts({
@@ -133,9 +153,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
@@ -182,10 +200,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('modules.txt content'); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', foo],
       not_added: [bar],
       deleted: [baz],
-    } as StatusResult);
+    });
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce('Foo go.sum');
     fs.readLocalFile.mockResolvedValueOnce('Bar go.sum');
@@ -265,9 +284,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -328,9 +345,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -371,9 +386,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
@@ -416,9 +429,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -525,9 +536,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -591,9 +600,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -654,9 +661,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -726,9 +731,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -797,9 +800,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -876,9 +877,7 @@ describe('modules/manager/gomod/artifacts', () => {
     // TODO: #7154 can be null
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     datasource.getPkgReleases.mockResolvedValueOnce({
@@ -927,9 +926,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
@@ -990,9 +987,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
     fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
@@ -1078,8 +1073,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1130,8 +1126,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1164,8 +1161,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1199,8 +1197,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1234,8 +1233,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1290,8 +1290,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('go.mod file');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1344,9 +1345,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1389,8 +1388,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1445,8 +1445,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('someText\n\ngo 1.17\n\n');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')
@@ -1515,8 +1516,9 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       modified: ['go.sum', 'main.go'],
-    } as StatusResult);
+    });
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New main.go')

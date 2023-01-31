@@ -28,6 +28,25 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
+const statusResult: StatusResult = {
+  modified: ['Podfile.lock'],
+  not_added: [],
+  conflicted: [],
+  created: [],
+  deleted: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
+
 describe('modules/manager/cocoapods/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -112,9 +131,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     const execSnapshots = mockExecAll();
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: [] as string[],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce({ ...statusResult, modified: [] });
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
     expect(
@@ -134,9 +151,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('Old Podfile');
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
     expect(
@@ -161,10 +176,11 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Pods/Manifest.lock');
     fs.readLocalFile.mockResolvedValueOnce('Pods manifest');
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['Pods/New'],
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
-    } as StatusResult);
+    });
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -233,9 +249,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
 
     await updateArtifacts({
       packageFileName: 'Podfile',
@@ -275,9 +289,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('New Podfile');
 
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['Podfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
 
     await updateArtifacts({
       packageFileName: 'Podfile',

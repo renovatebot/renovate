@@ -18,6 +18,24 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 const config: UpdateArtifactsConfig = {};
+const statusResult: StatusResult = {
+  modified: ['jsonnetfile.lock.json'],
+  not_added: [],
+  deleted: [],
+  conflicted: [],
+  created: [],
+  renamed: [],
+  staged: [],
+  files: [],
+  ahead: 0,
+  behind: 0,
+  current: null,
+  tracking: null,
+  detached: false,
+  isClean: () => {
+    return false;
+  },
+};
 
 describe('modules/manager/jsonnet-bundler/artifacts', () => {
   beforeEach(() => {
@@ -66,13 +84,11 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValueOnce({
+      ...statusResult,
       not_added: ['vendor/foo/main.jsonnet', 'vendor/bar/main.jsonnet'],
       modified: ['jsonnetfile.json', 'jsonnetfile.lock.json'],
       deleted: ['vendor/baz/deleted.jsonnet'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    });
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.json');
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('New foo/main.jsonnet');
@@ -138,12 +154,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
   it('performs lock file maintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['jsonnetfile.lock.json'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
       await updateArtifacts({
@@ -173,12 +184,7 @@ describe('modules/manager/jsonnet-bundler/artifacts', () => {
 
     fs.readLocalFile.mockResolvedValueOnce('Current jsonnetfile.lock.json');
     const execSnapshots = mockExecAll(execError);
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['jsonnetfile.lock.json'],
-      isClean(): boolean {
-        return false;
-      },
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(statusResult);
     fs.readLocalFile.mockResolvedValueOnce('Updated jsonnetfile.lock.json');
     expect(
       await updateArtifacts({
