@@ -168,9 +168,7 @@ function getExtraEnvOptions(
 ): Opt<ExtraEnv<unknown>> {
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
-    return customMavenWrapperUrl === DEFAULT_MAVEN_REPO_URL
-      ? {}
-      : { MVNW_REPOURL: customMavenWrapperUrl };
+    return { MVNW_REPOURL: customMavenWrapperUrl };
   }
   return {};
 }
