@@ -9,9 +9,13 @@ import type { WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
+export interface ExtractResult {
+  packageFiles: Record<string, PackageFile[]>;
+}
+
 export async function extractAllDependencies(
   config: RenovateConfig
-): Promise<Record<string, PackageFile[]>> {
+): Promise<ExtractResult> {
   let managerList = getManagerList();
   const { enabledManagers } = config;
   if (is.nonEmptyArray(enabledManagers)) {
@@ -42,19 +46,24 @@ export async function extractAllDependencies(
     }
   }
 
+  const extractResult: ExtractResult = {
+    packageFiles: {},
+  };
+
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
       return { manager: managerConfig.manager, packageFiles };
     })
   );
-  const extractions: Record<string, PackageFile[]> = {};
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {
     if (packageFiles?.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
-      extractions[manager] = (extractions[manager] || []).concat(packageFiles);
+      extractResult.packageFiles[manager] = (
+        extractResult.packageFiles[manager] || []
+      ).concat(packageFiles);
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);
@@ -63,7 +72,7 @@ export async function extractAllDependencies(
   // If not, log a warning to indicate possible misconfiguration.
   if (is.nonEmptyArray(config.enabledManagers)) {
     for (const enabledManager of config.enabledManagers) {
-      if (!(enabledManager in extractions)) {
+      if (!(enabledManager in extractResult.packageFiles)) {
         logger.debug(
           { manager: enabledManager },
           `Manager explicitly enabled in "enabledManagers" config, but found no results. Possible config error?`
@@ -72,5 +81,5 @@ export async function extractAllDependencies(
     }
   }
 
-  return extractions;
+  return extractResult;
 }
