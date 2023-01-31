@@ -3,15 +3,10 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
 import { getFileList } from '../../../util/git';
-import type { WorkerExtractConfig } from '../../types';
+import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
-
-export interface ExtractResult {
-  packageFiles: Record<string, PackageFile[]>;
-}
 
 export async function extractAllDependencies(
   config: RenovateConfig
