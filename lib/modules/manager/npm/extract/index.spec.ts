@@ -9,6 +9,7 @@ const fs: any = _fs;
 const defaultConfig = getConfig();
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
+const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const workspacesSimpleContent = Fixtures.get(
@@ -221,6 +222,23 @@ describe('modules/manager/npm/extract/index', () => {
         {}
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
+    });
+
+    it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.yarnrc.yml') {
+          return 'npmRegistryServer: https://registry.example.com';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {}
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls)
+      ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
     it('finds lerna', async () => {
