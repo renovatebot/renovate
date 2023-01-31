@@ -29,7 +29,7 @@ env:
 
 jobs:
   test:
-    name: ${{ matrix.node-version == 16 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
+    name: ${{ matrix.node-version == 18 && format('test ({0})', matrix.os) || format('test ({0}, node-{1})', matrix.os, matrix.node-version) }}
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
@@ -38,19 +38,19 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [14, 16, 18]
+        node-version: [16, 18]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
             "os": "macos-latest",
-            "node-version": 16
+            "node-version": 18
           }, {
             "os": "windows-latest",
-            "node-version": 16
+            "node-version": 18
           }]' || '[]') }}
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && (matrix.node-version == 16 || matrix.node-version == 18) }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 18 }}
       NODE_VERSION: ${{ matrix.node-version }}
 
     steps:
@@ -84,7 +84,7 @@ jobs:
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@58c146cc91c5b9e778e71775dfe9bf1442ad9a12 # v3.2.3
+        uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920 # v3.2.4
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}

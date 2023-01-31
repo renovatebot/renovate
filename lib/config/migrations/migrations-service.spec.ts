@@ -70,7 +70,7 @@ describe('config/migrations/migrations-service', () => {
     }
 
     class CustomMigrationsService extends MigrationsService {
-      protected static override getMigrations(
+      public static override getMigrations(
         original: RenovateConfig,
         migrated: RenovateConfig
       ): ReadonlyArray<Migration> {
@@ -81,5 +81,20 @@ describe('config/migrations/migrations-service', () => {
     const migratedConfig = CustomMigrationsService.run(originalConfig);
     expect(migratedConfig).toEqual({});
     expect(isMigrationDone).toBeTrue();
+  });
+
+  it('there should be a single migration per property name', () => {
+    const migrations = MigrationsService.getMigrations({}, {});
+
+    const set = new Set<string | RegExp>();
+    const duplicateProperties: (string | RegExp)[] = [];
+    for (const { propertyName } of migrations) {
+      if (set.has(propertyName)) {
+        duplicateProperties.push(propertyName);
+        continue;
+      }
+      set.add(propertyName);
+    }
+    expect(duplicateProperties).toBeEmptyArray();
   });
 });

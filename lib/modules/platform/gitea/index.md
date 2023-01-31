@@ -1,6 +1,7 @@
-# Gitea
+# Gitea and Forgejo
 
-Renovate supports [Gitea](https://gitea.io).
+Renovate supports [Gitea](https://gitea.io) and the new fork [Forgejo](https://forgejo.org).
+Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
 
 ## Authentication
 
