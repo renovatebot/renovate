@@ -69,17 +69,10 @@ generated: "2023-01-23T12:16:41.881988+01:00"
 
 describe('modules/manager/helmfile/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.resetModules();
-
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
     hostRules.clear();
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   it('returns null if no helmfile.lock found', async () => {
@@ -193,9 +186,9 @@ describe('modules/manager/helmfile/artifacts', () => {
     async ({ binarySource, expectedCommands }) => {
       GlobalConfig.set({ ...adminConfig, binarySource });
       fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-      git.getFile.mockResolvedValueOnce(lockFile as never);
+      git.getFile.mockResolvedValueOnce(lockFile);
       const execSnapshots = mockExecAll();
-      fs.readLocalFile.mockResolvedValueOnce(lockFileTwo as never);
+      fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
       fs.privateCacheDir.mockReturnValue(
         '/tmp/renovate/cache/__renovate-private-cache'
       );
@@ -220,7 +213,6 @@ describe('modules/manager/helmfile/artifacts', () => {
           },
         },
       ]);
-      expect(execSnapshots).toBeArrayOfSize(expectedCommands.length);
       expect(execSnapshots).toMatchObject(expectedCommands);
     }
   );
@@ -230,7 +222,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     "Error: cannot load Chart.lock: error converting YAML to JSON: yaml: line 1: did not find expected ',' or '}'",
   ])('catches error: %s', async (errorMessage) => {
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-    git.getFile.mockResolvedValueOnce(lockFile as never);
+    git.getFile.mockResolvedValueOnce(lockFile);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
