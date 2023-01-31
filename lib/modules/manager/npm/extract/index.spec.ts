@@ -9,6 +9,7 @@ const fs: any = _fs;
 const defaultConfig = getConfig();
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
+const input02Content = Fixtures.get('inputs/02.json', '..');
 const input01GlobContent = Fixtures.get('inputs/01-glob.json', '..');
 const workspacesContent = Fixtures.get('inputs/workspaces.json', '..');
 const workspacesSimpleContent = Fixtures.get(
@@ -165,25 +166,35 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         {}
       );
-      expect(res?.npmrc).toBeDefined();
+      expect(res?.npmrc).toBe('save-exact = true\n');
     });
 
-    it('ignores .npmrc when config.npmrc is defined and npmrcMerge=false', async () => {
+    it('uses config.npmrc if no .npmrc exists', async () => {
+      fs.readLocalFile = jest.fn(() => null);
+      const res = await npmExtract.extractPackageFile(
+        input01Content,
+        'package.json',
+        { ...defaultConfig, npmrc: 'config-npmrc' }
+      );
+      expect(res?.npmrc).toBe('config-npmrc');
+    });
+
+    it('uses config.npmrc if .npmrc does exist but npmrcMerge=false', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
-          return 'some-npmrc\n';
+          return 'repo-npmrc\n';
         }
         return null;
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { npmrc: 'some-configured-npmrc' }
+        { npmrc: 'config-npmrc' }
       );
-      expect(res?.npmrc).toBeUndefined();
+      expect(res?.npmrc).toBe('config-npmrc');
     });
 
-    it('reads .npmrc when config.npmrc is merged', async () => {
+    it('merges config.npmrc and repo .npmrc when npmrcMerge=true', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === '.npmrc') {
           return 'repo-npmrc\n';
@@ -211,6 +222,23 @@ describe('modules/manager/npm/extract/index', () => {
         {}
       );
       expect(res?.npmrc).toBe('registry=https://registry.npmjs.org\n');
+    });
+
+    it('reads registryUrls from .yarnrc.yml', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.yarnrc.yml') {
+          return 'npmRegistryServer: https://registry.example.com';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {}
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls)
+      ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
     it('finds lerna', async () => {

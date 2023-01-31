@@ -20,6 +20,11 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import {
+  YarnConfig,
+  loadConfigFromYarnrcYml,
+  resolveRegistryUrl,
+} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -104,6 +109,7 @@ export async function extractPackageFile(
         { npmrcFileName },
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
+      npmrc = config.npmrc;
     } else {
       npmrc = config.npmrc ?? '';
       if (npmrc.length) {
@@ -130,10 +136,18 @@ export async function extractPackageFile(
       }
       npmrc += repoNpmrc;
     }
+  } else if (is.string(config.npmrc)) {
+    npmrc = config.npmrc;
   }
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+
+  let yarnConfig: YarnConfig | null = null;
+  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  if (is.string(repoYarnrcYml)) {
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
 
   let lernaJsonFile: string | undefined;
   let lernaPackages: string[] | undefined;
@@ -268,6 +282,12 @@ export async function extractPackageFile(
       dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
+    }
+    if (yarnConfig) {
+      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
+      if (registryUrlFromYarnConfig) {
+        dep.registryUrls = [registryUrlFromYarnConfig];
+      }
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;

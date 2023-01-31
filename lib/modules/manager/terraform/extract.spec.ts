@@ -574,7 +574,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extract helm releases', async () => {
       const res = await extractPackageFile(helm, 'helm.tf', {});
-      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toHaveLength(7);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
@@ -594,7 +594,6 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: './charts/example',
           depType: 'helm_release',
-          registryUrls: [undefined],
           skipReason: 'local-chart',
         },
         {
@@ -617,7 +616,12 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: 'redis',
           depType: 'helm_release',
-          registryUrls: [undefined],
+        },
+        {
+          currentValue: 'v0.22.1',
+          datasource: 'docker',
+          depName: 'public.ecr.aws/karpenter/karpenter',
+          depType: 'helm_release',
         },
       ]);
     });

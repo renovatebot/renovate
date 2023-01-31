@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
+import type { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -61,7 +62,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     'gitea',
     'github',
     'gitlab',
-  ]);
+  ] satisfies PlatformId[]);
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {

@@ -1,4 +1,5 @@
 export const removedPresets: Record<string, string | null> = {
+  ':autodetectPinVersions': ':autodetectRangeStrategy',
   ':automergeBranchMergeCommit': ':automergeBranch',
   ':automergeBranchPush': ':automergeBranch',
   ':base': 'config:base',

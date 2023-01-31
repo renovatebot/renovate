@@ -116,7 +116,8 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch!);
-    packageFiles = await extractAllDependencies(config);
+    const extractResult = await extractAllDependencies(config);
+    packageFiles = extractResult?.packageFiles;
     // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,

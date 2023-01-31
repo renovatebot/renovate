@@ -2,7 +2,7 @@ import _findUp from 'find-up';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import { join, resolve } from 'upath';
-import { git, mockedFunction } from '../../../test/util';
+import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
   cachePathExists,
@@ -14,7 +14,7 @@ import {
   ensureLocalDir,
   findLocalSiblingOrParent,
   findUpLocal,
-  getFileContentMap,
+  getLocalFiles,
   getParentDir,
   getSiblingFileName,
   listCacheDir,
@@ -464,7 +464,7 @@ describe('util/fs/index', () => {
     });
   });
 
-  describe('getFileContentMap', () => {
+  describe('getLocalFiles', () => {
     it('reads list of files from local fs', async () => {
       const fileContentMap = {
         file1: 'foobar',
@@ -473,22 +473,12 @@ describe('util/fs/index', () => {
 
       await fs.outputFile(`${localDir}/file1`, fileContentMap.file1);
       await fs.outputFile(`${localDir}/file2`, fileContentMap.file2);
-      const res = await getFileContentMap(Object.keys(fileContentMap), true);
-      expect(res).toStrictEqual(fileContentMap);
-    });
-
-    it('reads list of files from git', async () => {
-      const fileContentMap = {
-        file1: 'foobar',
-      };
-
-      git.getFile.mockResolvedValueOnce('foobar');
-      const res = await getFileContentMap(Object.keys(fileContentMap));
+      const res = await getLocalFiles(Object.keys(fileContentMap));
       expect(res).toStrictEqual(fileContentMap);
     });
 
     it('returns null as content if file is not found', async () => {
-      const res = await getFileContentMap(['invalidfile'], true);
+      const res = await getLocalFiles(['invalidfile']);
       expect(res).toStrictEqual({
         invalidfile: null,
       });
