@@ -40,6 +40,10 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See <https://github.com/renovatebot/renovate/issues/8660> for background on why this was created.
 
+## RENOVATE_X_IGNORE_NODE_WARN
+
+Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
@@ -71,7 +75,7 @@ If set, Renovate will try to match against `packageName` after trying `depName` 
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
@@ -89,7 +93,7 @@ Default value: `alpha`.
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The order method for autodiscover server side repository search.
 
