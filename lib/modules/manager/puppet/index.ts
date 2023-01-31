@@ -1,11 +1,9 @@
-import type { Category, ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PuppetForgeDatasource } from '../../datasource/puppet-forge';
 
 export { extractPackageFile } from './extract';
-
-export const language: ProgrammingLanguage = 'ruby';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Puppetfile$'],

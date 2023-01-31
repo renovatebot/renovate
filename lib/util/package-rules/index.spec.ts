@@ -294,7 +294,6 @@ describe('util/package-rules/index', () => {
     };
     const dep = {
       depType: 'dependencies',
-      language: 'js',
       manager: 'meteor',
       depName: 'node',
     };

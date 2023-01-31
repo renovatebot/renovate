@@ -453,7 +453,6 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   updateType?: UpdateType;
   isBump?: boolean;
   sourceUrl?: string | null;
-  language?: string;
   categories?: string[];
   baseBranch?: string;
   manager?: string | null;
@@ -482,7 +481,6 @@ export interface MigratedRenovateConfig extends RenovateConfig {
 
 export interface ManagerConfig extends RenovateConfig {
   manager: string;
-  language?: string | null;
 }
 
 export interface ValidationResult {

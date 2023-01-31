@@ -223,14 +223,14 @@ sidebar_label: ${displayName}
   );
   categories.sort();
   categories.push('other');
-  let languageText = '\n';
+  let categoryText = '\n';
 
   for (const category of categories) {
-    languageText += `**${category}**: `;
-    languageText += allCategories[category].map(getManagerLink).join(', ');
-    languageText += '\n\n';
+    categoryText += `**${category}**: `;
+    categoryText += allCategories[category].map(getManagerLink).join(', ');
+    categoryText += '\n\n';
   }
   let indexContent = await readFile(`docs/usage/modules/manager/index.md`);
-  indexContent = replaceContent(indexContent, languageText);
+  indexContent = replaceContent(indexContent, categoryText);
   await updateFile(`${dist}/modules/manager/index.md`, indexContent);
 }

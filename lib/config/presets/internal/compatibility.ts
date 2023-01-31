@@ -12,9 +12,6 @@ export const presets: Record<string, Preset> = {
     },
     description:
       'Backwards-compatibility preset to restore `additionalBranchPrefix` settings for multiple managers which were removed in Renovate `v25`.',
-    docker: {
-      additionalBranchPrefix: 'docker-',
-    },
     homebrew: {
       additionalBranchPrefix: 'homebrew-',
     },
@@ -22,6 +19,10 @@ export const presets: Record<string, Preset> = {
       {
         additionalBranchPrefix: 'helm-',
         matchDatasources: ['helm'],
+      },
+      {
+        additionalBranchPrefix: 'docker-',
+        matchManagers: ['dockerfile', 'docker-compose'],
       },
     ],
   },

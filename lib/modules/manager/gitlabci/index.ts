@@ -1,8 +1,6 @@
-import type { Category, ProgrammingLanguage } from '../../../constants';
+import type { Category } from '../../../constants';
 import { DockerDatasource } from '../../datasource/docker';
 import { extractAllPackageFiles, extractPackageFile } from './extract';
-
-export const language: ProgrammingLanguage = 'docker';
 
 export { extractAllPackageFiles, extractPackageFile };
 
