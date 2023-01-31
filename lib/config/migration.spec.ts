@@ -540,6 +540,7 @@ describe('config/migration', () => {
         packageRules: [
           {
             paths: ['package.json'],
+            languages: ['python'],
             baseBranchList: ['master'],
             managers: ['dockerfile'],
             datasources: ['orb'],
@@ -564,6 +565,7 @@ describe('config/migration', () => {
             matchBaseBranches: ['master'],
             matchDatasources: ['orb'],
             matchDepTypes: ['peerDependencies'],
+            matchCategories: ['python'],
             matchManagers: ['dockerfile'],
             matchPackageNames: ['foo'],
             matchPackagePatterns: ['^bar'],

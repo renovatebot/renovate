@@ -4,6 +4,7 @@ import { AbstractMigration } from '../base/abstract-migration';
 
 export const renameMap = {
   paths: 'matchPaths',
+  languages: 'matchLanguages',
   baseBranchList: 'matchBaseBranches',
   managers: 'matchManagers',
   datasources: 'matchDatasources',
@@ -36,7 +37,7 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   const newPackageRules: PackageRule[] = [];
   const matchLanguages = packageRule['matchLanguages'];
   // no migration needed
-  if (is.nullOrUndefined(matchLanguages) || !is.array<string>(matchLanguages)) {
+  if (is.nullOrUndefined(matchLanguages) || !is.nonEmptyArray(matchLanguages)) {
     return [packageRule];
   }
 
@@ -53,10 +54,11 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
     newPackageRules.push(newRule);
   }
 
-  // if there has been no docker tag we need not create a separate rule to mimic OR behaviour
+  // if there has been no docker tag, then we can skip the migration logic.
   if (filteredLanguages.length === matchLanguages.length) {
     return newPackageRules;
   }
+  // Create a separate rule to mimic OR behaviour
   const newMatchManagerRule: any = { ...packageRule };
   delete newMatchManagerRule.matchLanguages;
 
