@@ -5,7 +5,7 @@ import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
@@ -141,14 +141,11 @@ async function executeWrapperCommand(
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
-  const customArtifactoryUrl = getCustomMavenWrapperUrl(deps);
-  const extraEnv = customArtifactoryUrl
-    ? { MVNW_REPOURL: customArtifactoryUrl }
-    : {};
+
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
-    extraEnv,
+    extraEnv: getExtraEnvOptions(deps),
     toolConstraints: [
       {
         toolName: 'java',
@@ -166,7 +163,19 @@ async function executeWrapperCommand(
   }
 }
 
-function getCustomMavenWrapperUrl(
+function getExtraEnvOptions(
+  deps: PackageDependency<Record<string, unknown>>[]
+): Opt<ExtraEnv<unknown>> {
+  const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
+  if (customMavenWrapperUrl) {
+    return customMavenWrapperUrl === DEFAULT_MAVEN_REPO_URL
+      ? {}
+      : { MVNW_REPOURL: customMavenWrapperUrl };
+  }
+  return {};
+}
+
+function getCustomMavenWrapperRepoUrl(
   deps: PackageDependency<Record<string, unknown>>[]
 ): string | null {
   const replaceString = deps
