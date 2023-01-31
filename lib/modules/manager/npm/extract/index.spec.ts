@@ -241,6 +241,23 @@ describe('modules/manager/npm/extract/index', () => {
       ).toBeArrayIncludingOnly(['https://registry.example.com']);
     });
 
+    it('reads registryUrls from .yarnrc', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === '.yarnrc') {
+          return 'registry "https://registry.example.com"';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {}
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls)
+      ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
     it('finds lerna', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
