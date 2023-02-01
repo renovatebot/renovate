@@ -311,6 +311,15 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^php-(?<version>\\S+)',
     },
   },
+  pnpm: {
+    asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pnpm',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pnpm/pnpm',
+      versioning: semverVersioning.id,
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   python: {
     asdfPluginUrl: 'https://github.com/danhper/asdf-python',
     config: {

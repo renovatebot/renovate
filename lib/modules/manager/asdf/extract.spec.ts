@@ -78,6 +78,7 @@ nodejs 18.12.0
 ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
+pnpm 7.26.2
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
@@ -329,6 +330,14 @@ dummy 1.2.3
             versioning: 'semver',
             depName: 'php',
             extractVersion: '^php-(?<version>\\S+)',
+          },
+          {
+            currentValue: '7.26.2',
+            datasource: 'github-releases',
+            packageName: 'pnpm/pnpm',
+            versioning: 'semver',
+            depName: 'pnpm',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.11.0',
