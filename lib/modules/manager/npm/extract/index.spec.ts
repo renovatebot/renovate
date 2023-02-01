@@ -28,6 +28,7 @@ describe('modules/manager/npm/extract/index', () => {
       jest.resetAllMocks();
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
+      fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
     });
 
     it('returns null if cannot parse', async () => {
