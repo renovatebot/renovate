@@ -165,7 +165,7 @@ async function executeWrapperCommand(
 
 function getExtraEnvOptions(
   deps: PackageDependency[]
-): Opt<ExtraEnv<unknown>> {
+): ExtraEnv {
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
     return { MVNW_REPOURL: customMavenWrapperUrl };
