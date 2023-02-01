@@ -178,6 +178,67 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('updates with autoReplaceNewString without Digest and when PinDigests is false no digest is added', async () => {
+      const dockerfile = 'FROM node:8.11.3-alpine AS node';
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = false;
+      upgrade.depName = 'node';
+      upgrade.packageName = 'node';
+      upgrade.currentValue = '8.11.3-alpine';
+      upgrade.newValue = '8.11.4-alpine';
+      upgrade.currentDigest = '';
+      upgrade.newDigest = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'node:8.11.3-alpine';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(`FROM node:8.11.4-alpine AS node`);
+    });
+
+    it('updates with autoReplaceNewString with Digest and when PinDigests is false it adds new digest', async () => {
+      const dockerfile =
+        'FROM node:8.11.3-alpine@sha256:9babc11daaca6927dd9977d9e945b27550ddaa20a4de7743527b23fe3a079523 AS node';
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = false;
+      upgrade.depName = 'node';
+      upgrade.packageName = 'node';
+      upgrade.currentValue = '8.11.3-alpine';
+      upgrade.newValue = '8.11.4-alpine';
+      upgrade.currentDigest =
+        'sha256:9babc11daaca6927dd9977d9e945b27550ddaa20a4de7743527b23fe3a079523';
+      upgrade.newDigest = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'node:8.11.3-alpine@sha256:9babc11daaca6927dd9977d9e945b27550ddaa20a4de7743527b23fe3a079523';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+      );
+    });
+
+    it('updates with autoReplaceNewString without Digest and when PinDigests is true it adds digest', async () => {
+      const dockerfile = 'FROM node:8.11.3-alpine AS node';
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'node';
+      upgrade.packageName = 'node';
+      upgrade.currentValue = '8.11.3-alpine';
+      upgrade.newValue = '8.11.4-alpine';
+      upgrade.currentDigest = '';
+      upgrade.newDigest = 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'node:8.11.3-alpine';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        `FROM node:8.11.4-alpine@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa AS node`
+      );
+    });
+
     it('succeeds when using autoReplaceStringTemplate to update depName when using regex', async () => {
       const yml =
         "- project: 'pipeline-fragments/docker-test'\n" +
@@ -638,13 +699,10 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.newValue = '3.16';
       upgrade.newDigest = 'p0o9i8u7z6t5r4e3w2q1';
       upgrade.packageFile = 'Dockerfile';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
-      expect(res).toBe(
-        dockerfile
-          .replace(upgrade.depName, upgrade.newName)
-          .replace(upgrade.currentValue, upgrade.newValue)
-          .replace(upgrade.currentDigest, upgrade.newDigest)
-      );
+      expect(res).toBe('FROM alpine:3.16@p0o9i8u7z6t5r4e3w2q1\n');
     });
 
     it('updates with droneci image replacement', async () => {

@@ -14,15 +14,8 @@ export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    depIndex,
-    currentDigest,
-    pinDigests,
-  } = upgrade;
+  const { manager, packageFile, newValue, newDigest, depIndex, currentDigest } =
+    upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade: PackageDependency;
   try {
@@ -79,7 +72,7 @@ export async function confirmIfDepUpdated(
   if (newUpgrade.currentDigest === newDigest) {
     return true;
   }
-  if (!currentDigest && !pinDigests) {
+  if (!currentDigest) {
     return true;
   }
   // istanbul ignore next
@@ -182,29 +175,33 @@ export async function doAutoReplace(
   }
   try {
     let newString: string;
-    if (autoReplaceStringTemplate && !newName) {
+
+    if (!currentDigest && !upgrade.pinDigests) {
+      upgrade.newDigest = '';
+    }
+
+    if (autoReplaceStringTemplate) {
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
-      if (currentValue && newValue) {
-        newString = newString.replace(
-          regEx(escapeRegExp(currentValue), 'g'),
-          newValue
-        );
-      }
-      if (depName && newName) {
-        newString = newString.replace(
-          regEx(escapeRegExp(depName), 'g'),
-          newName
-        );
-      }
-      if (currentDigest && newDigest) {
-        newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), 'g'),
-          newDigest
-        );
-      }
     }
+
+    if (currentValue && newValue) {
+      newString = newString.replace(
+        regEx(escapeRegExp(currentValue), 'g'),
+        newValue
+      );
+    }
+    if (depName && newName) {
+      newString = newString.replace(regEx(escapeRegExp(depName), 'g'), newName);
+    }
+    if (currentDigest && newDigest) {
+      newString = newString.replace(
+        regEx(escapeRegExp(currentDigest), 'g'),
+        newDigest
+      );
+    }
+
     if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },
