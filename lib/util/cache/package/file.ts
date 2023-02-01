@@ -64,9 +64,10 @@ export async function set(
   );
 }
 
-export function init(cacheDir: string): void {
+export function init(cacheDir: string): string {
   cacheFileName = upath.join(cacheDir, '/renovate/renovate-cache-v1');
   logger.debug('Initializing Renovate internal cache into ' + cacheFileName);
+  return cacheFileName;
 }
 
 export async function cleanup(): Promise<void> {
@@ -98,7 +99,7 @@ export async function cleanup(): Promise<void> {
     logger.debug(
       `Deleted ${deletedCount} of ${totalCount} file cached entries in ${durationMs}ms`
     );
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error cleaning up expired file cache');
   }
 }

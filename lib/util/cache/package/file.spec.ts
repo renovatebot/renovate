@@ -1,5 +1,6 @@
 import os from 'os';
-import { get, init, set } from './file';
+import cacache from 'cacache';
+import { cleanup, get, init, set } from './file';
 
 describe('util/cache/package/file', () => {
   it('returns if uninitiated', async () => {
@@ -22,5 +23,15 @@ describe('util/cache/package/file', () => {
     init(os.tmpdir());
     await set('test', 'key', 1234, -5);
     expect(await get('test', 'key')).toBeUndefined();
+  });
+
+  it('cleans up', async () => {
+    const cacheFileName = init(os.tmpdir());
+    await set('test', 'valid', 1234);
+    await set('test', 'expired', 1234, -5);
+    await cacache.put(cacheFileName, 'invalid', 'not json');
+    await cleanup();
+    const entries = await cacache.ls(cacheFileName);
+    expect(Object.keys(entries)).toEqual(['test-valid']);
   });
 });
