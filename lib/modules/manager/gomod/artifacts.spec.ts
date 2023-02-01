@@ -290,7 +290,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -307,7 +307,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -441,7 +441,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -471,7 +471,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -550,7 +550,7 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       {},
       {
         options: {
@@ -952,7 +952,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       {},
       {
         cmd:
@@ -969,7 +969,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1015,7 +1015,7 @@ describe('modules/manager/gomod/artifacts', () => {
       { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       {},
       {
         cmd:
@@ -1032,7 +1032,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +
@@ -1472,7 +1472,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull renovate/sidecar',
+        cmd: 'docker pull containerbase/sidecar',
       },
       {},
       {
@@ -1490,7 +1490,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.17.0' +
           ' && ' +
@@ -1544,7 +1544,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     const expectedResult = [
       {
-        cmd: 'docker pull renovate/sidecar',
+        cmd: 'docker pull containerbase/sidecar',
       },
       {},
       {
@@ -1562,7 +1562,7 @@ describe('modules/manager/gomod/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool golang 1.14.0' +
           ' && ' +

@@ -302,9 +302,9 @@ You can skip the host part, and use just the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `renovate/node` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_node` instead of `renovate_node`
+- called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
@@ -316,7 +316,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
 You can use the `dockerImagePrefix` option to override this default.
 
-Say you want to pull your images from `ghcr.io/containerbase`.
+Say you want to pull your images from `ghcr.io/containerbase` to bypass docker hub limits.
 You would put this in your configuration file:
 
 ```json
@@ -325,7 +325,7 @@ You would put this in your configuration file:
 }
 ```
 
-If you pulled a new `sidecar` image, the final image would be `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
+If renovate pulls a new `sidecar` image, the final image would be `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 

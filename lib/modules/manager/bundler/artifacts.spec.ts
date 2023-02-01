@@ -268,7 +268,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -279,7 +279,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -326,7 +326,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -337,7 +337,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.5' +
               ' && ' +
@@ -386,7 +386,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -397,7 +397,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.3.0' +
               ' && ' +
@@ -445,7 +445,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -457,7 +457,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -514,7 +514,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -525,7 +525,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -584,7 +584,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -595,7 +595,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
@@ -653,7 +653,7 @@ describe('modules/manager/bundler/artifacts', () => {
           })
         ).toEqual([updatedGemfileLock]);
         expect(execSnapshots).toMatchObject([
-          { cmd: 'docker pull renovate/sidecar' },
+          { cmd: 'docker pull containerbase/sidecar' },
           { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
           {
             cmd:
@@ -664,7 +664,7 @@ describe('modules/manager/bundler/artifacts', () => {
               '-e BUILDPACK_CACHE_DIR ' +
               '-e CONTAINERBASE_CACHE_DIR ' +
               '-w "/tmp/github/some/repo" ' +
-              'renovate/sidecar' +
+              'containerbase/sidecar' +
               ' bash -l -c "' +
               'install-tool ruby 1.2.0' +
               ' && ' +
