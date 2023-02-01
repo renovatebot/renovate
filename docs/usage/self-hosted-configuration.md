@@ -316,7 +316,7 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
 You can use the `dockerImagePrefix` option to override this default.
 
-Say you want to pull your images from `ghcr.io/containerbase` to bypass docker hub limits.
+Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
 You would put this in your configuration file:
 
 ```json
@@ -325,7 +325,7 @@ You would put this in your configuration file:
 }
 ```
 
-If renovate pulls a new `sidecar` image, the final image would be `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 
