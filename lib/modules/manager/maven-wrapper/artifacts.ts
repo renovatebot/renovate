@@ -188,10 +188,11 @@ function getCustomMavenWrapperRepoUrl(
     replaceString
   );
 
-  if (match) {
-    return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
+  if (!match) {
+    return null;
   }
-  return null;
+
+  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
 }
 
 async function createWrapperCommand(
