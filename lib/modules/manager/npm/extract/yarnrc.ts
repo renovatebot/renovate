@@ -17,11 +17,14 @@ export type YarnConfig = z.infer<typeof YarnrcYmlSchema>;
 
 export function loadConfigFromYarnrcYml(yarnrcYml: string): YarnConfig | null {
   try {
-    return YarnrcYmlSchema.parse(
-      load(yarnrcYml, {
-        json: true,
-      })
-    );
+    const obj = load(yarnrcYml, {
+      json: true,
+    });
+    if (!obj) {
+      // emtpy yaml file
+      return null;
+    }
+    return YarnrcYmlSchema.parse(obj);
   } catch (err) {
     logger.warn({ yarnrcYml, err }, `Failed to load yarnrc file`);
     return null;
