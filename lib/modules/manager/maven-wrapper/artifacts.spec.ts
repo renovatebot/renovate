@@ -423,6 +423,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
       },
     ]);
 
-    expect(execSnapshots[0]?.options?.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
   });
 });
