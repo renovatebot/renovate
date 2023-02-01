@@ -23,7 +23,6 @@ describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      jest.resetModules();
       fs.readLocalFile.mockResolvedValue(null);
       fs.localPathExists.mockResolvedValue(false);
     });
