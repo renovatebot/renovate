@@ -188,5 +188,6 @@ export interface UpgradeFingerprintConfig {
 }
 
 export interface ExtractResult {
+  extractionFingerprints: Record<string, string | undefined>;
   packageFiles: Record<string, PackageFile[]>;
 }
