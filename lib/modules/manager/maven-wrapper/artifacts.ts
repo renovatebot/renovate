@@ -5,7 +5,7 @@ import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ExtraEnv, Opt } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
@@ -63,7 +63,9 @@ export async function updateArtifacts({
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
     }
-    await executeWrapperCommand(cmd, config, packageFileName, updatedDeps);
+
+    const extraEnv = getExtraEnvOptions(updatedDeps);
+    await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -145,7 +147,7 @@ async function executeWrapperCommand(
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
-    extraEnv: getExtraEnvOptions(deps),
+    extraEnv,
     toolConstraints: [
       {
         toolName: 'java',
@@ -163,9 +165,7 @@ async function executeWrapperCommand(
   }
 }
 
-function getExtraEnvOptions(
-  deps: PackageDependency[]
-): ExtraEnv {
+function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
   const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
   if (customMavenWrapperUrl) {
     return { MVNW_REPOURL: customMavenWrapperUrl };
@@ -176,8 +176,9 @@ function getExtraEnvOptions(
 function getCustomMavenWrapperRepoUrl(
   deps: PackageDependency<Record<string, unknown>>[]
 ): string | null {
-  const replaceString = deps
-    .find((dep) => dep.depName === 'maven-wrapper')?.replaceString;
+  const replaceString = deps.find(
+    (dep) => dep.depName === 'maven-wrapper'
+  )?.replaceString;
 
   if (!replaceString) {
     return null;
