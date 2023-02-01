@@ -144,7 +144,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull renovate/sidecar',
+          cmd: 'docker pull containerbase/sidecar',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -155,7 +155,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e BUILDPACK_CACHE_DIR ' +
             '-e CONTAINERBASE_CACHE_DIR ' +
-            '-w "some-dir" renovate/sidecar ' +
+            '-w "some-dir" containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool node 16.16.0 ' +
             '&& ' +

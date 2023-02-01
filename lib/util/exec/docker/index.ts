@@ -259,7 +259,9 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
+  image = `${ensureTrailingSlash(
+    dockerImagePrefix ?? 'containerbase'
+  )}${image}`;
 
   // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
   logger.debug(
