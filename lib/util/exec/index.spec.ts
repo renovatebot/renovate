@@ -397,9 +397,9 @@ describe('util/exec/index', () => {
         inCmd,
         inOpts: { docker },
         outCmd: [
-          `docker pull ghcr.io/renovatebot/${image}`,
+          `docker pull ghcr.io/containerbase/${image}`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/containerbase/${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -413,7 +413,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerImagePrefix: 'ghcr.io/renovatebot',
+          dockerImagePrefix: 'ghcr.io/containerbase',
           binarySource: 'docker',
         },
       },
