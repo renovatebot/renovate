@@ -4,6 +4,9 @@ import { getConfig } from '../../../../config/defaults';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
+const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
+  '../../../../util/fs'
+);
 
 // TODO: fix types
 const defaultConfig = getConfig();
