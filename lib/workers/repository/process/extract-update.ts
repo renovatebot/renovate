@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
@@ -80,6 +81,27 @@ export function isCacheExtractValid(
     logger.debug('Cached extract result cannot be used due to config change');
     return false;
   }
+  if (!cachedExtract.extractionFingerprints) {
+    logger.debug(
+      'Cached extract is missing extractionFingerprints, so cannot be used'
+    );
+    return false;
+  }
+  const changedManagers = new Set();
+  for (const [manager, fingerprint] of Object.entries(
+    cachedExtract.extractionFingerprints
+  )) {
+    if (fingerprint !== hashMap.get(manager)) {
+      changedManagers.add(manager);
+    }
+  }
+  if (changedManagers.size > 0) {
+    logger.debug(
+      { changedManagers: [...changedManagers] },
+      'Manager fingerprint(s) have changed, extract cache cannot be reused'
+    );
+    return false;
+  }
   logger.debug(
     `Cached extract for sha=${baseBranchSha} is valid and can be used`
   );
@@ -114,11 +136,14 @@ export async function extract(
     }
   } else {
     await checkoutBranch(baseBranch!);
-    packageFiles = await extractAllDependencies(config);
+    const extractResult = (await extractAllDependencies(config)) || {};
+    packageFiles = extractResult.packageFiles;
+    const { extractionFingerprints } = extractResult;
     // TODO: fix types (#7154)
     cache.scan[baseBranch!] = {
       sha: baseBranchSha!,
       configHash,
+      extractionFingerprints,
       packageFiles,
     };
     // Clean up cached branch extracts
