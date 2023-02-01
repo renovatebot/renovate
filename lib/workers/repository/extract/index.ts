@@ -46,6 +46,8 @@ export async function extractAllDependencies(
     extractionFingerprints: {},
   };
 
+  // Store the fingerprint of all managers which match any file (even if they do not find any dependencies)
+  // The cached result needs to be invalidated if the fingerprint of any matching manager changes
   for (const { manager } of extractList) {
     extractResult.extractionFingerprints[manager] = hashMap.get(manager);
   }
