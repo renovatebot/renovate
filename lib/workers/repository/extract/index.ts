@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { getManagerList } from '../../../modules/manager';
+import { getManagerList, hashMap } from '../../../modules/manager';
 import { getFileList } from '../../../util/git';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
@@ -43,7 +43,12 @@ export async function extractAllDependencies(
 
   const extractResult: ExtractResult = {
     packageFiles: {},
+    extractionFingerprints: {},
   };
+
+  for (const { manager } of extractList) {
+    extractResult.extractionFingerprints[manager] = hashMap.get(manager);
+  }
 
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
