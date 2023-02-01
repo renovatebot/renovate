@@ -384,7 +384,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots[0]?.options?.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
   });
 
   it('should run not include MVNW_REPOURL when run with a malformed replaceString', async () => {
