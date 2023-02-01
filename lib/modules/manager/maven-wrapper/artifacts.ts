@@ -177,8 +177,7 @@ function getCustomMavenWrapperRepoUrl(
   deps: PackageDependency<Record<string, unknown>>[]
 ): string | null {
   const replaceString = deps
-    .filter((dep) => dep.depName === 'maven-wrapper')
-    .map((dep) => dep.replaceString)[0];
+    .find((dep) => dep.depName === 'maven-wrapper')?.replaceString;
 
   if (!replaceString) {
     return null;
