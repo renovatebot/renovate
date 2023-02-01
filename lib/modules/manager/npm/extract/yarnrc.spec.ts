@@ -47,6 +47,16 @@ describe('modules/manager/npm/extract/yarnrc', () => {
       });
       expect(registryUrl).toBeNull();
     });
+
+    it('ignores missing scope registryServer', () => {
+      const registryUrl = resolveRegistryUrl('@scope/a-package', {
+        npmScopes: {
+          scope: {},
+        },
+        npmRegistryServer: 'https://private.example.com/npm',
+      });
+      expect(registryUrl).toBeNull();
+    });
   });
 
   describe('loadConfigFromYarnrcYml()', () => {
@@ -95,6 +105,7 @@ describe('modules/manager/npm/extract/yarnrc', () => {
         `,
         null,
       ],
+      ['', null],
     ])('produces expected config (%s)', (yarnrcYml, expectedConfig) => {
       const config = loadConfigFromYarnrcYml(yarnrcYml);
 

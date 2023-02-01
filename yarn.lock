@@ -2530,15 +2530,15 @@
     got "^11.8.6"
     luxon "^3.2.1"
 
-"@renovatebot/pep440@2.1.12":
-  version "2.1.12"
-  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.12.tgz#4b071115670e9df16eb064861f2d1fd821b7caa7"
-  integrity sha512-V/9b3rnJOT37QK/3vfK95d8o2zzDaPWYXuqoC6XF1+EgXMqi37KDL5tdWJ+KSuUOy7+Zc/Vn5w1YIil8+wnYXg==
+"@renovatebot/pep440@2.1.13":
+  version "2.1.13"
+  resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.13.tgz#d630989b6abf9dd001edc526cf3e821450e6e45d"
+  integrity sha512-PFnG9X7on77Gp9FPdossWfvDL6QTg1MafZP3hdKafo3n6SP89wiyZmjFVaQwlRlE5cEmZQwh11dE8Oos9H2paw==
 
-"@renovatebot/ruby-semver@2.1.6":
-  version "2.1.6"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-2.1.6.tgz#bd2878012fc10dceb5e3555ea786f46810b5749e"
-  integrity sha512-K9pi1ceqYphMXpDvZuqRzizFRRHl02C7d2gLBVF7a2++3GYvtvu/xUlWMaA7PfnZT7cbaW8UZuCERe7qFHIvww==
+"@renovatebot/ruby-semver@2.1.7":
+  version "2.1.7"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-2.1.7.tgz#6e466c212ddd70b3e9db72a86a5c9909a2434c69"
+  integrity sha512-JV6IlSfgZEF5Vmi5Uwvr/QHlNZXLojzBLg6gScuE2bFx3qNyagnKzHJ/AuA3ir7/EFTHqHQK7XRUa0ddlN9ihA==
   dependencies:
     tslib "^2.4.1"
 
@@ -9163,10 +9163,10 @@ sax@^1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
 
-semantic-release@20.0.4:
-  version "20.0.4"
-  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-20.0.4.tgz#248ddc3cc816d6017ab81c52829c864cdd0a01d2"
-  integrity sha512-pTYxIjGbwbLvlCu+QI/4EtS8aDvuz3XedGibNPz2QnMUWSl5aeGLXRboVQQV03GaQbiYeZ6MnpA2zjgzTZcLEQ==
+semantic-release@20.1.0:
+  version "20.1.0"
+  resolved "https://registry.yarnpkg.com/semantic-release/-/semantic-release-20.1.0.tgz#07d493fe5431ad326018069e86cc50ba6927b65c"
+  integrity sha512-+9+n6RIr0Fz0F53cXrjpawxWlUg3O7/qr1jF9lrE+/v6WqwBrSWnavVHTPaf2WLerET2EngoqI0M4pahkKl6XQ==
   dependencies:
     "@semantic-release/commit-analyzer" "^9.0.2"
     "@semantic-release/error" "^3.0.0"
