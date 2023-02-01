@@ -1580,4 +1580,42 @@ describe('modules/manager/gomod/artifacts', () => {
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
   });
+
+  it('handles goGetDirs configuration correctly', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: [] as string[],
+    } as StatusResult);
+
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['.', 'foo', 'bar', '.baz/...'],
+        },
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t . foo bar .baz/...',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            CGO_ENABLED: '1',
+            GOFLAGS: '-modcacherw',
+            GOINSECURE: 'insecure.example.com/*',
+            GONOPROXY: 'noproxy.example.com/*',
+            GONOSUMDB: '1',
+            GOPRIVATE: 'private.example.com/*',
+            GOPROXY: 'proxy.example.com',
+          },
+        },
+      },
+    ]);
+  });
 });

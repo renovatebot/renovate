@@ -18,6 +18,7 @@ junit.xml
 renovate-schema.json
 **/gradle-wrapper/__fixtures__/**/.gradle
 .clinic/
+.vscode
 
 # generated code
 **/*.generated.ts

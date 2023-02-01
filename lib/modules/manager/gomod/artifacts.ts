@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { PlatformId } from '../../../constants';
@@ -271,7 +272,9 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    let args = 'get -d -t ./...';
+    const goGetDirs = config.goGetDirs?.map(quote).join(' ') ?? './...';
+
+    let args = 'get -d -t ' + goGetDirs;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 

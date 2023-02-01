@@ -908,6 +908,10 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch` and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## goGetDirs
+
+What directories will `go get` be executed on (`./...` by default).
+
 ## golang
 
 Configuration added here applies for all Go-related updates.
