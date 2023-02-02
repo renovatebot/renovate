@@ -121,7 +121,7 @@ function getUpdateImportPathCmds(
   const updateImportCommands = updatedDeps
     .map(({ depName, newVersion }) => ({
       depName: depName!,
-      newMajor: major(newVersion!),
+      newMajor: valid(newVersion) && major(newVersion),
     }))
     // Skip path upates going from v0 to v1
     .filter(
