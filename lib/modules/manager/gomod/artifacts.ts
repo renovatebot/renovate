@@ -33,7 +33,7 @@ const githubApiUrls = new Set([
   'https://api.github.com/',
 ]);
 
-const { major } = semver;
+const { major, valid } = semver;
 
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
