@@ -125,7 +125,8 @@ function getUpdateImportPathCmds(
     }))
     // Skip path upates going from v0 to v1
     .filter(
-      ({ depName, newMajor }) => !depName.startsWith('gopkg.in') && newMajor > 1
+      ({ depName, newMajor }) =>
+        !depName.startsWith('gopkg.in') && newMajor && newMajor > 1
     )
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
