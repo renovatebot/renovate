@@ -312,9 +312,7 @@ export async function ensurePr(
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
         // adds or-cache for existing PRs
-        if (!prCache) {
-          setPrCache(branchName, prFingerprint);
-        }
+          setPrCache(branchName, prFingerprint, false);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -345,7 +343,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
-        setPrCache(branchName, prFingerprint);
+        setPrCache(branchName, prFingerprint, true);
       }
       return { type: 'with-pr', pr: existingPr };
     }
@@ -439,7 +437,7 @@ export async function ensurePr(
       }
       // TODO: types (#7154)
       logger.debug(`Created ${pr.displayNumber!}`);
-      setPrCache(branchName, prFingerprint);
+      setPrCache(branchName, prFingerprint, true);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

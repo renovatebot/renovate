@@ -51,7 +51,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
   describe('setPrCache()', () => {
     it('logs if branch not found', () => {
       cache.getCache.mockReturnValue(dummyCache);
-      setPrCache('branch_1', 'fingerprint_hash');
+      setPrCache('branch_1', 'fingerprint_hash', false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'setPrCache(): Branch cache not present'
       );
@@ -60,7 +60,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
     it('set prCache', () => {
       cache.getCache.mockReturnValue(dummyCache);
       jest.useFakeTimers().setSystemTime(new Date('2020-01-01'));
-      setPrCache('branch_name', 'fingerprint_hash');
+      setPrCache('branch_name', 'fingerprint_hash', true);
       expect(dummyCache).toStrictEqual({
         branches: [
           {

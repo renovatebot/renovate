@@ -17,7 +17,11 @@ export function getPrCache(branchName: string): PrCache | null {
 }
 
 // store the time a PR was last updated
-export function setPrCache(branchName: string, fingerprint: string): void {
+export function setPrCache(
+  branchName: string,
+  fingerprint: string,
+  prModified: boolean
+): void {
   logger.debug(`setPrCache()`);
   const cache = getCache();
   const branch = cache.branches?.find(
@@ -29,8 +33,11 @@ export function setPrCache(branchName: string, fingerprint: string): void {
     return;
   }
 
+  const lastEdited = branch.prCache?.lastEdited;
   branch.prCache = {
     fingerprint,
-    lastEdited: new Date().toISOString(),
+    // update time when creating new cache or when pr was modified
+    lastEdited:
+      lastEdited && !prModified ? lastEdited : new Date().toISOString(),
   };
 }
