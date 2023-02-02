@@ -1,4 +1,5 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -432,5 +433,288 @@ describe('modules/manager/kustomize/extract', () => {
         ],
       });
     });
+  });
+
+  describe('extractResource', () => {
+    const urls = [
+      {
+        name: 'https aws code commit url',
+        url: 'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somedir',
+        host: 'git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'https://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        name: 'legacy azure https url with params',
+        url: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+        host: 'fabrikops2.visualstudio.com/',
+        project: 'someorg/somerepo',
+        packageName: 'https://fabrikops2.visualstudio.com/someorg/somerepo',
+      },
+      {
+        name: 'http github url without git suffix',
+        url: 'http://github.com/someorg/somerepo/somedir',
+        host: 'github.com/',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'scp github url without git suffix',
+        url: 'git@github.com:someorg/somerepo/somedir',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'http github url with git suffix',
+        url: 'http://github.com/someorg/somerepo.git/somedir',
+        host: 'github.com/',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'scp github url with git suffix',
+        url: 'git@github.com:someorg/somerepo.git/somedir',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'non-github_scp',
+        url: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+        host: 'gitlab2.sqtools.ru:',
+        project: 'infra/kubernetes/thanos-base',
+        packageName: 'git@gitlab2.sqtools.ru:infra/kubernetes/thanos-base.git',
+      },
+      {
+        name: 'non-github_scp with path delimiter',
+        url: 'git@bitbucket.org:company/project.git//path',
+        host: 'bitbucket.org:',
+        project: 'company/project',
+        packageName: 'git@bitbucket.org:company/project.git',
+      },
+      {
+        name: 'non-github_scp incorrectly using slash (invalid but currently passed through to git)',
+        url: 'git@bitbucket.org/company/project.git//path',
+        host: 'bitbucket.org/',
+        project: 'company/project',
+        packageName: 'git@bitbucket.org/company/project.git',
+      },
+      {
+        name: 'non-github_git-user_ssh',
+        url: 'ssh://git@bitbucket.org/company/project.git//path',
+        host: 'bitbucket.org/',
+        project: 'company/project',
+        packageName: 'ssh://git@bitbucket.org/company/project.git',
+      },
+      {
+        name: '_git host delimiter in non-github url',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with params',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with kust root path and params',
+        url: 'https://itfs.mycompany.com/collection/project/_git/somerepos/somedir',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: '_git host delimiter in non-github url with no kust root path',
+        url: 'git::https://itfs.mycompany.com/collection/project/_git/somerepos',
+        host: 'itfs.mycompany.com/',
+        project: 'collection/project/_git/somerepos',
+        packageName:
+          'https://itfs.mycompany.com/collection/project/_git/somerepos',
+      },
+      {
+        name: 'https bitbucket url with git suffix',
+        url: 'https://bitbucket.example.com/scm/project/repository.git',
+        host: 'bitbucket.example.com/',
+        project: 'scm/project/repository',
+        packageName: 'https://bitbucket.example.com/scm/project/repository.git',
+      },
+      {
+        name: 'ssh aws code commit url',
+        url: 'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo/somepath',
+        host: 'git-codecommit.us-east-2.amazonaws.com/',
+        project: 'someorg/somerepo',
+        packageName:
+          'ssh://git-codecommit.us-east-2.amazonaws.com/someorg/somerepo',
+      },
+      {
+        name: 'scp Github with slash fixed to colon',
+        url: 'git@github.com/someorg/somerepo/somepath',
+        host: 'github.com:',
+        project: 'someorg/somerepo',
+      },
+      {
+        name: 'https Github with double slash path delimiter and params',
+        url: 'https://github.com/kubernetes-sigs/kustomize//examples/multibases/dev/',
+        host: 'github.com/',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'ssh Github with double-slashed path delimiter and params',
+        url: 'ssh://git@github.com/kubernetes-sigs/kustomize//examples/multibases/dev',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'arbitrary https host with double-slash path delimiter',
+        url: 'https://example.org/path/to/repo//examples/multibases/dev',
+        host: 'example.org/',
+        project: 'path/to/repo',
+        packageName: 'https://example.org/path/to/repo',
+      },
+      {
+        name: 'arbitrary https host with .git repo suffix',
+        url: 'https://example.org/path/to/repo.git/examples/multibases/dev',
+        host: 'example.org/',
+        project: 'path/to/repo',
+        packageName: 'https://example.org/path/to/repo.git',
+      },
+      {
+        name: 'arbitrary ssh host with double-slash path delimiter',
+        url: 'ssh://alice@example.com/path/to/repo//examples/multibases/dev',
+        host: 'example.com/',
+        project: 'path/to/repo',
+        packageName: 'ssh://alice@example.com/path/to/repo',
+      },
+      // {
+      //   name: 'query_slash',
+      //   url: 'https://authority/org/repo?ref=group/version',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   name: 'query_git_delimiter',
+      //   url: 'https://authority/org/repo/?ref=includes_git/for_some_reason',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      // {
+      //   name: 'query_git_suffix',
+      //   url: 'https://authority/org/repo/?ref=includes.git/for_some_reason',
+      //   host: 'authority/',
+      //   project: 'org/repo',
+      //   packageName: 'https://authority/org/repo',
+      // },
+      {
+        name: 'non_parsable_path',
+        url: 'https://authority/org/repo/%-invalid-uri-so-not-parsable-by-net/url.Parse',
+        host: 'authority/',
+        project: 'org/repo',
+        packageName: 'https://authority/org/repo',
+      },
+      {
+        name: 'non-git username with non-github host',
+        url: 'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git//path',
+        host: 'bitbucket.org/',
+        project: 'ourteamname/ourrepositoryname',
+        packageName:
+          'ssh://myusername@bitbucket.org/ourteamname/ourrepositoryname.git',
+      },
+      {
+        name: 'username with http protocol (invalid but currently passed through to git)',
+        url: 'http://git@home.com/path/to/repository.git//path',
+        host: 'home.com/',
+        project: 'path/to/repository',
+        packageName: 'http://git@home.com/path/to/repository.git',
+      },
+      {
+        name: 'username with https protocol (invalid but currently passed through to git)',
+        url: 'https://git@home.com/path/to/repository.git//path',
+        host: 'home.com/',
+        project: 'path/to/repository',
+        packageName: 'https://git@home.com/path/to/repository.git',
+      },
+      {
+        name: 'complex github ssh url from docs',
+        url: 'ssh://git@ssh.github.com:443/YOUR-USERNAME/YOUR-REPOSITORY.git',
+        host: 'ssh.github.com:443/',
+        project: 'YOUR-USERNAME/YOUR-REPOSITORY',
+      },
+      {
+        name: 'colon behind slash not scp delimiter',
+        url: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git/path',
+        host: 'gitlab.com/',
+        project: 'user:name/YOUR-REPOSITORY',
+        packageName: 'git@gitlab.com/user:name/YOUR-REPOSITORY.git',
+      },
+      {
+        name: 'gitlab URLs with explicit git suffix',
+        url: 'git@gitlab.com:gitlab-tests/sample-project.git',
+        host: 'gitlab.com:',
+        project: 'gitlab-tests/sample-project',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project.git',
+      },
+      {
+        name: 'gitlab URLs without explicit git suffix',
+        url: 'git@gitlab.com:gitlab-tests/sample-project',
+        host: 'gitlab.com:',
+        project: 'gitlab-tests/sample-project',
+        packageName: 'git@gitlab.com:gitlab-tests/sample-project',
+      },
+      {
+        name: 'azure host with _git and // path separator',
+        url: 'https://username@dev.azure.com/org/project/_git/repo//path/to/kustomization/root',
+        host: 'dev.azure.com/',
+        project: 'org/project/_git/repo',
+        packageName: 'https://username@dev.azure.com/org/project/_git/repo',
+      },
+      {
+        name: 'legacy format azure host with _git',
+        url: 'https://org.visualstudio.com/project/_git/repo/path/to/kustomization/root',
+        host: 'org.visualstudio.com/',
+        project: 'project/_git/repo',
+        packageName: 'https://org.visualstudio.com/project/_git/repo',
+      },
+      {
+        name: 'ssh on github with custom username for custom ssh certificate authority',
+        url: 'ssh://org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+      {
+        name: 'scp on github with custom username for custom ssh certificate authority',
+        url: 'org-12345@github.com/kubernetes-sigs/kustomize',
+        host: 'github.com:',
+        project: 'kubernetes-sigs/kustomize',
+      },
+    ];
+
+    // as per kustomize URL specifications
+    it.each(urls)(
+      'extracts correct project from $name',
+      ({ url, host, project, packageName }) => {
+        const version = 'v1.0.0';
+        const sample: any = {
+          currentValue: version,
+        };
+        if (regEx(/(?:github\.com)(:|\/)/).test(url)) {
+          sample.depName = project;
+          sample.datasource = GithubTagsDatasource.id;
+        } else {
+          sample.depName = host + project;
+          sample.packageName = packageName;
+          sample.datasource = GitTagsDatasource.id;
+        }
+
+        const pkg = extractResource(`${url}?ref=${version}`);
+        expect(pkg).toEqual(sample);
+      }
+    );
   });
 });
