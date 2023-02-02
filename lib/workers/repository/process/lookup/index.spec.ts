@@ -1181,7 +1181,7 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
-    it.only('should warn if no digest could be found but pinning is enabled', async () => {
+    it('should warn if no digest could be found but pinning is enabled', async () => {
       config.currentValue = 'v1.0.0';
       config.currentDigest = 'bla';
       config.digestOneAndOnly = true;
