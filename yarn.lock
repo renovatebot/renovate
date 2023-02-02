@@ -2479,10 +2479,10 @@
   resolved "https://registry.yarnpkg.com/@redis/bloom/-/bloom-1.2.0.tgz#d3fd6d3c0af3ef92f26767b56414a370c7b63b71"
   integrity sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==
 
-"@redis/client@1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.0.tgz#aeb3a1a2f72b4f23358ef74693c1b5c1ff420693"
-  integrity sha512-MafrVNQ5LSnii1yYIlzjbz3i6Bw8c9RZkV3g7jNd3As/A1vo6UIn0+29ii631oKxIA+nAEMeACh6+9k9+iup1A==
+"@redis/client@1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.2.tgz#ad60561cfcfe6938f64327b913a425739645a661"
+  integrity sha512-NHkrqvyreowlqxZvt9ufA//nEv0/voHohMAybn50S3e/+9Xbc47bXX4djb7QOX6Kupp16NdfG7St8CzhyYA3cg==
   dependencies:
     cluster-key-slot "1.1.2"
     generic-pool "3.9.0"
@@ -8914,13 +8914,13 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@4.6.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.0.tgz#53dddba73b3f5c1fa0e289df120410277bd77ace"
-  integrity sha512-QTlRvQtfRM9ZxFRfBmd8UsGGrKZil/cAwlbDTnaSKirCUMfWgXjKQ4VlkhmNBc3mnAbbSgeYw9zs/HcfYGd1Cw==
+redis@4.6.1:
+  version "4.6.1"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.1.tgz#7778d888d5fe150a7c453b27a47b0e359fff8252"
+  integrity sha512-cmmO3uqHHRWrvpsT0JrrYl/uqyz6/GNnXZnPbwzp5Hy0Y7z8WBTZnF6TQ8v/ryIverGm9azq5oqzNzpWh8Ab+w==
   dependencies:
     "@redis/bloom" "1.2.0"
-    "@redis/client" "1.5.0"
+    "@redis/client" "1.5.2"
     "@redis/graph" "1.1.0"
     "@redis/json" "1.0.4"
     "@redis/search" "1.1.1"
