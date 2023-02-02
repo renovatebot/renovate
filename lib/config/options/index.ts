@@ -360,7 +360,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'goGetDirs',
-    description: 'What directories should `go get` run on',
+    description: 'Directory pattern to run `go get` on',
     type: 'array',
     subType: 'string',
     default: ['./...'],
