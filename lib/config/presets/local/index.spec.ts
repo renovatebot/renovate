@@ -15,7 +15,7 @@ const gitlab = mocked(_gitlab);
 
 describe('config/presets/local/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     const preset = { resolved: 'preset' };
     platform.getRawFile.mockResolvedValue('{ resolved: "preset" }');
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);

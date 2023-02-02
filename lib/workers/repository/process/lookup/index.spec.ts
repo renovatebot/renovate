@@ -49,7 +49,6 @@ describe('workers/repository/process/lookup/index', () => {
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
-    jest.resetAllMocks();
     jest
       .spyOn(GitRefsDatasource.prototype, 'getReleases')
       .mockResolvedValueOnce({
@@ -61,7 +60,10 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   // TODO: fix mocks
-  afterEach(() => httpMock.clear(false));
+  afterEach(() => {
+    jest.clearAllMocks();
+    httpMock.clear(false);
+  });
 
   describe('.lookupUpdates()', () => {
     it('returns null if unknown datasource', async () => {

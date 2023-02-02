@@ -38,7 +38,6 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.clear();
       hostRules.add({
         hostType: 'github',

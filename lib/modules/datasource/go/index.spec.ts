@@ -45,13 +45,12 @@ const datasource = new GoDatasource();
 describe('modules/datasource/go/index', () => {
   describe('getReleases', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.find.mockReturnValue({});
       hostRules.hosts.mockReturnValue([]);
     });
 
     afterEach(() => {
-      jest.resetAllMocks();
+      jest.clearAllMocks();
       delete process.env.GOPROXY;
     });
 

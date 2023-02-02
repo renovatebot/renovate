@@ -48,7 +48,7 @@ describe('modules/datasource/docker/index', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('getRegistryRepository', () => {

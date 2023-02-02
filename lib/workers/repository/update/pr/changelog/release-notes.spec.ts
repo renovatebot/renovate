@@ -67,7 +67,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   describe('releaseNotesCacheMinutes', () => {

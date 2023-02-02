@@ -47,7 +47,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
       GlobalConfig.reset();
       config = {
         ...getConfig(),
