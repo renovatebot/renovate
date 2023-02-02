@@ -6,7 +6,6 @@ import { platform } from '../../../modules/platform';
 import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
-import { reset as resetOnceKeys } from '../../../util/once';
 import { checkIfConfigured } from '../configured';
 import { PackageFiles } from '../package-files';
 import { WorkerPlatformConfig, initApis } from './apis';
@@ -34,7 +33,7 @@ export async function initRepo(
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
-  resetOnceKeys();
+  logger.once.reset();
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);
