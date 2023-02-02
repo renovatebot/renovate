@@ -342,8 +342,8 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        setPrCache(branchName, prFingerprint);
       }
-      setPrCache(branchName, prFingerprint);
       return { type: 'with-pr', pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
