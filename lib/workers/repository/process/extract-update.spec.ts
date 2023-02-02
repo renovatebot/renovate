@@ -87,6 +87,7 @@ describe('workers/repository/process/extract-update', () => {
           master: {
             sha: '123test',
             configHash: fingerprint(generateFingerprintConfig(config)),
+            extractionFingerprints: {},
             packageFiles,
           },
         },
@@ -99,19 +100,23 @@ describe('workers/repository/process/extract-update', () => {
   });
 
   describe('isCacheExtractValid()', () => {
-    let cachedExtract: BaseBranchCache = undefined as never;
+    let cachedExtract: BaseBranchCache;
+
+    beforeEach(() => {
+      cachedExtract = {
+        sha: 'sha',
+        configHash: undefined as never,
+        extractionFingerprints: {},
+        packageFiles: {},
+      };
+    });
 
     it('undefined cache', () => {
-      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(isCacheExtractValid('sha', 'hash', undefined)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
 
     it('partial cache', () => {
-      cachedExtract = {
-        sha: 'sha',
-        configHash: undefined as never,
-        packageFiles: {},
-      };
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
@@ -126,7 +131,6 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('config change', () => {
-      cachedExtract.sha = 'sha';
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -135,8 +139,30 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
+    it('invalid if no extractionFingerprints', () => {
+      cachedExtract.configHash = 'hash';
+      const { extractionFingerprints, ...restOfCache } = cachedExtract;
+      expect(
+        isCacheExtractValid(
+          'sha',
+          'hash',
+          restOfCache as never as BaseBranchCache
+        )
+      ).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract is missing extractionFingerprints, so cannot be used'
+      );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('invalid if changed fingerprints', () => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.extractionFingerprints = { npm: 'old-fingerprint' };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
     it('valid cache and config', () => {
-      cachedExtract.sha = 'sha';
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
       expect(logger.logger.debug).toHaveBeenCalledWith(

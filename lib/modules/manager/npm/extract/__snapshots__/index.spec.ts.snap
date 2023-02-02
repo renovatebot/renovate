@@ -1150,6 +1150,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
 }
 `;
 
+
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 {
   "constraints": {},
