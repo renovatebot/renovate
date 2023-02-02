@@ -17,6 +17,7 @@ describe('util/once', () => {
 
   it('should call a function once per key', () => {
     const fn = jest.fn();
+
     once('key1', fn);
     expect(fn).toHaveBeenCalledTimes(1);
 
