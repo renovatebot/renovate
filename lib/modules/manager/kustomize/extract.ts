@@ -16,16 +16,38 @@ import type { HelmChart, Image, Kustomize } from './types';
 const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
+// regex to match URLs with ".git" delimiter
+const dotGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
+// regex to match URLs with "_git" delimiter
+const underscoreGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
+// regex to match URLs having an extra "//"
+const gitUrlWithPath = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/
+);
 
 export function extractResource(base: string): PackageDependency | null {
-  const match = gitUrl.exec(base);
+  let match: RegExpExecArray | null;
+
+  if (base.includes('_git')) {
+    match = underscoreGitRegex.exec(base);
+  } else if (base.includes('.git')) {
+    match = dotGitRegex.exec(base);
+  } else if (gitUrlWithPath.test(base)) {
+    match = gitUrlWithPath.exec(base);
+  } else {
+    match = gitUrl.exec(base);
+  }
 
   if (!match?.groups) {
     return null;
   }
 
   const { path } = match.groups;
-  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
+  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
     return {
       currentValue: match.groups.currentValue,
       datasource: GithubTagsDatasource.id,
