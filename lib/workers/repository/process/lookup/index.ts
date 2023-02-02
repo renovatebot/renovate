@@ -384,6 +384,19 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+
+          // If the digest could not be determined, report this as otherwise the
+          // update will be omitted later on without notice.
+          if (update.newDigest === null) {
+            logger.debug(
+              { depName, ...update },
+              'Could not determine new digest for update.'
+            );
+            res.warnings.push({
+              message: `Could not determine new digest for update (${update.newValue}).`,
+              topic: depName,
+            });
+          }
         }
         if (update.newVersion) {
           const registryUrl = dependency?.releases?.find(
