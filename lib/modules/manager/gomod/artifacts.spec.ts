@@ -1,7 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -1585,9 +1585,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: [] as string[],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      })
+    );
 
     expect(
       await gomod.updateArtifacts({
@@ -1596,13 +1598,13 @@ describe('modules/manager/gomod/artifacts', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          goGetDirs: ['.', 'foo', 'bar', '.baz/...'],
+          goGetDirs: ['.', 'foo', '.bar/...', '&&', 'cat', '/etc/passwd'],
         },
       })
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t . foo bar .baz/...',
+        cmd: "go get -d -t . foo .bar/... '&&' cat /etc/passwd",
         options: {
           cwd: '/tmp/github/some/repo',
           env: {
