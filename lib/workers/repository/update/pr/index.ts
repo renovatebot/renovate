@@ -95,9 +95,9 @@ export async function ensurePr(
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
+  const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
-    const prCache = getPrCache(branchName);
     if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
@@ -311,8 +311,9 @@ export async function ensurePr(
       ) {
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
-if(!prCache){
-        setPrCache(branchName, prFingerprint);
+        // adds or-cache for existing PRs
+        if (!prCache) {
+          setPrCache(branchName, prFingerprint);
         }
         return { type: 'with-pr', pr: existingPr };
       }

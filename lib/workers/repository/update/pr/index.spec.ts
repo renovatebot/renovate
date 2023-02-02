@@ -58,6 +58,7 @@ describe('workers/repository/update/pr/index', () => {
       title: prTitle,
       bodyStruct,
       state: 'open',
+      displayNumber: '123',
     };
 
     const config: BranchConfig = {
@@ -739,29 +740,25 @@ describe('workers/repository/update/pr/index', () => {
       };
       let cachedPr: PrCache | null = null;
 
-      it('logs when cache is enabled but pr-cache is absent', async () => {
-        config.repositoryCache = 'enabled';
+      it('adds pr-cache when not present', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
-        prCache.getPrCache.mockReturnValueOnce(null);
-        await ensurePr(config);
-        expect(logger.logger.debug).toHaveBeenCalledWith('PR cache not found');
-      });
-
-      it('does not log when cache is disabled and pr-cache is absent', async () => {
-        config.repositoryCache = 'disabled';
-        platform.getBranchPr.mockResolvedValue(existingPr);
-        prCache.getPrCache.mockReturnValueOnce(null);
-        await ensurePr(config);
-        expect(logger.logger.debug).not.toHaveBeenCalledWith(
-          'PR cache not found'
+        cachedPr = null;
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr(config);
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: existingPr,
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          '123 does not need updating'
         );
+        expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
 
-      it('logs when pr cache does not match', async () => {
-        config.repositoryCache = 'enabled';
+      it('does not update pr-cache when pr fingerprint is same but pr was edited within 24hrs', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
-          fingerprint: 'fingerprint',
+          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
           lastEdited: new Date().toISOString(),
         };
         prCache.getPrCache.mockReturnValueOnce(cachedPr);
@@ -771,39 +768,36 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
+          '123 does not need updating'
+        );
+        expect(logger.logger.debug).toHaveBeenCalledWith(
+          'PR cache matches but it has been edited in the past 24hrs, so processing PR'
+        );
+        expect(prCache.setPrCache).not.toHaveBeenCalled();
+      });
+
+      it('updates pr-cache when pr fingerprint is different', async () => {
+        platform.getBranchPr.mockResolvedValue({
+          ...existingPr,
+          title: 'Another title',
+        });
+        cachedPr = {
+          fingerprint: 'old',
+          lastEdited: new Date('2020-01-20T00:00:00Z').toISOString(),
+        };
+        prCache.getPrCache.mockReturnValueOnce(cachedPr);
+        const res = await ensurePr(config);
+        expect(res).toEqual({
+          type: 'with-pr',
+          pr: { ...existingPr, title: 'Another title' },
+        });
+        expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR fingerprints mismatch, processing PR'
         );
+        expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
 
-      it('logs when pr cache matches but pr was edited within 24 hours', async () => {
-        config.repositoryCache = 'enabled';
-        platform.getBranchPr.mockResolvedValue(existingPr);
-        cachedPr = {
-          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
-          lastEdited: new Date().toISOString(),
-        };
-        prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        await ensurePr(config);
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR cache matches but it has been edited in the past 24hrs, so processing PR'
-        );
-      });
-
-      it('logs when pr cache matches but lastEdited date string is invalid', async () => {
-        config.repositoryCache = 'enabled';
-        platform.getBranchPr.mockResolvedValue(existingPr);
-        cachedPr = {
-          fingerprint: fingerprint(generatePrFingerprintConfig(config)),
-          lastEdited: 'invalid string',
-        };
-        prCache.getPrCache.mockReturnValueOnce(cachedPr);
-        await ensurePr(config);
-        expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR cache matches but it has been edited in the past 24hrs, so processing PR'
-        );
-      });
-
-      it('skips fetching changelogs', async () => {
+      it('skips fetching changelogs when cache is valid and pr was lastEdited before 24hrs', async () => {
         config.repositoryCache = 'enabled';
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
@@ -820,6 +814,24 @@ describe('workers/repository/update/pr/index', () => {
           'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
         );
         expect(embedChangelog).toHaveBeenCalledTimes(0);
+      });
+
+      it('logs when cache is enabled but pr-cache is absent', async () => {
+        config.repositoryCache = 'enabled';
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        prCache.getPrCache.mockReturnValueOnce(null);
+        await ensurePr(config);
+        expect(logger.logger.debug).toHaveBeenCalledWith('PR cache not found');
+      });
+
+      it('does not log when cache is disabled and pr-cache is absent', async () => {
+        config.repositoryCache = 'disabled';
+        platform.getBranchPr.mockResolvedValue(existingPr);
+        prCache.getPrCache.mockReturnValueOnce(null);
+        await ensurePr(config);
+        expect(logger.logger.debug).not.toHaveBeenCalledWith(
+          'PR cache not found'
+        );
       });
     });
   });
