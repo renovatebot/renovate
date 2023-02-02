@@ -22,6 +22,7 @@ import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
 import {
   YarnConfig,
+  loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,
 } from './yarnrc';
@@ -147,6 +148,12 @@ export async function extractPackageFile(
   const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
   if (is.string(repoYarnrcYml)) {
     yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
+
+  const legacyYarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
+  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  if (is.string(repoLegacyYarnrc)) {
+    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
   }
 
   let lernaJsonFile: string | undefined;
