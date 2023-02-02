@@ -910,7 +910,8 @@ Also, approval rules overriding should not be [prevented in GitLab settings](htt
 
 ## goGetDirs
 
-What directories will `go get` be executed on (`./...` by default).
+By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
+If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option.
 
 ## golang
 
