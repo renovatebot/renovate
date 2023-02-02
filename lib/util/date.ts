@@ -13,16 +13,16 @@ export function getElapsedMinutes(date: Date): number {
   return Math.floor((new Date().getTime() - date.getTime()) / ONE_MINUTE_MS);
 }
 
-export function getElapsedHours(time: Date | string): number {
-  const pastTime =
-    typeof time === 'string'
-      ? DateTime.fromISO(time)
-      : DateTime.fromJSDate(time);
+export function getElapsedHours(date: Date | string): number {
+  const pastDate =
+    typeof date === 'string'
+      ? DateTime.fromISO(date)
+      : DateTime.fromJSDate(date);
 
-  if (!pastTime.isValid) {
+  if (!pastDate.isValid) {
     return 0;
   }
 
-  const diff = DateTime.now().diff(pastTime, 'hours');
+  const diff = DateTime.now().diff(pastDate, 'hours');
   return Math.floor(diff.hours);
 }
