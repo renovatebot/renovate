@@ -106,7 +106,7 @@ describe('logger/once', () => {
       function doSomething() {
         logger.once.debug('foo');
         logger.debug('bar');
-        logger.once.debug('baz');
+        logger.once.debug({ some: 'data' }, 'baz');
       }
 
       doSomething();
@@ -115,7 +115,7 @@ describe('logger/once', () => {
 
       expect(debug).toHaveBeenNthCalledWith(1, 'foo');
       expect(debug).toHaveBeenNthCalledWith(2, 'bar');
-      expect(debug).toHaveBeenNthCalledWith(3, 'baz');
+      expect(debug).toHaveBeenNthCalledWith(3, { some: 'data' }, 'baz');
 
       expect(debug).toHaveBeenNthCalledWith(4, 'bar');
 
