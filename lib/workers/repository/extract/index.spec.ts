@@ -30,7 +30,7 @@ describe('workers/repository/extract/index', () => {
       config.enabledManagers = ['npm'];
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       const res = await extractAllDependencies(config);
-      expect(res).toEqual({ packageFiles: { npm: [{}] } });
+      expect(res).toMatchObject({ packageFiles: { npm: [{}] } });
     });
 
     it('warns if no packages found for a enabled manager', async () => {

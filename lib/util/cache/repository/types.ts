@@ -8,6 +8,7 @@ import type { RepoInitConfig } from '../../../workers/repository/init/types';
 export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
+  extractionFingerprints: Record<string, string | undefined>; // matching manager fingerprints
   packageFiles: Record<string, PackageFile[]>; // extract result
 }
 
