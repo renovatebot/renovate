@@ -118,18 +118,28 @@ function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
   { constraints }: UpdateArtifactsConfig
 ): string[] {
+  // Check if we fail to parse any major versions and log that they're skipped
+  const invalidMajorDeps = updatedDeps.filter(
+    ({ newVersion }) => !valid(newVersion)
+  );
+  if (invalidMajorDeps.length > 0) {
+    invalidMajorDeps.forEach(({ depName }) =>
+      logger.warn(`Could not get major version of ${depName!}. Ignoring`)
+    );
+  }
+
   const updateImportCommands = updatedDeps
+    .filter(({ newVersion }) => valid(newVersion))
     .map(({ depName, newVersion }) => ({
       depName: depName!,
-      newMajor: valid(newVersion) && major(newVersion),
+      newMajor: major(newVersion!),
     }))
     // Skip path upates going from v0 to v1
     .filter(
-      ({ depName, newMajor }) =>
-        !depName.startsWith('gopkg.in') && newMajor && newMajor > 1
+      ({ depName, newMajor }) => !depName.startsWith('gopkg.in') && newMajor > 1
     )
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+
     .map(
       ({ depName, newMajor }) =>
         `mod upgrade --mod-name=${depName} -t=${newMajor}`
