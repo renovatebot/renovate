@@ -5,3 +5,9 @@ export interface OrbRelease {
     createdAt?: string;
   }[];
 }
+
+export interface OrbResponse {
+  data?: {
+    orb?: OrbRelease;
+  };
+}
