@@ -316,7 +316,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pnpm',
     config: {
       datasource: NpmDatasource.id,
-      depName: 'pnpm',
+      packageName: 'pnpm',
       versioning: semverVersioning.id,
     },
   },
