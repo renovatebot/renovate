@@ -21,7 +21,7 @@ jest.mock('../lib/modules/platform', () => ({
   initPlatform: jest.fn(),
   getPlatformList: jest.fn(),
 }));
-jest.mock('../lib/logger');
+jest.mock('../lib/logger', () => jest.createMockFromModule('../lib/logger'));
 
 //------------------------------------------------
 // Required global jest types
