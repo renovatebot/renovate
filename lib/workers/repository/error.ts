@@ -91,6 +91,7 @@ export default async function handleError(
   }
   if (err.message === REPOSITORY_FORKED) {
     logger.info('Repository is a fork and not manually configured - skipping');
+    logger.info('See: https://docs.renovatebot.com/configuration-options/#includeforks');
     return err.message;
   }
   if (err.message === REPOSITORY_CANNOT_FORK) {
