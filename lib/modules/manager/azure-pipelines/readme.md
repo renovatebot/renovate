@@ -11,7 +11,8 @@ To opt into running it, set the following:
 }
 ```
 
-In most cases only major version numbers are specified in YAML when referencing a task version, e.g. `NodeTool@0`. Renovate, by default, will replace these with the full version, e.g. `NodeTool@0.216.0`.
+In most cases only major version numbers are specified in YAML when referencing a task version: `NodeTool@0`.
+By default, Renovate replaces these with the full version: `NodeTool@0.216.0`.
 
 To use the standard convention for Azure Pipelines, add:
 
