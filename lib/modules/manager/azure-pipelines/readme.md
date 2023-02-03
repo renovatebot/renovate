@@ -22,7 +22,7 @@ To use the standard convention for Azure Pipelines, add:
       "matchDatasources": ["azure-pipelines-tasks"],
       "extractVersion": "^(?<version>\\d+)"
     }
-  }
+  ]
 }
 ```
 
