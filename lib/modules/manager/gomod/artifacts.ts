@@ -16,6 +16,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
 import { find, getAll } from '../../../util/host-rules';
+import { isValidPath } from '../../../util/isvalidpath';
 import { regEx } from '../../../util/regex';
 import { createURLFromHostOrURL, validateUrl } from '../../../util/url';
 import { isValid } from '../../versioning/semver';
@@ -272,7 +273,8 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    const goGetDirs = config.goGetDirs?.map(quote).join(' ') ?? './...';
+    const goGetDirs =
+      config.goGetDirs?.filter(isValidPath).map(quote).join(' ') ?? './...';
 
     let args = 'get -d -t ' + goGetDirs;
     logger.trace({ cmd, args }, 'go get command included');
