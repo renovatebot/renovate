@@ -1077,6 +1077,69 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
+  it('supports docker mode with gomodTidyE', async () => {
+    GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+    hostRules.find.mockReturnValueOnce({});
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 1');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 2');
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum 3');
+    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.17.0' }, { version: '1.14.0' }],
+    });
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidyE'],
+        },
+      })
+    ).toEqual([
+      { file: { contents: 'New go.sum 1', path: 'go.sum', type: 'addition' } },
+      { file: { contents: 'New go.sum 2', path: 'go.mod', type: 'addition' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'docker pull renovate/sidecar' },
+      {},
+      {
+        cmd:
+          'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+          '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+          '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
+          '-e GOPROXY ' +
+          '-e GOPRIVATE ' +
+          '-e GONOPROXY ' +
+          '-e GONOSUMDB ' +
+          '-e GOINSECURE ' +
+          '-e GOFLAGS ' +
+          '-e CGO_ENABLED ' +
+          '-e BUILDPACK_CACHE_DIR ' +
+          '-e CONTAINERBASE_CACHE_DIR ' +
+          '-w "/tmp/github/some/repo" ' +
+          'renovate/sidecar' +
+          ' bash -l -c "' +
+          'install-tool golang 1.14.0' +
+          ' && ' +
+          'go get -d -t ./...' +
+          ' && ' +
+          'go mod tidy -e' +
+          ' && ' +
+          'go mod tidy -e' +
+          '"',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
