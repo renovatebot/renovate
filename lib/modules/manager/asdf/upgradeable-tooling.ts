@@ -318,7 +318,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: NpmDatasource.id,
       packageName: 'pnpm',
       versioning: semverVersioning.id,
-      extractVersion: '^v(?<version>\\S+)',
     },
   },
   python: {
