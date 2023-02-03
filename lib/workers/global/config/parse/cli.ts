@@ -24,7 +24,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--expose-env=true', '--trust-level=high')
         .replace('--expose-env', '--trust-level=high')
         .replace('--renovate-fork', '--include-forks')
-        .replace('--renovate-fork$', '--include-forks=true')
+        .replace(/^--include-forks$/, '--include-forks=true')
         .replace('"platform":"', '"hostType":"')
         .replace('"endpoint":"', '"matchHost":"')
         .replace('"host":"', '"matchHost":"')
