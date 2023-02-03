@@ -334,7 +334,7 @@ dummy 1.2.3
           {
             currentValue: '7.26.2',
             datasource: 'npm',
-            packageName: 'pnpm/pnpm',
+            packageName: 'pnpm',
             versioning: 'semver',
             depName: 'pnpm',
             extractVersion: '^v(?<version>\\S+)',
