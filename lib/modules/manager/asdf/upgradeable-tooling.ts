@@ -4,6 +4,7 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { NodeDatasource } from '../../datasource/node';
+import { NpmDatasource } from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as nodeVersioning from '../../versioning/node';
 import * as regexVersioning from '../../versioning/regex';
@@ -314,7 +315,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   pnpm: {
     asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pnpm',
     config: {
-      datasource: GithubReleasesDatasource.id,
+      datasource: NpmDatasource.id,
       packageName: 'pnpm/pnpm',
       versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',

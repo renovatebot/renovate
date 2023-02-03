@@ -333,7 +333,7 @@ dummy 1.2.3
           },
           {
             currentValue: '7.26.2',
-            datasource: 'github-releases',
+            datasource: 'npm',
             packageName: 'pnpm/pnpm',
             versioning: 'semver',
             depName: 'pnpm',
