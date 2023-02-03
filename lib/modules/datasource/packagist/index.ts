@@ -125,18 +125,17 @@ export class PackagistDatasource extends Datasource {
     const parsedRecord =
       schema.ComposerReleasesRecord.safeParse(composerReleases);
     if (parsedRecord.success) {
-      logger.trace('Packagist: extracting releases from record');
       return schema.extractReleaseResult(Object.values(parsedRecord.data));
     }
 
     const parsedArray =
       schema.ComposerReleasesArray.safeParse(composerReleases);
     if (parsedArray.success) {
-      logger.trace('Packagist: extracting releases from array');
+      logger.once.info('Packagist: extracting releases from array');
       return schema.extractReleaseResult(parsedArray.data);
     }
 
-    logger.trace(
+    logger.once.info(
       { composerReleases },
       'Packagist: unknown format to extract from'
     );
