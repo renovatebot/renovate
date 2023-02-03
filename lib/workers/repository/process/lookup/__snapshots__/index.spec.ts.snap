@@ -546,8 +546,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() should update 
 ]
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if no digest could be found but pinning is enabled 1`] = `[]`;
-
 exports[`workers/repository/process/lookup/index .lookupUpdates() should warn if no version matches dist-tag 1`] = `[]`;
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompatible versions for 8 1`] = `

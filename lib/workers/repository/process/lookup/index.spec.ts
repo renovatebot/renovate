@@ -1202,7 +1202,6 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
 
       const res = await lookup.lookupUpdates(config);
-      expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0]).toEqual({
