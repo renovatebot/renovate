@@ -38,6 +38,7 @@ export interface PrFingerprintConfig {
   timezone?: string;
   updateType?: UpdateType;
   warnings?: ValidationMessage[];
+  pendingVersions?: string[];
 
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
 }
@@ -74,6 +75,7 @@ export function generatePrFingerprintConfig(
     timezone: config.timezone,
     updateType: config.updateType,
     warnings: config.warnings,
+    pendingVersions: config.pendingVersions,
   };
 }
 
