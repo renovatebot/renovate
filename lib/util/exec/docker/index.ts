@@ -117,7 +117,7 @@ export async function getDockerTag(
     const version = versions.sort(ver.sortVersions.bind(ver)).pop();
     if (version) {
       logger.debug(
-        { depName: packageName, scheme, constraint, version },
+        { packageName, scheme, constraint, version },
         `Found compatible image version`
       );
       return version;
