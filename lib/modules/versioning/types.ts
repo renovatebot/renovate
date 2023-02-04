@@ -97,6 +97,8 @@ export interface VersioningApi {
   matches(version: string, range: string): boolean;
 
   valueToVersion?(version: string): string;
+
+  subset?(sub: string, dom: string): boolean;
 }
 
 export interface VersioningApiConstructor {
