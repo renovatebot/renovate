@@ -44,10 +44,15 @@ export async function updateArtifacts({
       constraint: config.constraints?.helmfile,
     };
 
+    const helmToolConstraint: ToolConstraint = {
+      toolName: 'helm',
+      constraint: config.constraints?.helm,
+    };
+
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},
-      toolConstraints: [helmfileToolConstraint],
+      toolConstraints: [helmToolConstraint, helmfileToolConstraint],
     };
     await exec(`helmfile deps -f ${quote(packageFileName)}`, execOptions);
 
