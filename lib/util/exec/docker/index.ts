@@ -127,7 +127,7 @@ export async function getDockerTag(
     return 'latest';
   }
   logger.warn(
-    { depName: packageName, constraint, scheme },
+    { packageName, constraint, scheme },
     'Failed to find a tag satisfying constraint, using "latest" tag instead'
   );
   return 'latest';
