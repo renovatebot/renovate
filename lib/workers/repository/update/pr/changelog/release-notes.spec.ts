@@ -322,7 +322,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/repository',
-          depName: 'some',
+          packageName: 'some',
         },
         {
           version: '1.0.0',
@@ -357,7 +357,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -399,7 +399,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -441,7 +441,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -483,7 +483,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -525,7 +525,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -560,7 +560,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -604,7 +604,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -648,7 +648,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -691,7 +691,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
         },
         {
           version: '1.0.1',
@@ -728,7 +728,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...gitlabProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
           apiBaseUrl: 'https://api.gitlab.com/',
         },
         {
@@ -765,7 +765,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...gitlabProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
           apiBaseUrl: 'https://api.gitlab.com/',
         },
         {
@@ -802,7 +802,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...gitlabProject,
           repository: 'some/other-repository',
-          depName: 'other',
+          packageName: 'other',
           apiBaseUrl: 'https://api.gitlab.com/',
         },
         {
@@ -825,7 +825,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       const res = await getReleaseNotes(
         {
           repository: 'some/repository',
-          depName: 'other',
+          packageName: 'other',
           apiBaseUrl: 'https://api.lol.lol/',
           baseUrl: 'https://lol.lol/',
         } as ChangeLogProject,
@@ -839,11 +839,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     });
 
     it('handles same version but different repo releases', async () => {
-      const depName = 'correctTagPrefix/exampleDep';
+      const packageName = 'correctTagPrefix/exampleDep';
       githubReleasesMock.mockResolvedValueOnce([
         {
           id: 1,
-          version: `${depName}@1.0.0`,
+          version: `${packageName}@1.0.0`,
           releaseTimestamp: '2020-01-01',
           url: 'correct/url/tag.com',
           name: 'some/dep',
@@ -870,7 +870,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'exampleDep',
+          packageName: 'exampleDep',
         },
         {
           version: '1.0.0',
@@ -904,7 +904,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         {
           ...githubProject,
           repository: 'some/other-repository',
-          depName: 'exampleDep',
+          packageName: 'exampleDep',
         },
         {
           version: '1.0.0',

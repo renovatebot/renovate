@@ -44,6 +44,7 @@ async function fetchDepUpdates(
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
+  depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#7154)
     logger.debug(`Dependency: ${depName!}, is ignored`);

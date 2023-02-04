@@ -24,7 +24,7 @@ import {
 } from '.';
 
 const datasource = 'dummy';
-const depName = 'package';
+const packageName = 'package';
 
 type RegistriesMock = Record<
   string,
@@ -175,17 +175,17 @@ describe('modules/datasource/index', () => {
       expect(
         await getPkgReleases({
           datasource: null as never, // #7154
-          depName: 'some/dep',
+          packageName: 'some/dep',
         })
       ).toBeNull();
     });
 
-    it('returns null for no depName', async () => {
+    it('returns null for no packageName', async () => {
       datasources.set(datasource, new DummyDatasource());
       expect(
         await getPkgReleases({
           datasource,
-          depName: null as never, // #7154
+          packageName: null as never, // #7154
         })
       ).toBeNull();
     });
@@ -194,7 +194,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getPkgReleases({
           datasource: 'some-unknown-datasource',
-          depName: 'some/dep',
+          packageName: 'some/dep',
         })
       ).toBeNull();
     });
@@ -206,7 +206,11 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new TestDatasource());
       const registryUrls = ['https://foo.bar'];
 
-      const res = await getPkgReleases({ datasource, depName, registryUrls });
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+        registryUrls,
+      });
 
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { datasource: 'dummy', registryUrls, defaultRegistryUrls: undefined },
@@ -231,7 +235,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new TestDatasource());
 
       expect(supportsDigests(datasource)).toBeTrue();
-      expect(await getDigest({ datasource, depName })).toBe('123');
+      expect(await getDigest({ datasource, packageName })).toBe('123');
     });
 
     it('returns replacementName if defined', async () => {
@@ -248,8 +252,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getDigest({
           datasource,
-          packageName: 'pkgName',
-          depName,
+          packageName,
           replacementName: 'replacement',
         })
       ).toBe('replacement');
@@ -262,13 +265,13 @@ describe('modules/datasource/index', () => {
     });
 
     it('adds changelogUrl', async () => {
-      expect(await getPkgReleases({ datasource, depName })).toMatchObject({
+      expect(await getPkgReleases({ datasource, packageName })).toMatchObject({
         changelogUrl: 'https://foo.bar/package/CHANGELOG.md',
       });
     });
 
     it('adds sourceUrl', async () => {
-      expect(await getPkgReleases({ datasource, depName })).toMatchObject({
+      expect(await getPkgReleases({ datasource, packageName })).toMatchObject({
         sourceUrl: 'https://foo.bar/package',
       });
     });
@@ -283,7 +286,7 @@ describe('modules/datasource/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
         defaultRegistryUrls: ['https://foo.bar'],
       });
       expect(res).toMatchObject({ releases: [{ version: '0.0.1' }] });
@@ -293,7 +296,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new DummyDatasource2());
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchObject({
         releases: [{ version: '1.2.3' }],
@@ -305,7 +308,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new DummyDatasource3());
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchObject({
         releases: [{ version: '1.2.3' }],
@@ -323,7 +326,7 @@ describe('modules/datasource/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
         extractVersion: '^(?<version>v\\d+\\.\\d+)',
         versioning: 'loose',
       });
@@ -342,7 +345,7 @@ describe('modules/datasource/index', () => {
       );
       const res = await getPkgReleases({
         datasource,
-        depName: 'foobar',
+        packageName: 'foobar',
       });
       expect(res).toMatchObject({ sourceUrl: 'https://abc.com' });
     });
@@ -359,7 +362,7 @@ describe('modules/datasource/index', () => {
       );
       const res = await getPkgReleases({
         datasource,
-        depName: 'foobar',
+        packageName: 'foobar',
       });
       expect(res).toMatchObject({ sourceUrl: 'https://github.com/Jasig/cas' });
     });
@@ -368,7 +371,7 @@ describe('modules/datasource/index', () => {
       datasources.set(datasource, new DummyDatasource());
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
         replacementName: 'def',
         replacementVersion: '2.0.0',
       });
@@ -389,7 +392,7 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls: ['https://reg1.com'],
           });
 
@@ -411,7 +414,7 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls,
           });
 
@@ -422,7 +425,7 @@ describe('modules/datasource/index', () => {
           expect(logger.logger.warn).toHaveBeenCalledWith(
             {
               datasource: 'dummy',
-              depName: 'package',
+              packageName: 'package',
               registryUrls,
             },
             'Excess registryUrls found for datasource lookup - using first configured only'
@@ -439,13 +442,13 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls,
           });
 
           expect(res).toBeNull();
           expect(logger.logger.warn).toHaveBeenCalledWith(
-            { datasource, depName, registryUrls },
+            { datasource, packageName, registryUrls },
             'Excess registryUrls found for datasource lookup - using first configured only'
           );
         });
@@ -482,7 +485,7 @@ describe('modules/datasource/index', () => {
         });
 
         it('merges custom defaultRegistryUrls and returns success', async () => {
-          const res = await getPkgReleases({ datasource, depName });
+          const res = await getPkgReleases({ datasource, packageName });
 
           expect(res).toMatchObject({
             releases: [
@@ -495,7 +498,7 @@ describe('modules/datasource/index', () => {
         it('ignores custom defaultRegistryUrls if registrUrls are set', async () => {
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             defaultRegistryUrls: ['https://reg3.com'],
             registryUrls: ['https://reg1.com', 'https://reg2.com'],
           });
@@ -511,7 +514,7 @@ describe('modules/datasource/index', () => {
         it('merges registries and returns success', async () => {
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls: ['https://reg1.com', 'https://reg2.com'],
           });
           expect(res).toMatchObject({
@@ -526,7 +529,7 @@ describe('modules/datasource/index', () => {
           await expect(
             getPkgReleases({
               datasource,
-              depName,
+              packageName,
               registryUrls: [
                 'https://reg1.com',
                 'https://reg2.com',
@@ -540,7 +543,7 @@ describe('modules/datasource/index', () => {
           expect(
             await getPkgReleases({
               datasource,
-              depName,
+              packageName,
               registryUrls: ['https://reg4.com', 'https://reg5.com'],
             })
           ).toBeNull();
@@ -567,7 +570,7 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls,
           });
 
@@ -589,7 +592,7 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls,
           });
 
@@ -607,7 +610,7 @@ describe('modules/datasource/index', () => {
           datasources.set(datasource, new HuntRegistriyDatasource(registries));
 
           await expect(
-            getPkgReleases({ datasource, depName, registryUrls })
+            getPkgReleases({ datasource, packageName, registryUrls })
           ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         });
 
@@ -625,7 +628,7 @@ describe('modules/datasource/index', () => {
 
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             registryUrls,
           });
 
@@ -653,7 +656,7 @@ describe('modules/datasource/index', () => {
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             defaultRegistryUrls: ['https://foo.bar'],
           });
           expect(res).toMatchObject({
@@ -680,7 +683,7 @@ describe('modules/datasource/index', () => {
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             defaultRegistryUrls: ['https://foo.bar'],
             constraints: {
               python: '2.7.0',
@@ -713,7 +716,7 @@ describe('modules/datasource/index', () => {
           datasources.set(datasource, new DummyDatasource(registries));
           const res = await getPkgReleases({
             datasource,
-            depName,
+            packageName,
             defaultRegistryUrls: ['https://foo.bar'],
             constraints: { python: '2.7.0' },
             constraintsFiltering: 'strict',

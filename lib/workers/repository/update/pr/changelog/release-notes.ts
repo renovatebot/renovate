@@ -125,15 +125,15 @@ export async function getReleaseNotes(
   release: ChangeLogRelease,
   config: BranchUpgradeConfig
 ): Promise<ChangeLogNotes | null> {
-  const { depName, repository } = project;
+  const { packageName, repository } = project;
   const { version, gitRef } = release;
   // TODO: types (#7154)
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName!})`);
+  logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
+  let matchedRelease = getExactReleaseMatch(packageName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -158,11 +158,11 @@ export async function getReleaseNotes(
 }
 
 function getExactReleaseMatch(
-  depName: string,
+  packageName: string,
   version: string,
   releases: ChangeLogNotes[]
 ): ChangeLogNotes | undefined {
-  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
+  const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!)

@@ -42,7 +42,8 @@ export interface LookupUpdateConfig
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   datasource: string;
-  depName: string;
+  depName?: string;
+  packageName: string;
   minimumConfidence?: string;
   extractedConstraints?: Record<string, string>;
   replacementName?: string;

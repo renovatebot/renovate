@@ -16,7 +16,7 @@ const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
-  depName: 'renovate',
+  packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
   newVersion: '3.0.0',
@@ -101,7 +101,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -136,7 +136,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -159,14 +159,14 @@ describe('workers/repository/update/pr/changelog/index', () => {
       httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       const res = await getChangeLogJSON({
         ...upgrade,
-        depName: '@renovate/no',
+        packageName: '@renovate/no',
       });
       expect(res).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -194,7 +194,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -276,7 +276,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -316,7 +316,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
@@ -354,7 +354,7 @@ describe('workers/repository/update/pr/changelog/index', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
