@@ -89,7 +89,8 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
   if (!is.undefined(doc.targetCustomizations)) {
     // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
     // if there is no version defined in the customization.
-    const helmBlockContext = { ...doc.helm, version: undefined };
+    const helmBlockContext: FleetHelmBlock = { ...doc.helm };
+    delete helmBlockContext.version;
 
     for (const custom of doc.targetCustomizations) {
       const dep = extractFleetHelmBlock({
