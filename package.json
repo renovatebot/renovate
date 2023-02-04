@@ -235,6 +235,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "5.0.0",
+    "vuln-vects": "1.1.0",
     "xmldoc": "1.2.0",
     "zod": "3.20.2"
   },

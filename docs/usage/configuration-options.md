@@ -1494,17 +1494,21 @@ If configured to `true`, it means that any `.npmrc` file in the repo will have `
 
 ## osvVulnerabilityAlerts
 
-Set this to `true` to enable [OSV](https://osv.dev/) vulnerability alerts.
-OSV vulnerabilities are only supported for top-level dependencies.
-OSV vulnerabilities are supported for the following datasources:
+Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies include known vulnerabilities.
+Set this option to `true` to receive pull requests with vulnerabilities fixes once they are available.
 
-- [`crate`](https://docs.renovatebot.com/modules/datasource/#crate-datasource)
-- [`go`](https://docs.renovatebot.com/modules/datasource/#go-datasource)
-- [`maven`](https://docs.renovatebot.com/modules/datasource/#maven-datasource)
-- [`npm`](https://docs.renovatebot.com/modules/datasource/#npm-datasource)
-- [`nuget`](https://docs.renovatebot.com/modules/datasource/#nuget-datasource)
-- [`pypi`](https://docs.renovatebot.com/modules/datasource/#pypi-datasource)
-- [`rubygems`](https://docs.renovatebot.com/modules/datasource/#rubygems-datasource)
+OSV-based vulnerability alerts are only supported for direct dependencies.
+The OSV database is only queried for vulnerabilities if dependencies rely on one of the following datasources:
+
+- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
+- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
+- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
+- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
+- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
+- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
+- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
+- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
+- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
 
 ## packageRules
 
