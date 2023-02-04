@@ -312,7 +312,7 @@ export async function ensurePr(
         // TODO: types (#7154)
         logger.debug(`${existingPr.displayNumber!} does not need updating`);
         // adds or-cache for existing PRs
-          setPrCache(branchName, prFingerprint, false);
+        setPrCache(branchName, prFingerprint, false);
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
