@@ -196,6 +196,7 @@ describe('modules/manager/helmfile/artifacts', () => {
         '/tmp/renovate/cache/__renovate-private-cache'
       );
       fs.getParentDir.mockReturnValue('');
+      // helm
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v3.7.2' }],
       });
