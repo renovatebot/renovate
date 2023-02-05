@@ -314,16 +314,11 @@ export class Vulnerabilities {
     affected: Osv.Affected,
     versioningApi: VersioningApi
   ): boolean {
-    if (this.isPackageAffected(ecosystem, packageName, affected)) {
-      if (
-        this.includedInVersions(depVersion, affected) ||
-        this.includedInRanges(depVersion, affected, versioningApi)
-      ) {
-        return true;
-      }
-    }
-
-    return false;
+    return (
+      this.isPackageAffected(ecosystem, packageName, affected) &&
+      (this.includedInVersions(depVersion, affected) ||
+        this.includedInRanges(depVersion, affected, versioningApi))
+    );
   }
 
   private getFixedVersion(
