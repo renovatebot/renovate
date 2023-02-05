@@ -755,7 +755,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
 
-      it('does not update pr-cache when pr fingerprint is same but pr was edited within 24hrs', async () => {
+      it('does not update lastEdited pr-cache when pr fingerprint is same but pr was edited within 24hrs', async () => {
         platform.getBranchPr.mockResolvedValue(existingPr);
         cachedPr = {
           fingerprint: fingerprint(generatePrFingerprintConfig(config)),
@@ -773,7 +773,11 @@ describe('workers/repository/update/pr/index', () => {
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches but it has been edited in the past 24hrs, so processing PR'
         );
-        expect(prCache.setPrCache).not.toHaveBeenCalled();
+        expect(prCache.setPrCache).toHaveBeenCalledWith(
+          sourceBranch,
+          cachedPr.fingerprint,
+          false
+        );
       });
 
       it('updates pr-cache when pr fingerprint is different', async () => {
