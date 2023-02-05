@@ -196,7 +196,6 @@ export class Vulnerabilities {
         }
       }
 
-
       this.sortByFixedVersion(packageRules, versioningApi);
     } catch (err) {
       logger.debug(
