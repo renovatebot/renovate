@@ -17,7 +17,7 @@ export function toMs(time: string): number | null {
   try {
     const specs = split(time);
     if (!specs.length) {
-      logger.debug(`Invalid time specifier: '${time}'`);
+      logger.debug({ time }, `Invalid time specifier: '${time}'`);
       return null;
     }
 
@@ -25,14 +25,14 @@ export function toMs(time: string): number | null {
     for (const spec of specs) {
       const millis = ms(spec);
       if (!is.number(millis)) {
-        logger.debug({ spec }, `Invalid time specifier: '${spec}'`);
+        logger.debug({ time }, `Invalid time specifier: '${spec}'`);
         return null;
       }
       totalMillis += millis;
     }
     return totalMillis;
   } catch (err) /* istanbul ignore next: shouldn't happen */ {
-    logger.debug({ err }, `Invalid time specifier: '${time}'`);
+    logger.debug({ time, err }, `Invalid time specifier: '${time}'`);
     return null;
   }
 }
