@@ -285,22 +285,17 @@ export class Vulnerabilities {
         if (
           is.nonEmptyString(event.introduced) &&
           (event.introduced === '0' ||
-            (versioningApi.isVersion(event.introduced) &&
-              (versioningApi.equals(depVersion, event.introduced) ||
-                versioningApi.isGreaterThan(depVersion, event.introduced))))
+            this.isVersionGtOrEq(depVersion, event.introduced, versioningApi))
         ) {
           vulnerable = true;
         } else if (
           is.nonEmptyString(event.fixed) &&
-          versioningApi.isVersion(event.fixed) &&
-          (versioningApi.equals(depVersion, event.fixed) ||
-            versioningApi.isGreaterThan(depVersion, event.fixed))
+          this.isVersionGtOrEq(depVersion, event.fixed, versioningApi)
         ) {
           vulnerable = false;
         } else if (
           is.nonEmptyString(event.last_affected) &&
-          versioningApi.isVersion(event.last_affected) &&
-          versioningApi.isGreaterThan(depVersion, event.last_affected)
+          this.isVersionGt(depVersion, event.last_affected, versioningApi)
         ) {
           vulnerable = false;
         }
@@ -353,27 +348,47 @@ export class Vulnerabilities {
     }
 
     fixedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
-    const fixedVersion = fixedVersions.find(
-      (version) =>
-        versioningApi.isVersion(version) &&
-        versioningApi.isGreaterThan(version, depVersion)
+    const fixedVersion = fixedVersions.find((version) =>
+      this.isVersionGt(version, depVersion, versioningApi)
     );
     if (fixedVersion) {
       return ecosystem === 'PyPI' ? `==${fixedVersion}` : fixedVersion;
     }
 
     lastAffectedVersions.sort((a, b) => versioningApi.sortVersions(a, b));
-    const lastAffected = lastAffectedVersions.find(
-      (version) =>
-        versioningApi.isVersion(version) &&
-        (versioningApi.equals(version, depVersion) ||
-          versioningApi.isGreaterThan(version, depVersion))
+    const lastAffected = lastAffectedVersions.find((version) =>
+      this.isVersionGtOrEq(version, depVersion, versioningApi)
     );
     if (lastAffected) {
       return `> ${lastAffected}`;
     }
 
     return null;
+  }
+
+  private isVersionGt(
+    version: string,
+    other: string,
+    versioningApi: VersioningApi
+  ): boolean {
+    return (
+      versioningApi.isVersion(version) &&
+      versioningApi.isVersion(other) &&
+      versioningApi.isGreaterThan(version, other)
+    );
+  }
+
+  private isVersionGtOrEq(
+    version: string,
+    other: string,
+    versioningApi: VersioningApi
+  ): boolean {
+    return (
+      versioningApi.isVersion(version) &&
+      versioningApi.isVersion(other) &&
+      (versioningApi.equals(version, other) ||
+        versioningApi.isGreaterThan(version, other))
+    );
   }
 
   private convertToPackageRule(
