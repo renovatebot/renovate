@@ -44,10 +44,6 @@ branchify.branchifyUpgrades.mockResolvedValue({
 
 describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
     it('runs with no baseBranches', async () => {
       const config = {
         repoIsOnboarded: true,
