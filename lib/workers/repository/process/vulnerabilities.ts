@@ -211,10 +211,16 @@ export class Vulnerabilities {
     packageRules: PackageRule[],
     versioningApi: VersioningApi
   ): void {
+    const versionsCleaned: Record<string, string> = {};
+    for (const rule of packageRules) {
+      const version = rule.allowedVersions as string;
+      versionsCleaned[version] = version.replace(regEx(/[=> ]+/g), '');
+    }
+
     packageRules.sort((a, b) =>
       versioningApi.sortVersions(
-        (a.allowedVersions as string).replace(regEx(/[=> ]+/g), ''),
-        (b.allowedVersions as string).replace(regEx(/[=> ]+/g), '')
+        versionsCleaned[a.allowedVersions as string],
+        versionsCleaned[b.allowedVersions as string]
       )
     );
   }
