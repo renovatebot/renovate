@@ -139,7 +139,7 @@ export class Vulnerabilities {
         return [];
       }
 
-      const depVersion: string =
+      const depVersion =
         dep.lockedVersion ?? dep.currentVersion ?? dep.currentValue!;
 
       const versioning = dep.versioning ?? getDefaultVersioning(dep.datasource);
