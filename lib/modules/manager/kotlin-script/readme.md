@@ -1,5 +1,5 @@
 Renovate supports upgrading dependencies in [Kotlin Script](https://github.com/Kotlin/KEEP/blob/master/proposals/scripting-support.md) files.
-These are self-contained scripts where one can write Kotlin code with JVM backend, and compilation happens when the scripts are ran.
+Read the [Kotlin Script docs](https://kotlinlang.org/docs/custom-script-deps-tutorial.html) to learn more.
 For example:
 
 ```kotlin
