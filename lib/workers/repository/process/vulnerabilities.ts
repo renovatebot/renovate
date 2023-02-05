@@ -154,45 +154,48 @@ export class Vulnerabilities {
 
       for (const vulnerability of vulnerabilities) {
         for (const affected of vulnerability.affected ?? []) {
-          if (
-            this.isPackageVulnerable(
-              ecosystem,
-              packageName,
-              depVersion,
-              affected,
-              versioningApi
-            )
-          ) {
-            logger.debug(
-              `Vulnerability ${vulnerability.id} affects ${packageName} ${depVersion}`
-            );
-            const fixedVersion = this.getFixedVersion(
-              ecosystem,
-              depVersion,
-              affected,
-              versioningApi
-            );
-            if (fixedVersion) {
-              logger.debug(
-                `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
-              );
-              const rule = this.convertToPackageRule(
-                packageFileConfig,
-                dep,
-                packageName,
-                depVersion,
-                fixedVersion,
-                vulnerability
-              );
-              packageRules.push(rule);
-            } else {
-              logger.debug(
-                `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
-              );
-            }
+          const isVulnerable = this.isPackageVulnerable(
+            ecosystem,
+            packageName,
+            depVersion,
+            affected,
+            versioningApi
+          );
+          if (!isVulnerable) {
+            continue;
           }
+
+          logger.debug(
+            `Vulnerability ${vulnerability.id} affects ${packageName} ${depVersion}`
+          );
+          const fixedVersion = this.getFixedVersion(
+            ecosystem,
+            depVersion,
+            affected,
+            versioningApi
+          );
+          if (is.nullOrUndefined(fixedVersion)) {
+            logger.debug(
+              `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+            );
+            continue;
+          }
+
+          logger.debug(
+            `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+          );
+          const rule = this.convertToPackageRule(
+            packageFileConfig,
+            dep,
+            packageName,
+            depVersion,
+            fixedVersion,
+            vulnerability
+          );
+          packageRules.push(rule);
         }
       }
+
 
       this.sortByFixedVersion(packageRules, versioningApi);
     } catch (err) {
