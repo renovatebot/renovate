@@ -30,4 +30,8 @@ describe('util/pretty-time', () => {
   `(`toMs('$input') === $expected`, ({ input, expected }) => {
     expect(toMs(input)).toBe(expected);
   });
+
+  it('returns null for error', () => {
+    expect(toMs(null as never)).toBeNull();
+  });
 });

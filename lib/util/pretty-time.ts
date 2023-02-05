@@ -31,7 +31,7 @@ export function toMs(time: string): number | null {
       totalMillis += millis;
     }
     return totalMillis;
-  } catch (err) /* istanbul ignore next: shouldn't happen */ {
+  } catch (err) {
     logger.debug({ time, err }, `Invalid time specifier: '${time}'`);
     return null;
   }
