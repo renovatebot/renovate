@@ -2479,10 +2479,10 @@
   resolved "https://registry.yarnpkg.com/@redis/bloom/-/bloom-1.2.0.tgz#d3fd6d3c0af3ef92f26767b56414a370c7b63b71"
   integrity sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==
 
-"@redis/client@1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.2.tgz#ad60561cfcfe6938f64327b913a425739645a661"
-  integrity sha512-NHkrqvyreowlqxZvt9ufA//nEv0/voHohMAybn50S3e/+9Xbc47bXX4djb7QOX6Kupp16NdfG7St8CzhyYA3cg==
+"@redis/client@1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.4.tgz#7ff66602168e0a2d51813189e0411f719818ad04"
+  integrity sha512-inTBWktJX6rRUCmhpVCnSb7pHOOiGCFIiy5IuEa0GgjcOJsKvw4zHkT9dfYm5UGoUi0I1c4i/f3ScMW5gkNpmQ==
   dependencies:
     cluster-key-slot "1.1.2"
     generic-pool "3.9.0"
@@ -5728,10 +5728,10 @@ graceful-fs@4.2.10, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, 
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
 
-graph-data-structure@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.1.0.tgz#8c9e78ed3262ace1d2efa796e5dcc0e439c8a53e"
-  integrity sha512-eP6R9RQ0TGS+276/CY5uO2OrEUvJbltpyFju+5TB18fpcufDZ7ftL7a2xtd9XM9fqQQIt5oKVXDe814mXb9GXg==
+graph-data-structure@3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.1.1.tgz#9c45dbd61ff22f2cbf1790c888d6fdff85c5c1c8"
+  integrity sha512-8hN+cbuxQPX16u6XsNHD365ywgsizdb3/4EQgCADNb/XUpqIWSNfZ2oCuEs59kn0XezVaxz/LK7oJ+kOE7wmMQ==
 
 grapheme-splitter@^1.0.4:
   version "1.0.4"
@@ -8914,13 +8914,13 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@4.6.1:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.1.tgz#7778d888d5fe150a7c453b27a47b0e359fff8252"
-  integrity sha512-cmmO3uqHHRWrvpsT0JrrYl/uqyz6/GNnXZnPbwzp5Hy0Y7z8WBTZnF6TQ8v/ryIverGm9azq5oqzNzpWh8Ab+w==
+redis@4.6.3:
+  version "4.6.3"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.3.tgz#fef5c02edf44a93880149321a41c9ddb5afd46e6"
+  integrity sha512-2UBX8APh9xIXotVwbt3/jUSeu9kwoke9fNzCMQppuQhmOUmEBkM73sdUifXiabjH7YUN0VireJcgw7ky4DnC+A==
   dependencies:
     "@redis/bloom" "1.2.0"
-    "@redis/client" "1.5.2"
+    "@redis/client" "1.5.4"
     "@redis/graph" "1.1.0"
     "@redis/json" "1.0.4"
     "@redis/search" "1.1.1"
