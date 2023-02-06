@@ -167,6 +167,8 @@ describe('modules/manager/helmfile/artifacts', () => {
             '-w "/tmp/github/some/repo" ' +
             'renovate/sidecar ' +
             'bash -l -c "' +
+            'install-tool helm v3.7.2' +
+            ' && ' +
             'install-tool helmfile v0.129.0' +
             ' && ' +
             'helmfile deps -f helmfile.yaml' +
@@ -177,6 +179,7 @@ describe('modules/manager/helmfile/artifacts', () => {
     {
       binarySource: 'install',
       expectedCommands: [
+        { cmd: 'install-tool helm v3.7.2' },
         { cmd: 'install-tool helmfile v0.129.0' },
         { cmd: 'helmfile deps -f helmfile.yaml' },
       ],
@@ -193,6 +196,10 @@ describe('modules/manager/helmfile/artifacts', () => {
         '/tmp/renovate/cache/__renovate-private-cache'
       );
       fs.getParentDir.mockReturnValue('');
+      // helm
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v3.7.2' }],
+      });
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v0.129.0' }],
       });
