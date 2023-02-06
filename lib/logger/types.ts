@@ -20,6 +20,10 @@ export interface Logger {
   error(meta: Record<string, any>, msg?: string): void;
   fatal(msg: string): void;
   fatal(meta: Record<string, any>, msg?: string): void;
+
+  once: Logger & {
+    reset: () => void;
+  };
 }
 
 export interface BunyanRecord extends Record<string, any> {

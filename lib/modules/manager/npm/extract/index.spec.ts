@@ -1,9 +1,12 @@
 import { Fixtures } from '../../../../../test/fixtures';
+import { fs } from '../../../../../test/util';
 import { getConfig } from '../../../../config/defaults';
-import * as _fs from '../../../../util/fs';
 import * as npmExtract from '.';
 
-const fs: any = _fs;
+jest.mock('../../../../util/fs');
+const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
+  '../../../../util/fs'
+);
 
 // TODO: fix types
 const defaultConfig = getConfig();
@@ -22,8 +25,10 @@ const invalidNameContent = Fixtures.get('invalid-name.json', '..');
 describe('modules/manager/npm/extract/index', () => {
   describe('.extractPackageFile()', () => {
     beforeEach(() => {
-      fs.readLocalFile = jest.fn(() => null);
-      fs.localPathExists = jest.fn(() => false);
+      jest.resetAllMocks();
+      fs.readLocalFile.mockResolvedValue(null);
+      fs.localPathExists.mockResolvedValue(false);
+      fs.getSiblingFileName.mockImplementation(realFs.getSiblingFileName);
     });
 
     it('returns null if cannot parse', async () => {
@@ -140,11 +145,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds a lock file', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'yarn.lock') {
-          return '# yarn.lock';
+          return Promise.resolve('# yarn.lock');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -155,11 +160,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds and filters .npmrc', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
-          return 'save-exact = true\npackage-lock = false\n';
+          return Promise.resolve('save-exact = true\npackage-lock = false\n');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -170,7 +175,7 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('uses config.npmrc if no .npmrc exists', async () => {
-      fs.readLocalFile = jest.fn(() => null);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
@@ -180,11 +185,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('uses config.npmrc if .npmrc does exist but npmrcMerge=false', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
-          return 'repo-npmrc\n';
+          return Promise.resolve('repo-npmrc\n');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -195,11 +200,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('merges config.npmrc and repo .npmrc when npmrcMerge=true', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
-          return 'repo-npmrc\n';
+          return Promise.resolve('repo-npmrc\n');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -210,11 +215,13 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds and filters .npmrc with variables', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.npmrc') {
-          return 'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n';
+          return Promise.resolve(
+            'registry=https://registry.npmjs.org\n//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}\n'
+          );
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -225,11 +232,30 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('reads registryUrls from .yarnrc.yml', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === '.yarnrc.yml') {
-          return 'npmRegistryServer: https://registry.example.com';
+          return Promise.resolve(
+            'npmRegistryServer: https://registry.example.com'
+          );
         }
-        return null;
+        return Promise.resolve(null);
+      });
+      const res = await npmExtract.extractPackageFile(
+        input02Content,
+        'package.json',
+        {}
+      );
+      expect(
+        res?.deps.flatMap((dep) => dep.registryUrls)
+      ).toBeArrayIncludingOnly(['https://registry.example.com']);
+    });
+
+    it('reads registryUrls from .yarnrc', async () => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
+        if (fileName === '.yarnrc') {
+          return Promise.resolve('registry "https://registry.example.com"');
+        }
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input02Content,
@@ -242,11 +268,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds lerna', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{}';
+          return Promise.resolve('{}');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -261,11 +287,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds "npmClient":"npm" in lerna.json', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{ "npmClient": "npm" }';
+          return Promise.resolve('{ "npmClient": "npm" }');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -280,11 +306,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds "npmClient":"yarn" in lerna.json', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{ "npmClient": "yarn" }';
+          return Promise.resolve('{ "npmClient": "yarn" }');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         input01Content,
@@ -299,11 +325,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds simple yarn workspaces', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{}';
+          return Promise.resolve('{}');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         workspacesSimpleContent,
@@ -314,11 +340,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{"useWorkspaces": true}';
+          return Promise.resolve('{"useWorkspaces": true}');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         workspacesSimpleContent,
@@ -329,11 +355,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('finds complex yarn workspaces', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'lerna.json') {
-          return '{}';
+          return Promise.resolve('{}');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const res = await npmExtract.extractPackageFile(
         workspacesContent,
@@ -676,11 +702,11 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('extracts npm package alias', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName: string): Promise<any> => {
         if (fileName === 'package-lock.json') {
-          return '{}';
+          return Promise.resolve('{}');
         }
-        return null;
+        return Promise.resolve(null);
       });
       const pJson = {
         dependencies: {
@@ -705,16 +731,16 @@ describe('modules/manager/npm/extract/index', () => {
     });
 
     it('sets skipInstalls false if Yarn zero-install is used', async () => {
-      fs.readLocalFile = jest.fn((fileName) => {
+      fs.readLocalFile.mockImplementation((fileName): Promise<any> => {
         if (fileName === 'yarn.lock') {
-          return '# yarn.lock';
+          return Promise.resolve('# yarn.lock');
         }
         if (fileName === '.yarnrc.yml') {
-          return 'pnpEnableInlining: false';
+          return Promise.resolve('pnpEnableInlining: false');
         }
-        return null;
+        return Promise.resolve(null);
       });
-      fs.localPathExists = jest.fn(() => true);
+      fs.localPathExists.mockResolvedValueOnce(true);
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',

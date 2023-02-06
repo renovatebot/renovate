@@ -221,3 +221,9 @@ export const qConcatExpr = (
   ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+
+export const qValueMatcher = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+);

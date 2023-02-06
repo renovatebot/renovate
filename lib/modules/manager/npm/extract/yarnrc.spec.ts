@@ -1,5 +1,9 @@
 import { codeBlock } from 'common-tags';
-import { loadConfigFromYarnrcYml, resolveRegistryUrl } from './yarnrc';
+import {
+  loadConfigFromLegacyYarnrc,
+  loadConfigFromYarnrcYml,
+  resolveRegistryUrl,
+} from './yarnrc';
 
 describe('modules/manager/npm/extract/yarnrc', () => {
   describe('resolveRegistryUrl()', () => {
@@ -40,6 +44,16 @@ describe('modules/manager/npm/extract/yarnrc', () => {
             npmRegistryServer: 'https://scope.example.com/npm',
           },
         },
+      });
+      expect(registryUrl).toBeNull();
+    });
+
+    it('ignores missing scope registryServer', () => {
+      const registryUrl = resolveRegistryUrl('@scope/a-package', {
+        npmScopes: {
+          scope: {},
+        },
+        npmRegistryServer: 'https://private.example.com/npm',
       });
       expect(registryUrl).toBeNull();
     });
@@ -91,8 +105,56 @@ describe('modules/manager/npm/extract/yarnrc', () => {
         `,
         null,
       ],
+      ['', null],
     ])('produces expected config (%s)', (yarnrcYml, expectedConfig) => {
       const config = loadConfigFromYarnrcYml(yarnrcYml);
+
+      expect(config).toEqual(expectedConfig);
+    });
+  });
+
+  describe('loadConfigFromLegacyYarnrc()', () => {
+    it.each([
+      [
+        codeBlock`
+          # yarn lockfile v1
+          registry "https://npm.example.com"
+        `,
+        {
+          npmRegistryServer: 'https://npm.example.com',
+        },
+      ],
+      [
+        codeBlock`
+          disturl "https://npm-dist.example.com"
+          registry https://npm.example.com
+          sass_binary_site "https://node-sass.example.com"
+        `,
+        {
+          npmRegistryServer: 'https://npm.example.com',
+        },
+      ],
+      [
+        codeBlock`
+          --install.frozen-lockfile true
+          "registry" "https://npm.example.com"
+          "@foo:registry" "https://npm-foo.example.com"
+          "@bar:registry" "https://npm-bar.example.com"
+        `,
+        {
+          npmRegistryServer: 'https://npm.example.com',
+          npmScopes: {
+            foo: {
+              npmRegistryServer: 'https://npm-foo.example.com',
+            },
+            bar: {
+              npmRegistryServer: 'https://npm-bar.example.com',
+            },
+          },
+        },
+      ],
+    ])('produces expected config (%s)', (legacyYarnrc, expectedConfig) => {
+      const config = loadConfigFromLegacyYarnrc(legacyYarnrc);
 
       expect(config).toEqual(expectedConfig);
     });
