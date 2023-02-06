@@ -10,7 +10,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
-  isValidPath,
+  isValidLocalPath,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -274,7 +274,8 @@ export async function updateArtifacts({
     const execCommands: string[] = [];
 
     const goGetDirs =
-      config.goGetDirs?.filter(isValidPath).map(quote).join(' ') ?? './...';
+      config.goGetDirs?.filter(isValidLocalPath).map(quote).join(' ') ??
+      './...';
 
     let args = 'get -d -t ' + goGetDirs;
     logger.trace({ cmd, args }, 'go get command included');

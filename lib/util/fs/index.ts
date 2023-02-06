@@ -301,7 +301,9 @@ export async function getLocalFiles(
   return fileContentMap;
 }
 
-const validFilePathRegex = new RegExp(/^(\/?[a-z0-9.]+)+$/);
-export function isValidPath(s: string): boolean {
+const validFilePathRegex = new RegExp(
+  /^(?!\/)(\.{1})?([a-z0-9/]+)?(\/\.{3})?$/
+);
+export function isValidLocalPath(s: string): boolean {
   return validFilePathRegex.test(s);
 }

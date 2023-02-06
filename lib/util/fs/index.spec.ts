@@ -17,7 +17,7 @@ import {
   getLocalFiles,
   getParentDir,
   getSiblingFileName,
-  isValidPath,
+  isValidLocalPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -486,25 +486,31 @@ describe('util/fs/index', () => {
     });
   });
 
-  describe('util/isvalidpath', () => {
-    it('detects invalid paths', () => {
-      const testCases = {
-        '.': true,
-        './...': true,
-        foo: true,
-        'foo/bar': true,
-        './foo/bar': true,
-        './foo/bar/...': true,
-        '\\foo': false,
-        "foo'": false,
-        'fo"o': false,
-        'fo&o': false,
-        'f;oo': false,
-        'f o o': false,
-      };
-      Object.entries(testCases).forEach(([s, expected]) => {
-        expect(isValidPath(s)).toBe(expected);
-      });
+  describe('isValidLocalPath', () => {
+    it.each`
+      value               | expected
+      ${undefined}        | ${true}
+      ${'.'}              | ${true}
+      ${'./...'}          | ${true}
+      ${'foo'}            | ${true}
+      ${'foo/bar'}        | ${true}
+      ${'./foo/bar'}      | ${true}
+      ${'./foo/bar/...'}  | ${true}
+      ${'..'}             | ${false}
+      ${'....'}           | ${false}
+      ${'./foo/..'}       | ${false}
+      ${'./foo/..../bar'} | ${false}
+      ${'./..'}           | ${false}
+      ${'\\foo'}          | ${false}
+      ${"foo'"}           | ${false}
+      ${'fo"o'}           | ${false}
+      ${'fo&o'}           | ${false}
+      ${'f;oo'}           | ${false}
+      ${'f o o'}          | ${false}
+      ${'/'}              | ${false}
+      ${'/foo'}           | ${false}
+    `('isValidLocalPath($value) == $expected', ({ value, expected }) => {
+      expect(isValidLocalPath(value)).toBe(expected);
     });
   });
 });
