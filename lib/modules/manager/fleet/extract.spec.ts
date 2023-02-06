@@ -104,6 +104,22 @@ kind: Fleet
             registryUrls: ['https://charts.example.com'],
             depType: 'fleet',
           },
+          {
+            currentValue: 'v1.8.0',
+            datasource: 'helm',
+            depName: 'cert-manager',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+          },
+          {
+            datasource: 'helm',
+            depName: 'cluster1',
+            packageName: 'cert-manager',
+            registryUrls: ['https://charts.jetstack.io'],
+            depType: 'fleet',
+            skipReason: 'no-version',
+          },
         ]);
       });
 

@@ -28,7 +28,7 @@ export interface FleetFile {
 export interface FleetHelmBlock {
   chart: string;
   repo?: string;
-  version: string;
+  version?: string;
 }
 
 export interface FleetFileHelm extends FleetHelmBlock {
