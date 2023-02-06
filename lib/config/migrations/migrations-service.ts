@@ -3,6 +3,7 @@ import { dequal } from 'dequal';
 import type { RenovateConfig } from '../types';
 import { RemovePropertyMigration } from './base/remove-property-migration';
 import { RenamePropertyMigration } from './base/rename-property-migration';
+import { AdoptiumJavaMigration } from './custom/adoptium-java-migration';
 import { AutomergeMajorMigration } from './custom/automerge-major-migration';
 import { AutomergeMigration } from './custom/automerge-migration';
 import { AutomergeMinorMigration } from './custom/automerge-minor-migration';
@@ -15,6 +16,7 @@ import { BranchNameMigration } from './custom/branch-name-migration';
 import { BranchPrefixMigration } from './custom/branch-prefix-migration';
 import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
+import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
@@ -138,6 +140,8 @@ export class MigrationsService {
     NodeMigration,
     SemanticPrefixMigration,
     MatchDatasourcesMigration,
+    AdoptiumJavaMigration,
+    DatasourceMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
