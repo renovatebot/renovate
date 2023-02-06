@@ -1497,7 +1497,7 @@ If configured to `true`, it means that any `.npmrc` file in the repo will have `
 Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies include known vulnerabilities.
 Set this option to `true` to receive pull requests with vulnerability fixes once they are available.
 
-OSV-based vulnerability alerts are only supported for direct dependencies.
+You will only get OSV-based vulnerability alerts for _direct_ dependencies.
 The OSV database is only queried for vulnerabilities if dependencies rely on one of the following datasources:
 
 - [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
