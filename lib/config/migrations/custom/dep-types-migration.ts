@@ -15,7 +15,7 @@ export class DepTypesMigration extends AbstractMigration {
       packageRules.push({
         matchDepTypes: [key],
         ...value,
-      } satisfies PackageRule);
+      } as PackageRule);
     }
 
     if (is.array(value)) {
@@ -25,7 +25,7 @@ export class DepTypesMigration extends AbstractMigration {
           if (depTypeName) {
             delete depType.depType;
             depType.matchDepTypes = [depTypeName];
-            packageRules.push({ ...(depType satisfies PackageRule) });
+            packageRules.push({ ...(depType as PackageRule) });
           }
         }
       }
