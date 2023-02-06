@@ -17,6 +17,7 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 1. If the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate uses [mod](https://github.com/marwan-at-work/mod) to update import paths on major updates, which can update any Go source file
 1. If the user has enabled the option `gomodTidy`, `gomodTidy1.17` `gomodTidyE` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate runs `go mod tidy`, `go mod tidy -compat=1.17` or `go mod tidy -e` respectively, which itself can update `go.mod` and `go.sum`.
    1. `gomodTidy` is implicitly enabled for major updates if the user has enabled the option `gomodUpdateImportPaths` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array. If go modules 1.17 compatibility is needed you need to explicitly set the option `gomodTidy1.17`.
+   1. If adding `gomodTidy1.17` and `gomodTidyE` at the same time, both options will be enabled and results in running `go mod tidy -compat=1.17 -e`.
 1. `go mod vendor` is run if vendored modules are detected
 1. A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
 1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
