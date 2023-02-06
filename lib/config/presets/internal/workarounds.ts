@@ -82,7 +82,7 @@ export const presets: Record<string, Preset> = {
         allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
-        matchDatasources: ['docker', 'adoptium-java'],
+        matchDatasources: ['docker', 'java-version'],
         matchPackageNames: [
           'eclipse-temurin',
           'amazoncorretto',

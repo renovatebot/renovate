@@ -1,8 +1,8 @@
-import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
+import { AdoptiumJavaDatasource } from '../../datasource/java-version';
 import { NodeDatasource } from '../../datasource/node';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';

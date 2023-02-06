@@ -1,4 +1,3 @@
-import { AdoptiumJavaDatasource } from './adoptium-java';
 import { ArtifactoryDatasource } from './artifactory';
 import { AwsMachineImageDataSource } from './aws-machine-image';
 import { AwsRdsDataSource } from './aws-rds';
@@ -32,6 +31,7 @@ import { HelmDatasource } from './helm';
 import { HermitDatasource } from './hermit';
 import { HexDatasource } from './hex';
 import { HexpmBobDatasource } from './hexpm-bob';
+import { AdoptiumJavaDatasource } from './java-version';
 import { JenkinsPluginsDatasource } from './jenkins-plugins';
 import { KubernetesApiDatasource } from './kubernetes-api';
 import { MavenDatasource } from './maven';
