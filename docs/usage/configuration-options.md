@@ -1494,7 +1494,7 @@ If configured to `true`, it means that any `.npmrc` file in the repo will have `
 
 ## osvVulnerabilityAlerts
 
-Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies include known vulnerabilities.
+Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
 Set this option to `true` to receive pull requests with vulnerability fixes once they are available.
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
