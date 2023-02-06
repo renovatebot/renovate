@@ -1498,7 +1498,7 @@ Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability d
 Set this option to `true` to receive pull requests with vulnerability fixes once they are available.
 
 You will only get OSV-based vulnerability alerts for _direct_ dependencies.
-The OSV database is only queried for vulnerabilities if dependencies rely on one of the following datasources:
+Renovate only queries the OSV database for dependencies that use one of these datasources:
 
 - [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
 - [`go`](https://docs.renovatebot.com/modules/datasource/go/)
