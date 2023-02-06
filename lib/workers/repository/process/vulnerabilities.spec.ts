@@ -1,4 +1,5 @@
 import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
+import { codeBlock } from 'common-tags';
 import { mockFn } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, logger } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
@@ -481,20 +482,33 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '0.6.3',
           isVulnerabilityAlert: true,
           prBodyNotes: [
-            '\n\n---\n\n### ' +
-              'HTTP Request smuggling through malformed Transfer Encoding headers\n' +
-              '[CVE-2020-35884](https://nvd.nist.gov/vuln/detail/CVE-2020-35884) / [RUSTSEC-2020-0031](https://rustsec.org/advisories/RUSTSEC-2020-0031.html) / SOME-1234-5678\n' +
-              '\n<details>\n<summary>More information</summary>\n' +
-              '\n### Details\n' +
-              'HTTP pipelining issues and request smuggling attacks are possible due to incorrect Transfer encoding header parsing.\n\nIt is possible conduct HTTP request smuggling attacks (CL:TE/TE:TE) by sending invalid Transfer Encoding headers.\n\nBy manipulating the HTTP response the attacker could poison a web-cache, perform an XSS attack, or obtain sensitive information from requests other than their own.\n\n' +
-              '### Severity\n' +
-              '- Score: 6.5 / 10 (Medium)\n' +
-              '- Vector: `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N`\n' +
-              '\n### References\n' +
-              'No references.' +
-              '\n\nThis data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0031)' +
-              ' and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).\n' +
-              '</details>',
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### HTTP Request smuggling through malformed Transfer Encoding headers
+              [CVE-2020-35884](https://nvd.nist.gov/vuln/detail/CVE-2020-35884) / [RUSTSEC-2020-0031](https://rustsec.org/advisories/RUSTSEC-2020-0031.html) / SOME-1234-5678
+
+              <details>
+              <summary>More information</summary>
+
+              ### Details
+              HTTP pipelining issues and request smuggling attacks are possible due to incorrect Transfer encoding header parsing.
+
+              It is possible conduct HTTP request smuggling attacks (CL:TE/TE:TE) by sending invalid Transfer Encoding headers.
+
+              By manipulating the HTTP response the attacker could poison a web-cache, perform an XSS attack, or obtain sensitive information from requests other than their own.
+
+              ### Severity
+              - Score: 6.5 / 10 (Medium)
+              - Vector: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N\`
+
+              ### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0031) and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).
+              </details>
+            `,
           ],
         },
       ]);
@@ -641,18 +655,27 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '> 0.8.0',
           isVulnerabilityAlert: true,
           prBodyNotes: [
-            '\n\n---\n\n### ' +
-              '[GHSA-xxxx-yyyy-zzzz](https://github.com/advisories/GHSA-xxxx-yyyy-zzzz)\n' +
-              '\n<details>\n<summary>More information</summary>\n' +
-              '\n### Details\n' +
-              'No details.\n\n' +
-              '### Severity\n' +
-              'Unknown severity.\n' +
-              '\n### References\n' +
-              'No references.' +
-              '\n\nThis data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xxxx-yyyy-zzzz)' +
-              ' and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).\n' +
-              '</details>',
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-xxxx-yyyy-zzzz](https://github.com/advisories/GHSA-xxxx-yyyy-zzzz)
+
+              <details>
+              <summary>More information</summary>
+
+              ### Details
+              No details.
+
+              ### Severity
+              Unknown severity.
+
+              ### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xxxx-yyyy-zzzz) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
+              </details>
+            `,
           ],
         },
       ]);
@@ -710,19 +733,28 @@ describe('workers/repository/process/vulnerabilities', () => {
           allowedVersions: '==2.5.1',
           isVulnerabilityAlert: true,
           prBodyNotes: [
-            '\n\n---\n\n### ' +
-              'PYSEC-2022-303\n' +
-              '\n<details>\n<summary>More information</summary>\n' +
-              '\n### Details\n' +
-              'No details.\n\n' +
-              '### Severity\n' +
-              '- Score: Unknown\n' +
-              '- Vector: `some-invalid-score`\n' +
-              '\n### References\n' +
-              'No references.' +
-              '\n\nThis data is provided by [OSV](https://osv.dev/vulnerability/PYSEC-2022-303)' +
-              ' and the [PyPI Advisory Database](https://github.com/pypa/advisory-database) ([CC-BY 4.0](https://github.com/pypa/advisory-database/blob/main/LICENSE)).\n' +
-              '</details>',
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### PYSEC-2022-303
+
+              <details>
+              <summary>More information</summary>
+
+              ### Details
+              No details.
+
+              ### Severity
+              - Score: Unknown
+              - Vector: \`some-invalid-score\`
+
+              ### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/PYSEC-2022-303) and the [PyPI Advisory Database](https://github.com/pypa/advisory-database) ([CC-BY 4.0](https://github.com/pypa/advisory-database/blob/main/LICENSE)).
+              </details>
+            `,
           ],
         },
       ]);
