@@ -12,7 +12,7 @@ import {
 } from './schema';
 
 export class DotnetDatasource extends Datasource {
-  static readonly id = 'dotnet';
+  static readonly id = 'dotnet-version';
 
   constructor() {
     super(DotnetDatasource.id);
