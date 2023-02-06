@@ -4,10 +4,10 @@ describe('config/migrations/custom/match-datasources-migration', () => {
   it('should migrate properly', () => {
     expect(MatchDatasourcesMigration).toMigrate(
       {
-        matchStrings: ['dotnet'],
+        matchDatasources: ['dotnet'],
       },
       {
-        matchStrings: ['dotnet-version'],
+        matchDatasources: ['dotnet-version'],
       }
     );
   });
