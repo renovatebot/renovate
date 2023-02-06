@@ -55,7 +55,6 @@ import type { DatasourceApi } from './types';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
-api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
@@ -89,6 +88,7 @@ api.set(HelmDatasource.id, new HelmDatasource());
 api.set(HermitDatasource.id, new HermitDatasource());
 api.set(HexDatasource.id, new HexDatasource());
 api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
+api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
 api.set(KubernetesApiDatasource.id, new KubernetesApiDatasource());
 api.set(MavenDatasource.id, new MavenDatasource());
