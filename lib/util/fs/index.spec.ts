@@ -509,6 +509,8 @@ describe('util/fs/index', () => {
       ${'f o o'}          | ${false}
       ${'/'}              | ${false}
       ${'/foo'}           | ${false}
+      ${'&&'}             | ${false}
+      ${';'}              | ${false}
     `('isValidLocalPath($value) == $expected', ({ value, expected }) => {
       expect(isValidLocalPath(value)).toBe(expected);
     });
