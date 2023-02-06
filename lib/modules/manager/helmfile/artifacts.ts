@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
+import type { ExecOptions } from '../../../util/exec/types';
 import {
   getSiblingFileName,
   readLocalFile,
@@ -39,15 +39,20 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    const helmfileToolConstraint: ToolConstraint = {
-      toolName: 'helmfile',
-      constraint: config.constraints?.helmfile,
-    };
 
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},
-      toolConstraints: [helmfileToolConstraint],
+      toolConstraints: [
+        {
+          toolName: 'helm',
+          constraint: config.constraints?.helm,
+        },
+        {
+          toolName: 'helmfile',
+          constraint: config.constraints?.helmfile,
+        },
+      ],
     };
     await exec(`helmfile deps -f ${quote(packageFileName)}`, execOptions);
 
