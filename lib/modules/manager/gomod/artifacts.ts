@@ -298,9 +298,10 @@ export async function updateArtifacts({
 
     let tidyOpts = '';
     if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
-      tidyOpts = ' -compat=1.17';
-    } else if (config.postUpdateOptions?.includes('gomodTidyE')) {
-      tidyOpts = ' -e';
+      tidyOpts += ' -compat=1.17';
+    }
+    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+      tidyOpts += ' -e';
     }
 
     const isGoModTidyRequired =
