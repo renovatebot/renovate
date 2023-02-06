@@ -405,14 +405,14 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      prBodyNotes: Vulnerabilities.generatePrBodyNotes(vulnerability),
+      prBodyNotes: this.generatePrBodyNotes(vulnerability),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
       },
     };
   }
 
-  private static evaluateCvssVector(vector: string): [string, string] {
+  private evaluateCvssVector(vector: string): [string, string] {
     try {
       const parsedCvss: CvssScore = parseCvssVector(vector);
       const severityLevel =
@@ -424,12 +424,10 @@ export class Vulnerabilities {
       logger.debug(`Error processing CVSS vector ${vector}`);
     }
 
-    return ['0', ''];
+    return ['', ''];
   }
 
-  private static generatePrBodyNotes(
-    vulnerability: Osv.Vulnerability
-  ): string[] {
+  private generatePrBodyNotes(vulnerability: Osv.Vulnerability): string[] {
     let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
@@ -449,23 +447,27 @@ export class Vulnerabilities {
     content += vulnerability.summary ? `${vulnerability.summary}\n` : '';
     content += `${aliases.join(' / ')}\n`;
     content += `\n<details>\n<summary>More information</summary>\n`;
-    content += `### Details\n${vulnerability.details ?? 'No details'}\n`;
+    content += `### Details\n${vulnerability.details ?? 'No details.'}\n`;
+
     content += '### Severity\n';
-    if (vulnerability.severity?.[0].score) {
-      const [score, severity] = this.evaluateCvssVector(
-        vulnerability.severity[0].score
-      );
-      content += `- Score: ${score} / 10 (${severity})\n`;
-      content += `- Vector: \`${vulnerability.severity?.[0].score}\`\n`;
+    const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
+      vulnerability.severity?.[0]?.score;
+    if (cvssVector) {
+      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      const score = baseScore ? `${baseScore} / 10 (${severity})` : 'Unknown';
+      content += `- Score: ${score}\n`;
+      content += `- Vector: \`${cvssVector}\`\n`;
     } else {
-      content += 'Unknown severity\n';
+      content += 'Unknown severity.\n';
     }
+
     content += `\n### References\n${
       vulnerability.references
         ?.map((ref) => {
           return `- [${ref.url}](${ref.url})`;
         })
-        .join('\n') ?? 'No references'
+        .join('\n') ?? 'No references.'
     }`;
 
     let attribution = '';
