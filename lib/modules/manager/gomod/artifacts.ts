@@ -138,7 +138,6 @@ function getUpdateImportPathCmds(
     .filter(
       ({ depName, newMajor }) => !depName.startsWith('gopkg.in') && newMajor > 1
     )
-    // TODO: types (#7154)
 
     .map(
       ({ depName, newMajor }) =>
