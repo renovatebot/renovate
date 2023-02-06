@@ -15,7 +15,14 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+jest.mock('../../../util/fs', () => {
+  // restore
+  return {
+    __esModules: true,
+    ...(jest.createMockFromModule('../../../util/fs') as any), // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+    isValidPath: (jest.requireActual('../../../util/fs') as any).isValidPath, // eslint-disable-line @typescript-eslint/no-unnecessary-type-assertion
+  };
+});
 jest.mock('../../datasource');
 
 process.env.BUILDPACK = 'true';

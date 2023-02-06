@@ -17,6 +17,7 @@ import {
   getLocalFiles,
   getParentDir,
   getSiblingFileName,
+  isValidPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -481,6 +482,28 @@ describe('util/fs/index', () => {
       const res = await getLocalFiles(['invalidfile']);
       expect(res).toStrictEqual({
         invalidfile: null,
+      });
+    });
+  });
+
+  describe('util/isvalidpath', () => {
+    it('detects invalid paths', () => {
+      const testCases = {
+        '.': true,
+        './...': true,
+        foo: true,
+        'foo/bar': true,
+        './foo/bar': true,
+        './foo/bar/...': true,
+        '\\foo': false,
+        "foo'": false,
+        'fo"o': false,
+        'fo&o': false,
+        'f;oo': false,
+        'f o o': false,
+      };
+      Object.entries(testCases).forEach(([s, expected]) => {
+        expect(isValidPath(s)).toBe(expected);
       });
     });
   });

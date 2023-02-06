@@ -10,13 +10,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  isValidPath,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
 import { find, getAll } from '../../../util/host-rules';
-import { isValidPath } from '../../../util/isvalidpath';
 import { regEx } from '../../../util/regex';
 import { createURLFromHostOrURL, validateUrl } from '../../../util/url';
 import { isValid } from '../../versioning/semver';
