@@ -13,7 +13,7 @@ const releases3_1 = Fixtures.getJson('releases-3.1.json');
 const baseUrl =
   'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata';
 
-describe('modules/datasource/dotnet/index', () => {
+describe('modules/datasource/dotnet-version/index', () => {
   describe('getReleases', () => {
     it('returns null for non-dotnet package', async () => {
       expect(

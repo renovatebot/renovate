@@ -14,7 +14,7 @@ import { DartDatasource } from './dart';
 import { DartVersionDatasource } from './dart-version';
 import { DenoDatasource } from './deno';
 import { DockerDatasource } from './docker';
-import { DotnetDatasource } from './dotnet';
+import { DotnetDatasource } from './dotnet-version';
 import { FlutterVersionDatasource } from './flutter-version';
 import { GalaxyDatasource } from './galaxy';
 import { GalaxyCollectionDatasource } from './galaxy-collection';

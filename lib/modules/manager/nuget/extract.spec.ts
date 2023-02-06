@@ -2,7 +2,7 @@ import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { DotnetDatasource } from '../../datasource/dotnet';
+import { DotnetDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 

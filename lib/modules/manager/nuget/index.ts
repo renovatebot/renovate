@@ -1,5 +1,5 @@
 import type { ProgrammingLanguage } from '../../../constants';
-import { DotnetDatasource } from '../../datasource/dotnet';
+import { DotnetDatasource } from '../../datasource/dotnet-version';
 import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';

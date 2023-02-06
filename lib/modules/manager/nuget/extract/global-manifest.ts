@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import { DotnetDatasource } from '../../../datasource/dotnet';
+import { DotnetDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
 import type { PackageDependency, PackageFile } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
