@@ -29,7 +29,9 @@ export class HelmReleaseExtractor extends DependencyExtractor {
       if (is.nonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {
           // For oci repos, we remove the oci:// and use the docker datasource
-          dep.registryUrls = [helmRelease.repository.replace('oci://', '')];
+          dep.registryUrls = [
+            helmRelease.repository.replace('oci://', 'https://'),
+          ];
           dep.datasource = DockerDatasource.id;
         } else {
           dep.registryUrls = [helmRelease.repository];

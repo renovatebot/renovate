@@ -628,7 +628,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'docker',
           depName: 'karpenter',
           depType: 'helm_release',
-          registryUrls: ['public.ecr.aws/karpenter'],
+          registryUrls: ['https://public.ecr.aws/karpenter'],
         },
       ]);
     });
