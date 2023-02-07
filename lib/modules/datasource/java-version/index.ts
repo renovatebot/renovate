@@ -12,7 +12,7 @@ import {
 } from './common';
 import type { AdoptiumJavaResponse } from './types';
 
-export class AdoptiumJavaDatasource extends Datasource {
+export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;
 
   constructor() {

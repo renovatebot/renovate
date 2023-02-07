@@ -2,7 +2,7 @@ import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
-import { AdoptiumJavaDatasource } from '../../datasource/java-version';
+import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeDatasource } from '../../datasource/node';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 
@@ -15,7 +15,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  AdoptiumJavaDatasource.id,
+  JavaVersionDatasource.id,
   DockerDatasource.id,
   GithubReleasesDatasource.id,
   GithubTagsDatasource.id,
