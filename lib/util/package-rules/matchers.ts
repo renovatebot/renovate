@@ -1,6 +1,6 @@
 import { BaseBranchesMatcher } from './base-branches';
-import { CurrentValueMatcher } from './current-value';
 import { CategoriesMatcher } from './categories';
+import { CurrentValueMatcher } from './current-value';
 import { CurrentVersionMatcher } from './current-version';
 import { DatasourcesMatcher } from './datasources';
 import { DepNameMatcher } from './dep-names';

@@ -1,5 +1,4 @@
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
-import { Category, ProgrammingLanguage } from '../constants';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
 import { applyPackageRules } from './index';
