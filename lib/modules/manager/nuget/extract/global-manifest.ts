@@ -1,5 +1,5 @@
 import { logger } from '../../../../logger';
-import { DotnetDatasource } from '../../../datasource/dotnet-version';
+import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
 import type { PackageDependency, PackageFile } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
@@ -31,7 +31,7 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      datasource: DotnetDatasource.id,
+      datasource: DotnetVersionDatasource.id,
     });
   }
 
