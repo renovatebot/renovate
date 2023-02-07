@@ -277,7 +277,7 @@ export async function updateArtifacts({
       config.goGetDirs?.filter(isValidLocalPath).map(quote).join(' ') ??
       './...';
 
-    let args = 'get -d -t ' + goGetDirs;
+    let args = `get -d -t ${goGetDirs}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
