@@ -79,6 +79,13 @@ describe('modules/manager/mix/extract', () => {
           depName: 'jason',
           packageName: 'jason',
         },
+        {
+          currentValue: '== 1.6.14',
+          currentVersion: '1.6.14',
+          datasource: 'hex',
+          depName: 'phoenix',
+          packageName: 'phoenix',
+        },
       ]);
     });
   });
