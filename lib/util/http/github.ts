@@ -321,11 +321,14 @@ export class GithubHttp extends Http<GithubHttpOptions> {
             lastPage = Math.min(pageLimit, lastPage);
           }
           const baseUrl = opts.baseUrl;
-          const rebasePaginationLinks =
-            baseUrl && process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
               const parsedUrl = new URL(linkHeader.next.url, baseUrl);
+              const rebasePaginationLinks =
+                baseUrl &&
+                process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+                // Preserve github.com URLs for use cases like release notes
+                parsedUrl.origin !== 'https://api.github.com';
               const nextUrl = rebasePaginationLinks
                 ? replaceUrlBase(parsedUrl, baseUrl)
                 : parsedUrl;

@@ -230,7 +230,7 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a']);
     });
 
-    it('rebases pagination links', async () => {
+    it('rebases GHE Server pagination links', async () => {
       process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
       // The origin and base URL which Renovate uses (from its config) to reach GHE:
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
@@ -257,7 +257,7 @@ describe('util/http/github', () => {
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
-    it('preserves pagination links', async () => {
+    it('preserves pagination links by default', async () => {
       const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
       setBaseUrl(baseUrl);
       const apiUrl = '/some-url?per_page=2';
@@ -272,6 +272,28 @@ describe('util/http/github', () => {
           link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
         })
         .get(`${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('preserves pagination links for github.com', async () => {
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      const baseUrl = 'https://api.github.com/';
+
+      setBaseUrl(baseUrl);
+      const apiUrl = 'some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get('/' + apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=3`)
         .reply(200, ['e']);
       const res = await githubApi.getJson(apiUrl, { paginate: true });
       expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
