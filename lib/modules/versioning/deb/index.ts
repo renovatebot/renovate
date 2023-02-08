@@ -67,7 +67,7 @@ class DebVersioningApi extends GenericVersioningApi {
       return null;
     }
     const release = [...nonEpochVersion.matchAll(numericPattern)].map((m) =>
-      Number(m[0])
+      parseInt(m[0], 10)
     );
     return {
       epoch,
