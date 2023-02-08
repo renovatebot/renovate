@@ -44,7 +44,7 @@ class DebVersioningApi extends GenericVersioningApi {
     if (nonEpochVersion.includes(':')) {
       const epochEnd = nonEpochVersion.indexOf(':');
       epoch = Number(nonEpochVersion.substring(0, epochEnd));
-      if (!Number.isInteger(epoch)) {
+      if (!Number.isInteger(epoch) || epoch < 0) {
         return null;
       }
       nonEpochVersion = nonEpochVersion.substring(epochEnd + 1);
