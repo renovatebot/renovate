@@ -49,7 +49,7 @@ describe('modules/versioning/deb/index', () => {
     ${'0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d'}  | ${true}
     ${'123098140293'}                              | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
-    expect(!!deb.isValid(version)).toBe(expected);
+    expect(deb.isValid(version)).toBe(expected);
   });
 
   test.each`
