@@ -6,6 +6,7 @@ describe('modules/versioning/deb/index', () => {
     ${'1.1'}                                       | ${true}
     ${'1.3.RC2'}                                   | ${true}
     ${'a:1.1-1'}                                   | ${false}
+    ${'1.1:1.3-1'}                                 | ${false}
     ${'1:1:1:2-1'}                                 | ${true}
     ${'1:a:b:c:2-1'}                               | ${true}
     ${'1:3_3.2-1'}                                 | ${false}
