@@ -59,6 +59,9 @@ export async function extractPackageFile(
             datasource: HexDatasource.id,
             packageName: organization ? `${app}:${organization}` : app,
           };
+          if (requirement?.startsWith('==')) {
+            dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
         }
 
         deps.push(dep);
