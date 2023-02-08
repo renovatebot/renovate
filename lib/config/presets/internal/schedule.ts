@@ -3,6 +3,47 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
+  automergeDaily: {
+    automergeSchedule: ['before 2am'],
+    description: 'Schedule automerge daily.',
+  },
+  automergeEarlyMondays: {
+    automergeSchedule: ['before 3am on Monday'],
+    description: 'Weekly automerge schedule on early Monday mornings.',
+  },
+  automergeMonthly: {
+    automergeSchedule: ['before 3am on the first day of the month'],
+    description: 'Schedule automerge monthly.',
+  },
+  automergeNonOfficeHours: {
+    automergeSchedule: [
+      'after 10pm every weekday',
+      'before 5am every weekday',
+      'every weekend',
+    ],
+    description:
+      'Schedule automerge for typical non-office hours (night time and weekends).',
+  },
+  automergeQuarterly: {
+    automergeSchedule: ['every 3 months on the first day of the month'],
+    description: 'Schedule automerge quarterly.',
+  },
+  automergeWeekdays: {
+    automergeSchedule: ['every weekday'],
+    description: 'Schedule automerge for weekdays.',
+  },
+  automergeWeekends: {
+    automergeSchedule: ['every weekend'],
+    description: 'Schedule automerge for weekends.',
+  },
+  automergeWeekly: {
+    description: 'Schedule automerge weekly.',
+    extends: ['schedule:automergeEarlyMondays'],
+  },
+  automergeYearly: {
+    automergeSchedule: ['every 12 months on the first day of the month'],
+    description: 'Schedule automerge once a year (not recommended).',
+  },
   daily: {
     description: 'Schedule daily.',
     schedule: ['before 2am'],
