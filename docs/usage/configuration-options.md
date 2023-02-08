@@ -2185,8 +2185,7 @@ If set to `branch` the postUpgradeTask is executed for the whole branch.
 
 Use `prAllowMaintainerEdits` to control if maintainers can edit Renovate's pull requests.
 
-When Renovate runs in a fork, this allows project maintainers to make manual changes to the
-Renovate PR branch, without needing to create another new PR.
+When Renovate runs in a fork, this allows project maintainers to make manual changes to the Renovate PR branch, without needing to create another new PR.
 
 <!-- prettier-ignore -->
 !!! note
