@@ -97,10 +97,13 @@ class DebVersioningApi extends GenericVersioningApi {
         while (numericChars.includes(b.charAt(bNumericEnd))) {
           bNumericEnd += 1;
         }
-        const aNumber = Number(a.substring(charPos, aNumericEnd));
-        const bNumber = Number(b.substring(charPos, bNumericEnd));
-        if (aNumber !== bNumber) {
-          return Math.sign(aNumber - bNumber);
+        const numericCmp = a
+          .substring(charPos, aNumericEnd)
+          .localeCompare(b.substring(charPos, bNumericEnd), undefined, {
+            numeric: true,
+          });
+        if (numericCmp !== 0) {
+          return numericCmp;
         }
         charPos = aNumericEnd; // the same as bNumericEnd as both are the same
         continue;
