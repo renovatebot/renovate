@@ -141,7 +141,7 @@ describe('workers/repository/process/extract-update', () => {
       git.checkoutBranch.mockResolvedValueOnce('123test');
 
       const packageFiles = await extract(config);
-      await expect(lookup(config, packageFiles)).resolves.not.toThrow();
+      await lookup(config, packageFiles);
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
     });
