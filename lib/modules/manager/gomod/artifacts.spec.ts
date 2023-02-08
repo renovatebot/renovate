@@ -1630,4 +1630,51 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
   });
+
+  it('returns updated go.sum when goGetDirs is specified', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['.'],
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t .',
+        options: {
+          cwd: '/tmp/github/some/repo',
+          env: {
+            CGO_ENABLED: '1',
+            GOFLAGS: '-modcacherw',
+            GOINSECURE: 'insecure.example.com/*',
+            GONOPROXY: 'noproxy.example.com/*',
+            GONOSUMDB: '1',
+            GOPRIVATE: 'private.example.com/*',
+            GOPROXY: 'proxy.example.com',
+          },
+        },
+      },
+    ]);
+  });
 });

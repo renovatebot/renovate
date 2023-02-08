@@ -273,9 +273,14 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    const goGetDirs =
-      config.goGetDirs?.filter(isValidLocalPath).map(quote).join(' ') ??
-      './...';
+    const userGoGetDirs = config.goGetDirs?.filter(isValidLocalPath);
+    if (config.goGetDirs?.length !== userGoGetDirs?.length) {
+      logger.debug(`some of the directories specified in "userGoGetDirs" are invalid, those will be skipped.
+      configured: ${config.goGetDirs?.join(', ') ?? ''}
+      will be used: ${userGoGetDirs?.join(', ') ?? ''}
+      `);
+    }
+    const goGetDirs = userGoGetDirs?.map(quote).join(' ') ?? './...';
 
     let args = `get -d -t ${goGetDirs}`;
     logger.trace({ cmd, args }, 'go get command included');
