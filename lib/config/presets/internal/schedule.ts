@@ -2,18 +2,18 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
+const daily = ['before 2am'];
+const earlyMondays = ['before 3am on Monday'];
+const monthly = ['before 3am on the first day of the month'];
 const nonOfficeHours = [
   'after 10pm every weekday',
   'before 5am every weekday',
   'every weekend',
 ];
-const yearly = ['every 12 months on the first day of the month'];
-const weekends = ['every weekend'];
-const weekdays = ['every weekday'];
 const quarterly = ['every 3 months on the first day of the month'];
-const monthly = ['before 3am on the first day of the month'];
-const earlyMondays = ['before 3am on Monday'];
-const daily = ['before 2am'];
+const weekdays = ['every weekday'];
+const weekends = ['every weekend'];
+const yearly = ['every 12 months on the first day of the month'];
 
 export const presets: Record<string, Preset> = {
   automergeDaily: {
