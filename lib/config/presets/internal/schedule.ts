@@ -2,38 +2,47 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
+const nonOfficeHours = [
+  'after 10pm every weekday',
+  'before 5am every weekday',
+  'every weekend',
+];
+const yearly = ['every 12 months on the first day of the month'];
+const weekends = ['every weekend'];
+const weekdays = ['every weekday'];
+const quarterly = ['every 3 months on the first day of the month'];
+const monthly = ['before 3am on the first day of the month'];
+const earlyMondays = ['before 3am on Monday'];
+const daily = ['before 2am'];
+
 export const presets: Record<string, Preset> = {
   automergeDaily: {
-    automergeSchedule: ['before 2am'],
+    automergeSchedule: daily,
     description: 'Schedule automerge daily.',
   },
   automergeEarlyMondays: {
-    automergeSchedule: ['before 3am on Monday'],
+    automergeSchedule: earlyMondays,
     description: 'Weekly automerge schedule on early Monday mornings.',
   },
   automergeMonthly: {
-    automergeSchedule: ['before 3am on the first day of the month'],
+    automergeSchedule: monthly,
     description: 'Schedule automerge monthly.',
   },
   automergeNonOfficeHours: {
-    automergeSchedule: [
-      'after 10pm every weekday',
-      'before 5am every weekday',
-      'every weekend',
-    ],
+    automergeSchedule: nonOfficeHours,
     description:
       'Schedule automerge for typical non-office hours (night time and weekends).',
   },
   automergeQuarterly: {
-    automergeSchedule: ['every 3 months on the first day of the month'],
+    automergeSchedule: quarterly,
     description: 'Schedule automerge quarterly.',
   },
   automergeWeekdays: {
-    automergeSchedule: ['every weekday'],
+    automergeSchedule: weekdays,
     description: 'Schedule automerge for weekdays.',
   },
   automergeWeekends: {
-    automergeSchedule: ['every weekend'],
+    automergeSchedule: weekends,
     description: 'Schedule automerge for weekends.',
   },
   automergeWeekly: {
@@ -41,41 +50,37 @@ export const presets: Record<string, Preset> = {
     extends: ['schedule:automergeEarlyMondays'],
   },
   automergeYearly: {
-    automergeSchedule: ['every 12 months on the first day of the month'],
+    automergeSchedule: yearly,
     description: 'Schedule automerge once a year (not recommended).',
   },
   daily: {
     description: 'Schedule daily.',
-    schedule: ['before 2am'],
+    schedule: daily,
   },
   earlyMondays: {
     description: 'Weekly schedule on early Monday mornings.',
-    schedule: ['before 3am on Monday'],
+    schedule: earlyMondays,
   },
   monthly: {
     description: 'Schedule monthly.',
-    schedule: ['before 3am on the first day of the month'],
+    schedule: monthly,
   },
   nonOfficeHours: {
     description:
       'Schedule for typical non-office hours (night time and weekends).',
-    schedule: [
-      'after 10pm every weekday',
-      'before 5am every weekday',
-      'every weekend',
-    ],
+    schedule: nonOfficeHours,
   },
   quarterly: {
     description: 'Schedule quarterly.',
-    schedule: ['every 3 months on the first day of the month'],
+    schedule: quarterly,
   },
   weekdays: {
     description: 'Schedule for weekdays.',
-    schedule: ['every weekday'],
+    schedule: weekdays,
   },
   weekends: {
     description: 'Schedule for weekends.',
-    schedule: ['every weekend'],
+    schedule: weekends,
   },
   weekly: {
     description: 'Schedule weekly.',
@@ -83,6 +88,6 @@ export const presets: Record<string, Preset> = {
   },
   yearly: {
     description: 'Schedule once a year (not recommended).',
-    schedule: ['every 12 months on the first day of the month'],
+    schedule: yearly,
   },
 };
