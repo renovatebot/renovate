@@ -248,7 +248,12 @@ module.exports = {
 
 #### AWS ECR (Amazon Web Services Elastic Container Registry)
 
-Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
+Renovate can authenticate with AWS ECR using AWS credentials, login password or an authorization token.
+
+##### Using AWS account credentials
+
+To authenticate using AWS credentials, specify the access key id & secret as the username & password. If required
+define the session token also, for example:
 
 ```json
 {
@@ -259,11 +264,54 @@ Renovate can authenticate with AWS ECR using AWS access key id & secret as the u
       "username": "AKIAABCDEFGHIJKLMNOPQ",
       "encrypted": {
         "password": "w...A"
+      },
+
+      // optional session token
+      "token": "IQ...="
+    }
+  ]
+}
+```
+
+##### Using the login password (basic auth)
+
+To authenticate using basic auth, simply provide the password in your config. For example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "encrypted": {
+        "password": "w...A"
       }
     }
   ]
 }
 ```
+
+To obtain a login password, using the command `aws ecr get-login-password` or the corresponding API.
+
+##### Using an authorization token
+
+To authenticate using an authorization token, provide only the token in your config. For example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "encrypted": {
+        "token": "QV...09"
+      }
+    }
+  ]
+}
+```
+
+To obtain an authorization token, using the command `aws ecr get-authorization-token` or the corresponding API.
 
 #### Google Container Registry / Google Artifact Registry
 
