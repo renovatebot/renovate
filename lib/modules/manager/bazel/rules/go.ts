@@ -26,10 +26,12 @@ export const GoTarget = z
 
       if (tag) {
         dep.currentValue = tag;
-      }
-
-      if (commit) {
-        dep.currentValue = 'v0.0.0';
+        if (commit) {
+          dep.currentDigest = commit;
+          dep.currentDigestShort = commit.substring(0, 7);
+        }
+      } else if (commit) {
+        dep.currentValue = tag;
         dep.currentDigest = commit;
         dep.currentDigestShort = commit.substring(0, 7);
         dep.digestOneAndOnly = true;
