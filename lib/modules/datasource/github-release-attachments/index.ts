@@ -32,16 +32,16 @@ function inferHashAlg(digest: string): string {
   }
 }
 
-export class GithubReleasesDatasource extends Datasource {
-  static readonly id = 'github-releases';
+export class GithubReleaseAttachmentsDatasource extends Datasource {
+  static readonly id = 'github-release-attachments';
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
   override http: GithubHttp;
 
   constructor() {
-    super(GithubReleasesDatasource.id);
-    this.http = new GithubHttp(GithubReleasesDatasource.id);
+    super(GithubReleaseAttachmentsDatasource.id);
+    this.http = new GithubHttp(GithubReleaseAttachmentsDatasource.id);
   }
 
   @cache({
@@ -171,7 +171,7 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   /**
-   * github.getDigest
+   * githubReleaseAttachments.getDigest
    *
    * The `newValue` supplied here should be a valid tag for the GitHub release.
    * Requires `currentValue` and `currentDigest`.
@@ -223,7 +223,7 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   /**
-   * github.getReleases
+   * githubReleaseAttachments.getReleases
    *
    * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with releases.
    *
