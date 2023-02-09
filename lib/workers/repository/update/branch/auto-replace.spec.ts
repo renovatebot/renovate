@@ -1038,5 +1038,29 @@ describe('workers/repository/update/branch/auto-replace', () => {
         `
       );
     });
+
+    it('updates with pinDigest enabled but no currentDigest value', async () => {
+      const dockerfile = codeBlock`
+        FROM ubuntu:18.04
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'ubuntu:18.04';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:1234567890';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM alpine:3.16@sha256:1234567890
+        `
+      );
+    });
   });
 });

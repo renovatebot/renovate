@@ -149,6 +149,7 @@ export async function doAutoReplace(
     currentDigest,
     newDigest,
     autoReplaceStringTemplate,
+    pinDigests,
   } = upgrade;
   /*
     If replacement support for more managers is added,
@@ -198,11 +199,15 @@ export async function doAutoReplace(
           newName
         );
       }
-      if (currentDigest && newDigest) {
-        newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), 'g'),
-          newDigest
-        );
+      if (newDigest) {
+        if (currentDigest) {
+          newString = newString.replace(
+            regEx(escapeRegExp(currentDigest), 'g'),
+            newDigest
+          );
+        } else if (pinDigests) {
+          newString = `${newString}@${newDigest}`;
+        }
       }
     }
     if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
