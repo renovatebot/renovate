@@ -245,7 +245,6 @@ async function getECRAuthToken(
       ...(opts.token && { sessionToken: opts.token }),
     };
   } else if (opts.token) {
-    addSecretForSanitizing(opts.token);
     return opts.token;
   }
 
