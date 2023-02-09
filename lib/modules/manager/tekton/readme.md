@@ -25,6 +25,24 @@ There are three ways to use a Tekton Bundle reference:
 
 Renovate's Tekton manager supports all the methods listed above.
 
+### Using image in Tekton Tasks
+
+Tekton Tasks define container images that are executed during its execution.
+There are several attributes where such images can be defined:
+
+1. In a Task step.
+1. In a Task stepTemplate.
+1. In a Task sidecar.
+
+Furthermore, Tekton Task definitions can be defined within various Tekton resources:
+
+1. Task
+1. TaskRun
+1. Pipeline
+1. PipelineRun
+
+Renovate's Tekton manager supports all the image attributes for the Tekton resources mentioned above.
+
 ### Set your own `fileMatch` pattern
 
 The `tekton` manager does not have a default `fileMatch` pattern.

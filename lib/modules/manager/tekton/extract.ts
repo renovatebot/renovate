@@ -8,6 +8,7 @@ import type {
   TektonBundle,
   TektonResolverParamsField,
   TektonResource,
+  TektonResourceSpec,
 } from './types';
 
 export function extractPackageFile(
@@ -28,6 +29,7 @@ export function extractPackageFile(
   }
   for (const doc of docs) {
     deps.push(...getDeps(doc));
+    deps.push(...getStepImageDeps(doc));
   }
   if (!deps.length) {
     return null;
@@ -108,6 +110,78 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     'Tekton bundle dependency found'
   );
   deps.push(dep);
+}
+
+function getStepImageDeps(doc: TektonResource): PackageDependency[] {
+  const deps: PackageDependency[] = [];
+  if (is.falsy(doc)) {
+    return deps;
+  }
+
+  // Handle list of TektonResources
+  for (const item of coerceArray(doc.items)) {
+    deps.push(...getStepImageDeps(item));
+  }
+
+  // Handle TriggerTemplate resource
+  for (const resource of coerceArray(doc.spec?.resourcetemplates)) {
+    deps.push(...getStepImageDeps(resource));
+  }
+
+  // Handle Task resource
+  addStepImageSpec(doc.spec, deps);
+
+  // Handle TaskRun resource
+  addStepImageSpec(doc.spec?.taskSpec, deps);
+
+  // Handle Pipeline resource
+  for (const task of coerceArray(doc.spec?.tasks)) {
+    addStepImageSpec(task.taskSpec, deps);
+  }
+  for (const task of coerceArray(doc.spec?.finally)) {
+    addStepImageSpec(task.taskSpec, deps);
+  }
+
+  // Handle PipelineRun resource
+  for (const task of coerceArray(doc.spec?.pipelineSpec?.tasks)) {
+    addStepImageSpec(task.taskSpec, deps);
+  }
+  for (const task of coerceArray(doc.spec?.pipelineSpec?.finally)) {
+    addStepImageSpec(task.taskSpec, deps);
+  }
+
+  return deps;
+}
+
+function addStepImageSpec(
+  spec: TektonResourceSpec | undefined,
+  deps: PackageDependency[]
+): void {
+  if (is.nullOrUndefined(spec)) {
+    return;
+  }
+
+  const steps = [
+    ...coerceArray(spec.steps),
+    ...coerceArray(spec.sidecars),
+    spec.stepTemplate,
+  ];
+  for (const step of steps) {
+    if (is.nullOrUndefined(step?.image)) {
+      continue;
+    }
+    const dep = getDep(step?.image);
+    dep.depType = 'tekton-step-image';
+    logger.trace(
+      {
+        depName: dep.depName,
+        currentValue: dep.currentValue,
+        currentDigest: dep.currentDigest,
+      },
+      'Tekton step image dependency found'
+    );
+    deps.push(dep);
+  }
 }
 
 function getBundleValue(
