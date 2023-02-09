@@ -10,6 +10,7 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
+const epochPattern = regEx(/^[0-9]+$/);
 const upstreamVersionPattern = regEx(/^[-+.:~A-Za-z0-9]+$/);
 const debianRevisionPattern = regEx(/^[+.~A-Za-z0-9]*$/);
 const numericPattern = regEx(/[0-9]+/g);
@@ -43,10 +44,13 @@ class DebVersioningApi extends GenericVersioningApi {
     let nonEpochVersion = version;
     if (nonEpochVersion.includes(':')) {
       const epochEnd = nonEpochVersion.indexOf(':');
-      epoch = Number(nonEpochVersion.substring(0, epochEnd));
-      if (!Number.isInteger(epoch) || epoch < 0) {
+      const epochMatch = nonEpochVersion
+        .substring(0, epochEnd)
+        .match(epochPattern);
+      if (!epochMatch) {
         return null;
       }
+      epoch = parseInt(epochMatch[0], 10);
       nonEpochVersion = nonEpochVersion.substring(epochEnd + 1);
     }
 

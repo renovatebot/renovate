@@ -5,8 +5,11 @@ describe('modules/versioning/deb/index', () => {
     version                                        | expected
     ${'1.1'}                                       | ${true}
     ${'1.3.RC2'}                                   | ${true}
+    ${'0:1.1-1'}                                   | ${true}
     ${'a:1.1-1'}                                   | ${false}
     ${'1.1:1.3-1'}                                 | ${false}
+    ${'1.1a:1.3-1'}                                | ${false}
+    ${'1a:1.3-1'}                                  | ${false}
     ${'-1:1.3-1'}                                  | ${false}
     ${'1:1:1:2-1'}                                 | ${true}
     ${'1:a:b:c:2-1'}                               | ${true}
