@@ -242,6 +242,7 @@ export class Vulnerabilities {
     }
 
     sortedCopy.sort((a, b) =>
+      // no pre-processing, as there are only very few values to sort
       versioningApi.sortVersions(Object.values(a)[0], Object.values(b)[0])
     );
 
