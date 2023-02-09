@@ -239,17 +239,17 @@ async function getECRAuthToken(
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
   if (opts.username && opts.password) {
-    logger.trace(`Using AWS credentials for ECR registry`);
+    logger.debug(`Using AWS credentials for ECR registry`);
     config.credentials = {
       accessKeyId: opts.username,
       secretAccessKey: opts.password,
       ...(opts.token && { sessionToken: opts.token }),
     };
   } else if (opts.password) {
-    logger.trace(`Using basic auth for ECR registry`);
+    logger.debug(`Using basic auth for ECR registry`);
     return Buffer.from(`AWS:${opts.password}`).toString('base64');
   } else if (opts.token) {
-    logger.trace(`Using auth token for ECR registry`);
+    logger.debug(`Using auth token for ECR registry`);
     return opts.token;
   }
 
