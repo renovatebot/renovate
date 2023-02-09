@@ -175,7 +175,7 @@ export class Vulnerabilities {
             versioningApi
           );
           if (is.nullOrUndefined(fixedVersion)) {
-            logger.debug(
+            logger.info(
               `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
             );
             continue;
