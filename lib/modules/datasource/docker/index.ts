@@ -237,11 +237,6 @@ async function getECRAuthToken(
   region: string | undefined,
   opts: HostRule
 ): Promise<string | null> {
-  if (opts.token) {
-    addSecretForSanitizing(opts.token);
-    return opts.token;
-  }
-
   const config: ECRClientConfig = { region };
   if (opts.username && opts.password) {
     config.credentials = {
@@ -249,6 +244,9 @@ async function getECRAuthToken(
       secretAccessKey: opts.password,
       ...(opts.token && { sessionToken: opts.token }),
     };
+  } else if (opts.token) {
+    addSecretForSanitizing(opts.token);
+    return opts.token;
   }
 
   const ecr = new ECR(config);
