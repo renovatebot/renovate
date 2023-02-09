@@ -264,10 +264,7 @@ define the session token also, for example:
       "username": "AKIAABCDEFGHIJKLMNOPQ",
       "encrypted": {
         "password": "w...A"
-      },
-
-      // optional session token
-      "token": "IQ...="
+      }
     }
   ]
 }
