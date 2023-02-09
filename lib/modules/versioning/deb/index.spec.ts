@@ -97,13 +97,6 @@ describe('modules/versioning/deb/index', () => {
   });
 
   test.each`
-    version    | expected
-    ${'1.2.0'} | ${true}
-  `('isCompatible("$version") === $expected', ({ version, expected }) => {
-    expect(deb.isCompatible(version)).toBe(expected);
-  });
-
-  test.each`
     version     | expected
     ${'1.2.0'}  | ${true}
     ${'^1.2.0'} | ${false}
