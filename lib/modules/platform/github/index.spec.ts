@@ -2218,7 +2218,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR can be edited by maintainers.',
           labels: null,
-          allowMaintainerEdits: true,
+          forkModeAllowMaintainerEdits: true,
         });
         expect(pr).toMatchObject({ number: 123 });
       });
@@ -2261,7 +2261,7 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR *cannot* be edited by maintainers.',
           labels: null,
-          allowMaintainerEdits: false,
+          forkModeAllowMaintainerEdits: false,
         });
         expect(pr).toMatchObject({ number: 123 });
       });

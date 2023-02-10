@@ -1556,13 +1556,6 @@ const options: RenovateOptions[] = [
     default: 'strict',
   },
   {
-    name: 'prAllowMaintainerEdits',
-    description: 'Decides if maintainers can edit Renovate pull requests.',
-    type: 'boolean',
-    supportedPlatforms: ['github'],
-    default: true,
-  },
-  {
     name: 'prCreation',
     description: 'When to create the PR for a branch.',
     type: 'string',
@@ -1919,6 +1912,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'forkModeAllowMaintainerEdits',
+    description:
+      'Decides if maintainers can edit Renovate pull requests when running in fork mode.',
+    type: 'boolean',
+    supportedPlatforms: ['github'],
+    default: true,
   },
   {
     name: 'confidential',

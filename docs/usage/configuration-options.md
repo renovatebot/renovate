@@ -875,6 +875,16 @@ Renovate follows tags _strictly_, this can cause problems when a tagged stream i
 For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
 If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
+## forkModeAllowMaintainerEdits
+
+Use `forkModeAllowMaintainerEdits` to control if maintainers can edit Renovate's pull requests when in fork mode.
+
+This allows project maintainers to make manual changes to the Renovate PR branch, without needing to create another new PR.
+
+<!-- prettier-ignore -->
+!!! note
+    This option is only relevant if you set `forkToken`.
+
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
@@ -2180,16 +2190,6 @@ A list of glob-style matchers that determine which files will be included in the
 Defaults to `update`, but can also be set to `branch`.
 This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
 If set to `branch` the postUpgradeTask is executed for the whole branch.
-
-## prAllowMaintainerEdits
-
-Use `prAllowMaintainerEdits` to control if maintainers can edit Renovate's pull requests.
-
-When Renovate runs in a fork, this allows project maintainers to make manual changes to the Renovate PR branch, without needing to create another new PR.
-
-<!-- prettier-ignore -->
-!!! note
-    This option is only relevant if you set `forkToken`.
 
 ## prBodyColumns
 

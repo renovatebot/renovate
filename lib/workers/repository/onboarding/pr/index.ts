@@ -174,7 +174,7 @@ If you need any further assistance then you can also [request help here](${
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
         targetBranch: config.defaultBranch!,
-        allowMaintainerEdits: config.prAllowMaintainerEdits,
+        forkModeAllowMaintainerEdits: config.forkModeAllowMaintainerEdits,
         prTitle: config.onboardingPrTitle!,
         prBody,
         labels,
