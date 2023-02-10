@@ -26,14 +26,13 @@ export const GoTarget = z
 
       if (tag) {
         dep.currentValue = tag;
-        if (commit) {
-          dep.currentDigest = commit;
-          dep.currentDigestShort = commit.substring(0, 7);
-        }
-      } else if (commit) {
+      }
+
+      if (commit) {
         dep.currentDigest = commit;
-        dep.currentDigestShort = commit.substring(0, 7);
-        dep.digestOneAndOnly = true;
+        if (!tag) {
+          dep.digestOneAndOnly = true;
+        }
       }
 
       if (remote) {

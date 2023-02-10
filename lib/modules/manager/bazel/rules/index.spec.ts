@@ -152,9 +152,7 @@ describe('modules/manager/bazel/rules/index', () => {
         depType: 'go_repository',
         depName: 'foo_bar',
         packageName: 'foo/bar/baz',
-        currentValue: undefined,
         currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
-        currentDigestShort: 'abcdef0',
         digestOneAndOnly: true,
       });
 
