@@ -333,7 +333,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
               // copy before modifying searchParams
-              const nextUrl = new URL(initialNextUrl);
+              const nextUrl = new URL(firstPageUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,
