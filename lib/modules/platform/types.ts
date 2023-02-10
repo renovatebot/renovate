@@ -103,7 +103,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
-  allowMaintainerEdits?: boolean;
+  forkModeAllowMaintainerEdits?: boolean;
 }
 export interface UpdatePrConfig {
   number: number;
