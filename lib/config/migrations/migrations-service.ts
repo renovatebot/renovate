@@ -17,7 +17,6 @@ import { CompatibilityMigration } from './custom/compatibility-migration';
 import { ComposerIgnorePlatformReqsMigration } from './custom/composer-ignore-platform-reqs-migration';
 import { DatasourceMigration } from './custom/datasource-migration';
 import { DepTypesMigration } from './custom/dep-types-migration';
-import { DotnetMigration } from './custom/dotnet-migration';
 import { DryRunMigration } from './custom/dry-run-migration';
 import { EnabledManagersMigration } from './custom/enabled-managers-migration';
 import { ExtendsMigration } from './custom/extends-migration';
@@ -74,6 +73,7 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
+    ['dotnet', 'dotnet-version'],
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
@@ -141,7 +141,6 @@ export class MigrationsService {
     SemanticPrefixMigration,
     MatchDatasourcesMigration,
     DatasourceMigration,
-    DotnetMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
