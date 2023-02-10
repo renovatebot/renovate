@@ -10,10 +10,10 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const epochPattern = regEx(/^[0-9]+$/);
-const upstreamVersionPattern = regEx(/^[-+.:~A-Za-z0-9]+$/);
-const debianRevisionPattern = regEx(/^[+.~A-Za-z0-9]*$/);
-const numericPattern = regEx(/[0-9]+/g);
+const epochPattern = regEx(/^\d+$/);
+const upstreamVersionPattern = regEx(/^[-+.:~A-Za-z\d]+$/);
+const debianRevisionPattern = regEx(/^[+.~A-Za-z\d]*$/);
+const numericPattern = regEx(/\d+/g);
 const characterOrder =
   '~ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+-.:';
 const numericChars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -30,7 +30,7 @@ export interface DebVersion extends GenericVersion {
    */
   upstreamVersion: string;
   /**
-   * debianRevsion is used to distinguish between different versions of packaging for the
+   * debianRevision is used to distinguish between different versions of packaging for the
    * same upstream version.
    */
   debianRevision: string;
@@ -42,8 +42,9 @@ class DebVersioningApi extends GenericVersioningApi {
        All found numbers are exported as release info */
     let epoch = 0;
     let nonEpochVersion = version;
-    if (nonEpochVersion.includes(':')) {
-      const epochEnd = nonEpochVersion.indexOf(':');
+
+    const epochEnd = nonEpochVersion.indexOf(':')
+    if (epochEnd >= 0) {
       const epochMatch = nonEpochVersion
         .substring(0, epochEnd)
         .match(epochPattern);
@@ -54,15 +55,10 @@ class DebVersioningApi extends GenericVersioningApi {
       nonEpochVersion = nonEpochVersion.substring(epochEnd + 1);
     }
 
-    let debianRevision = '';
-    let upstreamVersion;
-    if (nonEpochVersion.includes('-')) {
-      const revisionStart = nonEpochVersion.lastIndexOf('-');
-      debianRevision = nonEpochVersion.substring(revisionStart + 1);
-      upstreamVersion = nonEpochVersion.substring(0, revisionStart);
-    } else {
-      upstreamVersion = nonEpochVersion;
-    }
+    // split of last element by `-`
+    const result = nonEpochVersion.split('-')
+    const debianRevision = result.length > 1 ? result.pop()! : ''
+    const upstreamVersion = result.join('-')
 
     if (
       !upstreamVersionPattern.test(upstreamVersion) ||
