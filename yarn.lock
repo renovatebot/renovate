@@ -2900,10 +2900,10 @@
   resolved "https://registry.yarnpkg.com/@types/emscripten/-/emscripten-1.39.6.tgz#698b90fe60d44acf93c31064218fbea93fbfd85a"
   integrity sha512-H90aoynNhhkQP6DRweEjJp5vfUVdIj7tdPLsu7pq89vODD/lcugKfZOsfgwpvM6XUewEp2N5dCg1Uf3Qe55Dcg==
 
-"@types/eslint@8.4.10":
-  version "8.4.10"
-  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.4.10.tgz#19731b9685c19ed1552da7052b6f668ed7eb64bb"
-  integrity sha512-Sl/HOqN8NKPmhWo2VBEPm0nvHnu2LL3v9vKo8MEq0EtbJ4eVzGPl41VNPvn5E1i5poMk4/XD8UriLHpJvEP/Nw==
+"@types/eslint@8.21.0":
+  version "8.21.0"
+  resolved "https://registry.yarnpkg.com/@types/eslint/-/eslint-8.21.0.tgz#21724cfe12b96696feafab05829695d4d7bd7c48"
+  integrity sha512-35EhHNOXgxnUgh4XCJsGhE7zdlDhYDN/aMG6UbkByCFFNgQ7b3U+uVoqBpicFydR8JEfgdjCF7SJ7MiJfzuiTA==
   dependencies:
     "@types/estree" "*"
     "@types/json-schema" "*"
@@ -3368,19 +3368,19 @@
     "@typescript-eslint/types" "5.50.0"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.3.1":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.3.1.tgz#180bf54f82d285b829b004b2c3141adb3c822c2f"
-  integrity sha512-OigU50KuAGkxcLR/wYORNA8l6Z4LBxDu9qyW0XwWBycIRl7dDAdOOOjOfOEu1biJijlJpswACLiv/v8fOf7qJw==
+"@yarnpkg/core@3.4.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.4.0.tgz#1684dfcbd4e68ff28a11a25154d415f7de2c8224"
+  integrity sha512-EwkRU7TjZrpAPA2cqVBtMD95unti9uSXefGJbhCVANOfuY6tjBoqSt8uSf6BSXUUoJkxBWwewjTn0v0tgoLBkQ==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.10.0"
+    "@yarnpkg/fslib" "^2.10.1"
     "@yarnpkg/json-proxy" "^2.1.1"
     "@yarnpkg/libzip" "^2.2.4"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.2.6"
+    "@yarnpkg/pnp" "^3.3.0"
     "@yarnpkg/shell" "^3.2.5"
     camelcase "^5.3.1"
     chalk "^3.0.0"
@@ -3406,7 +3406,15 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.10.0", "@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
+"@yarnpkg/fslib@^2.10.1":
+  version "2.10.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.10.1.tgz#3ed7e450f1316e535740653c2e8eff2d851c45cb"
+  integrity sha512-pVMLtOYu87N5y5G2lyPNYTY2JbTco99v7nGFI34Blx01Ct9LmoKVOc91vnLOYIMMljKr1c8xs1O2UamRdMG5Pg==
+  dependencies:
+    "@yarnpkg/libzip" "^2.2.4"
+    tslib "^1.13.0"
+
+"@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.10.0.tgz#f3e24f1d6fb1bfbb8aa398c26dd663b84653eb71"
   integrity sha512-eHqvrVlzlhd4owKoLsMRaL4wTGer+r9BXi95u1omHYcAcEQbKnHH3PqYf3j7nxsc8apa09WyA1XNCiiIniFXLg==
@@ -3438,13 +3446,13 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.2.6":
-  version "3.2.6"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.2.6.tgz#ea9ee12a0d2e1fcfdccc0b8d920e7b545a49afb2"
-  integrity sha512-Qk+SZLfYKS0kuDOaulpXVUyOivSWGEQ483/2r9HwaY0CmPsWZCh70mxeK+RsCfcBeapYFZLaQRh115ukMLWvlg==
+"@yarnpkg/pnp@^3.3.0":
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.0.tgz#78be9a718ec58472154da602133826813b8be34c"
+  integrity sha512-ZiNfQIodOEatHODe33KNfWph9Db6aPPDMGrrRaAksrKoQhTN6B22CLK2wVPRKYfRiS5UvMd4SMYEUpdXMAAnmg==
   dependencies:
     "@types/node" "^13.7.0"
-    "@yarnpkg/fslib" "^2.10.0"
+    "@yarnpkg/fslib" "^2.10.1"
 
 "@yarnpkg/shell@^3.2.5":
   version "3.2.5"
@@ -10292,6 +10300,11 @@ vfile@^4.0.0:
     is-buffer "^2.0.0"
     unist-util-stringify-position "^2.0.0"
     vfile-message "^2.0.0"
+
+vuln-vects@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/vuln-vects/-/vuln-vects-1.1.0.tgz#537d403615610446c1d687934584ea9dfb2a63ed"
+  integrity sha512-LGDwn9nRz94YoeqOn2TZqQXzyonBc5FJppSgH34S/1U+3bgPONq/vvfiCbCQ4MeBll58xx+kDmhS73ac+EHBBw==
 
 walk-up-path@^1.0.0:
   version "1.0.0"
