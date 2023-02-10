@@ -40,37 +40,33 @@ class DebVersioningApi extends GenericVersioningApi {
   protected _parse(version: string): DebVersion | null {
     /* Splitting version into "[epoch:]upstream-version[-debian-revision]"
        All found numbers are exported as release info */
-    let epoch = 0;
-    let nonEpochVersion = version;
 
-    const epochEnd = nonEpochVersion.indexOf(':')
-    if (epochEnd >= 0) {
-      const epochMatch = nonEpochVersion
-        .substring(0, epochEnd)
-        .match(epochPattern);
-      if (!epochMatch) {
-        return null;
-      }
-      epoch = parseInt(epochMatch[0], 10);
-      nonEpochVersion = nonEpochVersion.substring(epochEnd + 1);
-    }
+    // split of first element by `:` as epoch:
+    const epochSplit = version.split(':');
+    const epochStr = epochSplit.length > 1 ? epochSplit.shift()! : '0';
+    const remainingVersion = epochSplit.join(':');
 
     // split of last element by `-`
-    const result = nonEpochVersion.split('-')
-    const debianRevision = result.length > 1 ? result.pop()! : ''
-    const upstreamVersion = result.join('-')
+    if (remainingVersion.endsWith('-')) {
+      // Forbit debian revision (it would result in `2.4.0-` == `2.4.0`)
+      return null;
+    }
+    const debianSplit = remainingVersion.split('-');
+    const debianRevision = debianSplit.length > 1 ? debianSplit.pop()! : '';
+    const upstreamVersion = debianSplit.join('-');
 
     if (
+      !epochPattern.test(epochStr) ||
       !upstreamVersionPattern.test(upstreamVersion) ||
       !debianRevisionPattern.test(debianRevision)
     ) {
       return null;
     }
-    const release = [...nonEpochVersion.matchAll(numericPattern)].map((m) =>
+    const release = [...remainingVersion.matchAll(numericPattern)].map((m) =>
       parseInt(m[0], 10)
     );
     return {
-      epoch,
+      epoch: parseInt(epochStr, 10),
       upstreamVersion,
       debianRevision,
       release,
@@ -127,7 +123,6 @@ class DebVersioningApi extends GenericVersioningApi {
   protected override _compare(version: string, other: string): number {
     const parsed1 = this._parse(version);
     const parsed2 = this._parse(other);
-    // istanbul ignore if
     if (!(parsed1 && parsed2)) {
       return 1;
     }
