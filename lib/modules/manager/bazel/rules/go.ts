@@ -31,7 +31,6 @@ export const GoTarget = z
           dep.currentDigestShort = commit.substring(0, 7);
         }
       } else if (commit) {
-        dep.currentValue = tag;
         dep.currentDigest = commit;
         dep.currentDigestShort = commit.substring(0, 7);
         dep.digestOneAndOnly = true;
