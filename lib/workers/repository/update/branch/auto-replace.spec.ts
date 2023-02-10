@@ -1058,7 +1058,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
         codeBlock`
-          FROM alpine:3.16@sha256:1234567890
+          FROM alpine:3.16
         `
       );
     });

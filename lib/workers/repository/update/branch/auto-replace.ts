@@ -41,6 +41,7 @@ export async function confirmIfDepUpdated(
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
+
   if (!newUpgrade!) {
     logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
@@ -61,6 +62,7 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
+
   if (newValue && newUpgrade.currentValue !== newValue) {
     logger.debug(
       {
@@ -73,15 +75,21 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
+
   if (!newDigest) {
     return true;
   }
   if (newUpgrade.currentDigest === newDigest) {
     return true;
   }
-  if (!currentDigest && !pinDigests) {
-    return true;
+  if (!currentDigest) {
+    if (!pinDigests) {
+      return true;
+    } else if (newDigest) {
+      return true;
+    }
   }
+
   // istanbul ignore next
   return false;
 }
@@ -149,7 +157,6 @@ export async function doAutoReplace(
     currentDigest,
     newDigest,
     autoReplaceStringTemplate,
-    pinDigests,
   } = upgrade;
   /*
     If replacement support for more managers is added,
@@ -199,15 +206,11 @@ export async function doAutoReplace(
           newName
         );
       }
-      if (newDigest) {
-        if (currentDigest) {
-          newString = newString.replace(
-            regEx(escapeRegExp(currentDigest), 'g'),
-            newDigest
-          );
-        } else if (pinDigests) {
-          newString = `${newString}@${newDigest}`;
-        }
+      if (currentDigest && newDigest) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentDigest), 'g'),
+          newDigest
+        );
       }
     }
     if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
