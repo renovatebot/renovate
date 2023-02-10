@@ -496,7 +496,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
-Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
+Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `helmfile`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -2147,6 +2147,7 @@ Table with options:
 | `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
 | `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
