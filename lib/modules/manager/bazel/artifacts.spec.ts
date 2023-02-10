@@ -3,7 +3,7 @@ import { codeBlock } from 'common-tags';
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import type { UpdateArtifact } from '../types';
-import { updateArtifacts } from './artifacts';
+import { updateArtifacts } from '.';
 
 describe('modules/manager/bazel/artifacts', () => {
   it('updates commit-based http archive', async () => {
