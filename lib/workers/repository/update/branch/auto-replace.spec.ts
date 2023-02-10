@@ -1130,5 +1130,99 @@ describe('workers/repository/update/branch/auto-replace', () => {
         'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"'
       );
     });
+
+    it('github-actions: updates with pinDigest enabled but no currentDigest value', async () => {
+      const githubaction = codeBlock`
+        name: build
+
+        on: [push]
+
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.datasource = 'github-tags';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest =
+        '1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f';
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubaction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          name: build
+
+          on: [push]
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@v2.0.0
+        `
+      );
+    });
+
+    it('github-actions: updates with pinDigest enabled and a currentDigest value', async () => {
+      const githubaction = codeBlock`
+        name: build
+
+        on: [push]
+
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc # tag=v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.datasource = 'github-tags';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest =
+        '2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString =
+        'actions/checkout@2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc # tag=v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest =
+        '1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f';
+      upgrade.packageFile = 'workflow.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubaction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          name: build
+
+          on: [push]
+
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f # tag=v2.0.0
+        `
+      );
+    });
   });
 });
