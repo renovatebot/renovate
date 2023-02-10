@@ -898,7 +898,11 @@ describe('modules/manager/gradle/parser', () => {
       ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = baz }'}               | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3', groupName: 'baz' }}
       ${'baz = "1.2.3"'} | ${'jacoco { toolVersion = property("baz") }'}   | ${{ depName: 'jacoco', packageName: GRADLE_PLUGINS['jacoco'], currentValue: '1.2.3' }}
       ${''}              | ${'lombok { version = "1.2.3" }'}               | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
+      ${''}              | ${'lombok { version.set("1.2.3") }'}            | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
+      ${''}              | ${'lombok { version.value("1.2.3") }'}          | ${{ depName: 'lombok', packageName: GRADLE_PLUGINS['lombok'], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { toolVersion = "1.2.3" }'}              | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion.set("1.2.3") }'}           | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
+      ${''}              | ${'pmd { toolVersion.value("1.2.3") }'}         | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { foo = "bar"; toolVersion = "1.2.3" }'} | ${{ depName: 'pmd', packageName: GRADLE_PLUGINS['pmd'], currentValue: '1.2.3' }}
       ${''}              | ${'spotbugs { toolVersion = "1.2.3" }'}         | ${{ depName: 'spotbugs', packageName: GRADLE_PLUGINS['spotbugs'], currentValue: '1.2.3' }}
       ${''}              | ${'pmd { toolVersion = "@@@" }'}                | ${null}
