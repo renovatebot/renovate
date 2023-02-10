@@ -327,7 +327,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
             !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
             // Preserve github.com URLs for use cases like release notes
             parsedUrl.origin !== 'https://api.github.com';
-          const initialNextUrl = rebasePaginationLinks
+          const firstPageUrl = rebasePagination
             ? replaceUrlBase(parsedUrl, baseUrl)
             : parsedUrl;
           const queue = [...range(2, lastPage)].map(
