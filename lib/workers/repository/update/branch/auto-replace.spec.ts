@@ -909,7 +909,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const tf = codeBlock`
         module "vpc" {
           source  = "terraform-aws-modules/vpc/aws"
-         version = "3.14.2"
+          version = "3.14.2"
         }
       `;
       upgrade.manager = 'terraform';
@@ -1039,7 +1039,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('updates with pinDigest enabled but no currentDigest value', async () => {
+    it('docker: updates with pinDigest enabled but no currentDigest value', async () => {
       const dockerfile = codeBlock`
         FROM ubuntu:18.04
       `;
@@ -1053,7 +1053,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.replaceString = 'ubuntu:18.04';
       upgrade.newName = 'alpine';
       upgrade.newValue = '3.16';
-      upgrade.newDigest = 'sha256:1234567890';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
       upgrade.packageFile = 'Dockerfile';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
@@ -1063,27 +1063,71 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('updates with pinDigest enabled and a currentDigest value', async () => {
+    it('docker: updates with pinDigest enabled and a currentDigest value', async () => {
       const dockerfile = codeBlock`
-        FROM ubuntu:18.04@sha256:abc
+        FROM ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0
       `;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '18.04';
-      upgrade.currentDigest = 'sha256:abc';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
       upgrade.depIndex = 0;
       upgrade.pinDigests = true;
       upgrade.updateType = 'replacement';
-      upgrade.replaceString = 'ubuntu:18.04@sha256:abc';
+      upgrade.replaceString = 'ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0';
       upgrade.newName = 'alpine';
       upgrade.newValue = '3.16';
-      upgrade.newDigest = 'sha256:1234567890';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
       upgrade.packageFile = 'Dockerfile';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toBe(
         codeBlock`
-          FROM alpine:3.16@sha256:1234567890
+          FROM alpine:3.16@sha256:p0o9i8u7z6t5r4e3w2q1
         `
+      );
+    });
+
+    it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
+      const yml = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.manager = 'regex';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
+    });
+
+    it('regex: updates with pinDigest enabled and a currentDigest value', async () => {
+      const yml =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.manager = 'regex';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"'
       );
     });
   });
