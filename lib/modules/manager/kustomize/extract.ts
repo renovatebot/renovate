@@ -32,7 +32,9 @@ const gitUrlWithPath = regEx(
 export function extractResource(base: string): PackageDependency | null {
   let match: RegExpExecArray | null;
 
-  if (base.includes('_git')) {
+  if (typeof base !== 'string') {
+    return null
+  } else if (base.includes('_git')) {
     match = underscoreGitRegex.exec(base);
   } else if (base.includes('.git')) {
     match = dotGitRegex.exec(base);
