@@ -28,7 +28,7 @@ Renovate's Tekton manager supports all the methods listed above.
 ### Configuring images in Tekton Tasks
 
 You can configure the container images that Tekton uses when it runs tasks.
-You may use these attributes to configure images in:
+You may use these attributes to configure images in a:
 
 1. Task step
 1. Task stepTemplate
