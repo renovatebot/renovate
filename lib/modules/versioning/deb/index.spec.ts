@@ -126,4 +126,43 @@ describe('modules/versioning/deb/index', () => {
   `('isSingleVersion("$version") === $expected', ({ version, expected }) => {
     expect(deb.isSingleVersion(version)).toBe(expected);
   });
+
+  test.each`
+    version              | expected
+    ${'v1.3.0'}          | ${1}
+    ${'2-0-1'}           | ${2}
+    ${'2.31-13+deb11u5'} | ${2}
+    ${'1:2.3.1'}         | ${2}
+    ${'foo'}             | ${null}
+    ${'8'}               | ${8}
+    ${'1.0'}             | ${1}
+  `('getMajor("$version") === $expected', ({ version, expected }) => {
+    expect(deb.getMajor(version)).toBe(expected);
+  });
+
+  test.each`
+    version              | expected
+    ${'v1.3.0'}          | ${3}
+    ${'2-0-1'}           | ${0}
+    ${'2.31-13+deb11u5'} | ${31}
+    ${'1:2.3.1'}         | ${3}
+    ${'foo'}             | ${null}
+    ${'8'}               | ${null}
+    ${'1.0'}             | ${0}
+  `('getMinor("$version") === $expected', ({ version, expected }) => {
+    expect(deb.getMinor(version)).toBe(expected);
+  });
+
+  test.each`
+    version              | expected
+    ${'v1.3.0'}          | ${0}
+    ${'2-0-1'}           | ${1}
+    ${'2.31-13+deb11u5'} | ${13}
+    ${'1:2.3.1'}         | ${1}
+    ${'foo'}             | ${null}
+    ${'8'}               | ${null}
+    ${'1.0'}             | ${null}
+  `('getPatch("$version") === $expected', ({ version, expected }) => {
+    expect(deb.getPatch(version)).toBe(expected);
+  });
 });
