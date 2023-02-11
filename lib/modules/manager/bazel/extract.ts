@@ -1,6 +1,6 @@
 import type { PackageDependency, PackageFile } from '../types';
 import { parse } from './parser';
-import { extractDepFromFragment } from './rules';
+import { extractDepsFromFragment } from './rules';
 import type { RecordFragment } from './types';
 
 export function extractPackageFile(
@@ -16,15 +16,11 @@ export function extractPackageFile(
 
   for (let idx = 0; idx < fragments.length; idx += 1) {
     const fragment = fragments[idx];
-
-    const dep = extractDepFromFragment(fragment);
-    if (!dep) {
-      continue;
+    for (const dep of extractDepsFromFragment(fragment)) {
+      dep.replaceString = fragment.value;
+      dep.managerData = { idx };
+      deps.push(dep);
     }
-
-    dep.replaceString = fragment.value;
-    dep.managerData = { idx };
-    deps.push(dep);
   }
 
   return deps.length ? { deps } : null;
