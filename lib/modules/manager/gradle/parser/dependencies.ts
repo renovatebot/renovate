@@ -170,10 +170,20 @@ const qImplicitGradlePlugin = q
     maxMatches: 1,
     startsWith: '{',
     endsWith: '}',
-    search: q
-      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
-      .op('=')
-      .join(qVersion),
+    search: q.sym<Ctx>(regEx(/^(?:toolVersion|version)$/)).alt(
+      // toolVersion = "1.2.3"
+      q.op<Ctx>('=').join(qVersion),
+      // toolVersion.set("1.2.3"), toolVersion.value("1.2.3")
+      q
+        .op<Ctx>('.')
+        .sym(regEx(/^(?:set|value)$/))
+        .tree({
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q.begin<Ctx>().join(qVersion).end(),
+        })
+    ),
   })
   .handler(handleImplicitGradlePlugin)
   .handler(cleanupTempVars);

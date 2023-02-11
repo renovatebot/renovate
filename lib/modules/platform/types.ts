@@ -67,7 +67,6 @@ export interface Pr {
   closedAt?: string;
   displayNumber?: string;
   hasAssignees?: boolean;
-  hasReviewers?: boolean;
   labels?: string[];
   number: number;
   reviewers?: string[];

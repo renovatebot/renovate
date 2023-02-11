@@ -288,7 +288,6 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
