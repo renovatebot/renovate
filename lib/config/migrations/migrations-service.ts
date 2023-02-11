@@ -73,7 +73,6 @@ export class MigrationsService {
   ]);
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
-    ['dotnet', 'dotnet-version'],
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
