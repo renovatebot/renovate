@@ -16,21 +16,21 @@ const Target = z.union([DockerTarget, GitTarget, GoTarget, HttpTarget]);
 const supportedRules = [...dockerRules, ...gitRules, ...goRules, ...httpRules];
 export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
-export function extractDepFromFragmentData(
+export function extractDepsFromFragmentData(
   fragmentData: FragmentData
-): PackageDependency | null {
+): PackageDependency[] {
   const res = Target.safeParse(fragmentData);
   if (!res.success) {
-    return null;
+    return [];
   }
   return res.data;
 }
 
-export function extractDepFromFragment(
+export function extractDepsFromFragment(
   fragment: Fragment
-): PackageDependency | null {
+): PackageDependency[] {
   const fragmentData = extract(fragment);
-  return extractDepFromFragmentData(fragmentData);
+  return extractDepsFromFragmentData(fragmentData);
 }
 
 export function extract(fragment: Fragment): FragmentData {
