@@ -666,7 +666,7 @@ async function sanitizeReviewers(
   reviewers: Account[],
   err: ExternalHostError
 ): Promise<Account[] | undefined> {
-  if (err.err instanceof HTTPError) {
+  if (err?.err instanceof HTTPError) {
     const response = err.err.response as Response<PrResponseError>;
 
     // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
