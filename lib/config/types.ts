@@ -56,6 +56,7 @@ export interface RenovateSharedConfig {
   npmrc?: string;
   npmrcMerge?: boolean;
   postUpgradeTasks?: PostUpgradeTasks;
+  preUpgradeTasks?: PreUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
@@ -156,6 +157,11 @@ export type ExecutionMode = 'branch' | 'update';
 export interface PostUpgradeTasks {
   commands?: string[];
   fileFilters?: string[];
+  executionMode: ExecutionMode;
+}
+
+export interface PreUpgradeTasks {
+  commands?: string[];
   executionMode: ExecutionMode;
 }
 
@@ -356,7 +362,12 @@ export interface RenovateOptionBase {
 
   name: string;
 
-  parent?: 'hostRules' | 'packageRules' | 'postUpgradeTasks' | 'regexManagers';
+  parent?:
+    | 'hostRules'
+    | 'packageRules'
+    | 'postUpgradeTasks'
+    | 'preUpgradeTasks'
+    | 'regexManagers';
 
   // used by tests
   relatedOptions?: string[];

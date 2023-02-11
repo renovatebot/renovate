@@ -80,6 +80,36 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'preUpgradeTasks',
+    description:
+      'Pre-upgrade tasks that are executed before updating dependency files by Renovate.',
+    type: 'object',
+    default: {
+      commands: [],
+      executionMode: 'update',
+    },
+  },
+  {
+    name: 'commands',
+    description:
+      'A list of pre-upgrade commands that are executed before updating dependency files by Renovate.',
+    type: 'array',
+    subType: 'string',
+    parent: 'preUpgradeTasks',
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'executionMode',
+    description:
+      'Controls when the pre upgrade tasks run: on every update, or once per upgrade branch.',
+    type: 'string',
+    parent: 'preUpgradeTasks',
+    allowedValues: ['update', 'branch'],
+    default: 'update',
+    cli: false,
+  },
+  {
     name: 'onboardingBranch',
     description:
       'Change this value to override the default onboarding branch name.',
