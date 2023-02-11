@@ -727,7 +727,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(pr?.number).toBe(5);
     });
 
-    it('removes inactive reviewers when updating pr', async () => {
+    it('removes inactive reviewers when creating pr', async () => {
       const inactiveReviewer = {
         user: {
           display_name: 'Bob Smith',
