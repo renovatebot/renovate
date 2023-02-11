@@ -628,7 +628,7 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    hasReviewers: !!mr.reviewers?.length,
+    reviewers: mr.reviewers?.map(({ username }) => username),
     title: mr.title,
     labels: mr.labels,
     sha: mr.sha,
