@@ -6,16 +6,14 @@ export class DatasourceMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.string(value)) {
-      let newValue: string;
-      switch (value) {
+      let newValue = value;
+      switch (newValue) {
         case 'adoptium-java':
           newValue = 'java-version';
           break;
         case 'dotnet':
           newValue = 'dotnet-version';
           break;
-        default:
-          newValue = value;
       }
 
       this.rewrite(newValue);
