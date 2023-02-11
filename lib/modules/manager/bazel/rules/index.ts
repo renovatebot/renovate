@@ -18,17 +18,17 @@ export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 export function extractDepFromFragmentData(
   fragmentData: FragmentData
-): PackageDependency | null {
+): PackageDependency[] {
   const res = Target.safeParse(fragmentData);
   if (!res.success) {
-    return null;
+    return [];
   }
   return res.data;
 }
 
 export function extractDepFromFragment(
   fragment: Fragment
-): PackageDependency | null {
+): PackageDependency[] {
   const fragmentData = extract(fragment);
   return extractDepFromFragmentData(fragmentData);
 }

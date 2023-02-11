@@ -16,15 +16,11 @@ export function extractPackageFile(
 
   for (let idx = 0; idx < fragments.length; idx += 1) {
     const fragment = fragments[idx];
-
-    const dep = extractDepFromFragment(fragment);
-    if (!dep) {
-      continue;
+    for (const dep of extractDepFromFragment(fragment)) {
+      dep.replaceString = fragment.value;
+      dep.managerData = { idx };
+      deps.push(dep);
     }
-
-    dep.replaceString = fragment.value;
-    dep.managerData = { idx };
-    deps.push(dep);
   }
 
   return deps.length ? { deps } : null;
