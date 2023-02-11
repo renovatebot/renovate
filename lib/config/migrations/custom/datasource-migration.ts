@@ -6,7 +6,7 @@ export class DatasourceMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.string(value)) {
-      const newValue = value === 'adoptium-java' ? 'java-version' : value;
+      const newValue = value === 'dotnet' ? 'dotnet-version' : value;
 
       this.rewrite(newValue);
     }

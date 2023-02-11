@@ -29,10 +29,10 @@ export const GoTarget = z
       }
 
       if (commit) {
-        dep.currentValue = 'v0.0.0';
         dep.currentDigest = commit;
-        dep.currentDigestShort = commit.substring(0, 7);
-        dep.digestOneAndOnly = true;
+        if (!tag) {
+          dep.digestOneAndOnly = true;
+        }
       }
 
       if (remote) {

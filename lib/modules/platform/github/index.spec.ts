@@ -7,7 +7,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import type { VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -2581,7 +2580,6 @@ describe('modules/platform/github/index', () => {
         },
         displayNumber: 'Pull Request #1234',
         hasAssignees: true,
-        hasReviewers: true,
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2867,7 +2865,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
@@ -2912,7 +2910,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },

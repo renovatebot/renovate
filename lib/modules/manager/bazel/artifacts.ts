@@ -5,9 +5,9 @@ import * as packageCache from '../../../util/cache/package';
 import { Http } from '../../../util/http';
 import { map as pMap } from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { UpdateDependencyConfig } from '../types';
+import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import { findCodeFragment, patchCodeAtFragments, updateCode } from './common';
-import type { BazelManagerData, RecordFragment, StringFragment } from './types';
+import type { RecordFragment, StringFragment } from './types';
 
 const http = new Http('bazel');
 
@@ -105,48 +105,17 @@ async function getHashFromUrls(urls: string[]): Promise<string | null> {
   return hashes[0];
 }
 
-export async function updateDependency({
-  fileContent,
-  upgrade,
-}: UpdateDependencyConfig<BazelManagerData>): Promise<string | null> {
-  try {
-    const { newValue, newDigest } = upgrade;
-    logger.debug({ newValue, newDigest }, `bazel.updateDependency()`);
-    const idx = upgrade.managerData!.idx;
-
-    if (upgrade.depType === 'container_pull') {
-      let result = fileContent;
-
-      if (newValue) {
-        result = updateCode(result, [idx, 'tag'], newValue);
-      }
-
-      if (newDigest) {
-        result = updateCode(result, [idx, 'digest'], newDigest);
-      }
-
-      return result;
-    }
-
-    if (
-      upgrade.depType === 'git_repository' ||
-      upgrade.depType === 'go_repository'
-    ) {
-      let result = fileContent;
-
-      if (newValue) {
-        result = updateCode(result, [idx, 'tag'], newValue);
-      }
-
-      if (newDigest) {
-        result = updateCode(result, [idx, 'commit'], newDigest);
-      }
-
-      return result;
-    }
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact
+): Promise<UpdateArtifactsResult[] | null> {
+  const { packageFileName: path, updatedDeps: upgrades } = updateArtifact;
+  let { newPackageFileContent: contents } = updateArtifact;
+  for (const upgrade of upgrades) {
+    const { managerData } = upgrade;
+    const idx = managerData?.idx as number;
 
     if (upgrade.depType === 'http_file' || upgrade.depType === 'http_archive') {
-      const rule = findCodeFragment(fileContent, [idx]);
+      const rule = findCodeFragment(contents, [idx]);
       // istanbul ignore if
       if (rule?.type !== 'record') {
         return null;
@@ -171,16 +140,19 @@ export async function updateDependency({
         return null;
       }
 
-      let result = fileContent;
-      result = patchCodeAtFragments(result, urlFragments, updateValues);
-      result = updateCode(result, [idx, 'strip_prefix'], updateValues);
-      result = updateCode(result, [idx, 'sha256'], hash);
-      return result;
+      contents = patchCodeAtFragments(contents, urlFragments, updateValues);
+      contents = updateCode(contents, [idx, 'strip_prefix'], updateValues);
+      contents = updateCode(contents, [idx, 'sha256'], hash);
     }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error setting new bazel WORKSPACE version');
   }
 
-  // istanbul ignore next
-  return null;
+  return [
+    {
+      file: {
+        type: 'addition',
+        path,
+        contents,
+      },
+    },
+  ];
 }

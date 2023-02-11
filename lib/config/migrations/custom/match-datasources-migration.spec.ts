@@ -7,7 +7,7 @@ describe('config/migrations/custom/match-datasources-migration', () => {
         matchDatasources: ['adoptium-java', 'dotnet'],
       },
       {
-        matchDatasources: ['java-version', 'dotnet'],
+        matchDatasources: ['java-version', 'dotnet-version'],
       }
     );
   });

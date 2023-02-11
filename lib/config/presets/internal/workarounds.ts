@@ -37,7 +37,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         allowedVersions: '<20000000',
-        matchCurrentVersion: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['alpine'],
       },
