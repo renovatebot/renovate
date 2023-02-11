@@ -5,7 +5,7 @@ import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
+import type { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
