@@ -218,4 +218,44 @@ describe('modules/manager/bazel/parser', () => {
       },
     ]);
   });
+
+  it('parses Maven', () => {
+    const input = codeBlock`
+      maven_install(
+        artifacts = [
+          "com.example1:foo:1.1.1",
+          maven.artifact(
+            group = "com.example2",
+            artifact = "bar",
+            version = "2.2.2",
+          )
+        ],
+        repositories = [
+          "https://example1.com/maven2",
+          "https://example2.com/maven2",
+        ]
+      )
+    `;
+
+    const res = parse(input);
+
+    expect(res?.map(extract)).toEqual([
+      {
+        rule: 'maven_install',
+        artifacts: [
+          'com.example1:foo:1.1.1',
+          {
+            artifact: 'bar',
+            function: 'maven.artifact',
+            group: 'com.example2',
+            version: '2.2.2',
+          },
+        ],
+        repositories: [
+          'https://example1.com/maven2',
+          'https://example2.com/maven2',
+        ],
+      },
+    ]);
+  });
 });
