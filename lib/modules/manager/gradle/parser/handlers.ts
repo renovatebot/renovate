@@ -137,6 +137,7 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = ctx.globalVars[versionTokens[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -228,6 +229,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
   } else if (pluginVersion[0].type === 'symbol') {
     const varData = ctx.globalVars[pluginVersion[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -414,6 +416,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = ctx.globalVars[versionTokens[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
