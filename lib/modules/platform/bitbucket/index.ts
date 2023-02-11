@@ -796,32 +796,30 @@ export async function createPr({
     }
     return pr;
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof ExternalHostError) {
-      // Try sanitizing reviewers
-      const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
+    // Try sanitizing reviewers
+    const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
-      if (sanitizedReviewers === undefined) {
-        logger.warn({ err }, 'Error creating pull request');
-        throw err;
-      } else {
-        const prRes = (
-          await bitbucketHttp.postJson<PrResponse>(
-            `/2.0/repositories/${config.repository}/pullrequests`,
-            {
-              body: {
-                ...body,
-                reviewers: sanitizedReviewers,
-              },
-            }
-          )
-        ).body;
-        const pr = utils.prInfo(prRes);
-        // istanbul ignore if
-        if (config.prList) {
-          config.prList.push(pr);
-        }
-        return pr;
+    if (sanitizedReviewers === undefined) {
+      logger.warn({ err }, 'Error creating pull request');
+      throw err;
+    } else {
+      const prRes = (
+        await bitbucketHttp.postJson<PrResponse>(
+          `/2.0/repositories/${config.repository}/pullrequests`,
+          {
+            body: {
+              ...body,
+              reviewers: sanitizedReviewers,
+            },
+          }
+        )
+      ).body;
+      const pr = utils.prInfo(prRes);
+      // istanbul ignore if
+      if (config.prList) {
+        config.prList.push(pr);
       }
+      return pr;
     }
   }
 }
@@ -851,24 +849,22 @@ export async function updatePr({
       }
     );
   } catch (err) {
-    if (err instanceof ExternalHostError) {
-      // Try sanitizing reviewers
-      const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
+    // Try sanitizing reviewers
+    const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
 
-      if (sanitizedReviewers === undefined) {
-        throw err;
-      } else {
-        await bitbucketHttp.putJson(
-          `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-          {
-            body: {
-              title,
-              description: sanitize(description),
-              reviewers: sanitizedReviewers,
-            },
-          }
-        );
-      }
+    if (sanitizedReviewers === undefined) {
+      throw err;
+    } else {
+      await bitbucketHttp.putJson(
+        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+        {
+          body: {
+            title,
+            description: sanitize(description),
+            reviewers: sanitizedReviewers,
+          },
+        }
+      );
     }
   }
 
