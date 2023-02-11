@@ -1,6 +1,28 @@
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository
 export const manualChangelogUrls: Record<string, Record<string, string>> = {
+  maven: {
+    'org.spockframework:spock-core':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-bom':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-groovy2-compat':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-guice':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-junit4':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-specs':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-spring':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-tapestry':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-testkit':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+    'org.spockframework:spock-unitils':
+      'https://github.com/spockframework/spock/blob/master/docs/release_notes.adoc',
+  },
   npm: {
     'babel-preset-react-app':
       'https://github.com/facebook/create-react-app/releases',
@@ -59,6 +81,26 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
 // Use this object to define manual source URLs for packages
 // Only necessary if the datasource is unable to locate the source URL itself
 export const manualSourceUrls: Record<string, Record<string, string>> = {
+  maven: {
+    'org.spockframework:spock-core': 'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-bom': 'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-groovy2-compat':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-guice':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-junit4':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-specs':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-spring':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-tapestry':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-testkit':
+      'https://github.com/spockframework/spock/',
+    'org.spockframework:spock-unitils':
+      'https://github.com/spockframework/spock/',
+  },
   orb: {
     'cypress-io/cypress': 'https://github.com/cypress-io/circleci-orb',
     'hutson/library-release-workflows':
