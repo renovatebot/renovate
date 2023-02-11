@@ -4289,7 +4289,7 @@ columnify@^1.6.0:
     strip-ansi "^6.0.1"
     wcwidth "^1.0.0"
 
-commander@10.0.0:
+commander@10.0.0, commander@^10.0.0:
   version "10.0.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-10.0.0.tgz#71797971162cd3cf65f0b9d24eb28f8d303acdf1"
   integrity sha512-zS5PnTI22FIRM6ylNW8G4Ap0IEOyk62fhLSD0+uHRT9McRCLGpkVNvao4bjimpK/GShynyQkFFxHhwMcETmduA==
@@ -4750,14 +4750,14 @@ eastasianwidth@^0.2.0:
   resolved "https://registry.yarnpkg.com/eastasianwidth/-/eastasianwidth-0.2.0.tgz#696ce2ec0aa0e6ea93a397ffcf24aa7840c827cb"
   integrity sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==
 
-editorconfig@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-1.0.1.tgz#94dee9bf4351ccce3b12eefed663efef29b06046"
-  integrity sha512-QKhz+SCEjJ6JpIK4Ve64KpSZs8ZIoIkd2qWbhfrVrwbIh60+uVV70QDh3FYcZrhwJwQ+m9UdrOMSbGe/Osxiew==
+editorconfig@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/editorconfig/-/editorconfig-1.0.2.tgz#0e4ff2ce6bf392f3f9e4d50c1a9819b06d380d15"
+  integrity sha512-l8CnaNCz0dgCqJQ3hKqW2qtUavm1WLdJUvlxufaZ6JDkds3UFxgUKnKJz982yJPYko/78LkWAiwJadFnFtUBjw==
   dependencies:
     "@one-ini/wasm" "0.1.1"
-    commander "^9.4.1"
-    minimatch "5.1.0"
+    commander "^10.0.0"
+    minimatch "6.1.6"
     semver "^7.3.8"
 
 electron-to-chromium@^1.4.251:
@@ -7600,17 +7600,17 @@ minimalistic-assert@^1.0.0:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimatch@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.0.tgz#1717b464f4971b144f6aabe8f2d0b8e4511e09c7"
-  integrity sha512-9TPBGGak4nHfGZsPBohm9AWg6NoT7QTCehS3BIJABslyZbzxfV78QM2Y6+i741OPZIafFAaiiEMh5OyIrJPgtg==
-  dependencies:
-    brace-expansion "^2.0.1"
-
 minimatch@5.1.6, minimatch@^5.0.1, minimatch@^5.1.0:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.6.tgz#1cfcb8cf5522ea69952cd2af95ae09477f122a96"
   integrity sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==
+  dependencies:
+    brace-expansion "^2.0.1"
+
+minimatch@6.1.6:
+  version "6.1.6"
+  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-6.1.6.tgz#5384bb324be5b5dae12a567c03d22908febd0ddd"
+  integrity sha512-6bR3UIeh/DF8+p6A9Spyuy67ShOq42rOkHWi7eUe3Ua99Zo5lZfGC6lJJWkeoK4k9jQFT3Pl7czhTXimG2XheA==
   dependencies:
     brace-expansion "^2.0.1"
 
