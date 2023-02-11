@@ -22,6 +22,7 @@ export function extractPackageFile(
       continue;
     }
 
+    dep.replaceString = fragment.value;
     dep.managerData = { idx };
     deps.push(dep);
   }
