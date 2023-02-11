@@ -245,8 +245,8 @@ describe('modules/manager/bazel/parser', () => {
         artifacts: [
           'com.example1:foo:1.1.1',
           {
+            _function: 'maven.artifact',
             artifact: 'bar',
-            function: 'maven.artifact',
             group: 'com.example2',
             version: '2.2.2',
           },

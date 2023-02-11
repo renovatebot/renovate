@@ -35,12 +35,17 @@ export const MavenTarget = z
       }),
     repositories: z.array(z.string()).optional(),
   })
-  .transform(({ rule, artifacts, repositories }): PackageDependency[] =>
-    artifacts.map((artifact) => ({
-      datasource: MavenDatasource.id,
-      depType: rule,
-      packageName: `${artifact.group}:${artifact.artifact}`,
-      currentValue: artifact.version,
-      registryUrls: repositories,
-    }))
+  .transform(
+    ({
+      rule: depType,
+      artifacts,
+      repositories: registryUrls,
+    }): PackageDependency[] =>
+      artifacts.map(({ group, artifact, version: currentValue }) => ({
+        datasource: MavenDatasource.id,
+        depName: `${group}:${artifact}`,
+        currentValue,
+        depType,
+        registryUrls,
+      }))
   );

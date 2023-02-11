@@ -112,7 +112,7 @@ const kwParams = q
           .handler((ctx, { value, offset }) => {
             const ruleFragment = currentFragment(ctx);
             if (ruleFragment.type === 'record') {
-              ruleFragment.children['function'] = {
+              ruleFragment.children['_function'] = {
                 type: 'string',
                 value,
                 offset,
@@ -125,9 +125,9 @@ const kwParams = q
               const ruleFragment = currentFragment(ctx);
               if (
                 ruleFragment.type === 'record' &&
-                ruleFragment.children['function']
+                ruleFragment.children['_function']
               ) {
-                ruleFragment.children['function'].value += `.${value}`;
+                ruleFragment.children['_function'].value += `.${value}`;
               }
               return ctx;
             }),

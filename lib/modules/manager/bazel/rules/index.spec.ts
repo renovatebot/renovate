@@ -363,7 +363,6 @@ describe('modules/manager/bazel/rules/index', () => {
               version: '2.2.2',
             },
           ],
-
           repositories: [
             'https://example1.com/maven2',
             'https://example2.com/maven2',
@@ -374,7 +373,7 @@ describe('modules/manager/bazel/rules/index', () => {
           currentValue: '1.1.1',
           datasource: 'maven',
           depType: 'maven_install',
-          packageName: 'com.example1:foo',
+          depName: 'com.example1:foo',
           registryUrls: [
             'https://example1.com/maven2',
             'https://example2.com/maven2',
@@ -384,7 +383,7 @@ describe('modules/manager/bazel/rules/index', () => {
           currentValue: '2.2.2',
           datasource: 'maven',
           depType: 'maven_install',
-          packageName: 'com.example2:bar',
+          depName: 'com.example2:bar',
           registryUrls: [
             'https://example1.com/maven2',
             'https://example2.com/maven2',
