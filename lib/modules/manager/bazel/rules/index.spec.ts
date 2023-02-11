@@ -1,5 +1,5 @@
 import { parseArchiveUrl } from './http';
-import { extractDepFromFragmentData } from '.';
+import { extractDepsFromFragmentData } from '.';
 
 describe('modules/manager/bazel/rules/index', () => {
   it('parses archiveUrl', () => {
@@ -46,15 +46,15 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('git', () => {
     it('extracts git dependencies', () => {
       expect(
-        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({ rule: 'git_repository', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'git_repository', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'git_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -62,7 +62,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'git_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -79,7 +79,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'git_repository',
           name: 'foo_bar',
           commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -96,7 +96,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'git_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -116,15 +116,15 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('go', () => {
     it('extracts go dependencies', () => {
       expect(
-        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({ rule: 'go_repository', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'go_repository', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'go_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -132,7 +132,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'go_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -149,7 +149,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'go_repository',
           name: 'foo_bar',
           commit: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -167,7 +167,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'go_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -185,7 +185,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'go_repository',
           name: 'foo_bar',
           tag: '1.2.3',
@@ -208,15 +208,15 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('http', () => {
     it('extracts http dependencies', () => {
       expect(
-        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({ rule: 'http_archive', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'http_archive', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -224,7 +224,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -241,7 +241,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -261,7 +261,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -278,7 +278,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'foo_bar',
           sha256: 'abcdef0123abcdef0123abcdef0123abcdef0123',
@@ -298,7 +298,7 @@ describe('modules/manager/bazel/rules/index', () => {
       ]);
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'http_archive',
           name: 'aspect_rules_js',
           sha256:
@@ -322,11 +322,11 @@ describe('modules/manager/bazel/rules/index', () => {
   describe('docker', () => {
     it('extracts docker dependencies', () => {
       expect(
-        extractDepFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
+        extractDepsFromFragmentData({ rule: 'foo_bar', name: 'foo_bar' })
       ).toBeEmptyArray();
 
       expect(
-        extractDepFromFragmentData({
+        extractDepsFromFragmentData({
           rule: 'container_pull',
           name: 'foo_bar',
           tag: '1.2.3',
