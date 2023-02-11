@@ -30,6 +30,7 @@ defmodule MyProject.MixProject do
       {:jason, ">= 1.0.0"},
       {:jason, "~> 1.0",
         optional: true},
+      {:phoenix, "== 1.6.14"},
     ]
   end
 end

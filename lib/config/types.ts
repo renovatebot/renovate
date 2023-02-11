@@ -243,6 +243,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
+  osvVulnerabilityAlerts?: boolean;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -261,6 +262,7 @@ export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;
