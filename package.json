@@ -181,7 +181,7 @@
     "delay": "5.0.0",
     "dequal": "2.0.3",
     "detect-indent": "6.1.0",
-    "editorconfig": "1.0.1",
+    "editorconfig": "1.0.2",
     "email-addresses": "5.0.0",
     "emoji-regex": "10.2.1",
     "emojibase": "6.1.0",
@@ -237,6 +237,7 @@
     "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "5.0.0",
+    "vuln-vects": "1.1.0",
     "xmldoc": "1.2.0",
     "zod": "3.20.2"
   },
