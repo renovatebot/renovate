@@ -11,8 +11,8 @@ describe('config/migrations/custom/datasource-migration', () => {
       }
     );
   });
-  
-  it('should migrate dotnet', () => {
+
+  it('should migrate donet', () => {
     expect(DatasourceMigration).toMigrate(
       {
         datasource: 'dotnet',

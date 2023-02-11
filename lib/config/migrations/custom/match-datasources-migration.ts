@@ -6,15 +6,16 @@ export class MatchDatasourcesMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (Array.isArray(value)) {
-      const newValue = value
-        .filter(is.nonEmptyString)
-        .map((datasource) =>
-          { 
-         if(datasource === 'adoptium-java') return 'java-version'
-           if(datasource === 'dotnet') return 'dotnet-version'
-           return datasource;
-          }
-        );
+      const newValue = value.filter(is.nonEmptyString).map((datasource) => {
+        switch (datasource) {
+          case 'adoptium-java':
+            return 'java-version';
+          case 'dotnet':
+            return 'dotnet-version';
+          default:
+            return datasource;
+        }
+      });
 
       this.rewrite(newValue);
     }
