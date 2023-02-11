@@ -1,9 +1,11 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
+import { HTTPError, Response } from 'got/dist/source';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -36,6 +38,7 @@ import {
   Account,
   EffectiveReviewer,
   PrResponse,
+  PrResponseError,
   RepoInfoBody,
   mergeBodyTransformer,
 } from './utils';
@@ -661,64 +664,73 @@ export function ensureCommentRemoval(
 
 async function sanitizeReviewers(
   reviewers: Account[],
-  err: any
+  err: ExternalHostError
 ): Promise<Account[] | undefined> {
-  if (err.statusCode === 400 && err.body?.error?.fields?.reviewers) {
-    const sanitizedReviewers: Account[] = [];
+  if (err.err instanceof HTTPError) {
+    const response = err.err.response as Response<PrResponseError>;
 
-    for (const msg of err.body.error.fields.reviewers) {
-      // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
-      if (msg === 'Malformed reviewers list') {
-        logger.debug(
-          { err },
-          'PR contains inactive reviewer accounts. Will try setting only active reviewers'
-        );
+    // Bitbucket returns a 400 if any of the PR reviewer accounts are now inactive (ie: disabled/suspended)
+    if (response.statusCode === 400 && response.body.error.fields.reviewers) {
+      logger.debug(
+        { err },
+        'PR contains inactive reviewer accounts. Will try setting only active reviewers'
+      );
 
-        // Validate that each previous PR reviewer account is still active
-        for (const reviewer of reviewers) {
-          const reviewerUser = (
-            await bitbucketHttp.getJson<Account>(`/2.0/users/${reviewer.uuid}`)
-          ).body;
+      const sanitizedReviewers: Account[] = [];
 
-          if (reviewerUser.account_status === 'active') {
-            sanitizedReviewers.push(reviewer);
-          }
-        }
+      for (const msg of response.body.error.fields.reviewers) {
+        if (msg === 'Malformed reviewers list') {
+          // Validate that each previous PR reviewer account is still active
+          for (const reviewer of reviewers) {
+            const reviewerUser = (
+              await bitbucketHttp.getJson<Account>(
+                `/2.0/users/${reviewer.uuid}`
+              )
+            ).body;
 
-        // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
-      } else if (
-        msg.endsWith(
-          'is not a member of this workspace and cannot be added to this pull request'
-        )
-      ) {
-        logger.debug(
-          { err },
-          'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
-        );
-
-        const workspace = config.repository.split('/')[0];
-
-        // Validate that each previous PR reviewer account is still a member of this workspace
-        for (const reviewer of reviewers) {
-          try {
-            await bitbucketHttp.get(
-              `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
-            );
-
-            sanitizedReviewers.push(reviewer);
-          } catch (err) {
-            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
-            if (err.response?.statusCode !== 404) {
-              throw err;
+            if (reviewerUser.account_status === 'active') {
+              sanitizedReviewers.push(reviewer);
             }
           }
-        }
-      } else {
-        return undefined;
-      }
-    }
 
-    return sanitizedReviewers;
+          // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
+        } else if (
+          msg.endsWith(
+            'is not a member of this workspace and cannot be added to this pull request'
+          )
+        ) {
+          logger.debug(
+            { err },
+            'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
+          );
+
+          const workspace = config.repository.split('/')[0];
+
+          // Validate that each previous PR reviewer account is still a member of this workspace
+          for (const reviewer of reviewers) {
+            try {
+              await bitbucketHttp.get(
+                `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
+              );
+
+              sanitizedReviewers.push(reviewer);
+            } catch (err) {
+              // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+              if (
+                err.response?.statusCode !== 404 ||
+                err.err.response?.statusCode !== 404
+              ) {
+                throw err;
+              }
+            }
+          }
+        } else {
+          return undefined;
+        }
+      }
+
+      return sanitizedReviewers;
+    }
   }
 
   return undefined;
@@ -784,30 +796,32 @@ export async function createPr({
     }
     return pr;
   } catch (err) /* istanbul ignore next */ {
-    // Try sanitizing reviewers
-    const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
+    if (err instanceof ExternalHostError) {
+      // Try sanitizing reviewers
+      const sanitizedReviewers = await sanitizeReviewers(reviewers, err);
 
-    if (sanitizedReviewers === undefined) {
-      logger.warn({ err }, 'Error creating pull request');
-      throw err;
-    } else {
-      const prRes = (
-        await bitbucketHttp.postJson<PrResponse>(
-          `/2.0/repositories/${config.repository}/pullrequests`,
-          {
-            body: {
-              ...body,
-              reviewers: sanitizedReviewers,
-            },
-          }
-        )
-      ).body;
-      const pr = utils.prInfo(prRes);
-      // istanbul ignore if
-      if (config.prList) {
-        config.prList.push(pr);
+      if (sanitizedReviewers === undefined) {
+        logger.warn({ err }, 'Error creating pull request');
+        throw err;
+      } else {
+        const prRes = (
+          await bitbucketHttp.postJson<PrResponse>(
+            `/2.0/repositories/${config.repository}/pullrequests`,
+            {
+              body: {
+                ...body,
+                reviewers: sanitizedReviewers,
+              },
+            }
+          )
+        ).body;
+        const pr = utils.prInfo(prRes);
+        // istanbul ignore if
+        if (config.prList) {
+          config.prList.push(pr);
+        }
+        return pr;
       }
-      return pr;
     }
   }
 }
@@ -825,7 +839,6 @@ export async function updatePr({
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
     )
   ).body;
-
   try {
     await bitbucketHttp.putJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
@@ -838,22 +851,24 @@ export async function updatePr({
       }
     );
   } catch (err) {
-    // Try sanitizing reviewers
-    const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
+    if (err instanceof ExternalHostError) {
+      // Try sanitizing reviewers
+      const sanitizedReviewers = await sanitizeReviewers(pr.reviewers, err);
 
-    if (sanitizedReviewers === undefined) {
-      throw err;
-    } else {
-      await bitbucketHttp.putJson(
-        `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
-        {
-          body: {
-            title,
-            description: sanitize(description),
-            reviewers: sanitizedReviewers,
-          },
-        }
-      );
+      if (sanitizedReviewers === undefined) {
+        throw err;
+      } else {
+        await bitbucketHttp.putJson(
+          `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+          {
+            body: {
+              title,
+              description: sanitize(description),
+              reviewers: sanitizedReviewers,
+            },
+          }
+        );
+      }
     }
   }
 

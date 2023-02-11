@@ -176,6 +176,15 @@ export interface PrResponse {
   created_on: string;
 }
 
+export interface PrResponseError {
+  error: {
+    fields: {
+      reviewers: string[];
+    };
+  };
+  message: string;
+}
+
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
