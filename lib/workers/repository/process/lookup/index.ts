@@ -392,10 +392,15 @@ export async function lookupUpdates(
               { depName, ...update },
               'Could not determine new digest for update.'
             );
-            res.warnings.push({
-              message: `Could not determine new digest for update (${update.newValue}).`,
-              topic: depName,
-            });
+
+            // Only report a warning if there is a current digest.
+            // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
+            if (currentDigest) {
+              res.warnings.push({
+                message: `Could not determine new digest for update (${update.newValue}).`,
+                topic: depName,
+              });
+            }
           }
         }
         if (update.newVersion) {

@@ -1181,12 +1181,11 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
-    it('should warn if no digest could be found but pinning is enabled', async () => {
+    it('should warn if no digest could be found but there is a current digest', async () => {
       config.currentValue = 'v1.0.0';
       config.currentDigest = 'bla';
       config.digestOneAndOnly = true;
       config.depName = 'angular/angular';
-      config.pinDigests = true;
       config.datasource = GithubTagsDatasource.id;
 
       // Only mock calls once so that the second invocation results in
@@ -1207,6 +1206,32 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.warnings[0]).toEqual({
         message: 'Could not determine new digest for update (v2.0.0).',
         topic: 'angular/angular',
+      });
+    });
+
+    describe('pinning enabled but no existing digest', () => {
+      it('should not warn if no new digest could be found', async () => {
+        config.currentValue = 'v1.0.0';
+        config.digestOneAndOnly = true;
+        config.depName = 'angular/angular';
+        config.pinDigests = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        // Only mock calls once so that the second invocation results in
+        // no digest being computable.
+        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+            hash: 'abc',
+          },
+        ]);
+
+        const res = await lookup.lookupUpdates(config);
+        expect(res.updates).toHaveLength(0);
+        expect(res.warnings).toHaveLength(0);
       });
     });
 
