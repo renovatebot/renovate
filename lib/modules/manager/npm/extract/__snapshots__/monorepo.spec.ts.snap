@@ -147,7 +147,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
       "lernaJsonFile": "lerna.json",
     },
     "packageFile": "package.json",
-    "yarnWorkspacesPackages": [
+    "workspacesPackages": [
       "packages/*",
     ],
   },

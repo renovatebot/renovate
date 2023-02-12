@@ -19,12 +19,12 @@ export async function detectMonorepos(
       managerData = {},
       lernaClient,
       lernaPackages,
-      yarnWorkspacesPackages,
+      workspacesPackages,
       skipInstalls,
     } = p;
     const { lernaJsonFile, yarnZeroInstall, hasPackageManager } = managerData;
 
-    const packages = yarnWorkspacesPackages ?? lernaPackages;
+    const packages = workspacesPackages ?? lernaPackages;
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
@@ -55,7 +55,7 @@ export async function detectMonorepos(
         subPackage.npmLock = subPackage.npmLock ?? npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
         if (subPackage.yarnLock) {
-          subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
+          subPackage.hasWorkspaces = !!workspacesPackages;
           subPackage.npmrc = subPackage.npmrc ?? npmrc;
         }
 
