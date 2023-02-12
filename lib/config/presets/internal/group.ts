@@ -449,8 +449,8 @@ const staticGroups = {
       {
         groupName: 'spock',
         matchPackagePrefixes: ["org.spockframework:spock-"],
-      },
-    ],
+      }
+    ]
   },
   springAmqp: {
     description: 'Group Java Spring AMQP packages.',
