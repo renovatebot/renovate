@@ -94,7 +94,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
-    return currentValue;
+    return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
