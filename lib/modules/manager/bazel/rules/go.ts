@@ -16,7 +16,7 @@ export const GoTarget = z
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
   .transform(
-    ({ rule, name, tag, commit, importpath, remote }): PackageDependency => {
+    ({ rule, name, tag, commit, importpath, remote }): PackageDependency[] => {
       const dep: PackageDependency = {
         datasource: GoDatasource.id,
         depType: rule,
@@ -46,6 +46,6 @@ export const GoTarget = z
         }
       }
 
-      return dep;
+      return [dep];
     }
   );

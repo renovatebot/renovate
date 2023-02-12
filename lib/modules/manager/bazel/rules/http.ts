@@ -62,10 +62,10 @@ export const HttpTarget = z
     sha256: z.string(),
   })
   .refine(({ url, urls }) => !!url || !!urls)
-  .transform(({ rule, name, url, urls = [] }): PackageDependency | null => {
+  .transform(({ rule, name, url, urls = [] }): PackageDependency[] => {
     const parsedUrl = [url, ...urls].map(parseArchiveUrl).find(is.truthy);
     if (!parsedUrl) {
-      return null;
+      return [];
     }
 
     const dep: PackageDependency = {
@@ -81,5 +81,5 @@ export const HttpTarget = z
       dep.currentValue = parsedUrl.currentValue;
     }
 
-    return dep;
+    return [dep];
   });
