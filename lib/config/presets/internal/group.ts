@@ -363,7 +363,6 @@ const staticGroups = {
       'group:rubyOnRails',
       'group:rubyOmniauth',
       'group:socketio',
-      'group:spock',
       'group:springAmqp',
       'group:springAndroid',
       'group:springBatch',
@@ -442,15 +441,6 @@ const staticGroups = {
         matchPackagePrefixes: ['socket.io'],
       },
     ],
-  },
-  spock: {
-    description: 'Group Spock Framework packages.',
-    packageRules: [
-      {
-        groupName: 'spock',
-        matchPackagePrefixes: ["org.spockframework:spock-"],
-      }
-    ]
   },
   springAmqp: {
     description: 'Group Java Spring AMQP packages.',
