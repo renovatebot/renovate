@@ -238,7 +238,6 @@ exports[`modules/platform/azure/index getPr(prNo) should return a pr in the righ
   },
   "createdAt": undefined,
   "displayNumber": "Pull Request #1234",
-  "hasReviewers": false,
   "labels": [
     "renovate",
   ],

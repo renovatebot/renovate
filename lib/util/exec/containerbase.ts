@@ -71,7 +71,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   java: {
-    datasource: 'adoptium-java',
+    datasource: 'java-version',
     depName: 'java',
     versioning: npmVersioningId,
   },

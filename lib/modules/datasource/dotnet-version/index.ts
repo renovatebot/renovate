@@ -11,11 +11,11 @@ import {
   DotnetReleasesSchema,
 } from './schema';
 
-export class DotnetDatasource extends Datasource {
-  static readonly id = 'dotnet';
+export class DotnetVersionDatasource extends Datasource {
+  static readonly id = 'dotnet-version';
 
   constructor() {
-    super(DotnetDatasource.id);
+    super(DotnetVersionDatasource.id);
   }
 
   override readonly caching = true;
@@ -27,7 +27,7 @@ export class DotnetDatasource extends Datasource {
   ];
 
   @cache({
-    namespace: `datasource-${DotnetDatasource.id}`,
+    namespace: `datasource-${DotnetVersionDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => packageName,
     ttlMinutes: 1440,
   })
@@ -77,7 +77,7 @@ export class DotnetDatasource extends Datasource {
   }
 
   @cache({
-    namespace: `datasource-${DotnetDatasource.id}`,
+    namespace: `datasource-${DotnetVersionDatasource.id}`,
     key: (releaseUrl: string, packageName: string) =>
       `${releaseUrl}:${packageName}`,
     ttlMinutes: 1440,
@@ -97,7 +97,7 @@ export class DotnetDatasource extends Datasource {
 
     const body = raw?.body;
     if (body) {
-      const type = DotnetDatasource.getType(packageName);
+      const type = DotnetVersionDatasource.getType(packageName);
       const { releases: releases } = body;
       result = releases
         .filter(
