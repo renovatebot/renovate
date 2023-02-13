@@ -75,10 +75,13 @@ class DebVersioningApi extends GenericVersioningApi {
   }
 
   protected _compare_string(a: string, b: string): number {
-    /* The string is compared by continuous blocks of a) non-digit and b) digit characters.
-       Non-digit blocks are compared lexicographically with a custom character order.
-       Digit blocks are compared numerically.
-    */
+    /* Special string sorting based on official specification:
+     * https://manpages.debian.org/unstable/dpkg-dev/deb-version.7.en.html#Sorting_algorithm
+     * The string is compared by continuous blocks of a) non-digit and b) digit characters.
+     * Non-digit blocks are compared lexicographically with a custom character order.
+     * Digit blocks are compared numerically.
+     * We are alternating between both modes until a difference is found.
+     */
     let charPos = 0;
     while (charPos < a.length || charPos < b.length) {
       const aChar = a.charAt(charPos);

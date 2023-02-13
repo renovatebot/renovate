@@ -115,6 +115,12 @@ describe('modules/versioning/deb/index', () => {
     ${'a:1.4'}           | ${'0:1.4'}           | ${true}
     ${'0:1.4'}           | ${'a:1.4'}           | ${true}
     ${'a:1.4'}           | ${'a:1.4'}           | ${true}
+    ${'a1'}              | ${'a~'}              | ${true}
+    ${'a0'}              | ${'a~'}              | ${true}
+    ${'aa'}              | ${'a1'}              | ${true}
+    ${'ab'}              | ${'a0'}              | ${true}
+    ${'10'}              | ${'1.'}              | ${true}
+    ${'10'}              | ${'1a'}              | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(deb.isGreaterThan(a, b)).toBe(expected);
   });
