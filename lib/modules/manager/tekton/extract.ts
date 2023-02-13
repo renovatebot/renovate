@@ -29,7 +29,6 @@ export function extractPackageFile(
   }
   for (const doc of docs) {
     deps.push(...getDeps(doc));
-    deps.push(...getStepImageDeps(doc));
   }
   if (!deps.length) {
     return null;
@@ -45,6 +44,10 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 
   // Handle TaskRun resource
   addDep(doc.spec?.taskRef, deps);
+  addStepImageSpec(doc.spec?.taskSpec, deps);
+
+  // Handle Task resource
+  addStepImageSpec(doc.spec, deps);
 
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
@@ -56,19 +59,17 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   }
 
   // Handle regular tasks of Pipeline resource
-  for (const task of coerceArray(doc.spec?.tasks)) {
+  for (const task of [
+    ...coerceArray(doc.spec?.tasks),
+    ...coerceArray(doc.spec?.finally),
+  ]) {
     addDep(task.taskRef, deps);
-  }
-
-  // Handle finally tasks of Pipeline resource
-  for (const task of coerceArray(doc.spec?.finally)) {
-    addDep(task.taskRef, deps);
+    addStepImageSpec(task.taskSpec, deps);
   }
 
   // Handle TriggerTemplate resource
   for (const resource of coerceArray(doc.spec?.resourcetemplates)) {
-    addDep(resource?.spec?.taskRef, deps);
-    addDep(resource?.spec?.pipelineRef, deps);
+    deps.push(...getDeps(resource));
   }
 
   // Handle list of TektonResources
@@ -110,47 +111,6 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     'Tekton bundle dependency found'
   );
   deps.push(dep);
-}
-
-function getStepImageDeps(doc: TektonResource): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-  if (is.falsy(doc)) {
-    return deps;
-  }
-
-  // Handle list of TektonResources
-  for (const item of coerceArray(doc.items)) {
-    deps.push(...getStepImageDeps(item));
-  }
-
-  // Handle TriggerTemplate resource
-  for (const resource of coerceArray(doc.spec?.resourcetemplates)) {
-    deps.push(...getStepImageDeps(resource));
-  }
-
-  // Handle Task resource
-  addStepImageSpec(doc.spec, deps);
-
-  // Handle TaskRun resource
-  addStepImageSpec(doc.spec?.taskSpec, deps);
-
-  // Handle Pipeline resource
-  for (const task of coerceArray(doc.spec?.tasks)) {
-    addStepImageSpec(task.taskSpec, deps);
-  }
-  for (const task of coerceArray(doc.spec?.finally)) {
-    addStepImageSpec(task.taskSpec, deps);
-  }
-
-  // Handle PipelineRun resource
-  for (const task of coerceArray(doc.spec?.pipelineSpec?.tasks)) {
-    addStepImageSpec(task.taskSpec, deps);
-  }
-  for (const task of coerceArray(doc.spec?.pipelineSpec?.finally)) {
-    addStepImageSpec(task.taskSpec, deps);
-  }
-
-  return deps;
 }
 
 function addStepImageSpec(
