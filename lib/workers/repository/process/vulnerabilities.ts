@@ -190,7 +190,8 @@ export class Vulnerabilities {
             packageName,
             depVersion,
             fixedVersion,
-            vulnerability
+            vulnerability,
+            affected
           );
           packageRules.push(rule);
         }
@@ -398,7 +399,8 @@ export class Vulnerabilities {
     packageName: string,
     depVersion: string,
     fixedVersion: string,
-    vulnerability: Osv.Vulnerability
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
   ): PackageRule {
     return {
       matchDatasources: [dep.datasource!],
@@ -406,7 +408,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      prBodyNotes: this.generatePrBodyNotes(vulnerability),
+      prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
       },
@@ -428,7 +430,10 @@ export class Vulnerabilities {
     return ['', ''];
   }
 
-  private generatePrBodyNotes(vulnerability: Osv.Vulnerability): string[] {
+  private generatePrBodyNotes(
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
+  ): string[] {
     let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
@@ -448,22 +453,37 @@ export class Vulnerabilities {
     content += vulnerability.summary ? `${vulnerability.summary}\n` : '';
     content += `${aliases.join(' / ')}\n`;
     content += `\n<details>\n<summary>More information</summary>\n`;
-    content += `### Details\n${vulnerability.details ?? 'No details.'}\n`;
 
-    content += '### Severity\n';
+    const details = vulnerability.details?.replace(
+      regEx(/^#{1,4} /gm),
+      '##### '
+    );
+    content += `#### Details\n${details ?? 'No details.'}\n`;
+
+    content += '#### Severity\n';
     const cvssVector =
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score;
+      vulnerability.severity?.[0]?.score ??
+      (affected.database_specific?.cvss as string); // RUSTSEC
     if (cvssVector) {
       const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
       const score = baseScore ? `${baseScore} / 10 (${severity})` : 'Unknown';
-      content += `- Score: ${score}\n`;
-      content += `- Vector: \`${cvssVector}\`\n`;
+      content += `- CVSS Score: ${score}\n`;
+      content += `- Vector String: \`${cvssVector}\`\n`;
+    } else if (
+      vulnerability.id.startsWith('GHSA-') &&
+      vulnerability.database_specific?.severity
+    ) {
+      const severity = vulnerability.database_specific.severity as string;
+      content +=
+        severity.charAt(0).toUpperCase() +
+        severity.slice(1).toLowerCase() +
+        '\n';
     } else {
       content += 'Unknown severity.\n';
     }
 
-    content += `\n### References\n${
+    content += `\n#### References\n${
       vulnerability.references
         ?.map((ref) => {
           return `- [${ref.url}](${ref.url})`;
