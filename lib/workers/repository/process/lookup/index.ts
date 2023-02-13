@@ -392,6 +392,7 @@ export async function lookupUpdates(
               {
                 depName,
                 currentValue,
+                datasource,
                 newValue: update.newValue,
                 bucket: update.bucket,
               },
@@ -402,7 +403,7 @@ export async function lookupUpdates(
             // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
             if (currentDigest) {
               res.warnings.push({
-                message: `Could not determine new digest for update (${update.newValue}).`,
+                message: `Could not determine new digest for update (datasource: ${datasource})`,
                 topic: depName,
               });
             }
