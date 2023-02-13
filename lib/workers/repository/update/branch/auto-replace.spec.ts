@@ -1133,10 +1133,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('github-actions: update with newValue only', async () => {
       const githubaction = codeBlock`
-        name: build
-
-        on: [push]
-
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1163,10 +1159,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
       expect(res).toBe(
         codeBlock`
-          name: build
-
-          on: [push]
-
           jobs:
             build:
               runs-on: ubuntu-latest
