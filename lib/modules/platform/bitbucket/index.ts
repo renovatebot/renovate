@@ -623,7 +623,18 @@ export async function addReviewers(
 
   const body = {
     title,
-    reviewers: reviewers.map((username: string) => ({ username })),
+    reviewers: reviewers.map((username: string) => {
+      const UUIDRegex = new RegExp(
+        /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i
+      );
+      let key = 'username';
+      if (UUIDRegex.test(username)) {
+        key = 'uuid';
+      }
+      return {
+        [key]: username,
+      };
+    }),
   };
 
   await bitbucketHttp.putJson(
