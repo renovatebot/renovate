@@ -318,13 +318,19 @@ export async function updateArtifacts({
       logger.debug('go mod tidy command skipped');
     }
 
-    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
-      ? ' -compat=1.17'
-      : '';
+    let tidyOpts = '';
+    if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
+      tidyOpts += ' -compat=1.17';
+    }
+    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+      tidyOpts += ' -e';
+    }
+
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
         config.postUpdateOptions?.includes('gomodTidy1.17') ||
+        config.postUpdateOptions?.includes('gomodTidyE') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;

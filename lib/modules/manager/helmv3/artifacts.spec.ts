@@ -1,7 +1,7 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { env, fs, git, mocked, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -225,10 +225,12 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['charts/example-1.9.2.tgz'],
-      deleted: ['charts/example-1.6.2.tgz'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.9.2.tgz'],
+        deleted: ['charts/example-1.6.2.tgz'],
+      })
+    );
     const updatedDeps = [{ depName: 'dep1' }];
     const test = await helmv3.updateArtifacts({
       packageFileName: 'Chart.yaml',
@@ -282,10 +284,12 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['charts/example-1.9.2.tgz'],
-      deleted: ['charts/example-1.6.2.tgz'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.9.2.tgz'],
+        deleted: ['charts/example-1.6.2.tgz'],
+      })
+    );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -333,9 +337,11 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['charts/example-1.9.2.tgz'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.9.2.tgz'],
+      })
+    );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -377,10 +383,12 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce({
-      not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
-      deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        not_added: ['charts/example-1.9.2.tgz', 'exampleFile'],
+        deleted: ['charts/example-1.6.2.tgz', 'aFolder/otherFile'],
+      })
+    );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
@@ -428,9 +436,11 @@ describe('modules/manager/helmv3/artifacts', () => {
 
     // sub chart artifacts
     fs.getSiblingFileName.mockReturnValueOnce('charts');
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['example/example.tgz'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['example/example.tgz'],
+      })
+    );
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await helmv3.updateArtifacts({
