@@ -621,12 +621,14 @@ export async function addReviewers(
   // TODO #7154
   const { title } = (await getPr(prId))!;
 
+  const UUIDRegex = regEx(
+    /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/,
+    'i'
+  );
+
   const body = {
     title,
     reviewers: reviewers.map((username: string) => {
-      const UUIDRegex = new RegExp(
-        /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/i
-      );
       let key = 'username';
       if (UUIDRegex.test(username)) {
         key = 'uuid';
