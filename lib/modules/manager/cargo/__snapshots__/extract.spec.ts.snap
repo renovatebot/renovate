@@ -528,6 +528,44 @@ exports[`modules/manager/cargo/extract extractPackageFile() extracts registry ur
 ]
 `;
 
+exports[`modules/manager/cargo/extract extractPackageFile() extracts registry urls from environment 1`] = `
+[
+  {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "proprietary-crate",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "registryUrls": [
+      "https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git",
+    ],
+  },
+  {
+    "currentValue": "3.0.0",
+    "datasource": "crate",
+    "depName": "mcorbin-test",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": true,
+    },
+    "registryUrls": [
+      "https://github.com/mcorbin/testregistry",
+    ],
+  },
+  {
+    "currentValue": "0.2",
+    "datasource": "crate",
+    "depName": "tokio",
+    "depType": "dependencies",
+    "managerData": {
+      "nestedVersion": false,
+    },
+  },
+]
+`;
+
 exports[`modules/manager/cargo/extract extractPackageFile() fails to parse cargo config with invalid TOML 1`] = `
 [
   {

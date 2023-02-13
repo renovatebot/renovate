@@ -11,6 +11,16 @@ import type {
   CargoSection,
 } from './types';
 
+function get_cargo_index_env(registryName: string): string | null {
+  return (
+    process.env[
+      `CARGO_REGISTRIES_${registryName
+        .toUpperCase()
+        .replaceAll('-', '_')}_INDEX`
+    ] ?? null
+  );
+}
+
 function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
@@ -43,7 +53,15 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          const registryUrl = cargoRegistries[registryName];
+          let registryUrl = cargoRegistries[registryName];
+
+          if (!registryUrl) {
+            const envUrl = get_cargo_index_env(registryName);
+            if (envUrl) {
+              registryUrl = envUrl;
+            }
+          }
+
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {

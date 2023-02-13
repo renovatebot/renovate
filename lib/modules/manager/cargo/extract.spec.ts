@@ -21,6 +21,7 @@ describe('modules/manager/cargo/extract', () => {
     let config: ExtractConfig;
     let adminConfig: RepoGlobalConfig;
     let tmpDir: DirectoryResult;
+    const OLD_ENV = process.env;
 
     beforeEach(async () => {
       config = {};
@@ -31,11 +32,13 @@ describe('modules/manager/cargo/extract', () => {
       };
 
       GlobalConfig.set(adminConfig);
+      process.env = { ...OLD_ENV };
     });
 
     afterEach(async () => {
       await tmpDir.cleanup();
       GlobalConfig.reset();
+      process.env = OLD_ENV;
     });
 
     it('returns null for invalid toml', async () => {
@@ -106,6 +109,18 @@ describe('modules/manager/cargo/extract', () => {
 
     it('extracts registry urls from .cargo/config (legacy path)', async () => {
       await writeLocalFile('.cargo/config', cargo6configtoml);
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts registry urls from environment', async () => {
+      process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
+        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
+      process.env.CARGO_REGISTRIES_MCORBIN_INDEX =
+        'https://github.com/mcorbin/testregistry';
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
