@@ -65,10 +65,23 @@ export const ComposerRelease = z
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
-export const ComposerReleases = z
+export const ComposerReleasesArray = z
   .array(ComposerRelease.nullable().catch(null))
   .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
-export type ComposerReleases = z.infer<typeof ComposerReleases>;
+export type ComposerReleasesArray = z.infer<typeof ComposerReleasesArray>;
+
+export const ComposerReleasesRecord = z
+  .record(ComposerRelease.nullable().catch(null))
+  .transform((map) => {
+    const res: Record<string, ComposerRelease> = {};
+    for (const [key, value] of Object.entries(map)) {
+      if (value !== null && value.version === key) {
+        res[key] = value;
+      }
+    }
+    return res;
+  });
+export type ComposerReleasesRecord = z.infer<typeof ComposerReleasesRecord>;
 
 export const ComposerPackagesResponse = z.object({
   packages: z.record(z.unknown()),
@@ -77,11 +90,11 @@ export const ComposerPackagesResponse = z.object({
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
-): ComposerReleases {
+): ComposerReleasesArray {
   try {
     const { packages } = ComposerPackagesResponse.parse(packagesResponse);
     const array = MinifiedArray.parse(packages[packageName]);
-    const releases = ComposerReleases.parse(array);
+    const releases = ComposerReleasesArray.parse(array);
     return releases;
   } catch (err) {
     logger.debug(
@@ -92,17 +105,15 @@ export function parsePackagesResponse(
   }
 }
 
-export function parsePackagesResponses(
-  packageName: string,
-  packagesResponses: unknown[]
+export function extractReleaseResult(
+  ...composerReleasesArrays: ComposerReleasesArray[]
 ): ReleaseResult | null {
   const releases: Release[] = [];
   let homepage: string | null | undefined;
   let sourceUrl: string | null | undefined;
 
-  for (const packagesResponse of packagesResponses) {
-    const releaseArray = parsePackagesResponse(packageName, packagesResponse);
-    for (const composerRelease of releaseArray) {
+  for (const composerReleasesArray of composerReleasesArrays) {
+    for (const composerRelease of composerReleasesArray) {
       const version = composerRelease.version.replace(/^v/, '');
       const gitRef = composerRelease.version;
 
@@ -143,4 +154,14 @@ export function parsePackagesResponses(
   }
 
   return result;
+}
+
+export function parsePackagesResponses(
+  packageName: string,
+  packagesResponses: unknown[]
+): ReleaseResult | null {
+  const releaseArrays = packagesResponses.map((pkgResp) =>
+    parsePackagesResponse(packageName, pkgResp)
+  );
+  return extractReleaseResult(...releaseArrays);
 }
