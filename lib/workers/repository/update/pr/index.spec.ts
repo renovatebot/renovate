@@ -395,7 +395,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -410,6 +409,27 @@ describe('workers/repository/update/pr/index', () => {
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(participants.addParticipants).toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
+      });
+
+      it('adds reviewers for PR automerge with red status and existing ignorable reviewers that can be ignored', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          hasAssignees: false,
+          reviewers: ['renovate-approve'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+          ignoreReviewers: ['renovate-approve'],
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addParticipants).toHaveBeenCalled();
       });
 
       it('skips branch automerge and forces PR creation due to artifact errors', async () => {
@@ -516,7 +536,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -541,7 +560,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -570,7 +588,6 @@ describe('workers/repository/update/pr/index', () => {
           const changedPr: Pr = {
             ...pr,
             hasAssignees: false,
-            hasReviewers: false,
           };
           platform.getBranchPr.mockResolvedValueOnce(changedPr);
           checks.resolveBranchStatus.mockResolvedValueOnce('red');

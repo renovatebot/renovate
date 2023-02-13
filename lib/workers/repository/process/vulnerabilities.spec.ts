@@ -492,18 +492,18 @@ describe('workers/repository/process/vulnerabilities', () => {
               <details>
               <summary>More information</summary>
 
-              ### Details
+              #### Details
               HTTP pipelining issues and request smuggling attacks are possible due to incorrect Transfer encoding header parsing.
 
               It is possible conduct HTTP request smuggling attacks (CL:TE/TE:TE) by sending invalid Transfer Encoding headers.
 
               By manipulating the HTTP response the attacker could poison a web-cache, perform an XSS attack, or obtain sensitive information from requests other than their own.
 
-              ### Severity
-              - Score: 6.5 / 10 (Medium)
-              - Vector: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N\`
+              #### Severity
+              - CVSS Score: 6.5 / 10 (Medium)
+              - Vector String: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:L/A:N\`
 
-              ### References
+              #### References
               No references.
 
               This data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0031) and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).
@@ -664,13 +664,13 @@ describe('workers/repository/process/vulnerabilities', () => {
               <details>
               <summary>More information</summary>
 
-              ### Details
+              #### Details
               No details.
 
-              ### Severity
+              #### Severity
               Unknown severity.
 
-              ### References
+              #### References
               No references.
 
               This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-xxxx-yyyy-zzzz) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
@@ -742,17 +742,165 @@ describe('workers/repository/process/vulnerabilities', () => {
               <details>
               <summary>More information</summary>
 
-              ### Details
+              #### Details
               No details.
 
-              ### Severity
-              - Score: Unknown
-              - Vector: \`some-invalid-score\`
+              #### Severity
+              - CVSS Score: Unknown
+              - Vector String: \`some-invalid-score\`
 
-              ### References
+              #### References
               No references.
 
               This data is provided by [OSV](https://osv.dev/vulnerability/PYSEC-2022-303) and the [PyPI Advisory Database](https://github.com/pypa/advisory-database) ([CC-BY 4.0](https://github.com/pypa/advisory-database/blob/main/LICENSE)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('show severity text in GHSA advisories without CVSS score', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+            ],
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'MODERATE',
+          },
+        },
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['npm'],
+          matchPackageNames: ['lodash'],
+          matchCurrentVersion: '4.17.10',
+          allowedVersions: '4.17.11',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### [GHSA-x5rq-j2xg-h7qm](https://github.com/advisories/GHSA-x5rq-j2xg-h7qm)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              No details.
+
+              #### Severity
+              Moderate
+
+              #### References
+              - [https://nvd.nist.gov/vuln/detail/CVE-2019-1010266](https://nvd.nist.gov/vuln/detail/CVE-2019-1010266)
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/GHSA-x5rq-j2xg-h7qm) and the [GitHub Advisory Database](https://github.com/github/advisory-database) ([CC-BY 4.0](https://github.com/github/advisory-database/blob/main/LICENSE.md)).
+              </details>
+            `,
+          ],
+        },
+      ]);
+    });
+
+    it('formats headings of vulnerability details', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        regex: [
+          {
+            deps: [
+              {
+                depName: 'sys-info',
+                currentValue: '0.6.0',
+                datasource: 'crate',
+              },
+            ],
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'RUSTSEC-2020-0100',
+          summary:
+            'Double free when calling `sys_info::disk_info` from multiple threads',
+          details:
+            'Affected versions of `sys-info` use a static, global, list to store temporary disk information while running. The function that cleans up this list,\n`DFCleanup`, assumes a single threaded environment and will try to free the same memory twice in a multithreaded environment.\n\nThis results in consistent double-frees and segfaults when calling `sys_info::disk_info` from multiple threads at once.\n\nThe issue was fixed by moving the global variable into a local scope.\n\n## Safer Alternatives:\n - [`sysinfo`](https://crates.io/crates/sysinfo)',
+          aliases: ['CVE-2020-36434'],
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'sys-info',
+                ecosystem: 'crates.io',
+                purl: 'pkg:cargo/sys-info',
+              },
+              ranges: [
+                {
+                  type: 'SEMVER',
+                  events: [{ introduced: '0.0.0-0' }, { fixed: '0.8.0' }],
+                },
+              ],
+              database_specific: {
+                cvss: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
+              },
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+
+      expect(config.packageRules).toHaveLength(1);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['crate'],
+          matchPackageNames: ['sys-info'],
+          matchCurrentVersion: '0.6.0',
+          allowedVersions: '0.8.0',
+          isVulnerabilityAlert: true,
+          prBodyNotes: [
+            '\n\n' +
+              codeBlock`
+              ---
+
+              ### Double free when calling \`sys_info::disk_info\` from multiple threads
+              [CVE-2020-36434](https://nvd.nist.gov/vuln/detail/CVE-2020-36434) / [RUSTSEC-2020-0100](https://rustsec.org/advisories/RUSTSEC-2020-0100.html)
+
+              <details>
+              <summary>More information</summary>
+
+              #### Details
+              Affected versions of \`sys-info\` use a static, global, list to store temporary disk information while running. The function that cleans up this list,
+              \`DFCleanup\`, assumes a single threaded environment and will try to free the same memory twice in a multithreaded environment.
+
+              This results in consistent double-frees and segfaults when calling \`sys_info::disk_info\` from multiple threads at once.
+
+              The issue was fixed by moving the global variable into a local scope.
+
+              ##### Safer Alternatives:
+               - [\`sysinfo\`](https://crates.io/crates/sysinfo)
+
+              #### Severity
+              - CVSS Score: 9.8 / 10 (Critical)
+              - Vector String: \`CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H\`
+
+              #### References
+              No references.
+
+              This data is provided by [OSV](https://osv.dev/vulnerability/RUSTSEC-2020-0100) and the [Rust Advisory Database](https://github.com/RustSec/advisory-db) ([CC0 1.0](https://github.com/rustsec/advisory-db/blob/main/LICENSE.txt)).
               </details>
             `,
           ],
