@@ -48,7 +48,7 @@ class DebVersioningApi extends GenericVersioningApi {
 
     // split of last element by `-`
     if (remainingVersion.endsWith('-')) {
-      // Forbit debian revision (it would result in `2.4.0-` == `2.4.0`)
+      // Forbid debian revision (it would result in `2.4.0-` == `2.4.0`)
       return null;
     }
     const debianSplit = remainingVersion.split('-');
