@@ -225,7 +225,7 @@ dummy 1.2.3
           },
           {
             currentValue: '16.0.0+36',
-            datasource: 'adoptium-java',
+            datasource: 'java-version',
             packageName: 'java-jdk',
             depName: 'java',
           },
@@ -369,7 +369,7 @@ dummy 1.2.3
         deps: [
           {
             currentValue: '16.0.0+36',
-            datasource: 'adoptium-java',
+            datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jdk',
           },
@@ -380,7 +380,7 @@ dummy 1.2.3
         deps: [
           {
             currentValue: '16.0.0+36',
-            datasource: 'adoptium-java',
+            datasource: 'java-version',
             depName: 'java',
             packageName: 'java-jre',
           },
