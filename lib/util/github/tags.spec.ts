@@ -44,7 +44,7 @@ describe('util/github/tags', () => {
         'v2.0.0',
         http
       );
-      expect(commit).toBe(null);
+      expect(commit).toBeNull();
       expect(githubGraphql.queryTags).toHaveBeenCalledWith(
         {
           packageName: 'some-org/repo',
@@ -63,7 +63,7 @@ describe('util/github/tags', () => {
         'v2.0.0',
         http
       );
-      expect(commit).toBe(null);
+      expect(commit).toBeNull();
     });
 
     it('should gracefully return `null` if tags cannot be queried', async () => {
@@ -77,7 +77,7 @@ describe('util/github/tags', () => {
         'v2.0.0',
         http
       );
-      expect(commit).toBe(null);
+      expect(commit).toBeNull();
     });
   });
 });
