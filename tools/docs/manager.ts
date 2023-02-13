@@ -119,7 +119,7 @@ export async function generateManagers(dist: string): Promise<void> {
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
 
-    const categories = definition.categories ?? ['other'];
+    const categories = definition.categories ?? [];
     for (const category of categories) {
       allCategories[category] ??= [];
       allCategories[category].push(manager);

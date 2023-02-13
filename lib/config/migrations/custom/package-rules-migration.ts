@@ -35,14 +35,18 @@ const dockerLanguageManagers = [
 
 function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   const newPackageRules: PackageRule[] = [];
-  const matchLanguages = packageRule['matchLanguages'];
+  const matchLanguages = packageRule.matchLanguages;
   // no migration needed
-  if (is.nullOrUndefined(matchLanguages) || !is.nonEmptyArray(matchLanguages)) {
+  if (
+    is.nullOrUndefined(matchLanguages) ||
+    !is.array<string>(matchLanguages) ||
+    matchLanguages.length === 0
+  ) {
     return [packageRule];
   }
 
   // deep copy
-  const newRule: any = { ...packageRule };
+  const newRule: PackageRule = { ...packageRule };
   delete newRule.matchLanguages;
 
   const filteredLanguages = matchLanguages.filter(
@@ -59,7 +63,7 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
     return newPackageRules;
   }
   // Create a separate rule to mimic OR behaviour
-  const newMatchManagerRule: any = { ...packageRule };
+  const newMatchManagerRule: PackageRule = { ...packageRule };
   delete newMatchManagerRule.matchLanguages;
 
   newMatchManagerRule.matchManagers = dockerLanguageManagers;
