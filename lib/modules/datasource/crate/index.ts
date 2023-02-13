@@ -7,6 +7,7 @@ import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
+import { Http } from '../../../util/http';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -15,6 +16,7 @@ import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import type {
   CrateMetadata,
   CrateRecord,
+  RegistryConfig,
   RegistryFlavor,
   RegistryInfo,
 } from './types';
@@ -24,6 +26,7 @@ export class CrateDatasource extends Datasource {
 
   constructor() {
     super(CrateDatasource.id);
+    this.http = new Http('crate');
   }
 
   override defaultRegistryUrls = ['https://crates.io'];
@@ -56,7 +59,7 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const registryInfo = await CrateDatasource.fetchRegistryInfo({
+    const registryInfo = await this.fetchRegistryInfo({
       packageName,
       registryUrl,
     });
@@ -165,9 +168,16 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.flavor === 'crates.io') {
+    if (info.flavor === 'crates.io' || info.flavor === 'sparse') {
+      let baseUrl: string;
+      if (info.flavor === 'sparse') {
+        baseUrl = info.url.toString();
+      } else {
+        baseUrl = CrateDatasource.CRATES_IO_BASE_URL;
+      }
+
       const crateUrl =
-        CrateDatasource.CRATES_IO_BASE_URL +
+        baseUrl +
         CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
       try {
         return (await this.http.get(crateUrl)).body;
@@ -196,6 +206,8 @@ export class CrateDatasource extends Datasource {
         const repo = tokens[3];
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${packageName}`;
       }
+      case 'sparse':
+        return `${info.dl ?? info.rawUrl}/${packageName}`;
       default:
         return `${info.rawUrl}/${packageName}`;
     }
@@ -221,7 +233,7 @@ export class CrateDatasource extends Datasource {
    * If an url is given, assumes it's a valid Git repository
    * url and clones it to cache.
    */
-  private static async fetchRegistryInfo({
+  private async fetchRegistryInfo({
     packageName,
     registryUrl,
   }: GetReleasesConfig): Promise<RegistryInfo | null> {
@@ -230,14 +242,28 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const url = parseUrl(registryUrl);
+    let sparse = false;
+    let url: URL | null;
+    let rawUrl: string;
+    // Sparse registries use the sparse+ protocol
+    if (registryUrl.startsWith('sparse+')) {
+      sparse = true;
+      rawUrl = registryUrl.substring(7);
+      url = parseUrl(rawUrl);
+    } else {
+      rawUrl = registryUrl;
+      url = parseUrl(registryUrl);
+    }
+
     if (!url) {
       logger.debug(`Could not parse registry URL ${registryUrl}`);
       return null;
     }
 
     let flavor: RegistryFlavor;
-    if (url.hostname === 'crates.io') {
+    if (sparse === true) {
+      flavor = 'sparse';
+    } else if (url.hostname === 'crates.io') {
       flavor = 'crates.io';
     } else if (url.hostname === 'dl.cloudsmith.io') {
       flavor = 'cloudsmith';
@@ -247,14 +273,26 @@ export class CrateDatasource extends Datasource {
 
     const registry: RegistryInfo = {
       flavor,
-      rawUrl: registryUrl,
+      rawUrl,
       url,
     };
 
-    if (flavor !== 'crates.io') {
+    if (flavor === 'sparse') {
+      // Extract the index's config.json file in order to determine the
+      // crate download location
+      // https://doc.rust-lang.org/cargo/reference/registries.html#index-format
+      const res = await this.http.getJson<RegistryConfig>(
+        `${rawUrl}/config.json`
+      );
+      if (res?.body.dl) {
+        registry.dl = res?.body.dl;
+      }
+    }
+
+    if (flavor !== 'crates.io' && flavor !== 'sparse') {
       if (!GlobalConfig.get('allowCustomCrateRegistries')) {
         logger.warn(
-          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
+          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io or sparse registries, bailing out'
         );
         return null;
       }

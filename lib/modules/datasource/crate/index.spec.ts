@@ -21,6 +21,8 @@ const API_BASE_URL = CrateDatasource.CRATES_IO_API_BASE_URL;
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
+const sparseBaseUrl = 'https://index.crates.io';
+
 const datasource = CrateDatasource.id;
 
 function setupGitMocks(delayMs?: number): { mockClone: jest.Mock<any, any> } {
@@ -66,6 +68,13 @@ function mockCratesApiCallFor(crateName: string, response?: httpMock.Body) {
     .scope(API_BASE_URL)
     .get(`/crates/${crateName}?include=`)
     .reply(response ? 200 : 404, response);
+}
+
+function mockSparseConfig() {
+  httpMock
+    .scope(sparseBaseUrl)
+    .get('/config.json')
+    .reply(200, Fixtures.get('config.json'));
 }
 
 describe('modules/datasource/crate/index', () => {
@@ -248,6 +257,40 @@ describe('modules/datasource/crate/index', () => {
       expect(res).toBeDefined();
     });
 
+    it('processes real data for sparse registry: libc', async () => {
+      mockSparseConfig();
+
+      httpMock
+        .scope(sparseBaseUrl)
+        .get('/li/bc/libc')
+        .reply(200, Fixtures.get('libc'));
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'libc',
+        registryUrls: ['sparse+https://index.crates.io'],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
+    it('processes real data for sparse registry: amethyst', async () => {
+      mockSparseConfig();
+
+      httpMock
+        .scope(sparseBaseUrl)
+        .get('/am/et/amethyst')
+        .reply(200, Fixtures.get('amethyst'));
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'amethyst',
+        registryUrls: ['sparse+https://index.crates.io'],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+    });
+
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
       const { mockClone } = setupGitMocks();
 
@@ -354,10 +397,23 @@ describe('modules/datasource/crate/index', () => {
       expect(result).toBeNull();
       expect(result2).toBeNull();
     });
+
+    it('does not clone for sparse registries', async () => {
+      const { mockClone } = setupGitMocks();
+      mockSparseConfig();
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'mypkg',
+        registryUrls: ['sparse+https://index.crates.io'],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toBeNull();
+    });
   });
 
   describe('fetchCrateRecordsPayload', () => {
-    it('rejects if it has neither clonePath nor crates.io flavor', async () => {
+    it('rejects if it has neither clonePath nor crates.io/sparse flavor', async () => {
       const info: RegistryInfo = {
         rawUrl: 'https://example.com',
         url: new URL('https://example.com'),

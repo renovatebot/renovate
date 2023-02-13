@@ -5,6 +5,8 @@ export type RegistryFlavor =
   /** https://cloudsmith.io, needs git clone */
   | 'cloudsmith'
 
+  /** A sparse registry accessed via HTTP, not git */
+  | 'sparse'
   /** unknown, assuming private git repository */
   | 'other';
 
@@ -16,6 +18,9 @@ export interface RegistryInfo {
 
   /** parsed URL of the registry */
   url: URL;
+
+  /** download location of crates, as specified in the registry's config.json */
+  dl?: string;
 
   /** path where the registry is cloned */
   clonePath?: string;
@@ -31,4 +36,9 @@ export interface CrateMetadata {
   documentation: string | null;
   homepage: string | null;
   repository: string | null;
+}
+
+export interface RegistryConfig {
+  dl: string;
+  api: string;
 }
