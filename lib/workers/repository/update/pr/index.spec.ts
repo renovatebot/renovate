@@ -58,7 +58,7 @@ describe('workers/repository/update/pr/index', () => {
       title: prTitle,
       bodyStruct,
       state: 'open',
-      displayNumber: '123',
+      displayNumber: `Pull Request #${number}`,
     };
 
     const config: BranchConfig = {
@@ -767,7 +767,7 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          '123 does not need updating'
+          'Pull Request #123 does not need updating'
         );
         expect(prCache.setPrCache).toHaveBeenCalledTimes(1);
       });
@@ -785,7 +785,7 @@ describe('workers/repository/update/pr/index', () => {
           pr: existingPr,
         });
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          '123 does not need updating'
+          'Pull Request #123 does not need updating'
         );
         expect(logger.logger.debug).toHaveBeenCalledWith(
           'PR cache matches but it has been edited in the past 24hrs, so processing PR'

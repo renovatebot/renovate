@@ -9,11 +9,11 @@ export function getPrCache(branchName: string): PrCache | null {
     (branch) => branchName === branch.branchName
   );
 
-  if (branch?.prCache) {
-    return branch.prCache;
+  if (!branch?.prCache) {
+    return null;
   }
 
-  return null;
+  return branch.prCache;
 }
 
 // store the time a PR was last updated

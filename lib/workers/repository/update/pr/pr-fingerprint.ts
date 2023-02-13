@@ -9,7 +9,7 @@ import { getElapsedHours } from '../../../../util/date';
 import type { BranchConfig } from '../../../types';
 
 // BranchUpgradeConfig - filtered
-interface FilteredBranchUpgradeConfig {
+export interface FilteredBranchUpgradeConfig {
   depName?: string;
   gitRef?: boolean;
   hasReleaseNotes?: boolean;

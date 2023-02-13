@@ -30,7 +30,7 @@ describe('workers/repository/update/pr/pr-cache', () => {
       expect(getPrCache('branch_name')).toBeNull();
     });
 
-    it('return null if prCache is falsy', () => {
+    it('return null if prCache is null/undefined', () => {
       cache.getCache.mockReturnValue(dummyCache);
       expect(getPrCache('branch_name')).toBeNull();
     });
