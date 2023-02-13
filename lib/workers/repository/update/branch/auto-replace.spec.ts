@@ -1178,10 +1178,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('github-actions: update with newValue and newDigest', async () => {
       const githubaction = codeBlock`
-        name: build
-
-        on: [push]
-
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1209,10 +1205,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
       expect(res).toBe(
         codeBlock`
-          name: build
-
-          on: [push]
-
           jobs:
             build:
               runs-on: ubuntu-latest
@@ -1224,10 +1216,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('github-actions: updates with pinDigest enabled but no currentDigest value', async () => {
       const githubaction = codeBlock`
-        name: build
-
-        on: [push]
-
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1256,10 +1244,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
       expect(res).toBe(
         codeBlock`
-          name: build
-
-          on: [push]
-
           jobs:
             build:
               runs-on: ubuntu-latest
@@ -1271,10 +1255,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
 
     it('github-actions: updates with pinDigest enabled and a currentDigest value', async () => {
       const githubaction = codeBlock`
-        name: build
-
-        on: [push]
-
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1305,10 +1285,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
       expect(res).toBe(
         codeBlock`
-          name: build
-
-          on: [push]
-
           jobs:
             build:
               runs-on: ubuntu-latest
