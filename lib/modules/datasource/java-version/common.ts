@@ -3,7 +3,7 @@ export const pageSize = 50;
 
 export const defaultRegistryUrl = 'https://api.adoptium.net/';
 
-export const datasource = 'adoptium-java';
+export const datasource = 'java-version';
 
 export function getImageType(packageName: string): string {
   switch (packageName) {

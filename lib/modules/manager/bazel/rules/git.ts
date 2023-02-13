@@ -23,7 +23,7 @@ export const GitTarget = z
     remote: z.string(),
   })
   .refine(({ tag, commit }) => !!tag || !!commit)
-  .transform(({ rule, name, tag, commit, remote }): PackageDependency => {
+  .transform(({ rule, name, tag, commit, remote }): PackageDependency[] => {
     const dep: PackageDependency = {
       depType: rule,
       depName: name,
@@ -47,5 +47,5 @@ export const GitTarget = z
       dep.skipReason = 'unsupported-datasource';
     }
 
-    return dep;
+    return [dep];
   });

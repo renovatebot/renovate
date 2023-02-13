@@ -171,7 +171,7 @@ export async function doAutoReplace(
     newName !== depName &&
     (is.undefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
-  const replaceString = upgrade.replaceString ?? currentValue;
+  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {

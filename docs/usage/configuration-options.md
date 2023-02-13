@@ -1336,6 +1336,19 @@ For example, consider this config:
 
 It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
+## ignoreReviewers
+
+By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
+If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
+In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
+
+```json
+{
+  "reviewers": ["foo"],
+  "ignoreReviewers": ["renovate-approve"]
+}
+```
+
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
