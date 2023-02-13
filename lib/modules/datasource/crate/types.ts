@@ -19,7 +19,7 @@ export interface RegistryInfo {
   /** parsed URL of the registry */
   url: URL;
 
-  /** download location of crates, as specified in the registry's config.json */
+  /** Download location of crates, as specified in the registry's config.json */
   dl?: string;
 
   /** path where the registry is cloned */

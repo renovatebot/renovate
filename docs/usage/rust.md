@@ -30,7 +30,7 @@ Both of these are currently only possible when running Renovate self-hosted.
 
 ## Private sparse crate registries
 
-Renovate can update dependencies hosted on a private sparse crate registry (<https://doc.rust-lang.org/beta/cargo/reference/registry-index.html#sparse-protocol>).
-Since sparse registries are HTTP based, authentication for Renovate can be configured via additional hostRules.
+Renovate can update dependencies hosted on a private sparse crate registry, read [Rust's Cargo book](https://doc.rust-lang.org/beta/cargo/reference/registry-index.html#sparse-protocol) to learn more.
+Since sparse registries are HTTP based, authentication for Renovate can be configured via additional `hostRules`.
 
 Renovate can only update Cargo lockfiles for projects using dependencies from sparse registries if the local Rust toolchain has the sparse-registry feature enabled (i.e beta/nightly/or 1.68 or later - 1.68 is due for release on March 9th 2023).
