@@ -17,8 +17,21 @@ export function extractPackageFile(
   for (let idx = 0; idx < fragments.length; idx += 1) {
     const fragment = fragments[idx];
     for (const dep of extractDepsFromFragment(fragment)) {
-      dep.replaceString = fragment.value;
       dep.managerData = { idx };
+
+      // Selectively provide `replaceString` in order
+      // to auto-replace functionality work correctly.
+      const replaceString = fragment.value;
+      if (
+        replaceString.startsWith('container_pull') ||
+        replaceString.startsWith('git_repository') ||
+        replaceString.startsWith('go_repository')
+      ) {
+        if (dep.currentValue && dep.currentDigest) {
+          dep.replaceString = replaceString;
+        }
+      }
+
       deps.push(dep);
     }
   }
