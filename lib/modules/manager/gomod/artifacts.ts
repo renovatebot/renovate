@@ -346,6 +346,7 @@ export async function updateArtifacts({
 
     const res: UpdateArtifactsResult[] = [];
     if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
       res.push({
         file: {
           type: 'addition',
