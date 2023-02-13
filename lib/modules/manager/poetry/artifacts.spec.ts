@@ -309,7 +309,7 @@ describe('modules/manager/poetry/artifacts', () => {
         newPackageFileContent: pyproject1toml,
         config: {
           ...config,
-          constraints: {},
+          constraints: { poetry: '1.2.0' },
         },
       })
     ).toEqual([
@@ -337,7 +337,7 @@ describe('modules/manager/poetry/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 2.7.5 ' +
           '&& ' +
-          "pip install --user 'poetry>=1.0' " +
+          'pip install --user poetry==1.2.0 ' +
           '&& ' +
           'poetry update --lock --no-interaction dep1' +
           '"',
