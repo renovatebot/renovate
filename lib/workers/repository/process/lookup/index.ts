@@ -389,7 +389,12 @@ export async function lookupUpdates(
           // update will be omitted later on without notice.
           if (update.newDigest === null) {
             logger.debug(
-              { depName, ...update },
+              {
+                depName,
+                currentValue,
+                newValue: update.newValue,
+                bucket: update.bucket,
+              },
               'Could not determine new digest for update.'
             );
 
