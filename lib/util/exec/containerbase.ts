@@ -36,7 +36,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
   dotnet: {
-    datasource: 'dotnet',
+    datasource: 'dotnet-version',
     depName: 'dotnet-sdk',
     versioning: semverVersioningId,
   },
