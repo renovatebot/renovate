@@ -8,7 +8,7 @@ import {
   partial,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import githubScm from '../../../../modules/platform/github/scm';
+import { GithubScm } from '../../../../modules/platform/github/scm';
 import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import type { MigratedData } from './migrated-data';
@@ -157,7 +157,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       ['renovate.json', renovateConfigJson],
       ['renovate.json5', renovateConfigJson5],
     ])('rebases via github platform (%s)', async (filename, rawConfig) => {
-      githubScm.commitAndPush = jest.fn();
+      GithubScm.instance.commitAndPush = jest.fn();
       setPlatformScmApi('github');
       git.isBranchBehindBase.mockResolvedValueOnce(true);
       migratedConfigData.filename = filename;
@@ -166,7 +166,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       await rebaseMigrationBranch(config, migratedConfigData);
 
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(githubScm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledTimes(1);
     });
   });
 

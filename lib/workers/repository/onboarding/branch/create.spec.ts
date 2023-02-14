@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import githubScm from '../../../../modules/platform/github/scm';
+import { GithubScm } from '../../../../modules/platform/github/scm';
 import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import { commitFiles } from '../../../../util/git';
 import { createOnboardingBranch } from './create';
@@ -38,12 +38,12 @@ describe('workers/repository/onboarding/branch/create', () => {
     });
 
     it('commits via github platform', async () => {
-      githubScm.commitAndPush = jest.fn();
+      GithubScm.instance.commitAndPush = jest.fn();
       setPlatformScmApi('github');
 
       await createOnboardingBranch(config);
 
-      expect(githubScm.commitAndPush).toHaveBeenCalledWith({
+      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
           {

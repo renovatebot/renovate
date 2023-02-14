@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, git } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import githubScm from '../../../../modules/platform/github/scm';
+import { GithubScm } from '../../../../modules/platform/github/scm';
 import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import * as memCache from '../../../../util/cache/memory';
 import { toSha256 } from '../../../../util/hasha';
@@ -81,12 +81,12 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       'rebases via github platform ' +
         '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
       async ({ checkboxEnabled, expected }) => {
-        githubScm.commitAndPush = jest.fn();
+        GithubScm.instance.commitAndPush = jest.fn();
         setPlatformScmApi('github');
         config.onboardingRebaseCheckbox = checkboxEnabled;
         git.isBranchBehindBase.mockResolvedValueOnce(true);
         await rebaseOnboardingBranch(config, hash);
-        expect(githubScm.commitAndPush).toHaveBeenCalledTimes(1);
+        expect(GithubScm.instance.commitAndPush).toHaveBeenCalledTimes(1);
         expect(OnboardingState.prUpdateRequested).toBe(expected);
       }
     );

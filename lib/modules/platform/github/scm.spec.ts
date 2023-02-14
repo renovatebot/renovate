@@ -1,5 +1,6 @@
 import { git, mocked } from '../../../../test/util';
-import githubScm from './scm';
+import { DefaultGitScm } from '../default-scm';
+import { GithubScm } from './scm';
 import * as _github from '.';
 
 jest.mock('.');
@@ -19,7 +20,10 @@ describe('modules/platform/github/scm', () => {
   };
 
   it('platformCommit = false => delegate to git', async () => {
-    await githubScm.commitAndPush!({ ...commitObj, platformCommit: false });
+    await GithubScm.instance.commitAndPush({
+      ...commitObj,
+      platformCommit: false,
+    });
 
     expect(git.commitFiles).toHaveBeenCalledWith({
       ...commitObj,
@@ -29,12 +33,20 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = true => delegate to github', async () => {
-    await githubScm.commitAndPush!({ ...commitObj, platformCommit: true });
+    await GithubScm.instance.commitAndPush({
+      ...commitObj,
+      platformCommit: true,
+    });
 
     expect(git.commitFiles).not.toHaveBeenCalled();
     expect(github.commitFiles).toHaveBeenCalledWith({
       ...commitObj,
       platformCommit: true,
     });
+  });
+
+  it('check overridden singleton instance', () => {
+    expect(DefaultGitScm.instance instanceof GithubScm).toBeFalse();
+    expect(GithubScm.instance instanceof GithubScm).toBeTrue();
   });
 });

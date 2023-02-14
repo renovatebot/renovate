@@ -1,7 +1,7 @@
 import type { Indent } from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
 import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
-import githubScm from '../../../../modules/platform/github/scm';
+import { GithubScm } from '../../../../modules/platform/github/scm';
 import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import { checkoutBranch, commitFiles } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
@@ -56,12 +56,12 @@ describe('workers/repository/config-migration/branch/create', () => {
     });
 
     it('commits via github platform', async () => {
-      githubScm.commitAndPush = jest.fn();
+      GithubScm.instance.commitAndPush = jest.fn();
       setPlatformScmApi('github');
       await createConfigMigrationBranch(config, migratedConfigData);
 
       expect(checkoutBranch).toHaveBeenCalledWith(config.defaultBranch);
-      expect(githubScm.commitAndPush).toHaveBeenCalledWith({
+      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/migrate-config',
         baseBranch: 'dev',
         files: [

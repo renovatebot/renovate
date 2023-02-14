@@ -1,6 +1,6 @@
 import { getConfig, git } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import githubScm from '../../../../modules/platform/github/scm';
+import { GithubScm } from '../../../../modules/platform/github/scm';
 import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -52,10 +52,10 @@ describe('workers/repository/update/branch/commit', () => {
         path: 'package.json',
         contents: 'some contents',
       });
-      githubScm.commitAndPush = jest.fn();
+      GithubScm.instance.commitAndPush = jest.fn();
       setPlatformScmApi('github');
       await commitFilesToBranch(config);
-      expect(githubScm.commitAndPush).toHaveBeenCalledWith({
+      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledWith({
         baseBranch: undefined,
         branchName: 'renovate/some-branch',
         files: [
