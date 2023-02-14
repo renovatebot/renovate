@@ -14,7 +14,7 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
     locks: ProviderLock[]
   ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
-    if (is.nullOrUndefined(providerTypes)) {
+    if (!is.nonEmptyObject(providerTypes)) {
       return [];
     }
 
