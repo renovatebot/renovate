@@ -112,6 +112,7 @@ export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
   allowPostUpgradeCommandTemplating?: boolean;
+  allowPreUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
   allowedPreUpgradeCommands?: string[];

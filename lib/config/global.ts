@@ -8,6 +8,7 @@ export class GlobalConfig {
     'allowedPreUpgradeCommands',
     'allowPlugins',
     'allowPostUpgradeCommandTemplating',
+    'allowPreUpgradeCommandTemplating',
     'allowScripts',
     'binarySource',
     'cacheDir',

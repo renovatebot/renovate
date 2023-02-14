@@ -80,6 +80,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'allowPreUpgradeCommandTemplating',
+    description:
+      'Set this to `true` to allow templating for pre-upgrade commands.',
+    type: 'boolean',
+    default: false,
+    globalOnly: true,
+  },
+  {
     name: 'allowedPreUpgradeCommands',
     description:
       'A list of regular expressions that decide which pre-upgrade tasks are allowed.',
@@ -95,6 +103,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       commands: [],
+      fileFilters: [],
       executionMode: 'update',
     },
   },
@@ -102,6 +111,16 @@ const options: RenovateOptions[] = [
     name: 'commands',
     description:
       'A list of pre-upgrade commands that are executed before updating dependency files by Renovate.',
+    type: 'array',
+    subType: 'string',
+    parent: 'preUpgradeTasks',
+    default: [],
+    cli: false,
+  },
+  {
+    name: 'fileFilters',
+    description:
+      'Files that match the glob pattern will be committed after running a pre-upgrade task.',
     type: 'array',
     subType: 'string',
     parent: 'preUpgradeTasks',
