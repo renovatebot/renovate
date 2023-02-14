@@ -212,7 +212,7 @@ async function createWrapperCommand(
   );
 }
 
-function mavenWrapperFileName(): string {
+export function mavenWrapperFileName(): string {
   if (
     os.platform() === 'win32' &&
     GlobalConfig.get('binarySource') !== 'docker'

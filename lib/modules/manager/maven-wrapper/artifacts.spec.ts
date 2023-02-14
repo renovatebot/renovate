@@ -7,6 +7,7 @@ import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { resetPrefetchedImages } from '../../../util/exec/docker';
 import { getPkgReleases } from '../../datasource';
+import { mavenWrapperFileName } from './artifacts';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
@@ -119,7 +120,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual(expected);
     expect(execSnapshots).toEqual([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -151,7 +152,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(updatedDeps).toEqual([]);
     expect(execSnapshots).toEqual([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -207,7 +208,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +
-          './mvnw wrapper:wrapper"',
+          `${mavenWrapperFileName()} wrapper:wrapper"`,
         options: {
           cwd: '../..',
           encoding: 'utf-8',
@@ -279,7 +280,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool java 17.0.0' },
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -327,7 +328,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -366,7 +367,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',
@@ -404,7 +405,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       {
-        cmd: './mvnw wrapper:wrapper',
+        cmd: `${mavenWrapperFileName()} wrapper:wrapper`,
         options: {
           cwd: '/tmp/github',
           encoding: 'utf-8',

@@ -19,6 +19,7 @@ import type { StatusResult } from '../../../util/git/types';
 import { getPkgReleases } from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateBuildFile } from './artifacts';
+import { gradleWrapperFileName } from './utils';
 import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
@@ -110,7 +111,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          cmd: `${gradleWrapperFileName()} wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip`,
           options: {
             cwd: '/tmp/github/some/repo',
             encoding: 'utf-8',
@@ -160,7 +161,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(result).toBeEmptyArray();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew wrapper --gradle-version 5.6.4',
+          cmd: `${gradleWrapperFileName()} wrapper --gradle-version 5.6.4`,
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -214,7 +215,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
             ' bash -l -c "' +
             'install-tool java 11.0.1' +
             ' && ' +
-            './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768' +
+            `${gradleWrapperFileName()} wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768` +
             '"',
           options: { cwd: '/tmp/github/some/repo' },
         },
@@ -256,7 +257,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       expect(execSnapshots).toMatchObject([
         { cmd: 'install-tool java 11.0.1' },
         {
-          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+          cmd: `${gradleWrapperFileName()} wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768`,
           options: { cwd: '/tmp/github/some/repo' },
         },
       ]);
@@ -323,7 +324,7 @@ describe('modules/manager/gradle-wrapper/artifacts', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: './gradlew wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip',
+          cmd: `${gradleWrapperFileName()} wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip`,
           options: {
             cwd: '/tmp/github/some/repo/sub',
             encoding: 'utf-8',
