@@ -30,7 +30,7 @@ export class ModuleExtractor extends DependencyExtractor {
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const modules = hclRoot.module;
-    if (is.nullOrUndefined(modules)) {
+    if (!is.nonEmptyObject(modules)) {
       return [];
     }
 
