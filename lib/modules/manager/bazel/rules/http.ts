@@ -1,11 +1,36 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
-import { regEx } from '../../../../util/regex';
+import { escapeRegExp, regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import type { PackageDependency } from '../../types';
 import type { UrlParsedResult } from '../types';
+
+const archives = [
+  '.zip',
+  '.tar',
+
+  '.gz',
+  '.tar.gz',
+  '.tgz',
+
+  '.bz2',
+  '.tar.bz2',
+  '.tbz2',
+
+  '.xz',
+  '.tar.xz',
+  '.txz',
+];
+
+const archiveSuffixRegex = regEx(
+  `(?:${archives.map(escapeRegExp).join('|')})$`
+);
+
+function stripArchiveSuffix(value: string): string {
+  return value.replace(archiveSuffixRegex, '');
+}
 
 export function parseArchiveUrl(
   urlString: string | undefined | null
@@ -13,10 +38,12 @@ export function parseArchiveUrl(
   if (!urlString) {
     return null;
   }
+
   const url = parseUrl(urlString);
   if (!url || url.host !== 'github.com' || !url.pathname) {
     return null;
   }
+
   const [p0, p1, p2, p3, p4, p5] = url.pathname.split('/').slice(1);
   const repo = p0 + '/' + p1;
   let datasource = '';
@@ -35,19 +62,12 @@ export function parseArchiveUrl(
     currentValue = p3;
   }
 
-  if (currentValue) {
-    // Strip archive extension to get hash or tag.
-    // Tolerates formats produced by Git(Hub|Lab) and allowed by http_archive
-    // Note: Order matters in suffix list to strip, e.g. .tar.gz.
-    for (const extension of ['.gz', '.bz2', '.xz', '.tar', '.tgz', '.zip']) {
-      if (currentValue.endsWith(extension)) {
-        currentValue = currentValue.slice(0, -extension.length);
-      }
-    }
-
-    return { datasource, repo, currentValue };
+  if (!currentValue) {
+    return null;
   }
-  return null;
+
+  currentValue = stripArchiveSuffix(currentValue);
+  return { datasource, repo, currentValue };
 }
 
 export const httpRules = ['http_archive', 'http_file'] as const;
