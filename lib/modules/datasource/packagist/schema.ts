@@ -149,6 +149,13 @@ export function extractReleaseResult(
   return result;
 }
 
+export function extractDepReleases(
+  composerReleases: unknown
+): ReleaseResult | null {
+  const parsedReleases = ComposerReleases.parse(composerReleases);
+  return extractReleaseResult(parsedReleases);
+}
+
 export function parsePackagesResponses(
   packageName: string,
   packagesResponses: unknown[]
