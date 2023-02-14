@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../../../logger';
 import type { PackageDependency } from '../../../types';
 import { TerraformProviderExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
@@ -15,6 +16,15 @@ export class ProvidersExtractor extends TerraformProviderExtractor {
   ): PackageDependency[] {
     const providerTypes = hclRoot?.provider;
     if (is.nullOrUndefined(providerTypes)) {
+      return [];
+    }
+
+    // istanbul ignore if
+    if (!is.plainObject(providerTypes)) {
+      logger.debug(
+        { providerTypes },
+        'Terraform: unexpected `providerTypes` value'
+      );
       return [];
     }
 
