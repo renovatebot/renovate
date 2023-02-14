@@ -2168,7 +2168,7 @@ Table with options:
 | `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
-| `pnpmDedupe`              | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                        |
+| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 

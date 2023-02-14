@@ -53,7 +53,7 @@ export async function generateLockFile(
       extraEnv.NPM_AUTH = env.NPM_AUTH;
       extraEnv.NPM_EMAIL = env.NPM_EMAIL;
     }
-    const commands: string[] = []
+    const commands: string[] = [];
 
     cmd = 'pnpm';
     let args = 'install --recursive --lockfile-only';
@@ -62,14 +62,14 @@ export async function generateLockFile(
       args += ' --ignore-pnpmfile';
     }
     logger.trace({ cmd, args }, 'pnpm command');
-    commands.push(`${cmd} ${args}`)
+    commands.push(`${cmd} ${args}`);
 
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('pnpmDedupe')) {
       logger.debug('Performing pnpm dedupe');
       commands.push('pnpm dedupe');
     }
-    
+
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
       logger.debug(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
