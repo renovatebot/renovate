@@ -3,6 +3,7 @@ import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
@@ -27,15 +28,20 @@ export function extractRepository(
     // the repository URL to managers.
     // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
     const { platform, endpoint } = GlobalConfig.get();
-    if (
-      platform === 'azure' &&
-      endpoint !== null &&
-      repository.name.includes('/')
-    ) {
-      const [projectName, repoName] = repository.name.split('/');
-      repositoryUrl = `${endpoint!}/${encodeURIComponent(
-        projectName
-      )}/_git/${encodeURIComponent(repoName)}`;
+    if (platform === 'azure' && endpoint) {
+      if (repository.name.includes('/')) {
+        const [projectName, repoName] = repository.name.split('/');
+        repositoryUrl = joinUrlParts(
+          endpoint,
+          encodeURIComponent(projectName),
+          '_git',
+          encodeURIComponent(repoName)
+        );
+      } else {
+        logger.debug(
+          'Renovate cannot update repositories that do not include the project name'
+        );
+      }
     }
   }
 
