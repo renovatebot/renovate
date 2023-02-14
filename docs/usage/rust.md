@@ -22,7 +22,7 @@ Renovate updates Rust crates by default.
 ## Cargo configuration and private registry discovery
 
 Renovate can determine private registry URLs from a `.cargo/config.toml` (or the legacy `.cargo/config`) Cargo configuration file.
-Renovate can also detect private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` environment variable, per https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables.
+Renovate can also detect private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` [environment variable](https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables).
 
 ## Private crate registries and private Git dependencies
 
