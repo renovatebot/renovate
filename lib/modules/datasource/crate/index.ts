@@ -7,7 +7,6 @@ import * as memCache from '../../../util/cache/memory';
 import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
-import { Http } from '../../../util/http';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
@@ -26,7 +25,6 @@ export class CrateDatasource extends Datasource {
 
   constructor() {
     super(CrateDatasource.id);
-    this.http = new Http('crate');
   }
 
   override defaultRegistryUrls = ['https://crates.io'];
@@ -207,7 +205,7 @@ export class CrateDatasource extends Datasource {
         return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${packageName}`;
       }
       case 'sparse':
-        return `${info.dl ?? info.rawUrl}/${packageName}`;
+        return `${info.downloadLocation ?? info.rawUrl}/${packageName}`;
       default:
         return `${info.rawUrl}/${packageName}`;
     }
@@ -285,7 +283,7 @@ export class CrateDatasource extends Datasource {
         `${rawUrl}/config.json`
       );
       if (res?.body.dl) {
-        registry.dl = res?.body.dl;
+        registry.downloadLocation = res?.body.dl;
       }
     }
 

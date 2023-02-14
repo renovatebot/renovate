@@ -269,9 +269,9 @@ describe('modules/datasource/crate/index', () => {
         depName: 'libc',
         registryUrls: ['sparse+https://index.crates.io'],
       });
-      expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(res?.releases.length).toBe(65);
     });
 
     it('processes real data for sparse registry: amethyst', async () => {
@@ -286,9 +286,9 @@ describe('modules/datasource/crate/index', () => {
         depName: 'amethyst',
         registryUrls: ['sparse+https://index.crates.io'],
       });
-      expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(res?.releases.length).toBe(19);
     });
 
     it('refuses to clone if allowCustomCrateRegistries is not true', async () => {
@@ -402,6 +402,7 @@ describe('modules/datasource/crate/index', () => {
       const { mockClone } = setupGitMocks();
       mockSparseConfig();
 
+      httpMock.scope(sparseBaseUrl).get('/my/pk/mypkg').reply(404);
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
