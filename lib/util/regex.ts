@@ -104,6 +104,6 @@ const UUIDRegex = regEx(
   'i'
 );
 
-export function checkUUID(input: string): boolean {
+export function isUUID(input: string): boolean {
   return UUIDRegex.test(input);
 }
