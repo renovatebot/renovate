@@ -28,7 +28,7 @@ export async function preUpgradeCommandsExecutor(
 ): Promise<PreUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
+  const { allowedPreUpgradeCommands, allowPostUpgradeCommandTemplating } =
     GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -36,7 +36,7 @@ export async function preUpgradeCommandsExecutor(
     logger.trace(
       {
         tasks: upgrade.postUpgradeTasks,
-        allowedCommands: allowedPostUpgradeCommands,
+        allowedCommands: allowedPreUpgradeCommands,
       },
       `Checking for post-upgrade tasks`
     );
@@ -59,9 +59,7 @@ export async function preUpgradeCommandsExecutor(
 
       for (const cmd of commands) {
         if (
-          allowedPostUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd)
-          )
+          allowedPreUpgradeCommands!.some((pattern) => regEx(pattern).test(cmd))
         ) {
           try {
             const compiledCmd = allowPostUpgradeCommandTemplating
@@ -87,7 +85,7 @@ export async function preUpgradeCommandsExecutor(
           logger.warn(
             {
               cmd,
-              allowedPostUpgradeCommands,
+              allowedPreUpgradeCommands,
             },
             'Post-upgrade task did not match any on allowedPostUpgradeCommands list'
           );
@@ -156,16 +154,16 @@ export async function preUpgradeCommandsExecutor(
 export default async function executePreUpgradeCommands(
   config: BranchConfig
 ): Promise<PreUpgradeCommandsExecutionResult | null> {
-  const { allowedPostUpgradeCommands } = GlobalConfig.get();
+  const { allowedPreUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
     (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
     (config.updatedArtifacts && config.updatedArtifacts.length > 0);
 
   if (
-    /* Only run post-upgrade tasks if there are changes to package files... */
+    /* Only run pre-upgrade tasks if there are changes to package files... */
     !hasChangedFiles ||
-    is.emptyArray(allowedPostUpgradeCommands)
+    is.emptyArray(allowedPreUpgradeCommands)
   ) {
     return null;
   }
@@ -175,18 +173,18 @@ export default async function executePreUpgradeCommands(
       manager: config.manager,
       depName: config.upgrades.map(({ depName }) => depName).join(' '),
       branchName: config.branchName,
-      postUpgradeTasks:
-        config.postUpgradeTasks!.executionMode === 'branch'
-          ? config.postUpgradeTasks
+      preUpgradeTasks:
+        config.preUpgradeTasks!.executionMode === 'branch'
+          ? config.preUpgradeTasks
           : undefined,
       fileFilters: config.fileFilters,
     },
   ];
 
   const updateUpgradeCommands: BranchUpgradeConfig[] = config.upgrades.filter(
-    ({ postUpgradeTasks }) =>
-      !postUpgradeTasks?.executionMode ||
-      postUpgradeTasks.executionMode === 'update'
+    ({ preUpgradeTasks }) =>
+      !preUpgradeTasks?.executionMode ||
+      preUpgradeTasks.executionMode === 'update'
   );
 
   const { updatedArtifacts, artifactErrors } = await preUpgradeCommandsExecutor(
