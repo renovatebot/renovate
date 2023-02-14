@@ -66,7 +66,7 @@ export const presets: Record<string, Preset> = {
       'supertest',
       'ts-auto-mock',
       'ts-jest',
-      "vitest",
+      'vitest',
     ],
     matchPackagePrefixes: [
       '@testing-library',
