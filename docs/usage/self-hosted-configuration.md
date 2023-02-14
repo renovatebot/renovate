@@ -60,6 +60,49 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
+## allowPreUpgradeCommandTemplating
+
+Set to `true` to allow templating of dependency level pre-upgrade commands.
+
+Let's look at an example of configuring packages with existing Angular migrations.
+
+Add two properties to `config.js`: `allowPreUpgradeCommandTemplating` and `allowedPreUpgradeCommands`:
+
+```javascript
+module.exports = {
+  allowPreUpgradeCommandTemplating: true,
+  allowedPreUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+};
+```
+
+In the `renovate.json` file, define the commands and files to be included in the final commit.
+
+The command to install dependencies (`npm ci --ignore-scripts`) is needed because, by default, the installation of dependencies is skipped (see the `skipInstalls` global option).
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["@angular/core"],
+      "preUpgradeTasks": {
+        "commands": [
+          "npm ci --ignore-scripts",
+          "npx ng update {{{depName}}} --from={{{currentVersion}}} --to={{{newVersion}}} --migrate-only --allow-dirty --force"
+        ],
+        "fileFilters": ["**/**"]
+      }
+    }
+  ]
+}
+```
+
+With this configuration, the executable command for `@angular/core` looks like this:
+
+```bash
+npm ci --ignore-scripts
+npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
+```
+
 ## allowScripts
 
 ## allowedPostUpgradeCommands
@@ -72,6 +115,19 @@ For example:
 ```json
 {
   "allowedPostUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+}
+```
+
+## allowedPreUpgradeCommands
+
+A list of regular expressions that decide which commands in `preUpgradeTasks` are allowed to run.
+If this list is empty then no tasks will be executed.
+
+For example:
+
+```json
+{
+  "allowedPreUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
