@@ -28,20 +28,20 @@ export async function preUpgradeCommandsExecutor(
 ): Promise<PreUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPreUpgradeCommands, allowPostUpgradeCommandTemplating } =
+  const { allowedPreUpgradeCommands, allowPreUpgradeCommandTemplating } =
     GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
     addMeta({ dep: upgrade.depName });
     logger.trace(
       {
-        tasks: upgrade.postUpgradeTasks,
+        tasks: upgrade.preUpgradeTasks,
         allowedCommands: allowedPreUpgradeCommands,
       },
-      `Checking for post-upgrade tasks`
+      `Checking for pre-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
-    const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? [];
+    const commands = upgrade.preUpgradeTasks?.commands ?? [];
+    const fileFilters = upgrade.preUpgradeTasks?.fileFilters ?? [];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
       for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
@@ -62,18 +62,18 @@ export async function preUpgradeCommandsExecutor(
           allowedPreUpgradeCommands!.some((pattern) => regEx(pattern).test(cmd))
         ) {
           try {
-            const compiledCmd = allowPostUpgradeCommandTemplating
+            const compiledCmd = allowPreUpgradeCommandTemplating
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
-            logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
+            logger.trace({ cmd: compiledCmd }, 'Executing pre-upgrade task');
             const execResult = await exec(compiledCmd, {
               cwd: GlobalConfig.get('localDir'),
             });
 
             logger.debug(
               { cmd: compiledCmd, ...execResult },
-              'Executed post-upgrade task'
+              'Executed pre-upgrade task'
             );
           } catch (error) {
             artifactErrors.push({
@@ -87,12 +87,12 @@ export async function preUpgradeCommandsExecutor(
               cmd,
               allowedPreUpgradeCommands,
             },
-            'Post-upgrade task did not match any on allowedPostUpgradeCommands list'
+            'Pre-upgrade task did not match any on allowedPreUpgradeCommands list'
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
+              `Pre-upgrade command '${cmd}' has not been added to the allowed list in allowedPreUpgradeCommands`
             ),
           });
         }
@@ -105,7 +105,7 @@ export async function preUpgradeCommandsExecutor(
           if (minimatch(relativePath, pattern)) {
             logger.debug(
               { file: relativePath, pattern },
-              'Post-upgrade file saved'
+              'Pre-upgrade file saved'
             );
             const existingContent = await readLocalFile(relativePath);
             const existingUpdatedArtifacts = updatedArtifacts.find(
@@ -120,7 +120,7 @@ export async function preUpgradeCommandsExecutor(
                 contents: existingContent,
               });
             }
-            // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
+            // If the file is deleted by a previous pre-update command, remove the deletion from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'deletion' && ua.path === relativePath)
             );
@@ -133,13 +133,13 @@ export async function preUpgradeCommandsExecutor(
           if (minimatch(relativePath, pattern)) {
             logger.debug(
               { file: relativePath, pattern },
-              'Post-upgrade file removed'
+              'Pre-upgrade file removed'
             );
             updatedArtifacts.push({
               type: 'deletion',
               path: relativePath,
             });
-            // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
+            // If the file is created or modified by a previous pre-update command, remove the modification from updatedArtifacts
             updatedArtifacts = updatedArtifacts.filter(
               (ua) => !(ua.type === 'addition' && ua.path === relativePath)
             );
