@@ -6,6 +6,7 @@ import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import type { PackageDependency } from '../../types';
 
+// Source: https://bazel.build/rules/lib/repo/http
 const archives = [
   '.zip',
   '.tar',
@@ -115,11 +116,13 @@ export const HttpTarget = z
       packageName: parsedUrl.packageName,
     };
 
-    // We don't want to set both `currentValue` and `currentDigest`,
-    // relying on artifact updates instead.
+    // We don't want to set both `currentValue` and `currentDigest`.
     //
-    // However, we want to auto-replace to be run successfully
-    // against digest-only dependencies.
+    // What we want is to provide the first occurrence of `currentValue`,
+    // or, if it's not available, `currentDigest`.
+    //
+    // Auto-replace mechanism will replace this first occurrence,
+    // and artifact update function will do the rest.
     //
     // Hence, `if-else-if` is being used here.
     if (parsedUrl.currentValue) {
