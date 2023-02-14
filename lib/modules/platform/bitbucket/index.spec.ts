@@ -985,6 +985,32 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
     });
+
+    it('reviewers', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, {
+        ...pr,
+        reviewers: [reviewer],
+      });
+      expect(await bitbucket.getPr(5)).toEqual({
+        bodyStruct: {
+          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
+        },
+        createdAt: '2018-07-02T07:02:25.275030+00:00',
+        displayNumber: 'Pull Request #5',
+        number: 5,
+        reviewers: ['{90b6646d-1724-4a64-9fd9-539515fe94e9}'],
+        sourceBranch: 'branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'title',
+      });
+    });
   });
 
   describe('massageMarkdown()', () => {

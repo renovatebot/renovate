@@ -1919,6 +1919,47 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr?.hasAssignees).toBeTrue();
     });
+
+    it('returns the PR with reviewers', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'do something',
+          description: 'a merge request',
+          state: 'merged',
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          assignees: [],
+          reviewers: [
+            { id: 1, username: 'foo' },
+            { id: 2, username: 'bar' },
+          ],
+        });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        displayNumber: 'Merge Request #12345',
+        hasAssignees: false,
+        headPipelineStatus: undefined,
+        labels: undefined,
+        number: 12345,
+        reviewers: ['foo', 'bar'],
+        sha: undefined,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {

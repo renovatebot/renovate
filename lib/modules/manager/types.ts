@@ -187,6 +187,9 @@ export interface Upgrade<T = Record<string, any>>
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
+  registryUrls?: string[] | null;
+  currentVersion?: string;
+  replaceString?: string;
 }
 
 export interface ArtifactError {
@@ -201,7 +204,7 @@ export interface UpdateArtifactsResult {
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
-  updatedDeps: PackageDependency<T>[];
+  updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
