@@ -32,18 +32,7 @@ function stripArchiveSuffix(value: string): string {
   return value.replace(archiveSuffixRegex, '');
 }
 
-export function parseArchiveUrl(
-  urlString: string | undefined | null
-): UrlParsedResult | null {
-  if (!urlString) {
-    return null;
-  }
-
-  const url = parseUrl(urlString);
-  if (!url || url.host !== 'github.com' || !url.pathname) {
-    return null;
-  }
-
+export function parseGithubUrl(url: URL): UrlParsedResult | null {
   const [p0, p1, p2, p3, p4, p5] = url.pathname.split('/').slice(1);
   const repo = p0 + '/' + p1;
   let datasource = '';
@@ -68,6 +57,25 @@ export function parseArchiveUrl(
 
   currentValue = stripArchiveSuffix(currentValue);
   return { datasource, repo, currentValue };
+}
+
+export function parseArchiveUrl(
+  urlString: string | undefined | null
+): UrlParsedResult | null {
+  if (!urlString) {
+    return null;
+  }
+
+  const url = parseUrl(urlString);
+  if (!url?.pathname) {
+    return null;
+  }
+
+  if (url.host === 'github.com') {
+    return parseGithubUrl(url);
+  }
+
+  return null;
 }
 
 export const httpRules = ['http_archive', 'http_file'] as const;
