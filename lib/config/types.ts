@@ -55,8 +55,8 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  postUpgradeTasks?: PostUpgradeTasks;
-  preUpgradeTasks?: PreUpgradeTasks;
+  postUpgradeTasks?: PeriUpgradeTasks;
+  preUpgradeTasks?: PeriUpgradeTasks;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
@@ -155,14 +155,9 @@ export interface LegacyAdminConfig {
 
 export type ExecutionMode = 'branch' | 'update';
 
-export interface PostUpgradeTasks {
+export interface PeriUpgradeTasks {
   commands?: string[];
   fileFilters?: string[];
-  executionMode: ExecutionMode;
-}
-
-export interface PreUpgradeTasks {
-  commands?: string[];
   executionMode: ExecutionMode;
 }
 
