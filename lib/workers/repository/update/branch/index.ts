@@ -48,6 +48,7 @@ import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
+import executePreUpgradeCommands from './execute-pre-upgrade-commands';
 import { getUpdatedPackageFiles } from './get-updated';
 import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
@@ -389,6 +390,14 @@ export async function processBranch(
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
       await checkoutBranch(config.baseBranch);
+
+      const preUpgradeCommandResults = await executePreUpgradeCommands(config);
+      if (preUpgradeCommandResults !== null) {
+        const { updatedArtifacts, artifactErrors } = preUpgradeCommandResults;
+        config.updatedArtifacts = updatedArtifacts;
+        config.artifactErrors = artifactErrors;
+      }
+
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
