@@ -1,6 +1,5 @@
 import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
-import semver from 'semver';
 import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -174,13 +173,12 @@ export async function updateArtifacts({
           .join(' ')}`
       );
     }
-    const constraint = getPythonConstraint(existingLockFileContent, config);
-    const poetryVersion =
-      config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
+    const pythonConstraint = getPythonConstraint(
+      existingLockFileContent,
+      config
+    );
     const poetryConstraint =
-      poetryVersion && semver.valid(poetryVersion)
-        ? `==${poetryVersion}`
-        : poetryVersion;
+      config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
       PIP_CACHE_DIR: await ensureCacheDir('pip'),
@@ -190,9 +188,9 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      toolConstraints: [{ toolName: 'python', constraint }],
-      preCommands: [
-        `pip install --user ${quote(`poetry${poetryConstraint ?? ''}`)}`,
+      toolConstraints: [
+        { toolName: 'python', constraint: pythonConstraint },
+        { toolName: 'poetry', constraint: poetryConstraint },
       ],
     };
     await exec(cmd, execOptions);
