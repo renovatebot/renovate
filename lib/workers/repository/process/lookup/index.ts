@@ -384,6 +384,30 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+
+          // If the digest could not be determined, report this as otherwise the
+          // update will be omitted later on without notice.
+          if (update.newDigest === null) {
+            logger.debug(
+              {
+                depName,
+                currentValue,
+                datasource,
+                newValue: update.newValue,
+                bucket: update.bucket,
+              },
+              'Could not determine new digest for update.'
+            );
+
+            // Only report a warning if there is a current digest.
+            // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
+            if (currentDigest) {
+              res.warnings.push({
+                message: `Could not determine new digest for update (datasource: ${datasource})`,
+                topic: depName,
+              });
+            }
+          }
         }
         if (update.newVersion) {
           const registryUrl = dependency?.releases?.find(

@@ -26,7 +26,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     'applyPrettierFormatting'
   );
 
-  beforeAll(() => {
+  beforeEach(() => {
     GlobalConfig.set({
       localDir: '',
     });
@@ -47,8 +47,6 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     };
 
     beforeEach(() => {
-      jest.resetAllMocks();
-      GlobalConfig.reset();
       config = {
         ...getConfig(),
         repository: 'some/repo',
@@ -72,9 +70,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     ])(
       'does nothing if branch is up to date (%s)',
       async (filename, rawConfig) => {
-        git.getFile
-          .mockResolvedValueOnce(rawConfig)
-          .mockResolvedValueOnce(rawConfig);
+        git.getFile.mockResolvedValueOnce(rawConfig);
         migratedConfigData.filename = filename;
         migratedConfigData.content = rawConfig;
 
@@ -82,6 +78,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
 
         expect(checkoutBranch).toHaveBeenCalledTimes(0);
         expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(git.getFile).toHaveBeenCalledTimes(1);
       }
     );
 
@@ -90,6 +87,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
       ['renovate.json5', renovateConfigJson5],
     ])('rebases migration branch (%s)', async (filename, rawConfig) => {
       git.isBranchBehindBase.mockResolvedValueOnce(true);
+      prettierSpy.mockResolvedValueOnce('');
       migratedConfigData.filename = filename;
       migratedConfigData.content = rawConfig;
 
@@ -157,6 +155,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     ])('rebases via platform (%s)', async (filename, rawConfig) => {
       config.platformCommit = true;
       git.isBranchBehindBase.mockResolvedValueOnce(true);
+      prettierSpy.mockResolvedValueOnce('');
       migratedConfigData.filename = filename;
       migratedConfigData.content = rawConfig;
 

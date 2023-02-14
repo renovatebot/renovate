@@ -54,8 +54,6 @@ describe('logger/err-serializer', () => {
     const baseUrl = 'https://github.com';
 
     beforeEach(() => {
-      // reset module
-      jest.resetAllMocks();
       // clean up hostRules
       hostRules.clear();
       hostRules.add({
