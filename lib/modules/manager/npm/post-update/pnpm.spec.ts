@@ -69,6 +69,19 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('performs dedupe', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile('some-dir', {}, {...config, postUpdateOptions }, [
+      { isLockFileMaintenance: true },
+    ]);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(fs.deleteLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
