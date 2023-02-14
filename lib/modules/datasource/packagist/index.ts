@@ -5,7 +5,6 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
@@ -119,27 +118,28 @@ export class PackagistDatasource extends Datasource {
     return packagistFile;
   }
 
-  private static extractDepReleases(versions: RegistryFile): ReleaseResult {
-    const dep: ReleaseResult = { releases: [] };
-    // istanbul ignore if
-    if (!versions) {
-      return dep;
+  /* istanbul ignore next */
+  private static extractDepReleases(
+    composerReleases: unknown
+  ): ReleaseResult | null {
+    const parsedRecord =
+      schema.ComposerReleasesRecord.safeParse(composerReleases);
+    if (parsedRecord.success) {
+      return schema.extractReleaseResult(Object.values(parsedRecord.data));
     }
-    dep.releases = Object.keys(versions).map((version) => {
-      // TODO: fix function parameter type: `versions`
-      const release = (versions as any)[version];
-      const parsedVersion = release.version ?? version;
-      dep.homepage = release.homepage || dep.homepage;
-      if (release.source?.url) {
-        dep.sourceUrl = release.source.url;
-      }
-      return {
-        version: parsedVersion.replace(regEx(/^v/), ''),
-        gitRef: parsedVersion,
-        releaseTimestamp: release.time,
-      };
-    });
-    return dep;
+
+    const parsedArray =
+      schema.ComposerReleasesArray.safeParse(composerReleases);
+    if (parsedArray.success) {
+      logger.once.info('Packagist: extracting releases from array');
+      return schema.extractReleaseResult(parsedArray.data);
+    }
+
+    logger.once.info(
+      { composerReleases },
+      'Packagist: unknown format to extract from'
+    );
+    return null;
   }
 
   @cache({
@@ -162,7 +162,7 @@ export class PackagistDatasource extends Datasource {
       providerPackages,
     } = registryMeta;
 
-    const includesPackages: Record<string, ReleaseResult> = {};
+    const includesPackages: Record<string, ReleaseResult | null> = {};
 
     const tasks: (() => Promise<void>)[] = [];
 

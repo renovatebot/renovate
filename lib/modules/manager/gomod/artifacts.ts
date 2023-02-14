@@ -66,7 +66,7 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (!hostRule.hostType) {
+    if (hostRule.hostType === 'go' || !hostRule.hostType) {
       environmentVariables = addAuthFromHostRule(
         hostRule,
         environmentVariables
@@ -296,13 +296,19 @@ export async function updateArtifacts({
       logger.debug('go mod tidy command skipped');
     }
 
-    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
-      ? ' -compat=1.17'
-      : '';
+    let tidyOpts = '';
+    if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
+      tidyOpts += ' -compat=1.17';
+    }
+    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+      tidyOpts += ' -e';
+    }
+
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
         config.postUpdateOptions?.includes('gomodTidy1.17') ||
+        config.postUpdateOptions?.includes('gomodTidyE') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
@@ -331,20 +337,24 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(sumFileName)) {
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName)
+    ) {
       return null;
     }
 
-    logger.debug('Returning updated go.sum');
-    const res: UpdateArtifactsResult[] = [
-      {
+    const res: UpdateArtifactsResult[] = [];
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
         file: {
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
-      },
-    ];
+      });
+    }
 
     // Include all the .go file import changes
     if (isImportPathUpdateRequired) {

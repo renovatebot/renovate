@@ -65,8 +65,13 @@ const allToolConfig: Record<string, ToolConfig> = {
     depName: 'helm/helm',
     versioning: semverVersioningId,
   },
+  helmfile: {
+    datasource: 'github-releases',
+    depName: 'helmfile/helmfile',
+    versioning: semverVersioningId,
+  },
   java: {
-    datasource: 'adoptium-java',
+    datasource: 'java-version',
     depName: 'java',
     versioning: npmVersioningId,
   },

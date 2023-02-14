@@ -290,12 +290,16 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
 
-  const res: any = {
+  const res: Pr = {
     displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
   };
 
-  res.hasReviewers = is.nonEmptyArray(pr.reviewers);
+  if (is.nonEmptyArray(pr.reviewers)) {
+    res.reviewers = pr.reviewers
+      .map(({ uuid }) => uuid)
+      .filter(is.nonEmptyString);
+  }
 
   return res;
 }
