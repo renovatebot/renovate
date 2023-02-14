@@ -30,7 +30,13 @@ export class ModuleExtractor extends DependencyExtractor {
 
   extract(hclRoot: TerraformDefinitionFile): PackageDependency[] {
     const modules = hclRoot.module;
-    if (!is.nonEmptyObject(modules)) {
+    if (is.nullOrUndefined(modules)) {
+      return [];
+    }
+
+    // istanbul ignore if
+    if (!is.plainObject(modules)) {
+      logger.debug({ modules }, 'Terraform: unexpected `modules` value');
       return [];
     }
 
