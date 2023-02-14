@@ -118,28 +118,11 @@ export class PackagistDatasource extends Datasource {
     return packagistFile;
   }
 
-  /* istanbul ignore next */
   private static extractDepReleases(
     composerReleases: unknown
   ): ReleaseResult | null {
-    const parsedRecord =
-      schema.ComposerReleasesRecord.safeParse(composerReleases);
-    if (parsedRecord.success) {
-      return schema.extractReleaseResult(Object.values(parsedRecord.data));
-    }
-
-    const parsedArray =
-      schema.ComposerReleasesArray.safeParse(composerReleases);
-    if (parsedArray.success) {
-      logger.once.info('Packagist: extracting releases from array');
-      return schema.extractReleaseResult(parsedArray.data);
-    }
-
-    logger.once.info(
-      { composerReleases },
-      'Packagist: unknown format to extract from'
-    );
-    return null;
+    const parsedReleases = schema.ComposerReleases.parse(composerReleases);
+    return schema.extractReleaseResult(parsedReleases);
   }
 
   @cache({
