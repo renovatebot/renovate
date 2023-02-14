@@ -16,7 +16,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     const dependencies = [];
 
     const helmReleases = hclMap?.resource?.helm_release;
-    if (is.nullOrUndefined(helmReleases)) {
+    if (!is.nonEmptyObject(helmReleases)) {
       return [];
     }
     for (const helmRelease of Object.values(helmReleases).flat()) {
