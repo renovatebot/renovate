@@ -240,6 +240,10 @@ describe('modules/manager/poetry/artifacts', () => {
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
     });
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.2.0' }],
+    });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
       await updateArtifacts({
@@ -278,7 +282,7 @@ describe('modules/manager/poetry/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.4.2 ' +
           '&& ' +
-          "pip install --user 'poetry>=1.0' " +
+          'install-tool poetry 1.2.0 ' +
           '&& ' +
           'poetry update --lock --no-interaction dep1' +
           '"',
@@ -300,6 +304,10 @@ describe('modules/manager/poetry/artifacts', () => {
     // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+    });
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }, { version: '1.2.0' }],
     });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -337,7 +345,7 @@ describe('modules/manager/poetry/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 2.7.5 ' +
           '&& ' +
-          "pip install --user 'poetry>=1.0' " +
+          'install-tool poetry 1.2.0 ' +
           '&& ' +
           'poetry update --lock --no-interaction dep1' +
           '"',
@@ -357,6 +365,10 @@ describe('modules/manager/poetry/artifacts', () => {
     // python
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+    });
+    // poetry
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.2.0' }],
     });
     const updatedDeps = [{ depName: 'dep1' }];
     expect(
@@ -381,7 +393,7 @@ describe('modules/manager/poetry/artifacts', () => {
 
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 2.7.5' },
-      { cmd: "pip install --user 'poetry>=1.0'" },
+      { cmd: 'install-tool poetry 1.2.0' },
       { cmd: 'poetry update --lock --no-interaction dep1' },
     ]);
   });
