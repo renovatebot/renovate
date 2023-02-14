@@ -44,7 +44,9 @@ export async function preUpgradeCommandsExecutor(
     const fileFilters = upgrade.preUpgradeTasks?.fileFilters ?? [];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
+      for (const file of (config.updatedPackageFiles ?? []).concat(
+        updatedArtifacts
+      )) {
         const canWriteFile = await localPathIsFile(file.path);
         if (file.type === 'addition' && canWriteFile) {
           let contents: Buffer | null;
@@ -156,15 +158,7 @@ export default async function executePreUpgradeCommands(
 ): Promise<PreUpgradeCommandsExecutionResult | null> {
   const { allowedPreUpgradeCommands } = GlobalConfig.get();
 
-  const hasChangedFiles =
-    (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
-    (config.updatedArtifacts && config.updatedArtifacts.length > 0);
-
-  if (
-    /* Only run pre-upgrade tasks if there are changes to package files... */
-    !hasChangedFiles ||
-    is.emptyArray(allowedPreUpgradeCommands)
-  ) {
+  if (is.emptyArray(allowedPreUpgradeCommands)) {
     return null;
   }
 
