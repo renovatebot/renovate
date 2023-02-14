@@ -50,7 +50,6 @@ describe('modules/datasource/go/index', () => {
     });
 
     afterEach(() => {
-      jest.clearAllMocks();
       delete process.env.GOPROXY;
     });
 

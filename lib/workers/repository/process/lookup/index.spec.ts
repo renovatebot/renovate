@@ -61,7 +61,6 @@ describe('workers/repository/process/lookup/index', () => {
 
   // TODO: fix mocks
   afterEach(() => {
-    jest.clearAllMocks();
     httpMock.clear(false);
   });
 

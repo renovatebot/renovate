@@ -47,10 +47,6 @@ describe('modules/datasource/docker/index', () => {
     hostRules.hosts.mockReturnValue([]);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('getRegistryRepository', () => {
     it('handles local registries', () => {
       const res = getRegistryRepository(

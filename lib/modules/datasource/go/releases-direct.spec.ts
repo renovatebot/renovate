@@ -25,10 +25,6 @@ describe('modules/datasource/go/releases-direct', () => {
     hostRules.hosts.mockReturnValue([]);
   });
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   describe('getReleases', () => {
     it('returns null for null getDatasource result', async () => {
       getDatasourceSpy.mockResolvedValueOnce(null);
