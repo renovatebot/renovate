@@ -8,10 +8,6 @@ const projectPath = '/api/v4/projects/some%2Frepo';
 const basePath = `${projectPath}/repository`;
 
 describe('config/presets/gitlab/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('getPreset()', () => {
     it('throws EXTERNAL_HOST_ERROR', async () => {
       httpMock.scope(gitlabApiHost).get(projectPath).reply(500);
