@@ -65,8 +65,11 @@ export class GoDatasource extends Datasource {
     }
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
+      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
+        ? value
+        : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {

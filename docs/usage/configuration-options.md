@@ -496,7 +496,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
-Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
+Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `helmfile`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -821,7 +821,9 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
+`fileMatch` patterns in the user config are added to the default values and do not replace them.
+The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
@@ -1334,6 +1336,19 @@ For example, consider this config:
 
 It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
+## ignoreReviewers
+
+By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
+If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
+In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
+
+```json
+{
+  "reviewers": ["foo"],
+  "ignoreReviewers": ["renovate-approve"]
+}
+```
+
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
@@ -1489,6 +1504,24 @@ A use case for the latter is if you are a Renovate bot admin and wish to provide
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
+
+## osvVulnerabilityAlerts
+
+Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
+Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
+
+You will only get OSV-based vulnerability alerts for _direct_ dependencies.
+Renovate only queries the OSV database for dependencies that use one of these datasources:
+
+- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
+- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
+- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
+- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
+- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
+- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
+- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
+- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
+- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
 
 ## packageRules
 
@@ -2132,6 +2165,7 @@ Table with options:
 | `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
 | `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
 | `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |

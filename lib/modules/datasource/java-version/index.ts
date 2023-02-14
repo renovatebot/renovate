@@ -12,7 +12,7 @@ import {
 } from './common';
 import type { AdoptiumJavaResponse } from './types';
 
-export class AdoptiumJavaDatasource extends Datasource {
+export class JavaVersionDatasource extends Datasource {
   static readonly id = datasource;
 
   constructor() {
@@ -55,8 +55,7 @@ export class AdoptiumJavaDatasource extends Datasource {
     namespace: `datasource-${datasource}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `${registryUrl}:${getImageType(packageName)}`,
+      `${registryUrl!}:${getImageType(packageName)}`,
   })
   async getReleases({
     registryUrl,
@@ -68,8 +67,7 @@ export class AdoptiumJavaDatasource extends Datasource {
       'fetching java release'
     );
     // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    const url = `${registryUrl}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
+    const url = `${registryUrl!}v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC`;
 
     const result: ReleaseResult = {
       homepage: 'https://adoptium.net',

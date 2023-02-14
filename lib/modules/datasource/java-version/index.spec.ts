@@ -11,7 +11,7 @@ function getPath(page: number, imageType = 'jdk'): string {
 
 const depName = 'java';
 
-describe('modules/datasource/adoptium-java/index', () => {
+describe('modules/datasource/java-version/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock

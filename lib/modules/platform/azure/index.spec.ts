@@ -379,7 +379,6 @@ describe('modules/platform/azure/index', () => {
         },
         createdAt: undefined,
         displayNumber: 'Pull Request #1',
-        hasReviewers: false,
         labels: [],
         number: 1,
         pullRequestId: 1,

@@ -7,7 +7,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import type { VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -53,6 +52,14 @@ describe('modules/platform/github/index', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({})).rejects.toThrow(
         'Init: You must configure a GitHub token'
+      );
+    });
+
+    it('should throw if fine-grained token', async () => {
+      await expect(
+        github.initPlatform({ token: 'github_pat_XXXXXX' })
+      ).rejects.toThrow(
+        'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
       );
     });
 
@@ -2573,7 +2580,6 @@ describe('modules/platform/github/index', () => {
         },
         displayNumber: 'Pull Request #1234',
         hasAssignees: true,
-        hasReviewers: true,
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2859,7 +2865,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
@@ -2904,7 +2910,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
