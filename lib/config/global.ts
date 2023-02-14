@@ -5,6 +5,7 @@ export class GlobalConfig {
   private static readonly OPTIONS: (keyof RepoGlobalConfig)[] = [
     'allowCustomCrateRegistries',
     'allowedPostUpgradeCommands',
+    'allowedPreUpgradeCommands',
     'allowPlugins',
     'allowPostUpgradeCommandTemplating',
     'allowScripts',

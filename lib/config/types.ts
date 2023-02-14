@@ -114,6 +114,7 @@ export interface RepoGlobalConfig {
   allowPostUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
+  allowedPreUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;

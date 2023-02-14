@@ -80,6 +80,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'allowedPreUpgradeCommands',
+    description:
+      'A list of regular expressions that decide which pre-upgrade tasks are allowed.',
+    type: 'array',
+    subType: 'string',
+    default: [],
+    globalOnly: true,
+  },
+  {
     name: 'preUpgradeTasks',
     description:
       'Pre-upgrade tasks that are executed before updating dependency files by Renovate.',
