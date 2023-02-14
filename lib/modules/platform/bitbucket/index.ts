@@ -8,7 +8,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
+import { checkUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -621,16 +621,11 @@ export async function addReviewers(
   // TODO #7154
   const { title } = (await getPr(prId))!;
 
-  const UUIDRegex = regEx(
-    /^\{[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\}$/,
-    'i'
-  );
-
   const body = {
     title,
     reviewers: reviewers.map((username: string) => {
       let key = 'username';
-      if (UUIDRegex.test(username)) {
+      if (checkUUID(username)) {
         key = 'uuid';
       }
       return {
