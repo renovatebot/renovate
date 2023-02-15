@@ -2230,8 +2230,8 @@ e.g.
 ```json
 {
   "preUpgradeTasks": {
-    "commands": ["tslint --fix"],
-    "fileFilters": ["yarn.lock", "**/*.js"],
+    "commands": ["xcodegen generate"],
+    "fileFilters": [],
     "executionMode": "update"
   }
 }
