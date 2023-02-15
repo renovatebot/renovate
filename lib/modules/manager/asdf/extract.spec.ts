@@ -336,7 +336,6 @@ dummy 1.2.3
             datasource: 'npm',
             packageName: 'pnpm',
             depName: 'pnpm',
-            versioning: 'semver',
           },
           {
             currentValue: '3.11.0',
