@@ -155,6 +155,7 @@ export async function doAutoReplace(
     currentValue,
     newValue,
     currentDigest,
+    currentDigestShort,
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
@@ -209,6 +210,12 @@ export async function doAutoReplace(
       if (currentDigest && newDigest) {
         newString = newString.replace(
           regEx(escapeRegExp(currentDigest), 'g'),
+          newDigest
+        );
+      }
+      if (currentDigestShort && newDigest) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentDigestShort), 'g'),
           newDigest
         );
       }

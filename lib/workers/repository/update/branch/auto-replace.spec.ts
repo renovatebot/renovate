@@ -1132,7 +1132,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('github-actions: update with newValue only', async () => {
-      const githubaction = codeBlock`
+      const githubAction = codeBlock`
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1145,6 +1145,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depName = 'actions/checkout';
       upgrade.currentValue = 'v1.0.0';
       upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
       upgrade.pinDigests = true;
       upgrade.updateType = 'replacement';
@@ -1154,7 +1155,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.packageFile = 'workflows/build.yml';
       const res = await doAutoReplace(
         upgrade,
-        githubaction,
+        githubAction,
         reuseExistingBranch
       );
       expect(res).toBe(
@@ -1169,7 +1170,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('github-actions: update with newValue and newDigest', async () => {
-      const githubaction = codeBlock`
+      const githubAction = codeBlock`
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1182,17 +1183,17 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depName = 'actions/checkout';
       upgrade.currentValue = 'v1.0.0';
       upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
       upgrade.pinDigests = true;
       upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@v1.0.0';
       upgrade.newValue = 'v2.0.0';
-      upgrade.newDigest =
-        '1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f';
+      upgrade.newDigest = '1cf887';
       upgrade.packageFile = 'workflows/build.yml';
       const res = await doAutoReplace(
         upgrade,
-        githubaction,
+        githubAction,
         reuseExistingBranch
       );
       expect(res).toBe(
@@ -1201,13 +1202,13 @@ describe('workers/repository/update/branch/auto-replace', () => {
             build:
               runs-on: ubuntu-latest
               steps:
-                - uses: actions/checkout@1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f # v2.0.0
+                - uses: actions/checkout@1cf887 # v2.0.0
         `
       );
     });
 
     it('github-actions: updates with pinDigest enabled but no currentDigest value', async () => {
-      const githubaction = codeBlock`
+      const githubAction = codeBlock`
         jobs:
           build:
             runs-on: ubuntu-latest
@@ -1220,18 +1221,18 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.depName = 'actions/checkout';
       upgrade.currentValue = 'v1.0.0';
       upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
       upgrade.pinDigests = true;
       upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@v1.0.0';
       upgrade.newName = 'some-other-action/checkout';
       upgrade.newValue = 'v2.0.0';
-      upgrade.newDigest =
-        '1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f';
+      upgrade.newDigest = '1cf887';
       upgrade.packageFile = 'workflows/build.yml';
       const res = await doAutoReplace(
         upgrade,
-        githubaction,
+        githubAction,
         reuseExistingBranch
       );
       expect(res).toBe(
@@ -1246,33 +1247,30 @@ describe('workers/repository/update/branch/auto-replace', () => {
     });
 
     it('github-actions: updates with pinDigest enabled and a currentDigest value', async () => {
-      const githubaction = codeBlock`
+      const githubAction = codeBlock`
         jobs:
           build:
             runs-on: ubuntu-latest
             steps:
-              - uses: actions/checkout@2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc # tag=v1.0.0
+              - uses: actions/checkout@2485f4 # tag=v1.0.0
       `;
       upgrade.manager = 'github-actions';
       upgrade.autoReplaceStringTemplate =
         '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
       upgrade.depName = 'actions/checkout';
       upgrade.currentValue = 'v1.0.0';
-      upgrade.currentDigest =
-        '2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc';
+      upgrade.currentDigestShort = '2485f4';
       upgrade.depIndex = 0;
       upgrade.pinDigests = true;
       upgrade.updateType = 'replacement';
-      upgrade.replaceString =
-        'actions/checkout@2485f4d55aae6c5b073114bc4c4b1907c0abae14166281beee7d93f76ebf41fc # tag=v1.0.0';
+      upgrade.replaceString = 'actions/checkout@2485f4 # tag=v1.0.0';
       upgrade.newName = 'some-other-action/checkout';
       upgrade.newValue = 'v2.0.0';
-      upgrade.newDigest =
-        '1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f';
+      upgrade.newDigest = '1cf887';
       upgrade.packageFile = 'workflow.yml';
       const res = await doAutoReplace(
         upgrade,
-        githubaction,
+        githubAction,
         reuseExistingBranch
       );
       expect(res).toBe(
@@ -1281,7 +1279,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
             build:
               runs-on: ubuntu-latest
               steps:
-                - uses: some-other-action/checkout@1cf887de9e8df1530de6a3a80e5fb8cef3c26c5248611921bd860c85313a688f # tag=v2.0.0
+                - uses: some-other-action/checkout@1cf887 # tag=v2.0.0
         `
       );
     });
