@@ -4,6 +4,7 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeDatasource } from '../../datasource/node';
+import { NpmDatasource } from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 
 export { extractPackageFile } from './extract';
@@ -21,5 +22,6 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   HexpmBobDatasource.id,
   NodeDatasource.id,
+  NpmDatasource.id,
   RubyVersionDatasource.id,
 ];

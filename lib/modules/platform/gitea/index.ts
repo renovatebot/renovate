@@ -118,7 +118,6 @@ function toRenovatePR(data: PR): Pr | null {
 
   return {
     number: data.number,
-    displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title,
     isDraft,
