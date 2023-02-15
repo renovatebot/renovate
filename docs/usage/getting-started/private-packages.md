@@ -427,7 +427,7 @@ hostRules: [
 
 ### pip
 
-If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
 To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
 This is because `packageRules` are applied _after_ package file extraction.
 
