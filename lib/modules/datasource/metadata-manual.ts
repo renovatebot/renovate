@@ -54,6 +54,10 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     neo4j: 'https://neo4j.com/release-notes/',
     'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
   },
+  gradle: {
+    'com.figure.gradle.semver-plugin': 
+      'https://github.com/FigureTechnologies/gradle-semver-plugin/releases',
+  }
 };
 
 // Use this object to define manual source URLs for packages
