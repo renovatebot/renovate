@@ -291,7 +291,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   }
 
   const res: Pr = {
-    displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
   };
 

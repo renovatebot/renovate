@@ -307,8 +307,9 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // TODO: types (#7154)
-        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        logger.debug(
+          `Pull Request #${existingPr.number} does not need updating`
+        );
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -349,7 +350,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create PR: ' + prTitle);
-      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+      pr = { number: 0 } as never;
     } else {
       try {
         if (
@@ -430,8 +431,7 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      // TODO: types (#7154)
-      logger.debug(`Created ${pr.displayNumber!}`);
+      logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {
