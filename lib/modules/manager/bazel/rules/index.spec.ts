@@ -16,8 +16,8 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'foo/bar',
-      currentValue: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+      packageName: 'foo/bar',
+      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
     });
 
     // Archive of a release
@@ -27,7 +27,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-releases',
-      repo: 'foo/bar',
+      packageName: 'foo/bar',
       currentValue: '1.2.3',
     });
 
@@ -38,7 +38,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'aspect-build/rules_js',
+      packageName: 'aspect-build/rules_js',
       currentValue: 'v1.1.2',
     });
   });
