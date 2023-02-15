@@ -65,7 +65,6 @@ export interface Pr {
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
-  displayNumber?: string;
   hasAssignees?: boolean;
   labels?: string[];
   number: number;

@@ -1,9 +1,3 @@
-export interface UrlParsedResult {
-  datasource: string;
-  repo: string;
-  currentValue: string;
-}
-
 export interface BazelManagerData {
   idx: number;
 }
@@ -56,6 +50,7 @@ export type FragmentData =
 export type FragmentPath =
   | [number]
   | [number, string]
-  | [number, string, number];
+  | [number, string, number]
+  | [number, string, number, string];
 
 export type FragmentUpdater = string | ((_: string) => string);

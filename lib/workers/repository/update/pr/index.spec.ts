@@ -299,7 +299,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({
           type: 'with-pr',
-          pr: { displayNumber: 'Dry run PR', number: 0 },
+          pr: { number: 0 },
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();

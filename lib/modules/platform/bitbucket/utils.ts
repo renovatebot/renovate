@@ -188,7 +188,6 @@ export interface PrResponseError {
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    displayNumber: `Pull Request #${pr.id}`,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,

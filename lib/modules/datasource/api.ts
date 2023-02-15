@@ -1,4 +1,3 @@
-import { AdoptiumJavaDatasource } from './adoptium-java';
 import { ArtifactoryDatasource } from './artifactory';
 import { AwsMachineImageDataSource } from './aws-machine-image';
 import { AwsRdsDataSource } from './aws-rds';
@@ -32,6 +31,7 @@ import { HelmDatasource } from './helm';
 import { HermitDatasource } from './hermit';
 import { HexDatasource } from './hex';
 import { HexpmBobDatasource } from './hexpm-bob';
+import { JavaVersionDatasource } from './java-version';
 import { JenkinsPluginsDatasource } from './jenkins-plugins';
 import { KubernetesApiDatasource } from './kubernetes-api';
 import { MavenDatasource } from './maven';
@@ -55,7 +55,6 @@ import type { DatasourceApi } from './types';
 const api = new Map<string, DatasourceApi>();
 export default api;
 
-api.set(AdoptiumJavaDatasource.id, new AdoptiumJavaDatasource());
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
@@ -89,6 +88,7 @@ api.set(HelmDatasource.id, new HelmDatasource());
 api.set(HermitDatasource.id, new HermitDatasource());
 api.set(HexDatasource.id, new HexDatasource());
 api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
+api.set(JavaVersionDatasource.id, new JavaVersionDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
 api.set(KubernetesApiDatasource.id, new KubernetesApiDatasource());
 api.set(MavenDatasource.id, new MavenDatasource());

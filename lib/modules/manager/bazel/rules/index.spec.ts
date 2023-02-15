@@ -16,8 +16,8 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'foo/bar',
-      currentValue: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+      packageName: 'foo/bar',
+      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
     });
 
     // Archive of a release
@@ -27,7 +27,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-releases',
-      repo: 'foo/bar',
+      packageName: 'foo/bar',
       currentValue: '1.2.3',
     });
 
@@ -38,7 +38,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'aspect-build/rules_js',
+      packageName: 'aspect-build/rules_js',
       currentValue: 'v1.1.2',
     });
   });
@@ -344,6 +344,50 @@ describe('modules/manager/bazel/rules/index', () => {
           packageName: 'example.com/foo/bar',
           registryUrls: ['https://example.com'],
           versioning: 'docker',
+        },
+      ]);
+    });
+  });
+
+  describe('maven', () => {
+    it('extracts maven dependencies', () => {
+      expect(
+        extractDepsFromFragmentData({
+          rule: 'maven_install',
+          artifacts: [
+            'com.example1:foo:1.1.1',
+            {
+              artifact: 'bar',
+              function: 'maven.artifact',
+              group: 'com.example2',
+              version: '2.2.2',
+            },
+          ],
+          repositories: [
+            'https://example1.com/maven2',
+            'https://example2.com/maven2',
+          ],
+        })
+      ).toEqual([
+        {
+          currentValue: '1.1.1',
+          datasource: 'maven',
+          depType: 'maven_install',
+          depName: 'com.example1:foo',
+          registryUrls: [
+            'https://example1.com/maven2',
+            'https://example2.com/maven2',
+          ],
+        },
+        {
+          currentValue: '2.2.2',
+          datasource: 'maven',
+          depType: 'maven_install',
+          depName: 'com.example2:bar',
+          registryUrls: [
+            'https://example1.com/maven2',
+            'https://example2.com/maven2',
+          ],
         },
       ]);
     });
