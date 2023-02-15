@@ -756,7 +756,14 @@ describe('modules/platform/bitbucket/index', () => {
           account_id: '123',
         },
       };
-      const activeReviewer = {
+      const activeReviewerOutsideOfWorkspace = {
+        user: {
+          display_name: 'Alice Smith',
+          uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
+          account_id: '456',
+        },
+      };
+      const activeReviewerWithinWorkspace = {
         user: {
           display_name: 'Jane Smith',
           uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -767,7 +774,11 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
-          values: [activeReviewer, inactiveReviewer],
+          values: [
+            activeReviewerWithinWorkspace,
+            activeReviewerOutsideOfWorkspace,
+            inactiveReviewer,
+          ],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(400, {
@@ -779,13 +790,25 @@ describe('modules/platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
         .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+        )
+        .reply(404)
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
