@@ -65,23 +65,16 @@ export const ComposerRelease = z
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
-export const ComposerReleasesArray = z
-  .array(ComposerRelease.nullable().catch(null))
+export const ComposerReleases = z
+  .union([
+    z.array(ComposerRelease.nullable().catch(null)),
+    z
+      .record(ComposerRelease.nullable().catch(null))
+      .transform((map) => Object.values(map)),
+  ])
+  .catch([])
   .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
-export type ComposerReleasesArray = z.infer<typeof ComposerReleasesArray>;
-
-export const ComposerReleasesRecord = z
-  .record(ComposerRelease.nullable().catch(null))
-  .transform((map) => {
-    const res: Record<string, ComposerRelease> = {};
-    for (const [key, value] of Object.entries(map)) {
-      if (value !== null && value.version === key) {
-        res[key] = value;
-      }
-    }
-    return res;
-  });
-export type ComposerReleasesRecord = z.infer<typeof ComposerReleasesRecord>;
+export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
 export const ComposerPackagesResponse = z.object({
   packages: z.record(z.unknown()),
@@ -90,11 +83,11 @@ export const ComposerPackagesResponse = z.object({
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
-): ComposerReleasesArray {
+): ComposerReleases {
   try {
     const { packages } = ComposerPackagesResponse.parse(packagesResponse);
     const array = MinifiedArray.parse(packages[packageName]);
-    const releases = ComposerReleasesArray.parse(array);
+    const releases = ComposerReleases.parse(array);
     return releases;
   } catch (err) {
     logger.debug(
@@ -106,7 +99,7 @@ export function parsePackagesResponse(
 }
 
 export function extractReleaseResult(
-  ...composerReleasesArrays: ComposerReleasesArray[]
+  ...composerReleasesArrays: ComposerReleases[]
 ): ReleaseResult | null {
   const releases: Release[] = [];
   let homepage: string | null | undefined;
@@ -154,6 +147,13 @@ export function extractReleaseResult(
   }
 
   return result;
+}
+
+export function extractDepReleases(
+  composerReleases: unknown
+): ReleaseResult | null {
+  const parsedReleases = ComposerReleases.parse(composerReleases);
+  return extractReleaseResult(parsedReleases);
 }
 
 export function parsePackagesResponses(
