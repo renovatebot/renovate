@@ -2525,10 +2525,10 @@
   dependencies:
     "@seald-io/nedb" "^4.0.0"
 
-"@renovatebot/osv-offline@1.1.5":
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.1.5.tgz#190f7f68b450f5df755950f32166829ad36835e2"
-  integrity sha512-puVnDwYHYz9ou3wB/0FMf+Sc4nbhTXHUDj4cv6vNIXxxwPLp21oZfVrHOCMua0r2WFhZONS17hB2FPIjeKgYCQ==
+"@renovatebot/osv-offline@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.0.tgz#c7081aec58058dbbd69e460250cf44537a43f24a"
+  integrity sha512-EQjn++uKasPZrVcUUkW3UP7hgQZrM99Fm2B+a4f3K+CWKRN8T5BIeqsSkgWBdDLPxxkDxQRqAm6ICetkmMFYGw==
   dependencies:
     "@octokit/rest" "^19.0.7"
     "@renovatebot/osv-offline-db" "1.3.1"
