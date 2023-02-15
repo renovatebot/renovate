@@ -2,7 +2,6 @@
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is always 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
@@ -13,7 +12,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises 
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises with squash enabled when repository squash option is default_on 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
@@ -24,7 +22,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) raises 
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns the PR 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
@@ -35,7 +32,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) returns
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "isDraft": true,
@@ -47,7 +43,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) support
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "isDraft": true,
@@ -59,7 +54,6 @@ exports[`modules/platform/gitlab/index createPr(branchName, title, body) support
 
 exports[`modules/platform/gitlab/index createPr(branchName, title, body) uses default branch 1`] = `
 {
-  "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
@@ -73,7 +67,6 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should return the
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
-  "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "labels": undefined,
@@ -92,7 +85,6 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip depr
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
-  "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "isDraft": true,
@@ -112,7 +104,6 @@ exports[`modules/platform/gitlab/index getBranchPr(branchName) should strip draf
   "bodyStruct": {
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
-  "displayNumber": "Merge Request #91",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "isDraft": true,
@@ -132,7 +123,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes deprecated draft pref
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
-  "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "isDraft": true,
@@ -152,7 +142,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) removes draft prefix from ret
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
-  "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "isDraft": true,
@@ -172,7 +161,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR 1`] = `
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
-  "displayNumber": "Merge Request #12345",
   "hasAssignees": false,
   "headPipelineStatus": undefined,
   "labels": undefined,
@@ -191,7 +179,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the PR with nonexisti
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
-  "displayNumber": "Merge Request #12345",
   "hasAssignees": true,
   "headPipelineStatus": undefined,
   "labels": undefined,
@@ -210,7 +197,6 @@ exports[`modules/platform/gitlab/index getPr(prNo) returns the mergeable PR 1`] 
   "bodyStruct": {
     "hash": "23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90",
   },
-  "displayNumber": "Merge Request #12345",
   "hasAssignees": true,
   "headPipelineStatus": undefined,
   "labels": undefined,
