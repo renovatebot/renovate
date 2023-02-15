@@ -760,7 +760,7 @@ describe('modules/platform/bitbucket/index', () => {
         user: {
           display_name: 'Alice Smith',
           uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
-          account_id: '456',
+          account_id: '789',
         },
       };
       const activeReviewerWithinWorkspace = {
