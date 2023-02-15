@@ -1,5 +1,5 @@
 import type { ProgrammingLanguage } from '../../../constants';
-import { DotnetDatasource } from '../../datasource/dotnet';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import { NugetDatasource } from '../../datasource/nuget';
 
 export { extractPackageFile } from './extract';
@@ -17,4 +17,7 @@ export const defaultConfig = {
   ],
 };
 
-export const supportedDatasources = [DotnetDatasource.id, NugetDatasource.id];
+export const supportedDatasources = [
+  DotnetVersionDatasource.id,
+  NugetDatasource.id,
+];

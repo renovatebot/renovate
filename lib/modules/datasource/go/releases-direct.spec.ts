@@ -21,13 +21,8 @@ describe('modules/datasource/go/releases-direct', () => {
   );
 
   beforeEach(() => {
-    jest.resetAllMocks();
     hostRules.find.mockReturnValue({});
     hostRules.hosts.mockReturnValue([]);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   describe('getReleases', () => {

@@ -603,7 +603,6 @@ export async function createPr({
   const pr = res.body;
   pr.number = pr.iid;
   pr.sourceBranch = sourceBranch;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -623,12 +622,11 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
-    displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    hasReviewers: !!mr.reviewers?.length,
+    reviewers: mr.reviewers?.map(({ username }) => username),
     title: mr.title,
     labels: mr.labels,
     sha: mr.sha,

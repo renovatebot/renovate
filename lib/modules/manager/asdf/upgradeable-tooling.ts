@@ -1,20 +1,17 @@
-import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
+import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeDatasource } from '../../datasource/node';
 import { NpmDatasource } from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
-import * as nodeVersioning from '../../versioning/node';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
 import type { PackageDependency } from '../types';
 
 export type StaticTooling = Partial<PackageDependency> &
-  Required<
-    Pick<PackageDependency, 'datasource' | 'versioning' | 'packageName'>
-  >;
+  Required<Pick<PackageDependency, 'datasource'>>;
 
 export type DynamicTooling = (version: string) => StaticTooling | undefined;
 
@@ -30,7 +27,6 @@ const hugoDefinition: ToolingDefinition = {
   config: (version) => ({
     datasource: GithubReleasesDatasource.id,
     packageName: 'gohugoio/hugo',
-    versioning: semverVersioning.id,
     extractVersion: '^v(?<version>\\S+)',
     // The asdf hugo plugin supports prefixing the version with
     // `extended_`. Extended versions feature Sass support.
@@ -44,7 +40,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'argoproj/argo-cd',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -53,7 +48,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'aws/aws-cli',
-      versioning: semverVersioning.id,
     },
   },
   bun: {
@@ -61,7 +55,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'oven-sh/bun',
-      versioning: semverVersioning.id,
       extractVersion: '^bun-v(?<version>\\S+)',
     },
   },
@@ -70,7 +63,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sagiegurari/cargo-make',
-      versioning: semverVersioning.id,
     },
   },
   clojure: {
@@ -86,7 +78,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'crystal-lang/crystal',
-      versioning: semverVersioning.id,
     },
   },
   deno: {
@@ -94,7 +85,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'denoland/deno',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -103,7 +93,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'direnv/direnv',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -112,15 +101,12 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'dprint/dprint',
-      versioning: semverVersioning.id,
     },
   },
   elixir: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-elixir',
     config: {
       datasource: HexpmBobDatasource.id,
-      packageName: 'elixir',
-      versioning: semverVersioning.id,
     },
   },
   elm: {
@@ -128,7 +114,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'elm/compiler',
-      versioning: semverVersioning.id,
     },
   },
   erlang: {
@@ -145,7 +130,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: DockerDatasource.id,
       packageName: 'practicalscheme/gauche',
-      versioning: semverVersioning.id,
     },
   },
   gohugo: hugoDefinition,
@@ -154,7 +138,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golang/go',
-      versioning: semverVersioning.id,
       extractVersion: '^go(?<version>\\S+)',
     },
   },
@@ -163,7 +146,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'ghc/ghc',
-      versioning: semverVersioning.id,
       extractVersion: '^ghc-(?<version>\\S+?)-release',
     },
   },
@@ -172,7 +154,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'helm/helm',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -181,7 +162,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'helmfile/helmfile',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -191,7 +171,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'idris-lang/Idris-dev',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -203,9 +182,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       );
       if (adoptOpenJdkMatches) {
         return {
-          datasource: AdoptiumJavaDatasource.id,
+          datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
-          versioning: semverVersioning.id,
           currentValue: adoptOpenJdkMatches.groups!.version,
         };
       }
@@ -214,9 +192,8 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       );
       if (adoptOpenJreMatches) {
         return {
-          datasource: AdoptiumJavaDatasource.id,
+          datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
-          versioning: semverVersioning.id,
           currentValue: adoptOpenJreMatches.groups!.version,
         };
       }
@@ -229,7 +206,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'JuliaLang/julia',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -238,7 +214,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'casey/just',
-      versioning: semverVersioning.id,
     },
   },
   kotlin: {
@@ -246,7 +221,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'JetBrains/kotlin',
-      versioning: semverVersioning.id,
       extractVersion: '^(Kotlin |v)(?<version>\\S+)',
     },
   },
@@ -255,7 +229,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'kubernetes-sigs/kustomize',
-      versioning: semverVersioning.id,
       extractVersion: '^kustomize/v(?<version>\\S+)',
     },
   },
@@ -264,7 +237,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'lua/lua',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -273,7 +245,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'nim-lang/Nim',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -282,8 +253,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       depName: 'node',
       datasource: NodeDatasource.id,
-      packageName: 'node',
-      versioning: nodeVersioning.id,
     },
   },
   ocaml: {
@@ -291,7 +260,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'ocaml/ocaml',
-      versioning: semverVersioning.id,
     },
   },
   perl: {
@@ -299,7 +267,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'Perl/perl5',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -308,7 +275,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'php/php-src',
-      versioning: semverVersioning.id,
       extractVersion: '^php-(?<version>\\S+)',
     },
   },
@@ -325,7 +291,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'python/cpython',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -342,7 +307,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'rust-lang/rust',
-      versioning: semverVersioning.id,
     },
   },
   scala: {
@@ -352,7 +316,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         return {
           datasource: GithubTagsDatasource.id,
           packageName: 'scala/scala',
-          versioning: semverVersioning.id,
           extractVersion: '^v(?<version>\\S+)',
         };
       }
@@ -360,7 +323,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
         return {
           datasource: GithubTagsDatasource.id,
           packageName: 'lampepfl/dotty',
-          versioning: semverVersioning.id,
         };
       }
 
@@ -372,7 +334,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'koalaman/shellcheck',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -381,7 +342,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mvdan/sh',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -390,7 +350,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/terraform',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -399,7 +358,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'aquasecurity/trivy',
-      versioning: semverVersioning.id,
       extractVersion: '^v(?<version>\\S+)',
     },
   },
@@ -408,7 +366,6 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'ziglang/zig',
-      versioning: semverVersioning.id,
     },
   },
 };
