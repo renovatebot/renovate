@@ -7,9 +7,9 @@ import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import * as _platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
-import * as _repositoryWorker from '../repository';
-import * as _configParser from './config/parse';
-import * as _limits from './limits';
+import * as repositoryWorker from '../repository';
+import * as configParser from './config/parse';
+import * as limits from './limits';
 import * as globalWorker from '.';
 
 jest.mock('../repository');
@@ -18,28 +18,24 @@ jest.mock('../../config/presets');
 
 jest.mock('fs-extra');
 const fs = mocked(_fs);
+const platform = mocked(_platform);
 
 // imports are readonly
-const repositoryWorker = _repositoryWorker;
-const configParser: jest.Mocked<typeof _configParser> = _configParser as never;
-const platform: jest.Mocked<typeof _platform> = _platform as never;
 const presets = mocked(_presets);
-const limits = _limits;
 
 const addSecretForSanitizing = jest.spyOn(secrets, 'addSecretForSanitizing');
+const parseConfigs = jest.spyOn(configParser, 'parseConfigs');
 
 describe('workers/global/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     logger.getProblems.mockImplementationOnce(() => []);
-    configParser.parseConfigs = jest.fn();
     platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;
   });
 
   it('handles config warnings and errors', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       repositories: [],
       maintainYarnLock: true,
       foo: 1,
@@ -51,7 +47,7 @@ describe('workers/global/index', () => {
   });
 
   it('resolves global presets immediately', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       repositories: [],
       globalExtends: [':pinVersions'],
       hostRules: [{ matchHost: 'github.com', token: 'abc123' }],
@@ -61,33 +57,33 @@ describe('workers/global/index', () => {
     expect(presets.resolveConfigPresets).toHaveBeenCalledWith({
       extends: [':pinVersions'],
     });
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
   });
 
   it('throws if global presets could not be resolved', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
-      repositories: [],
-      globalExtends: [':pinVersions'],
-    });
-    presets.resolveConfigPresets.mockImplementation(() => {
+    presets.resolveConfigPresets.mockImplementationOnce(() => {
       throw new Error('some-error');
     });
     await expect(
       globalWorker.resolveGlobalExtends(['some-preset'])
     ).rejects.toThrow(CONFIG_PRESETS_INVALID);
     expect(presets.resolveConfigPresets).toHaveBeenCalled();
+    expect(parseConfigs).not.toHaveBeenCalled();
   });
 
   it('handles zero repos', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
       cacheDir: '/tmp/cache',
       repositories: [],
     });
     await expect(globalWorker.start()).resolves.toBe(0);
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
+    expect(repositoryWorker.renovateRepository).not.toHaveBeenCalled();
   });
 
   it('processes repositories', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',
       enabled: true,
       repositories: ['a', 'b'],
@@ -99,14 +95,15 @@ describe('workers/global/index', () => {
         },
       ],
     });
-    await globalWorker.start();
-    expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(2);
   });
 
   it('processes repositories break', async () => {
-    limits.isLimitReached = jest.fn(() => true);
-    configParser.parseConfigs.mockResolvedValueOnce({
+    const isLimitReached = jest.spyOn(limits, 'isLimitReached');
+    isLimitReached.mockReturnValue(true);
+    parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',
       enabled: true,
       repositories: ['a', 'b'],
@@ -119,12 +116,13 @@ describe('workers/global/index', () => {
       ],
     });
     await globalWorker.start();
-    expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
+    isLimitReached.mockReset();
   });
 
   it('exits with non-zero when errors are logged', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
       cacheDir: '/tmp/cache',
       repositories: [],
@@ -140,7 +138,7 @@ describe('workers/global/index', () => {
   });
 
   it('exits with zero when warnings are logged', async () => {
-    configParser.parseConfigs.mockResolvedValueOnce({
+    parseConfigs.mockResolvedValueOnce({
       baseDir: '/tmp/base',
       cacheDir: '/tmp/cache',
       repositories: [],
@@ -157,31 +155,31 @@ describe('workers/global/index', () => {
 
   describe('processes platforms', () => {
     it('github', async () => {
-      configParser.parseConfigs.mockResolvedValueOnce({
+      parseConfigs.mockResolvedValueOnce({
         repositories: ['a'],
         platform: 'github',
         endpoint: 'https://github.com/',
       });
       await globalWorker.start();
-      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
 
     it('gitlab', async () => {
-      configParser.parseConfigs.mockResolvedValueOnce({
+      parseConfigs.mockResolvedValueOnce({
         repositories: [{ repository: 'a' }],
         platform: 'gitlab',
         endpoint: 'https://my.gitlab.com/',
       });
       await globalWorker.start();
-      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('write repositories to file', () => {
     it('successfully write file', async () => {
-      configParser.parseConfigs.mockResolvedValueOnce({
+      parseConfigs.mockResolvedValueOnce({
         repositories: ['myOrg/myRepo'],
         platform: 'github',
         endpoint: 'https://github.com/',
@@ -194,7 +192,7 @@ describe('workers/global/index', () => {
         '/tmp/renovate-output.json',
         '["myOrg/myRepo"]'
       );
-      expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
+      expect(parseConfigs).toHaveBeenCalledTimes(1);
       expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
     });
   });

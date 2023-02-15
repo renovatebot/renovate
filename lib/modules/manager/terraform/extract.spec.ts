@@ -4,6 +4,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as hashicorp from '../../versioning/hashicorp';
 import { extractPackageFile } from '.';
 
 const modules = Fixtures?.get('modules.tf');
@@ -687,6 +688,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'hashicorp/terraform',
           depType: 'required_version',
           extractVersion: 'v(?<version>.*)$',
+          versioning: hashicorp.id,
         },
       ]);
     });

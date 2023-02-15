@@ -260,7 +260,6 @@ export async function getPr(
   );
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
@@ -832,7 +831,6 @@ export async function createPr({
   }
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${prInfoRes.body.id}`,
     ...utils.prInfo(prInfoRes.body),
   };
 

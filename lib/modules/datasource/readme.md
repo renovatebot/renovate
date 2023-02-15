@@ -5,7 +5,7 @@ Datasources are used in Renovate primarily to fetch released versions of package
 ## Follow the class-based programming style
 
 New datasources _must_ follow the class-based programming style.
-Use the `adoptium-java` datasource as a reference.
+Use the `java-version` datasource as a reference.
 
 Add the datasource to the API in [`api.ts`](api.ts) so that the new datasource is usable. If you find `Pending mocks!` errors in the Jest tests and your mocked URLs are correct, ensure the datasource is correctly registered.
 
