@@ -1568,7 +1568,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1684,7 +1683,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1736,7 +1734,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1788,7 +1785,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1947,7 +1943,6 @@ describe('modules/platform/gitlab/index', () => {
         bodyStruct: {
           hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
         },
-        displayNumber: 'Merge Request #12345',
         hasAssignees: false,
         headPipelineStatus: undefined,
         labels: undefined,

@@ -152,10 +152,6 @@ describe('util/exec/common', () => {
   const stdout = 'out message';
   const stderr = 'err message';
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('rawExec', () => {
     it('command exits with code 0', async () => {
       const cmd = 'ls -l';

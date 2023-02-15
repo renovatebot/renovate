@@ -1,8 +1,7 @@
 import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
-  ComposerReleasesArray,
-  ComposerReleasesRecord,
+  ComposerReleases,
   MinifiedArray,
   parsePackagesResponse,
   parsePackagesResponses,
@@ -111,54 +110,19 @@ describe('modules/datasource/packagist/schema', () => {
     });
   });
 
-  describe('ComposerReleasesArray', () => {
-    it('rejects ComposerReleasesArray', () => {
-      expect(() => ComposerReleasesArray.parse(null)).toThrow();
-      expect(() => ComposerReleasesArray.parse(undefined)).toThrow();
-      expect(() => ComposerReleasesArray.parse('')).toThrow();
-      expect(() => ComposerReleasesArray.parse({})).toThrow();
-    });
-
-    it('parses ComposerReleasesArray', () => {
-      expect(ComposerReleasesArray.parse([])).toEqual([]);
-      expect(ComposerReleasesArray.parse([null])).toEqual([]);
-      expect(ComposerReleasesArray.parse([1, 2, 3])).toEqual([]);
-      expect(ComposerReleasesArray.parse(['foobar'])).toEqual([]);
+  describe('ComposerReleases', () => {
+    it('parses ComposerReleases', () => {
+      expect(ComposerReleases.parse(null)).toBeEmptyArray();
+      expect(ComposerReleases.parse(undefined)).toBeEmptyArray();
+      expect(ComposerReleases.parse('')).toBeEmptyArray();
+      expect(ComposerReleases.parse({})).toBeEmptyArray();
+      expect(ComposerReleases.parse([])).toBeEmptyArray();
+      expect(ComposerReleases.parse([null])).toBeEmptyArray();
+      expect(ComposerReleases.parse([1, 2, 3])).toBeEmptyArray();
+      expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
       expect(
-        ComposerReleasesArray.parse([
-          { version: '1.2.3' },
-          { version: 'dev-main' },
-        ])
+        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
       ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
-    });
-  });
-
-  describe('ComposerReleasesRecord', () => {
-    it('rejects ComposerReleasesRecord', () => {
-      expect(() => ComposerReleasesRecord.parse(null)).toThrow();
-      expect(() => ComposerReleasesRecord.parse(undefined)).toThrow();
-      expect(() => ComposerReleasesRecord.parse('')).toThrow();
-      expect(() => ComposerReleasesRecord.parse([])).toThrow();
-    });
-
-    it('parses ComposerReleasesRecord', () => {
-      expect(ComposerReleasesRecord.parse({})).toEqual({});
-      expect(ComposerReleasesRecord.parse({ foo: null })).toEqual({});
-      expect(ComposerReleasesRecord.parse({ foo: 1, bar: 2, baz: 3 })).toEqual(
-        {}
-      );
-      expect(ComposerReleasesRecord.parse({ foo: 'bar' })).toEqual({});
-      expect(
-        ComposerReleasesRecord.parse({
-          '0.0.1': { foo: 'bar' },
-          '0.0.2': { version: '0.0.1' },
-          '1.2.3': { version: '1.2.3' },
-          'dev-main': { version: 'dev-main' },
-        })
-      ).toEqual({
-        '1.2.3': { version: '1.2.3' },
-        'dev-main': { version: 'dev-main' },
-      });
     });
   });
 
