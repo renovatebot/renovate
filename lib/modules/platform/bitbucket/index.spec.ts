@@ -603,6 +603,27 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.addReviewers(5, ['someuser', 'someotheruser'])
       ).toResolve();
     });
+
+    it('should handle reviewers as username or UUID', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, pr)
+        .put('/2.0/repositories/some/repo/pullrequests/5', {
+          title: pr.title,
+          reviewers: [
+            { username: 'someuser' },
+            { uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}' },
+          ],
+        })
+        .reply(200);
+      await expect(
+        bitbucket.addReviewers(5, [
+          'someuser',
+          '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        ])
+      ).toResolve();
+    });
   });
 
   describe('ensureComment()', () => {
