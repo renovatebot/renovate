@@ -46,5 +46,15 @@ exports[`modules/manager/npm/extract/pnpm .detectPnpmWorkspaces() uses pnpm work
     "packageJsonName": "@demo/solo-trailing-slash",
     "pnpmShrinkwrap": "pnpm-lock.yaml",
   },
+  {
+    "packageFile": "test/test-package/package.json",
+    "packageJsonName": "@demo/test-package",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
+  {
+    "packageFile": "tests/test-package2/package.json",
+    "packageJsonName": "@demo/test-package2",
+    "pnpmShrinkwrap": "pnpm-lock.yaml",
+  },
 ]
 `;

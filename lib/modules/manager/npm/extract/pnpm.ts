@@ -105,7 +105,11 @@ export async function detectPnpmWorkspaces(
       const { localDir } = GlobalConfig.get();
       const packages = await findPackages(
         upath.dirname(upath.join(localDir, workspaceYamlPath)),
-        { patterns: filters }
+        {
+          patterns: filters,
+          // Match the ignores used in @pnpm/find-workspace-packages
+          ignore: ['**/node_modules/**', '**/bower_components/**'],
+        }
       );
       const packagePaths = packages.map((pkg) =>
         upath.join(pkg.dir, 'package.json')

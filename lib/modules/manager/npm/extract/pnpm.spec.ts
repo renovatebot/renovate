@@ -126,6 +126,16 @@ describe('modules/manager/npm/extract/pnpm', () => {
           packageJsonName: '@demo/solo-trailing-slash',
           pnpmShrinkwrap: undefined as undefined | string,
         },
+        {
+          packageFile: 'test/test-package/package.json',
+          packageJsonName: '@demo/test-package',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
+        {
+          packageFile: 'tests/test-package2/package.json',
+          packageJsonName: '@demo/test-package2',
+          pnpmShrinkwrap: undefined as undefined | string,
+        },
       ];
 
       await detectPnpmWorkspaces(packageFiles);
