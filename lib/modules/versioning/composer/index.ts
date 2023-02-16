@@ -163,8 +163,8 @@ function minSatisfyingVersion(
   );
 }
 
-function subset(sub: string, dom: string): boolean | undefined {
-  return npm.subset!(composer2npm(sub), composer2npm(dom));
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return npm.subset!(composer2npm(subRange), composer2npm(superRange));
 }
 
 function getNewValue({

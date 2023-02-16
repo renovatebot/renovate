@@ -99,13 +99,13 @@ export interface VersioningApi {
   valueToVersion?(version: string): string;
 
   /**
-   * @returns true if sub range is entirely contained by dom range, false otherwise,
+   * @returns true if subRange is entirely contained by superRange, false otherwise,
    * and undefined if it cannot determine it.
    *
-   * @param sub - the sub range
-   * @param dom - the dom range
+   * @param subRange - the sub range
+   * @param superRange - the dom range
    */
-  subset?(sub: string, dom: string): boolean | undefined;
+  subset?(subRange: string, superRange: string): boolean | undefined;
 }
 
 export interface VersioningApiConstructor {

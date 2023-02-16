@@ -232,8 +232,8 @@ function sortVersions(a: string, b: string): number {
   return npm.sortVersions(poetry2semver(a) ?? '', poetry2semver(b) ?? '');
 }
 
-function subset(sub: string, dom: string): boolean | undefined {
-  return npm.subset!(poetry2npm(sub), poetry2npm(dom));
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return npm.subset!(poetry2npm(subRange), poetry2npm(superRange));
 }
 
 export const api: VersioningApi = {
