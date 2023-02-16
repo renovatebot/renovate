@@ -68,7 +68,7 @@ export interface BranchCache {
    */
   isModified?: boolean;
   /**
-   * 
+   *
    */
   pristine?: boolean;
   /**
