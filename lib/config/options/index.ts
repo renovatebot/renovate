@@ -1679,6 +1679,14 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['github'],
   },
   {
+    name: 'osvVulnerabilityAlerts',
+    description: 'Use vulnerability alerts from `osv.dev`.',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    experimentalIssues: [20427],
+  },
+  {
     name: 'pruneBranchAfterAutomerge',
     description: 'Set to `true` to enable branch pruning after automerging.',
     type: 'boolean',
@@ -1901,6 +1909,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'ignoreReviewers',
+    description:
+      'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
+    type: 'array',
+    subType: 'string',
+  },
+  {
     name: 'reviewers',
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',
@@ -1989,6 +2004,7 @@ const options: RenovateOptions[] = [
       'gomodTidy1.17',
       'gomodTidyE',
       'npmDedupe',
+      'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],

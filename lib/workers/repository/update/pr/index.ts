@@ -74,6 +74,20 @@ export function updatePrDebugData(
   };
 }
 
+function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
+  if (
+    is.nonEmptyArray(config.ignoreReviewers) &&
+    is.nonEmptyArray(pr.reviewers)
+  ) {
+    const ignoreReviewers = new Set(config.ignoreReviewers);
+    return (
+      pr.reviewers.filter((reviewer) => !ignoreReviewers.has(reviewer)).length >
+      0
+    );
+  }
+  return pr.reviewers ? pr.reviewers.length > 0 : false;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -273,9 +287,10 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
+
       if (
         !existingPr.hasAssignees &&
-        !existingPr.hasReviewers &&
+        !hasNotIgnoredReviewers(existingPr, config) &&
         config.automerge &&
         !config.assignAutomerge &&
         (await getBranchStatus()) === 'red'
@@ -292,8 +307,9 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // TODO: types (#7154)
-        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        logger.debug(
+          `Pull Request #${existingPr.number} does not need updating`
+        );
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -334,7 +350,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create PR: ' + prTitle);
-      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+      pr = { number: 0 } as never;
     } else {
       try {
         if (
@@ -415,8 +431,7 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      // TODO: types (#7154)
-      logger.debug(`Created ${pr.displayNumber!}`);
+      logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

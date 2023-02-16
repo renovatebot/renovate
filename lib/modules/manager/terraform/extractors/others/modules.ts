@@ -34,6 +34,12 @@ export class ModuleExtractor extends DependencyExtractor {
       return [];
     }
 
+    // istanbul ignore if
+    if (!is.plainObject(modules)) {
+      logger.debug({ modules }, 'Terraform: unexpected `modules` value');
+      return [];
+    }
+
     const dependencies = [];
     for (const moduleElement of Object.values(modules).flat()) {
       const dep = {

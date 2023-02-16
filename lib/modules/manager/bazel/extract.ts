@@ -1,6 +1,6 @@
 import type { PackageDependency, PackageFile } from '../types';
 import { parse } from './parser';
-import { extractDepFromFragment } from './rules';
+import { extractDepsFromFragment } from './rules';
 import type { RecordFragment } from './types';
 
 export function extractPackageFile(
@@ -16,14 +16,24 @@ export function extractPackageFile(
 
   for (let idx = 0; idx < fragments.length; idx += 1) {
     const fragment = fragments[idx];
+    for (const dep of extractDepsFromFragment(fragment)) {
+      dep.managerData = { idx };
 
-    const dep = extractDepFromFragment(fragment);
-    if (!dep) {
-      continue;
+      // Selectively provide `replaceString` in order
+      // to auto-replace functionality work correctly.
+      const replaceString = fragment.value;
+      if (
+        replaceString.startsWith('container_pull') ||
+        replaceString.startsWith('git_repository') ||
+        replaceString.startsWith('go_repository')
+      ) {
+        if (dep.currentValue && dep.currentDigest) {
+          dep.replaceString = replaceString;
+        }
+      }
+
+      deps.push(dep);
     }
-
-    dep.managerData = { idx };
-    deps.push(dep);
   }
 
   return deps.length ? { deps } : null;

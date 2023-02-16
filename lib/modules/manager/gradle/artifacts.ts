@@ -124,8 +124,6 @@ export async function updateArtifacts({
 
   try {
     const oldLockFileContentMap = await getFiles(lockFiles);
-
-    await writeLocalFile(packageFileName, newPackageFileContent);
     await prepareGradleCommand(gradlewFile);
 
     let cmd = `${gradlewName} --console=plain -q`;
@@ -159,6 +157,7 @@ export async function updateArtifacts({
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
+    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);

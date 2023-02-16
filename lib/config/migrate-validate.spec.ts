@@ -4,7 +4,6 @@ import { migrateAndValidate } from './migrate-validate';
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.resetAllMocks();
   config = getConfig();
 });
 

@@ -177,7 +177,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases)) {
+  for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -188,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources)) {
+  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -199,7 +199,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components)) {
+  for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({
