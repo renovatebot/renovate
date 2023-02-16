@@ -314,14 +314,15 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
-        if (linkHeader?.next?.url && linkHeader?.last?.page) {
+        const next = linkHeader?.next;
+        if (next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
           const baseUrl = opts.baseUrl;
-          const parsedUrl = new URL(linkHeader.next!.url, baseUrl);
+          const parsedUrl = new URL(next.url, baseUrl);
           const rebasePagination =
             !!baseUrl &&
             !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
