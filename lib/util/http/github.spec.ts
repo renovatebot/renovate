@@ -52,6 +52,7 @@ describe('util/http/github', () => {
   let repoCache: RepoCacheData = {};
 
   beforeEach(() => {
+    delete process.env.RENOVATE_X_REBASE_PAGINATION_LINKS;
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
@@ -227,6 +228,75 @@ describe('util/http/github', () => {
       const res = await githubApi.getJson('some-url', { paginate: true });
       expect(res).toBeDefined();
       expect(res.body).toEqual(['a']);
+    });
+
+    it('rebases GHE Server pagination links', async () => {
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      // The origin and base URL which Renovate uses (from its config) to reach GHE:
+      const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
+      setBaseUrl(baseUrl);
+      // The hostname from GHE settings, which users use through their browsers to reach GHE:
+      // https://docs.github.com/en/enterprise-server@3.5/admin/configuration/configuring-network-settings/configuring-a-hostname
+      const gheHostname = 'ghe.mycompany.com';
+      // GHE replies to paginated requests with a Link response header whose URLs have this base
+      const gheBaseUrl = `https://${gheHostname}/api/v3`;
+      const apiUrl = '/some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get(apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${gheBaseUrl}${apiUrl}&page=2>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${gheBaseUrl}${apiUrl}&page=3>; rel="next", <${gheBaseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('preserves pagination links by default', async () => {
+      const baseUrl = 'http://ghe.alternative.domain.com/api/v3';
+      setBaseUrl(baseUrl);
+      const apiUrl = '/some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get(apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
+    });
+
+    it('preserves pagination links for github.com', async () => {
+      process.env.RENOVATE_X_REBASE_PAGINATION_LINKS = '1';
+      const baseUrl = 'https://api.github.com/';
+
+      setBaseUrl(baseUrl);
+      const apiUrl = 'some-url?per_page=2';
+      httpMock
+        .scope(baseUrl)
+        .get('/' + apiUrl)
+        .reply(200, ['a', 'b'], {
+          link: `<${baseUrl}${apiUrl}&page=2>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=2`)
+        .reply(200, ['c', 'd'], {
+          link: `<${baseUrl}${apiUrl}&page=3>; rel="next", <${baseUrl}${apiUrl}&page=3>; rel="last"`,
+        })
+        .get(`/${apiUrl}&page=3`)
+        .reply(200, ['e']);
+      const res = await githubApi.getJson(apiUrl, { paginate: true });
+      expect(res.body).toEqual(['a', 'b', 'c', 'd', 'e']);
     });
 
     describe('handleGotError', () => {

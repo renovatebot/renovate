@@ -4,6 +4,8 @@ import { escapeRegExp, regEx } from '../../../../util/regex';
 import { parseUrl } from '../../../../util/url';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
+import { GitlabReleasesDatasource } from '../../../datasource/gitlab-releases';
+import { GitlabTagsDatasource } from '../../../datasource/gitlab-tags';
 import type { PackageDependency } from '../../types';
 
 // Source: https://bazel.build/rules/lib/repo/http
@@ -76,6 +78,27 @@ export function parseGithubPath(
     : { datasource, packageName, currentValue: value };
 }
 
+function parseGitlabPath(pathname: string): Partial<PackageDependency> | null {
+  // https://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.zip
+  // https://gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz
+  const [p0, p1, p2, p3, p4] = pathname.split('/').slice(1);
+  const packageName = p0 + '/' + p1;
+  if (p2 === '-' && p3 === 'archive' && p4) {
+    return isHash(p4)
+      ? {
+          datasource: GitlabTagsDatasource.id,
+          packageName,
+          currentDigest: p4,
+        }
+      : {
+          datasource: GitlabReleasesDatasource.id,
+          packageName,
+          currentValue: p4,
+        };
+  }
+  return null;
+}
+
 export function parseArchiveUrl(
   urlString: string | undefined | null
 ): Partial<PackageDependency> | null {
@@ -87,6 +110,10 @@ export function parseArchiveUrl(
 
   if (url?.host === 'github.com') {
     return parseGithubPath(url.pathname);
+  }
+
+  if (url?.host === 'gitlab.com') {
+    return parseGitlabPath(url.pathname);
   }
 
   return null;
