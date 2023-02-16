@@ -29,14 +29,14 @@ export interface BranchUpgradeCache {
 export interface PrCache {
   fingerprint: string;
   /**
-   *Whether this PR was last edited
+   * Whether this PR was last edited
    */
   lastEdited: string;
 }
 
 export interface BranchCache {
   /**
-   *Whether this branch has automerge enabled
+   * Whether this branch has automerge enabled
    */
   automerge: boolean;
   /**
@@ -68,7 +68,7 @@ export interface BranchCache {
    */
   isModified?: boolean;
   /**
-   *
+   * 
    */
   pristine?: boolean;
   /**
