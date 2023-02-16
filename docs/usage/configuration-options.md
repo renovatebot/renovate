@@ -817,7 +817,7 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 !!! note
     Renovate can only show release notes from some platforms and some package managers.
     We're planning improvements so that Renovate can show more release notes.
-    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
 
@@ -2168,6 +2168,7 @@ Table with options:
 | `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -2331,7 +2332,7 @@ This config option slows down the _rate_ at which Renovate creates PRs.
 Slowing Renovate down can be handy when you're onboarding a repository with a lot of dependencies.
 What may happen if you don't set a `prHourlyLimit`:
 
-1. Renovate creates a Onboarding PR
+1. Renovate creates an Onboarding PR
 1. You merge the onboarding PR to activate Renovate
 1. Renovate creates a "Pin Dependencies" PR (if needed)
 1. You merge the "Pin Dependencies" PR
