@@ -413,7 +413,7 @@ export async function getPkgReleases(
           }
 
           return constraint.some(
-            // If the constraint value is a subset of ant release's constraints, then it's OK
+            // If the constraint value is a subset of any release's constraints, then it's OK
             // fallback to release's constraint match if subset is not supported by versioning
             (releaseConstraint) =>
               !releaseConstraint ||

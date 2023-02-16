@@ -98,7 +98,11 @@ export interface VersioningApi {
 
   valueToVersion?(version: string): string;
 
-  subset?(sub: string, dom: string): boolean;
+  /**
+   * Returns true if sub range is entirely contained by dom range, false otherwise,
+   * and undefined if we wannot determine it.
+   */
+  subset?(sub: string, dom: string): boolean | undefined;
 }
 
 export interface VersioningApiConstructor {
