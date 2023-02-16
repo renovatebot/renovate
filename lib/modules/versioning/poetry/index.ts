@@ -253,6 +253,6 @@ export const api: VersioningApi = {
   matches,
   minSatisfyingVersion,
   sortVersions,
-  subset
+  subset,
 };
 export default api;

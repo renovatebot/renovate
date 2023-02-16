@@ -48,7 +48,7 @@ function getNewValue(_: NewValueConfig): string | null {
 function subset(sub: string, dom: string): boolean | undefined {
   return poetry.isValid(sub) && poetry.isValid(dom)
     ? poetry.subset!(sub, dom)
-    : pep440.subset!(sub, dom);
+    : undefined;
 }
 
 export const api: VersioningApi = {
@@ -59,6 +59,6 @@ export const api: VersioningApi = {
   isValid,
   matches,
   minSatisfyingVersion,
-  subset
+  subset,
 };
 export default api;

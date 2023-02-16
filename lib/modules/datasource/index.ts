@@ -418,7 +418,8 @@ export async function getPkgReleases(
             // fallback to release's constraint match if subset is not supported by versioning
             (releaseConstraint) =>
               !releaseConstraint ||
-              (version.subset?.(constraintValue, releaseConstraint) ?? version.matches(constraintValue, releaseConstraint))
+              (version.subset?.(constraintValue, releaseConstraint) ??
+                version.matches(constraintValue, releaseConstraint))
           );
         });
       }
