@@ -56,7 +56,7 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
   },
   maven: {
     'com.figure.gradle.semver-plugin': 
-      'https://github.com/FigureTechnologies/gradle-semver-plugin/releases',
+      'https://github.com/FigureTechnologies/gradle-semver-plugin',
   }
 };
 
