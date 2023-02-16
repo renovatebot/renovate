@@ -212,8 +212,7 @@ export async function doAutoReplace(
           regEx(escapeRegExp(currentDigest), 'g'),
           newDigest
         );
-      }
-      if (currentDigestShort && newDigest) {
+      } else if (currentDigestShort && newDigest) {
         newString = newString.replace(
           regEx(escapeRegExp(currentDigestShort), 'g'),
           newDigest
