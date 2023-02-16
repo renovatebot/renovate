@@ -405,7 +405,7 @@ const options: RenovateOptions[] = [
       'Set to enable rebase/retry markdown checkbox for onboarding PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gitlab', 'gitea'],
+    supportedPlatforms: ['gitea', 'github', 'gitlab'],
     globalOnly: true,
     experimental: true,
     experimentalIssues: [17633],
@@ -1528,7 +1528,7 @@ const options: RenovateOptions[] = [
     description: 'Label to make Renovate stop updating a PR.',
     type: 'string',
     default: 'stop-updating',
-    supportedPlatforms: ['azure', 'github', 'gitlab', 'gitea'],
+    supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
     name: 'stabilityDays',
@@ -1669,6 +1669,14 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     supportedPlatforms: ['github'],
+  },
+  {
+    name: 'osvVulnerabilityAlerts',
+    description: 'Use vulnerability alerts from `osv.dev`.',
+    type: 'boolean',
+    default: false,
+    experimental: true,
+    experimentalIssues: [20427],
   },
   {
     name: 'pruneBranchAfterAutomerge',
@@ -1893,6 +1901,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'ignoreReviewers',
+    description:
+      'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
+    type: 'array',
+    subType: 'string',
+  },
+  {
     name: 'reviewers',
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',
@@ -1979,7 +1994,9 @@ const options: RenovateOptions[] = [
       'gomodUpdateImportPaths',
       'gomodTidy',
       'gomodTidy1.17',
+      'gomodTidyE',
       'npmDedupe',
+      'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],

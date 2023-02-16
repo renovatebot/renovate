@@ -17,6 +17,7 @@ import {
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
+import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
@@ -73,6 +74,20 @@ export function updatePrDebugData(
   };
 }
 
+function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
+  if (
+    is.nonEmptyArray(config.ignoreReviewers) &&
+    is.nonEmptyArray(pr.reviewers)
+  ) {
+    const ignoreReviewers = new Set(config.ignoreReviewers);
+    return (
+      pr.reviewers.filter((reviewer) => !ignoreReviewers.has(reviewer)).length >
+      0
+    );
+  }
+  return pr.reviewers ? pr.reviewers.length > 0 : false;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -114,12 +129,7 @@ export async function ensurePr(
     ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
-      if (elapsedHours >= config.prNotPendingHours) {
+      if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
         logger.debug('Branch exceeds prNotPending hours - forcing PR creation');
         config.forcePr = true;
       }
@@ -153,11 +163,7 @@ export async function ensurePr(
     if ((await getBranchStatus()) === 'yellow') {
       logger.debug(`Branch status is yellow - checking timeout`);
       const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const currentTime = new Date();
-      const millisecondsPerHour = 1000 * 60 * 60;
-      const elapsedHours = Math.round(
-        (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
-      );
+      const elapsedHours = getElapsedHours(lastCommitTime);
       if (
         !dependencyDashboardCheck &&
         ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
@@ -281,9 +287,10 @@ export async function ensurePr(
   try {
     if (existingPr) {
       logger.debug('Processing existing PR');
+
       if (
         !existingPr.hasAssignees &&
-        !existingPr.hasReviewers &&
+        !hasNotIgnoredReviewers(existingPr, config) &&
         config.automerge &&
         !config.assignAutomerge &&
         (await getBranchStatus()) === 'red'
@@ -300,8 +307,9 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // TODO: types (#7154)
-        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        logger.debug(
+          `Pull Request #${existingPr.number} does not need updating`
+        );
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -342,7 +350,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create PR: ' + prTitle);
-      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+      pr = { number: 0 } as never;
     } else {
       try {
         if (
@@ -423,8 +431,7 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      // TODO: types (#7154)
-      logger.debug(`Created ${pr.displayNumber!}`);
+      logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

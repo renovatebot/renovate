@@ -8,9 +8,10 @@ const lockedVersion = Fixtures.get('lockedVersion.tf');
 
 describe('modules/manager/terraform/hcl/index', () => {
   describe('parseHCL()', () => {
-    it('should return flat modules', async () => {
-      const res = await parseHCL(modulesTF);
-      expect(Object.keys(res.module)).toBeArrayOfSize(6);
+    it('should return flat modules', () => {
+      const res = parseHCL(modulesTF);
+      expect(res?.module).toBeDefined();
+      expect(Object.keys(res!.module!)).toBeArrayOfSize(6);
       expect(res).toMatchObject({
         module: {
           bar: [
@@ -49,8 +50,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       });
     });
 
-    it('should return nested terraform block', async () => {
-      const res = await parseHCL(lockedVersion);
+    it('should return nested terraform block', () => {
+      const res = parseHCL(lockedVersion);
       expect(res).toMatchObject({
         terraform: [
           {
@@ -66,8 +67,8 @@ describe('modules/manager/terraform/hcl/index', () => {
       });
     });
 
-    it('should return resource blocks', async () => {
-      const res = await parseHCL(resourcesTF);
+    it('should return resource blocks', () => {
+      const res = parseHCL(resourcesTF);
       expect(res).toMatchObject({
         resource: {
           docker_container: {
@@ -97,8 +98,8 @@ describe('modules/manager/terraform/hcl/index', () => {
   });
 
   describe('parseJSON', () => {
-    it('should parse json', async () => {
-      const res = await parseJSON(resourcesTFJSON);
+    it('should parse json', () => {
+      const res = parseJSON(resourcesTFJSON);
       expect(res).toMatchObject({
         resource: {
           aws_instance: {

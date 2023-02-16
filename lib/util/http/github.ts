@@ -94,7 +94,7 @@ function handleGotError(
     err.statusCode === 403 &&
     message.startsWith('You have exceeded a secondary rate limit')
   ) {
-    logger.debug({ err }, 'GitHub failure: secondary rate limit');
+    logger.warn({ err }, 'GitHub failure: secondary rate limit');
     return new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
@@ -314,14 +314,14 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
-        if (linkHeader?.next && linkHeader?.last) {
+        if (linkHeader?.next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
           const baseUrl = opts.baseUrl;
-          const parsedUrl = new URL(linkHeader.next.url, baseUrl);
+          const parsedUrl = new URL(linkHeader.next!.url, baseUrl);
           const rebasePagination =
             !!baseUrl &&
             !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&

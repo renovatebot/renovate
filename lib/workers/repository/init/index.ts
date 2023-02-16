@@ -33,6 +33,7 @@ export async function initRepo(
   PackageFiles.clear();
   let config: RenovateConfig = initializeConfig(config_);
   await resetCaches();
+  logger.once.reset();
   config = await initApis(config);
   await initializeCaches(config as WorkerPlatformConfig);
   config = await getRepoConfig(config);

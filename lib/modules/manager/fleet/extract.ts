@@ -87,10 +87,15 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
   result.push(extractFleetHelmBlock(doc.helm));
 
   if (!is.undefined(doc.targetCustomizations)) {
+    // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
+    // if there is no version defined in the customization.
+    const helmBlockContext: FleetHelmBlock = { ...doc.helm };
+    delete helmBlockContext.version;
+
     for (const custom of doc.targetCustomizations) {
       const dep = extractFleetHelmBlock({
         // merge base config with customization
-        ...doc.helm,
+        ...helmBlockContext,
         ...custom.helm,
       });
       result.push({
@@ -130,7 +135,7 @@ export function extractPackageFile(
       deps.push(...gitRepoDeps);
     }
   } catch (err) {
-    logger.error({ error: err, packageFile }, 'Failed to parse fleet YAML');
+    logger.warn({ error: err, packageFile }, 'Failed to parse fleet YAML');
   }
 
   return deps.length ? { deps } : null;

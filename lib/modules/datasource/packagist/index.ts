@@ -5,12 +5,12 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as schema from './schema';
+import { extractDepReleases } from './schema';
 import type {
   AllPackages,
   PackageMeta,
@@ -119,29 +119,6 @@ export class PackagistDatasource extends Datasource {
     return packagistFile;
   }
 
-  private static extractDepReleases(versions: RegistryFile): ReleaseResult {
-    const dep: ReleaseResult = { releases: [] };
-    // istanbul ignore if
-    if (!versions) {
-      return dep;
-    }
-    dep.releases = Object.keys(versions).map((version) => {
-      // TODO: fix function parameter type: `versions`
-      const release = (versions as any)[version];
-      const parsedVersion = release.version ?? version;
-      dep.homepage = release.homepage || dep.homepage;
-      if (release.source?.url) {
-        dep.sourceUrl = release.source.url;
-      }
-      return {
-        version: parsedVersion.replace(regEx(/^v/), ''),
-        gitRef: parsedVersion,
-        releaseTimestamp: release.time,
-      };
-    });
-    return dep;
-  }
-
   @cache({
     namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => regUrl,
@@ -157,34 +134,35 @@ export class PackagistDatasource extends Datasource {
       packages,
       providersUrl,
       providersLazyUrl,
-      files,
-      includesFiles,
+      files = [],
+      includesFiles = [],
       providerPackages,
     } = registryMeta;
-    if (files) {
-      const queue = files.map(
-        (file) => (): Promise<PackagistFile> =>
-          this.getPackagistFile(regUrl, file)
-      );
-      const resolvedFiles = await p.all(queue);
-      for (const res of resolvedFiles) {
+
+    const includesPackages: Record<string, ReleaseResult | null> = {};
+
+    const tasks: (() => Promise<void>)[] = [];
+
+    for (const file of files) {
+      tasks.push(async () => {
+        const res = await this.getPackagistFile(regUrl, file);
         for (const [name, val] of Object.entries(res.providers)) {
           providerPackages[name] = val.sha256;
         }
-      }
+      });
     }
-    const includesPackages: Record<string, ReleaseResult> = {};
-    if (includesFiles) {
-      for (const file of includesFiles) {
+
+    for (const file of includesFiles) {
+      tasks.push(async () => {
         const res = await this.getPackagistFile(regUrl, file);
-        if (res.packages) {
-          for (const [key, val] of Object.entries(res.packages)) {
-            const dep = PackagistDatasource.extractDepReleases(val);
-            includesPackages[key] = dep;
-          }
+        for (const [key, val] of Object.entries(res.packages ?? {})) {
+          includesPackages[key] = extractDepReleases(val);
         }
-      }
+      });
     }
+
+    await p.all(tasks);
+
     const allPackages: AllPackages = {
       packages,
       providersUrl,
@@ -239,9 +217,7 @@ export class PackagistDatasource extends Datasource {
         includesPackages,
       } = allPackages;
       if (packages?.[packageName]) {
-        const dep = PackagistDatasource.extractDepReleases(
-          packages[packageName]
-        );
+        const dep = extractDepReleases(packages[packageName]);
         return dep;
       }
       if (includesPackages?.[packageName]) {
@@ -267,7 +243,7 @@ export class PackagistDatasource extends Datasource {
       // TODO: fix types (#9610)
       const versions = (await this.http.getJson<any>(pkgUrl, opts)).body
         .packages[packageName];
-      const dep = PackagistDatasource.extractDepReleases(versions);
+      const dep = extractDepReleases(versions);
       logger.trace({ dep }, 'dep');
       return dep;
     } catch (err) /* istanbul ignore next */ {
