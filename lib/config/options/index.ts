@@ -22,17 +22,17 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowPostUpgradeCommandTemplating',
+    name: 'allowPeriUpgradeCommandTemplating',
     description:
-      'Set this to `true` to allow templating for post-upgrade commands.',
+      'Set this to `true` to allow templating for pre-upgrade and post-upgrade commands.',
     type: 'boolean',
     default: false,
     globalOnly: true,
   },
   {
-    name: 'allowedPostUpgradeCommands',
+    name: 'allowedPeriUpgradeCommands',
     description:
-      'A list of regular expressions that decide which post-upgrade tasks are allowed.',
+      'A list of regular expressions that decide which pre-upgrade and post-upgrade tasks are allowed.',
     type: 'array',
     subType: 'string',
     default: [],
@@ -78,23 +78,6 @@ const options: RenovateOptions[] = [
     allowedValues: ['update', 'branch'],
     default: 'update',
     cli: false,
-  },
-  {
-    name: 'allowPreUpgradeCommandTemplating',
-    description:
-      'Set this to `true` to allow templating for pre-upgrade commands.',
-    type: 'boolean',
-    default: false,
-    globalOnly: true,
-  },
-  {
-    name: 'allowedPreUpgradeCommands',
-    description:
-      'A list of regular expressions that decide which pre-upgrade tasks are allowed.',
-    type: 'array',
-    subType: 'string',
-    default: [],
-    globalOnly: true,
   },
   {
     name: 'preUpgradeTasks',

@@ -111,11 +111,9 @@ export interface GlobalOnlyConfig {
 export interface RepoGlobalConfig {
   allowCustomCrateRegistries?: boolean;
   allowPlugins?: boolean;
-  allowPostUpgradeCommandTemplating?: boolean;
-  allowPreUpgradeCommandTemplating?: boolean;
+  allowPeriUpgradeCommandTemplating?: boolean;
   allowScripts?: boolean;
-  allowedPostUpgradeCommands?: string[];
-  allowedPreUpgradeCommands?: string[];
+  allowedPeriUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
   cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
