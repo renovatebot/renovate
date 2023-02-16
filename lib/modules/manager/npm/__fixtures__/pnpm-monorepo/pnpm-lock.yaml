@@ -56,6 +56,18 @@ importers:
     dependencies:
       dotenv: 9.0.2
 
+  test/test-package:
+    specifiers:
+      dotenv: ^9.0.2
+    dependencies:
+      dotenv: 9.0.2
+
+  tests/test-package2:
+    specifiers:
+      dotenv: ^9.0.2
+    dependencies:
+      dotenv: 9.0.2
+
 packages:
 
   /ansi-styles/3.2.1:
