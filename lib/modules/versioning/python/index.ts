@@ -45,9 +45,9 @@ function getNewValue(_: NewValueConfig): string | null {
   return null;
 }
 
-function subset(sub: string, dom: string): boolean | undefined {
-  return poetry.isValid(sub) && poetry.isValid(dom)
-    ? poetry.subset!(sub, dom)
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return poetry.isValid(subRange) && poetry.isValid(superRange)
+    ? poetry.subset!(subRange, superRange)
     : undefined;
 }
 
