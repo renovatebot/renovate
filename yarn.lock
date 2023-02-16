@@ -2509,20 +2509,20 @@
 "@renovate/eslint-plugin@file:./tools/eslint":
   version "0.0.0"
 
-"@renovatebot/osv-offline-db@1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.3.1.tgz#ce9db5e49cd37549afba874a89e56ae6c758cd83"
-  integrity sha512-DnNPBY0nCDRKF2yF4nfcRpj5IpWYsM9iLAc5bTyYVNGsMAnjThkpwkDi9dhG3Hf7pY2PWn7Aj2A704hq9b/MtQ==
+"@renovatebot/osv-offline-db@1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.3.2.tgz#960f687fce4555f3d802ff855318eeb9d34a9215"
+  integrity sha512-02sMhxKjmRvHm6HIdTEyVIAIdEdYWLOU/ecQuiP2hvgXg28P6GWj/BkAbQ8GU0uLfBMZiqB4DK9MKoI4wx7BJw==
   dependencies:
-    "@seald-io/nedb" "^4.0.0"
+    "@seald-io/nedb" "^4.0.1"
 
-"@renovatebot/osv-offline@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.0.tgz#c7081aec58058dbbd69e460250cf44537a43f24a"
-  integrity sha512-EQjn++uKasPZrVcUUkW3UP7hgQZrM99Fm2B+a4f3K+CWKRN8T5BIeqsSkgWBdDLPxxkDxQRqAm6ICetkmMFYGw==
+"@renovatebot/osv-offline@1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.1.tgz#660be0bb36e75115be01e35e88c5434232037486"
+  integrity sha512-qIaG49oXvH9qsafa+0Gn2xdDAqj66GeKIIY7Zt1qydBhpMpiWWF53EKn2Q2b3zXAs8ldVjUtf5Rd8dLyklYSkg==
   dependencies:
     "@octokit/rest" "^19.0.7"
-    "@renovatebot/osv-offline-db" "1.3.1"
+    "@renovatebot/osv-offline-db" "1.3.2"
     adm-zip "~0.5.10"
     fs-extra "^11.1.0"
     got "^11.8.6"
@@ -2545,7 +2545,7 @@
   resolved "https://registry.yarnpkg.com/@seald-io/binary-search-tree/-/binary-search-tree-1.0.3.tgz#165a9a456eaa30d15885b25db83861bcce2c6a74"
   integrity sha512-qv3jnwoakeax2razYaMsGI/luWdliBLHTdC6jU55hQt1hcFqzauH/HsBollQ7IR4ySTtYhT+xyHoijpA16C+tA==
 
-"@seald-io/nedb@^4.0.0":
+"@seald-io/nedb@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@seald-io/nedb/-/nedb-4.0.1.tgz#bfd62b5468e6b03e4f3a16dabd12c9d55aab8856"
   integrity sha512-E2l7EUEMkSO3WLydRxRWjVWzijzWehzKmy/q9ekbgaOOQjYD7zHdS8z3KsM8+aQ910agfREZCR+3YCc5Xuc9dg==

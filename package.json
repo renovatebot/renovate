@@ -155,7 +155,7 @@
     "@opentelemetry/sdk-trace-node": "1.9.1",
     "@opentelemetry/semantic-conventions": "1.9.1",
     "@qnighy/marshal": "0.1.3",
-    "@renovatebot/osv-offline": "1.2.0",
+    "@renovatebot/osv-offline": "1.2.1",
     "@renovatebot/pep440": "2.1.13",
     "@renovatebot/ruby-semver": "2.1.8",
     "@sindresorhus/is": "4.6.0",
