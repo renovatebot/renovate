@@ -28,6 +28,9 @@ export interface BranchUpgradeCache {
 
 export interface PrCache {
   fingerprint: string;
+  /**
+   *Whether this PR was last edited
+   */
   lastEdited: string;
 }
 
