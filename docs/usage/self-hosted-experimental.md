@@ -102,11 +102,11 @@ Default value: `asc`.
 
 ## `RENOVATE_X_REBASE_PAGINATION_LINKS`
 
+If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
+
 <!-- prettier-ignore -->
 !!! note
     For the GitHub Enterprise Server platform only.
-
-If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 
