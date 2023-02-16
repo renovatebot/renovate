@@ -103,6 +103,59 @@ For example:
 
 For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
 
+### GitHub Merge Queue
+
+Renovate supports GitHub's Merge Queue.
+
+Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) first.
+
+The steps you need to follow to enable GitHub's Merge Queue depend on whether you use GitHub Actions or another CI provider.
+
+<!-- prettier-ignore -->
+!!! tip "GitHub Merge Queue overview page"
+    GitHub has a page that shows all the PRs in the Merge Queue.
+    The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
+    For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
+
+#### If you use GitHub Actions
+
+If you use GitHub Actions as your CI provider, follow these steps:
+
+1. Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
+
+   ```yaml
+   on:
+     pull_request:
+     merge_group:
+   ```
+
+1. On `github.com`: Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
+1. On `github.com`: Confirm you've set the correct "required checks" for your base branch
+1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+   ```json
+   {
+     "automerge": true,
+     "platformAutomerge": true
+   }
+   ```
+
+#### If you don't use GitHub Actions
+
+If you _don't_ use GitHub Actions as your CI provider, follow these steps:
+
+1. Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this
+1. On `github.com`: Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
+1. On `github.com`: Confirm you've set the correct "required checks" for your base branch
+1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+   ```json
+   {
+     "automerge": true,
+     "platformAutomerge": true
+   }
+   ```
+
 ## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
