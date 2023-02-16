@@ -74,6 +74,10 @@ export { isVersion, matches };
 const equals = (version1: string, version2: string): boolean =>
   isVersion(version1) && isVersion(version2) && eq(version1, version2);
 
+function subset(sub: string, dom: string): boolean | undefined {
+  return undefined;
+}
+
 export const api: VersioningApi = {
   equals,
   getMajor,
@@ -91,6 +95,7 @@ export const api: VersioningApi = {
   getNewValue,
   sortVersions,
   isLessThanRange,
+  subset
 };
 
 export default api;
