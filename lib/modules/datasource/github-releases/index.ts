@@ -2,7 +2,7 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
-import { queryReleases } from '../../../util/github/graphql';
+import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type {
   GithubDigestFile,
   GithubRestAsset,
@@ -170,14 +170,15 @@ export class GithubReleasesDatasource extends Datasource {
    *  - Map the hashed asset to `newValue` and return the updated digest as a string
    */
   override async getDigest(
-    {
+    config: DigestConfig,
+    newValue: string
+  ): Promise<string | null> {
+    const {
       packageName: repo,
       currentValue,
       currentDigest,
       registryUrl,
-    }: DigestConfig,
-    newValue: string
-  ): Promise<string | null> {
+    } = config;
     logger.debug(
       { repo, currentValue, currentDigest, registryUrl, newValue },
       'getDigest'
@@ -185,13 +186,13 @@ export class GithubReleasesDatasource extends Datasource {
     if (!currentDigest) {
       return null;
     }
-    if (!currentValue) {
-      return currentDigest;
-    }
 
     const apiBaseUrl = getApiBaseUrl(registryUrl);
+    const currentReleaseUrl = currentValue
+      ? `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`
+      : `${apiBaseUrl}repos/${repo}/releases/latest`;
     const { body: currentRelease } = await this.http.getJson<GithubRestRelease>(
-      `${apiBaseUrl}repos/${repo}/releases/tags/${currentValue}`
+      currentReleaseUrl
     );
     const digestAsset = await this.findDigestAsset(
       currentRelease,
@@ -199,7 +200,9 @@ export class GithubReleasesDatasource extends Datasource {
     );
     let newDigest: string | null;
     if (!digestAsset || newValue === currentValue) {
-      newDigest = currentDigest;
+      const tags = await queryTags(config, this.http);
+      const tag = tags.find((tag) => tag.version === currentRelease.tag_name);
+      newDigest = tag?.hash ?? currentDigest;
     } else {
       const { body: newRelease } = await this.http.getJson<GithubRestRelease>(
         `${apiBaseUrl}repos/${repo}/releases/tags/${newValue}`

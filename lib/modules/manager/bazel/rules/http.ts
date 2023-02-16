@@ -44,7 +44,9 @@ function stripArchiveSuffix(value: string): string {
 }
 
 function isHash(value: unknown): value is string {
-  return is.string(value) && regEx(/[0-9a-z]{40}/i).test(value);
+  return (
+    is.string(value) && regEx(/^(?:[0-9a-z]{7}|[0-9a-z]{40})$/i).test(value)
+  );
 }
 
 export function parseGithubPath(
@@ -64,8 +66,10 @@ export function parseGithubPath(
     value = p5;
   } else if (p2 === 'archive') {
     // https://github.com/foo/bar/archive/1.2.3.tar.gz
-    datasource = GithubTagsDatasource.id;
-    value = p3;
+    value = stripArchiveSuffix(p3);
+    datasource = isHash(value)
+      ? GithubReleasesDatasource.id
+      : GithubTagsDatasource.id;
   }
 
   if (!value) {
