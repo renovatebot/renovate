@@ -58,7 +58,6 @@ describe('workers/repository/update/pr/index', () => {
       title: prTitle,
       bodyStruct,
       state: 'open',
-      displayNumber: `Pull Request #${number}`,
     };
 
     const config: BranchConfig = {
@@ -303,7 +302,6 @@ describe('workers/repository/update/pr/index', () => {
           '<!-- Reviewable:start -->something<!-- Reviewable:end -->';
         const changedPr: Pr = {
           ...pr,
-          displayNumber: 'PR1',
           bodyStruct: getPrBodyStruct(`${body}${reviewableContent}`),
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
@@ -315,7 +313,7 @@ describe('workers/repository/update/pr/index', () => {
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(prCache.setPrCache).toHaveBeenCalled();
         expect(logger.logger.debug).toHaveBeenCalledWith(
-          'PR1 does not need updating'
+          'Pull Request #123 does not need updating'
         );
       });
     });

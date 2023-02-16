@@ -95,5 +95,8 @@ export function validatePrCache(
     return false;
   }
 
+  logger.debug(
+    'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
+  );
   return true;
 }

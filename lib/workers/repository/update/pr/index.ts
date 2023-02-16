@@ -116,9 +116,6 @@ export async function ensurePr(
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
       if (validatePrCache(prCache, prFingerprint)) {
-        logger.debug(
-          'PR cache matches and no PR changes in last 24hrs, so skipping PR body check'
-        );
         return { type: 'with-pr', pr: existingPr };
       }
     } else if (config.repositoryCache === 'enabled') {
