@@ -5,6 +5,17 @@ jest.mock('./pnpm');
 
 describe('modules/manager/npm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
+    it('handles no monorepo', async () => {
+      const packageFiles: Partial<PackageFile>[] = [
+        {
+          packageFile: 'package.json',
+          deps: [],
+        },
+      ];
+      await detectMonorepos(packageFiles);
+      expect(packageFiles).toHaveLength(1);
+    });
+
     it('uses lerna package settings', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
