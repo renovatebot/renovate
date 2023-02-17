@@ -36,7 +36,7 @@ export async function generateLockFiles(
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
-  const lernaClient = lernaPackageFile.lernaClient;
+  const lernaClient: string = lernaPackageFile.managerData?.lernaClient;
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };

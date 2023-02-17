@@ -483,21 +483,21 @@ export async function extractPackageFile(
 
   return {
     deps,
-    packageJsonName,
     packageFileVersion,
     npmrc,
     ...lockFiles,
     managerData: {
+      lernaClient,
       lernaJsonFile,
+      lernaPackages,
+      packageJsonName,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager
       ),
+      workspacesPackages,
     },
-    lernaClient,
-    lernaPackages,
     skipInstalls,
-    workspacesPackages,
     constraints,
   };
 }
@@ -532,7 +532,7 @@ export async function extractAllPackageFiles(
   return npmFiles;
 }
 
-function setNodeCommitTopic(dep: NpmManagerData): void {
+function setNodeCommitTopic(dep: PackageDependency<NpmManagerData>): void {
   // This is a special case for Node.js to group it together with other managers
   if (dep.depName === 'node') {
     dep.commitMessageTopic = 'Node.js';

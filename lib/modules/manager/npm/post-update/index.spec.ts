@@ -554,10 +554,10 @@ describe('modules/manager/npm/post-update/index', () => {
               {
                 packageFile: 'package.json',
                 managerData: {
+                  lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
                 },
                 npmLock: 'package-lock.json',
-                lernaClient: 'npm',
               },
             ],
           }
@@ -713,10 +713,10 @@ describe('modules/manager/npm/post-update/index', () => {
               {
                 packageFile: 'package.json',
                 managerData: {
+                  lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
                 },
                 npmLock: 'npm-shrinkwrap.json',
-                lernaClient: 'npm',
               },
             ],
           }

@@ -71,16 +71,12 @@ export interface PackageFile<T = Record<string, any>>
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
   deps: PackageDependency[];
-  lernaClient?: string;
-  lernaPackages?: string[];
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string | null;
-  packageJsonName?: string;
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  workspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }

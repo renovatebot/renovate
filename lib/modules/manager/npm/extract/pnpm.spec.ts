@@ -88,52 +88,54 @@ describe('modules/manager/npm/extract/pnpm', () => {
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
-          packageJsonName: '@demo/nested-group-a',
+          managerData: { packageJsonName: '@demo/nested-group-a' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'nested-packages/group/b/package.json',
-          packageJsonName: '@demo/nested-group-b',
+          managerData: { packageJsonName: '@demo/nested-group-b' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'non-nested-packages/a/package.json',
-          packageJsonName: '@demo/non-nested-a',
+          managerData: { packageJsonName: '@demo/non-nested-a' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'non-nested-packages/b/package.json',
-          packageJsonName: '@demo/non-nested-b',
+          managerData: { packageJsonName: '@demo/non-nested-b' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'solo-package/package.json',
-          packageJsonName: '@demo/solo',
+          managerData: { packageJsonName: '@demo/solo' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'solo-package-leading-dot-slash/package.json',
-          packageJsonName: '@demo/solo-leading-dot-slash',
+          managerData: { packageJsonName: '@demo/solo-leading-dot-slash' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'solo-package-leading-double-dot-slash/package.json',
-          packageJsonName: '@demo/solo-leading-double-dot-slash',
+          managerData: {
+            packageJsonName: '@demo/solo-leading-double-dot-slash',
+          },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'solo-package-trailing-slash/package.json',
-          packageJsonName: '@demo/solo-trailing-slash',
+          managerData: { packageJsonName: '@demo/solo-trailing-slash' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'test/test-package/package.json',
-          packageJsonName: '@demo/test-package',
+          managerData: { packageJsonName: '@demo/test-package' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
         {
           packageFile: 'tests/test-package2/package.json',
-          packageJsonName: '@demo/test-package2',
+          managerData: { packageJsonName: '@demo/test-package2' },
           pnpmShrinkwrap: undefined as undefined | string,
         },
       ];
