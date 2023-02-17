@@ -228,6 +228,12 @@ describe('modules/manager/bazel/parser', () => {
             group = "com.example2",
             artifact = "bar",
             version = "2.2.2",
+          ),
+          maven.artifact(
+            "com.example3",
+            "baz",
+            "3.3.3",
+            neverlink = True
           )
         ],
         repositories = [
@@ -246,9 +252,15 @@ describe('modules/manager/bazel/parser', () => {
           'com.example1:foo:1.1.1',
           {
             _function: 'maven.artifact',
-            artifact: 'bar',
             group: 'com.example2',
+            artifact: 'bar',
             version: '2.2.2',
+          },
+          {
+            _function: 'maven.artifact',
+            '0': 'com.example3',
+            '1': 'baz',
+            '2': '3.3.3',
           },
         ],
         repositories: [

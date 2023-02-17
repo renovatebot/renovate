@@ -194,7 +194,7 @@ export async function extractPackageFile(
     overrides: 'overrides',
   };
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   function extractDependency(
     depType: string,
@@ -216,11 +216,11 @@ export async function extractPackageFile(
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
-        constraints.node = dep.currentValue;
+        extractedConstraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
-        constraints.yarn = dep.currentValue;
+        extractedConstraints.yarn = dep.currentValue;
         const major =
           isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
         if (major && major > 1) {
@@ -229,14 +229,14 @@ export async function extractPackageFile(
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'npm';
-        constraints.npm = dep.currentValue;
+        extractedConstraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'microsoft/vscode';
-        constraints.vscode = dep.currentValue;
+        extractedConstraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = 'unknown-engines';
       }
@@ -498,7 +498,7 @@ export async function extractPackageFile(
     lernaPackages,
     skipInstalls,
     workspacesPackages,
-    constraints,
+    extractedConstraints,
   };
 }
 
