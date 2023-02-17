@@ -141,8 +141,12 @@ If you use GitHub Actions as your CI provider, follow these steps:
 
    ```json
    {
-     "automerge": true,
-     "platformAutomerge": true
+     "platformAutomerge": true,
+     "packageRules": [{
+       "description": "Automerge non-major updates",
+       "matchUpdateTypes": ["minor", "patch"],
+       "automerge": true
+     }]
    }
    ```
 
@@ -154,14 +158,7 @@ If you _don't_ use GitHub Actions as your CI provider, follow these steps:
 1. On `github.com`:
    1. Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
    1. Confirm you've set the correct "required checks" for your base branch
-1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
-
-   ```json
-   {
-     "automerge": true,
-     "platformAutomerge": true
-   }
-   ```
+1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example)
 
 ## Automerging and scheduling
 
