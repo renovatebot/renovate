@@ -161,13 +161,13 @@ describe('modules/manager/npm/extract/monorepo', () => {
       ]);
     });
 
-    it('uses yarn workspaces package settings with constraints', async () => {
+    it('uses yarn workspaces package settings with extractedConstraints', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           workspacesPackages: ['docs'],
           skipInstalls: true, // coverage
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
@@ -180,13 +180,13 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageFile: 'docs/package.json',
           packageJsonName: 'docs',
           yarnLock: 'yarn.lock',
-          constraints: { yarn: '^3.2.0' },
+          extractedConstraints: { yarn: '^3.2.0' },
         },
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
@@ -195,7 +195,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           },
         },
         {
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '^3.2.0',
           },
