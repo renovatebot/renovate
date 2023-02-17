@@ -65,7 +65,6 @@ export interface PackageFile<T = Record<string, any>>
     ManagerData<T> {
   autoReplaceStringTemplate?: string;
   hasWorkspaces?: boolean;
-  constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
