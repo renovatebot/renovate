@@ -347,14 +347,14 @@ export function isECRMaxResultsError(err: HttpError): boolean {
 }
 
 const defaultConfig = {
-  commitMessageTopic: '{{{packageName}}} Docker tag',
+  commitMessageTopic: '{{{depName}}} Docker tag',
   commitMessageExtra:
     'to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{{prettyNewVersion}}}{{/if}}{{/if}}',
   digest: {
     branchTopic: '{{{depNameSanitized}}}-{{{currentValue}}}',
     commitMessageExtra: 'to {{newDigestShort}}',
     commitMessageTopic:
-      '{{{packageName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
+      '{{{depName}}}{{#if currentValue}}:{{{currentValue}}}{{/if}} Docker digest',
     group: {
       commitMessageTopic: '{{{groupName}}}',
       commitMessageExtra: '',
