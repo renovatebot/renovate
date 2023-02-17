@@ -158,6 +158,7 @@ export function extractPackageFile(
   let currentValue: string | null = null;
 
   function yieldDep(): void {
+    // istanbul ignore if
     if (!packageName) {
       return;
     }
