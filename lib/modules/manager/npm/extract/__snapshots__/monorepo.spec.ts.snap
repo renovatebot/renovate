@@ -40,6 +40,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
         "depName": "bar",
       },
     ],
+    "hasWorkspaces": false,
     "lernaClient": undefined,
     "managerData": {
       "hasPackageManager": undefined,
@@ -47,12 +48,14 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   {
+    "hasWorkspaces": false,
     "lernaClient": undefined,
     "managerData": {
       "hasPackageManager": undefined,
@@ -60,6 +63,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
     "skipInstalls": undefined,
@@ -108,6 +112,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
         "depName": "bar",
       },
     ],
+    "hasWorkspaces": false,
     "lernaClient": undefined,
     "managerData": {
       "hasPackageManager": undefined,
@@ -115,12 +120,14 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   {
+    "hasWorkspaces": false,
     "lernaClient": undefined,
     "managerData": {
       "hasPackageManager": undefined,
@@ -128,6 +135,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
     "skipInstalls": undefined,
@@ -147,11 +155,12 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
       "lernaJsonFile": "lerna.json",
     },
     "packageFile": "package.json",
-    "yarnWorkspacesPackages": [
+    "workspacesPackages": [
       "packages/*",
     ],
   },
   {
+    "hasWorkspaces": true,
     "lernaClient": "yarn",
     "managerData": {
       "hasPackageManager": undefined,
@@ -159,12 +168,14 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/a/package.json",
     "packageJsonName": "@org/a",
     "skipInstalls": undefined,
     "yarnLock": undefined,
   },
   {
+    "hasWorkspaces": true,
     "lernaClient": "yarn",
     "managerData": {
       "hasPackageManager": undefined,
@@ -172,6 +183,7 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
       "yarnZeroInstall": undefined,
     },
     "npmLock": undefined,
+    "npmrc": undefined,
     "packageFile": "packages/b/package.json",
     "packageJsonName": "@org/b",
     "skipInstalls": undefined,
