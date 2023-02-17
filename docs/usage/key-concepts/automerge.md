@@ -143,11 +143,13 @@ If you use GitHub Actions as your CI provider, follow these steps:
    ```json
    {
      "platformAutomerge": true,
-     "packageRules": [{
-       "description": "Automerge non-major updates",
-       "matchUpdateTypes": ["minor", "patch"],
-       "automerge": true
-     }]
+     "packageRules": [
+       {
+         "description": "Automerge non-major updates",
+         "matchUpdateTypes": ["minor", "patch"],
+         "automerge": true
+       }
+     ]
    }
    ```
 
