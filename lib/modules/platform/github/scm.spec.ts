@@ -1,5 +1,4 @@
 import { git, mocked } from '../../../../test/util';
-import { DefaultGitScm } from '../default-scm';
 import { GithubScm } from './scm';
 import * as _github from '.';
 
@@ -20,7 +19,7 @@ describe('modules/platform/github/scm', () => {
   };
 
   it('platformCommit = false => delegate to git', async () => {
-    await GithubScm.instance.commitAndPush({
+    await new GithubScm().commitAndPush({
       ...commitObj,
       platformCommit: false,
     });
@@ -33,7 +32,7 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = true => delegate to github', async () => {
-    await GithubScm.instance.commitAndPush({
+    await new GithubScm().commitAndPush({
       ...commitObj,
       platformCommit: true,
     });
@@ -43,10 +42,5 @@ describe('modules/platform/github/scm', () => {
       ...commitObj,
       platformCommit: true,
     });
-  });
-
-  it('check overridden singleton instance', () => {
-    expect(DefaultGitScm.instance instanceof GithubScm).toBeFalse();
-    expect(GithubScm.instance instanceof GithubScm).toBeTrue();
   });
 });

@@ -1,10 +1,6 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
-import { GithubScm } from '../../../../modules/platform/github/scm';
-import { setPlatformScmApi } from '../../../../modules/platform/scm';
-import { commitFiles } from '../../../../util/git';
+import { RenovateConfig, getConfig, scm } from '../../../../../test/util';
 import { createOnboardingBranch } from './create';
 
-jest.mock('../../../../util/git');
 jest.mock('./config', () => ({
   getOnboardingConfigContents: () =>
     JSON.stringify({
@@ -17,33 +13,12 @@ describe('workers/repository/onboarding/branch/create', () => {
 
   beforeEach(() => {
     config = getConfig();
-    setPlatformScmApi('default');
   });
 
   describe('createOnboardingBranch', () => {
     it('applies the default commit message', async () => {
       await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith({
-        branchName: 'renovate/configure',
-        files: [
-          {
-            type: 'addition',
-            path: 'renovate.json',
-            contents: '{"foo":"bar"}',
-          },
-        ],
-        message: 'Add renovate.json',
-        platformCommit: false,
-      });
-    });
-
-    it('commits via github platform', async () => {
-      GithubScm.instance.commitAndPush = jest.fn();
-      setPlatformScmApi('github');
-
-      await createOnboardingBranch(config);
-
-      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -65,7 +40,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
       await createOnboardingBranch(config);
 
-      expect(commitFiles).toHaveBeenCalledWith({
+      expect(scm.commitAndPush).toHaveBeenCalledWith({
         branchName: 'renovate/configure',
         files: [
           {
@@ -88,7 +63,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -115,7 +90,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -139,7 +114,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -166,7 +141,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -191,7 +166,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -214,7 +189,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -238,7 +213,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [
             {
@@ -262,7 +237,7 @@ describe('workers/repository/onboarding/branch/create', () => {
 
         await createOnboardingBranch(config);
 
-        expect(commitFiles).toHaveBeenCalledWith({
+        expect(scm.commitAndPush).toHaveBeenCalledWith({
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,

@@ -5,7 +5,12 @@ import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { Platform, platform as _platform } from '../lib/modules/platform';
+import {
+  Platform,
+  PlatformScm,
+  platform as _platform,
+} from '../lib/modules/platform';
+import { scm as _scm } from '../lib/modules/platform/scm';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
@@ -45,6 +50,7 @@ export const git = mocked(_git);
 
 // TODO: fix types, jest / typescript is using wrong overload (#7154)
 export const platform = mocked(partial<Required<Platform>>(_platform));
+export const scm = mocked(partial<Required<PlatformScm>>(_scm));
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 export const logger = mocked(_logger);

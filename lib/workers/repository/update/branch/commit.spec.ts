@@ -1,11 +1,7 @@
-import { getConfig, git } from '../../../../../test/util';
+import { getConfig, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
-import { GithubScm } from '../../../../modules/platform/github/scm';
-import { setPlatformScmApi } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
-
-jest.mock('../../../../util/git');
 
 describe('workers/repository/update/branch/commit', () => {
   describe('commitFilesToBranch', () => {
@@ -25,14 +21,13 @@ describe('workers/repository/update/branch/commit', () => {
         upgrades: [],
       } as BranchConfig;
       jest.resetAllMocks();
-      git.commitFiles.mockResolvedValueOnce('123test');
-      setPlatformScmApi('default');
+      scm.commitAndPush.mockResolvedValueOnce('123test');
       GlobalConfig.reset();
     });
 
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     it('commits files', async () => {
@@ -42,33 +37,8 @@ describe('workers/repository/update/branch/commit', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles.mock.calls).toMatchSnapshot();
-    });
-
-    it('commits via github platform', async () => {
-      config.updatedPackageFiles?.push({
-        type: 'addition',
-        path: 'package.json',
-        contents: 'some contents',
-      });
-      GithubScm.instance.commitAndPush = jest.fn();
-      setPlatformScmApi('github');
-      await commitFilesToBranch(config);
-      expect(GithubScm.instance.commitAndPush).toHaveBeenCalledWith({
-        baseBranch: undefined,
-        branchName: 'renovate/some-branch',
-        files: [
-          {
-            contents: 'some contents',
-            path: 'package.json',
-            type: 'addition',
-          },
-        ],
-        force: false,
-        message: 'some commit message',
-        platformCommit: false,
-      });
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
+      expect(scm.commitAndPush.mock.calls).toMatchSnapshot();
     });
 
     it('dry runs', async () => {
@@ -79,7 +49,7 @@ describe('workers/repository/update/branch/commit', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
   });
 });

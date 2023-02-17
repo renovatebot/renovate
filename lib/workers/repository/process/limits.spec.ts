@@ -2,13 +2,11 @@ import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   getConfig,
-  git,
   platform,
+  scm,
 } from '../../../../test/util';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
-
-jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 
@@ -98,7 +96,7 @@ describe('workers/repository/process/limits', () => {
   describe('getConcurrentBranchesRemaining()', () => {
     it('calculates concurrent limit remaining', async () => {
       config.branchConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
       const res = await limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
@@ -108,7 +106,7 @@ describe('workers/repository/process/limits', () => {
     it('defaults to prConcurrentLimit', async () => {
       config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
       const res = await limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);

@@ -1,6 +1,4 @@
 import type { Jest } from '@jest/environment';
-// Check for missing or pending http mocks
-import './http-mock';
 import type { Global } from '@jest/types';
 import type { AsymmetricMatchers, BaseExpect, Matchers } from 'expect';
 import type {
@@ -13,14 +11,22 @@ import type {
   MockedObject as JestMockedObject,
   SpyInstance as JestSpyInstance,
 } from 'jest-mock';
+import { mockDeep } from 'jest-mock-extended';
 import type { SnapshotMatchers } from 'jest-snapshot';
 import type { Plugin } from 'pretty-format';
+import type { PlatformScm } from '../lib/modules/platform';
+// Check for missing or pending http mocks
+import './http-mock';
 
 jest.mock('../lib/modules/platform', () => ({
   platform: jest.createMockFromModule('../lib/modules/platform/github'),
   initPlatform: jest.fn(),
   getPlatformList: jest.fn(),
 }));
+jest.mock('../lib/modules/platform/scm', () => ({
+  scm: mockDeep<PlatformScm>(),
+}));
+
 jest.mock('../lib/logger');
 
 //------------------------------------------------

@@ -1,4 +1,4 @@
-import { git, logger, mocked } from '../../../../test/util';
+import { git, logger, mocked, scm } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
@@ -91,7 +91,7 @@ describe('workers/repository/process/extract-update', () => {
           },
         },
       });
-      git.getBranchCommit.mockReturnValueOnce('123test');
+      scm.getBranchCommit.mockResolvedValueOnce('123test');
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);

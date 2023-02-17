@@ -7,6 +7,7 @@ import {
   mockedFunction,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -108,12 +109,12 @@ describe('workers/repository/config-migration/branch/index', () => {
       it('skips branch when there is a closed one delete it and add an ignore PR message', async () => {
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
-        git.branchExists.mockReturnValueOnce(true);
+        scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
         expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
-        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledWith(
           { prTitle: title },
           'Closed PR already exists. Skipping branch.'
@@ -131,7 +132,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         GlobalConfig.set({ dryRun: 'full' });
         platform.findPr.mockResolvedValueOnce(pr);
         platform.getBranchPr.mockResolvedValue(null);
-        git.branchExists.mockReturnValueOnce(true);
+        scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
         expect(logger.info).toHaveBeenCalledWith(
