@@ -72,11 +72,11 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
-  let yarnWorkspacesPackages: string[] | undefined;
+  let workspacesPackages: string[] | undefined;
   if (is.array(packageJson.workspaces)) {
-    yarnWorkspacesPackages = packageJson.workspaces;
+    workspacesPackages = packageJson.workspaces;
   } else {
-    yarnWorkspacesPackages = packageJson.workspaces?.packages;
+    workspacesPackages = packageJson.workspaces?.packages;
   }
 
   const lockFiles: NpmLockFiles = {
@@ -459,7 +459,7 @@ export async function extractPackageFile(
         packageFileVersion ||
         npmrc ||
         lernaJsonFile ||
-        yarnWorkspacesPackages
+        workspacesPackages
       )
     ) {
       logger.debug('Skipping file');
@@ -497,7 +497,7 @@ export async function extractPackageFile(
     lernaClient,
     lernaPackages,
     skipInstalls,
-    yarnWorkspacesPackages,
+    workspacesPackages,
     constraints,
   };
 }

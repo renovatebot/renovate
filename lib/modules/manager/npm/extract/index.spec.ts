@@ -336,7 +336,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
     });
 
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
@@ -351,7 +351,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -366,7 +366,7 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
     });
 
     it('extracts engines', async () => {

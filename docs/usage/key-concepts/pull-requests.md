@@ -31,7 +31,7 @@ Some Renovate pull requests have a section like this:
 
 > 👻 **Immortal:** This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/renovate/discussions) if that's undesired.
 
-A **immortal** PRs keeps popping up again after you close it.
+An **immortal** PR keeps popping up again after you close it.
 
 This document explains why we have immortal PRs, and how you can fix them.
 
