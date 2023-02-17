@@ -280,7 +280,7 @@ export async function updateArtifacts({
           .filter((dir) => {
             const isValid = isValidLocalPath(dir);
             if (!isValid) {
-              logger.debug(`invalid path in goGetDirs will be skipped: ${dir}`);
+              logger.warn(`Invalid path in goGetDirs: ${dir}`);
             }
             return isValid;
           })
