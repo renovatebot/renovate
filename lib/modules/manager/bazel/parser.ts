@@ -11,6 +11,7 @@ interface Ctx {
   stack: NestedFragment[];
   recordKey?: string;
   subRecordKey?: string;
+  argIndex?: number;
 }
 
 function emptyCtx(source: string): Ctx {
@@ -140,13 +141,18 @@ const kwParams = q
             startsWith: '(',
             endsWith: ')',
             search: q
-              .sym<Ctx>((ctx, { value: subRecordKey }) => ({
-                ...ctx,
-                subRecordKey,
-              }))
-              .op('=')
+              .opt(
+                q
+                  .sym<Ctx>((ctx, { value: subRecordKey }) => ({
+                    ...ctx,
+                    subRecordKey,
+                  }))
+                  .op('=')
+              )
               .str((ctx, { value: subRecordValue, offset }) => {
-                const subRecordKey = ctx.subRecordKey!;
+                const argIndex = ctx.argIndex ?? 0;
+
+                const subRecordKey = ctx.subRecordKey! ?? argIndex.toString();
                 const ruleFragment = currentFragment(ctx);
                 if (ruleFragment.type === 'record') {
                   ruleFragment.children[subRecordKey] = {
@@ -156,9 +162,12 @@ const kwParams = q
                   };
                 }
                 delete ctx.subRecordKey;
+                ctx.argIndex = argIndex + 1;
                 return ctx;
               }),
             postHandler: (ctx, tree) => {
+              delete ctx.argIndex;
+
               const callFrag = currentFragment(ctx);
               ctx.stack.pop();
               if (callFrag.type === 'record' && tree.type === 'wrapped-tree') {
