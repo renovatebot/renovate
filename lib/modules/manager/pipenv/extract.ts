@@ -147,6 +147,6 @@ export async function extractPackageFile(
     res.lockFiles = [lockFileName];
   }
 
-  res.constraints = constraints;
+  res.extractedConstraints = constraints;
   return res;
 }

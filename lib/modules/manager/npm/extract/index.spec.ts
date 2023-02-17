@@ -123,7 +123,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res?.deps).toHaveLength(13);
       expect(res).toMatchSnapshot({
-        constraints: {},
+        extractedConstraints: {},
         deps: [
           ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
           {
@@ -410,7 +410,7 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: {
+        extractedConstraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
           vscode: '>=1.49.3',
@@ -772,7 +772,7 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: { yarn: '3.0.0' },
+        extractedConstraints: { yarn: '3.0.0' },
         deps: [
           {
             commitMessageTopic: 'Yarn',

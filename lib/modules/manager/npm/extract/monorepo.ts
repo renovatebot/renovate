@@ -63,10 +63,10 @@ export async function detectMonorepos(
         subPackage.hasWorkspaces = !!workspacesPackages;
         subPackage.npmrc ??= npmrc;
 
-        if (p.constraints) {
-          subPackage.constraints = {
-            ...p.constraints,
-            ...subPackage.constraints,
+        if (p.extractedConstraints) {
+          subPackage.extractedConstraints = {
+            ...p.extractedConstraints,
+            ...subPackage.extractedConstraints,
           };
         }
 

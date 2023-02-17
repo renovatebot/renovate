@@ -21,15 +21,15 @@ export async function getLockedVersions(
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
-      if (!isYarn1 && !packageFile.constraints?.yarn) {
+      if (!isYarn1 && !packageFile.extractedConstraints?.yarn) {
         if (lockfileVersion && lockfileVersion >= 8) {
           // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
-          packageFile.constraints!.yarn = '^3.0.0';
+          packageFile.extractedConstraints!.yarn = '^3.0.0';
         } else if (lockfileVersion && lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          packageFile.constraints!.yarn = '^2.2.0';
+          packageFile.extractedConstraints!.yarn = '^2.2.0';
         } else {
-          packageFile.constraints!.yarn = '^2.0.0';
+          packageFile.extractedConstraints!.yarn = '^2.0.0';
         }
       }
       for (const dep of packageFile.deps) {
@@ -58,22 +58,26 @@ export async function getLockedVersions(
       }
       const { lockfileVersion } = lockFileCache[npmLock];
       if (lockfileVersion === 1) {
-        if (packageFile.constraints?.npm) {
+        if (packageFile.extractedConstraints?.npm) {
           // Add a <7 constraint if it's not already a fixed version
-          if (semver.satisfies('6.14.18', packageFile.constraints.npm)) {
-            packageFile.constraints.npm += ' <7';
+          if (
+            semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
+          ) {
+            packageFile.extractedConstraints.npm += ' <7';
           }
         } else {
-          packageFile.constraints!.npm = '<7';
+          packageFile.extractedConstraints!.npm = '<7';
         }
       } else if (lockfileVersion === 2) {
-        if (packageFile.constraints?.npm) {
+        if (packageFile.extractedConstraints?.npm) {
           // Add a <9 constraint if the latest 8.x is compatible
-          if (semver.satisfies('8.19.3', packageFile.constraints.npm)) {
-            packageFile.constraints.npm += ' <9';
+          if (
+            semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
+          ) {
+            packageFile.extractedConstraints.npm += ' <9';
           }
         } else {
-          packageFile.constraints!.npm = '<9';
+          packageFile.extractedConstraints!.npm = '<9';
         }
       }
       for (const dep of packageFile.deps) {
