@@ -36,11 +36,11 @@ export async function lookupUpdates(
     currentDigest,
     currentValue,
     datasource,
-    depName,
     digestOneAndOnly,
     followTag,
     lockedVersion,
     packageFile,
+    packageName,
     pinDigests,
     rollbackPrs,
     isVulnerabilityAlert,
@@ -53,7 +53,7 @@ export async function lookupUpdates(
     warnings: [],
   } as any;
   try {
-    logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
+    logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
     // Use the datasource's default versioning if none is configured
     config.versioning ??= getDefaultVersioning(datasource);
     const versioning = allVersioning.get(config.versioning);
@@ -83,16 +83,16 @@ export async function lookupUpdates(
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
-          topic: depName,
-          message: `Failed to look up ${datasource} dependency ${depName}`,
+          topic: packageName,
+          message: `Failed to look up ${datasource} dependency ${packageName}`,
         };
-        logger.debug({ dependency: depName, packageFile }, warning.message);
+        logger.debug({ dependency: packageName, packageFile }, warning.message);
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug(`Found deprecationMessage for dependency ${depName}`);
+        logger.debug(`Found deprecationMessage for dependency ${packageName}`);
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -114,7 +114,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug({ dependency: depName, result: dependency }, message);
+        logger.debug({ dependency: packageName, result: dependency }, message);
         if (!currentDigest) {
           return res;
         }
@@ -125,8 +125,8 @@ export async function lookupUpdates(
         const taggedVersion = dependency.tags?.[followTag];
         if (!taggedVersion) {
           res.warnings.push({
-            topic: depName,
-            message: `Can't find version with tag ${followTag} for ${depName}`,
+            topic: packageName,
+            message: `Can't find version with tag ${followTag} for ${packageName}`,
           });
           return res;
         }
@@ -148,9 +148,9 @@ export async function lookupUpdates(
         // istanbul ignore if
         if (!rollback) {
           res.warnings.push({
-            topic: depName,
+            topic: packageName,
             // TODO: types (#7154)
-            message: `Can't find version matching ${currentValue!} for ${depName}`,
+            message: `Can't find version matching ${currentValue!} for ${packageName}`,
           });
           return res;
         }
@@ -314,7 +314,7 @@ export async function lookupUpdates(
           // istanbul ignore if
           if (rangeStrategy === 'bump') {
             logger.trace(
-              { depName, currentValue, lockedVersion, newVersion },
+              { packageName, currentValue, lockedVersion, newVersion },
               'Skipping bump because newValue is the same'
             );
             continue;
@@ -329,7 +329,7 @@ export async function lookupUpdates(
       }
     } else if (currentValue) {
       logger.debug(
-        `Dependency ${depName} has unsupported value ${currentValue}`
+        `Dependency ${packageName} has unsupported value ${currentValue}`
       );
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
@@ -390,7 +390,7 @@ export async function lookupUpdates(
           if (update.newDigest === null) {
             logger.debug(
               {
-                depName,
+                packageName,
                 currentValue,
                 datasource,
                 newValue: update.newValue,
@@ -404,7 +404,7 @@ export async function lookupUpdates(
             if (currentDigest) {
               res.warnings.push({
                 message: `Could not determine new digest for update (datasource: ${datasource})`,
-                topic: depName,
+                topic: packageName,
               });
             }
           }
@@ -454,7 +454,7 @@ export async function lookupUpdates(
         currentDigest,
         currentValue,
         datasource,
-        depName,
+        packageName,
         digestOneAndOnly,
         followTag,
         lockedVersion,

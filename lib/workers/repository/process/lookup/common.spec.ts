@@ -5,7 +5,7 @@ describe('workers/repository/process/lookup/common', () => {
   it('overrides extracted config with user config', () => {
     const config: LookupUpdateConfig = {
       datasource: '',
-      depName: '',
+      packageName: '',
       versioning: '',
       rangeStrategy: 'pin',
     };
@@ -20,7 +20,7 @@ describe('workers/repository/process/lookup/common', () => {
     };
     expect(mergeConfigConstraints(config)).toMatchObject({
       datasource: '',
-      depName: '',
+      packageName: '',
       versioning: '',
       rangeStrategy: 'pin',
       constraints: {
@@ -35,7 +35,7 @@ describe('workers/repository/process/lookup/common', () => {
   it('sets config with extracted config', () => {
     const config: LookupUpdateConfig = {
       datasource: '',
-      depName: '',
+      packageName: '',
       versioning: '',
       rangeStrategy: 'pin',
     };
@@ -45,7 +45,7 @@ describe('workers/repository/process/lookup/common', () => {
     };
     expect(mergeConfigConstraints(config)).toMatchObject({
       datasource: '',
-      depName: '',
+      packageName: '',
       versioning: '',
       rangeStrategy: 'pin',
       constraints: {

@@ -20,7 +20,7 @@ export class HelmDatasource extends Datasource {
   override readonly defaultRegistryUrls = ['https://charts.helm.sh/stable'];
 
   override readonly defaultConfig = {
-    commitMessageTopic: 'Helm release {{depName}}',
+    commitMessageTopic: 'Helm release {{packageName}}',
   };
 
   override readonly defaultVersioning = helmVersioning.id;
