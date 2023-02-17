@@ -440,8 +440,7 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName =
-    config.replacementName ?? config.packageName;
+  const packageName = config.replacementName ?? config.packageName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
