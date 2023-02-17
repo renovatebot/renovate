@@ -24,8 +24,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -145,8 +145,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -325,8 +325,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -374,8 +374,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -408,8 +408,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -475,8 +475,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -529,8 +529,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
   "packageJsonName": undefined,
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -665,8 +665,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -801,8 +801,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -937,8 +937,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": "yarn.lock",
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -959,10 +959,10 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex y
   "packageJsonName": "@a/b",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
+  "workspacesPackages": [
     "packages/*",
   ],
+  "yarnLock": undefined,
 }
 `;
 
@@ -1097,8 +1097,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`]
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -1119,10 +1119,10 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
   "packageJsonName": "@a/b",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
+  "workspacesPackages": [
     "packages/*",
   ],
+  "yarnLock": undefined,
 }
 `;
 
@@ -1143,13 +1143,12 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
   "packageJsonName": "@a/b",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
-  "yarnWorkspacesPackages": [
+  "workspacesPackages": [
     "packages/*",
   ],
+  "yarnLock": undefined,
 }
 `;
-
 
 exports[`modules/manager/npm/extract/index .extractPackageFile() returns an array of dependencies 1`] = `
 {
@@ -1282,8 +1281,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": undefined,
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": undefined,
 }
 `;
 
@@ -1400,8 +1399,8 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
+  "workspacesPackages": [],
   "yarnLock": undefined,
-  "yarnWorkspacesPackages": [],
 }
 `;
 
@@ -1536,7 +1535,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
   "packageJsonName": "renovate",
   "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
+  "workspacesPackages": undefined,
   "yarnLock": "yarn.lock",
-  "yarnWorkspacesPackages": undefined,
 }
 `;
