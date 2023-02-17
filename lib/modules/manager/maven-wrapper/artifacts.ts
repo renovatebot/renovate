@@ -5,17 +5,20 @@ import { dirname, join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ExecOptions, ExtraEnv } from '../../../util/exec/types';
 import { chmodLocalFile, readLocalFile, statLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type { StatusResult } from '../../../util/git/types';
+import { regEx } from '../../../util/regex';
 import mavenVersioning from '../../versioning/maven';
 import type {
+  PackageDependency,
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
 
+const DEFAULT_MAVEN_REPO_URL = 'https://repo.maven.apache.org/maven2';
 interface MavenWrapperPaths {
   wrapperExecutableFileName: string;
   localProjectDir: string;
@@ -60,7 +63,9 @@ export async function updateArtifacts({
       logger.info('No mvnw found - skipping Artifacts update');
       return null;
     }
-    await executeWrapperCommand(cmd, config, packageFileName);
+
+    const extraEnv = getExtraEnvOptions(updatedDeps);
+    await executeWrapperCommand(cmd, config, packageFileName, extraEnv);
 
     const status = await getRepoStatus();
     const artifactFileNames = [
@@ -133,13 +138,16 @@ export function getJavaConstraint(
 async function executeWrapperCommand(
   cmd: string,
   config: UpdateArtifactsConfig,
-  packageFileName: string
+  packageFileName: string,
+  extraEnv: ExtraEnv
 ): Promise<void> {
   logger.debug(`Updating maven wrapper: "${cmd}"`);
   const { wrapperFullyQualifiedPath } = getMavenPaths(packageFileName);
+
   const execOptions: ExecOptions = {
     cwdFile: wrapperFullyQualifiedPath,
     docker: {},
+    extraEnv,
     toolConstraints: [
       {
         toolName: 'java',
@@ -155,6 +163,36 @@ async function executeWrapperCommand(
     logger.error({ err }, 'Error executing maven wrapper update command.');
     throw err;
   }
+}
+
+function getExtraEnvOptions(deps: PackageDependency[]): ExtraEnv {
+  const customMavenWrapperUrl = getCustomMavenWrapperRepoUrl(deps);
+  if (customMavenWrapperUrl) {
+    return { MVNW_REPOURL: customMavenWrapperUrl };
+  }
+  return {};
+}
+
+function getCustomMavenWrapperRepoUrl(
+  deps: PackageDependency[]
+): string | null {
+  const replaceString = deps.find(
+    (dep) => dep.depName === 'maven-wrapper'
+  )?.replaceString;
+
+  if (!replaceString) {
+    return null;
+  }
+
+  const match = regEx(/^(.*?)\/org\/apache\/maven\/wrapper\//).exec(
+    replaceString
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  return match[1] === DEFAULT_MAVEN_REPO_URL ? null : match[1];
 }
 
 async function createWrapperCommand(

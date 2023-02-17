@@ -259,6 +259,11 @@ function setGraphqlPageSize(fieldName: string, newPageSize: number): void {
   }
 }
 
+function replaceUrlBase(url: URL, baseUrl: string): URL {
+  const relativeUrl = `${url.pathname}${url.search}`;
+  return new URL(relativeUrl, baseUrl);
+}
+
 export class GithubHttp extends Http<GithubHttpOptions> {
   constructor(hostType = 'github', options?: GithubHttpOptions) {
     super(hostType, options);
@@ -309,15 +314,27 @@ export class GithubHttp extends Http<GithubHttpOptions> {
         // Check if result is paginated
         const pageLimit = opts.pageLimit ?? 10;
         const linkHeader = parseLinkHeader(result?.headers?.link);
-        if (linkHeader?.next && linkHeader?.last) {
+        const next = linkHeader?.next;
+        if (next?.url && linkHeader?.last?.page) {
           let lastPage = parseInt(linkHeader.last.page, 10);
           // istanbul ignore else: needs a test
           if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
             lastPage = Math.min(pageLimit, lastPage);
           }
+          const baseUrl = opts.baseUrl;
+          const parsedUrl = new URL(next.url, baseUrl);
+          const rebasePagination =
+            !!baseUrl &&
+            !!process.env.RENOVATE_X_REBASE_PAGINATION_LINKS &&
+            // Preserve github.com URLs for use cases like release notes
+            parsedUrl.origin !== 'https://api.github.com';
+          const firstPageUrl = rebasePagination
+            ? replaceUrlBase(parsedUrl, baseUrl)
+            : parsedUrl;
           const queue = [...range(2, lastPage)].map(
             (pageNumber) => (): Promise<HttpResponse<T>> => {
-              const nextUrl = new URL(linkHeader.next.url, opts.baseUrl);
+              // copy before modifying searchParams
+              const nextUrl = new URL(firstPageUrl);
               nextUrl.searchParams.set('page', String(pageNumber));
               return this.request<T>(
                 nextUrl,

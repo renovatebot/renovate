@@ -120,7 +120,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           },
           lernaPackages: ['oldpackages/*'],
           lernaClient: 'yarn',
-          yarnWorkspacesPackages: ['packages/*'],
+          workspacesPackages: ['packages/*'],
         },
         {
           packageFile: 'packages/a/package.json',
@@ -141,7 +141,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
-          yarnWorkspacesPackages: 'packages/*',
+          workspacesPackages: 'packages/*',
         },
         {
           packageFile: 'packages/a/package.json',
@@ -165,7 +165,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
-          yarnWorkspacesPackages: ['docs'],
+          workspacesPackages: ['docs'],
           skipInstalls: true, // coverage
           constraints: {
             node: '^14.15.0 || >=16.13.0',
@@ -215,7 +215,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           },
           skipInstalls: false,
           npmrc: '@org:registry=//registry.some.org\n',
-          yarnWorkspacesPackages: 'packages/*',
+          workspacesPackages: 'packages/*',
         },
         {
           packageFile: 'packages/a/package.json',

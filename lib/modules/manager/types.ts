@@ -64,7 +64,7 @@ export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  hasYarnWorkspaces?: boolean;
+  hasWorkspaces?: boolean;
   constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
@@ -80,7 +80,7 @@ export interface PackageFile<T = Record<string, any>>
   packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  yarnWorkspacesPackages?: string[] | string;
+  workspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
@@ -187,6 +187,9 @@ export interface Upgrade<T = Record<string, any>>
   isLockFileMaintenance?: boolean;
   isRemediation?: boolean;
   isVulnerabilityAlert?: boolean;
+  registryUrls?: string[] | null;
+  currentVersion?: string;
+  replaceString?: string;
 }
 
 export interface ArtifactError {
@@ -201,7 +204,7 @@ export interface UpdateArtifactsResult {
 
 export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
-  updatedDeps: PackageDependency<T>[];
+  updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }

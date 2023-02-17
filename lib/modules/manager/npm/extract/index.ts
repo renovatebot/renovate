@@ -20,6 +20,12 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import {
+  YarnConfig,
+  loadConfigFromLegacyYarnrc,
+  loadConfigFromYarnrcYml,
+  resolveRegistryUrl,
+} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -66,11 +72,11 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
-  let yarnWorkspacesPackages: string[] | undefined;
+  let workspacesPackages: string[] | undefined;
   if (is.array(packageJson.workspaces)) {
-    yarnWorkspacesPackages = packageJson.workspaces;
+    workspacesPackages = packageJson.workspaces;
   } else {
-    yarnWorkspacesPackages = packageJson.workspaces?.packages;
+    workspacesPackages = packageJson.workspaces?.packages;
   }
 
   const lockFiles: NpmLockFiles = {
@@ -137,6 +143,18 @@ export async function extractPackageFile(
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+
+  let yarnConfig: YarnConfig | null = null;
+  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  if (is.string(repoYarnrcYml)) {
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
+
+  const legacyYarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
+  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  if (is.string(repoLegacyYarnrc)) {
+    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
+  }
 
   let lernaJsonFile: string | undefined;
   let lernaPackages: string[] | undefined;
@@ -271,6 +289,12 @@ export async function extractPackageFile(
       dep.skipReason = 'file';
       hasFancyRefs = true;
       return dep;
+    }
+    if (yarnConfig) {
+      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
+      if (registryUrlFromYarnConfig) {
+        dep.registryUrls = [registryUrlFromYarnConfig];
+      }
     }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
@@ -435,7 +459,7 @@ export async function extractPackageFile(
         packageFileVersion ||
         npmrc ||
         lernaJsonFile ||
-        yarnWorkspacesPackages
+        workspacesPackages
       )
     ) {
       logger.debug('Skipping file');
@@ -473,7 +497,7 @@ export async function extractPackageFile(
     lernaClient,
     lernaPackages,
     skipInstalls,
-    yarnWorkspacesPackages,
+    workspacesPackages,
     constraints,
   };
 }

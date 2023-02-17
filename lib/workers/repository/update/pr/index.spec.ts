@@ -299,7 +299,7 @@ describe('workers/repository/update/pr/index', () => {
 
         expect(res).toEqual({
           type: 'with-pr',
-          pr: { displayNumber: 'Dry run PR', number: 0 },
+          pr: { number: 0 },
         });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
@@ -341,8 +341,6 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('Automerge', () => {
       it('handles branch automerge', async () => {
-        platform.getBranchPr.mockResolvedValueOnce(pr);
-
         const res = await ensurePr({
           ...config,
           automerge: true,
@@ -361,7 +359,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -371,6 +368,27 @@ describe('workers/repository/update/pr/index', () => {
           automerge: true,
           automergeType: 'pr',
           assignAutomerge: false,
+        });
+
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
+        expect(participants.addParticipants).toHaveBeenCalled();
+      });
+
+      it('adds reviewers for PR automerge with red status and existing ignorable reviewers that can be ignored', async () => {
+        const changedPr: Pr = {
+          ...pr,
+          hasAssignees: false,
+          reviewers: ['renovate-approve'],
+        };
+        platform.getBranchPr.mockResolvedValueOnce(changedPr);
+        checks.resolveBranchStatus.mockResolvedValueOnce('red');
+
+        const res = await ensurePr({
+          ...config,
+          automerge: true,
+          automergeType: 'pr',
+          assignAutomerge: false,
+          ignoreReviewers: ['renovate-approve'],
         });
 
         expect(res).toEqual({ type: 'with-pr', pr: changedPr });
@@ -479,7 +497,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -504,7 +521,6 @@ describe('workers/repository/update/pr/index', () => {
         const changedPr: Pr = {
           ...pr,
           hasAssignees: false,
-          hasReviewers: false,
         };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
         checks.resolveBranchStatus.mockResolvedValueOnce('red');
@@ -533,7 +549,6 @@ describe('workers/repository/update/pr/index', () => {
           const changedPr: Pr = {
             ...pr,
             hasAssignees: false,
-            hasReviewers: false,
           };
           platform.getBranchPr.mockResolvedValueOnce(changedPr);
           checks.resolveBranchStatus.mockResolvedValueOnce('red');

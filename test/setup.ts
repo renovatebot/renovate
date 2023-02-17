@@ -27,7 +27,7 @@ jest.mock('../lib/modules/platform/scm', () => ({
   scm: mockDeep<PlatformScm>(),
 }));
 
-jest.mock('../lib/logger');
+jest.mock('../lib/logger', () => jest.createMockFromModule('../lib/logger'));
 
 //------------------------------------------------
 // Required global jest types

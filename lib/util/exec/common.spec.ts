@@ -1,5 +1,5 @@
 import { spawn as _spawn } from 'child_process';
-import type { ChildProcess, SendHandle, Serializable } from 'child_process';
+import type { SendHandle, Serializable } from 'child_process';
 import { Readable } from 'stream';
 import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
@@ -144,17 +144,13 @@ function getSpawnStub(args: StubArgs): any {
     unref,
     kill,
     pid,
-  } as ChildProcess;
+  };
 }
 
 describe('util/exec/common', () => {
   const cmd = 'ls -l';
   const stdout = 'out message';
   const stderr = 'err message';
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
 
   describe('rawExec', () => {
     it('command exits with code 0', async () => {

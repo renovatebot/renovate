@@ -11,10 +11,12 @@ import { updateArtifacts } from '.';
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
-jest.spyOn(os, 'platform').mockImplementation(() => 'darwin');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
+
 process.env.CONTAINERBASE = 'true';
+
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
   git.getRepoStatus.mockResolvedValueOnce(
@@ -26,8 +28,8 @@ function mockMavenFileChangedInGit(fileName = 'maven-wrapper.properties') {
 
 describe('modules/manager/maven-wrapper/artifacts', () => {
   beforeEach(() => {
+    osPlatformSpy.mockImplementation(() => 'linux');
     GlobalConfig.set({ localDir: join('/tmp/github/some/repo') });
-    jest.resetAllMocks();
     fs.statLocalFile.mockResolvedValue(
       partial<Stats>({
         isFile: () => true,
@@ -50,10 +52,6 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         { version: '17.0.0' },
       ],
     });
-  });
-
-  afterEach(() => {
-    GlobalConfig.reset();
   });
 
   it('Should not update if there is no dep with maven:wrapper', async () => {
@@ -95,6 +93,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
 
     expect(execSnapshots[2].cmd).toContain('java 8.0.1');
     expect(updatedDeps).toEqual(expected);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
   it('Should update when it is maven wrapper', async () => {
@@ -137,6 +136,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
   it('Should not update deps when maven-wrapper.properties is not in git change', async () => {
@@ -169,6 +169,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
   it('updates with docker', async () => {
@@ -225,11 +226,11 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 
   it('Should return null when cmd is not found', async () => {
-    mockMavenFileChangedInGit('also-not-maven-wrapper.properties');
-    jest.spyOn(os, 'platform').mockImplementation(() => 'win32');
+    osPlatformSpy.mockImplementation(() => 'win32');
     const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
     fs.statLocalFile.mockResolvedValue(null);
     const updatedDeps = await updateArtifacts({
@@ -240,10 +241,10 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     });
     expect(updatedDeps).toBeNull();
     expect(execSnapshots).toMatchObject([]);
+    expect(git.getRepoStatus).not.toHaveBeenCalled();
   });
 
   it('Should throw an error when it cant execute', async () => {
-    mockMavenFileChangedInGit();
     mockExecAll(new Error('temporary-error'));
     const updatedDeps = await updateArtifacts({
       packageFileName: 'maven',
@@ -260,6 +261,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).not.toHaveBeenCalled();
   });
 
   it('updates with binarySource install', async () => {
@@ -307,5 +309,126 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
         },
       },
     ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+  });
+
+  it('should run wrapper:wrapper with MVNW_REPOURL if it is a custom artifactory', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString:
+            'https://internal.local/maven-public/org/apache/maven/wrapper/maven-wrapper/3.0.0/maven-wrapper-3.0.0.jar',
+        },
+      ],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+            MVNW_REPOURL: 'https://internal.local/maven-public',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+  });
+
+  it('should run not include MVNW_REPOURL when run with default maven repo url', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString:
+            'https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.1.1/maven-wrapper-3.1.1.jar',
+        },
+      ],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
+  });
+
+  it('should run not include MVNW_REPOURL when run with a malformed replaceString', async () => {
+    const execSnapshots = mockExecAll({ stdout: '', stderr: '' });
+    mockMavenFileChangedInGit();
+    await updateArtifacts({
+      packageFileName: 'maven-wrapper',
+      newPackageFileContent: '',
+      updatedDeps: [
+        {
+          depName: 'maven-wrapper',
+          replaceString: 'not a good url',
+        },
+      ],
+      config: { currentValue: '3.0.0', newValue: '3.3.1' },
+    });
+
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: './mvnw wrapper:wrapper',
+        options: {
+          cwd: '/tmp/github',
+          encoding: 'utf-8',
+          env: {
+            HOME: '/home/user',
+            HTTPS_PROXY: 'https://example.com',
+            HTTP_PROXY: 'http://example.com',
+            LANG: 'en_US.UTF-8',
+            LC_ALL: 'en_US',
+            NO_PROXY: 'localhost',
+            PATH: '/tmp/path',
+          },
+          maxBuffer: 10485760,
+          timeout: 900000,
+        },
+      },
+    ]);
+
+    expect(execSnapshots[0]!.options!.env).not.toHaveProperty('MVNW_REPOURL');
+    expect(git.getRepoStatus).toHaveBeenCalledOnce();
   });
 });
