@@ -22,7 +22,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowPeriUpgradeCommandTemplating',
+    name: 'allowUpgradeCommandTemplating',
     description:
       'Set this to `true` to allow templating for pre-upgrade and post-upgrade commands.',
     type: 'boolean',
@@ -30,7 +30,7 @@ const options: RenovateOptions[] = [
     globalOnly: true,
   },
   {
-    name: 'allowedPeriUpgradeCommands',
+    name: 'allowedUpgradeCommands',
     description:
       'A list of regular expressions that decide which pre-upgrade and post-upgrade tasks are allowed.',
     type: 'array',

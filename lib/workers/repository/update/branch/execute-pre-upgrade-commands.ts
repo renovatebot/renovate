@@ -28,7 +28,7 @@ export async function preUpgradeCommandsExecutor(
 ): Promise<PreUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPeriUpgradeCommands, allowPeriUpgradeCommandTemplating } =
+  const { allowedUpgradeCommands, allowUpgradeCommandTemplating } =
     GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -36,7 +36,7 @@ export async function preUpgradeCommandsExecutor(
     logger.trace(
       {
         tasks: upgrade.preUpgradeTasks,
-        allowedCommands: allowedPeriUpgradeCommands,
+        allowedCommands: allowedUpgradeCommands,
       },
       `Checking for pre-upgrade tasks`
     );
@@ -61,12 +61,10 @@ export async function preUpgradeCommandsExecutor(
 
       for (const cmd of commands) {
         if (
-          allowedPeriUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd)
-          )
+          allowedUpgradeCommands!.some((pattern) => regEx(pattern).test(cmd))
         ) {
           try {
-            const compiledCmd = allowPeriUpgradeCommandTemplating
+            const compiledCmd = allowUpgradeCommandTemplating
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
@@ -89,14 +87,14 @@ export async function preUpgradeCommandsExecutor(
           logger.warn(
             {
               cmd,
-              allowedPeriUpgradeCommands,
+              allowedUpgradeCommands,
             },
-            'Pre-upgrade task did not match any on allowedPeriUpgradeCommands list'
+            'Pre-upgrade task did not match any on allowedUpgradeCommands list'
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Pre-upgrade command '${cmd}' has not been added to the allowed list in allowedPeriUpgradeCommands`
+              `Pre-upgrade command '${cmd}' has not been added to the allowed list in allowedUpgradeCommands`
             ),
           });
         }
@@ -158,9 +156,9 @@ export async function preUpgradeCommandsExecutor(
 export default async function executePreUpgradeCommands(
   config: BranchConfig
 ): Promise<PreUpgradeCommandsExecutionResult | null> {
-  const { allowedPeriUpgradeCommands } = GlobalConfig.get();
+  const { allowedUpgradeCommands } = GlobalConfig.get();
 
-  if (is.emptyArray(allowedPeriUpgradeCommands)) {
+  if (is.emptyArray(allowedUpgradeCommands)) {
     return null;
   }
 

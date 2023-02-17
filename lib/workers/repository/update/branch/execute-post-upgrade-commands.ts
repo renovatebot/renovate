@@ -29,7 +29,7 @@ export async function postUpgradeCommandsExecutor(
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   const artifactErrors = [...(config.artifactErrors ?? [])];
-  const { allowedPeriUpgradeCommands, allowPeriUpgradeCommandTemplating } =
+  const { allowedUpgradeCommands, allowUpgradeCommandTemplating } =
     GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
@@ -37,7 +37,7 @@ export async function postUpgradeCommandsExecutor(
     logger.trace(
       {
         tasks: upgrade.postUpgradeTasks,
-        allowedCommands: allowedPeriUpgradeCommands,
+        allowedCommands: allowedUpgradeCommands,
       },
       `Checking for post-upgrade tasks`
     );
@@ -61,12 +61,10 @@ export async function postUpgradeCommandsExecutor(
 
       for (const cmd of commands) {
         if (
-          allowedPeriUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd)
-          )
+          allowedUpgradeCommands!.some((pattern) => regEx(pattern).test(cmd))
         ) {
           try {
-            const compiledCmd = allowPeriUpgradeCommandTemplating
+            const compiledCmd = allowUpgradeCommandTemplating
               ? compile(cmd, mergeChildConfig(config, upgrade))
               : cmd;
 
@@ -89,14 +87,14 @@ export async function postUpgradeCommandsExecutor(
           logger.warn(
             {
               cmd,
-              allowedPeriUpgradeCommands,
+              allowedUpgradeCommands,
             },
-            'Post-upgrade task did not match any on allowedPeriUpgradeCommands list'
+            'Post-upgrade task did not match any on allowedUpgradeCommands list'
           );
           artifactErrors.push({
             lockFile: upgrade.packageFile,
             stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPeriUpgradeCommands`
+              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedUpgradeCommands`
             ),
           });
         }
@@ -158,7 +156,7 @@ export async function postUpgradeCommandsExecutor(
 export default async function executePostUpgradeCommands(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult | null> {
-  const { allowedPeriUpgradeCommands } = GlobalConfig.get();
+  const { allowedUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =
     (config.updatedPackageFiles && config.updatedPackageFiles.length > 0) ||
@@ -167,7 +165,7 @@ export default async function executePostUpgradeCommands(
   if (
     /* Only run post-upgrade tasks if there are changes to package files... */
     !hasChangedFiles ||
-    is.emptyArray(allowedPeriUpgradeCommands)
+    is.emptyArray(allowedUpgradeCommands)
   ) {
     return null;
   }

@@ -17,18 +17,18 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPlugins
 
-## allowPeriUpgradeCommandTemplating
+## allowUpgradeCommandTemplating
 
 Set to `true` to allow templating of dependency level pre-upgrade and post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
-Add two properties to `config.js`: `allowPeriUpgradeCommandTemplating` and `allowedPeriUpgradeCommands`:
+Add two properties to `config.js`: `allowUpgradeCommandTemplating` and `allowedUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPeriUpgradeCommandTemplating: true,
-  allowedPeriUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+  allowUpgradeCommandTemplating: true,
+  allowedUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
 
@@ -62,7 +62,7 @@ npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dir
 
 ## allowScripts
 
-## allowedPeriUpgradeCommands
+## allowedUpgradeCommands
 
 A list of regular expressions that decide which commands in `preUpgradeTasks` and `postUpgradeTasks` are allowed to run.
 If this list is empty then no tasks will be executed.
@@ -71,7 +71,7 @@ For example:
 
 ```json
 {
-  "allowedPeriUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
+  "allowedUpgradeCommands": ["^tslint --fix$", "^tslint --[a-z]+$"]
 }
 ```
 
