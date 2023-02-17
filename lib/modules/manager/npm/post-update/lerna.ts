@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -36,8 +37,8 @@ export async function generateLockFiles(
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
-  const lernaClient: string = lernaPackageFile.managerData?.lernaClient;
-  if (!lernaClient) {
+  const lernaClient = lernaPackageFile.managerData?.lernaClient;
+  if (!is.nonEmptyString(lernaClient)) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
   }
