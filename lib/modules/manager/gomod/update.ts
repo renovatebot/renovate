@@ -138,7 +138,7 @@ export function updateDependency({
 
     if (depType === 'indirect') {
       newLine = newLine.replace(
-        regEx(/(?:\s*\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
         ' // indirect'
       );
     }
