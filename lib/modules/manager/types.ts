@@ -93,7 +93,7 @@ export interface Package<T> extends ManagerData<T> {
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  packageName?: string | null;
+  packageName?: string;
   target?: string;
   versioning?: string;
   dataType?: string;

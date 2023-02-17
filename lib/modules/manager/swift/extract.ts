@@ -158,6 +158,9 @@ export function extractPackageFile(
   let currentValue: string | null = null;
 
   function yieldDep(): void {
+    if (!packageName) {
+      return;
+    }
     const depName = getDepName(packageName);
     if (depName && currentValue) {
       const dep: PackageDependency = {
