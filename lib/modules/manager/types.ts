@@ -53,7 +53,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 
 export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  hasWorkspaces?: boolean;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];

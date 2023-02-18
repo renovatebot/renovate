@@ -56,7 +56,7 @@ export async function detectMonorepos(
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
-        subPackage.hasWorkspaces = !!workspacesPackages;
+        subPackage.managerData.hasWorkspaces = !!workspacesPackages;
         subPackage.npmrc ??= npmrc;
 
         if (p.extractedConstraints) {

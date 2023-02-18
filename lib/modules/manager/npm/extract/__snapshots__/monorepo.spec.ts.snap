@@ -40,9 +40,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
         "depName": "bar",
       },
     ],
-    "hasWorkspaces": false,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -55,9 +55,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
     "skipInstalls": undefined,
   },
   {
-    "hasWorkspaces": false,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -112,9 +112,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
         "depName": "bar",
       },
     ],
-    "hasWorkspaces": false,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -127,9 +127,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
     "skipInstalls": undefined,
   },
   {
-    "hasWorkspaces": false,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -160,9 +160,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
     "packageFile": "package.json",
   },
   {
-    "hasWorkspaces": true,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -175,9 +175,9 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
     "skipInstalls": undefined,
   },
   {
-    "hasWorkspaces": true,
     "managerData": {
       "hasPackageManager": undefined,
+      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
