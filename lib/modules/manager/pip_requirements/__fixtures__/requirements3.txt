@@ -1,4 +1,4 @@
-Django==1.11.23 # renovate
+Django==3.2.18 # renovate
 distribute==0.6.27 # renovate: ignore
 dj-database-url==0.2 # pyup: nothing
 psycopg2==2.4.5 # renovate:
