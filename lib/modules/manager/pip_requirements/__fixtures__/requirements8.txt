@@ -1,4 +1,4 @@
-Django==1.9.1 \
+Django==3.2.18 \
     --hash=sha256:9f7ca04c6dbcf08b794f2ea5283c60156a37ebf2b8316d1027f594f34ff61101 \
     --hash=sha256:a29aac46a686cade6da87ce7e7287d5d53cddabc41d777c6230a583c36244a18
 bgg==0.22.1 \
