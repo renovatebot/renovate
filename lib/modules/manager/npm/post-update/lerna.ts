@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -10,12 +11,13 @@ import type {
   ToolConstraint,
 } from '../../../../util/exec/types';
 import type { PackageFile, PostUpdateConfig } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 // Exported for testability
 export function getLernaVersion(
-  lernaPackageFile: Partial<PackageFile>
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>
 ): string | null {
   const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
   if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
@@ -30,14 +32,14 @@ export function getLernaVersion(
 }
 
 export async function generateLockFiles(
-  lernaPackageFile: Partial<PackageFile>,
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>,
   lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
-  const lernaClient = lernaPackageFile.lernaClient;
-  if (!lernaClient) {
+  const lernaClient = lernaPackageFile.managerData?.lernaClient;
+  if (!is.nonEmptyString(lernaClient)) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
   }
