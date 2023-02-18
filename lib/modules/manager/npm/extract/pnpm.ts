@@ -11,6 +11,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 import type { PnpmWorkspaceFile } from './types';
 
 export async function extractPnpmFilters(
@@ -74,13 +75,14 @@ export async function findPnpmWorkspace(
 }
 
 export async function detectPnpmWorkspaces(
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
   const packagePathCache = new Map<string, string[] | null>();
 
   for (const p of packageFiles) {
-    const { packageFile, pnpmShrinkwrap } = p;
+    const { packageFile, managerData } = p;
+    const { pnpmShrinkwrap } = managerData as NpmManagerData;
 
     // check if pnpmShrinkwrap-file has already been provided
     if (pnpmShrinkwrap) {
@@ -123,7 +125,8 @@ export async function detectPnpmWorkspaces(
     );
 
     if (isPackageInWorkspace) {
-      p.pnpmShrinkwrap = lockFilePath;
+      p.managerData ??= {};
+      p.managerData.pnpmShrinkwrap = lockFilePath;
     } else {
       logger.trace(
         { packageFile, workspaceYamlPath },

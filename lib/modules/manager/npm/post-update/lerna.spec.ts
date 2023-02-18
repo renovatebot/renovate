@@ -14,8 +14,8 @@ process.env.BUILDPACK = 'true';
 
 function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
-    lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+    managerData: { lernaClient },
   };
 }
 
@@ -23,7 +23,7 @@ function lernaPkgFileWithoutLernaDep(
   lernaClient: string
 ): Partial<PackageFileContent> {
   return {
-    lernaClient,
+    managerData: { lernaClient },
   };
 }
 
