@@ -31,6 +31,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
               currentValue: `${yarnVersion}`,
             },
           ],
+          packageFile: 'some-file',
         },
       ];
     }
@@ -264,6 +265,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -293,6 +295,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -305,6 +308,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
+          packageFile: 'some-file',
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
         },
@@ -326,6 +330,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -359,6 +364,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -402,6 +408,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
               currentValue: '2.0.0',
             },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -443,6 +450,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
               currentValue: '2.0.0',
             },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);
@@ -467,6 +475,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { depName: 'a', currentValue: '1.0.0' },
             { depName: 'b', currentValue: '2.0.0' },
           ],
+          packageFile: 'some-file',
         },
       ];
       await getLockedVersions(packageFiles);

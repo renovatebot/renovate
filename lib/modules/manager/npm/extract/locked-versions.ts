@@ -48,8 +48,6 @@ export async function getLockedVersions(
         }
       }
     } else if (npmLock) {
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {

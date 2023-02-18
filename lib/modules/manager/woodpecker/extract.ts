@@ -2,14 +2,14 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import type { WoodpeckerConfig } from './types';
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   extractConfig: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.debug('woodpecker.extractPackageFile()');
   let config: WoodpeckerConfig;
   try {

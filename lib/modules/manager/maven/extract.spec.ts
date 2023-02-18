@@ -11,14 +11,14 @@ const complexSettingsContent = Fixtures.get(`complex.settings.xml`);
 describe('modules/manager/maven/extract', () => {
   describe('extractDependencies', () => {
     it('returns null for invalid XML', () => {
-      expect(extractPackage('')).toBeNull();
-      expect(extractPackage('invalid xml content')).toBeNull();
-      expect(extractPackage('<foobar></foobar>')).toBeNull();
-      expect(extractPackage('<project></project>')).toBeNull();
+      expect(extractPackage('', 'some-file')).toBeNull();
+      expect(extractPackage('invalid xml content', 'some-file')).toBeNull();
+      expect(extractPackage('<foobar></foobar>', 'some-file')).toBeNull();
+      expect(extractPackage('<project></project>', 'some-file')).toBeNull();
     });
 
     it('extract dependencies from any XML position', () => {
-      const res = extractPackage(simpleContent);
+      const res = extractPackage(simpleContent, 'some-file');
       expect(res).toMatchSnapshot({
         deps: [
           {
@@ -130,7 +130,7 @@ describe('modules/manager/maven/extract', () => {
     });
 
     it('tries minimum manifests', () => {
-      const res = extractPackage(minimumContent);
+      const res = extractPackage(minimumContent, 'some-file');
       expect(res).toEqual({
         datasource: 'maven',
         deps: [],

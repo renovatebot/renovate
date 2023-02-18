@@ -60,8 +60,8 @@ export async function getManagerPackageFiles(
           res.deps[index].depIndex = index;
         }
         packageFiles.push({
-          packageFile,
           ...res,
+          packageFile,
         });
       }
     } else {

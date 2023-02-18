@@ -7,7 +7,7 @@ import { joinUrlParts } from '../../../util/url';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { AzurePipelines, Container, Repository } from './types';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
@@ -117,7 +117,7 @@ export function parseAzurePipelines(
 export function extractPackageFile(
   content: string,
   filename: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${filename})`);
   const deps: PackageDependency[] = [];
 

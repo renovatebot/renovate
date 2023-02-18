@@ -247,7 +247,7 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
 
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
+  packageFile: string
 ): PackageFile<Record<string, any>> | null {
   if (!rawContent) {
     return null;
@@ -371,7 +371,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];

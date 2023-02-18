@@ -60,7 +60,7 @@ export interface NpmLockFiles {
   lockFiles?: string[];
 }
 
-export interface PackageFile<T = Record<string, any>>
+export interface PackageFileContent<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   autoReplaceStringTemplate?: string;
@@ -74,7 +74,6 @@ export interface PackageFile<T = Record<string, any>>
   lernaPackages?: string[];
   mavenProps?: Record<string, any>;
   npmrc?: string;
-  packageFile?: string | null;
   packageJsonName?: string;
   packageFileVersion?: string;
   parent?: string;
@@ -82,6 +81,11 @@ export interface PackageFile<T = Record<string, any>>
   workspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+}
+
+export interface PackageFile<T = Record<string, any>>
+  extends PackageFileContent<T> {
+  packageFile: string;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -263,7 +267,7 @@ export interface ManagerApi extends ModuleApi {
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile | null>;
+  ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

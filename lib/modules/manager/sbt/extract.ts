@@ -11,7 +11,7 @@ import {
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import { REGISTRY_URLS } from '../gradle/parser/common';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -286,7 +286,7 @@ const query = q.tree<Ctx>({
 export function extractPackageFile(
   content: string,
   _packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   let parsedResult: Ctx | null = null;
 
   try {

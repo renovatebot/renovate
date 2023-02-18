@@ -72,7 +72,12 @@ describe('workers/repository/process/vulnerabilities', () => {
 
     it('unsupported datasource', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
-        dockerfile: [{ deps: [{ depName: 'node', datasource: 'docker' }] }],
+        dockerfile: [
+          {
+            deps: [{ depName: 'node', datasource: 'docker' }],
+            packageFile: 'some-file',
+          },
+        ],
       };
 
       await vulnerabilities.fetchVulnerabilities(config, packageFiles);
@@ -83,7 +88,12 @@ describe('workers/repository/process/vulnerabilities', () => {
 
     it('package found but no vulnerabilities', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
-        npm: [{ deps: [{ depName: 'lodash', datasource: 'npm' }] }],
+        npm: [
+          {
+            deps: [{ depName: 'lodash', datasource: 'npm' }],
+            packageFile: 'some-file',
+          },
+        ],
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([]);
 
@@ -100,6 +110,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -125,6 +136,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'npm',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -148,6 +160,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'npm',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -187,6 +200,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -213,6 +227,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -242,6 +257,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'fake', currentValue: '1.5.1', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -280,6 +296,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'stdlib', currentValue: '1.7.5', datasource: 'go' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -338,6 +355,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -406,6 +424,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -426,6 +445,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'crate',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -521,6 +541,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -577,6 +598,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'quokka', currentValue: '1.2.3', datasource: 'pypi' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -616,6 +638,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'lodash', currentValue: '0.5.0', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -692,6 +715,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'pypi',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -767,6 +791,7 @@ describe('workers/repository/process/vulnerabilities', () => {
             deps: [
               { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -828,6 +853,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'crate',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };

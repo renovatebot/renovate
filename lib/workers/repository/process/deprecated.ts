@@ -31,7 +31,7 @@ export async function raiseDeprecationWarnings(
             depPackageFiles: [],
           };
           deprecatedPackages[dep.depName!].depPackageFiles.push(
-            packageFile.packageFile!
+            packageFile.packageFile
           );
         }
       }
