@@ -279,7 +279,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           lockFiles: ['package-lock.json'],
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           packageFile: 'some-file',
         },
       ]);
@@ -353,7 +353,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           lockFiles: ['package-lock.json'],
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           packageFile: 'some-file',
         },
       ]);
@@ -390,7 +390,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           lockFiles: ['package-lock.json'],
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           packageFile: 'some-file',
         },
       ]);
@@ -435,7 +435,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           lockFiles: ['package-lock.json'],
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           packageFile: 'some-file',
         },
       ]);
@@ -480,7 +480,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
           ],
           lockFiles: ['package-lock.json'],
-          npmLock: 'package-lock.json',
+          managerData: { npmLock: 'package-lock.json' },
           packageFile: 'some-file',
         },
       ]);
@@ -507,8 +507,8 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b' },
           ],
           lockFiles: ['pnpm-lock.yaml'],
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
           packageFile: 'some-file',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
         },
       ]);
     });
