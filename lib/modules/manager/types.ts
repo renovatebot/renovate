@@ -59,11 +59,9 @@ export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   additionalRegistryUrls?: string[];
   deps: PackageDependency[];
   lockFiles?: string[];
-  mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string | null;
   packageFileVersion?: string;
-  parent?: string;
   skipInstalls?: boolean;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
