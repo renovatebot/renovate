@@ -1,7 +1,7 @@
 // TODO #7154
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from '.';
 
@@ -401,7 +401,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should update ranges', () => {
       const newValue = '[1.2.3]';
-      const select = (depSet: PackageFile) =>
+      const select = (depSet: PackageFileContent) =>
         selectDep(depSet.deps, 'org.example:hard-range');
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent!);
@@ -415,7 +415,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
-      const select = (depSet: PackageFile) =>
+      const select = (depSet: PackageFileContent) =>
         depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent!);

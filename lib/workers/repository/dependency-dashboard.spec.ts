@@ -11,7 +11,7 @@ import {
 import { GlobalConfig } from '../../config/global';
 import type {
   PackageDependency,
-  PackageFile,
+  PackageFileContent,
 } from '../../modules/manager/types';
 import type { Platform } from '../../modules/platform';
 import {
@@ -51,7 +51,7 @@ function genRandString(length: number): string {
 function genRandPackageFile(
   depsNum: number,
   depNameLen: number
-): Record<string, PackageFile[]> {
+): Record<string, PackageFileContent[]> {
   const deps: PackageDependency[] = [];
   for (let i = 0; i < depsNum; i++) {
     deps.push({
@@ -906,7 +906,7 @@ describe('workers/repository/dependency-dashboard', () => {
               warnings: [{ message: 'dependency-2', topic: '' }],
             },
           ];
-          const packageFiles: Record<string, PackageFile[]> = {
+          const packageFiles: Record<string, PackageFileContent[]> = {
             npm: [{ packageFile: 'package.json', deps: dep }],
           };
           await dependencyDashboard.ensureDependencyDashboard(

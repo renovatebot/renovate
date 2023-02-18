@@ -51,7 +51,8 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy: RangeStrategy;
 }
 
-export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
+export interface PackageFileContent<T = Record<string, any>>
+  extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
@@ -239,13 +240,13 @@ export interface ManagerApi extends ModuleApi {
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]
-  ): Result<PackageFile[] | null>;
+  ): Result<PackageFileContent[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile | null>;
+  ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

@@ -2,7 +2,7 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { id as versioning } from '../../versioning/maven';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MavenVersionExtract, Version } from './types';
 
 // https://regex101.com/r/IcOs7P/1
@@ -36,7 +36,9 @@ function extractLineInfo(lines: string[], regex: RegExp): Version | null {
   return null;
 }
 
-export function extractPackageFile(fileContent: string): PackageFile | null {
+export function extractPackageFile(
+  fileContent: string
+): PackageFileContent | null {
   logger.trace('maven-wrapper.extractPackageFile()');
   const extractResult = extractVersions(fileContent);
   const deps = [];

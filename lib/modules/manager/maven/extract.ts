@@ -6,7 +6,11 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { MavenProp } from './types';
 
 export function parsePom(raw: string): XmlDocument | null {
@@ -245,7 +249,7 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
-interface MavenInterimPackageFile extends PackageFile {
+interface MavenInterimPackageFile extends PackageFileContent {
   mavenProps?: Record<string, any>;
   parent?: string;
 }
@@ -253,7 +257,7 @@ interface MavenInterimPackageFile extends PackageFile {
 export function extractPackage(
   rawContent: string,
   packageFile: string | null = null
-): PackageFile<Record<string, any>> | null {
+): PackageFileContent<Record<string, any>> | null {
   if (!rawContent) {
     return null;
   }
@@ -369,7 +373,9 @@ export function parseSettings(raw: string): XmlDocument | null {
   return null;
 }
 
-export function resolveParents(packages: PackageFile[]): PackageFile[] {
+export function resolveParents(
+  packages: PackageFileContent[]
+): PackageFileContent[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
@@ -456,7 +462,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
 
 function cleanResult(
   packageFiles: MavenInterimPackageFile[]
-): PackageFile<Record<string, any>>[] {
+): PackageFileContent<Record<string, any>>[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
     delete packageFile.parent;
@@ -470,8 +476,8 @@ function cleanResult(
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[]> {
-  const packages: PackageFile[] = [];
+): Promise<PackageFileContent[]> {
+  const packages: PackageFileContent[] = [];
   const additionalRegistryUrls: string[] = [];
 
   for (const packageFile of packageFiles) {
