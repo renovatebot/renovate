@@ -85,7 +85,6 @@ If you need any further assistance then you can also [request help here](${
     let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        // TODO: types (#7154)
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
       );
     }
