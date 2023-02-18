@@ -105,7 +105,6 @@ export class PackageFiles {
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          // TODO: types (#7154)
           deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
