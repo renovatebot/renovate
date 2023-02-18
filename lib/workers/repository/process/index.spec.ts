@@ -2,6 +2,7 @@ import {
   RenovateConfig,
   getConfig,
   git,
+  logger,
   mocked,
   platform,
 } from '../../../../test/util';
@@ -119,6 +120,34 @@ describe('workers/repository/process/index', () => {
         packageFiles: {},
       });
       expect(lookup).toHaveBeenCalledTimes(0);
+    });
+
+    it('finds baseBranches via regular expressions', async () => {
+      extract.mockResolvedValue({} as never);
+      config.baseBranches = ['/^release\\/.*/', 'dev', '!/^pre-release\\/.*/'];
+      git.getBranchList.mockReturnValue([
+        'dev',
+        'pre-release/v0',
+        'release/v1',
+        'release/v2',
+        'some-other',
+      ]);
+      git.branchExists.mockReturnValue(true);
+      const res = await extractDependencies(config);
+      expect(res).toEqual({
+        branchList: [undefined, undefined],
+        branches: [undefined, undefined],
+        packageFiles: undefined,
+      });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { baseBranches: ['release/v1', 'release/v2', 'dev', 'some-other'] },
+        'baseBranches'
+      );
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v1' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v2' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'dev' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'some-other' });
     });
   });
 });

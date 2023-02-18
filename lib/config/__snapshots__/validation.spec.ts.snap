@@ -13,6 +13,15 @@ exports[`config/validation validateConfig(config) catches invalid allowedVersion
 ]
 `;
 
+exports[`config/validation validateConfig(config) catches invalid baseBranches regex 1`] = `
+[
+  {
+    "message": "Invalid regExp for baseBranches: \`/***$}{]][/\`",
+    "topic": "Configuration Error",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
 [
   {

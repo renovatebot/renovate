@@ -117,6 +117,15 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid baseBranches regex', async () => {
+      const config = {
+        baseBranches: ['/***$}{]][/'],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
+
     it('returns nested errors', async () => {
       const config: RenovateConfig = {
         foo: 1,
