@@ -156,7 +156,11 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
+      expect(res).toMatchSnapshot({
+        managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
     });
 
     it('finds and filters .npmrc', async () => {

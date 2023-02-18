@@ -11,11 +11,10 @@ import * as nodeVersioning from '../../../versioning/node';
 import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
-  NpmLockFiles,
   PackageDependency,
   PackageFile,
 } from '../../types';
-import type { NpmManagerData } from '../types';
+import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
@@ -485,8 +484,8 @@ export async function extractPackageFile(
     deps,
     packageFileVersion,
     npmrc,
-    ...lockFiles,
     managerData: {
+      ...lockFiles,
       lernaClient,
       lernaJsonFile,
       lernaPackages,
@@ -502,7 +501,9 @@ export async function extractPackageFile(
   };
 }
 
-export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
+export async function postExtract(
+  packageFiles: PackageFile<NpmManagerData>[]
+): Promise<void> {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
@@ -510,8 +511,8 @@ export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[]> {
-  const npmFiles: PackageFile[] = [];
+): Promise<PackageFile<NpmManagerData>[]> {
+  const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else

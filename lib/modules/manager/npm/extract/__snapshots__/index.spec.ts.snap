@@ -16,16 +16,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() catches invalid
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -137,16 +137,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -317,16 +317,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -366,16 +366,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": "package-lock.json",
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": "package-lock.json",
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
-  "yarnLock": undefined,
 }
 `;
 
@@ -400,16 +400,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts packag
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -467,16 +467,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -521,16 +521,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": undefined,
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": undefined,
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -657,16 +657,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
     "lernaClient": "npm",
     "lernaJsonFile": "lerna.json",
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -793,16 +793,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds "npmClien
     "lernaClient": "yarn",
     "lernaJsonFile": "lerna.json",
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -929,16 +929,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds a lock fi
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": "yarn.lock",
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": "yarn.lock",
 }
 `;
 
@@ -951,18 +951,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds complex y
     "lernaClient": "npm",
     "lernaJsonFile": "lerna.json",
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "@a/b",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": [
       "packages/*",
     ],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1089,16 +1089,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds lerna 1`]
     "lernaClient": "npm",
     "lernaJsonFile": "lerna.json",
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1111,18 +1111,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
     "lernaClient": "npm",
     "lernaJsonFile": "lerna.json",
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "@a/b",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": [
       "packages/*",
     ],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1135,18 +1135,18 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() finds simple ya
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "@a/b",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": [
       "packages/*",
     ],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "0.0.8",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1273,16 +1273,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1391,16 +1391,16 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() returns an arra
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": [],
+    "yarnLock": undefined,
     "yarnZeroInstall": false,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": true,
-  "yarnLock": undefined,
 }
 `;
 
@@ -1527,15 +1527,15 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() sets skipInstal
     "lernaClient": undefined,
     "lernaJsonFile": undefined,
     "lernaPackages": undefined,
+    "npmLock": undefined,
     "packageJsonName": "renovate",
+    "pnpmShrinkwrap": undefined,
     "workspacesPackages": undefined,
+    "yarnLock": "yarn.lock",
     "yarnZeroInstall": true,
   },
-  "npmLock": undefined,
   "npmrc": undefined,
   "packageFileVersion": "1.0.0",
-  "pnpmShrinkwrap": undefined,
   "skipInstalls": false,
-  "yarnLock": "yarn.lock",
 }
 `;

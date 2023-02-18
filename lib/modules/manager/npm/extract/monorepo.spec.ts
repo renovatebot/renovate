@@ -156,8 +156,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          managerData: { packageJsonName: '@org/a' },
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',
@@ -181,7 +180,6 @@ describe('modules/manager/npm/extract/monorepo', () => {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
-          yarnLock: 'yarn.lock',
           managerData: {
             hasPackageManager: true,
             workspacesPackages: ['docs'],
@@ -189,8 +187,8 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'docs/package.json',
-          managerData: { packageJsonName: 'docs' },
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: 'docs', yarnLock: 'yarn.lock' },
+
           extractedConstraints: { yarn: '^3.2.0' },
         },
       ];
@@ -230,8 +228,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          managerData: { packageJsonName: '@org/a' },
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',

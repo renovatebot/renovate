@@ -35,24 +35,28 @@ describe('modules/manager/npm/post-update/index', () => {
         packageFile: 'packages/core/package.json',
         managerData: {
           lernaJsonFile: 'lerna.json',
+          npmLock: 'package-lock.json',
         },
-        npmLock: 'package-lock.json',
         npmrc: '#dummy',
       },
       {
         packageFile: 'packages/cli/package.json',
         managerData: {
           lernaJsonFile: 'lerna.json',
+          yarnLock: 'yarn.lock',
         },
-        yarnLock: 'yarn.lock',
       },
       {
         packageFile: 'packages/test/package.json',
-        yarnLock: 'yarn.lock',
+        managerData: {
+          yarnLock: 'yarn.lock',
+        },
       },
       {
         packageFile: 'packages/pnpm/package.json',
-        pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+        managerData: {
+          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+        },
       },
     ],
   };
@@ -74,8 +78,8 @@ describe('modules/manager/npm/post-update/index', () => {
           isRemediation: true,
           managerData: {
             lernaJsonFile: 'lerna.json',
+            npmLock: 'package-lock.json',
           },
-          npmLock: 'package-lock.json',
           rangeStrategy: 'widen',
         },
         {
@@ -83,17 +87,21 @@ describe('modules/manager/npm/post-update/index', () => {
           isRemediation: true,
           managerData: {
             lernaJsonFile: 'lerna.json',
+            npmLock: 'randomFolder/package-lock.json',
           },
-          npmLock: 'randomFolder/package-lock.json',
           lockFiles: ['randomFolder/package-lock.json'],
           rangeStrategy: 'pin',
         },
         {
           isLockfileUpdate: true,
-          npmLock: 'package-lock.json',
+          managerData: {
+            npmLock: 'package-lock.json',
+          },
         },
         {
-          yarnLock: 'yarn.lock',
+          managerData: {
+            yarnLock: 'yarn.lock',
+          },
           isLockfileUpdate: true,
         },
       ],
@@ -173,7 +181,9 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [
               {
                 isLockfileUpdate: true,
-                yarnLock: 'yarn.lock',
+                managerData: {
+                  yarnLock: 'yarn.lock',
+                },
               },
             ],
           },
@@ -223,9 +233,13 @@ describe('modules/manager/npm/post-update/index', () => {
       await writeExistingFiles(updateConfig, {
         npm: [
           // This package's npmrc should be written verbatim.
-          { packageFile: 'packages/core/package.json', npmrc: '#dummy' },
+          {
+            packageFile: 'packages/core/package.json',
+            npmrc: '#dummy',
+            managerData: {},
+          },
           // No npmrc content should be written for this package.
-          { packageFile: 'packages/core/package.json' },
+          { packageFile: 'packages/core/package.json', managerData: {} },
         ],
       });
 
@@ -242,9 +256,13 @@ describe('modules/manager/npm/post-update/index', () => {
         {
           npm: [
             // This package's npmrc should be written verbatim.
-            { packageFile: 'packages/core/package.json', npmrc: '#dummy' },
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: '#dummy',
+              managerData: {},
+            },
             // No npmrc content should be written for this package.
-            { packageFile: 'packages/core/package.json' },
+            { packageFile: 'packages/core/package.json', managerData: {} },
           ],
         }
       );
@@ -556,8 +574,8 @@ describe('modules/manager/npm/post-update/index', () => {
                 managerData: {
                   lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
+                  npmLock: 'package-lock.json',
                 },
-                npmLock: 'package-lock.json',
               },
             ],
           }
@@ -704,7 +722,9 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            npmLock: 'npm-shrinkwrap.json',
+            managerData: {
+              npmLock: 'npm-shrinkwrap.json',
+            },
             updateLockFiles: true,
             upgrades: [{}],
           },
@@ -715,8 +735,8 @@ describe('modules/manager/npm/post-update/index', () => {
                 managerData: {
                   lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
+                  npmLock: 'npm-shrinkwrap.json',
                 },
-                npmLock: 'npm-shrinkwrap.json',
               },
             ],
           }

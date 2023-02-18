@@ -2,30 +2,26 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
-    const {
-      packageFile,
-      npmLock,
-      yarnLock,
-      npmrc,
-      managerData = {},
-      skipInstalls,
-    } = p;
+    const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
     const {
       lernaClient,
       lernaJsonFile,
       lernaPackages,
+      npmLock,
       yarnZeroInstall,
       hasPackageManager,
       workspacesPackages,
+      yarnLock,
     } = managerData;
 
     const packages = (workspacesPackages ?? lernaPackages) as
@@ -57,8 +53,8 @@ export async function detectMonorepos(
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
         subPackage.managerData.lernaClient = lernaClient;
-        subPackage.yarnLock = subPackage.yarnLock ?? yarnLock;
-        subPackage.npmLock = subPackage.npmLock ?? npmLock;
+        subPackage.managerData.yarnLock ??= yarnLock;
+        subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
         subPackage.hasWorkspaces = !!workspacesPackages;
         subPackage.npmrc ??= npmrc;

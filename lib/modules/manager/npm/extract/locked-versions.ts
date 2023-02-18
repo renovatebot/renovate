@@ -1,17 +1,19 @@
 import semver from 'semver';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
 export async function getLockedVersions(
-  packageFiles: PackageFile[]
+  packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
-    const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;
+    const { managerData = {} } = packageFile;
+    const { yarnLock, npmLock, pnpmShrinkwrap } = managerData;
     const lockFiles: string[] = [];
     if (yarnLock) {
       logger.trace('Found yarnLock');
