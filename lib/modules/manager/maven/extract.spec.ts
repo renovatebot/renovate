@@ -113,19 +113,19 @@ describe('modules/manager/maven/extract', () => {
         ],
         mavenProps: {
           quuxGroup: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: 'org.example',
           },
           quuxId: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: 'quux',
           },
           quuxVersion: {
-            packageFile: null,
+            packageFile: 'some-file',
             val: '1.2.3.4',
           },
         },
-        packageFile: null,
+        packageFile: 'some-file',
       });
     });
 
@@ -135,7 +135,7 @@ describe('modules/manager/maven/extract', () => {
         datasource: 'maven',
         deps: [],
         mavenProps: {},
-        packageFile: null,
+        packageFile: 'some-file',
         packageFileVersion: '1',
       });
     });
