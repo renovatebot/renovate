@@ -75,6 +75,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           lockFiles: ['yarn.lock'],
           npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -122,6 +123,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           lockFiles: ['yarn.lock'],
           npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -169,6 +171,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           lockFiles: ['yarn.lock'],
           npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -208,6 +211,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           lockFiles: ['yarn.lock'],
           npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -248,6 +252,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           lockFiles: ['yarn.lock'],
           npmLock: 'package-lock.json',
           yarnLock: 'yarn.lock',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -278,6 +283,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -345,6 +351,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -379,6 +386,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -421,6 +429,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -463,6 +472,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           ],
           lockFiles: ['package-lock.json'],
           npmLock: 'package-lock.json',
+          packageFile: 'some-file',
         },
       ]);
     });
@@ -486,6 +496,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
             { currentValue: '2.0.0', depName: 'b' },
           ],
           lockFiles: ['pnpm-lock.yaml'],
+          packageFile: 'some-file',
           pnpmShrinkwrap: 'pnpm-lock.yaml',
         },
       ]);
