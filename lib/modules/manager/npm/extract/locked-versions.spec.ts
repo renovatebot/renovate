@@ -1,4 +1,4 @@
-import type { PackageFile } from '../../types';
+import type { PackageFileContent } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 
@@ -14,7 +14,7 @@ describe('modules/manager/npm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
     function getPackageFiles(
       yarnVersion: string
-    ): PackageFile<NpmManagerData>[] {
+    ): PackageFileContent<NpmManagerData>[] {
       return [
         {
           managerData: { npmLock: 'package-lock.json', yarnLock: 'yarn.lock' },

@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
-import type { PackageFile } from '../../modules/manager/types';
+import type { PackageFileContent } from '../../modules/manager/types';
 import {
   getDepWarningsDashboard,
   getDepWarningsOnboardingPR,
@@ -52,7 +52,7 @@ describe('workers/repository/errors-warnings', () => {
 
     it('returns 2 pr warnings text dependencyDashboard true', () => {
       const dependencyDashboard = true;
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',
@@ -99,7 +99,7 @@ describe('workers/repository/errors-warnings', () => {
 
     it('returns 2 pr warnings text dependencyDashboard false', () => {
       const dependencyDashboard = false;
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',
@@ -145,7 +145,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('PR warning returns empty string', () => {
-      const packageFiles: Record<string, PackageFile[]> = {};
+      const packageFiles: Record<string, PackageFileContent[]> = {};
       const res = getDepWarningsPR(packageFiles);
       expect(res).toBe('');
     });
@@ -157,7 +157,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('returns dependency dashboard warning text', () => {
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',
@@ -206,7 +206,7 @@ describe('workers/repository/errors-warnings', () => {
     });
 
     it('dependency dashboard warning returns empty string', () => {
-      const packageFiles: Record<string, PackageFile[]> = {};
+      const packageFiles: Record<string, PackageFileContent[]> = {};
       const res = getDepWarningsDashboard(packageFiles);
       expect(res).toBe('');
     });
@@ -250,7 +250,7 @@ describe('workers/repository/errors-warnings', () => {
 
   describe('getDepWarningsOnboardingPR()', () => {
     it('returns onboarding warning text', () => {
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',

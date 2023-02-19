@@ -12,7 +12,7 @@ import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
   PackageDependency,
-  PackageFile,
+  PackageFileContent,
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
@@ -43,7 +43,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile<NpmManagerData> | null> {
+): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
@@ -502,7 +502,7 @@ export async function extractPackageFile(
 }
 
 export async function postExtract(
-  packageFiles: PackageFile<NpmManagerData>[]
+  packageFiles: PackageFileContent<NpmManagerData>[]
 ): Promise<void> {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
@@ -511,8 +511,8 @@ export async function postExtract(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile<NpmManagerData>[]> {
-  const npmFiles: PackageFile<NpmManagerData>[] = [];
+): Promise<PackageFileContent<NpmManagerData>[]> {
+  const npmFiles: PackageFileContent<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else

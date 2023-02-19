@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
+import type { PackageFileContent } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
@@ -111,7 +111,7 @@ export async function extractDependencies(
   if (config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(config.baseBranches);
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
-    const extracted: Record<string, Record<string, PackageFile[]>> = {};
+    const extracted: Record<string, Record<string, PackageFileContent[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
       if (branchExists(baseBranch)) {
