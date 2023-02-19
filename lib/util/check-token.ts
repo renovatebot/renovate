@@ -2,12 +2,12 @@ import { GlobalConfig } from '../config/global';
 import { logger } from '../logger';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFile } from '../modules/manager/types';
+import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFile[]> | undefined
+  packageFiles: Record<string, PackageFileContent[]> | undefined
 ): void {
   const { token } = hostRules.find({
     hostType: 'github',

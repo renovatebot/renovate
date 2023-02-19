@@ -2,12 +2,12 @@
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
+import type { PackageFileContent } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 
 export async function raiseDeprecationWarnings(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, PackageFileContent[]>
 ): Promise<void> {
   if (!config.repoIsOnboarded) {
     return;

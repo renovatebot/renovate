@@ -10,7 +10,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import type { PackageFile } from '../../types';
+import type { PackageFileContent } from '../../types';
 import type { NpmManagerData } from '../types';
 import type { PnpmWorkspaceFile } from './types';
 
@@ -75,7 +75,7 @@ export async function findPnpmWorkspace(
 }
 
 export async function detectPnpmWorkspaces(
-  packageFiles: Partial<PackageFile<NpmManagerData>>[]
+  packageFiles: Partial<PackageFileContent<NpmManagerData>>[]
 ): Promise<void> {
   logger.debug(`Detecting pnpm Workspaces`);
   const packagePathCache = new Map<string, string[] | null>();

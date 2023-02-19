@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { analyseTerragruntModule, extractTerragruntModule } from './modules';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import {
@@ -11,7 +11,7 @@ import {
 const dependencyBlockExtractionRegex = regEx(/^\s*(?<type>[a-z_]+)\s+{\s*$/);
 const contentCheckList = ['terraform {'];
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace({ content }, 'terragrunt.extractPackageFile()');
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
