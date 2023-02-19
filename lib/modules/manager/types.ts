@@ -51,36 +51,20 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   rangeStrategy: RangeStrategy;
 }
 
-export interface NpmLockFiles {
-  yarnLock?: string;
-  packageLock?: string;
-  shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
-  npmLock?: string;
-  lockFiles?: string[];
-}
-
-export interface PackageFile<T = Record<string, any>>
-  extends NpmLockFiles,
-    ManagerData<T> {
+export interface PackageFileContent<T = Record<string, any>>
+  extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
   deps: PackageDependency[];
-  lernaClient?: string;
-  lernaPackages?: string[];
-  mavenProps?: Record<string, any>;
+  lockFiles?: string[];
   npmrc?: string;
   packageFile?: string | null;
-  packageJsonName?: string;
   packageFileVersion?: string;
-  parent?: string;
   skipInstalls?: boolean;
-  yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
@@ -167,12 +151,11 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   variableName?: string;
 }
 
-export interface Upgrade<T = Record<string, any>>
-  extends Package<T>,
-    NpmLockFiles {
+export interface Upgrade<T = Record<string, any>> extends Package<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
+  lockFiles?: string[];
   name?: string;
   newDigest?: string;
   newFrom?: string;
@@ -258,13 +241,13 @@ export interface ManagerApi extends ModuleApi {
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]
-  ): Result<PackageFile[] | null>;
+  ): Result<PackageFileContent[] | null>;
 
   extractPackageFile?(
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile | null>;
+  ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

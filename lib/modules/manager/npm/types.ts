@@ -71,9 +71,22 @@ export type NpmDepType =
   | 'peerDependencies'
   | 'resolutions';
 
-export interface NpmManagerData extends Record<string, any> {
+export interface NpmLockFiles {
+  yarnLock?: string;
+  packageLock?: string;
+  shrinkwrapJson?: string;
+  pnpmShrinkwrap?: string;
+  npmLock?: string;
+}
+
+export interface NpmManagerData extends NpmLockFiles, Record<string, any> {
   hasPackageManager?: boolean;
+  hasWorkspaces?: boolean;
+  lernaClient?: string;
   lernaJsonFile?: string;
+  lernaPackages?: string[];
+  packageJsonName?: string;
   parents?: string[];
   yarnZeroInstall?: boolean;
+  workspacesPackages?: string[] | string;
 }

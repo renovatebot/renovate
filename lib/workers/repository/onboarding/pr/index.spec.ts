@@ -8,7 +8,7 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
+import type { PackageFileContent } from '../../../../modules/manager/types';
 import type { Pr } from '../../../../modules/platform';
 import * as memCache from '../../../../util/cache/memory';
 import type { BranchConfig } from '../../../types';
@@ -20,7 +20,7 @@ jest.mock('../../../../util/git');
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
-    let packageFiles: Record<string, PackageFile[]>;
+    let packageFiles: Record<string, PackageFileContent[]>;
     let branches: BranchConfig[];
 
     const bodyStruct = {

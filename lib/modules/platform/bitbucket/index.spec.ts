@@ -603,6 +603,27 @@ describe('modules/platform/bitbucket/index', () => {
         bitbucket.addReviewers(5, ['someuser', 'someotheruser'])
       ).toResolve();
     });
+
+    it('should handle reviewers as username or UUID', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, pr)
+        .put('/2.0/repositories/some/repo/pullrequests/5', {
+          title: pr.title,
+          reviewers: [
+            { username: 'someuser' },
+            { uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}' },
+          ],
+        })
+        .reply(200);
+      await expect(
+        bitbucket.addReviewers(5, [
+          'someuser',
+          '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        ])
+      ).toResolve();
+    });
   });
 
   describe('ensureComment()', () => {
@@ -727,7 +748,7 @@ describe('modules/platform/bitbucket/index', () => {
       expect(pr?.number).toBe(5);
     });
 
-    it('removes inactive reviewers when updating pr', async () => {
+    it('removes inactive reviewers when creating pr', async () => {
       const inactiveReviewer = {
         user: {
           display_name: 'Bob Smith',
@@ -735,7 +756,14 @@ describe('modules/platform/bitbucket/index', () => {
           account_id: '123',
         },
       };
-      const activeReviewer = {
+      const activeReviewerOutsideOfWorkspace = {
+        user: {
+          display_name: 'Alice Smith',
+          uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
+          account_id: '789',
+        },
+      };
+      const activeReviewerWithinWorkspace = {
         user: {
           display_name: 'Jane Smith',
           uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
@@ -746,7 +774,11 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
-          values: [activeReviewer, inactiveReviewer],
+          values: [
+            activeReviewerWithinWorkspace,
+            activeReviewerOutsideOfWorkspace,
+            inactiveReviewer,
+          ],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(400, {
@@ -758,13 +790,25 @@ describe('modules/platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
         .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+        )
+        .reply(404)
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -1002,7 +1046,6 @@ describe('modules/platform/bitbucket/index', () => {
           hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
         },
         createdAt: '2018-07-02T07:02:25.275030+00:00',
-        displayNumber: 'Pull Request #5',
         number: 5,
         reviewers: ['{90b6646d-1724-4a64-9fd9-539515fe94e9}'],
         sourceBranch: 'branch',
@@ -1045,7 +1088,12 @@ describe('modules/platform/bitbucket/index', () => {
         uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
         account_id: '123',
       };
-      const activeReviewer = {
+      const activeReviewerOutsideOfWorkspace = {
+        display_name: 'Alice Smith',
+        uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
+        account_id: '789',
+      };
+      const activeReviewerWithinWorkspace = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
         account_id: '456',
@@ -1053,7 +1101,13 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [activeReviewer, inactiveReviewer] })
+        .reply(200, {
+          reviewers: [
+            activeReviewerWithinWorkspace,
+            activeReviewerOutsideOfWorkspace,
+            inactiveReviewer,
+          ],
+        })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(400, {
           type: 'error',
@@ -1064,13 +1118,25 @@ describe('modules/platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
         .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+        )
+        .reply(404)
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
         })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
