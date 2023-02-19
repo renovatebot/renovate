@@ -62,6 +62,7 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
+            extractedConstraints: { some: 'constraint' },
             deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
           },
         ],
