@@ -3,7 +3,7 @@ import minimatch from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { PostUpgradeTasks } from '../../../../config/types';
-import { logger } from '../../../../logger';
+import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
 import {
@@ -34,6 +34,15 @@ export async function upgradeTaskExecutor(
 ): Promise<UpgradeCommandsExecutionResult> {
   let currentUpdatedArtifacts = updatedArtifacts;
   let artifactErrors: ArtifactError[] = [];
+
+  addMeta({ dep: upgrade.depName });
+  logger.trace(
+    {
+      tasks: upgradeTask,
+      allowedCommands: allowedUpgradeCommands,
+    },
+    `Checking for ${taskType.toLowerCase()} tasks`
+  );
 
   const commands = upgradeTask?.commands ?? [];
   const fileFilters = upgradeTask?.fileFilters ?? [];

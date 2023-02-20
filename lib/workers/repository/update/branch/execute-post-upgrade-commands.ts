@@ -1,7 +1,6 @@
 // TODO #7154
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
-import { addMeta, logger } from '../../../../logger';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import {
   UpgradeCommandsExecutionResult,
@@ -18,14 +17,6 @@ export async function postUpgradeCommandsExecutor(
     GlobalConfig.get();
 
   for (const upgrade of filteredUpgradeCommands) {
-    addMeta({ dep: upgrade.depName });
-    logger.trace(
-      {
-        tasks: upgrade.postUpgradeTasks,
-        allowedCommands: allowedPostUpgradeCommands,
-      },
-      `Checking for post-upgrade tasks`
-    );
     const upgradeTask = upgrade.postUpgradeTasks;
     const result = await upgradeTaskExecutor(
       upgradeTask,
