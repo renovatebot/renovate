@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFileContent } from '../../../../modules/manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
@@ -30,7 +30,7 @@ import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]> | null,
+  packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
   if (
@@ -85,8 +85,7 @@ If you need any further assistance then you can also [request help here](${
     let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        // TODO: types (#7154)
-        managerFiles.map((file) => ` * \`${file.packageFile!}\` (${manager})`)
+        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
       );
     }
     prBody =

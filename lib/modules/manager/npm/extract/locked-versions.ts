@@ -1,13 +1,13 @@
 import semver from 'semver';
 import { logger } from '../../../../logger';
-import type { PackageFileContent } from '../../types';
+import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
 export async function getLockedVersions(
-  packageFiles: PackageFileContent<NpmManagerData>[]
+  packageFiles: PackageFile<NpmManagerData>[]
 ): Promise<void> {
   const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
@@ -50,8 +50,6 @@ export async function getLockedVersions(
         }
       }
     } else if (npmLock) {
-      // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.debug(`Found ${npmLock} for ${packageFile.packageFile}`);
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {

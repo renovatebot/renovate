@@ -62,11 +62,15 @@ export interface PackageFileContent<T = Record<string, any>>
   deps: PackageDependency[];
   lockFiles?: string[];
   npmrc?: string;
-  packageFile?: string | null;
   packageFileVersion?: string;
   skipInstalls?: boolean;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+}
+
+export interface PackageFile<T = Record<string, any>>
+  extends PackageFileContent<T> {
+  packageFile: string;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -241,7 +245,7 @@ export interface ManagerApi extends ModuleApi {
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]
-  ): Result<PackageFileContent[] | null>;
+  ): Result<PackageFile[] | null>;
 
   extractPackageFile?(
     content: string,

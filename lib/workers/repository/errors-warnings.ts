@@ -1,7 +1,7 @@
 // TODO #7154
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
-import type { PackageFileContent } from '../../modules/manager/types';
+import type { PackageFile } from '../../modules/manager/types';
 import { emojify } from '../../util/emoji';
 import { regEx } from '../../util/regex';
 import type { DepWarnings } from '../types';
@@ -33,7 +33,7 @@ export function getErrors(config: RenovateConfig): string {
 }
 
 function getDepWarnings(
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
@@ -59,7 +59,7 @@ function getDepWarnings(
 }
 
 export function getDepWarningsOnboardingPR(
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   let warningText = '';
@@ -82,7 +82,7 @@ export function getDepWarningsOnboardingPR(
 }
 
 export function getDepWarningsPR(
-  packageFiles: Record<string, PackageFileContent[]>,
+  packageFiles: Record<string, PackageFile[]>,
   dependencyDashboard?: boolean
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
@@ -104,7 +104,7 @@ export function getDepWarningsPR(
 }
 
 export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (!warnings.length) {
