@@ -1,7 +1,7 @@
 import { regEx } from '../../../util/regex';
 import { CdnJsDatasource } from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const regex = regEx(/<\s*(script|link)\s+[^>]*?\/?>/i);
 
@@ -29,7 +29,7 @@ export function extractDep(tag: string): PackageDependency | null {
   return dep;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let rest = content;
   let match = regex.exec(rest);

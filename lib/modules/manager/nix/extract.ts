@@ -1,11 +1,11 @@
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { id as nixpkgsVersioning } from '../../versioning/nixpkgs';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const nixpkgsRegex = regEx(/"github:nixos\/nixpkgs\/(?<ref>[a-z0-9-.]+)"/i);
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   const match = nixpkgsRegex.exec(content);

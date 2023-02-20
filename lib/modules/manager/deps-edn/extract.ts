@@ -7,7 +7,7 @@ import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { parseDepsEdnFile } from './parser';
 import type {
   ParsedEdnData,
@@ -205,7 +205,7 @@ function extractSection(
   return deps;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const parsed = parseDepsEdnFile(content);
   if (!parsed) {
     return null;

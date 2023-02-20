@@ -2,10 +2,10 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { VelaPipelineConfiguration } from './types';
 
-export function extractPackageFile(file: string): PackageFile | null {
+export function extractPackageFile(file: string): PackageFileContent | null {
   let doc: VelaPipelineConfiguration | undefined;
 
   try {
