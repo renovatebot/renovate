@@ -1597,15 +1597,14 @@ describe('workers/repository/update/branch/index', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         upgrades: [
-          {
-            ...getConfig(),
+          partial<BranchUpgradeConfig>({
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
-          } as BranchUpgradeConfig,
+          }),
         ],
       } as BranchConfig;
       const result = await branchWorker.processBranch(inconfig);
@@ -1703,9 +1702,8 @@ describe('workers/repository/update/branch/index', () => {
             'modified_then_deleted_file',
           ],
         },
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
-            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1717,9 +1715,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
+          },
           {
-            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1731,8 +1728,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
-        ],
+          },
+        ]),
       };
 
       const result = await branchWorker.processBranch(inconfig);
@@ -1852,9 +1849,8 @@ describe('workers/repository/update/branch/index', () => {
             'modified_then_deleted_file',
           ],
         },
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
-            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1866,9 +1862,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
+          },
           {
-            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1880,8 +1875,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
-        ],
+          },
+        ]),
       };
 
       const result = await branchWorker.processBranch(inconfig);
