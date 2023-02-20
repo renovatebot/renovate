@@ -136,33 +136,9 @@ export function getNewValue({
         });
       }
       if (element.operator === '^') {
-        const split = currentValue.split('.');
-        if (suffix.length) {
-          return `^${newVersion}`;
-        }
-        if (split.length === 1) {
-          // ^4
-          return `^${toVersionMajor}`;
-        }
-        if (split.length === 2) {
-          // ^4.1
-          return `^${toVersionMajor}.${toVersionMinor}`;
-        }
         return `^${newVersion}`;
       }
       if (element.operator === '~') {
-        const split = currentValue.split('.');
-        if (suffix.length) {
-          return `~${newVersion}`;
-        }
-        if (split.length === 1) {
-          // ~4
-          return `~${toVersionMajor}`;
-        }
-        if (split.length === 2) {
-          // ~4.1
-          return `~${toVersionMajor}.${toVersionMinor}`;
-        }
         return `~${newVersion}`;
       }
       if (element.operator === '=') {
