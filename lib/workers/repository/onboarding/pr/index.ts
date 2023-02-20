@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
+import type { PackageFileContent } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
@@ -26,7 +26,7 @@ import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]> | null,
+  packageFiles: Record<string, PackageFileContent[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
   if (

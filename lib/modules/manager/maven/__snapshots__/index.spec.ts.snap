@@ -33,7 +33,6 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
       },
     ],
     "packageFile": "parent.pom.xml",
-    "parent": "child.pom.xml",
   },
   {
     "datasource": "maven",
@@ -188,7 +187,6 @@ exports[`modules/manager/maven/index updateDependency should include registryUrl
     ],
     "packageFile": "child.pom.xml",
     "packageFileVersion": "0.0.1",
-    "parent": "parent.pom.xml",
   },
 ]
 `;

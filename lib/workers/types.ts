@@ -12,7 +12,7 @@ import type {
   ExtractConfig,
   LookupUpdate,
   PackageDependency,
-  PackageFile,
+  PackageFileContent,
 } from '../modules/manager/types';
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
@@ -118,7 +118,7 @@ export interface BranchConfig
   rebaseRequested?: boolean;
   result?: BranchResult;
   upgrades: BranchUpgradeConfig[];
-  packageFiles?: Record<string, PackageFile[]>;
+  packageFiles?: Record<string, PackageFileContent[]>;
   prBlockedBy?: PrBlockedBy;
   prNo?: number;
   stopUpdating?: boolean;
@@ -189,5 +189,5 @@ export interface UpgradeFingerprintConfig {
 
 export interface ExtractResult {
   extractionFingerprints: Record<string, string | undefined>;
-  packageFiles: Record<string, PackageFile[]>;
+  packageFiles: Record<string, PackageFileContent[]>;
 }

@@ -1,4 +1,4 @@
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { parse } from './parser';
 import { extractDepsFromFragment } from './rules';
 import type { RecordFragment } from './types';
@@ -6,7 +6,7 @@ import type { RecordFragment } from './types';
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   const fragments: RecordFragment[] | null = parse(content, packageFile);

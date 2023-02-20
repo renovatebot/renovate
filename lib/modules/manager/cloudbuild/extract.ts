@@ -2,9 +2,9 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix types

@@ -484,7 +484,7 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, 50000)
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'by renaming this PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
