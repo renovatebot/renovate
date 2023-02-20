@@ -119,7 +119,6 @@ function getMatch(str: string, state: string | null): MatchResult | null {
 }
 
 function getDepName(url: string | null): string | null {
-  // istanbul ignore if
   if (!url) {
     return null;
   }
