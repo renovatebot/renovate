@@ -11,7 +11,6 @@ export async function findCommitOfTag(
   logger.trace(`github/tags.findCommitOfTag(${packageName}, ${tag})`);
   try {
     const tags = await queryTags({ packageName, registryUrl }, http);
-    // istanbul ignore if
     if (!tags.length) {
       logger.debug(
         `github/tags.findCommitOfTag(): No tags found for ${packageName}`
