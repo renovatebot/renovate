@@ -249,6 +249,22 @@ Renovate also allows users to explicitly configure `baseBranches`, e.g. for use 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
 
+`baseBranches` supports Regular Expressions that must begin and end with `/`, e.g.:
+
+```json
+{
+  "baseBranches": ["main", "/^release\\/.*/"]
+}
+```
+
+For ignoring certain branches, a special negated regex syntax can be used, e.g.:
+
+```json
+{
+  "baseBranches": ["main", "!/^pre-release\\/.*/"]
+}
+```
+
 <!-- prettier-ignore -->
 !!! note
     Do _not_ use the `baseBranches` config option when you've set a `forkToken`.
