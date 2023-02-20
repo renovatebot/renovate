@@ -154,7 +154,7 @@ export interface LegacyAdminConfig {
 
 export type ExecutionMode = 'branch' | 'update';
 
-export interface PeriUpgradeTasks {
+export interface UpgradeTasks {
   commands?: string[];
   fileFilters?: string[];
   executionMode: ExecutionMode;
