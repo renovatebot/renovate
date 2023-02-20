@@ -340,7 +340,6 @@ const staticGroups = {
     description: 'Group React and corresponding `@types` packages together.',
     packageRules: [
       {
-        extends: 'monorepo:react',
         groupName: 'react monorepo',
         matchPackageNames: ['@types/react', '@types/react-dom'],
       },
