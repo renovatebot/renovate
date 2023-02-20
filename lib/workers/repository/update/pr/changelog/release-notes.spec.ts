@@ -92,10 +92,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(
         await addReleaseNotes(input as never, {} as BranchUpgradeConfig)
       ).toEqual(input);
-      // TODO #7154
-      expect(
-        await addReleaseNotes(null as never, {} as BranchUpgradeConfig)
-      ).toBeNull();
+      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
       expect(
         await addReleaseNotes(
           { versions: [] } as never,
