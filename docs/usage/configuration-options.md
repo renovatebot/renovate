@@ -257,11 +257,13 @@ If so then Renovate will reflect this setting in its description and use package
 }
 ```
 
-For ignoring certain branches, a special negated regex syntax can be used, e.g.:
+You can negate the regex by prefixing it with `!`.
+Only use a single negation and do not mix it with other branch names, since all branches are combined with `or`.
+With a negation, all branches except those matching the regex will be added to the result:
 
 ```json
 {
-  "baseBranches": ["main", "!/^pre-release\\/.*/"]
+  "baseBranches": ["!/^pre-release\\/.*/"]
 }
 ```
 
