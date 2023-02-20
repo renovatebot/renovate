@@ -29,7 +29,7 @@ export interface BranchUpgradeCache {
 export interface PrCache {
   fingerprint: string;
   /**
-   * Whether this PR was last edited
+   * last PR modified ISO timestamp 
    */
   lastEdited: string;
 }
