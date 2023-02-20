@@ -122,8 +122,12 @@ describe('config/validation', () => {
         baseBranches: ['/***$}{]][/'],
       };
       const { errors } = await configValidation.validateConfig(config);
-      expect(errors).toHaveLength(1);
-      expect(errors).toMatchSnapshot();
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid regExp for baseBranches: `/***$}{]][/`',
+        },
+      ]);
     });
 
     it('returns nested errors', async () => {
