@@ -8,11 +8,27 @@ export async function findCommitOfTag(
   tag: string,
   http: GithubHttp
 ): Promise<string | null> {
+  logger.trace(`github/tags.findCommitOfTag(${packageName}, ${tag})`);
   try {
     const tags = await queryTags({ packageName, registryUrl }, http);
+    // istanbul ignore if
+    if (!tags.length) {
+      logger.debug(
+        `github/tags.findCommitOfTag(): No tags found for ${packageName}`
+      );
+    }
     const tagItem = tags.find(({ version }) => version === tag);
     if (tagItem) {
-      return tagItem.hash;
+      if (tagItem.hash) {
+        return tagItem.hash;
+      }
+      logger.debug(
+        `github/tags.findCommitOfTag: Tag ${tag} has no hash for ${packageName}`
+      );
+    } else {
+      logger.debug(
+        `github/tags.findCommitOfTag: Tag ${tag} not found for ${packageName}`
+      );
     }
   } catch (err) {
     logger.debug(
