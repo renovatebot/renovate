@@ -90,6 +90,8 @@ export class MigrationsService {
     ['masterIssueFooter', 'dependencyDashboardFooter'],
     ['masterIssueTitle', 'dependencyDashboardTitle'],
     ['masterIssueLabels', 'dependencyDashboardLabels'],
+    ['allowPostUpgradeCommandTemplating', 'allowUpgradeCommandTemplating'],
+    ['allowedPostUpgradeCommands', 'allowedUpgradeCommands'],
   ]);
 
   static readonly customMigrations: ReadonlyArray<MigrationConstructor> = [
