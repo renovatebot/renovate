@@ -1,4 +1,3 @@
-// TODO: types (#7154)
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
@@ -171,7 +170,7 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   }
 
   /**
-   * githubReleaseAttachments.getDigest
+   * Attempts to resolve the digest for the specified package.
    *
    * The `newValue` supplied here should be a valid tag for the GitHub release.
    * Requires `currentValue` and `currentDigest`.
@@ -223,9 +222,8 @@ export class GithubReleaseAttachmentsDatasource extends Datasource {
   }
 
   /**
-   * githubReleaseAttachments.getReleases
-   *
-   * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with releases.
+   * This function can be used to fetch releases with a customisable versioning
+   * (e.g. semver) and with releases.
    *
    * This function will:
    *  - Fetch all releases

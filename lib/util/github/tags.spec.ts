@@ -4,14 +4,11 @@ import { findCommitOfTag } from './tags';
 
 describe('util/github/tags', () => {
   describe('findCommitOfTag', () => {
-    let http: GithubHttp;
-
-    beforeEach(() => {
-      http = new GithubHttp();
-    });
+    const http = new GithubHttp();
+    const queryTagsSpy = jest.spyOn(githubGraphql, 'queryTags');
 
     it('should be able to find the hash of a Git tag', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+      queryTagsSpy.mockResolvedValueOnce([
         {
           version: 'v1.0.0',
           gitRef: 'v1.0.0',
@@ -36,7 +33,7 @@ describe('util/github/tags', () => {
     });
 
     it('should support passing a custom registry URL', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([]);
+      queryTagsSpy.mockResolvedValueOnce([]);
 
       const commit = await findCommitOfTag(
         'https://my-enterprise-github.dev',
@@ -55,7 +52,7 @@ describe('util/github/tags', () => {
     });
 
     it('should return `null` if the tag does not exist', async () => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([]);
+      queryTagsSpy.mockResolvedValueOnce([]);
 
       const commit = await findCommitOfTag(
         undefined,
@@ -67,9 +64,7 @@ describe('util/github/tags', () => {
     });
 
     it('should gracefully return `null` if tags cannot be queried', async () => {
-      jest
-        .spyOn(githubGraphql, 'queryTags')
-        .mockRejectedValue(new Error('some error'));
+      queryTagsSpy.mockRejectedValue(new Error('some error'));
 
       const commit = await findCommitOfTag(
         undefined,

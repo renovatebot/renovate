@@ -1,4 +1,3 @@
-// TODO: types (#7154)
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { queryReleases } from '../../../util/github/graphql';
@@ -28,7 +27,7 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   /**
-   * githubReleaseAttachments.getDigest
+   * Attempts to resolve the digest for the specified package.
    *
    * The `newValue` supplied here should be a valid tag for the GitHub release. The digest
    * of a GitHub release will be the underlying SHA of the release tag.
@@ -55,8 +54,6 @@ export class GithubReleasesDatasource extends Datasource {
   }
 
   /**
-   * githubReleases.getReleases
-   *
    * This function can be used to fetch releases with a customizable versioning
    * (e.g. semver) and with releases.
    *
