@@ -1,17 +1,15 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
-import { exec } from '../../../../util/exec';
 import { localPathIsFile, writeLocalFile } from '../../../../util/fs';
 import type { FileChange } from '../../../../util/git/types';
-import { regEx } from '../../../../util/regex';
-import { sanitize } from '../../../../util/sanitize';
-import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
-import { updateUpdatedArtifacts } from './execute-upgrade-commands';
+import {
+  updateUpdatedArtifacts,
+  upgradeCommandExecutor,
+} from './execute-upgrade-commands';
 
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
@@ -23,7 +21,7 @@ export async function postUpgradeCommandsExecutor(
   config: BranchConfig
 ): Promise<PostUpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
-  const artifactErrors = [...(config.artifactErrors ?? [])];
+  let artifactErrors = [...(config.artifactErrors ?? [])];
   const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
     GlobalConfig.get();
 
@@ -55,52 +53,21 @@ export async function postUpgradeCommandsExecutor(
       }
 
       for (const cmd of commands) {
-        if (
-          allowedPostUpgradeCommands!.some((pattern) =>
-            regEx(pattern).test(cmd)
-          )
-        ) {
-          try {
-            const compiledCmd = allowPostUpgradeCommandTemplating
-              ? compile(cmd, mergeChildConfig(config, upgrade))
-              : cmd;
-
-            logger.trace({ cmd: compiledCmd }, 'Executing post-upgrade task');
-            const execResult = await exec(compiledCmd, {
-              cwd: GlobalConfig.get('localDir'),
-            });
-
-            logger.debug(
-              { cmd: compiledCmd, ...execResult },
-              'Executed post-upgrade task'
-            );
-          } catch (error) {
-            artifactErrors.push({
-              lockFile: upgrade.packageFile,
-              stderr: sanitize(error.message),
-            });
-          }
-        } else {
-          logger.warn(
-            {
-              cmd,
-              allowedPostUpgradeCommands,
-            },
-            'Post-upgrade task did not match any on allowedPostUpgradeCommands list'
-          );
-          artifactErrors.push({
-            lockFile: upgrade.packageFile,
-            stderr: sanitize(
-              `Post-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
-            ),
-          });
-        }
+        const commandError = await upgradeCommandExecutor(
+          allowedPostUpgradeCommands ?? [],
+          cmd,
+          allowPostUpgradeCommandTemplating,
+          config,
+          upgrade,
+          'Post-upgrade'
+        );
+        artifactErrors = [...artifactErrors, ...commandError];
       }
 
       updatedArtifacts = await updateUpdatedArtifacts(
         fileFilters,
         updatedArtifacts,
-        'Post-update'
+        'Post-upgrade'
       );
     }
   }

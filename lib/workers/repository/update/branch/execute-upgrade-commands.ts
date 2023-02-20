@@ -17,7 +17,8 @@ export async function upgradeCommandExecutor(
   cmd: string,
   allowUpgradeCommandTemplating: undefined | boolean,
   config: BranchConfig,
-  upgrade: BranchUpgradeConfig
+  upgrade: BranchUpgradeConfig,
+  taskType: string
 ): Promise<ArtifactError[]> {
   const artifactErrors = [];
   if (allowedUpgradeCommands.some((pattern) => regEx(pattern).test(cmd))) {
@@ -26,14 +27,17 @@ export async function upgradeCommandExecutor(
         ? compile(cmd, mergeChildConfig(config, upgrade))
         : cmd;
 
-      logger.trace({ cmd: compiledCmd }, 'Executing pre-upgrade task');
+      logger.trace(
+        { cmd: compiledCmd },
+        'Executing ' + taskType.toLowerCase() + ' task'
+      );
       const execResult = await exec(compiledCmd, {
         cwd: GlobalConfig.get('localDir'),
       });
 
       logger.debug(
         { cmd: compiledCmd, ...execResult },
-        'Executed pre-upgrade task'
+        'Executed ' + taskType.toLowerCase() + ' task'
       );
     } catch (error) {
       artifactErrors.push({
@@ -47,12 +51,12 @@ export async function upgradeCommandExecutor(
         cmd,
         allowedUpgradeCommands,
       },
-      'Pre-upgrade task did not match any on allowedPostUpgradeCommands list'
+      taskType + ' task did not match any on allowedPostUpgradeCommands list'
     );
     artifactErrors.push({
       lockFile: upgrade.packageFile,
       stderr: sanitize(
-        `Pre-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
+        `${taskType} command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
       ),
     });
   }
