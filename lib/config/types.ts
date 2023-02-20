@@ -55,8 +55,8 @@ export interface RenovateSharedConfig {
   hashedBranchLength?: number;
   npmrc?: string;
   npmrcMerge?: boolean;
-  postUpgradeTasks?: PeriUpgradeTasks;
-  preUpgradeTasks?: PeriUpgradeTasks;
+  postUpgradeTasks?: UpgradeTasks | null;
+  preUpgradeTasks?: UpgradeTasks | null;
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
