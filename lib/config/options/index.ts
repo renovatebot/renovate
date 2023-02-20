@@ -751,6 +751,7 @@ const options: RenovateOptions[] = [
     description:
       'List of one or more custom base branches defined as exact strings (e.g. `["main"]`) and/or via regex expressions (e.g. `["/^release\\/.*/"]`).',
     type: 'array',
+    subType: 'string',
     stage: 'package',
     cli: false,
   },
