@@ -216,7 +216,7 @@ describe('util/exec/docker/index', () => {
       (vol ? `${vol} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `renovate/${img} ` +
+      `containerbase/${img} ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {

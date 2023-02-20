@@ -82,7 +82,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false
     ),
@@ -90,7 +90,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
