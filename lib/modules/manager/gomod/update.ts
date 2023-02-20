@@ -137,7 +137,10 @@ export function updateDependency({
     }
 
     if (depType === 'indirect') {
-      newLine += ' // indirect';
+      newLine = newLine.replace(
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        ' // indirect'
+      );
     }
 
     lines[upgrade.managerData.lineNumber] = newLine;

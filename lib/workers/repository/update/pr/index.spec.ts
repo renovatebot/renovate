@@ -372,8 +372,6 @@ describe('workers/repository/update/pr/index', () => {
 
     describe('Automerge', () => {
       it('handles branch automerge', async () => {
-        platform.getBranchPr.mockResolvedValueOnce(pr);
-
         const res = await ensurePr({
           ...config,
           automerge: true,

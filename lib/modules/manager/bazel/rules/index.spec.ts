@@ -357,10 +357,16 @@ describe('modules/manager/bazel/rules/index', () => {
           artifacts: [
             'com.example1:foo:1.1.1',
             {
-              artifact: 'bar',
-              function: 'maven.artifact',
+              _function: 'maven.artifact',
               group: 'com.example2',
+              artifact: 'bar',
               version: '2.2.2',
+            },
+            {
+              _function: 'maven.artifact',
+              '0': 'com.example3',
+              '1': 'baz',
+              '2': '3.3.3',
             },
           ],
           repositories: [
@@ -384,6 +390,16 @@ describe('modules/manager/bazel/rules/index', () => {
           datasource: 'maven',
           depType: 'maven_install',
           depName: 'com.example2:bar',
+          registryUrls: [
+            'https://example1.com/maven2',
+            'https://example2.com/maven2',
+          ],
+        },
+        {
+          currentValue: '3.3.3',
+          datasource: 'maven',
+          depType: 'maven_install',
+          depName: 'com.example3:baz',
           registryUrls: [
             'https://example1.com/maven2',
             'https://example2.com/maven2',

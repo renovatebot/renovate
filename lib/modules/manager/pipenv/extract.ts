@@ -6,7 +6,7 @@ import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
@@ -104,7 +104,7 @@ function extractFromSection(
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.debug('pipenv.extractPackageFile()');
 
   let pipfile: PipFile;
@@ -115,7 +115,7 @@ export async function extractPackageFile(
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;
   }
-  const res: PackageFile = { deps: [] };
+  const res: PackageFileContent = { deps: [] };
   if (pipfile.source) {
     res.registryUrls = pipfile.source.map((source) => source.url);
   }
@@ -147,6 +147,6 @@ export async function extractPackageFile(
     res.lockFiles = [lockFileName];
   }
 
-  res.constraints = constraints;
+  res.extractedConstraints = constraints;
   return res;
 }
