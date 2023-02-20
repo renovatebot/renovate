@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile as _extractPackageFile } from '.';
 
@@ -63,15 +64,16 @@ describe('modules/manager/bazel/extract', () => {
 
     it('extracts dependencies for container_pull deptype', () => {
       const res = extractPackageFile(
+        codeBlock`
+          container_pull(
+            name="hasura",
+            registry="index.docker.io",
+            repository="hasura/graphql-engine",
+            # v1.0.0-alpha31.cli-migrations 11/28
+            digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+            tag="v1.0.0-alpha31.cli-migrations"
+          )
         `
-        container_pull(
-          name="hasura",
-          registry="index.docker.io",
-          repository="hasura/graphql-engine",
-          # v1.0.0-alpha31.cli-migrations 11/28
-          digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
-          tag="v1.0.0-alpha31.cli-migrations"
-        )`
       );
       expect(res?.deps).toMatchObject([
         {
@@ -87,13 +89,13 @@ describe('modules/manager/bazel/extract', () => {
 
     it('check remote option in go_repository', () => {
       const successStory = extractPackageFile(
-        `
-go_repository(
-  name = "test_repository",
-  importpath = "github.com/google/uuid",
-  remote = "https://github.com/test/uuid-fork",
-  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-)
+        codeBlock`
+          go_repository(
+            name = "test_repository",
+            importpath = "github.com/google/uuid",
+            remote = "https://github.com/test/uuid-fork",
+            commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+          )
         `
       );
       expect(successStory?.deps[0].datasource).toBe('go');
@@ -102,37 +104,37 @@ go_repository(
       );
 
       const badStory = extractPackageFile(
-        `
-go_repository(
-  name = "test_repository",
-  importpath = "github.com/google/uuid",
-  remote = "https://github.com/test/uuid.git#branch",
-  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-)
+        codeBlock`
+          go_repository(
+            name = "test_repository",
+            importpath = "github.com/google/uuid",
+            remote = "https://github.com/test/uuid.git#branch",
+            commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+          )
         `
       );
       expect(badStory?.deps[0].skipReason).toBe('unsupported-remote');
 
       const gheStory = extractPackageFile(
-        `
-go_repository(
-  name = "test_repository",
-  importpath = "github.com/google/uuid",
-  remote = "https://github.mycompany.com/test/uuid",
-  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-)
+        codeBlock`
+          go_repository(
+            name = "test_repository",
+            importpath = "github.com/google/uuid",
+            remote = "https://github.mycompany.com/test/uuid",
+            commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+          )
         `
       );
       expect(gheStory?.deps[0].skipReason).toBe('unsupported-remote');
 
       const gitlabRemote = extractPackageFile(
-        `
-go_repository(
-  name = "test_repository",
-  importpath = "github.com/google/uuid",
-  remote = "https://gitlab.com/test/uuid",
-  commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
-)
+        codeBlock`
+          go_repository(
+            name = "test_repository",
+            importpath = "github.com/google/uuid",
+            remote = "https://gitlab.com/test/uuid",
+            commit = "dec09d789f3dba190787f8b4454c7d3c936fed9e"
+          )
         `
       );
       expect(gitlabRemote?.deps[0].skipReason).toBe('unsupported-remote');
@@ -142,7 +144,7 @@ go_repository(
       // Sequential http_archive
       // See https://github.com/aspect-build/rules_swc/commit/d4989f9dfed781dc0226421fb9373b45052e7bc8
       const res = extractPackageFile(
-        `
+        codeBlock`
           http_archive(
             name = "aspect_rules_js",
             sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
@@ -160,6 +162,52 @@ go_repository(
 
       expect(res?.deps).toHaveLength(2);
       expect(res?.deps).toMatchSnapshot();
+    });
+
+    it('http_archive with GitLab url', () => {
+      // Sequential http_archive
+      // See https://github.com/aspect-build/rules_swc/commit/d4989f9dfed781dc0226421fb9373b45052e7bc8
+      const res = extractPackageFile(
+        codeBlock`
+          http_archive(
+            name = "eigen3",
+            url = "https://gitlab.com/libeigen/eigen/-/archive/3.3.5/eigen-3.3.5.zip",
+            strip_prefix = "eigen-3.3.5",
+            sha256 = "0e7aeece6c8874146c2a4addc437eebdf1ec4026680270f00e76705c8186f0b5",
+            build_file = "@//third_party:eigen3.BUILD",
+          )
+
+          http_archive(
+            name = "eigen",
+            build_file = "//third_party:eigen.BUILD",
+            sha256 = "d76992f1972e4ff270221c7ee8125610a8e02bb46708a7295ee646e99287083b",  # SHARED_EIGEN_SHA
+            strip_prefix = "eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2",
+            urls = [
+                "https://storage.googleapis.com/mirror.tensorflow.org/gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz",
+                "https://gitlab.com/foo/bar",
+                "https://gitlab.com/libeigen/eigen/-/archive/90ee821c563fa20db4d64d6991ddca256d5c52f2/eigen-90ee821c563fa20db4d64d6991ddca256d5c52f2.tar.gz",
+            ],
+          )
+        `
+      );
+
+      expect(res?.deps).toHaveLength(2);
+      expect(res?.deps).toMatchObject([
+        {
+          currentValue: '3.3.5',
+          datasource: 'gitlab-releases',
+          depName: 'eigen3',
+          depType: 'http_archive',
+          packageName: 'libeigen/eigen',
+        },
+        {
+          currentDigest: '90ee821c563fa20db4d64d6991ddca256d5c52f2',
+          datasource: 'gitlab-tags',
+          depName: 'eigen',
+          depType: 'http_archive',
+          packageName: 'libeigen/eigen',
+        },
+      ]);
     });
   });
 });

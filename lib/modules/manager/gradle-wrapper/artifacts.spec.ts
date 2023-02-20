@@ -26,7 +26,7 @@ jest.mock('../../../util/git');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 
-process.env.BUILDPACK = 'true';
+process.env.CONTAINERBASE = 'true';
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -39,12 +39,11 @@ const config: UpdateArtifactsConfig = {
   newValue: '5.6.4',
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle-wrapper/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',

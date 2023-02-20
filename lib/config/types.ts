@@ -265,6 +265,7 @@ export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;

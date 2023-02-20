@@ -3,7 +3,11 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { isGitlabIncludeLocal } from './common';
 import type { GitlabPipeline, Image, Job, Services } from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
@@ -75,7 +79,7 @@ export function extractPackageFile(
   content: string,
   _fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
     const doc = load(replaceReferenceTags(content), {
@@ -119,10 +123,10 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[] | null> {
+): Promise<PackageFileContent[] | null> {
   const filesToExamine = [...packageFiles];
   const seen = new Set<string>(packageFiles);
-  const results: PackageFile[] = [];
+  const results: PackageFileContent[] = [];
 
   // extract all includes from the files
   while (filesToExamine.length > 0) {

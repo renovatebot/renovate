@@ -4,7 +4,7 @@ import { logger } from '../../../logger';
 import { readLocalDirectory } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { HermitDatasource } from '../../datasource/hermit';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { HermitListItem } from './types';
 
 const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
@@ -16,7 +16,7 @@ const pkgReferenceRegex = regEx(`(?<packageName>.*?)-(?<version>[0-9]{1}.*)`);
 export async function extractPackageFile(
   content: string,
   filename: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace('hermit.extractPackageFile()');
   const dependencies = [] as PackageDependency[];
   const packages = await listHermitPackages(filename);

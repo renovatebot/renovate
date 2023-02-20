@@ -3,9 +3,9 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { OrbDatasource } from '../../datasource/orb';
 import * as npmVersioning from '../../versioning/npm';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);

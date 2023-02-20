@@ -1683,7 +1683,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     experimental: true,
-    experimentalIssues: [6562],
+    experimentalIssues: [20427],
   },
   {
     name: 'pruneBranchAfterAutomerge',
@@ -1908,6 +1908,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'ignoreReviewers',
+    description:
+      'Reviewers to be ignored in PR reviewers presence (either username or email address depending on the platform).',
+    type: 'array',
+    subType: 'string',
+  },
+  {
     name: 'reviewers',
     description:
       'Requested reviewers for Pull Requests (either username or email address depending on the platform).',
@@ -1977,6 +1984,7 @@ const options: RenovateOptions[] = [
       'gomodTidy1.17',
       'gomodTidyE',
       'npmDedupe',
+      'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],

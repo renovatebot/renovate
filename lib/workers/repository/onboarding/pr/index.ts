@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFile } from '../../../../modules/manager/types';
+import type { PackageFileContent } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { emojify } from '../../../../util/emoji';
@@ -30,7 +30,7 @@ import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]> | null,
+  packageFiles: Record<string, PackageFileContent[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
   if (
@@ -147,8 +147,7 @@ If you need any further assistance then you can also [request help here](${
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
-      // TODO: types (#7154)
-      logger.debug(`${existingPr.displayNumber!} does not need updating`);
+      logger.debug(`Pull Request #${existingPr.number} does not need updating`);
       return;
     }
     // PR must need updating
@@ -179,7 +178,10 @@ If you need any further assistance then you can also [request help here](${
         labels,
         platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
-      logger.info({ pr: pr!.displayNumber }, 'Onboarding PR created');
+      logger.info(
+        { pr: `Pull Request #${pr!.number}` },
+        'Onboarding PR created'
+      );
       await addParticipants(config, pr!);
     }
   } catch (err) {

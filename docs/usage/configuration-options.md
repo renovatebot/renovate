@@ -812,7 +812,7 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 !!! note
     Renovate can only show release notes from some platforms and some package managers.
     We're planning improvements so that Renovate can show more release notes.
-    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
 
@@ -1320,6 +1320,19 @@ For example, consider this config:
 ```
 
 It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
+
+## ignoreReviewers
+
+By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
+If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
+In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
+
+```json
+{
+  "reviewers": ["foo"],
+  "ignoreReviewers": ["renovate-approve"]
+}
+```
 
 ## ignoreScripts
 
@@ -2111,6 +2124,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Please check platform specific docs for version requirements.
 
+To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Concepts, Automerge, GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
+
 ## platformCommit
 
 Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
@@ -2132,6 +2147,7 @@ Table with options:
 | `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
 | `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
 | `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
@@ -2295,7 +2311,7 @@ This config option slows down the _rate_ at which Renovate creates PRs.
 Slowing Renovate down can be handy when you're onboarding a repository with a lot of dependencies.
 What may happen if you don't set a `prHourlyLimit`:
 
-1. Renovate creates a Onboarding PR
+1. Renovate creates an Onboarding PR
 1. You merge the onboarding PR to activate Renovate
 1. Renovate creates a "Pin Dependencies" PR (if needed)
 1. You merge the "Pin Dependencies" PR

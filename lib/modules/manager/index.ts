@@ -4,7 +4,7 @@ import type {
   ExtractConfig,
   GlobalManagerConfig,
   ManagerApi,
-  PackageFile,
+  PackageFileContent,
   RangeConfig,
   Result,
 } from './types';
@@ -36,7 +36,7 @@ export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
   files: string[]
-): Promise<PackageFile[] | null> {
+): Promise<PackageFileContent[] | null> {
   if (!managers.has(manager)) {
     return null;
   }
@@ -57,7 +57,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Result<PackageFile | null> {
+): Result<PackageFileContent | null> {
   if (!managers.has(manager)) {
     return null;
   }
