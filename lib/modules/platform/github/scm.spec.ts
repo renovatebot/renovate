@@ -1,4 +1,5 @@
 import { git, mocked } from '../../../../test/util';
+import type { CommitFilesConfig } from '../../../util/git/types';
 import { GithubScm } from './scm';
 import * as _github from '.';
 
@@ -7,19 +8,20 @@ const github = mocked(_github);
 
 describe('modules/platform/github/scm', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-    git.commitFiles = jest.fn();
+    jest.spyOn(git, 'commitFiles').mockResolvedValue('sha');
   });
+
+  const githubScm = new GithubScm();
 
   const commitObj = {
     baseBranch: 'main',
     branchName: 'branch',
     files: [],
     message: 'msg',
-  };
+  } satisfies CommitFilesConfig;
 
   it('platformCommit = false => delegate to git', async () => {
-    await new GithubScm().commitAndPush({
+    await githubScm.commitAndPush({
       ...commitObj,
       platformCommit: false,
     });
@@ -32,7 +34,7 @@ describe('modules/platform/github/scm', () => {
   });
 
   it('platformCommit = true => delegate to github', async () => {
-    await new GithubScm().commitAndPush({
+    await githubScm.commitAndPush({
       ...commitObj,
       platformCommit: true,
     });

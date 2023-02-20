@@ -47,7 +47,7 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { baseBranch, branchName } = branch;
   try {
-    const sha = (await scm.getBranchCommit(branchName)) ?? null;
+    const sha = await scm.getBranchCommit(branchName);
     const baseBranchSha = await scm.getBranchCommit(baseBranch);
     const pristine = getCachedPristineResult(branchName);
     let prNo = null;

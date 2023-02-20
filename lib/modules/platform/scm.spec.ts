@@ -7,10 +7,6 @@ jest.mock('../../util/git');
 jest.unmock('./scm'); //mocked from test/setup
 
 describe('modules/platform/scm', () => {
-  beforeEach(() => {
-    jest.resetModules();
-  });
-
   it('no platform chosen', () => {
     expect(() => scm.branchExists('branchName')).toThrow(PLATFORM_NOT_FOUND);
   });

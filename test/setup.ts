@@ -15,8 +15,6 @@ import { mockDeep } from 'jest-mock-extended';
 import type { SnapshotMatchers } from 'jest-snapshot';
 import type { Plugin } from 'pretty-format';
 import type { PlatformScm } from '../lib/modules/platform';
-// Check for missing or pending http mocks
-import './http-mock';
 
 jest.mock('../lib/modules/platform', () => ({
   platform: jest.createMockFromModule('../lib/modules/platform/github'),
