@@ -123,7 +123,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res?.deps).toHaveLength(13);
       expect(res).toMatchSnapshot({
-        constraints: {},
+        extractedConstraints: {},
         deps: [
           ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
           {
@@ -156,7 +156,11 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
+      expect(res).toMatchSnapshot({
+        managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
     });
 
     it('finds and filters .npmrc', async () => {
@@ -280,9 +284,11 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'npm',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'npm',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -299,9 +305,11 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'npm',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'npm',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -318,9 +326,11 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'yarn',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'yarn',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -336,7 +346,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
@@ -351,7 +363,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -366,7 +380,9 @@ describe('modules/manager/npm/extract/index', () => {
         'package.json',
         defaultConfig
       );
-      expect(res).toMatchSnapshot({ workspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('extracts engines', async () => {
@@ -398,7 +414,7 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: {
+        extractedConstraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
           vscode: '>=1.49.3',
@@ -760,7 +776,7 @@ describe('modules/manager/npm/extract/index', () => {
         defaultConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: { yarn: '3.0.0' },
+        extractedConstraints: { yarn: '3.0.0' },
         deps: [
           {
             commitMessageTopic: 'Yarn',
