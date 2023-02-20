@@ -2,13 +2,17 @@ import { RANGE_PATTERN } from '@renovatebot/pep440';
 import { lang, lexer, parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 interface ManagerData {
   lineNumber: number;
 }
 
-type Context = PackageFile<ManagerData>;
+type Context = PackageFileContent<ManagerData>;
 
 const python = lang.createLang('python');
 
@@ -78,7 +82,7 @@ export function extractPackageFile(
   content: string,
   _packageFile: string,
   _config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const res = python.query<Context, parser.Node>(content, query, { deps: [] });
   return res?.deps?.length ? res : null;
 }

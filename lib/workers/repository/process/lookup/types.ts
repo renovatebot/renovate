@@ -44,7 +44,6 @@ export interface LookupUpdateConfig
   datasource: string;
   packageName: string;
   minimumConfidence?: string;
-  extractedConstraints?: Record<string, string>;
   replacementName?: string;
   replacementVersion?: string;
 }

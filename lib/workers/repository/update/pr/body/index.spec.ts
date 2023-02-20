@@ -1,5 +1,5 @@
 import { mocked, platform } from '../../../../../../test/util';
-import type { PackageFile } from '../../../../../modules/manager/types';
+import type { PackageFileContent } from '../../../../../modules/manager/types';
 import { prDebugDataRe } from '../../../../../modules/platform/pr-body';
 import * as _template from '../../../../../util/template';
 import * as _changelogs from './changelogs';
@@ -220,7 +220,7 @@ describe('workers/repository/update/pr/body/index', () => {
 
       platform.massageMarkdown.mockImplementation((x) => massagedMarkDown);
       template.compile.mockImplementation((x) => compiledContent);
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',

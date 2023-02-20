@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import { MavenDatasource } from '../../../modules/datasource/maven';
-import type { PackageFile } from '../../../modules/manager/types';
+import type { PackageFileContent } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { fetchUpdates } from './fetch';
 import * as lookup from './lookup';
@@ -19,7 +19,7 @@ describe('workers/repository/process/fetch', () => {
     });
 
     it('handles empty deps', async () => {
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
@@ -36,7 +36,7 @@ describe('workers/repository/process/fetch', () => {
           enabled: false,
         },
       ];
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             packageFile: 'package.json',
@@ -62,6 +62,7 @@ describe('workers/repository/process/fetch', () => {
         maven: [
           {
             packageFile: 'pom.xml',
+            extractedConstraints: { some: 'constraint' },
             deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
           },
         ],
@@ -72,7 +73,7 @@ describe('workers/repository/process/fetch', () => {
     });
 
     it('skips deps with empty names', async () => {
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         docker: [
           {
             packageFile: 'values.yaml',
@@ -99,7 +100,7 @@ describe('workers/repository/process/fetch', () => {
     });
 
     it('skips internal deps by default', async () => {
-      const packageFiles: Record<string, PackageFile[]> = {
+      const packageFiles: Record<string, PackageFileContent[]> = {
         docker: [
           {
             packageFile: 'values.yaml',
