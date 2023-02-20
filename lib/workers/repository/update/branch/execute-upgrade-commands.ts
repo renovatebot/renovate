@@ -1,6 +1,8 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
+import type { UpgradeTasks } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
@@ -15,6 +17,52 @@ import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+
+export interface UpgradeCommandsExecutionResult {
+  updatedArtifacts: FileChange[];
+  artifactErrors: ArtifactError[];
+}
+
+export async function upgradeTaskExecutor(
+  upgradeTask: UpgradeTasks | null | undefined,
+  config: BranchConfig,
+  updatedArtifacts: FileChange[],
+  allowedUpgradeCommands: string[] | undefined,
+  allowUpgradeCommandTemplating: boolean | undefined,
+  upgrade: BranchUpgradeConfig
+): Promise<UpgradeCommandsExecutionResult> {
+  let currentUpdatedArtifacts = updatedArtifacts;
+  const artifactErrors: ArtifactError[] = [];
+
+  const commands = upgradeTask?.commands ?? [];
+  const fileFilters = upgradeTask?.fileFilters ?? [];
+  if (is.nonEmptyArray(commands)) {
+    // Persist updated files in file system so any executed commands can see them
+    const filesToPersist = (config.updatedPackageFiles ?? []).concat(
+      currentUpdatedArtifacts
+    );
+    await persistUpdatedFiles(filesToPersist);
+
+    for (const cmd of commands) {
+      const commandError = await upgradeCommandExecutor(
+        allowedUpgradeCommands ?? [],
+        cmd,
+        allowUpgradeCommandTemplating,
+        config,
+        upgrade,
+        'Pre-upgrade'
+      );
+      artifactErrors.concat(commandError);
+    }
+
+    currentUpdatedArtifacts = await updateUpdatedArtifacts(
+      fileFilters,
+      currentUpdatedArtifacts,
+      'Pre-upgrade'
+    );
+  }
+  return { updatedArtifacts: currentUpdatedArtifacts, artifactErrors };
+}
 
 export async function persistUpdatedFiles(
   filesToPersist: FileChange[]
