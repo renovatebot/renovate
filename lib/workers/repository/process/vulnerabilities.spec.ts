@@ -148,9 +148,33 @@ describe('workers/repository/process/vulnerabilities', () => {
       );
     });
 
-    it('exception due to invalid version upon comparison', async () => {
-      const err = new TypeError('Invalid Version: ^1.1.0');
+    it('exception while fetching vulnerabilities', async () => {
+      const err = new Error('unknown');
       const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.11',
+                datasource: 'npm',
+              },
+            ],
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockRejectedValueOnce(err);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        { err },
+        'Error fetching vulnerability information for lodash'
+      );
+    });
+
+    it('log event with invalid version', async () => {
+      const event = { fixed: '^6.0' };
+      const packageFiles: Record<string, PackageFileContent[]> = {
         npm: [
           {
             deps: [
@@ -178,7 +202,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               ranges: [
                 {
                   type: 'SEMVER',
-                  events: [{ introduced: '^0' }, { fixed: '^1.1.0' }],
+                  events: [{ introduced: '0' }, event],
                 },
               ],
             },
@@ -188,8 +212,8 @@ describe('workers/repository/process/vulnerabilities', () => {
 
       await vulnerabilities.fetchVulnerabilities(config, packageFiles);
       expect(logger.logger.debug).toHaveBeenCalledWith(
-        { err },
-        'Error fetching vulnerability information for lodash'
+        { event },
+        'Skipping OSV event with invalid version'
       );
     });
 
