@@ -28,6 +28,10 @@ describe('util/github/graphql/query-adapters/releases-query-adapter', () => {
     expect(adapter.transform({ ...item, isDraft: true })).toBeNull();
   });
 
+  it('handles invalid items', () => {
+    expect(adapter.transform({} as never)).toBeNull();
+  });
+
   it('marks prereleases as unstable', () => {
     expect(adapter.transform({ ...item, isPrerelease: true })).toMatchObject({
       isStable: false,
