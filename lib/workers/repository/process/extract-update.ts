@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
-import type { PackageFileContent } from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
@@ -21,7 +21,7 @@ import { WriteUpdateResult, writeUpdates } from './write';
 export interface ExtractResult {
   branches: BranchConfig[];
   branchList: string[];
-  packageFiles: Record<string, PackageFileContent[]>;
+  packageFiles: Record<string, PackageFile[]>;
 }
 
 export interface StatsResult {
@@ -36,7 +36,7 @@ export interface Stats {
 
 // istanbul ignore next
 function extractStats(
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): Stats | null {
   if (!packageFiles) {
     return null;
@@ -111,11 +111,11 @@ export function isCacheExtractValid(
 
 export async function extract(
   config: RenovateConfig
-): Promise<Record<string, PackageFileContent[]>> {
+): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
   const baseBranchSha = getBranchCommit(baseBranch!);
-  let packageFiles: Record<string, PackageFileContent[]>;
+  let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
@@ -169,7 +169,7 @@ export async function extract(
 
 async function fetchVulnerabilities(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   if (config.osvVulnerabilityAlerts) {
     try {
@@ -183,7 +183,7 @@ async function fetchVulnerabilities(
 
 export async function lookup(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<ExtractResult> {
   await fetchVulnerabilities(config, packageFiles);
   await fetchUpdates(config, packageFiles);
