@@ -134,9 +134,9 @@ describe('workers/repository/process/index', () => {
       ]);
       git.branchExists.mockReturnValue(true);
       const res = await extractDependencies(config);
-      expect(res).toEqual({
-        branchList: [undefined, undefined],
-        branches: [undefined, undefined],
+      expect(res).toStrictEqual({
+        branchList: [undefined, undefined, undefined, undefined],
+        branches: [undefined, undefined, undefined, undefined],
         packageFiles: undefined,
       });
 
