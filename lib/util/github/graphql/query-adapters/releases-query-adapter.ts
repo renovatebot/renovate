@@ -1,6 +1,6 @@
+import { z } from 'zod';
 import type {
   GithubGraphqlDatasourceAdapter,
-  GithubGraphqlRelease,
   GithubReleaseItem,
 } from '../types';
 import { prepareQuery } from '../util';
@@ -30,7 +30,24 @@ const query = prepareQuery(`
   }
 `);
 
+const GithubGraphqlRelease = z.object({
+  version: z.string(),
+  releaseTimestamp: z.string(),
+  isDraft: z.boolean(),
+  isPrerelease: z.boolean(),
+  url: z.string(),
+  id: z.number(),
+  name: z.string().nullable(),
+  description: z.string().nullable(),
+});
+export type GithubGraphqlRelease = z.infer<typeof GithubGraphqlRelease>;
+
 function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
+  const releaseItem = GithubGraphqlRelease.safeParse(item);
+  if (!releaseItem.success) {
+    return null;
+  }
+
   const {
     version,
     releaseTimestamp,
@@ -40,7 +57,7 @@ function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
     id,
     name,
     description,
-  } = item;
+  } = releaseItem.data;
 
   if (isDraft) {
     return null;
@@ -51,9 +68,15 @@ function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
     releaseTimestamp,
     url,
     id,
-    name,
-    description,
   };
+
+  if (name) {
+    result.name = name;
+  }
+
+  if (description) {
+    result.description = description;
+  }
 
   if (isPrerelease) {
     result.isStable = false;

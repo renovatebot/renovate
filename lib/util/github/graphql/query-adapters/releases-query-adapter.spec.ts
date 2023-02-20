@@ -1,5 +1,5 @@
-import type { GithubGraphqlRelease } from '../types';
 import { adapter } from './releases-query-adapter';
+import type { GithubGraphqlRelease } from './releases-query-adapter';
 
 const item: GithubGraphqlRelease = {
   version: '1.2.3',

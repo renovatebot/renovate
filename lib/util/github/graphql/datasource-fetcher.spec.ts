@@ -44,11 +44,14 @@ const adapter: GithubGraphqlDatasourceAdapter<
     version,
     releaseTimestamp,
     foo,
-  }: TestAdapterInput): TestAdapterOutput => ({
-    version,
-    releaseTimestamp,
-    bar: foo,
-  }),
+  }: TestAdapterInput): TestAdapterOutput | null =>
+    version && releaseTimestamp && foo
+      ? {
+          version,
+          releaseTimestamp,
+          bar: foo,
+        }
+      : null,
 };
 
 function resp(
@@ -208,6 +211,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
           resp(false, [
             { version: v3, releaseTimestamp: t3, foo: '3' },
             { version: v2, releaseTimestamp: t2, foo: '2' },
+            {} as never,
             { version: v1, releaseTimestamp: t1, foo: '1' },
           ])
         );
