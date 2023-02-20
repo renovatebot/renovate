@@ -1,5 +1,5 @@
 import { git, logger, mocked } from '../../../../test/util';
-import type { PackageFileContent } from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
@@ -88,7 +88,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('uses repository cache', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {};
+      const packageFiles: Record<string, PackageFile[]> = {};
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
