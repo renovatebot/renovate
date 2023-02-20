@@ -5,13 +5,13 @@ import {
   extractPackageFile,
   get,
 } from '../../../modules/manager';
-import type { PackageFile } from '../../../modules/manager/types';
+import type { PackageFileContent } from '../../../modules/manager/types';
 import { readLocalFile } from '../../../util/fs';
 import type { WorkerExtractConfig } from '../../types';
 
 export async function getManagerPackageFiles(
   config: WorkerExtractConfig
-): Promise<PackageFile[] | null> {
+): Promise<PackageFileContent[] | null> {
   const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
@@ -44,7 +44,7 @@ export async function getManagerPackageFiles(
     }
     return allPackageFiles;
   }
-  const packageFiles: PackageFile[] = [];
+  const packageFiles: PackageFileContent[] = [];
   for (const packageFile of fileList) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else

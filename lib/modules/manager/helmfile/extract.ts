@@ -4,7 +4,11 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { Doc } from './types';
 
 const isValidChartName = (name: string | undefined): boolean =>
@@ -21,7 +25,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
