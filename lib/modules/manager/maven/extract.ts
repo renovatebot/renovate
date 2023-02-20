@@ -454,9 +454,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: MavenInterimPackageFile[]
-): PackageFile[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
     delete packageFile.parent;
