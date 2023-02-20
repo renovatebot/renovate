@@ -1,8 +1,63 @@
 import minimatch from 'minimatch';
+import { mergeChildConfig } from '../../../../config';
+import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
+import type { ArtifactError } from '../../../../modules/manager/types';
+import { exec } from '../../../../util/exec';
 import { readLocalFile } from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
+import { regEx } from '../../../../util/regex';
+import { sanitize } from '../../../../util/sanitize';
+import { compile } from '../../../../util/template';
+import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+
+export async function upgradeCommandExecutor(
+  allowedUpgradeCommands: string[],
+  cmd: string,
+  allowUpgradeCommandTemplating: undefined | boolean,
+  config: BranchConfig,
+  upgrade: BranchUpgradeConfig
+): Promise<ArtifactError[]> {
+  const artifactErrors = [];
+  if (allowedUpgradeCommands.some((pattern) => regEx(pattern).test(cmd))) {
+    try {
+      const compiledCmd = allowUpgradeCommandTemplating
+        ? compile(cmd, mergeChildConfig(config, upgrade))
+        : cmd;
+
+      logger.trace({ cmd: compiledCmd }, 'Executing pre-upgrade task');
+      const execResult = await exec(compiledCmd, {
+        cwd: GlobalConfig.get('localDir'),
+      });
+
+      logger.debug(
+        { cmd: compiledCmd, ...execResult },
+        'Executed pre-upgrade task'
+      );
+    } catch (error) {
+      artifactErrors.push({
+        lockFile: upgrade.packageFile,
+        stderr: sanitize(error.message),
+      });
+    }
+  } else {
+    logger.warn(
+      {
+        cmd,
+        allowedUpgradeCommands,
+      },
+      'Pre-upgrade task did not match any on allowedPostUpgradeCommands list'
+    );
+    artifactErrors.push({
+      lockFile: upgrade.packageFile,
+      stderr: sanitize(
+        `Pre-upgrade command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
+      ),
+    });
+  }
+  return artifactErrors;
+}
 
 export async function updateUpdatedArtifacts(
   fileFilters: string[],
