@@ -2,24 +2,16 @@
 import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
-import type { ArtifactError } from '../../../../modules/manager/types';
-import type { FileChange } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import {
-  persistUpdatedFiles,
-  updateUpdatedArtifacts,
-  upgradeCommandExecutor,
+  UpgradeCommandsExecutionResult,
+  upgradeTaskExecutor,
 } from './execute-upgrade-commands';
-
-export interface PostUpgradeCommandsExecutionResult {
-  updatedArtifacts: FileChange[];
-  artifactErrors: ArtifactError[];
-}
 
 export async function postUpgradeCommandsExecutor(
   filteredUpgradeCommands: BranchUpgradeConfig[],
   config: BranchConfig
-): Promise<PostUpgradeCommandsExecutionResult> {
+): Promise<UpgradeCommandsExecutionResult> {
   let updatedArtifacts = [...(config.updatedArtifacts ?? [])];
   let artifactErrors = [...(config.artifactErrors ?? [])];
   const { allowedPostUpgradeCommands, allowPostUpgradeCommandTemplating } =
@@ -34,39 +26,25 @@ export async function postUpgradeCommandsExecutor(
       },
       `Checking for post-upgrade tasks`
     );
-    const commands = upgrade.postUpgradeTasks?.commands ?? [];
-    const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? [];
-    if (is.nonEmptyArray(commands)) {
-      // Persist updated files in file system so any executed commands can see them
-      const filesToPersist =
-        config.updatedPackageFiles!.concat(updatedArtifacts);
-      await persistUpdatedFiles(filesToPersist);
-
-      for (const cmd of commands) {
-        const commandError = await upgradeCommandExecutor(
-          allowedPostUpgradeCommands ?? [],
-          cmd,
-          allowPostUpgradeCommandTemplating,
-          config,
-          upgrade,
-          'Post-upgrade'
-        );
-        artifactErrors = [...artifactErrors, ...commandError];
-      }
-
-      updatedArtifacts = await updateUpdatedArtifacts(
-        fileFilters,
-        updatedArtifacts,
-        'Post-upgrade'
-      );
-    }
+    const upgradeTask = upgrade.postUpgradeTasks;
+    const result = await upgradeTaskExecutor(
+      upgradeTask,
+      config,
+      updatedArtifacts,
+      allowedPostUpgradeCommands,
+      allowPostUpgradeCommandTemplating,
+      upgrade,
+      'Post-upgrade'
+    );
+    updatedArtifacts = result.updatedArtifacts;
+    artifactErrors = [...artifactErrors, ...result.artifactErrors];
   }
   return { updatedArtifacts, artifactErrors };
 }
 
 export default async function executePostUpgradeCommands(
   config: BranchConfig
-): Promise<PostUpgradeCommandsExecutionResult | null> {
+): Promise<UpgradeCommandsExecutionResult | null> {
   const { allowedPostUpgradeCommands } = GlobalConfig.get();
 
   const hasChangedFiles =

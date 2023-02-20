@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
-import type { UpgradeTasks } from '../../../../config/types';
+import type { PostUpgradeTasks } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
@@ -24,15 +24,16 @@ export interface UpgradeCommandsExecutionResult {
 }
 
 export async function upgradeTaskExecutor(
-  upgradeTask: UpgradeTasks | null | undefined,
+  upgradeTask: PostUpgradeTasks | null | undefined,
   config: BranchConfig,
   updatedArtifacts: FileChange[],
   allowedUpgradeCommands: string[] | undefined,
   allowUpgradeCommandTemplating: boolean | undefined,
-  upgrade: BranchUpgradeConfig
+  upgrade: BranchUpgradeConfig,
+  taskType: string
 ): Promise<UpgradeCommandsExecutionResult> {
   let currentUpdatedArtifacts = updatedArtifacts;
-  const artifactErrors: ArtifactError[] = [];
+  let artifactErrors: ArtifactError[] = [];
 
   const commands = upgradeTask?.commands ?? [];
   const fileFilters = upgradeTask?.fileFilters ?? [];
@@ -50,15 +51,15 @@ export async function upgradeTaskExecutor(
         allowUpgradeCommandTemplating,
         config,
         upgrade,
-        'Pre-upgrade'
+        taskType
       );
-      artifactErrors.concat(commandError);
+      artifactErrors = [...artifactErrors, ...commandError];
     }
 
     currentUpdatedArtifacts = await updateUpdatedArtifacts(
       fileFilters,
       currentUpdatedArtifacts,
-      'Pre-upgrade'
+      taskType
     );
   }
   return { updatedArtifacts: currentUpdatedArtifacts, artifactErrors };
