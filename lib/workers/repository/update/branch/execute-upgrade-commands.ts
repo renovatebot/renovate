@@ -4,13 +4,35 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
-import { readLocalFile } from '../../../../util/fs';
+import {
+  localPathIsFile,
+  readLocalFile,
+  writeLocalFile,
+} from '../../../../util/fs';
 import { getRepoStatus } from '../../../../util/git';
 import type { FileChange } from '../../../../util/git/types';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+
+export async function persistUpdatedFiles(
+  filesToPersist: FileChange[]
+): Promise<void> {
+  for (const file of filesToPersist) {
+    const canWriteFile = await localPathIsFile(file.path);
+    if (file.type === 'addition' && canWriteFile) {
+      let contents: Buffer | null;
+      if (typeof file.contents === 'string') {
+        contents = Buffer.from(file.contents);
+      } else {
+        contents = file.contents;
+      }
+      // TODO #7154
+      await writeLocalFile(file.path, contents!);
+    }
+  }
+}
 
 export async function upgradeCommandExecutor(
   allowedUpgradeCommands: string[],

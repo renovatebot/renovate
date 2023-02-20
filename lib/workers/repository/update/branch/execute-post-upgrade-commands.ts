@@ -3,10 +3,10 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
-import { localPathIsFile, writeLocalFile } from '../../../../util/fs';
 import type { FileChange } from '../../../../util/git/types';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
 import {
+  persistUpdatedFiles,
   updateUpdatedArtifacts,
   upgradeCommandExecutor,
 } from './execute-upgrade-commands';
@@ -38,19 +38,9 @@ export async function postUpgradeCommandsExecutor(
     const fileFilters = upgrade.postUpgradeTasks?.fileFilters ?? [];
     if (is.nonEmptyArray(commands)) {
       // Persist updated files in file system so any executed commands can see them
-      for (const file of config.updatedPackageFiles!.concat(updatedArtifacts)) {
-        const canWriteFile = await localPathIsFile(file.path);
-        if (file.type === 'addition' && canWriteFile) {
-          let contents: Buffer | null;
-          if (typeof file.contents === 'string') {
-            contents = Buffer.from(file.contents);
-          } else {
-            contents = file.contents;
-          }
-          // TODO #7154
-          await writeLocalFile(file.path, contents!);
-        }
-      }
+      const filesToPersist =
+        config.updatedPackageFiles!.concat(updatedArtifacts);
+      await persistUpdatedFiles(filesToPersist);
 
       for (const cmd of commands) {
         const commandError = await upgradeCommandExecutor(
