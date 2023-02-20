@@ -153,6 +153,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
+            packageFile: 'some-file',
             deps: [
               {
                 depName: 'lodash',
@@ -174,7 +175,7 @@ describe('workers/repository/process/vulnerabilities', () => {
 
     it('log event with invalid version', async () => {
       const event = { fixed: '^6.0' };
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
