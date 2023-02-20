@@ -1,22 +1,17 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';
 import type { ArtifactError } from '../../../../modules/manager/types';
 import { exec } from '../../../../util/exec';
-import {
-  localPathIsFile,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../../util/fs';
-import { getRepoStatus } from '../../../../util/git';
+import { localPathIsFile, writeLocalFile } from '../../../../util/fs';
 import type { FileChange } from '../../../../util/git/types';
 import { regEx } from '../../../../util/regex';
 import { sanitize } from '../../../../util/sanitize';
 import { compile } from '../../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../types';
+import { updateUpdatedArtifacts } from './execute-upgrade-commands';
 
 export interface PostUpgradeCommandsExecutionResult {
   updatedArtifacts: FileChange[];
@@ -102,54 +97,11 @@ export async function postUpgradeCommandsExecutor(
         }
       }
 
-      const status = await getRepoStatus();
-
-      for (const relativePath of status.modified.concat(status.not_added)) {
-        for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
-            logger.debug(
-              { file: relativePath, pattern },
-              'Post-upgrade file saved'
-            );
-            const existingContent = await readLocalFile(relativePath);
-            const existingUpdatedArtifacts = updatedArtifacts.find(
-              (ua) => ua.path === relativePath
-            );
-            if (existingUpdatedArtifacts?.type === 'addition') {
-              existingUpdatedArtifacts.contents = existingContent;
-            } else {
-              updatedArtifacts.push({
-                type: 'addition',
-                path: relativePath,
-                contents: existingContent,
-              });
-            }
-            // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
-            updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'deletion' && ua.path === relativePath)
-            );
-          }
-        }
-      }
-
-      for (const relativePath of status.deleted || []) {
-        for (const pattern of fileFilters) {
-          if (minimatch(relativePath, pattern)) {
-            logger.debug(
-              { file: relativePath, pattern },
-              'Post-upgrade file removed'
-            );
-            updatedArtifacts.push({
-              type: 'deletion',
-              path: relativePath,
-            });
-            // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
-            updatedArtifacts = updatedArtifacts.filter(
-              (ua) => !(ua.type === 'addition' && ua.path === relativePath)
-            );
-          }
-        }
-      }
+      updatedArtifacts = await updateUpdatedArtifacts(
+        fileFilters,
+        updatedArtifacts,
+        'Post-update'
+      );
     }
   }
   return { updatedArtifacts, artifactErrors };
