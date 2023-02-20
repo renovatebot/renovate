@@ -87,6 +87,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   });
 
   describe('addReleaseNotes()', () => {
+    it('returns null if input is null/undefined', async () => {
+      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
+      expect(
+        await addReleaseNotes(undefined, {} as BranchUpgradeConfig)
+      ).toBeNull();
+    });
+
     it('returns input if invalid', async () => {
       const input = { a: 1 };
       expect(
@@ -94,10 +101,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       ).toEqual(input);
       expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
       expect(
-        await addReleaseNotes(
-          { versions: [] } as never,
-          {} as BranchUpgradeConfig
-        )
+        await addReleaseNotes({ versions: [] }, {} as BranchUpgradeConfig)
       ).toStrictEqual({
         versions: [],
       });
