@@ -11,7 +11,7 @@ const bitbucketHttp = new BitbucketHttp();
 
 export interface Config {
   defaultBranch: string;
-  has_issues: boolean;
+  hasBitbucketIssuesEnabled: boolean;
   mergeMethod: string;
   owner: string;
   prList: Pr[];
@@ -19,6 +19,10 @@ export interface Config {
   username: string;
   userUuid: string;
   ignorePrAuthor: boolean;
+  repositoryUrl: string;
+  hasJiraProjectLinked: boolean;
+  jiraProjectKey: string;
+  jiraCloudId: string;
 }
 
 export interface PagedResult<T = any> {
@@ -35,6 +39,7 @@ export interface RepoInfo {
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;
+  repositoryUrl: string;
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
@@ -49,6 +54,7 @@ export interface RepoInfoBody {
   mainbranch: { name: string };
   has_issues: boolean;
   uuid: string;
+  links: { html: { href: string } };
 }
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
@@ -59,6 +65,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
     uuid: repoInfoBody.uuid,
+    repositoryUrl: repoInfoBody.links.html.href,
   };
 }
 
