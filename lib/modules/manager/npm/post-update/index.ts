@@ -24,11 +24,7 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { ensureTrailingSlash } from '../../../../util/url';
 import { NpmDatasource } from '../../../datasource/npm';
 import { scm } from '../../../platform/scm';
-import type {
-  PackageFileContent,
-  PostUpdateConfig,
-  Upgrade,
-} from '../../types';
+import type { PackageFile, PostUpdateConfig, Upgrade } from '../../types';
 import { getZeroInstallPaths } from '../extract/yarn';
 import type { NpmDepType, NpmManagerData } from '../types';
 import { composeLockFile, parseLockFile } from '../utils';
@@ -92,7 +88,7 @@ export function determineLockFileDirs(
 
   function getPackageFile(
     fileName: string
-  ): Partial<PackageFileContent<NpmManagerData>> {
+  ): Partial<PackageFile<NpmManagerData>> {
     logger.trace('Looking for packageFile: ' + fileName);
 
     for (const packageFile of packageFiles.npm!) {

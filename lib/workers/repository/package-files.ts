@@ -1,17 +1,14 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import type { PackageFileContent } from '../../modules/manager/types';
+import type { PackageFile } from '../../modules/manager/types';
 import { clone } from '../../util/clone';
 
 export class PackageFiles {
-  private static data = new Map<
-    string,
-    Record<string, PackageFileContent[]> | null
-  >();
+  private static data = new Map<string, Record<string, PackageFile[]> | null>();
 
   static add(
     baseBranch: string,
-    packageFiles: Record<string, PackageFileContent[]> | null
+    packageFiles: Record<string, PackageFile[]> | null
   ): void {
     logger.debug(
       { baseBranch },
@@ -82,7 +79,7 @@ export class PackageFiles {
    * @param data
    */
   private static getDashboardMarkdownInternal(
-    data: Map<string, Record<string, PackageFileContent[]> | null>
+    data: Map<string, Record<string, PackageFile[]> | null>
   ): string {
     const none = 'None detected\n\n';
     const pad = data.size > 1; // padding condition for a multi base branch repo
@@ -108,8 +105,7 @@ export class PackageFiles {
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          // TODO: types (#7154)
-          deps += `<details><summary>${packageFile.packageFile!}</summary>\n\n`;
+          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;
@@ -136,7 +132,7 @@ export class PackageFiles {
    *          otherwise false is returned
    */
   private static pop(
-    data: Map<string, Record<string, PackageFileContent[]> | null>
+    data: Map<string, Record<string, PackageFile[]> | null>
   ): boolean {
     // get detected managers list of the last listed base branch
     const [branch, managers] = Array.from(data).pop() ?? [];

@@ -522,6 +522,19 @@ export async function validateConfig(
                 }
               }
             }
+            if (key === 'baseBranches') {
+              for (const baseBranch of val as string[]) {
+                if (
+                  isConfigRegex(baseBranch) &&
+                  !configRegexPredicate(baseBranch)
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid regExp for ${currentPath}: \`${baseBranch}\``,
+                  });
+                }
+              }
+            }
             if (
               (selectors.includes(key) ||
                 key === 'matchCurrentVersion' ||

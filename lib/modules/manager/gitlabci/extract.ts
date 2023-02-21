@@ -6,6 +6,7 @@ import { trimLeadingSlash } from '../../../util/url';
 import type {
   ExtractConfig,
   PackageDependency,
+  PackageFile,
   PackageFileContent,
 } from '../types';
 import { isGitlabIncludeLocal } from './common';
@@ -123,10 +124,10 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFileContent[] | null> {
+): Promise<PackageFile[] | null> {
   const filesToExamine = [...packageFiles];
   const seen = new Set<string>(packageFiles);
-  const results: PackageFileContent[] = [];
+  const results: PackageFile[] = [];
 
   // extract all includes from the files
   while (filesToExamine.length > 0) {

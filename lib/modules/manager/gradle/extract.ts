@@ -2,11 +2,7 @@ import upath from 'upath';
 import { logger } from '../../../logger';
 import { getLocalFiles } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
 import {
   isGcvPropsFile,
@@ -52,10 +48,10 @@ function getRegistryUrlsForDep(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFileContent[] | null> {
+): Promise<PackageFile[] | null> {
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
   const varRegistry: VariableRegistry = {};
-  const packageFilesByName: Record<string, PackageFileContent> = {};
+  const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
   const fileContents = await getLocalFiles(packageFiles);
@@ -131,7 +127,7 @@ export async function extractAllPackageFiles(
     const key = dep.managerData?.packageFile;
     // istanbul ignore else
     if (key) {
-      let pkgFile: PackageFileContent = packageFilesByName[key];
+      let pkgFile: PackageFile = packageFilesByName[key];
       // istanbul ignore if: won't happen if "apply from" processes only initially known files
       if (!pkgFile) {
         pkgFile = {

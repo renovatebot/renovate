@@ -9,7 +9,7 @@ import {
 } from '../../../modules/datasource';
 import type {
   PackageDependency,
-  PackageFileContent,
+  PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { clone } from '../../../util/clone';
@@ -20,7 +20,7 @@ import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
 async function fetchDepUpdates(
-  packageFileConfig: RenovateConfig & PackageFileContent,
+  packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
   let dep = clone(indep);
@@ -83,7 +83,7 @@ async function fetchDepUpdates(
 async function fetchManagerPackagerFileUpdates(
   config: RenovateConfig,
   managerConfig: RenovateConfig,
-  pFile: PackageFileContent
+  pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
   if (pFile.extractedConstraints) {
@@ -110,7 +110,7 @@ async function fetchManagerPackagerFileUpdates(
 
 async function fetchManagerUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]>,
+  packageFiles: Record<string, PackageFile[]>,
   manager: string
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
@@ -128,7 +128,7 @@ async function fetchManagerUpdates(
 
 export async function fetchUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]>
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
   const allManagerJobs = managers.map((manager) =>

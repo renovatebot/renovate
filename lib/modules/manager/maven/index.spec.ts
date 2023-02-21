@@ -212,14 +212,16 @@ describe('modules/manager/maven/index', () => {
     it('should update an existing dependency', () => {
       const newValue = '9.9.9.9-final';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency({
         fileContent: pomContent,
         upgrade,
       })!;
-      const updatedDep = selectDep(extractPackage(updatedContent)!.deps);
+      const updatedDep = selectDep(
+        extractPackage(updatedContent, 'some-file')!.deps
+      );
 
       expect(updatedDep?.currentValue).toEqual(newValue);
     });
@@ -252,7 +254,7 @@ describe('modules/manager/maven/index', () => {
 
     it('should apply props recursively', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('recursive_props.pom.xml'))!,
+        extractPackage(Fixtures.get('recursive_props.pom.xml'), 'some-file')!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -264,7 +266,10 @@ describe('modules/manager/maven/index', () => {
 
     it('should apply props multiple times', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('multiple_usages_props.pom.xml'))!,
+        extractPackage(
+          Fixtures.get('multiple_usages_props.pom.xml'),
+          'some-file'
+        )!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -276,7 +281,10 @@ describe('modules/manager/maven/index', () => {
 
     it('should detect props infinitely recursing props', () => {
       const [{ deps }] = resolveParents([
-        extractPackage(Fixtures.get('infinite_recursive_props.pom.xml'))!,
+        extractPackage(
+          Fixtures.get('infinite_recursive_props.pom.xml'),
+          'some-file'
+        )!,
       ]);
       expect(deps).toMatchObject([
         {
@@ -317,7 +325,7 @@ describe('modules/manager/maven/index', () => {
     it('should not touch content if new and old versions are equal', () => {
       const newValue = '1.2.3';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, newValue };
       const updatedContent = updateDependency({
@@ -388,7 +396,7 @@ describe('modules/manager/maven/index', () => {
       const currentValue = '1.2.2';
       const newValue = '1.2.4';
 
-      const { deps } = extractPackage(pomContent)!;
+      const { deps } = extractPackage(pomContent, 'some-file')!;
       const dep = selectDep(deps);
       const upgrade = { ...dep, currentValue, newValue };
       const updatedContent = updateDependency({
@@ -403,11 +411,12 @@ describe('modules/manager/maven/index', () => {
       const newValue = '[1.2.3]';
       const select = (depSet: PackageFileContent) =>
         selectDep(depSet.deps, 'org.example:hard-range');
-      const oldContent = extractPackage(pomContent);
+      const oldContent = extractPackage(pomContent, 'some-file');
       const dep = select(oldContent!);
       const upgrade = { ...dep, newValue };
       const newContent = extractPackage(
-        updateDependency({ fileContent: pomContent, upgrade })!
+        updateDependency({ fileContent: pomContent, upgrade })!,
+        'some-file'
       );
       const newDep = select(newContent!);
       expect(newDep?.currentValue).toEqual(newValue);
@@ -417,7 +426,7 @@ describe('modules/manager/maven/index', () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFileContent) =>
         depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
-      const oldContent = extractPackage(pomContent);
+      const oldContent = extractPackage(pomContent, 'some-file');
       const dep = select(oldContent!);
       expect(dep).not.toBeNull();
       const upgrade = { ...dep, newValue };

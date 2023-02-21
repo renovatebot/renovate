@@ -1,6 +1,8 @@
 import {
   RenovateConfig,
   getConfig,
+  git,
+  logger,
   mocked,
   platform,
   scm,
@@ -13,6 +15,7 @@ import * as _extractUpdate from './extract-update';
 import { lookup } from './extract-update';
 import { extractDependencies, updateRepo } from '.';
 
+jest.mock('../../../util/git');
 jest.mock('./extract-update');
 
 const extract = mocked(_extractUpdate).extract;
@@ -118,6 +121,34 @@ describe('workers/repository/process/index', () => {
         packageFiles: {},
       });
       expect(lookup).toHaveBeenCalledTimes(0);
+    });
+
+    it('finds baseBranches via regular expressions', async () => {
+      extract.mockResolvedValue({} as never);
+      config.baseBranches = ['/^release\\/.*/', 'dev', '!/^pre-release\\/.*/'];
+      git.getBranchList.mockReturnValue([
+        'dev',
+        'pre-release/v0',
+        'release/v1',
+        'release/v2',
+        'some-other',
+      ]);
+      scm.branchExists.mockResolvedValue(true);
+      const res = await extractDependencies(config);
+      expect(res).toStrictEqual({
+        branchList: [undefined, undefined, undefined, undefined],
+        branches: [undefined, undefined, undefined, undefined],
+        packageFiles: undefined,
+      });
+
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        { baseBranches: ['release/v1', 'release/v2', 'dev', 'some-other'] },
+        'baseBranches'
+      );
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v1' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'release/v2' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'dev' });
+      expect(addMeta).toHaveBeenCalledWith({ baseBranch: 'some-other' });
     });
   });
 });
