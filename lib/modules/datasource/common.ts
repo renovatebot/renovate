@@ -5,6 +5,6 @@ export function isGetPkgReleasesConfig(
 ): input is GetPkgReleasesConfig {
   return (
     (input as GetPkgReleasesConfig).datasource !== undefined &&
-    (input as GetPkgReleasesConfig).depName !== undefined
+    (input as GetPkgReleasesConfig).packageName !== undefined
   );
 }
