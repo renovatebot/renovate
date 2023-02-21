@@ -5,8 +5,8 @@ import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 import { CondaDatasource } from './index';
 
-const depName = 'main/pytest';
-const depUrl = `/${depName}`;
+const packageName = 'main/pytest';
+const depUrl = `/${packageName}`;
 
 describe('modules/datasource/conda/index', () => {
   describe('getReleases', () => {
@@ -15,7 +15,7 @@ describe('modules/datasource/conda/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -25,7 +25,7 @@ describe('modules/datasource/conda/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).toBeNull();
     });
@@ -35,7 +35,7 @@ describe('modules/datasource/conda/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).toBeNull();
     });
@@ -45,7 +45,7 @@ describe('modules/datasource/conda/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -57,7 +57,7 @@ describe('modules/datasource/conda/index', () => {
         .reply(200, Fixtures.get('pytest.json'));
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(94);
@@ -67,20 +67,20 @@ describe('modules/datasource/conda/index', () => {
       const condaDatasource = new CondaDatasource();
       const res = await condaDatasource.getReleases({
         registryUrl: '',
-        packageName: depName,
+        packageName,
       });
       expect(res).toBeNull();
     });
 
     it('supports multiple custom datasource urls', async () => {
-      const depName = 'pytest';
+      const packageName = 'pytest';
       httpMock
         .scope('https://api.anaconda.org/package/rapids')
-        .get(`/${depName}`)
+        .get(`/${packageName}`)
         .reply(404);
       httpMock
         .scope('https://api.anaconda.org/package/conda-forge')
-        .get(`/${depName}`)
+        .get(`/${packageName}`)
         .reply(200, {
           html_url: 'http://anaconda.org/anaconda/pytest',
           dev_url: 'https://github.com/pytest-dev/pytest/',
@@ -96,7 +96,7 @@ describe('modules/datasource/conda/index', () => {
       const res = await getPkgReleases({
         ...config,
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchObject({
         homepage: 'http://anaconda.org/anaconda/pytest',
