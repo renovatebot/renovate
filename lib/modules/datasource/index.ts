@@ -90,7 +90,11 @@ function firstRegistry(
 ): Promise<ReleaseResult | null> {
   if (registryUrls.length > 1) {
     logger.warn(
-      { datasource: datasource.id, depName: config.depName, registryUrls },
+      {
+        datasource: datasource.id,
+        packageName: config.packageName,
+        registryUrls,
+      },
       'Excess registryUrls found for datasource lookup - using first configured only'
     );
   }
@@ -343,7 +347,7 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const packageName = config.packageName ?? config.depName;
+  const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
@@ -437,8 +441,7 @@ function getDigestConfig(
   config: GetDigestInputConfig
 ): DigestConfig {
   const { currentValue, currentDigest } = config;
-  const packageName =
-    config.replacementName ?? config.packageName ?? config.depName;
+  const packageName = config.replacementName ?? config.packageName;
   const [registryUrl] = resolveRegistryUrls(
     datasource,
     config.defaultRegistryUrls,
