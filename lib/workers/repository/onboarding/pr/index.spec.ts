@@ -15,7 +15,7 @@ import type { BranchConfig } from '../../../types';
 import { OnboardingState } from '../common';
 import { ensureOnboardingPr } from '.';
 
-jest.mock('../../../../util/git'); //TODO: check why still needed!
+jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/pr/index', () => {
   describe('ensureOnboardingPr()', () => {

@@ -1,4 +1,6 @@
 import type { Jest } from '@jest/environment';
+// Check for missing or pending http mocks
+import './http-mock';
 import type { Global } from '@jest/types';
 import type { AsymmetricMatchers, BaseExpect, Matchers } from 'expect';
 import type {
