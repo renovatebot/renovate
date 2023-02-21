@@ -1,3 +1,4 @@
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { HostRulesMigration } from './host-rules-migration';
 
 describe('config/migrations/custom/host-rules-migration', () => {
@@ -48,8 +49,6 @@ describe('config/migrations/custom/host-rules-migration', () => {
           token: '123test',
         },
       ])
-    ).toThrow(
-      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
-    );
+    ).toThrow(CONFIG_VALIDATION);
   });
 });

@@ -69,9 +69,9 @@ function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     const [matchHost] = hostValues;
     result.matchHost = massageUrl(matchHost!);
   } else if (hostValues.length > 1) {
-    throw new Error(
-      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
-    );
+    const error = new Error('config-validation');
+    error.validationError = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+    throw error;
   }
 
   return result;
