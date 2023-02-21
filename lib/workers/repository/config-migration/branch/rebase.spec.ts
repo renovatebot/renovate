@@ -10,8 +10,8 @@ import {
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { checkoutBranch } from '../../../../util/git';
-import type { MigratedData } from './migrated-data';
 import { MigratedDataFactory } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 import { jsonStripWhitespaces, rebaseMigrationBranch } from './rebase';
 
 jest.mock('../../../../util/git');

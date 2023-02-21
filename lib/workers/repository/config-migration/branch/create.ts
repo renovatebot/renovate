@@ -5,8 +5,8 @@ import { scm } from '../../../../modules/platform/scm';
 import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import type { MigratedData } from './migrated-data';
 import { MigratedDataFactory } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 
 export async function createConfigMigrationBranch(
   config: Partial<RenovateConfig>,

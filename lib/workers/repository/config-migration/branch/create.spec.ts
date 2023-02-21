@@ -4,8 +4,8 @@ import { RenovateConfig, getConfig, partial } from '../../../../../test/util';
 import { scm } from '../../../../modules/platform/scm';
 import { checkoutBranch } from '../../../../util/git';
 import { createConfigMigrationBranch } from './create';
-import type { MigratedData } from './migrated-data';
 import { MigratedDataFactory } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 
 jest.mock('../../../../util/git');
 

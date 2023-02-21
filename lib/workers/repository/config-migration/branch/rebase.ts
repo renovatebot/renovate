@@ -7,8 +7,8 @@ import { checkoutBranch, getFile } from '../../../../util/git';
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
-import type { MigratedData } from './migrated-data';
 import { MigratedDataFactory } from './migrated-data';
+import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
   config: RenovateConfig,
