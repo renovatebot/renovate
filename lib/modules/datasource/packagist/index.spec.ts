@@ -57,10 +57,10 @@ describe('modules/datasource/packagist/index', () => {
       const packagesOnly = {
         packages: {
           'vendor/package-name': {
-            'dev-master': {},
-            '1.0.x-dev': {},
-            '0.0.1': {},
-            '1.0.0': {},
+            'dev-master': { version: 'dev-master' },
+            '1.0.x-dev': { version: '1.0.x-dev' },
+            '0.0.1': { version: '0.0.1' },
+            '1.0.0': { version: '1.0.0' },
           },
         },
       };

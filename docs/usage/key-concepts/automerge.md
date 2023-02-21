@@ -103,6 +103,67 @@ For example:
 
 For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
 
+### GitHub Merge Queue
+
+Renovate supports GitHub's Merge Queue.
+
+Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) first.
+
+The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
+
+<!-- prettier-ignore -->
+!!! tip "GitHub Merge Queue overview page"
+    GitHub has a page that shows all the PRs in the Merge Queue.
+    The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
+    For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
+
+<!-- prettier-ignore -->
+!!! warning "GitHub Merge Queue is in beta"
+    GitHub's Merge Queue feature is labeled as a beta feature by GitHub themselves.
+    The Merge Queue may stop working, have bugs, or maybe you need to update your configuration when GitHub changes things.
+
+#### If you use GitHub Actions
+
+If you use GitHub Actions as your CI provider, follow these steps:
+
+1. Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
+
+   ```yaml
+   on:
+     pull_request:
+     merge_group:
+   ```
+
+1. On `github.com`:
+   1. Go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section, [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge)
+   1. Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
+   1. Confirm you've set the correct "required checks" for your base branch
+1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+   ```json
+   {
+     "platformAutomerge": true,
+     "packageRules": [
+       {
+         "description": "Automerge non-major updates",
+         "matchUpdateTypes": ["minor", "patch"],
+         "automerge": true
+       }
+     ]
+   }
+   ```
+
+#### If you don't use GitHub Actions
+
+If you _don't_ use GitHub Actions as your CI provider, follow these steps:
+
+1. Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this
+1. On `github.com`:
+   1. Go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section, [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge)
+   1. Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
+   1. Confirm you've set the correct "required checks" for your base branch
+1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example)
+
 ## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
@@ -136,6 +197,9 @@ If you have enabled branch protection which prevents Renovate from automerging d
 
 When automerge is enabled on a PR, Renovate will _not_ add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
 If tests subsequently _fail_, making automerge not possible, then Renovate will add the configured assignees and/or reviewers.
+
+Note: Renovate won't add assignees and reviewers to a PR with failing checks if the PR already has assignees or reviewers present.
+If there are accounts you wish to ignore (i.e. add assignees and reviewers regardless) then add them to `ignoreReviewers` to specify those which should be filtered out in such consideration.
 
 ## Frequent problems and how to resolve them
 

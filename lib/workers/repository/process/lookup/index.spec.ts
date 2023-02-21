@@ -14,6 +14,7 @@ import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
+import * as githubGraphql from '../../../../util/github/graphql';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
@@ -48,7 +49,6 @@ describe('workers/repository/process/lookup/index', () => {
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
-    jest.resetAllMocks();
     jest
       .spyOn(GitRefsDatasource.prototype, 'getReleases')
       .mockResolvedValueOnce({
@@ -60,7 +60,9 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   // TODO: fix mocks
-  afterEach(() => httpMock.clear(false));
+  afterEach(() => {
+    httpMock.clear(false);
+  });
 
   describe('.lookupUpdates()', () => {
     it('returns null if unknown datasource', async () => {
@@ -1178,6 +1180,61 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.warnings[0].message).toBe(
         "Can't find version with tag foo for typescript"
       );
+    });
+
+    it('should warn if no digest could be found but there is a current digest', async () => {
+      config.currentValue = 'v1.0.0';
+      config.currentDigest = 'bla';
+      config.digestOneAndOnly = true;
+      config.depName = 'angular/angular';
+      config.datasource = GithubTagsDatasource.id;
+
+      // Only mock calls once so that the second invocation results in
+      // no digest being computable.
+      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          hash: 'abc',
+        },
+      ]);
+
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+      expect(res.warnings).toHaveLength(1);
+      expect(res.warnings[0]).toEqual({
+        message:
+          'Could not determine new digest for update (datasource: github-tags)',
+        topic: 'angular/angular',
+      });
+    });
+
+    describe('pinning enabled but no existing digest', () => {
+      it('should not warn if no new digest could be found', async () => {
+        config.currentValue = 'v1.0.0';
+        config.digestOneAndOnly = true;
+        config.depName = 'angular/angular';
+        config.pinDigests = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        // Only mock calls once so that the second invocation results in
+        // no digest being computable.
+        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+            hash: 'abc',
+          },
+        ]);
+
+        const res = await lookup.lookupUpdates(config);
+        expect(res.updates).toHaveLength(0);
+        expect(res.warnings).toHaveLength(0);
+      });
     });
 
     it('should treat zero zero tilde ranges as 0.0.x', async () => {

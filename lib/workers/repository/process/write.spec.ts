@@ -5,6 +5,7 @@ import {
   git,
   logger,
   mocked,
+  partial,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { addMeta } from '../../../logger';
@@ -141,19 +142,19 @@ describe('workers/repository/process/write', () => {
           baseBranch: 'base',
           manager: 'npm',
           upgrades: [
-            {
+            partial<BranchUpgradeConfig>({
               manager: 'npm',
-            } as BranchUpgradeConfig,
+            }),
           ],
         },
       ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [
-          {
+          partial<BranchCache>({
             branchName: 'new/some-branch',
             sha: '111',
             branchFingerprint: '111',
-          } as BranchCache,
+          }),
         ],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -170,18 +171,18 @@ describe('workers/repository/process/write', () => {
           baseBranch: 'base',
           manager: 'npm',
           upgrades: [
-            {
+            partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
-            } as BranchUpgradeConfig,
+            }),
           ],
         },
       ];
       repoCache.getCache.mockReturnValueOnce({
         branches: [
-          {
+          partial<BranchCache>({
             branchName: 'new/some-branch',
             branchFingerprint: '222',
-          } as BranchCache,
+          }),
         ],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -213,9 +214,9 @@ describe('workers/repository/process/write', () => {
           baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
-            {
+            partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
-            } as BranchUpgradeConfig,
+            }),
           ],
         },
       ];
@@ -234,11 +235,11 @@ describe('workers/repository/process/write', () => {
       });
       repoCache.getCache.mockReturnValueOnce({
         branches: [
-          {
+          partial<BranchCache>({
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
             branchFingerprint,
-          } as BranchCache,
+          }),
         ],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -258,9 +259,9 @@ describe('workers/repository/process/write', () => {
           baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
-            {
+            partial<BranchUpgradeConfig>({
               manager: 'unknown-manager',
-            } as BranchUpgradeConfig,
+            }),
           ],
         },
       ];
@@ -278,11 +279,11 @@ describe('workers/repository/process/write', () => {
       });
       repoCache.getCache.mockReturnValueOnce({
         branches: [
-          {
+          partial<BranchCache>({
             branchName: 'new/some-branch',
             baseBranch: 'base_branch',
             branchFingerprint,
-          } as BranchCache,
+          }),
         ],
       });
       branchWorker.processBranch.mockResolvedValueOnce({
@@ -300,13 +301,13 @@ describe('workers/repository/process/write', () => {
           baseBranch: 'base_branch',
           manager: 'npm',
           upgrades: [
-            {
+            partial<BranchUpgradeConfig>({
               manager: 'npm',
-            } as BranchUpgradeConfig,
+            }),
           ],
         },
       ];
-      const repoCacheObj = {} as RepoCacheData;
+      const repoCacheObj = partial<RepoCacheData>({});
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -376,7 +377,7 @@ describe('workers/repository/process/write', () => {
 
   describe('syncBranchState()', () => {
     it('creates minimal branch state when cache is not populated', () => {
-      const repoCacheObj = {} as RepoCacheData;
+      const repoCacheObj = partial<RepoCacheData>({});
       repoCache.getCache.mockReturnValue(repoCacheObj);
       git.getBranchCommit.mockReturnValueOnce('sha');
       git.getBranchCommit.mockReturnValueOnce('base_sha');

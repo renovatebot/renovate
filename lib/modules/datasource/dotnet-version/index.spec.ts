@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { DotnetDatasource } from '.';
+import { DotnetVersionDatasource } from '.';
 
 const releasesIndex = Fixtures.getJson('releases-index.json');
 const releases7_0 = Fixtures.getJson('releases-7.0.json');
@@ -13,12 +13,12 @@ const releases3_1 = Fixtures.getJson('releases-3.1.json');
 const baseUrl =
   'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata';
 
-describe('modules/datasource/dotnet/index', () => {
+describe('modules/datasource/dotnet-version/index', () => {
   describe('getReleases', () => {
     it('returns null for non-dotnet package', async () => {
       expect(
         await getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'non-dotnet',
         })
       ).toBeNull();
@@ -29,7 +29,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       expect(
         await getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).toBeNull();
@@ -45,7 +45,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       expect(
         await getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).toBeNull();
@@ -56,7 +56,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       await expect(
         getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -72,7 +72,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       await expect(
         getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -83,7 +83,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       expect(
         await getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).toBeNull();
@@ -99,7 +99,7 @@ describe('modules/datasource/dotnet/index', () => {
 
       expect(
         await getPkgReleases({
-          datasource: DotnetDatasource.id,
+          datasource: DotnetVersionDatasource.id,
           depName: 'dotnet-sdk',
         })
       ).toBeNull();
@@ -120,7 +120,7 @@ describe('modules/datasource/dotnet/index', () => {
         .reply(200, releases3_1);
 
       const res = await getPkgReleases({
-        datasource: DotnetDatasource.id,
+        datasource: DotnetVersionDatasource.id,
         depName: 'dotnet-sdk',
       });
 
@@ -154,7 +154,7 @@ describe('modules/datasource/dotnet/index', () => {
         .reply(200, releases3_1);
 
       const res = await getPkgReleases({
-        datasource: DotnetDatasource.id,
+        datasource: DotnetVersionDatasource.id,
         depName: 'dotnet-runtime',
       });
 

@@ -22,10 +22,6 @@ function getPath(folder: string): string {
 }
 
 describe('modules/datasource/artifactory/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('getReleases', () => {
     it('parses real data (folders): with slash at the end', async () => {
       httpMock

@@ -111,18 +111,15 @@ describe('modules/datasource/packagist/schema', () => {
   });
 
   describe('ComposerReleases', () => {
-    it('rejects ComposerReleases', () => {
-      expect(() => ComposerReleases.parse(null)).toThrow();
-      expect(() => ComposerReleases.parse(undefined)).toThrow();
-      expect(() => ComposerReleases.parse('')).toThrow();
-      expect(() => ComposerReleases.parse({})).toThrow();
-    });
-
     it('parses ComposerReleases', () => {
-      expect(ComposerReleases.parse([])).toEqual([]);
-      expect(ComposerReleases.parse([null])).toEqual([]);
-      expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
-      expect(ComposerReleases.parse(['foobar'])).toEqual([]);
+      expect(ComposerReleases.parse(null)).toBeEmptyArray();
+      expect(ComposerReleases.parse(undefined)).toBeEmptyArray();
+      expect(ComposerReleases.parse('')).toBeEmptyArray();
+      expect(ComposerReleases.parse({})).toBeEmptyArray();
+      expect(ComposerReleases.parse([])).toBeEmptyArray();
+      expect(ComposerReleases.parse([null])).toBeEmptyArray();
+      expect(ComposerReleases.parse([1, 2, 3])).toBeEmptyArray();
+      expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
       expect(
         ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
       ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);

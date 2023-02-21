@@ -15,14 +15,23 @@ export const DockerTarget = z
     registry: z.string(),
   })
   .transform(
-    ({ rule, name, repository, tag, digest, registry }): PackageDependency => ({
-      datasource: DockerDatasource.id,
-      versioning: dockerVersioning,
-      depType: rule,
-      depName: name,
-      packageName: repository,
-      currentValue: tag,
-      currentDigest: digest,
-      registryUrls: [registry],
-    })
+    ({
+      rule,
+      name,
+      repository,
+      tag,
+      digest,
+      registry,
+    }): PackageDependency[] => [
+      {
+        datasource: DockerDatasource.id,
+        versioning: dockerVersioning,
+        depType: rule,
+        depName: name,
+        packageName: repository,
+        currentValue: tag,
+        currentDigest: digest,
+        registryUrls: [registry],
+      },
+    ]
   );

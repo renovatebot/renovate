@@ -3,7 +3,11 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { CrateDatasource } from '../../datasource/crate';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type {
   CargoConfig,
   CargoManifest,
@@ -141,7 +145,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   _config?: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
 
   const cargoConfig = await readCargoConfig();
@@ -217,7 +221,7 @@ export async function extractPackageFile(
     return null;
   }
   const lockFileName = await findLocalSiblingOrParent(fileName, 'Cargo.lock');
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   // istanbul ignore if
   if (lockFileName) {
     res.lockFiles = [lockFileName];

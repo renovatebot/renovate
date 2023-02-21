@@ -3,17 +3,18 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type {
   TektonBundle,
   TektonResolverParamsField,
   TektonResource,
+  TektonResourceSpec,
 } from './types';
 
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('tekton.extractPackageFile()');
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
@@ -43,6 +44,10 @@ function getDeps(doc: TektonResource): PackageDependency[] {
 
   // Handle TaskRun resource
   addDep(doc.spec?.taskRef, deps);
+  addStepImageSpec(doc.spec?.taskSpec, deps);
+
+  // Handle Task resource
+  addStepImageSpec(doc.spec, deps);
 
   // Handle PipelineRun resource
   addDep(doc.spec?.pipelineRef, deps);
@@ -54,19 +59,17 @@ function getDeps(doc: TektonResource): PackageDependency[] {
   }
 
   // Handle regular tasks of Pipeline resource
-  for (const task of coerceArray(doc.spec?.tasks)) {
+  for (const task of [
+    ...coerceArray(doc.spec?.tasks),
+    ...coerceArray(doc.spec?.finally),
+  ]) {
     addDep(task.taskRef, deps);
-  }
-
-  // Handle finally tasks of Pipeline resource
-  for (const task of coerceArray(doc.spec?.finally)) {
-    addDep(task.taskRef, deps);
+    addStepImageSpec(task.taskSpec, deps);
   }
 
   // Handle TriggerTemplate resource
   for (const resource of coerceArray(doc.spec?.resourcetemplates)) {
-    addDep(resource?.spec?.taskRef, deps);
-    addDep(resource?.spec?.pipelineRef, deps);
+    deps.push(...getDeps(resource));
   }
 
   // Handle list of TektonResources
@@ -108,6 +111,37 @@ function addDep(ref: TektonBundle, deps: PackageDependency[]): void {
     'Tekton bundle dependency found'
   );
   deps.push(dep);
+}
+
+function addStepImageSpec(
+  spec: TektonResourceSpec | undefined,
+  deps: PackageDependency[]
+): void {
+  if (is.nullOrUndefined(spec)) {
+    return;
+  }
+
+  const steps = [
+    ...coerceArray(spec.steps),
+    ...coerceArray(spec.sidecars),
+    spec.stepTemplate,
+  ];
+  for (const step of steps) {
+    if (is.nullOrUndefined(step?.image)) {
+      continue;
+    }
+    const dep = getDep(step?.image);
+    dep.depType = 'tekton-step-image';
+    logger.trace(
+      {
+        depName: dep.depName,
+        currentValue: dep.currentValue,
+        currentDigest: dep.currentDigest,
+      },
+      'Tekton step image dependency found'
+    );
+    deps.push(dep);
+  }
 }
 
 function getBundleValue(
