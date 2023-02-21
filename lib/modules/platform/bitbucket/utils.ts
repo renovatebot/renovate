@@ -1,4 +1,11 @@
 import url from 'url';
+import { defaultSchema } from '@atlaskit/adf-schema/schema-default';
+import {
+  JSONDocNode,
+  JSONTransformer,
+} from '@atlaskit/editor-json-transformer';
+import { MarkdownTransformer } from '@atlaskit/editor-markdown-transformer';
+// import { MarkdownSerializer } from 'prosemirror-markdown';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
@@ -22,7 +29,7 @@ export interface Config {
   repositoryUrl: string;
   hasJiraProjectLinked: boolean;
   jiraProjectKey: string;
-  jiraCloudId: string;
+  jiraCloudUrl: string;
 }
 
 export interface PagedResult<T = any> {
@@ -208,4 +215,31 @@ export interface EffectiveReviewer {
   type: string;
   reviewer_type: string;
   user: Account;
+}
+
+export function convertIssueBodyToAtlassianDocumentFormat(
+  issueBody: string
+): JSONDocNode | null {
+  const jsonTransformer = new JSONTransformer();
+  const markdownTransformer = new MarkdownTransformer(defaultSchema);
+
+  // const markdown = new MarkdownParser(defaultSchema, ).parse(issueBody);
+  const atlassianMarkdown = markdownTransformer.parse(issueBody);
+
+  return jsonTransformer.encode(atlassianMarkdown);
+}
+
+export function convertAtlassianDocumentFormatToMarkdown(
+  document: JSONDocNode
+): string {
+  // const jsonTransformer = new JSONTransformer();
+  // const markdownTransformer = new MarkdownTransformer(defaultSchema);
+
+  // const json = jsonTransformer.parse(document);
+  // const mdSerializer = new MarkdownSerializer(defaultSchema);
+  // const defaultMDSeriealizer = defaultMarkdownSerializer.serialize(json);
+
+  // const md = markdownTransformer.encode(json);
+  // Note: Note: the atlassian sdk does not support converting ADF back to markdown, but that's ok - we'll just naively update existing issues
+  return '';
 }
