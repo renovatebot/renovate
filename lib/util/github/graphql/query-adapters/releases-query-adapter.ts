@@ -36,7 +36,7 @@ const GithubGraphqlRelease = z.object({
   isDraft: z.boolean(),
   isPrerelease: z.boolean(),
   url: z.string(),
-  id: z.number(),
+  id: z.number().nullable(),
   name: z.string().nullable(),
   description: z.string().nullable(),
 });
@@ -67,8 +67,11 @@ function transform(item: GithubGraphqlRelease): GithubReleaseItem | null {
     version,
     releaseTimestamp,
     url,
-    id,
   };
+
+  if (id) {
+    result.id = id;
+  }
 
   if (name) {
     result.name = name;

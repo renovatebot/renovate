@@ -64,7 +64,7 @@ export interface GithubPackageConfig {
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
-  id: number;
+  id?: number;
   name?: string;
   description?: string;
 }
