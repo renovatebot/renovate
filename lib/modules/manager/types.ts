@@ -47,7 +47,7 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string | null;
+  manager?: string;
   rangeStrategy: RangeStrategy;
 }
 
