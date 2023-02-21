@@ -31,7 +31,7 @@ export interface RenovateSharedConfig {
   branchPrefixOld?: string;
   branchName?: string;
   branchNameStrict?: boolean;
-  manager?: string | null;
+  manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -460,7 +460,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string | null;
+  manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }
