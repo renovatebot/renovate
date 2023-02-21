@@ -5,64 +5,22 @@ import {
   JSONTransformer,
 } from '@atlaskit/editor-json-transformer';
 import { MarkdownTransformer } from '@atlaskit/editor-markdown-transformer';
-// import { MarkdownSerializer } from 'prosemirror-markdown';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
-import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
+import type {
+  BitbucketBranchState,
+  BitbucketMergeStrategy,
+  MergeRequestBody,
+  PrResponse,
+  RepoInfo,
+  RepoInfoBody,
+} from './types';
 
 const bitbucketHttp = new BitbucketHttp();
-
-export interface Config {
-  defaultBranch: string;
-  hasBitbucketIssuesEnabled: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: Pr[];
-  repository: string;
-  username: string;
-  userUuid: string;
-  ignorePrAuthor: boolean;
-  repositoryUrl: string;
-  hasJiraProjectLinked: boolean;
-  jiraProjectKey: string;
-  jiraCloudUrl: string;
-}
-
-export interface PagedResult<T = any> {
-  pagelen: number;
-  size?: number;
-  next?: string;
-  values: T[];
-}
-
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-  repositoryUrl: string;
-}
-
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-  links: { html: { href: string } };
-}
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -166,30 +124,6 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export interface PrResponse {
-  id: number;
-  title: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<Account>;
-  created_on: string;
-}
-
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
@@ -204,42 +138,21 @@ export function prInfo(pr: PrResponse): Pr {
   };
 }
 
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
-}
-
-export interface EffectiveReviewer {
-  type: string;
-  reviewer_type: string;
-  user: Account;
-}
-
 export function convertIssueBodyToAtlassianDocumentFormat(
   issueBody: string
 ): JSONDocNode | null {
   const jsonTransformer = new JSONTransformer();
   const markdownTransformer = new MarkdownTransformer(defaultSchema);
-
-  // const markdown = new MarkdownParser(defaultSchema, ).parse(issueBody);
-  const atlassianMarkdown = markdownTransformer.parse(issueBody);
-
-  return jsonTransformer.encode(atlassianMarkdown);
+  return jsonTransformer.encode(markdownTransformer.parse(issueBody));
 }
 
+/**
+ * Note: the Atlassian MarkdownTransformer.encode() function is currently unimplemented,
+ * which would be needed for ADF --> Markdown/CommonMark conversion.
+ * For now, we'll naively return an empty string which means the issue body will always be updated
+ */
 export function convertAtlassianDocumentFormatToMarkdown(
   document: JSONDocNode
 ): string {
-  // const jsonTransformer = new JSONTransformer();
-  // const markdownTransformer = new MarkdownTransformer(defaultSchema);
-
-  // const json = jsonTransformer.parse(document);
-  // const mdSerializer = new MarkdownSerializer(defaultSchema);
-  // const defaultMDSeriealizer = defaultMarkdownSerializer.serialize(json);
-
-  // const md = markdownTransformer.encode(json);
-  // Note: Note: the atlassian sdk does not support converting ADF back to markdown, but that's ok - we'll just naively update existing issues
   return '';
 }
