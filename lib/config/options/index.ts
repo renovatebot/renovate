@@ -749,8 +749,9 @@ const options: RenovateOptions[] = [
   {
     name: 'baseBranches',
     description:
-      'An array of one or more custom base branches to be processed. If left empty, the default branch will be chosen.',
+      'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
+    subType: 'string',
     stage: 'package',
     cli: false,
   },

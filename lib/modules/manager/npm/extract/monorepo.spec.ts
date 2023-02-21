@@ -1,4 +1,4 @@
-import type { PackageFileContent } from '../../types';
+import type { PackageFile } from '../../types';
 import { detectMonorepos } from './monorepo';
 
 jest.mock('./pnpm');
@@ -6,7 +6,7 @@ jest.mock('./pnpm');
 describe('modules/manager/npm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
     it('handles no monorepo', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           deps: [],
@@ -17,7 +17,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses lerna package settings', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
@@ -70,7 +70,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('updates internal packages', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
@@ -123,7 +123,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings with lerna', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
@@ -148,7 +148,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings without lerna', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
@@ -172,7 +172,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses yarn workspaces package settings with extractedConstraints', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           skipInstalls: true, // coverage
@@ -216,7 +216,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
     });
 
     it('uses yarnZeroInstall and skipInstalls from yarn workspaces package settings', async () => {
-      const packageFiles: Partial<PackageFileContent>[] = [
+      const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {

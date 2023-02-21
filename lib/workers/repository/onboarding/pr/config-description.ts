@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { configFileNames } from '../../../../config/app-strings';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFileContent } from '../../../../modules/manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { emojify } from '../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];
@@ -31,7 +31,7 @@ function getDescriptionArray(config: RenovateConfig): string[] {
 
 export function getConfigDesc(
   config: RenovateConfig,
-  packageFiles?: Record<string, PackageFileContent[]>
+  packageFiles?: Record<string, PackageFile[]>
 ): string {
   // TODO: type (#7154)
   const configFile = configFileNames.includes(config.onboardingConfigFileName!)

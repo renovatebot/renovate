@@ -9,7 +9,7 @@ import { logger } from '../../../logger';
 import { getDefaultVersioning } from '../../../modules/datasource';
 import type {
   PackageDependency,
-  PackageFileContent,
+  PackageFile,
 } from '../../../modules/manager/types';
 import {
   VersioningApi,
@@ -52,7 +52,7 @@ export class Vulnerabilities {
 
   async fetchVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFileContent[]>
+    packageFiles: Record<string, PackageFile[]>
   ): Promise<void> {
     const managers = Object.keys(packageFiles);
     const allManagerJobs = managers.map((manager) =>
@@ -63,7 +63,7 @@ export class Vulnerabilities {
 
   private async fetchManagerVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFileContent[]>,
+    packageFiles: Record<string, PackageFile[]>,
     manager: string
   ): Promise<void> {
     const managerConfig = getManagerConfig(config, manager);
@@ -86,7 +86,7 @@ export class Vulnerabilities {
   private async fetchManagerPackageFileVulnerabilities(
     config: RenovateConfig,
     managerConfig: RenovateConfig,
-    pFile: PackageFileContent
+    pFile: PackageFile
   ): Promise<void> {
     const { packageFile } = pFile;
     const packageFileConfig = mergeChildConfig(managerConfig, pFile);
@@ -108,7 +108,7 @@ export class Vulnerabilities {
   }
 
   private async fetchDependencyVulnerabilities(
-    packageFileConfig: RenovateConfig & PackageFileContent,
+    packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem = Vulnerabilities.datasourceEcosystemMap[dep.datasource!];
@@ -403,7 +403,7 @@ export class Vulnerabilities {
   }
 
   private convertToPackageRule(
-    packageFileConfig: RenovateConfig & PackageFileContent,
+    packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency,
     packageName: string,
     depVersion: string,
