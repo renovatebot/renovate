@@ -12,7 +12,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
     const params = {
       versioning: versioning.id,
       datasource: JenkinsPluginsDatasource.id,
-      depName: 'email-ext',
+      packageName: 'email-ext',
       registryUrls: ['https://updates.jenkins.io/'],
     };
 
@@ -24,7 +24,7 @@ describe('modules/datasource/jenkins-plugins/index', () => {
 
     it('returns null for a package miss', async () => {
       const newparams = { ...params };
-      newparams.depName = 'non-existing';
+      newparams.packageName = 'non-existing';
 
       httpMock
         .scope('https://updates.jenkins.io')

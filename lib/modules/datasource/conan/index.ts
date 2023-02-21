@@ -36,17 +36,17 @@ export class ConanDatasource extends Datasource {
   }
 
   async getConanCenterReleases(
-    depName: string,
+    conanName: string,
     userAndChannel: string
   ): Promise<ReleaseResult | null> {
     if (userAndChannel && userAndChannel !== '@_/_') {
       logger.debug(
-        { depName, userAndChannel },
+        { conanName, userAndChannel },
         'User/channel not supported for Conan Center lookups'
       );
       return null;
     }
-    const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${depName}/config.yml`;
+    const url = `https://api.github.com/repos/conan-io/conan-center-index/contents/recipes/${conanName}/config.yml`;
     const res = await this.githubHttp.get(url, {
       headers: { accept: 'application/vnd.github.v3.raw' },
     });
@@ -78,7 +78,7 @@ export class ConanDatasource extends Datasource {
     const revisionLookUp = joinUrlParts(
       url,
       'v2/conans/',
-      conanPackage.depName,
+      conanPackage.conanName,
       newValue,
       conanPackage.userAndChannel,
       '/revisions'
@@ -102,19 +102,27 @@ export class ConanDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const conanPackage = getConanPackage(packageName);
-    const depName = conanPackage.depName;
     const userAndChannel = '@' + conanPackage.userAndChannel;
     if (
       is.string(registryUrl) &&
       ensureTrailingSlash(registryUrl) === defaultRegistryUrl
     ) {
-      return this.getConanCenterReleases(depName, userAndChannel);
+      return this.getConanCenterReleases(
+        conanPackage.conanName,
+        userAndChannel
+      );
     }
 
-    logger.trace({ depName, registryUrl }, 'Looking up conan api dependency');
+    logger.trace(
+      { packageName, registryUrl },
+      'Looking up conan api dependency'
+    );
     if (registryUrl) {
       const url = ensureTrailingSlash(registryUrl);
-      const lookupUrl = joinUrlParts(url, `v2/conans/search?q=${depName}`);
+      const lookupUrl = joinUrlParts(
+        url,
+        `v2/conans/search?q=${conanPackage.conanName}`
+      );
 
       try {
         const rep = await this.http.getJson<ConanJSON>(lookupUrl);
