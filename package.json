@@ -136,7 +136,6 @@
   },
   "dependencies": {
     "@atlaskit/adf-schema": "25.1.1",
-    "@atlaskit/adf-utils": "18.0.2",
     "@atlaskit/editor-json-transformer": "8.8.3",
     "@atlaskit/editor-markdown-transformer": "5.0.0",
     "@aws-sdk/client-codecommit": "3.256.0",
@@ -225,7 +224,6 @@
     "p-throttle": "4.1.1",
     "parse-link-header": "2.0.0",
     "prettier": "2.8.4",
-    "prosemirror-markdown": "1.10.1",
     "quick-lru": "5.1.1",
     "redis": "4.6.4",
     "remark": "13.0.0",
@@ -286,7 +284,6 @@
     "@types/nock": "10.0.3",
     "@types/node": "16.18.12",
     "@types/parse-link-header": "2.0.1",
-    "@types/prosemirror-model": "1.17.0",
     "@types/semver": "7.3.13",
     "@types/semver-stable": "3.0.0",
     "@types/semver-utils": "1.1.1",
