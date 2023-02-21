@@ -2200,7 +2200,7 @@ describe('modules/platform/github/index', () => {
         });
       });
 
-      it('should allow maintainer edits if enabled via options', async () => {
+      it('should allow maintainer edits if explicitly enabled via options', async () => {
         scope
           .post(
             '/repos/some/repo/pulls',
@@ -2217,12 +2217,35 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR can be edited by maintainers.',
           labels: null,
-          forkModeAllowMaintainerEdits: true,
+          platformOptions: {
+            githubForkModeDisallowMaintainerEdits: false,
+          },
         });
         expect(pr).toMatchObject({ number: 123 });
       });
 
-      it('should not allow maintainer edits if not explicitly set', async () => {
+      it('should allow maintainer edits if not explicitly set', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should disallow maintainer edits if explicitly disabled', async () => {
         scope
           .post(
             '/repos/some/repo/pulls',
@@ -2239,28 +2262,9 @@ describe('modules/platform/github/index', () => {
           prTitle: 'PR title',
           prBody: 'PR *cannot* be edited by maintainers.',
           labels: null,
-        });
-        expect(pr).toMatchObject({ number: 123 });
-      });
-
-      it('should not allow maintainer edits if explicitly disabled', async () => {
-        scope
-          .post(
-            '/repos/some/repo/pulls',
-            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
-            (body) => body.maintainer_can_modify === false
-          )
-          .reply(200, {
-            number: 123,
-            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
-          });
-        const pr = await github.createPr({
-          sourceBranch: 'some-branch',
-          targetBranch: 'main',
-          prTitle: 'PR title',
-          prBody: 'PR *cannot* be edited by maintainers.',
-          labels: null,
-          forkModeAllowMaintainerEdits: false,
+          platformOptions: {
+            githubForkModeDisallowMaintainerEdits: true,
+          },
         });
         expect(pr).toMatchObject({ number: 123 });
       });

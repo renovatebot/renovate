@@ -1479,7 +1479,6 @@ export async function createPr({
   prBody: rawBody,
   labels,
   draftPR = false,
-  forkModeAllowMaintainerEdits,
   platformOptions,
 }: CreatePRConfig): Promise<GhPr | null> {
   const body = sanitize(rawBody);
@@ -1500,7 +1499,8 @@ export async function createPr({
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
-    options.body.maintainer_can_modify = !!forkModeAllowMaintainerEdits;
+    options.body.maintainer_can_modify =
+      platformOptions?.githubForkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (

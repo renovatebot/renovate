@@ -894,11 +894,17 @@ Renovate follows tags _strictly_, this can cause problems when a tagged stream i
 For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
 If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
-## forkModeAllowMaintainerEdits
+## forkModeDisallowMaintainerEdits
 
-Use `forkModeAllowMaintainerEdits` to control if maintainers can edit Renovate's pull requests when in fork mode.
+Use `forkModeDisallowMaintainerEdits` to disallow maintainers from editing Renovate's pull requests when in fork mode.
 
-This allows project maintainers to make manual changes to the Renovate PR branch, without needing to create another new PR.
+If GitHub pull requests are created from a [fork repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), the PR author can decide to allow upstream repository to modify the PR directly.
+
+Allowing maintainers to edit pull requests directly is helpful when Renovate pull requests require additional changes. The reviewer can simply push to the pull request without having to create a new PR.
+
+https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork.
+
+You may decide to disallow edits to Renovate pull requests in order to workaround issues in Renovate where modified fork branches are not deleted properly: https://github.com/renovatebot/renovate/issues/16657. If this option is enabled, reviewers will need to create a new PR if additional changes are needed.
 
 <!-- prettier-ignore -->
 !!! note

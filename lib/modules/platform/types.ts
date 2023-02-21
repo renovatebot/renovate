@@ -92,6 +92,7 @@ export type PlatformPrOptions = {
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  githubForkModeDisallowMaintainerEdits?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -101,7 +102,6 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
-  forkModeAllowMaintainerEdits?: boolean;
 }
 export interface UpdatePrConfig {
   number: number;

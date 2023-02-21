@@ -50,6 +50,8 @@ export function getPlatformPrOptions(
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    githubForkModeDisallowMaintainerEdits:
+      config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -385,7 +387,6 @@ export async function ensurePr(
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
-          forkModeAllowMaintainerEdits: config.forkModeAllowMaintainerEdits,
         });
 
         incLimitedValue('PullRequests');

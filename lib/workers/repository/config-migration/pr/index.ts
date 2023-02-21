@@ -100,7 +100,6 @@ ${
         sourceBranch: branchName,
         // TODO #7154
         targetBranch: config.defaultBranch!,
-        forkModeAllowMaintainerEdits: config.forkModeAllowMaintainerEdits,
         prTitle,
         prBody,
         labels,
