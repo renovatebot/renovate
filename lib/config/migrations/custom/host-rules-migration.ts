@@ -1,13 +1,24 @@
 import is from '@sindresorhus/is';
 import type { HostRule } from '../../../types';
+import { clone } from '../../../util/clone';
 import { AbstractMigration } from '../base/abstract-migration';
+
+interface LegacyHostRule {
+  hostName?: string;
+  domainName?: string;
+  baseUrl?: string;
+  host?: string;
+  endpoint?: string;
+}
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';
 
-  override run(value: Record<string, unknown>[]): void {
+  override run(value: (LegacyHostRule & HostRule)[]): void {
     const newHostRules: HostRule[] = [];
-    for (const hostRule of value) {
+    for (let hostRule of value) {
+      hostRule = migrateRule(hostRule);
+
       const newRule: any = {};
 
       for (const [key, value] of Object.entries(hostRule)) {
@@ -25,19 +36,6 @@ export class HostRulesMigration extends AbstractMigration {
           continue;
         }
 
-        if (
-          key === 'endpoint' ||
-          key === 'host' ||
-          key === 'baseUrl' ||
-          key === 'hostName' ||
-          key === 'domainName'
-        ) {
-          if (is.string(value)) {
-            newRule.matchHost ??= massageUrl(value);
-          }
-          continue;
-        }
-
         newRule[key] = value;
       }
 
@@ -46,6 +44,37 @@ export class HostRulesMigration extends AbstractMigration {
 
     this.rewrite(newHostRules);
   }
+}
+
+function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+  const cloned: LegacyHostRule & HostRule = clone(rule);
+  delete cloned.hostName;
+  delete cloned.domainName;
+  delete cloned.baseUrl;
+  delete cloned.endpoint;
+  delete cloned.host;
+  const result: HostRule = cloned;
+
+  const { matchHost } = result;
+  const { hostName, domainName, baseUrl, endpoint, host } = rule;
+  const hostValues = [
+    matchHost,
+    hostName,
+    domainName,
+    baseUrl,
+    endpoint,
+    host,
+  ].filter(Boolean);
+  if (hostValues.length === 1) {
+    const [matchHost] = hostValues;
+    result.matchHost = massageUrl(matchHost!);
+  } else if (hostValues.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+    );
+  }
+
+  return result;
 }
 
 function massageUrl(url: string): string {

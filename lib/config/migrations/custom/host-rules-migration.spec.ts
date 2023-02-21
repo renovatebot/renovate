@@ -10,6 +10,8 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { domainName: 'domain.com/', token: '123test' },
           { matchHost: 'domain.com/', token: '123test' },
           { hostName: 'some.domain.com', token: '123test' },
+          { endpoint: 'domain.com/', token: '123test' },
+          { host: 'some.domain.com', token: '123test' },
         ],
       } as any,
       {
@@ -19,8 +21,35 @@ describe('config/migrations/custom/host-rules-migration', () => {
           { matchHost: 'https://domain.com/', token: '123test' },
           { matchHost: 'https://domain.com/', token: '123test' },
           { matchHost: 'some.domain.com', token: '123test' },
+          { matchHost: 'https://domain.com/', token: '123test' },
+          { matchHost: 'some.domain.com', token: '123test' },
         ],
       }
+    );
+  });
+
+  it('throws when multiple hosts are present', () => {
+    expect(() =>
+      new HostRulesMigration(
+        {
+          hostRules: [
+            {
+              matchHost: 'https://some.domain.com',
+              baseUrl: 'https://some.domain.com',
+              token: '123test',
+            },
+          ],
+        } as any,
+        {}
+      ).run([
+        {
+          matchHost: 'https://some.domain.com',
+          baseUrl: 'https://some.domain.com',
+          token: '123test',
+        },
+      ])
+    ).toThrow(
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
     );
   });
 });
