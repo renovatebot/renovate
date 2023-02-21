@@ -15,50 +15,6 @@ describe('util/host-rules', () => {
     clear();
   });
 
-  describe('add()', () => {
-    it('throws if both domainName and hostName', () => {
-      expect(() =>
-        add({
-          hostType: 'azure',
-          domainName: 'github.com',
-          hostName: 'api.github.com',
-        } as HostRule)
-      ).toThrow();
-    });
-
-    it('throws if both domainName and baseUrl', () => {
-      expect(() =>
-        add({
-          hostType: 'azure',
-          domainName: 'github.com',
-          matchHost: 'https://api.github.com',
-        } as HostRule)
-      ).toThrow();
-    });
-
-    it('throws if both hostName and baseUrl', () => {
-      expect(() =>
-        add({
-          hostType: 'azure',
-          hostName: 'api.github.com',
-          matchHost: 'https://api.github.com',
-        } as HostRule)
-      ).toThrow();
-    });
-
-    it('supports baseUrl-only', () => {
-      add({
-        matchHost: 'https://some.endpoint',
-        username: 'user1',
-        password: 'pass1',
-      });
-      expect(find({ url: 'https://some.endpoint/v3/' })).toEqual({
-        password: 'pass1',
-        username: 'user1',
-      });
-    });
-  });
-
   describe('find()', () => {
     beforeEach(() => {
       clear();
@@ -71,11 +27,11 @@ describe('util/host-rules', () => {
     it('needs exact host matches', () => {
       add({
         hostType: NugetDatasource.id,
-        hostName: 'nuget.org',
+        matchHost: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
         token: undefined,
-      } as HostRule);
+      });
       expect(find({ hostType: NugetDatasource.id })).toEqual({});
       expect(
         find({ hostType: NugetDatasource.id, url: 'https://nuget.org' })
@@ -109,7 +65,7 @@ describe('util/host-rules', () => {
 
     it('matches on domainName', () => {
       add({
-        domainName: 'github.com',
+        matchHost: 'github.com',
         token: 'def',
       } as HostRule);
       expect(
@@ -192,7 +148,7 @@ describe('util/host-rules', () => {
 
     it('matches on hostName', () => {
       add({
-        hostName: 'nuget.local',
+        matchHost: 'nuget.local',
         token: 'abc',
       } as HostRule);
       expect(
@@ -291,7 +247,7 @@ describe('util/host-rules', () => {
       });
       add({
         hostType: NugetDatasource.id,
-        hostName: 'my.local.registry',
+        matchHost: 'my.local.registry',
         token: 'def',
       } as HostRule);
       add({
@@ -324,7 +280,7 @@ describe('util/host-rules', () => {
     it('needs exact host matches', () => {
       const hostRule = {
         hostType: 'nuget',
-        hostName: 'nuget.org',
+        matchHost: 'nuget.org',
         username: 'root',
         password: 'p4$$w0rd',
       };
