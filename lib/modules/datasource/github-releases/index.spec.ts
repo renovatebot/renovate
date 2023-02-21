@@ -63,7 +63,7 @@ describe('modules/datasource/github-releases/index', () => {
 
       const res = await getPkgReleases({
         datasource: GithubReleasesDatasource.id,
-        depName: 'some/dep',
+        packageName: 'some/dep',
       });
 
       expect(res).toMatchObject({
@@ -83,7 +83,7 @@ describe('modules/datasource/github-releases/index', () => {
   });
 
   describe('getDigest', () => {
-    const depName = 'some/dep';
+    const packageName = 'some/dep';
     const currentValue = 'v1.0.0';
     const currentDigest = 'sha-of-v1';
     const newValue = 'v15.0.0';
@@ -110,7 +110,7 @@ describe('modules/datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleasesDatasource.id,
-          depName,
+          packageName,
           currentValue,
         },
         newValue
@@ -120,7 +120,7 @@ describe('modules/datasource/github-releases/index', () => {
 
     it('should be independent of the current value', async () => {
       const digest = await getDigest(
-        { datasource: GithubReleasesDatasource.id, depName },
+        { datasource: GithubReleasesDatasource.id, packageName },
         newValue
       );
       expect(digest).toBe(newDigest);
@@ -130,7 +130,7 @@ describe('modules/datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleasesDatasource.id,
-          depName,
+          packageName,
           currentValue,
           currentDigest,
         },
@@ -143,7 +143,7 @@ describe('modules/datasource/github-releases/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleasesDatasource.id,
-          depName,
+          packageName,
           currentValue,
           currentDigest,
         },

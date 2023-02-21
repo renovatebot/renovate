@@ -1,6 +1,6 @@
 [GitLab Packages API](https://docs.gitlab.com/ee/api/packages.html) supports looking up package versions from [all types of packages registry supported by GitLab](https://docs.gitlab.com/ee/user/packages/package_registry/index.html) and can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
-To specify which specific repository should be queried when looking up a package, the `depName` should be formed with the project path first, then a `:` and finally the package name.
+To specify which specific repository should be queried when looking up a package, the `packageName` should be formed with the project path first, then a `:` and finally the package name.
 
 As an example, `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list:@gitlab-org/nk-js` would look for the`@gitlab-org/nk-js` packages in the generic packages repository of the `gitlab-org/ci-cd/package-stage/feature-testing/new-packages-list` project.
 

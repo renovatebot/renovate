@@ -66,7 +66,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
 
       const res = await getPkgReleases({
         datasource: GithubReleaseAttachmentsDatasource.id,
-        depName: 'some/dep',
+        packageName: 'some/dep',
       });
 
       expect(res).toMatchObject({
@@ -86,18 +86,18 @@ describe('modules/datasource/github-release-attachments/index', () => {
   });
 
   describe('getDigest', () => {
-    const depName = 'some/dep';
+    const packageName = 'some/dep';
     const currentValue = 'v1.0.0';
     const currentDigest = 'v1.0.0-digest';
 
     const releaseMock = new GitHubReleaseAttachmentMocker(
       githubApiHost,
-      depName
+      packageName
     );
 
     it('requires currentDigest', async () => {
       const digest = await getDigest(
-        { datasource: GithubReleaseAttachmentsDatasource.id, depName },
+        { datasource: GithubReleaseAttachmentsDatasource.id, packageName },
         currentValue
       );
       expect(digest).toBeNull();
@@ -107,7 +107,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleaseAttachmentsDatasource.id,
-          depName,
+          packageName,
           currentDigest,
         },
         currentValue
@@ -126,7 +126,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleaseAttachmentsDatasource.id,
-          depName,
+          packageName,
           currentValue,
           currentDigest,
         },
@@ -142,7 +142,7 @@ describe('modules/datasource/github-release-attachments/index', () => {
       const digest = await getDigest(
         {
           datasource: GithubReleaseAttachmentsDatasource.id,
-          depName,
+          packageName,
           currentValue,
           currentDigest,
         },
