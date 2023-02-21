@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import type { HostRule } from '../../../types';
 import { clone } from '../../../util/clone';
 import { AbstractMigration } from '../base/abstract-migration';
@@ -64,13 +65,16 @@ function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     baseUrl,
     endpoint,
     host,
-  ].filter(Boolean);
+  ].filter(is.string);
   if (hostValues.length === 1) {
     const [matchHost] = hostValues;
-    result.matchHost = massageUrl(matchHost!);
+    result.matchHost = massageUrl(matchHost);
   } else if (hostValues.length > 1) {
-    const error = new Error('config-validation');
-    error.validationError = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+    const error = new Error(CONFIG_VALIDATION);
+    error.validationSource = 'config';
+    error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+    error.validationError =
+      'The renovate configuration file contains some invalid settings';
     throw error;
   }
 
