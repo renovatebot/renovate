@@ -16,7 +16,7 @@ You need the following dependencies for local development:
 - C++ compiler
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-If you are using Node.js `<= 18` you need to run `yarn install  --ignore-engines`, because we've some `devDependecies` which require Node.js v18+.
+If you are using Node.js `<= 18` you need to run `yarn install  --ignore-engines`, because we've some `devDependencies` which require Node.js v18+.
 
 #### Linux
 

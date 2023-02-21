@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractCollections } from './collections';
 import { extractCollectionsMetaDataFile } from './collections-metadata';
 import { extractRoles } from './roles';
@@ -25,7 +25,7 @@ export function getSliceEndNumber(
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('ansible-galaxy.extractPackageFile()');
   const galaxyFileNameRegEx = regEx(/galaxy\.ya?ml$/);
   const deps: PackageDependency[] = [];

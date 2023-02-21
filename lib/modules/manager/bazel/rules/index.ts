@@ -6,31 +6,44 @@ import { DockerTarget, dockerRules } from './docker';
 import { GitTarget, gitRules } from './git';
 import { GoTarget, goRules } from './go';
 import { HttpTarget, httpRules } from './http';
+import { MavenTarget, mavenRules } from './maven';
 
-const Target = z.union([DockerTarget, GitTarget, GoTarget, HttpTarget]);
+const Target = z.union([
+  DockerTarget,
+  GitTarget,
+  GoTarget,
+  HttpTarget,
+  MavenTarget,
+]);
 
 /**
  * Gather all rule names supported by Renovate in order to speed up parsing
  * by filtering out other syntactically correct rules we don't support yet.
  */
-const supportedRules = [...dockerRules, ...gitRules, ...goRules, ...httpRules];
+const supportedRules = [
+  ...dockerRules,
+  ...gitRules,
+  ...goRules,
+  ...httpRules,
+  ...mavenRules,
+];
 export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
-export function extractDepFromFragmentData(
+export function extractDepsFromFragmentData(
   fragmentData: FragmentData
-): PackageDependency | null {
+): PackageDependency[] {
   const res = Target.safeParse(fragmentData);
   if (!res.success) {
-    return null;
+    return [];
   }
   return res.data;
 }
 
-export function extractDepFromFragment(
+export function extractDepsFromFragment(
   fragment: Fragment
-): PackageDependency | null {
+): PackageDependency[] {
   const fragmentData = extract(fragment);
-  return extractDepFromFragmentData(fragmentData);
+  return extractDepsFromFragmentData(fragmentData);
 }
 
 export function extract(fragment: Fragment): FragmentData {

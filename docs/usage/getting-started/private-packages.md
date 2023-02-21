@@ -394,6 +394,21 @@ npmRegistries:
     # this will not be overwritten and may conflict
 ```
 
+### maven
+
+GitLab package registry can be authorized using `Authorization: Bearer <token>`.
+In GitLab Pipelines authorization can be achieved using following config:
+
+```js
+hostRules: [
+  {
+    hostType: 'maven',
+    matchHost: 'https://gitlab.host.com/api/v4',
+    token: process.env.CI_JOB_TOKEN,
+  },
+];
+```
+
 ### nuget
 
 For each known NuGet registry, Renovate searches for `hostRules` with `hostType=nuget` and matching host.
@@ -412,7 +427,7 @@ hostRules: [
 
 ### pip
 
-If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
 To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
 This is because `packageRules` are applied _after_ package file extraction.
 

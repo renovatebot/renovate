@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
@@ -261,11 +260,9 @@ export async function getPr(
   );
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
-  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   // TODO #7154
   pr.version = updatePrVersion(pr.number, pr.version!);
 
@@ -834,7 +831,6 @@ export async function createPr({
   }
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${prInfoRes.body.id}`,
     ...utils.prInfo(prInfoRes.body),
   };
 

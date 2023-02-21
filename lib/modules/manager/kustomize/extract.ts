@@ -8,7 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { splitImageParts } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
@@ -16,16 +16,38 @@ import type { HelmChart, Image, Kustomize } from './types';
 const gitUrl = regEx(
   /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^/\s]+\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
 );
+// regex to match URLs with ".git" delimiter
+const dotGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*(\.git))))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
+// regex to match URLs with "_git" delimiter
+const underscoreGitRegex = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])?(?<project>[^?\s]*)(_git\/[^/\s]+)))(?<subdir>[^?\s]*)\?ref=(?<currentValue>.+)$/
+);
+// regex to match URLs having an extra "//"
+const gitUrlWithPath = regEx(
+  /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/\s]+(?::[0-9]+)?[:/])(?<project>[^?\s]+)))(?:\/\/)(?<subdir>[^?\s]+)\?ref=(?<currentValue>.+)$/
+);
 
 export function extractResource(base: string): PackageDependency | null {
-  const match = gitUrl.exec(base);
+  let match: RegExpExecArray | null;
+
+  if (base.includes('_git')) {
+    match = underscoreGitRegex.exec(base);
+  } else if (base.includes('.git')) {
+    match = dotGitRegex.exec(base);
+  } else if (gitUrlWithPath.test(base)) {
+    match = gitUrlWithPath.exec(base);
+  } else {
+    match = gitUrl.exec(base);
+  }
 
   if (!match?.groups) {
     return null;
   }
 
   const { path } = match.groups;
-  if (path.startsWith('github.com:') || path.startsWith('github.com/')) {
+  if (regEx(/(?:github\.com)(:|\/)/).test(path)) {
     return {
       currentValue: match.groups.currentValue,
       datasource: GithubTagsDatasource.id,
@@ -145,7 +167,7 @@ export function parseKustomize(content: string): Kustomize | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('kustomize.extractPackageFile()');
   const deps: PackageDependency[] = [];
 
@@ -155,7 +177,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases)) {
+  for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -166,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources)) {
+  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -177,7 +199,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components)) {
+  for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({

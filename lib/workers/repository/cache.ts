@@ -16,6 +16,7 @@ import {
 } from '../../util/git';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { getPrCache } from './update/pr/pr-cache';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
@@ -73,6 +74,7 @@ async function generateBranchCache(
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
+    const prCache = getPrCache(branchName);
     return {
       automerge,
       baseBranchSha,
@@ -83,6 +85,7 @@ async function generateBranchCache(
       isConflicted,
       isModified,
       pristine,
+      prCache,
       prNo,
       sha,
       upgrades,
