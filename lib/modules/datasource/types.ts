@@ -3,8 +3,7 @@ import type { ModuleApi } from '../../types';
 
 export interface GetDigestInputConfig {
   datasource: string;
-  packageName?: string;
-  depName: string;
+  packageName: string;
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
   additionalRegistryUrls?: string[];
@@ -31,8 +30,7 @@ export interface GetPkgReleasesConfig {
   registryUrls?: string[] | null;
   additionalRegistryUrls?: string[];
   datasource: string;
-  depName: string;
-  packageName?: string;
+  packageName: string;
   versioning?: string;
   extractVersion?: string;
   constraints?: Record<string, string>;

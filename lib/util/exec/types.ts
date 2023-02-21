@@ -7,7 +7,7 @@ export interface ToolConstraint {
 
 export interface ToolConfig {
   datasource: string;
-  depName: string;
+  packageName: string;
   hash?: boolean;
   versioning: string;
 }

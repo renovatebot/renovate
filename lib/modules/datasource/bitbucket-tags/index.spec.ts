@@ -32,7 +32,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
@@ -69,7 +69,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         .reply(200, body);
       const res = await getDigest({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeString();
@@ -94,7 +94,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
         .reply(200, body);
       const res = await getDigest({
         datasource,
-        depName: 'some/dep2',
+        packageName: 'some/dep2',
       });
       expect(res).toBeNull();
     });
@@ -116,7 +116,7 @@ describe('modules/datasource/bitbucket-tags/index', () => {
       const res = await getDigest(
         {
           datasource,
-          depName: 'some/dep2',
+          packageName: 'some/dep2',
         },
         'v1.0.0'
       );
