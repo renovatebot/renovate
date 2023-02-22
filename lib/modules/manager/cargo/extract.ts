@@ -11,14 +11,9 @@ import type {
   CargoSection,
 } from './types';
 
-function get_cargo_index_env(registryName: string): string | null {
-  return (
-    process.env[
-      `CARGO_REGISTRIES_${registryName
-        .toUpperCase()
-        .replaceAll('-', '_')}_INDEX`
-    ] ?? null
-  );
+function getCargoIndexEnv(registryName: string): string | null {
+  const registry = registryName.toUpperCase().replaceAll('-', '_');
+  return process.env[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
 }
 
 function extractFromSection(
@@ -53,14 +48,7 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          let registryUrl = cargoRegistries[registryName];
-
-          if (!registryUrl) {
-            const envUrl = get_cargo_index_env(registryName);
-            if (envUrl) {
-              registryUrl = envUrl;
-            }
-          }
+          const registryUrl = cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
 
           if (registryUrl) {
             registryUrls = [registryUrl];
