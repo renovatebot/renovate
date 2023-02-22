@@ -81,4 +81,74 @@ describe('util/schema', () => {
       );
     });
   });
+
+  describe('looseArray', () => {
+    it('parses array', () => {
+      const s = schema.looseArray(z.string());
+      expect(s.parse(['foo', 'bar'])).toEqual(['foo', 'bar']);
+    });
+
+    it('handles non-array', () => {
+      const s = schema.looseArray(z.string());
+      expect(s.parse({ foo: 'bar' })).toEqual([]);
+    });
+
+    it('drops wrong items', () => {
+      const s = schema.looseArray(z.string());
+      expect(s.parse(['foo', 123, null, undefined, []])).toEqual(['foo']);
+    });
+
+    it('runs callback for wrong elements', () => {
+      let called = false;
+      const s = schema.looseArray(z.string(), () => {
+        called = true;
+      });
+      expect(s.parse(['foo', 123, 'bar'])).toEqual(['foo', 'bar']);
+      expect(called).toBeTrue();
+    });
+
+    it('runs callback for non-array', () => {
+      let called = false;
+      const s = schema.looseArray(z.string(), () => {
+        called = true;
+      });
+      expect(s.parse('foobar')).toEqual([]);
+      expect(called).toBeTrue();
+    });
+  });
+
+  describe('looseRecord', () => {
+    it('parses record', () => {
+      const s = schema.looseRecord(z.string());
+      expect(s.parse({ foo: 'bar' })).toEqual({ foo: 'bar' });
+    });
+
+    it('handles non-record', () => {
+      const s = schema.looseRecord(z.string());
+      expect(s.parse(['foo', 'bar'])).toEqual({});
+    });
+
+    it('drops wrong items', () => {
+      const s = schema.looseRecord(z.string());
+      expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({ foo: 'foo' });
+    });
+
+    it('runs callback for wrong elements', () => {
+      let called = false;
+      const s = schema.looseRecord(z.string(), () => {
+        called = true;
+      });
+      expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({ foo: 'foo' });
+      expect(called).toBeTrue();
+    });
+
+    it('runs callback for non-record', () => {
+      let called = false;
+      const s = schema.looseRecord(z.string(), () => {
+        called = true;
+      });
+      expect(s.parse('foobar')).toEqual({});
+      expect(called).toBeTrue();
+    });
+  });
 });

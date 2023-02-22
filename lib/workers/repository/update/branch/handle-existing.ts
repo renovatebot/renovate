@@ -5,8 +5,8 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
@@ -40,11 +40,11 @@ export async function handleClosedPr(
         });
       }
     }
-    if (branchExists(config.branchName)) {
+    if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
-        await deleteBranch(config.branchName);
+        await scm.deleteBranch(config.branchName);
       }
     }
   } else if (pr.state === 'merged') {

@@ -909,7 +909,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const tf = codeBlock`
         module "vpc" {
           source  = "terraform-aws-modules/vpc/aws"
-         version = "3.14.2"
+          version = "3.14.2"
         }
       `;
       upgrade.manager = 'terraform';
@@ -1035,6 +1035,251 @@ describe('workers/repository/update/branch/auto-replace', () => {
           FROM notUbuntu:18.04
           FROM alsoNotUbuntu:18.04
           FROM alpine:3.16
+        `
+      );
+    });
+
+    it('docker: updates with pinDigest enabled but no currentDigest value', async () => {
+      const dockerfile = codeBlock`
+        FROM ubuntu:18.04
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'ubuntu:18.04';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM alpine:3.16
+        `
+      );
+    });
+
+    it('docker: updates with pinDigest enabled and a currentDigest value', async () => {
+      const dockerfile = codeBlock`
+        FROM ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'ubuntu';
+      upgrade.currentValue = '18.04';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'alpine';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM alpine:3.16@sha256:p0o9i8u7z6t5r4e3w2q1
+        `
+      );
+    });
+
+    it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
+      const yml = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.manager = 'regex';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = undefined;
+      upgrade.depIndex = 0;
+      upgrade.replaceString = 'image: "some.url.com/my-repository:1.0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*?\\\'?\\"?(?<depName>[^:\\\'\\"]+):(?<currentValue>[^@\\\'\\"]+)@?(?<currentDigest>[^\\s\\\'\\"]+)?\\"?\\\'?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe('image: "some.other.url.com/some-new-repo:3.16"');
+    });
+
+    it('regex: updates with pinDigest enabled and a currentDigest value', async () => {
+      const yml =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.manager = 'regex';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'some.url.com/my-repository';
+      upgrade.currentValue = '1.0';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.newName = 'some.other.url.com/some-new-repo';
+      upgrade.newValue = '3.16';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.matchStrings = [
+        'image:\\s*[\\\'\\"]?(?<depName>[^:]+):(?<currentValue>[^@]+)?@?(?<currentDigest>[^\\s\\\'\\"]+)?[\\\'\\"]?\\s*',
+      ];
+      const res = await doAutoReplace(upgrade, yml, reuseExistingBranch);
+      expect(res).toBe(
+        'image: "some.other.url.com/some-new-repo:3.16@sha256:p0o9i8u7z6t5r4e3w2q1"'
+      );
+    });
+
+    it('github-actions: update with newValue only', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = undefined;
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v2.0.0
+        `
+      );
+    });
+
+    it('github-actions: update with newValue and newDigest', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@1cf887 # v2.0.0
+        `
+      );
+    });
+
+    it('github-actions: updates with pinDigest enabled but no currentDigest value', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigest = undefined;
+      upgrade.currentDigestShort = undefined;
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'actions/checkout@v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflows/build.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@v2.0.0
+        `
+      );
+    });
+
+    it('github-actions: updates with pinDigest enabled and a currentDigest value', async () => {
+      const githubAction = codeBlock`
+        jobs:
+          build:
+            runs-on: ubuntu-latest
+            steps:
+              - uses: actions/checkout@2485f4 # tag=v1.0.0
+      `;
+      upgrade.manager = 'github-actions';
+      upgrade.autoReplaceStringTemplate =
+        '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
+      upgrade.depName = 'actions/checkout';
+      upgrade.currentValue = 'v1.0.0';
+      upgrade.currentDigestShort = '2485f4';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'actions/checkout@2485f4 # tag=v1.0.0';
+      upgrade.newName = 'some-other-action/checkout';
+      upgrade.newValue = 'v2.0.0';
+      upgrade.newDigest = '1cf887';
+      upgrade.packageFile = 'workflow.yml';
+      const res = await doAutoReplace(
+        upgrade,
+        githubAction,
+        reuseExistingBranch
+      );
+      expect(res).toBe(
+        codeBlock`
+          jobs:
+            build:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: some-other-action/checkout@1cf887 # tag=v2.0.0
         `
       );
     });
