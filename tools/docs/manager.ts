@@ -11,6 +11,8 @@ import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
+const noCategoryDisplayName = 'no-category';
+
 if (process.env.GITHUB_TOKEN) {
   logger.debug('Using GITHUB_TOKEN from env');
   hostRules.add({
@@ -119,7 +121,7 @@ export async function generateManagers(dist: string): Promise<void> {
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
 
-    const categories = definition.categories ?? [];
+    const categories = definition.categories ?? [noCategoryDisplayName];
     for (const category of categories) {
       allCategories[category] ??= [];
       allCategories[category].push(manager);
@@ -218,11 +220,12 @@ sidebar_label: ${displayName}
     await updateFile(`${dist}/modules/manager/${manager}/index.md`, md);
   }
 
+  // add noCategoryDisplayName as last option
   const categories = Object.keys(allCategories).filter(
-    (category) => category !== 'other'
+    (category) => category !== noCategoryDisplayName
   );
   categories.sort();
-  categories.push('other');
+  categories.push(noCategoryDisplayName);
   let categoryText = '\n';
 
   for (const category of categories) {

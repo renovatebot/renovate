@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import lodashClonedeep from 'lodash/cloneDeep';
 import type { PackageRule } from '../../types';
 import { AbstractMigration } from '../base/abstract-migration';
 
@@ -46,7 +47,7 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   }
 
   // deep copy
-  const newRule: PackageRule = { ...packageRule };
+  const newRule: PackageRule = lodashClonedeep(packageRule);
   delete newRule.matchLanguages;
 
   const filteredLanguages = matchLanguages.filter(
