@@ -43,6 +43,7 @@ export interface BranchResponse {
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
+
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;
