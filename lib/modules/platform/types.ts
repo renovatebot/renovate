@@ -93,6 +93,7 @@ export type PlatformPrOptions = {
   gitLabIgnoreApprovals?: boolean;
   gerritAutoApprove?: boolean;
   usePlatformAutomerge?: boolean;
+  forkModeDisallowMaintainerEdits?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;

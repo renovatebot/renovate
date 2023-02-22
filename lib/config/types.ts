@@ -234,6 +234,7 @@ export interface RenovateConfig
   postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+  forkModeDisallowMaintainerEdits?: boolean;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;

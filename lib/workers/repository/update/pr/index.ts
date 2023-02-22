@@ -52,6 +52,7 @@ export function getPlatformPrOptions(
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
     gerritAutoApprove: config.gerritAutoApprove,
     gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
