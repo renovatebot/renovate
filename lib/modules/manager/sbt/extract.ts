@@ -2,6 +2,10 @@ import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
+import {
+  GITHUB_TAGS_REPO,
+  GithubTagsDatasource,
+} from '../../datasource/github-tags';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
@@ -10,6 +14,7 @@ import {
 } from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
+import * as semverVersioning from '../../versioning/semver';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { normalizeScalaVersion } from './util';
@@ -32,9 +37,40 @@ interface Ctx {
   depType?: string;
   useScalaVersion?: boolean;
   variableName?: string;
+
+  sbtVersion?: string;
 }
 
 const scala = lang.createLang('scala');
+
+const sbtVersionMatch = q
+  .sym<Ctx>('sbt')
+  .op('.')
+  .sym('version')
+  .op('=')
+  .num((ctx, { value: sbtMajor }) => ({ ...ctx, sbtVersion: sbtMajor }))
+  .num((ctx, { value: sbtMinor }) => ({
+    ...ctx,
+    sbtVersion: (ctx.sbtVersion as string) + sbtMinor,
+  }))
+  .num((ctx, { value: sbtBugfix }) => ({
+    ...ctx,
+    sbtVersion: (ctx.sbtVersion as string) + sbtBugfix,
+  }))
+  .handler((ctx) => {
+    if (ctx.sbtVersion) {
+      const dep: PackageDependency = {
+        datasource: GithubTagsDatasource.id,
+        depName: 'sbt/sbt',
+        packageName: 'sbt/sbt',
+        versioning: semverVersioning.id,
+        currentValue: ctx.sbtVersion,
+        extractVersion: '^v(?<version>\\S+)',
+      };
+      ctx.deps.push(dep);
+    }
+    return ctx;
+  });
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
@@ -265,6 +301,9 @@ function registryUrlHandler(ctx: Ctx): Ctx {
     if (dep.depType === 'plugin') {
       dep.registryUrls.push(SBT_PLUGINS_REPO);
     }
+    if (dep.depName === 'sbt/sbt') {
+      dep.registryUrls = [GITHUB_TAGS_REPO];
+    }
   }
   return ctx;
 }
@@ -273,6 +312,7 @@ const query = q.tree<Ctx>({
   type: 'root-tree',
   maxDepth: 32,
   search: q.alt<Ctx>(
+    sbtVersionMatch,
     scalaVersionMatch,
     packageFileVersionMatch,
     sbtPackageMatch,
