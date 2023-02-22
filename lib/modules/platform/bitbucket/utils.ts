@@ -1,55 +1,19 @@
 import url from 'url';
 import type { MergeStrategy } from '../../../config/types';
-import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
-import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
+import {
+  MergeRequestBody,
+  PrResponse,
+  RepoInfo,
+  RepoInfoBody,
+  bitbucketMergeStrategies,
+  prStates,
+} from './types';
 
 const bitbucketHttp = new BitbucketHttp();
-
-export interface Config {
-  defaultBranch: string;
-  has_issues: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: Pr[];
-  repository: string;
-  username: string;
-  userUuid: string;
-  ignorePrAuthor: boolean;
-}
-
-export interface PagedResult<T = any> {
-  pagelen: number;
-  size?: number;
-  next?: string;
-  values: T[];
-}
-
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-}
-
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-}
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -61,13 +25,6 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
     uuid: repoInfoBody.uuid,
   };
 }
-
-const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
-  new Map([
-    ['squash', 'squash'],
-    ['merge-commit', 'merge_commit'],
-    ['fast-forward', 'fast_forward'],
-  ]);
 
 export function mergeBodyTransformer(
   mergeStrategy: MergeStrategy | undefined
@@ -83,20 +40,6 @@ export function mergeBodyTransformer(
 
   return body;
 }
-
-export const prStates = {
-  open: ['OPEN'],
-  notOpen: ['MERGED', 'DECLINED', 'SUPERSEDED'],
-  merged: ['MERGED'],
-  closed: ['DECLINED', 'SUPERSEDED'],
-  all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
-};
-
-export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
-  green: 'SUCCESSFUL',
-  red: 'FAILED',
-  yellow: 'INPROGRESS',
-};
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   const { search, ...parsedUrl } = url.parse(inputUrl, true);
@@ -152,30 +95,6 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export interface PrResponse {
-  id: number;
-  title: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<Account>;
-  created_on: string;
-}
-
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
@@ -188,17 +107,4 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
-}
-
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
-}
-
-export interface EffectiveReviewer {
-  type: string;
-  reviewer_type: string;
-  user: Account;
 }
