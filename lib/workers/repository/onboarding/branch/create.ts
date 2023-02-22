@@ -2,7 +2,7 @@ import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
 import { OnboardingCommitMessageFactory } from './commit-message';
 import { getOnboardingConfigContents } from './config';
 
@@ -33,7 +33,7 @@ export async function createOnboardingBranch(
     return null;
   }
 
-  return commitAndPush({
+  return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [

@@ -4,11 +4,8 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
-import {
-  deleteBranch,
-  getBranchList,
-  isBranchModified,
-} from '../../../util/git';
+import { scm } from '../../../modules/platform/scm';
+import { getBranchList } from '../../../util/git';
 
 async function cleanUpBranches(
   { pruneStaleBranches: enabled }: RenovateConfig,
@@ -24,7 +21,7 @@ async function cleanUpBranches(
         branchName,
         state: 'open',
       });
-      const branchIsModified = await isBranchModified(branchName);
+      const branchIsModified = await scm.isBranchModified(branchName);
       if (pr) {
         if (branchIsModified) {
           logger.debug(
@@ -69,7 +66,7 @@ async function cleanUpBranches(
             prTitle: newPrTitle,
             state: 'closed',
           });
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
       } else if (branchIsModified) {
         logger.debug('Orphan Branch is modified - skipping branch deletion');
@@ -77,7 +74,7 @@ async function cleanUpBranches(
         logger.info(`DRY-RUN: Would delete orphan branch ${branchName}`);
       } else {
         logger.info({ branch: branchName }, `Deleting orphan branch`);
-        await deleteBranch(branchName);
+        await scm.deleteBranch(branchName);
       }
     } catch (err) /* istanbul ignore next */ {
       if (err.message === 'config-validation') {

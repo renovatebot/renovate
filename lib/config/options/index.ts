@@ -1718,7 +1718,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     experimental: true,
-    experimentalIssues: [20427],
+    experimentalIssues: [20542],
   },
   {
     name: 'pruneBranchAfterAutomerge',
