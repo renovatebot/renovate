@@ -27,14 +27,12 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   };
 }
 
-export const bitbucketMergeStrategies: Map<
-  MergeStrategy,
-  BitbucketMergeStrategy
-> = new Map([
-  ['squash', 'squash'],
-  ['merge-commit', 'merge_commit'],
-  ['fast-forward', 'fast_forward'],
-]);
+const bitbucketMergeStrategies: Map<MergeStrategy, BitbucketMergeStrategy> =
+  new Map([
+    ['squash', 'squash'],
+    ['merge-commit', 'merge_commit'],
+    ['fast-forward', 'fast_forward'],
+  ]);
 
 export function mergeBodyTransformer(
   mergeStrategy: MergeStrategy | undefined
