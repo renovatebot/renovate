@@ -2,7 +2,7 @@ import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
-import type { PackageFile, PostUpdateConfig } from '../../types';
+import type { PackageFileContent, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 import { getNodeToolConstraint } from './node-version';
 
@@ -12,18 +12,18 @@ jest.mock('../../../datasource');
 
 process.env.BUILDPACK = 'true';
 
-function lernaPkgFile(lernaClient: string): Partial<PackageFile> {
+function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
-    lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+    managerData: { lernaClient },
   };
 }
 
 function lernaPkgFileWithoutLernaDep(
   lernaClient: string
-): Partial<PackageFile> {
+): Partial<PackageFileContent> {
   return {
-    lernaClient,
+    managerData: { lernaClient },
   };
 }
 

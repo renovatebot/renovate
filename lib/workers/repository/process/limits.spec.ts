@@ -2,13 +2,11 @@ import { DateTime } from 'luxon';
 import {
   RenovateConfig,
   getConfig,
-  git,
   platform,
+  scm,
 } from '../../../../test/util';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
-
-jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 
@@ -96,41 +94,44 @@ describe('workers/repository/process/limits', () => {
   });
 
   describe('getConcurrentBranchesRemaining()', () => {
-    it('calculates concurrent limit remaining', () => {
+    it('calculates concurrent limit remaining', async () => {
       config.branchConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
-      const res = limits.getConcurrentBranchesRemaining(config, [
+      scm.branchExists.mockResolvedValueOnce(true);
+      const res = await limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
       expect(res).toBe(19);
     });
 
-    it('defaults to prConcurrentLimit', () => {
+    it('defaults to prConcurrentLimit', async () => {
       config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
-      const res = limits.getConcurrentBranchesRemaining(config, [
+      scm.branchExists.mockResolvedValueOnce(true);
+      const res = await limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
       expect(res).toBe(19);
     });
 
-    it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
+    it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', async () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
-      const res = limits.getConcurrentBranchesRemaining(config, []);
+      const res = await limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toBe(99);
     });
 
-    it('returns 99 if no limits are set', () => {
-      const res = limits.getConcurrentBranchesRemaining(config, []);
+    it('returns 99 if no limits are set', async () => {
+      const res = await limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toBe(99);
     });
 
-    it('returns prConcurrentLimit if errored', () => {
+    it('returns prConcurrentLimit if errored', async () => {
       config.branchConcurrentLimit = 2;
       // TODO: #7154
-      const res = limits.getConcurrentBranchesRemaining(config, null as never);
+      const res = await limits.getConcurrentBranchesRemaining(
+        config,
+        null as never
+      );
       expect(res).toBe(2);
     });
   });

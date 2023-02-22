@@ -41,6 +41,7 @@ export async function confirmIfDepUpdated(
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ manager, packageFile, err }, 'Failed to parse newContent');
   }
+
   if (!newUpgrade!) {
     logger.debug(`No newUpgrade in ${packageFile!}`);
     return false;
@@ -61,6 +62,7 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
+
   if (newValue && newUpgrade.currentValue !== newValue) {
     logger.debug(
       {
@@ -73,15 +75,21 @@ export async function confirmIfDepUpdated(
     );
     return false;
   }
+
   if (!newDigest) {
     return true;
   }
   if (newUpgrade.currentDigest === newDigest) {
     return true;
   }
-  if (!currentDigest && !pinDigests) {
-    return true;
+  if (!currentDigest) {
+    if (!pinDigests) {
+      return true;
+    } else if (newDigest) {
+      return true;
+    }
   }
+
   // istanbul ignore next
   return false;
 }
@@ -147,6 +155,7 @@ export async function doAutoReplace(
     currentValue,
     newValue,
     currentDigest,
+    currentDigestShort,
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
@@ -163,7 +172,7 @@ export async function doAutoReplace(
     newName !== depName &&
     (is.undefined(upgrade.replaceString) ||
       !upgrade.replaceString?.includes(depName!));
-  const replaceString = upgrade.replaceString ?? currentValue;
+  const replaceString = upgrade.replaceString ?? currentValue ?? currentDigest;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex: number;
   if (replaceWithoutReplaceString) {
@@ -201,6 +210,11 @@ export async function doAutoReplace(
       if (currentDigest && newDigest) {
         newString = newString.replace(
           regEx(escapeRegExp(currentDigest), 'g'),
+          newDigest
+        );
+      } else if (currentDigestShort && newDigest) {
+        newString = newString.replace(
+          regEx(escapeRegExp(currentDigestShort), 'g'),
           newDigest
         );
       }

@@ -190,7 +190,8 @@ export class Vulnerabilities {
             packageName,
             depVersion,
             fixedVersion,
-            vulnerability
+            vulnerability,
+            affected
           );
           packageRules.push(rule);
         }
@@ -198,10 +199,11 @@ export class Vulnerabilities {
 
       this.sortByFixedVersion(packageRules, versioningApi);
     } catch (err) {
-      logger.debug(
+      logger.warn(
         { err },
         `Error fetching vulnerability information for ${packageName}`
       );
+      return [];
     }
 
     return packageRules;
@@ -236,9 +238,11 @@ export class Vulnerabilities {
     for (const event of events) {
       if (event.introduced === '0') {
         zeroEvent = event;
-        continue;
+      } else if (versioningApi.isVersion(Object.values(event)[0])) {
+        sortedCopy.push(event);
+      } else {
+        logger.debug({ event }, 'Skipping OSV event with invalid version');
       }
-      sortedCopy.push(event);
     }
 
     sortedCopy.sort((a, b) =>
@@ -340,9 +344,15 @@ export class Vulnerabilities {
       }
 
       for (const event of range.events) {
-        if (is.nonEmptyString(event.fixed)) {
+        if (
+          is.nonEmptyString(event.fixed) &&
+          versioningApi.isVersion(event.fixed)
+        ) {
           fixedVersions.push(event.fixed);
-        } else if (is.nonEmptyString(event.last_affected)) {
+        } else if (
+          is.nonEmptyString(event.last_affected) &&
+          versioningApi.isVersion(event.last_affected)
+        ) {
           lastAffectedVersions.push(event.last_affected);
         }
       }
@@ -398,7 +408,8 @@ export class Vulnerabilities {
     packageName: string,
     depVersion: string,
     fixedVersion: string,
-    vulnerability: Osv.Vulnerability
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
   ): PackageRule {
     return {
       matchDatasources: [dep.datasource!],
@@ -406,7 +417,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      prBodyNotes: this.generatePrBodyNotes(vulnerability),
+      prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
       },
@@ -428,7 +439,10 @@ export class Vulnerabilities {
     return ['', ''];
   }
 
-  private generatePrBodyNotes(vulnerability: Osv.Vulnerability): string[] {
+  private generatePrBodyNotes(
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
+  ): string[] {
     let aliases = [vulnerability.id].concat(vulnerability.aliases ?? []).sort();
     aliases = aliases.map((id) => {
       if (id.startsWith('CVE-')) {
@@ -448,22 +462,37 @@ export class Vulnerabilities {
     content += vulnerability.summary ? `${vulnerability.summary}\n` : '';
     content += `${aliases.join(' / ')}\n`;
     content += `\n<details>\n<summary>More information</summary>\n`;
-    content += `### Details\n${vulnerability.details ?? 'No details.'}\n`;
 
-    content += '### Severity\n';
+    const details = vulnerability.details?.replace(
+      regEx(/^#{1,4} /gm),
+      '##### '
+    );
+    content += `#### Details\n${details ?? 'No details.'}\n`;
+
+    content += '#### Severity\n';
     const cvssVector =
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score;
+      vulnerability.severity?.[0]?.score ??
+      (affected.database_specific?.cvss as string); // RUSTSEC
     if (cvssVector) {
       const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
       const score = baseScore ? `${baseScore} / 10 (${severity})` : 'Unknown';
-      content += `- Score: ${score}\n`;
-      content += `- Vector: \`${cvssVector}\`\n`;
+      content += `- CVSS Score: ${score}\n`;
+      content += `- Vector String: \`${cvssVector}\`\n`;
+    } else if (
+      vulnerability.id.startsWith('GHSA-') &&
+      vulnerability.database_specific?.severity
+    ) {
+      const severity = vulnerability.database_specific.severity as string;
+      content +=
+        severity.charAt(0).toUpperCase() +
+        severity.slice(1).toLowerCase() +
+        '\n';
     } else {
       content += 'Unknown severity.\n';
     }
 
-    content += `\n### References\n${
+    content += `\n#### References\n${
       vulnerability.references
         ?.map((ref) => {
           return `- [${ref.url}](${ref.url})`;
