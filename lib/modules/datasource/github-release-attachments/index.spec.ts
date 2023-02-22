@@ -2,12 +2,15 @@ import { getDigest, getPkgReleases } from '..';
 import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
-import { GithubReleasesDatasource } from '.';
+import { GitHubReleaseAttachmentMocker } from './test';
+import { GithubReleaseAttachmentsDatasource } from '.';
 
 jest.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
 
-describe('modules/datasource/github-releases/index', () => {
+const githubApiHost = 'https://api.github.com';
+
+describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
@@ -62,7 +65,7 @@ describe('modules/datasource/github-releases/index', () => {
       ]);
 
       const res = await getPkgReleases({
-        datasource: GithubReleasesDatasource.id,
+        datasource: GithubReleaseAttachmentsDatasource.id,
         packageName: 'some/dep',
       });
 
@@ -85,71 +88,67 @@ describe('modules/datasource/github-releases/index', () => {
   describe('getDigest', () => {
     const packageName = 'some/dep';
     const currentValue = 'v1.0.0';
-    const currentDigest = 'sha-of-v1';
-    const newValue = 'v15.0.0';
-    const newDigest = 'sha-of-v15';
+    const currentDigest = 'v1.0.0-digest';
 
-    beforeEach(() => {
-      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
-        {
-          version: 'v1.0.0',
-          gitRef: 'v1.0.0',
-          releaseTimestamp: '2021-01-01',
-          hash: 'sha-of-v1',
-        },
-        {
-          version: 'v15.0.0',
-          gitRef: 'v15.0.0',
-          releaseTimestamp: '2022-10-01',
-          hash: 'sha-of-v15',
-        },
-      ]);
+    const releaseMock = new GitHubReleaseAttachmentMocker(
+      githubApiHost,
+      packageName
+    );
+
+    it('requires currentDigest', async () => {
+      const digest = await getDigest(
+        { datasource: GithubReleaseAttachmentsDatasource.id, packageName },
+        currentValue
+      );
+      expect(digest).toBeNull();
     });
 
-    it('should be independent of the current digest', async () => {
+    it('defaults to currentDigest when currentVersion is missing', async () => {
       const digest = await getDigest(
         {
-          datasource: GithubReleasesDatasource.id,
+          datasource: GithubReleaseAttachmentsDatasource.id,
           packageName,
-          currentValue,
+          currentDigest,
         },
-        newValue
+        currentValue
       );
-      expect(digest).toBe(newDigest);
-    });
-
-    it('should be independent of the current value', async () => {
-      const digest = await getDigest(
-        { datasource: GithubReleasesDatasource.id, packageName },
-        newValue
-      );
-      expect(digest).toBe(newDigest);
+      expect(digest).toEqual(currentDigest);
     });
 
     it('returns updated digest in new release', async () => {
+      releaseMock.withDigestFileAsset(
+        currentValue,
+        `${currentDigest} asset.zip`
+      );
+      const nextValue = 'v1.0.1';
+      const nextDigest = 'updated-digest';
+      releaseMock.withDigestFileAsset(nextValue, `${nextDigest} asset.zip`);
       const digest = await getDigest(
         {
-          datasource: GithubReleasesDatasource.id,
+          datasource: GithubReleaseAttachmentsDatasource.id,
           packageName,
           currentValue,
           currentDigest,
         },
-        newValue
+        nextValue
       );
-      expect(digest).toEqual(newDigest);
+      expect(digest).toEqual(nextDigest);
     });
 
-    it('returns null if the new value/tag does not exist', async () => {
+    // This is awkward, but I found returning `null` in this case to not produce an update
+    // I'd prefer a PR with the old digest (that I can manually patch) to no PR, so I made this decision.
+    it('ignores failures verifying currentDigest', async () => {
+      releaseMock.release(currentValue);
       const digest = await getDigest(
         {
-          datasource: GithubReleasesDatasource.id,
+          datasource: GithubReleaseAttachmentsDatasource.id,
           packageName,
           currentValue,
           currentDigest,
         },
-        'unknown-tag'
+        currentValue
       );
-      expect(digest).toBeNull();
+      expect(digest).toEqual(currentDigest);
     });
   });
 });
