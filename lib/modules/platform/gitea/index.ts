@@ -407,16 +407,17 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
-    if (!internalChecksAsSuccess && ccs.worstStatus === 'success') {
-      if (
-        ccs.statuses.every((status) => status.context?.startsWith('renovate/'))
-      ) {
-        logger.debug(
-          'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
-        );
-        return 'yellow';
-      }
+    if (
+      !internalChecksAsSuccess &&
+      ccs.worstStatus === 'success' &&
+      ccs.statuses.every((status) => status.context?.startsWith('renovate/'))
+    ) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      return 'yellow';
     }
+
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 

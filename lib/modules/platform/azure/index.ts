@@ -407,19 +407,18 @@ export async function getBranchStatus(
   if (noOfPending) {
     return 'yellow';
   }
-  if (!internalChecksAsSuccess) {
-    if (
-      statuses.every(
-        (status) =>
-          status.state === GitStatusState.Succeeded &&
-          status.context?.genre === 'renovate'
-      )
-    ) {
-      logger.debug(
-        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
-      );
-      return 'yellow';
-    }
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === GitStatusState.Succeeded &&
+        status.context?.genre === 'renovate'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
+    return 'yellow';
   }
   return 'green';
 }
