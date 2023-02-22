@@ -48,7 +48,8 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          const registryUrl = cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
+          const registryUrl =
+            cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
 
           if (registryUrl) {
             registryUrls = [registryUrl];
