@@ -314,7 +314,6 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     }
     return getPr(pr._number);
   } else {
-    // TODO: Problem: what happened?
     throw new Error(
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`
     );
@@ -358,7 +357,7 @@ async function checkForExistingMessage(
   newMessage: string,
   msgType: string | null
 ): Promise<boolean> {
-  const newMsg = newMessage.trim(); //TODO HACK: the last \n was removed from gerrit after the comment was added?!?
+  const newMsg = newMessage.trim(); //the last \n was removed from gerrit after the comment was added...
   const messages = await client.getMessages(changeId);
   return (
     messages.find(
@@ -369,8 +368,6 @@ async function checkForExistingMessage(
   );
 }
 
-//TODO: we should only give +2 if "automerge was enabled and the code-review label is available"
-// AND renovate was the uploader of this revision!!!
 async function approveChange(changeId: number): Promise<void> {
   const isApproved = await checkForCodeReviewLabel(changeId, 'approved');
   if (!isApproved) {
@@ -458,19 +455,17 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string | null | undefined
 ): Promise<BranchStatus | null> {
-  if (context) {
-    const { labelName } = mapBranchStateContextToLabel(context);
-    if (labelName) {
-      const change = (await findOwnPr({ branchName, state: 'open' })).pop();
-      if (change) {
-        const labelRes = labelName && change.labels && change.labels[labelName];
-        if (labelRes) {
-          if (labelRes.approved) {
-            return 'green';
-          }
-          if (labelRes.rejected) {
-            return 'red';
-          }
+  const { labelName } = mapBranchStateContextToLabel(context);
+  if (labelName) {
+    const change = (await findOwnPr({ branchName, state: 'open' })).pop();
+    if (change) {
+      const labelRes = change.labels?.[labelName];
+      if (labelRes) {
+        if (labelRes.approved) {
+          return 'green';
+        }
+        if (labelRes.rejected) {
+          return 'red';
         }
       }
     }
