@@ -245,7 +245,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'foo',
+              key: 'renovate/stability-days',
               state: 'SUCCESSFUL',
             },
           ],
