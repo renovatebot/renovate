@@ -1,4 +1,4 @@
-import type { Range, SemVer } from 'semver';
+import type { SemVer } from 'semver';
 import type { RangeStrategy } from '../../types';
 
 export interface NewValueConfig {
@@ -30,7 +30,7 @@ export interface VersioningApi {
   getNewValue(newValueConfig: NewValueConfig): string | null;
   sortVersions(version: string, other: string): number;
 
-  matches(version: string, range: string | Range): boolean;
+  matches(version: string, range: string): boolean;
 
   valueToVersion?(version: string): string;
 }
