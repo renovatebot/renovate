@@ -879,13 +879,6 @@ export async function getBranchStatus(
         conclusion: run.conclusion,
       }));
       logger.debug({ checkRuns }, 'check runs result');
-      if (!internalChecksAsSuccess) {
-        checkRuns = checkRuns.filter(
-          (checkRun) =>
-            checkRun.conclusion !== 'success' ||
-            !checkRun.name?.startsWith('renovate/')
-        );
-      }
     } else {
       // istanbul ignore next
       logger.debug({ result: checkRunsRaw }, 'No check runs found');
