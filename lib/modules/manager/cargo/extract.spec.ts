@@ -124,8 +124,40 @@ describe('modules/manager/cargo/extract', () => {
       const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
       });
-      expect(res?.deps).toMatchSnapshot();
-      expect(res?.deps).toHaveLength(3);
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: ['https://github.com/mcorbin/testregistry'],
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+        },
+      ]);
     });
 
     it('extracts workspace dependencies', async () => {
