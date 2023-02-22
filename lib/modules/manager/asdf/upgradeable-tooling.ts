@@ -353,6 +353,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  terragrunt: {
+    asdfPluginUrl: 'https://github.com/ohmer/asdf-terragrunt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'gruntwork-io/terragrunt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   trivy: {
     asdfPluginUrl: 'https://github.com/zufardhiyaulhaq/asdf-trivy',
     config: {

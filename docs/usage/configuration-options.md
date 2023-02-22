@@ -244,9 +244,28 @@ Renovate also allows users to explicitly configure `baseBranches`, e.g. for use 
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranches": ["main", "/^release\\/.*/"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
+
+`baseBranches` supports Regular Expressions that must begin and end with `/`, e.g.:
+
+```json
+{
+  "baseBranches": ["main", "/^release\\/.*/"]
+}
+```
+
+You can negate the regex by prefixing it with `!`.
+Only use a single negation and do not mix it with other branch names, since all branches are combined with `or`.
+With a negation, all branches except those matching the regex will be added to the result:
+
+```json
+{
+  "baseBranches": ["!/^pre-release\\/.*/"]
+}
+```
 
 <!-- prettier-ignore -->
 !!! note
@@ -2146,6 +2165,8 @@ This behavior is no longer guaranteed when you enable `platformAutomerge` becaus
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 Please check platform specific docs for version requirements.
+
+To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Concepts, Automerge, GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
 
 ## platformCommit
 

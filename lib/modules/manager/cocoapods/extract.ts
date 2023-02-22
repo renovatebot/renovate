@@ -5,7 +5,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { PodDatasource } from '../../datasource/pod';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
@@ -83,7 +83,7 @@ export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace('cocoapods.extractPackageFile()');
   const deps: PackageDependency[] = [];
   const lines: string[] = content.split(newlineRegex);
@@ -145,7 +145,7 @@ export async function extractPackageFile(
       deps.push(dep);
     }
   }
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   const lockFile = getSiblingFileName(fileName, 'Podfile.lock');
   // istanbul ignore if
   if (await localPathExists(lockFile)) {

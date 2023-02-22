@@ -82,6 +82,7 @@ scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
 terraform 1.3.3
+terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
 dummy 1.2.3
@@ -348,6 +349,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
             depName: 'terraform',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.43.2',
+            datasource: 'github-releases',
+            packageName: 'gruntwork-io/terragrunt',
+            depName: 'terragrunt',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

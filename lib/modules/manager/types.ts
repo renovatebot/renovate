@@ -47,12 +47,14 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string | null;
+  manager?: string;
   rangeStrategy: RangeStrategy;
 }
 
-export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
+export interface PackageFileContent<T = Record<string, any>>
+  extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
+  constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -60,11 +62,15 @@ export interface PackageFile<T = Record<string, any>> extends ManagerData<T> {
   deps: PackageDependency[];
   lockFiles?: string[];
   npmrc?: string;
-  packageFile?: string | null;
   packageFileVersion?: string;
   skipInstalls?: boolean;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
+}
+
+export interface PackageFile<T = Record<string, any>>
+  extends PackageFileContent<T> {
+  packageFile: string;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -245,7 +251,7 @@ export interface ManagerApi extends ModuleApi {
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile | null>;
+  ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 

@@ -252,8 +252,8 @@ interface MavenInterimPackageFile extends PackageFile {
 
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
-): PackageFile<Record<string, any>> | null {
+  packageFile: string
+): PackageFile | null {
   if (!rawContent) {
     return null;
   }
@@ -376,7 +376,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -454,9 +454,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: MavenInterimPackageFile[]
-): PackageFile<Record<string, any>>[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
     delete packageFile.parent;

@@ -13,6 +13,7 @@ import type {
   ExtractConfig,
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../../types';
 import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
@@ -43,7 +44,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile<NpmManagerData> | null> {
+): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
@@ -520,8 +521,8 @@ export async function extractAllPackageFiles(
       const deps = await extractPackageFile(content, packageFile, config);
       if (deps) {
         npmFiles.push({
-          packageFile,
           ...deps,
+          packageFile,
         });
       }
     } else {

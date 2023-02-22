@@ -3,7 +3,7 @@ import type { RegexManagerTemplates } from '../../../config/types';
 import type {
   ExtractConfig,
   PackageDependency,
-  PackageFile,
+  PackageFileContent,
   Result,
 } from '../types';
 import { handleAny, handleCombination, handleRecursive } from './strategies';
@@ -19,7 +19,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
-): Result<PackageFile | null> {
+): Result<PackageFileContent | null> {
   let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:
@@ -45,7 +45,7 @@ export function extractPackageFile(
   // filter all null values
   deps = deps.filter(is.truthy);
   if (deps.length) {
-    const res: PackageFile & RegexManagerTemplates = {
+    const res: PackageFileContent & RegexManagerTemplates = {
       deps,
       matchStrings: config.matchStrings,
     };
