@@ -20,7 +20,8 @@
     "types": ["node", "jest-extended", "expect-more-jest"],
     "allowJs": true,
     "checkJs": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "skipLibCheck": true
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
