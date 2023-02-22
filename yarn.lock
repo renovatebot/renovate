@@ -9244,10 +9244,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@3.16.0:
-  version "3.16.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.16.0.tgz#421773e24680f5716999cc4a1d60127b4b6a9dec"
-  integrity sha512-zuWYsOLEhbJRWVxpjdiXl6eyAyGo/KzVW+KFhhw9MqEEJttcq+32jTWSGyxTdf9e/YCohxRE+9xpWFj9FdiJNw==
+simple-git@3.16.1:
+  version "3.16.1"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-3.16.1.tgz#b67f18cbd3c68bbc4b9177ed49256afe51f12d47"
+  integrity sha512-xzRxMKiy1zEYeHGXgAzvuXffDS0xgsq07Oi4LWEEcVH29vLpcZ2tyQRWyK0NLLlCVaKysZeem5tC1qHEOxsKwA==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
