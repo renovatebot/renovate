@@ -50,8 +50,7 @@ export function getPlatformPrOptions(
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
-    githubForkModeDisallowMaintainerEdits:
-      config.forkModeDisallowMaintainerEdits,
+    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }

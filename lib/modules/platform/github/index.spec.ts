@@ -2218,7 +2218,7 @@ describe('modules/platform/github/index', () => {
           prBody: 'PR can be edited by maintainers.',
           labels: null,
           platformOptions: {
-            githubForkModeDisallowMaintainerEdits: false,
+            forkModeDisallowMaintainerEdits: false,
           },
         });
         expect(pr).toMatchObject({ number: 123 });
@@ -2263,7 +2263,7 @@ describe('modules/platform/github/index', () => {
           prBody: 'PR *cannot* be edited by maintainers.',
           labels: null,
           platformOptions: {
-            githubForkModeDisallowMaintainerEdits: true,
+            forkModeDisallowMaintainerEdits: true,
           },
         });
         expect(pr).toMatchObject({ number: 123 });

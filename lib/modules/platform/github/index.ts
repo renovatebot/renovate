@@ -1500,7 +1500,7 @@ export async function createPr({
   if (config.forkToken) {
     options.token = config.forkToken;
     options.body.maintainer_can_modify =
-      platformOptions?.githubForkModeDisallowMaintainerEdits !== true;
+      platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (
