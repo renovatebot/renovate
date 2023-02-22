@@ -9,8 +9,13 @@ export interface GerritProjectInfo {
   description?: string;
   state?: 'ACTIVE' | 'READ_ONLY' | 'HIDDEN';
   branches?: { [key: string]: string }; //TODO: always empty???
-  labels?: { [key: string]: GerritLabelInfo };
+  labels?: { [key: string]: GerritLabelTypeInfo };
   web_links?: any;
+}
+
+export interface GerritLabelTypeInfo {
+  values: { [val: number]: string };
+  default_value: number;
 }
 
 export interface GerritBranchInfo {
@@ -25,6 +30,8 @@ export interface GerritFindPRConfig extends FindPRConfig {
 }
 
 export type GerritChangeStatus = 'NEW' | 'MERGED' | 'ABANDONED';
+
+export type GerritReviewersType = 'REVIEWER' | 'CC' | 'REMOVED';
 
 export interface GerritChange {
   id: string;
@@ -61,14 +68,14 @@ export interface GerritChange {
   unresolved_comment_count?: number;
   _number: number;
   owner: GerritAccountInfo;
-  actions?: GerritActionInfo[];
+  actions?: { [key: string]: GerritActionInfo };
   submit_records: any[]; // SubmitRecordInfo[]
   requirements?: any[]; //List of the requirements
   submit_requirements?: any[]; //List of the SubmitRequirementResultInfo
   labels?: { [key: string]: GerritLabelInfo };
   permitted_labels?: any[];
   removable_reviewers?: any[];
-  reviewers?: { [key: string]: GerritAccountInfo[] }; //key = ReviewerState
+  reviewers?: { [key in GerritReviewersType]: GerritAccountInfo[] }; //key = ReviewerState
   pending_reviewers?: any;
   reviewer_updates?: any;
   messages?: GerritChangeMessageInfo[];
@@ -95,6 +102,7 @@ export interface GerritRevisionInfo {
   created: Date; //TODO: map
   uploader: GerritAccountInfo;
   ref: string; //The Git reference for the patch set.
+  actions?: { [key: string]: GerritActionInfo };
   //... many more...still not necessary
 }
 
@@ -150,4 +158,9 @@ export interface GerritAttentionSetInfo {
   last_update: Date;
   reason: string;
   reason_account: GerritAccountInfo;
+}
+
+export interface GerritMergeableInfo {
+  submit_type: string; //MERGE_IF_NECESSARY, FAST_FORWARD_ONLY, REBASE_IF_NECESSARY, REBASE_ALWAYS, MERGE_ALWAYS or CHERRY_PICK
+  mergeable: boolean;
 }

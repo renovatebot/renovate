@@ -21,44 +21,33 @@ In this case the bot will automatically add the _Code-Review_ label with the val
 
 _Important: The login should be allowed to give +2 for the Code-Review label._
 
-**Also, you must use the following two settings. It will not work without these settings.**
+The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used.
+It works similar to the default option `"pr"`.
 
-```json5
+## optional Features
+
+The [StabilityDays](https://docs.renovatebot.com/configuration-options/#stabilitydays) feature can be used.
+It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and the permission to set the min/max value.
+
+There is no special Submit-Rule necessary to block submits for renovate usage, (i.e. can be _Trigger Votes_ only)
+because Renovate will query the label and prevent `automerge` accordingly.
+
+The same applies to the (upcoming beta?) feature [Merge-Confidence](https://docs.renovatebot.com/merge-confidence/).
+
+The Gerrit-Label names can be configured in your Renovate config file:
+
+```json
 {
-  platformCommit: true, //allow to reuse the Change-Id
-  gitNoVerify: ['push'], //allow-commit-hook to generate a Change-Id
+  "gerritLabelMapping": {
+    "stabilityDaysLabel": "Renovate-StabilityDays",
+    "mergeConfidenceLabel": "Renovate-Merge-Confidence"
+  }
 }
 ```
 
-**Current Workarounds/Changes to git-based-commands:**
-
-They should be moved behind the Platform interface (optionally) to avoid such workarounds.
-Perhaps it should be possible in the future to integrate a platform which is not based on Git.
-
-- registerBranch()
-  A new method which allows to register virtual branches (not really exists) including commitSHA and whether they have been "modified" from another user. (see isBranchModified below)
-
-- isBranchModified()
-  Checks if the last uploader was different to the Renovate user and store this into "branchIsModified[branchname]". For Gerrit we rely on the above pre-registration in `initRepo()`.
-
-- isBranchConflicted()
-  This one tries to merge "origin/${branchName}" into baseBranch and check for conflicts. From `initRepo()` we fetch all open gerrit-changes to the local branch-name "origin/${branchName}" to let this work as expected.
-
-- isBranchBehindBase()
-  The implementation now checks all branches (not remote only) but includes the `origin/` prefix in the match. This way the fake-branches checked out from `initRepo()` return the correct answer, and it should work for the other platforms too (because `remotes/origin/$branchname`).
-
-- deleteBranch()
-  Because Gerrit doesn't use branches the `deleteBranch()` function always fails.
-
 ## TODOS
 
-- better comment/msg "Markdown" support, Gerrit 3.7 brings better support, but still no &lt;image&gt; or &lt;details&gt; support
 - Images in Markdown-Comments, needs [Gerrit-Feature](https://bugs.chromium.org/p/gerrit/issues/detail?id=2015)
-
-## Features awaiting implementation
-
-- setStability/setConfidence needs platform.setBranchStatus(...), what should we do with this information? Where to store it? As a gerrit-comment/message with special TAG?
-- optimize/restructure gerrit-http calls (findPr returns more details then getPr...)
 
 ## Unsupported platform features/concepts
 

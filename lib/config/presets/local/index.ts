@@ -21,6 +21,7 @@ const resolvers = {
   bitbucket: local,
   'bitbucket-server': local,
   codecommit: null,
+  gerrit: local,
   gitea,
   github,
   gitlab,

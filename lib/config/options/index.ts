@@ -2519,7 +2519,7 @@ const options: RenovateOptions[] = [
     description: `Use platform API to perform commits instead of using Git directly.`,
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['github', 'gerrit'],
+    supportedPlatforms: ['github'],
   },
   {
     name: 'gerritAutoApprove',

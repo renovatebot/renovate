@@ -1,11 +1,15 @@
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { PrState } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
 import { parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
-import type { GerritChange, GerritChangeStatus } from './types';
+import type {
+  GerritChange,
+  GerritChangeStatus,
+  GerritLabelTypeInfo,
+} from './types';
 import { TAG_PULL_REQUEST_BODY } from './types';
 
 export function getGerritRepoUrl(repository: string, endpoint: string): string {
@@ -53,7 +57,8 @@ export function mapGerritChangeToPr(change: GerritChange): Pr {
     sourceBranch: extractSourceBranch(change) ?? change.branch,
     targetBranch: change.branch,
     title: change.subject,
-    hasReviewers: change.reviewers !== undefined,
+    reviewers:
+      change.reviewers?.REVIEWER?.map((reviewer) => reviewer.username!) ?? [],
     bodyStruct: {
       hash: hashBody(findPullRequestBody(change)),
     },
@@ -90,4 +95,20 @@ export function findPullRequestBody(change: GerritChange): string | undefined {
     return msg.message.replace(/^Patch Set \d+:\n\n/, ''); //TODO: check how to get rid of the auto-added prefix?
   }
   return undefined;
+}
+
+export function mapBranchStatusToLabel(
+  state: BranchStatus,
+  label: GerritLabelTypeInfo
+): number {
+  const numbers = Object.keys(label.values).map((x) => parseInt(x));
+  switch (state) {
+    case 'green':
+      return Math.max(...numbers);
+    case 'yellow':
+    case 'red':
+      return Math.min(...numbers);
+  }
+  // istanbul ignore next
+  return label.default_value;
 }

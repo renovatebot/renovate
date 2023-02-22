@@ -896,8 +896,9 @@ If `next` is no longer getting updates, you must switch your `followTag` to `sta
 
 ## gerritAutoApprove
 
-If set to `true`, Renovate automatically approves its own changes.
-This means Renovate assigns the Code-Review label = +2.
+If set to `true`, Renovate automatically approves its own changes. This means Renovate assigns the Code-Review label = +2.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
 ## gitAuthor
 

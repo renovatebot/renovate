@@ -1,10 +1,12 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { mocked } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
+import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
-import type { GerritChangeStatus } from './types';
+import type { GerritChangeStatus, GerritLabelTypeInfo } from './types';
 import * as utils from './utils';
+import { mapBranchStatusToLabel } from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -109,5 +111,49 @@ describe('modules/platform/gerrit/utils', () => {
       change.messages = [{ tag: 'other-tag', message: 'message' }];
       expect(utils.findPullRequestBody(change)).toBeUndefined();
     });
+  });
+
+  describe('mapBranchStatusToLabel()', () => {
+    const labelWithOne: GerritLabelTypeInfo = {
+      values: { '-1': 'rejected', '0': 'default', '1': 'accepted' },
+      default_value: 0,
+    };
+
+    it.each([
+      ['red' as BranchStatus, -1],
+      ['yellow' as BranchStatus, -1],
+      ['green' as BranchStatus, 1],
+    ])(
+      'Label with +1/-1 map branchState=%p to %p',
+      (branchState, expectedValue) => {
+        expect(mapBranchStatusToLabel(branchState, labelWithOne)).toEqual(
+          expectedValue
+        );
+      }
+    );
+
+    const labelWithTwo: GerritLabelTypeInfo = {
+      values: {
+        '-2': 'rejected',
+        '-1': 'disliked',
+        '0': 'default',
+        '1': 'looksOkay',
+        '2': 'approved',
+      },
+      default_value: 0,
+    };
+
+    it.each([
+      ['red' as BranchStatus, -2],
+      ['yellow' as BranchStatus, -2],
+      ['green' as BranchStatus, 2],
+    ])(
+      'Label with +2/-2, map branchState=%p to %p',
+      (branchState, expectedValue) => {
+        expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
+          expectedValue
+        );
+      }
+    );
   });
 });

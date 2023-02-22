@@ -19,6 +19,7 @@ export class GlobalConfig {
     'dryRun',
     'exposeAllEnv',
     'executionTimeout',
+    'gerritLabelMapping',
     'githubTokenWarn',
     'localDir',
     'migratePresets',

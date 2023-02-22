@@ -7,8 +7,10 @@ exports[`modules/platform/gerrit/utils mapGerritChangeToPr() map a gerrit change
   "bodyStruct": {
     "hash": "9d603793b5b479240657b64157a4024cf1d7bf1adafe803df2bae0cb953e9684",
   },
-  "hasReviewers": true,
   "number": 123456,
+  "reviewers": [
+    "username",
+  ],
   "sourceBranch": "renovate/dependency-1.x",
   "state": "open",
   "targetBranch": "main",
@@ -21,8 +23,10 @@ exports[`modules/platform/gerrit/utils mapGerritChangeToPr() map a gerrit change
   "bodyStruct": {
     "hash": "9d603793b5b479240657b64157a4024cf1d7bf1adafe803df2bae0cb953e9684",
   },
-  "hasReviewers": true,
   "number": 123456,
+  "reviewers": [
+    "username",
+  ],
   "sourceBranch": "main",
   "state": "open",
   "targetBranch": "main",
