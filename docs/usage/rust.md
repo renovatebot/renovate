@@ -11,7 +11,7 @@ Renovate supports upgrading dependencies in `Cargo.toml` files and their accompa
 
 1. Renovate searches in each repository for any `Cargo.toml` files
 1. Renovate extracts existing dependencies from `[dependencies]`, `[dev-dependencies]`, `[build-dependencies]` and `[workspace.dependencies]`
-1. Renovate looks up Cargo configuration to discover index URLs for private registries.
+1. Renovate looks up Cargo configuration to find index URLs for private registries
 1. Renovate resolves the dependency's version using the crates.io API or by cloning the index URL
 1. If Renovate finds an update, Renovate will use `cargo update` to update both `Cargo.toml` and `Cargo.lock`
 
@@ -21,8 +21,12 @@ Renovate updates Rust crates by default.
 
 ## Cargo configuration and private registry discovery
 
-Renovate can determine private registry URLs from a `.cargo/config.toml` (or the legacy `.cargo/config`) Cargo configuration file.
-Renovate can also detect private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` [environment variable](https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables).
+Renovate can find private registry URLs in these Cargo configuration files:
+
+- `.cargo/config.toml`
+- `.cargo/config` (legacy)
+Renovate can also find private registry URLs via a `CARGO_REGISTRIES_<name>_INDEX` environment variable.
+Read the [Rust environment variables docs](https://doc.rust-lang.org/cargo/reference/environment-variables.html#configuration-environment-variables) to learn more.
 
 ## Private crate registries and private Git dependencies
 
