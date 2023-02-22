@@ -116,7 +116,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 }
 ```
 
-You can negate the regex by putting a `!` in front.
+You can negate the regex by putting an `!` in front.
 Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
@@ -161,7 +161,9 @@ Supported tools for dynamic install are:
 - `composer`
 - `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
+- `helm`
 - `jb`
 - `jsonnet-bundler`
 - `lerna`
@@ -174,6 +176,7 @@ Supported tools for dynamic install are:
 - `pnpm`
 - `poetry`
 - `python`
+- `rust`
 - `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
@@ -196,6 +199,17 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## cacheHardTtlMinutes
+
+This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
+It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+
+When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
+Results which are soft expired are reused in the following manner:
+
+- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
 ## containerbaseDir
 
@@ -360,8 +374,15 @@ If this option is not set, Renovate will fallback to 15 minutes.
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
-Confidential data can be leaked if a malicious script enumerates all environment variables.
+If you must expose all environment variables to package managers, you can set this option to `true`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Always consider the security implications of using `exposeAllEnv`!
+    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -509,7 +530,20 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingRebaseCheckbox
+
 ## optimizeForDisabled
+
+When this option is `true`, Renovate will do the following during repository initialization:
+
+- Attempt to fetch the default config file (`renovate.json`)
+- Check if the file contains `"enabled": false`
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+This option is only useful where the ratio of disabled repos is quite high.
+It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
 
 ## password
 
@@ -630,7 +664,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example url: `redis://localhost`.
+Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
@@ -761,7 +795,11 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+By default, Renovate processes each repository that it finds.
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
+
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

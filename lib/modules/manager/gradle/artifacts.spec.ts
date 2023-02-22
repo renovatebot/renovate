@@ -36,12 +36,11 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -68,7 +67,7 @@ describe('modules/manager/gradle/artifacts', () => {
       'gradle.lockfile',
       'gradle/wrapper/gradle-wrapper.properties',
     ]);
-    fs.getFileContentMap.mockResolvedValue({
+    git.getFiles.mockResolvedValue({
       'gradle.lockfile': 'Current gradle.lockfile',
     });
     git.getRepoStatus.mockResolvedValue(

@@ -6,7 +6,7 @@ import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
-import type { DatasourceApi, GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BaseGoDatasource } from './base';
 import { getSourceUrl } from './common';
 
@@ -15,8 +15,8 @@ export class GoDirectDatasource extends Datasource {
 
   git: GitTagsDatasource;
   github: GithubTagsDatasource;
-  gitlab: DatasourceApi;
-  bitbucket: DatasourceApi;
+  gitlab: GitlabTagsDatasource;
+  bitbucket: BitBucketTagsDatasource;
 
   constructor() {
     super(GoDirectDatasource.id);

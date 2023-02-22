@@ -29,14 +29,15 @@ Multi-platform and multi-language.
 
 ## Supported Platforms
 
-Renovate works on the following platforms:
+Renovate works on these platforms:
 
-- GitHub (.com and Enterprise Server)
-- GitLab (.com and CE/EE)
-- Bitbucket Cloud
-- Bitbucket Server
-- Azure DevOps
-- Gitea
+- [GitHub (.com and Enterprise Server)](https://docs.renovatebot.com/modules/platform/github/)
+- [GitLab (.com and CE/EE)](https://docs.renovatebot.com/modules/platform/gitlab/)
+- [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
+- [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
+- [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
+- [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
+- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 
 ## Who Uses Renovate?
 
@@ -92,9 +93,9 @@ From there you can create a pipeline with the `RenovateMe` task.
 You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
-### Bitbucket Cloud/Server, Gitea, GitLab
+### Bitbucket Cloud/Server, Forgejo, Gitea, GitLab
 
-For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
+For Bitbucket Cloud, Bitbucket Server, Forgejo, Gitea and GitLab, use our self-hosting option.
 
 ## Configuration
 
@@ -115,7 +116,7 @@ To run your own instance of Renovate you have several options:
 
 ## Contributing
 
-If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+If you want to contribute to Renovate or get a local copy running, please read the instructions in [contributing guidelines](.github/contributing.md).
 To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure

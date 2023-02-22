@@ -1,7 +1,7 @@
 // TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, logger, partial } from '../../../../../test/util';
+import { fs, git, logger, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
@@ -35,24 +35,28 @@ describe('modules/manager/npm/post-update/index', () => {
         packageFile: 'packages/core/package.json',
         managerData: {
           lernaJsonFile: 'lerna.json',
+          npmLock: 'package-lock.json',
         },
-        npmLock: 'package-lock.json',
         npmrc: '#dummy',
       },
       {
         packageFile: 'packages/cli/package.json',
         managerData: {
           lernaJsonFile: 'lerna.json',
+          yarnLock: 'yarn.lock',
         },
-        yarnLock: 'yarn.lock',
       },
       {
         packageFile: 'packages/test/package.json',
-        yarnLock: 'yarn.lock',
+        managerData: {
+          yarnLock: 'yarn.lock',
+        },
       },
       {
         packageFile: 'packages/pnpm/package.json',
-        pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+        managerData: {
+          pnpmShrinkwrap: 'packages/pnpm/pnpm-lock.yaml',
+        },
       },
     ],
   };
@@ -74,8 +78,8 @@ describe('modules/manager/npm/post-update/index', () => {
           isRemediation: true,
           managerData: {
             lernaJsonFile: 'lerna.json',
+            npmLock: 'package-lock.json',
           },
-          npmLock: 'package-lock.json',
           rangeStrategy: 'widen',
         },
         {
@@ -83,17 +87,21 @@ describe('modules/manager/npm/post-update/index', () => {
           isRemediation: true,
           managerData: {
             lernaJsonFile: 'lerna.json',
+            npmLock: 'randomFolder/package-lock.json',
           },
-          npmLock: 'randomFolder/package-lock.json',
           lockFiles: ['randomFolder/package-lock.json'],
           rangeStrategy: 'pin',
         },
         {
           isLockfileUpdate: true,
-          npmLock: 'package-lock.json',
+          managerData: {
+            npmLock: 'package-lock.json',
+          },
         },
         {
-          yarnLock: 'yarn.lock',
+          managerData: {
+            yarnLock: 'yarn.lock',
+          },
           isLockfileUpdate: true,
         },
       ],
@@ -173,7 +181,9 @@ describe('modules/manager/npm/post-update/index', () => {
             upgrades: [
               {
                 isLockfileUpdate: true,
-                yarnLock: 'yarn.lock',
+                managerData: {
+                  yarnLock: 'yarn.lock',
+                },
               },
             ],
           },
@@ -217,6 +227,51 @@ describe('modules/manager/npm/post-update/index', () => {
         ['yarn.lock'],
         ['packages/pnpm/pnpm-lock.yaml'],
       ]);
+    });
+
+    it('writes .npmrc files', async () => {
+      await writeExistingFiles(updateConfig, {
+        npm: [
+          // This package's npmrc should be written verbatim.
+          {
+            packageFile: 'packages/core/package.json',
+            npmrc: '#dummy',
+            managerData: {},
+          },
+          // No npmrc content should be written for this package.
+          { packageFile: 'packages/core/package.json', managerData: {} },
+        ],
+      });
+
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
+      );
+    });
+
+    it('only sources npmrc content from package config', async () => {
+      await writeExistingFiles(
+        { ...updateConfig, npmrc: '#foobar' },
+        {
+          npm: [
+            // This package's npmrc should be written verbatim.
+            {
+              packageFile: 'packages/core/package.json',
+              npmrc: '#dummy',
+              managerData: {},
+            },
+            // No npmrc content should be written for this package.
+            { packageFile: 'packages/core/package.json', managerData: {} },
+          ],
+        }
+      );
+
+      expect(fs.writeLocalFile).toHaveBeenCalledOnce();
+      expect(fs.writeLocalFile).toHaveBeenCalledWith(
+        'packages/core/.npmrc',
+        '#dummy\n'
+      );
     });
 
     it('works only on relevant folders', async () => {
@@ -517,10 +572,10 @@ describe('modules/manager/npm/post-update/index', () => {
               {
                 packageFile: 'package.json',
                 managerData: {
+                  lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
+                  npmLock: 'package-lock.json',
                 },
-                npmLock: 'package-lock.json',
-                lernaClient: 'npm',
               },
             ],
           }
@@ -573,7 +628,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('lockfile maintenance branch exists', async () => {
       // TODO: can this really happen?
-      git.branchExists.mockReturnValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
       expect(
         await getAdditionalFiles(
           {
@@ -667,7 +722,9 @@ describe('modules/manager/npm/post-update/index', () => {
         await getAdditionalFiles(
           {
             ...updateConfig,
-            npmLock: 'npm-shrinkwrap.json',
+            managerData: {
+              npmLock: 'npm-shrinkwrap.json',
+            },
             updateLockFiles: true,
             upgrades: [{}],
           },
@@ -676,10 +733,10 @@ describe('modules/manager/npm/post-update/index', () => {
               {
                 packageFile: 'package.json',
                 managerData: {
+                  lernaClient: 'npm',
                   lernaJsonFile: 'lerna.json',
+                  npmLock: 'npm-shrinkwrap.json',
                 },
-                npmLock: 'npm-shrinkwrap.json',
-                lernaClient: 'npm',
               },
             ],
           }

@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../test/util';
 import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
@@ -265,6 +266,76 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeDefined();
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('Grouped pin & pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('Grouped pin can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'3.2.0'",
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('grouped pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'abcd',
+          newValue: 'v3',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'dcba',
+          newMajor: 2,
+          newValue: 'v2',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeTrue();
     });
 
@@ -1162,6 +1233,86 @@ describe('workers/repository/updates/generate', () => {
       expect(res.commitMessage).toBe(
         'PATCH: Update dependency some-dep to 1.2.0'
       );
+    });
+
+    it('dedupes duplicate table rows', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.0',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: 'docker',
+          depName: 'some-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.0',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.1',
+          newVersion: '5.1.2',
+        },
+        {
+          commitBodyTable: true,
+          manager: 'some-manager',
+          datasource: NpmDatasource.id,
+          depName: 'another-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          currentVersion: '5.1.1',
+          newVersion: '5.1.2',
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.commitMessage?.trim()).toBe(codeBlock`
+        | datasource | package     | from  | to    |
+        | ---------- | ----------- | ----- | ----- |
+        | npm        | another-dep | 5.1.1 | 5.1.2 |
+        | npm        | some-dep    | 5.1.0 | 5.1.2 |
+        | docker     | some-dep    | 5.1.0 | 5.1.2 |
+      `);
+      expect([
+        ...(res.commitMessage?.matchAll(/another-dep/g) ?? []),
+      ]).toBeArrayOfSize(1);
+      expect([
+        ...(res.commitMessage?.matchAll(/some-dep/g) ?? []),
+      ]).toBeArrayOfSize(2);
+    });
+
+    it('using commitMessagePrefix without separator', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          branchName: 'some-branch',
+          commitMessagePrefix: '🆙',
+          depName: 'some-dep',
+          manager: 'some-manager',
+          newValue: '1.2.0',
+          commitMessageAction: 'Update',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.prTitle).toBe('🆙 Update dependency some-dep to 1.2.0');
+      expect(res.commitMessage).toBe('🆙 Update dependency some-dep to 1.2.0');
     });
   });
 });

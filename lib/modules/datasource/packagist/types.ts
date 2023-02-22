@@ -32,5 +32,5 @@ export interface AllPackages {
   providersLazyUrl?: string;
   providerPackages: Record<string, string>;
 
-  includesPackages: Record<string, ReleaseResult>;
+  includesPackages: Record<string, ReleaseResult | null>;
 }

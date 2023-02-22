@@ -40,6 +40,10 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
 See <https://github.com/renovatebot/renovate/issues/8660> for background on why this was created.
 
+## RENOVATE_X_IGNORE_NODE_WARN
+
+Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
@@ -63,11 +67,15 @@ Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://doc
 
 If set, Renovate will terminate the whole process group of a terminated child process spawned by Renovate.
 
+## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
+
+If set, Renovate will try to match against `packageName` after trying `depName` When using `matchPackageNames` & `matchPackagePatterns` matchers.
+
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The sort method for autodiscover server side repository search.
 
@@ -85,7 +93,7 @@ Default value: `alpha`.
 
 <!-- prettier-ignore -->
 !!! note
-    For the Gitea platform only.
+    For the Forgejo and Gitea platform only.
 
 The order method for autodiscover server side repository search.
 
@@ -95,6 +103,14 @@ Allowed values:
 - `desc`
 
 Default value: `asc`.
+
+## `RENOVATE_X_REBASE_PAGINATION_LINKS`
+
+If set, Renovate will rewrite GitHub Enterprise Server's pagination responses to use the `endpoint` URL from the Renovate config.
+
+<!-- prettier-ignore -->
+!!! note
+    For the GitHub Enterprise Server platform only.
 
 ## `OTEL_EXPORTER_OTLP_ENDPOINT`
 

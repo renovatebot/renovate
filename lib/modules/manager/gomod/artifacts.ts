@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
+import type { PlatformId } from '../../../constants';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
@@ -61,11 +62,11 @@ function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
     'gitea',
     'github',
     'gitlab',
-  ]);
+  ] satisfies PlatformId[]);
 
   // for each hostRule without hostType we add additional authentication variables to the environmentVariables
   for (const hostRule of hostRules) {
-    if (!hostRule.hostType) {
+    if (hostRule.hostType === 'go' || !hostRule.hostType) {
       environmentVariables = addAuthFromHostRule(
         hostRule,
         environmentVariables
@@ -259,11 +260,13 @@ export async function updateArtifacts({
         CGO_ENABLED: GlobalConfig.get('binarySource') === 'docker' ? '0' : null,
         ...getGitEnvironmentVariables(),
       },
-      docker: {
-        image: 'go',
-        tagConstraint: goConstraints,
-        tagScheme: 'npm',
-      },
+      docker: {},
+      toolConstraints: [
+        {
+          toolName: 'golang',
+          constraint: goConstraints,
+        },
+      ],
     };
 
     const execCommands: string[] = [];
@@ -293,13 +296,19 @@ export async function updateArtifacts({
       logger.debug('go mod tidy command skipped');
     }
 
-    const tidyOpts = config.postUpdateOptions?.includes('gomodTidy1.17')
-      ? ' -compat=1.17'
-      : '';
+    let tidyOpts = '';
+    if (config.postUpdateOptions?.includes('gomodTidy1.17')) {
+      tidyOpts += ' -compat=1.17';
+    }
+    if (config.postUpdateOptions?.includes('gomodTidyE')) {
+      tidyOpts += ' -e';
+    }
+
     const isGoModTidyRequired =
       !mustSkipGoModTidy &&
       (config.postUpdateOptions?.includes('gomodTidy') ||
         config.postUpdateOptions?.includes('gomodTidy1.17') ||
+        config.postUpdateOptions?.includes('gomodTidyE') ||
         (config.updateType === 'major' && isImportPathUpdateRequired));
     if (isGoModTidyRequired) {
       args = 'mod tidy' + tidyOpts;
@@ -328,20 +337,24 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(sumFileName)) {
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName)
+    ) {
       return null;
     }
 
-    logger.debug('Returning updated go.sum');
-    const res: UpdateArtifactsResult[] = [
-      {
+    const res: UpdateArtifactsResult[] = [];
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
         file: {
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
-      },
-    ];
+      });
+    }
 
     // Include all the .go file import changes
     if (isImportPathUpdateRequired) {

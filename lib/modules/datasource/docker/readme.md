@@ -12,3 +12,5 @@ Here's an example from our `renovate/renovate` Dockerfile:
 ```dockerfile
 LABEL org.opencontainers.image.source="https://github.com/renovatebot/renovate"
 ```
+
+If you use [Harbor](https://goharbor.io/) as a proxy cache for Docker Hub, then you must use Harbor version `2.5.0` or higher.

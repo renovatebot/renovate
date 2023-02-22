@@ -51,7 +51,7 @@ describe('modules/manager/nuget/artifacts', () => {
   it('aborts if no lock file found', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap.mockResolvedValueOnce({ 'packages.lock.json': null });
+    git.getFiles.mockResolvedValueOnce({ 'packages.lock.json': null });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -68,13 +68,12 @@ describe('modules/manager/nuget/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce(
       'path/with space/packages.lock.json'
     );
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'path/with space/packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'path/with space/packages.lock.json': 'Current packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'path/with space/packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'path/with space/packages.lock.json': 'Current packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'path/with space/project.csproj',
@@ -91,6 +90,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -100,13 +100,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('updates lock file', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -131,6 +130,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -140,13 +140,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('does not update lock file when non-proj file is changed', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'otherfile.props',
@@ -161,13 +160,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('does not update lock file when no deps changed', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -182,13 +180,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('performs lock file maintenance', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -216,6 +213,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -226,13 +224,12 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -262,6 +259,7 @@ describe('modules/manager/nuget/artifacts', () => {
           '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
           '-v "/tmp/renovate/cache":"/tmp/renovate/cache" ' +
           '-e NUGET_PACKAGES ' +
+          '-e MSBUILDDISABLENODEREUSE ' +
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
@@ -277,6 +275,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -287,13 +286,12 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -320,6 +318,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -332,6 +331,7 @@ describe('modules/manager/nuget/artifacts', () => {
             CONTAINERBASE_CACHE_DIR: '/tmp/renovate/cache/containerbase',
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -342,13 +342,12 @@ describe('modules/manager/nuget/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'global' });
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     expect(
       await nuget.updateArtifacts({
         packageFileName: 'project.csproj',
@@ -373,6 +372,7 @@ describe('modules/manager/nuget/artifacts', () => {
           env: {
             NUGET_PACKAGES:
               '/tmp/renovate/cache/__renovate-private-cache/nuget/packages',
+            MSBUILDDISABLENODEREUSE: '1',
           },
         },
       },
@@ -382,7 +382,7 @@ describe('modules/manager/nuget/artifacts', () => {
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap.mockResolvedValueOnce({
+    git.getFiles.mockResolvedValueOnce({
       'packages.lock.json': 'Current packages.lock.json',
     });
     fs.writeLocalFile.mockImplementationOnce(() => {
@@ -409,13 +409,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('authenticates at registries', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     getConfiguredRegistries.mockResolvedValueOnce([
       {
         name: 'myRegistry',
@@ -465,13 +464,12 @@ describe('modules/manager/nuget/artifacts', () => {
   it('strips protocol version from feed url', async () => {
     const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
-    fs.getFileContentMap
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'Current packages.lock.json',
-      })
-      .mockResolvedValueOnce({
-        'packages.lock.json': 'New packages.lock.json',
-      });
+    git.getFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'Current packages.lock.json',
+    });
+    fs.getLocalFiles.mockResolvedValueOnce({
+      'packages.lock.json': 'New packages.lock.json',
+    });
     getConfiguredRegistries.mockResolvedValueOnce([
       {
         name: 'myRegistry',

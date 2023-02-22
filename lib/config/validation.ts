@@ -42,6 +42,7 @@ const ignoredNodes = [
 ];
 const tzRe = regEx(/^:timezone\((.+)\)$/);
 const rulesRe = regEx(/p.*Rules\[\d+\]$/);
+
 function isManagerPath(parentPath: string): boolean {
   return (
     regEx(/^regexManagers\[[0-9]+]$/).test(parentPath) ||
@@ -317,9 +318,13 @@ export async function validateConfig(
               'matchManagers',
               'matchDatasources',
               'matchDepTypes',
+              'matchDepNames',
+              'matchDepPatterns',
               'matchPackageNames',
               'matchPackagePatterns',
               'matchPackagePrefixes',
+              'excludeDepNames',
+              'excludeDepPatterns',
               'excludePackageNames',
               'excludePackagePatterns',
               'excludePackagePrefixes',
@@ -485,8 +490,12 @@ export async function validateConfig(
               }
             }
             if (
-              key === 'matchPackagePatterns' ||
-              key === 'excludePackagePatterns'
+              [
+                'matchPackagePatterns',
+                'excludePackagePatterns',
+                'matchDepPatterns',
+                'excludeDepPatterns',
+              ].includes(key)
             ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {
@@ -509,6 +518,19 @@ export async function validateConfig(
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
+                  });
+                }
+              }
+            }
+            if (key === 'baseBranches') {
+              for (const baseBranch of val as string[]) {
+                if (
+                  isConfigRegex(baseBranch) &&
+                  !configRegexPredicate(baseBranch)
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid regExp for ${currentPath}: \`${baseBranch}\``,
                   });
                 }
               }
@@ -588,6 +610,7 @@ export async function validateConfig(
       }
     }
   }
+
   function sortAll(a: ValidationMessage, b: ValidationMessage): number {
     // istanbul ignore else: currently never happen
     if (a.topic === b.topic) {
@@ -596,6 +619,7 @@ export async function validateConfig(
     // istanbul ignore next: currently never happen
     return a.topic > b.topic ? 1 : -1;
   }
+
   errors.sort(sortAll);
   warnings.sort(sortAll);
   return { errors, warnings };

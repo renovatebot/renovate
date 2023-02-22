@@ -25,7 +25,7 @@ async function importKey(): Promise<void> {
     return;
   }
   const keyFileName = upath.join(os.tmpdir() + '/git-private.key');
-  await fs.outputFile(keyFileName, gitPrivateKey);
+  await fs.outputFile(keyFileName, gitPrivateKey!);
   const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
   logger.debug({ stdout, stderr }, 'Private key import result');
   keyId = `${stdout}${stderr}`

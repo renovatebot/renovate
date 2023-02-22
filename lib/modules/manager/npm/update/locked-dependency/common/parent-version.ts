@@ -45,7 +45,7 @@ export async function findFirstParentVersion(
     const targetDep = await getPkgReleasesCached(targetDepName);
     // istanbul ignore if
     if (!targetDep) {
-      logger.warn(
+      logger.info(
         { targetDepName },
         'Could not look up target dependency for remediation'
       );

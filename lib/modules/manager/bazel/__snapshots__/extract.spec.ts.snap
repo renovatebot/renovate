@@ -14,8 +14,6 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
   },
   {
     "currentDigest": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
-    "currentDigestShort": "dec09d7",
-    "currentValue": "v0.0.0",
     "datasource": "go",
     "depName": "com_github_google_uuid",
     "depType": "go_repository",
@@ -157,8 +155,6 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
   },
   {
     "currentDigest": "816c9085562cd7ee03e7f8188a1cfd942858cded",
-    "currentDigestShort": "816c908",
-    "currentValue": "v0.0.0",
     "datasource": "go",
     "depName": "com_github_pkg_errors",
     "depType": "go_repository",
@@ -181,6 +177,13 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "registryUrls": [
       "gcr.io",
     ],
+    "replaceString": "container_pull(
+    name = "py3_image_base",
+    digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
+    registry = "gcr.io",
+    repository = "distroless/python3-debian10",
+    tag = "latest",
+)",
     "versioning": "docker",
   },
   {

@@ -28,6 +28,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -105,6 +106,10 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
+}
+
+function localName(branchName: string): string {
+  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -225,16 +230,6 @@ async function fetchBranchCommits(): Promise<void> {
   }
 }
 
-export async function registerBranch(
-  localBranchName: string,
-  modified: boolean,
-  sha?: string
-): Promise<void> {
-  config.branchCommits[localBranchName] =
-    sha ?? (await git.revparse([localBranchName])).trim();
-  config.branchIsModified[localBranchName] = modified;
-}
-
 export async function fetchRevSpec(revSpec: string): Promise<void> {
   await gitRetry(() => git.fetch(['origin', revSpec]));
 }
@@ -253,18 +248,6 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   gitInitialized = false;
   submodulesInitizialized = false;
   await fetchBranchCommits();
-}
-
-export async function installHook(
-  name: string,
-  hookSource: string
-): Promise<void> {
-  await syncGit();
-  const localDir = GlobalConfig.get('localDir')!;
-  const gitHooks = upath.join(localDir, '.git/hooks');
-  await fs.mkdir(gitHooks, { recursive: true });
-  await fs.writeFile(`${gitHooks}/${name}`, hookSource);
-  await fs.chmod(`${gitHooks}/${name}`, fs.constants.S_IRWXU);
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -483,6 +466,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
 }
 
 // istanbul ignore next
@@ -516,7 +500,7 @@ export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
-    n: 10,
+    n: 20,
     format: { message: '%s' },
   });
   return res.all.map((commit) => commit.message);
@@ -580,7 +564,6 @@ export function getBranchList(): string[] {
   return Object.keys(config.branchCommits);
 }
 
-//TODO: move to Platform-Interface
 export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
@@ -602,13 +585,12 @@ export async function isBranchBehindBase(
   try {
     const { currentBranchSha, currentBranch } = config;
     const branches = await git.branch([
-      '--all', //for gerrit we check by name, there are no real remote branches. origin/$branchname was faked
+      '--remotes',
       '--verbose',
       '--contains',
       config.currentBranchSha,
     ]);
-    isBehind = !branches.all.filter((b) => b.match(`origin/${branchName}$`))
-      .length;
+    isBehind = !branches.all.map(localName).includes(branchName);
     logger.debug(
       { currentBranch, currentBranchSha },
       `branch.isBehindBase(): ${isBehind}`
@@ -623,7 +605,6 @@ export async function isBranchBehindBase(
   }
 }
 
-//TODO: move to Platform-Interface
 export async function isBranchModified(branchName: string): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
@@ -689,7 +670,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   return true;
 }
 
-//TODO: move to Platform-Interface
 export async function isBranchConflicted(
   baseBranch: string,
   branch: string
@@ -879,6 +859,18 @@ export async function getFile(
   }
 }
 
+export async function getFiles(
+  fileNames: string[]
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = await getFile(fileName);
+  }
+
+  return fileContentMap;
+}
+
 export async function hasDiff(
   sourceRef: string,
   targetRef: string
@@ -1044,7 +1036,7 @@ export async function pushCommit({
   files,
 }: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1056,7 +1048,7 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${sourceRef}:${targetRef}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
@@ -1094,7 +1086,6 @@ export async function commitFiles(
     if (commitResult) {
       const pushResult = await pushCommit({
         sourceRef: commitConfig.branchName,
-        targetRef: commitConfig.targetBranch ?? commitConfig.branchName,
         files: commitConfig.files,
       });
       if (pushResult) {
@@ -1222,11 +1213,16 @@ export async function clearRenovateRefs(): Promise<void> {
       /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
         for (const ref of obsoleteRefs) {
-          const pushOpts = ['--delete', 'origin', ref];
-          await git.push(pushOpts);
+          try {
+            const pushOpts = ['--delete', 'origin', ref];
+            await git.push(pushOpts);
+          } catch (err) /* istanbul ignore next */ {
+            logger.debug({ err }, 'Error deleting obsolete refs');
+            break;
+          }
         }
       } else {
-        throw err;
+        logger.warn({ err }, 'Error deleting obsolete refs');
       }
     }
   }

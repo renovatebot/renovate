@@ -21,18 +21,11 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import {
-  checkoutBranch,
-  deleteBranch,
-  getBranchCommit,
-  branchExists as gitBranchExists,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -42,16 +35,15 @@ import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
 import { embedChangelog, needsChangelogs } from '../../changelog';
-import { ensurePr, getPlatformPrOptions, updatePrDebugData } from '../pr';
+import { ensurePr } from '../pr';
 import { checkAutoMerge } from '../pr/automerge';
-import { getPrBody } from '../pr/body';
 import { setArtifactErrorStatus } from './artifacts';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import executePostUpgradeCommands from './execute-post-upgrade-commands';
 import { getUpdatedPackageFiles } from './get-updated';
-import { handlepr } from './handle-existing';
+import { handleClosedPr, handleModifiedPr } from './handle-existing';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
@@ -66,7 +58,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
-    await deleteBranch(branchName);
+    await scm.deleteBranch(branchName);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
@@ -87,14 +79,14 @@ export async function processBranch(
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  let branchExists = gitBranchExists(config.branchName);
+  let branchExists = await scm.branchExists(config.branchName);
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
       config.branchPrefixOld!
     );
-    branchExists = gitBranchExists(branchName);
+    branchExists = await scm.branchExists(branchName);
     if (branchExists) {
       config.branchName = branchName;
       logger.debug('Found existing branch with branchPrefixOld');
@@ -119,7 +111,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      await handlepr(config, existingPr);
+      await handleClosedPr(config, existingPr);
       return {
         branchExists: false,
         prNo: existingPr.number,
@@ -197,7 +189,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -212,32 +204,8 @@ export async function processBranch(
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
-          if (dependencyDashboardCheck || config.rebaseRequested) {
-            logger.debug('Manual rebase has been requested for PR');
-          } else {
-            const newBody = getPrBody(branchConfig, {
-              debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
-              rebasingNotice:
-                'Renovate will not automatically rebase this PR, because other commits have been found.',
-            });
-            const newBodyHash = hashBody(newBody);
-            if (newBodyHash !== branchPr.bodyStruct?.hash) {
-              if (GlobalConfig.get('dryRun')) {
-                logger.info(
-                  `DRY-RUN: Would update existing PR to indicate that rebasing is not possible`
-                );
-              } else {
-                logger.debug(
-                  'Updating existing PR to indicate that rebasing is not possible'
-                );
-                await platform.updatePr({
-                  number: branchPr.number,
-                  prTitle: branchPr.title,
-                  prBody: newBody,
-                  platformOptions: getPlatformPrOptions(config),
-                });
-              }
-            }
+          await handleModifiedPr(config, branchPr);
+          if (!(dependencyDashboardCheck || config.rebaseRequested)) {
             return {
               branchExists,
               prNo: branchPr.number,
@@ -257,7 +225,7 @@ export async function processBranch(
             result: 'pr-edited',
           };
         }
-        const branchSha = getBranchCommit(config.branchName);
+        const branchSha = await scm.getBranchCommit(config.branchName);
         const oldPrSha = oldPr?.sha;
         if (!oldPrSha || oldPrSha === branchSha) {
           logger.debug(
@@ -503,7 +471,7 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch, config.branchName));
+        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs

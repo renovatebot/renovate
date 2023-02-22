@@ -34,7 +34,7 @@ import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { fromBase64 } from '../../../util/string';
+import { fromBase64, looseEquals } from '../../../util/string';
 import { ensureTrailingSlash } from '../../../util/url';
 import type {
   AggregatedVulnerabilities,
@@ -128,6 +128,11 @@ export async function initPlatform({
   let token = originalToken;
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
+  }
+  if (token.startsWith('github_pat_')) {
+    throw new Error(
+      'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
+    );
   }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
@@ -719,7 +724,7 @@ export async function findPr({
       return false;
     }
 
-    if (!config.forkToken && config.repository !== p.sourceRepo) {
+    if (!config.forkToken && !looseEquals(config.repository, p.sourceRepo)) {
       return false;
     }
 

@@ -23,8 +23,11 @@ export const presets: Record<string, Preset> = {
       'replacements:parcel-css-to-lightningcss',
       'replacements:react-query-devtools-to-scoped',
       'replacements:react-query-to-scoped',
+      'replacements:react-scripts-ts-to-react-scripts',
       'replacements:renovate-pep440-to-renovatebot-pep440',
       'replacements:rollup-node-resolve-to-scoped',
+      'replacements:vso-task-lib-to-azure-pipelines-task-lib',
+      'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
   },
@@ -572,6 +575,17 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'react-scripts-ts-to-react-scripts': {
+    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['react-scripts-ts'],
+        replacementName: 'react-scripts',
+        replacementVersion: '2.1.8',
+      },
+    ],
+  },
   'redux-devtools-extension-to-scope': {
     description:
       'The `redux-devtools-extension` package was renamed to `@redux-devtools/extension`.',
@@ -604,6 +618,42 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['rollup-plugin-node-resolve'],
         replacementName: '@rollup/plugin-node-resolve',
         replacementVersion: '6.0.0',
+      },
+    ],
+  },
+  'spectre-cli-to-spectre-console-cli': {
+    description:
+      'The `Spectre.Cli` package was renamed to `Spectre.Console.Cli`.',
+    packageRules: [
+      {
+        matchDatasources: ['nuget'],
+        matchPackageNames: ['Spectre.Cli'],
+        replacementName: 'Spectre.Console.Cli',
+        replacementVersion: '0.45.0',
+      },
+    ],
+  },
+  'vso-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vso-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vso-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
+      },
+    ],
+  },
+  'vsts-task-lib-to-azure-pipelines-task-lib': {
+    description:
+      'The `vsts-task-lib` package is now published as `azure-pipelines-task-lib`.',
+    packageRules: [
+      {
+        matchDatasources: ['npm'],
+        matchPackageNames: ['vsts-task-lib'],
+        replacementName: 'azure-pipelines-task-lib',
+        replacementVersion: '3.4.0',
       },
     ],
   },

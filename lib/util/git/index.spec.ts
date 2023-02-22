@@ -385,6 +385,28 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('getFiles(filePath)', () => {
+    it('gets the file', async () => {
+      const res = await git.getFiles(['master_file', 'some_missing_path']);
+      expect(res).toEqual({
+        master_file: defaultBranch,
+        some_missing_path: null,
+      });
+    });
+  });
+
+  describe('hasDiff(sourceRef, targetRef)', () => {
+    it('compare without changes', () => {
+      return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();
+    });
+
+    it('compare with changes', () => {
+      return expect(
+        git.hasDiff('origin/master', 'origin/renovate/future_branch')
+      ).resolves.toBeTrue();
+    });
+  });
+
   describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file: FileChange = {
@@ -1035,88 +1057,14 @@ describe('util/git/index', () => {
     });
   });
 
-  describe('installHook()', () => {
-    it('installHook()', async () => {
-      //git.getCommitMessages() only returns the first line (i.e. subject) of each msg
-      await git.installHook(
-        'commit-msg',
-        '#!/bin/sh\necho "APPENDED FROM COMMIT-MSG HOOK" >> $1;'
-      );
-      const files: FileChange[] = [
-        {
-          type: 'addition',
-          path: 'some-new-file',
-          contents: 'some new-contents',
-        },
-      ];
-      setNoVerify(['push']);
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Orig-commit-msg',
-      });
-
-      const messages = await git.getCommitMessages();
-      expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
-    });
-  });
-
   describe('fetchRevSpec()', () => {
     it('fetchRevSpec()', async () => {
-      //duplicate defaultBranch as local branch with prefix "origin/"
       await git.fetchRevSpec(
-        `refs/heads/${defaultBranch}:refs/heads/origin/${defaultBranch}`
+        `refs/heads/${defaultBranch}:refs/heads/other/${defaultBranch}`
       );
       //checkout this duplicate
-      const sha = await git.checkoutBranch(`origin/${defaultBranch}`);
+      const sha = await git.checkoutBranch(`other/${defaultBranch}`);
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
-    });
-  });
-
-  describe('hasDiff()', () => {
-    it('hasDiff() - src == dst should always be equal', () => {
-      return expect(
-        git.hasDiff(
-          'remotes/origin/renovate/equal_branch',
-          'remotes/origin/renovate/equal_branch'
-        )
-      ).resolves.toBeFalse();
-    });
-
-    it('hasDiff() - compare with modified branch should return true', () => {
-      return expect(
-        git.hasDiff(
-          `remotes/origin/${defaultBranch}`,
-          'remotes/origin/renovate/modified_branch'
-        )
-      ).resolves.toBeTrue();
-    });
-  });
-
-  describe('registerBranch()', () => {
-    it('registerBranch() - register freely branchname with sha', async () => {
-      const sha = git.getBranchCommit(defaultBranch)!;
-      await git.registerBranch('anyBranchName', false, sha);
-
-      expect(git.getBranchCommit('anyBranchName')).toBe(sha);
-      await expect(git.isBranchModified('anyBranchName')).resolves.toBeFalse();
-    });
-
-    it('registerBranch() - register existing branchname lookup sha', async () => {
-      const sha = git.getBranchCommit(defaultBranch)!;
-      await git.fetchRevSpec(`${defaultBranch}:refs/heads/existingBranch`);
-      await git.registerBranch('existingBranch', false);
-
-      expect(git.getBranchCommit('existingBranch')).toBe(sha);
-      await expect(git.isBranchModified('existingBranch')).resolves.toBeFalse();
-    });
-
-    it('registerBranch() - register modified branch', async () => {
-      const sha = git.getBranchCommit(defaultBranch)!;
-      await git.registerBranch('existingBranch', true, sha);
-
-      expect(git.getBranchCommit('existingBranch')).toBe(sha);
-      await expect(git.isBranchModified('existingBranch')).resolves.toBeTrue();
     });
   });
 });

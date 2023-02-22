@@ -8,8 +8,10 @@ import {
   SBT_PLUGINS_REPO,
   SbtPluginDatasource,
 } from '../../datasource/sbt-plugin';
+import { get } from '../../versioning';
+import * as mavenVersioning from '../../versioning/maven';
 import { REGISTRY_URLS } from '../gradle/parser/common';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -29,7 +31,7 @@ interface Ctx {
   currentVarName?: string;
   depType?: string;
   useScalaVersion?: boolean;
-  groupName?: string;
+  variableName?: string;
 }
 
 const scala = lang.createLang('scala');
@@ -49,10 +51,17 @@ const scalaVersionMatch = q
   )
   .handler((ctx) => {
     if (ctx.scalaVersion) {
+      const version = get(mavenVersioning.id);
+
+      let packageName = 'org.scala-lang:scala-library';
+      if (version.getMajor(ctx.scalaVersion) === 3) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
       const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
+        packageName,
         currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
@@ -79,10 +88,12 @@ const packageFileVersionMatch = q
     })
   );
 
-const variableNameMatch = q.sym<Ctx>((ctx, { value: varName }) => ({
-  ...ctx,
-  currentVarName: varName,
-}));
+const variableNameMatch = q
+  .sym<Ctx>((ctx, { value: varName }) => ({
+    ...ctx,
+    currentVarName: varName,
+  }))
+  .opt(q.op<Ctx>(':').sym('String'));
 
 const variableValueMatch = q.str<Ctx>((ctx, { value }) => {
   ctx.vars[ctx.currentVarName!] = value;
@@ -127,7 +138,7 @@ const versionMatch = q.alt<Ctx>(
     const currentValue = ctx.vars[varName];
     if (currentValue) {
       ctx.currentValue = currentValue;
-      ctx.groupName = varName;
+      ctx.variableName = varName;
     }
     return ctx;
   }),
@@ -147,6 +158,13 @@ const versionedDependencyMatch = groupIdMatch
   .op('%')
   .join(versionMatch);
 
+const crossDependencyMatch = groupIdMatch
+  .op('%%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
 function depHandler(ctx: Ctx): Ctx {
   const {
     scalaVersion,
@@ -155,7 +173,7 @@ function depHandler(ctx: Ctx): Ctx {
     currentValue,
     useScalaVersion,
     depType,
-    groupName,
+    variableName,
   } = ctx;
 
   delete ctx.groupId;
@@ -163,7 +181,7 @@ function depHandler(ctx: Ctx): Ctx {
   delete ctx.currentValue;
   delete ctx.useScalaVersion;
   delete ctx.depType;
-  delete ctx.groupName;
+  delete ctx.variableName;
 
   const depName = `${groupId!}:${artifactId!}`;
 
@@ -183,8 +201,9 @@ function depHandler(ctx: Ctx): Ctx {
     dep.datasource = SbtPluginDatasource.id;
   }
 
-  if (groupName) {
-    dep.groupName = groupName;
+  if (variableName) {
+    dep.groupName = variableName;
+    dep.variableName = variableName;
   }
 
   ctx.deps.push(dep);
@@ -198,7 +217,7 @@ function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
 
 const sbtPackageMatch = q
   .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
-  .alt(simpleDependencyMatch, versionedDependencyMatch)
+  .alt(crossDependencyMatch, simpleDependencyMatch, versionedDependencyMatch)
   .opt(
     q.alt<Ctx>(
       q.sym<Ctx>('classifier').str(depTypeHandler),
@@ -267,7 +286,7 @@ const query = q.tree<Ctx>({
 export function extractPackageFile(
   content: string,
   _packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   let parsedResult: Ctx | null = null;
 
   try {

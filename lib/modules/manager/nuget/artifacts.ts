@@ -6,12 +6,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
-  getFileContentMap,
+  getLocalFiles,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
   writeLocalFile,
 } from '../../../util/fs';
+import { getFiles } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -68,10 +69,11 @@ async function runDotnetRestore(
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'sidecar',
+    docker: {},
+    extraEnv: {
+      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      MSBUILDDISABLENODEREUSE: '1',
     },
-    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
     toolConstraints: [
       { toolName: 'dotnet', constraint: config.constraints?.dotnet },
     ],
@@ -129,24 +131,22 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
-  ];
-
-  if (!isCentralManament) {
-    packageFiles.push(packageFileName);
-  }
+  const deps = await getDependentPackageFiles(
+    packageFileName,
+    isCentralManament
+  );
+  const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
     `Found ${packageFiles.length} dependent package files`
   );
 
-  const lockFileNames = packageFiles.map((f) =>
-    getSiblingFileName(f, 'packages.lock.json')
+  const lockFileNames = deps.map((f) =>
+    getSiblingFileName(f.name, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -171,7 +171,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getFileContentMap(lockFileNames, true);
+    const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

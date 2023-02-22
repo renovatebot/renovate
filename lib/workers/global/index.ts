@@ -20,6 +20,7 @@ import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
@@ -62,7 +63,7 @@ function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger.warn(
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.'
     );
@@ -75,7 +76,7 @@ function checkEnv(): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger.warn(
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
     );
@@ -109,6 +110,13 @@ export async function resolveGlobalExtends(
 export async function start(): Promise<number> {
   let config: AllConfig;
   try {
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
+      addSecretForSanitizing(process.env.AWS_SECRET_ACCESS_KEY, 'global');
+    }
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SESSION_TOKEN)) {
+      addSecretForSanitizing(process.env.AWS_SESSION_TOKEN, 'global');
+    }
+
     await instrument('config', async () => {
       // read global config from file, env and cli args
       config = await getGlobalConfig();
