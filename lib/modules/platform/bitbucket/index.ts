@@ -380,11 +380,12 @@ export async function getBranchStatus(
     return 'yellow';
   }
   if (!internalChecksAsSuccess) {
-    const noOfNonInternal = statuses.filter(
-      (status) =>
-        status.state === 'SUCCESSFUL' && !status.key?.startsWith('renovate/')
-    ).length;
-    if (noOfNonInternal === 0) {
+    if (
+      statuses.every(
+        (status) =>
+          status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/')
+      )
+    ) {
       logger.debug(
         'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
       );

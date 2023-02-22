@@ -410,7 +410,7 @@ export async function getBranchStatus(
   if (!internalChecksAsSuccess) {
     if (
       statuses.every(
-        (status: GitStatus) =>
+        (status) =>
           status.state === GitStatusState.Succeeded &&
           status.context?.genre === 'renovate'
       )

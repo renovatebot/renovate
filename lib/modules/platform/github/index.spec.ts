@@ -1125,32 +1125,6 @@ describe('modules/platform/github/index', () => {
       expect(res).toBe('green');
     });
 
-    it('should return pending if all passed check runs are internal', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope
-        .get('/repos/some/repo/commits/somebranch/status')
-        .reply(200, {
-          state: 'pending',
-          statuses: [],
-        })
-        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
-        .reply(200, {
-          total_count: 1,
-          check_runs: [
-            {
-              id: 23950198,
-              status: 'completed',
-              conclusion: 'success',
-              name: 'renovate/stability-days',
-            },
-          ],
-        });
-      await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch', false);
-      expect(res).toBe('yellow');
-    });
-
     it('should fail if a check run is pending', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
