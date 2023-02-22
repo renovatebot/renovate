@@ -7,8 +7,7 @@ export function readOnlyIssueBody(body: string): string {
     .replace(' To discard all commits and start over, click on a checkbox.', '')
     .replace(regEx(/ Click (?:on |)a checkbox.*\./g), '')
     .replace(regEx(/\[ ] <!-- \w*-branch.*-->/g), '')
-    .replace('**Click on this checkbox to rebase all open PRs at once**', '')
-    .replace(regEx(/\[ ] <!-- rebase-all-open-prs -->/g), '');
+    .replace(regEx(/- \[ ] <!-- rebase-all-open-prs -->.*/g), '');
 }
 
 export default readOnlyIssueBody;

@@ -2,12 +2,8 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  getFile,
-  isBranchBehindBase,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hasha';
 import { OnboardingState, defaultConfigFile } from '../common';
 import { OnboardingCommitMessageFactory } from './commit-message';
@@ -29,7 +25,7 @@ export async function rebaseOnboardingBranch(
   }
 
   // TODO #7154
-  if (await isBranchModified(config.onboardingBranch!)) {
+  if (await scm.isBranchModified(config.onboardingBranch!)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
@@ -37,7 +33,10 @@ export async function rebaseOnboardingBranch(
   // TODO: fix types (#7154)
   if (
     contents === existingContents &&
-    !(await isBranchBehindBase(config.onboardingBranch!, config.defaultBranch!))
+    !(await scm.isBranchBehindBase(
+      config.onboardingBranch!,
+      config.defaultBranch!
+    ))
   ) {
     logger.debug('Onboarding branch is up to date');
     return null;
@@ -61,7 +60,7 @@ export async function rebaseOnboardingBranch(
   }
 
   // TODO #7154
-  return commitAndPush({
+  return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.onboardingBranch!,
     files: [
