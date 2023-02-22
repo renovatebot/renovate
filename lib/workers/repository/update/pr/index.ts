@@ -97,16 +97,15 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
-  );
-
   const config: BranchConfig = { ...prConfig };
   const filteredPrConfig = generatePrFingerprintConfig(config);
   const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const getBranchStatus = memoize(() =>
+    resolveBranchStatus(branchName, ignoreTests)
+  );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
