@@ -225,7 +225,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master')).toBe('red');
+      expect(await bitbucket.getBranchStatus('master', true)).toBe('red');
     });
 
     it('getBranchStatus 4', async () => {
@@ -245,12 +245,12 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'foo',
+              key: 'renovate/stability-days',
               state: 'SUCCESSFUL',
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch')).toBe('green');
+      expect(await bitbucket.getBranchStatus('branch', true)).toBe('green');
     });
 
     it('getBranchStatus 5', async () => {
@@ -275,7 +275,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch')).toBe('yellow');
+      expect(await bitbucket.getBranchStatus('pending/branch', true)).toBe(
+        'yellow'
+      );
     });
 
     it('getBranchStatus 6', async () => {
@@ -297,9 +299,34 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [],
         });
-      expect(await bitbucket.getBranchStatus('branch-with-empty-status')).toBe(
-        'yellow'
-      );
+      expect(
+        await bitbucket.getBranchStatus('branch-with-empty-status', true)
+      ).toBe('yellow');
+    });
+
+    it('getBranchStatus 7', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/refs/branches/branch')
+        .reply(200, {
+          name: 'branch',
+          target: {
+            hash: 'branch_hash',
+            parents: [{ hash: 'master_hash' }],
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'renovate/stability-days',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+      expect(await bitbucket.getBranchStatus('branch', false)).toBe('yellow');
     });
   });
 

@@ -356,7 +356,8 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatus(branchName);
@@ -377,6 +378,18 @@ export async function getBranchStatus(
   ).length;
   if (noOfPending) {
     return 'yellow';
+  }
+  if (!internalChecksAsSuccess) {
+    const noOfNonInternal = statuses.filter(
+      (status) =>
+        status.state === 'SUCCESSFUL' && !status.key?.startsWith('renovate/')
+    ).length;
+    if (noOfNonInternal === 0) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      return 'yellow';
+    }
   }
   return 'green';
 }

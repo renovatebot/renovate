@@ -632,7 +632,7 @@ describe('modules/platform/gitea/index', () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch');
+      return gitea.getBranchStatus('some-branch', true);
     };
 
     it('should return yellow for unknown result', async () => {
@@ -654,7 +654,7 @@ describe('modules/platform/gitea/index', () => {
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -664,9 +664,46 @@ describe('modules/platform/gitea/index', () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
+    });
+
+    it('should treat internal checks as success', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce({
+        worstStatus: 'success',
+        statuses: [
+          {
+            id: 1,
+            status: 'success',
+            context: 'renovate/stability-days',
+            description: 'internal check',
+            target_url: '',
+            created_at: '',
+          },
+        ],
+      });
+      expect(await gitea.getBranchStatus('some-branch', true)).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initFakeRepo();
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<CombinedCommitStatus>({
+          worstStatus: 'success',
+          statuses: [
+            {
+              id: 1,
+              status: 'success',
+              context: 'renovate/stability-days',
+              description: 'internal check',
+              target_url: '',
+              created_at: '',
+            },
+          ],
+        })
+      );
+      expect(await gitea.getBranchStatus('some-branch', false)).toBe('yellow');
     });
   });
 
