@@ -3,15 +3,15 @@ import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
+import { mocked } from '../../../../test/util';
 
 jest.mock('../../../util/host-rules');
-const hostRules: any = _hostRules;
+const hostRules = mocked(_hostRules);
 
 const githubApiHost = 'https://api.github.com';
 
 describe('modules/datasource/github-release-attachments/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',

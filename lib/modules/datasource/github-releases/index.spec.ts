@@ -2,13 +2,13 @@ import { getDigest, getPkgReleases } from '..';
 import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GithubReleasesDatasource } from '.';
+import { mocked } from '../../../../test/util';
 
 jest.mock('../../../util/host-rules');
-const hostRules: any = _hostRules;
+const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/github-releases/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
