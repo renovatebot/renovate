@@ -31,7 +31,7 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
-import {
+import type {
   Account,
   BitbucketStatus,
   BranchResponse,
@@ -41,8 +41,6 @@ import {
   PrResponse,
   RepoInfo,
   RepoInfoBody,
-  buildStates,
-  prStates,
 } from './types';
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
@@ -252,7 +250,7 @@ export async function getPrList(): Promise<Pr[]> {
   if (!config.prList) {
     logger.debug('Retrieving PR list');
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
-    url += prStates.all.map((state) => 'state=' + state).join('&');
+    url += utils.prStates.all.map((state) => 'state=' + state).join('&');
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
@@ -412,7 +410,7 @@ export async function setBranchStatus({
 
   const body = {
     name: context,
-    state: buildStates[state],
+    state: utils.buildStates[state],
     key: context,
     description,
     url,

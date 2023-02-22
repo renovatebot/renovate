@@ -1,31 +1,7 @@
-import type { MergeStrategy } from '../../../config/types';
-import type { BranchStatus } from '../../../types';
 import type { Pr } from '../types';
 
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
 
-export const prStates = {
-  open: ['OPEN'],
-  notOpen: ['MERGED', 'DECLINED', 'SUPERSEDED'],
-  merged: ['MERGED'],
-  closed: ['DECLINED', 'SUPERSEDED'],
-  all: ['OPEN', 'MERGED', 'DECLINED', 'SUPERSEDED'],
-};
-
-export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
-  green: 'SUCCESSFUL',
-  red: 'FAILED',
-  yellow: 'INPROGRESS',
-};
-
-export const bitbucketMergeStrategies: Map<
-  MergeStrategy,
-  BitbucketMergeStrategy
-> = new Map([
-  ['squash', 'squash'],
-  ['merge-commit', 'merge_commit'],
-  ['fast-forward', 'fast_forward'],
-]);
 export interface MergeRequestBody {
   close_source_branch?: boolean;
   message?: string;
