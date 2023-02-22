@@ -1,9 +1,9 @@
 import { getDigest, getPkgReleases } from '..';
+import { mocked } from '../../../../test/util';
 import * as githubGraphql from '../../../util/github/graphql';
 import * as _hostRules from '../../../util/host-rules';
 import { GitHubReleaseAttachmentMocker } from './test';
 import { GithubReleaseAttachmentsDatasource } from '.';
-import { mocked } from '../../../../test/util';
 
 jest.mock('../../../util/host-rules');
 const hostRules = mocked(_hostRules);
