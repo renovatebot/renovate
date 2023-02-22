@@ -12,13 +12,13 @@ export interface VersioningApi {
   // validation
 
   /**
-   * Check whether the `version` is compatible with the `current` version range
+   * Check whether the `version` is compatible with the `current` value
    * constraint.
    */
   isCompatible(version: string, current?: string): boolean;
 
   /**
-   * Check whether the `version` constraint is pinned, i.e. it only allows a
+   * Check whether the `version` constraint is not a range, i.e. it only allows a
    * single specific version.
    */
   isSingleVersion(version: string): boolean;
@@ -31,7 +31,7 @@ export interface VersioningApi {
   isStable(version: string): boolean;
 
   /**
-   * Check whether the `input` is a valid version range constraint.
+   * Check whether the `input` is a valid version or a valid version range constraint.
    */
   isValid(input: string): boolean;
 
@@ -51,6 +51,8 @@ export interface VersioningApi {
   /**
    * Check whether `version` and `other` are logically equivalent, even if
    * they're not the exact same string.
+   *
+   * For example, with Semver the build metadata should be ignored when comparing.
    */
   equals(version: string, other: string): boolean;
 
