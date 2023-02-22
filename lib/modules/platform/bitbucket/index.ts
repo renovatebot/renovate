@@ -31,20 +31,25 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
-import * as utils from './utils';
-import {
+import type {
   Account,
+  BitbucketStatus,
+  BranchResponse,
+  Config,
   EffectiveReviewer,
+  PagedResult,
   PrResponse,
+  RepoInfo,
   RepoInfoBody,
-  mergeBodyTransformer,
-} from './utils';
+} from './types';
+import * as utils from './utils';
+import { mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
-let config: utils.Config = {} as any;
+let config: Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
@@ -127,7 +132,7 @@ export async function getRawFile(
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
-    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    // Branch name contains slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
@@ -164,8 +169,8 @@ export async function initRepo({
     repository,
     username: opts.username,
     ignorePrAuthor,
-  } as utils.Config;
-  let info: utils.RepoInfo;
+  } as Config;
+  let info: RepoInfo;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -306,12 +311,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
 
-interface BranchResponse {
-  target: {
-    hash: string;
-  };
-}
-
 // Return the commit SHA for a branch
 async function getBranchCommit(
   branchName: string
@@ -344,9 +343,9 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 async function getStatus(
   branchName: string,
   useCache = true
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<utils.BitbucketStatus>(
+  return utils.accumulateValues<BitbucketStatus>(
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
@@ -764,7 +763,7 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+      await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;
