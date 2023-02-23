@@ -151,7 +151,7 @@ export interface PackageDependency<T = Record<string, any>>
   variableName?: string;
 }
 
-export interface Upgrade extends PackageDependency {
+export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
@@ -185,16 +185,16 @@ export interface UpdateArtifactsResult {
   file?: FileChange;
 }
 
-export interface UpdateArtifact {
+export interface UpdateArtifact<T = Record<string, unknown>> {
   packageFileName: string;
-  updatedDeps: Upgrade[];
+  updatedDeps: Upgrade<T>[];
   newPackageFileContent: string;
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig {
+export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
-  upgrade: Upgrade;
+  upgrade: Upgrade<T>;
 }
 
 export interface BumpPackageVersionResult {
