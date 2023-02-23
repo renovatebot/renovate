@@ -143,3 +143,32 @@ export function looseRecord<T extends z.ZodTypeAny>(
 
   return filteredRecord;
 }
+
+export function looseValue<T, U extends z.ZodTypeDef, V>(
+  schema: z.ZodType<T, U, V>,
+  catchCallback?: () => void
+): z.ZodCatch<z.ZodNullable<z.ZodType<T, U, V>>> {
+  const nullableSchema = schema.nullable();
+  const schemaWithFallback = catchCallback
+    ? nullableSchema.catch(() => {
+        catchCallback();
+        return null;
+      })
+    : nullableSchema.catch(null);
+  return schemaWithFallback;
+}
+
+export function looseObject<T extends z.ZodRawShape>(
+  shape: T
+): z.ZodObject<{
+  [k in keyof T]: z.ZodOptional<z.ZodCatch<z.ZodNullable<T[k]>>>;
+}> {
+  const newShape: Record<keyof T, z.ZodTypeAny> = { ...shape };
+  const keys: (keyof T)[] = Object.keys(shape);
+  for (const k of keys) {
+    const v = looseValue(shape[k]);
+    newShape[k] = v;
+  }
+
+  return z.object(newShape).partial() as never;
+}
