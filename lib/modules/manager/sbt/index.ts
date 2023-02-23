@@ -11,7 +11,7 @@ export const supportedDatasources = [
   MavenDatasource.id,
   SbtPackageDatasource.id,
   SbtPluginDatasource.id,
-  GithubTagsDatasource.id // For sbt itself
+  GithubTagsDatasource.id, // For sbt itself
 ];
 
 export const defaultConfig = {
