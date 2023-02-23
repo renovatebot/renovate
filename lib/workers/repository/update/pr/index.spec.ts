@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { git, logger, mocked, platform } from '../../../../../test/util';
+import { git, logger, mocked, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -254,7 +254,7 @@ describe('workers/repository/update/pr/index', () => {
 
           expect(res).toEqual({ type: 'without-pr', prBlockedBy: 'Error' });
           expect(prCache.setPrCache).not.toHaveBeenCalled();
-          expect(git.deleteBranch).toHaveBeenCalledWith('renovate-branch');
+          expect(scm.deleteBranch).toHaveBeenCalledWith('renovate-branch');
         });
       });
     });

@@ -3,17 +3,12 @@
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { scm } from '../../modules/platform/scm';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
   BranchUpgradeCache,
 } from '../../util/cache/repository/types';
-import {
-  getBranchCommit,
-  isBranchBehindBase,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../util/git';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import { getPrCache } from './update/pr/pr-cache';
@@ -53,8 +48,8 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { baseBranch, branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) ?? null;
-    const baseBranchSha = getBranchCommit(baseBranch);
+    const sha = await scm.getBranchCommit(branchName);
+    const baseBranchSha = await scm.getBranchCommit(baseBranch);
     const pristine = getCachedPristineResult(branchName);
     let prNo = null;
     let isModified = false;
@@ -65,9 +60,9 @@ async function generateBranchCache(
       if (branchPr) {
         prNo = branchPr.number;
       }
-      isModified = await isBranchModified(branchName);
-      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
-      isConflicted = await isBranchConflicted(baseBranch, branchName);
+      isModified = await scm.isBranchModified(branchName);
+      isBehindBase = await scm.isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
