@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
+import { looseObject, looseValue } from '../../../util/schema';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -44,32 +45,20 @@ export const ComposerRelease = z
     version: z.string(),
   })
   .merge(
-    z
-      .object({
-        homepage: z.string().nullable().catch(null),
-        source: z
-          .object({
-            url: z.string(),
-          })
-          .nullable()
-          .catch(null),
-        time: z.string().nullable().catch(null),
-        require: z
-          .object({
-            php: z.string(),
-          })
-          .nullable()
-          .catch(null),
-      })
-      .partial()
+    looseObject({
+      homepage: z.string(),
+      source: z.object({ url: z.string() }),
+      time: z.string(),
+      require: z.object({ php: z.string() }),
+    })
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
 export const ComposerReleases = z
   .union([
-    z.array(ComposerRelease.nullable().catch(null)),
+    z.array(looseValue(ComposerRelease)),
     z
-      .record(ComposerRelease.nullable().catch(null))
+      .record(looseValue(ComposerRelease))
       .transform((map) => Object.values(map)),
   ])
   .catch([])
