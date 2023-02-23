@@ -37,4 +37,4 @@ Now you may use comments in your `versions.ini` files to automatically update de
 NKJS_VERSION=3.4.0
 ```
 
-By default, `gitlab-releases` uses the `semver` versioning scheme.
+By default, `gitlab-releases` uses the `semver-coerced` versioning scheme.
