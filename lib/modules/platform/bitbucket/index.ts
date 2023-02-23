@@ -7,13 +7,11 @@ import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
-import {
-  JiraHttp,
-  setBaseUrl as setJiraBaseUrl,
-} from '../../../util/http/jira';
+import { setBaseUrl as setJiraBaseUrl } from '../../../util/http/jira';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import * as jiraIssues from '../../issues/jira/index';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -38,14 +36,11 @@ import * as comments from './comments';
 import type {
   Account,
   BitbucketIssue,
+  BitbucketJiraProjectsResponse,
   BitbucketStatus,
   BranchResponse,
   Config,
   EffectiveReviewer,
-  JiraIssue,
-  JiraProjectsResponse,
-  JiraSearchResponse,
-  JiraTransitionsResponse,
   PagedResult,
   PrResponse,
   RepoInfo,
@@ -64,8 +59,6 @@ const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 const pathSeparator = '/';
 
 let renovateUserUuid: string | null = null;
-
-const jiraHttp = new JiraHttp();
 
 export async function initPlatform({
   endpoint,
@@ -202,9 +195,10 @@ export async function initRepo({
 
     // Check if there are any linked Jira Projects
     try {
-      const jiraProjects = await bitbucketHttp.getJson<JiraProjectsResponse>(
-        `/internal/repositories/${repository}/jira/projects`
-      );
+      const jiraProjects =
+        await bitbucketHttp.getJson<BitbucketJiraProjectsResponse>(
+          `/internal/repositories/${repository}/jira/projects`
+        );
 
       // Currently only handle repositories with a single jira project
       if (jiraProjects.body.values.length === 1) {
@@ -485,7 +479,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
 
   if (config.hasJiraProjectLinked) {
-    return await findJiraIssue(title);
+    return await jiraIssues.findIssue(title, config.jiraProjectKey);
   }
 
   return await findBitbucketIssue(title);
@@ -502,28 +496,6 @@ export async function findBitbucketIssue(title: string): Promise<Issue | null> {
   return {
     number: issue.id,
     body: issue.content?.raw,
-  };
-}
-
-export async function findJiraIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findJiraIssue(${title})`);
-
-  const issues = await findOpenJiraIssues(title);
-  if (!issues.length) {
-    return null;
-  }
-  if (issues.length > 1) {
-    logger.error(
-      `findJiraIssue found more than one issue with title ${title}. This should not happen.`
-    );
-  }
-  const [issue] = issues;
-
-  return {
-    number: issue.id,
-    body: utils.convertAtlassianDocumentFormatToMarkdown(
-      issue.fields.description
-    ),
   };
 }
 
@@ -551,30 +523,6 @@ async function findOpenBitbucketIssues(
   }
 }
 
-async function findOpenJiraIssues(title: string): Promise<JiraIssue[]> {
-  try {
-    const jql = encodeURIComponent(
-      [
-        `summary ~ "${title}"`,
-        `project = "${config.jiraProjectKey}"`,
-        `reporter = currentUser()`,
-        'status != "done"', //TODO - Should we only check for `new` or `open` issues, or is not done also ok?
-      ].join(' AND ')
-    );
-
-    return (
-      (
-        await jiraHttp.getJson<{ issues: JiraIssue[] }>(
-          `/rest/api/3/search?jql=${jql}`
-        )
-      ).body.issues || /* istanbul ignore next */ []
-    );
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error finding open jira issues');
-    return [];
-  }
-}
-
 async function closeBitbucketIssue(issueNumber: number): Promise<void> {
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
@@ -582,30 +530,6 @@ async function closeBitbucketIssue(issueNumber: number): Promise<void> {
       body: { state: 'closed' },
     }
   );
-}
-
-async function closeJiraIssue(issueKey: string): Promise<void> {
-  const transitions = await jiraHttp.getJson<JiraTransitionsResponse>(
-    `/rest/api/3/issue/${issueKey}/transitions`
-  );
-
-  for (const transition of transitions.body.transitions) {
-    if (transition.to.statusCategory.key === 'done') {
-      logger.debug(`closeJiraIssue: closing issue ${issueKey}`);
-
-      await jiraHttp.postJson(`/rest/api/3/issue/${issueKey}/transitions`, {
-        body: {
-          transition: {
-            id: transition.id,
-          },
-        },
-      });
-
-      return;
-    }
-  }
-
-  logger.debug('Error closeJiraIssue');
 }
 
 export function massageMarkdown(input: string): string {
@@ -622,20 +546,6 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
-export function massageJiraMarkdown(input: string, config: Config): string {
-  // Remove any HTML we use
-  return massageMarkdown(input)
-    .replace(
-      regEx(/\]\(\.\.\/\.\.\/pull-requests\//g),
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `](${config.repositoryUrl}/pull-requests/`
-    )
-    .replace(regEx(/\*\*\n\n\n\*\*/g), '\n#### ') // Level 4 heading for package types
-    .replace(regEx(/\n\n\*\*/g), '\n### ') // Level 3 heading for managers
-    .replace(regEx(/\*\*/g), '') // Remove closing bold tags
-    .replace(regEx(/WARN:/g), '⚠️'); // WARN to use emoji
-}
-
 export async function ensureIssue({
   title,
   reuseTitle,
@@ -646,7 +556,11 @@ export async function ensureIssue({
   if (config.hasBitbucketIssuesEnabled) {
     return await ensureBitbucketIssue({ title, reuseTitle, body });
   } else if (config.hasJiraProjectLinked) {
-    return await ensureJiraIssue({ title, reuseTitle, body });
+    return await jiraIssues.ensureIssue(
+      { title, reuseTitle, body },
+      config.jiraProjectKey,
+      config.repositoryUrl
+    );
   }
 
   logger.warn('Issues are disabled - cannot ensureIssue');
@@ -718,75 +632,6 @@ export async function ensureBitbucketIssue({
   return null;
 }
 
-export async function ensureJiraIssue({
-  title,
-  reuseTitle,
-  body,
-}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.debug(`ensureJiraIssue()`);
-  let description = readOnlyIssueBody(sanitize(body));
-  description = massageJiraMarkdown(description, config);
-
-  try {
-    let issues = await findOpenJiraIssues(title);
-    if (!issues.length && reuseTitle) {
-      issues = await findOpenJiraIssues(reuseTitle);
-    }
-    if (issues.length) {
-      // Close any duplicates
-      for (const issue of issues.slice(1)) {
-        await closeJiraIssue(issue.key);
-      }
-      const [issue] = issues;
-
-      if (
-        issue.fields.summary !== title ||
-        issue.fields.description !==
-          utils.convertMarkdownToAtlassianDocumentFormat(description.trim())
-      ) {
-        await jiraHttp.putJson(`/rest/api/3/issue/${issue.key}`, {
-          body: {
-            fields: {
-              summary: title,
-              description:
-                utils.convertMarkdownToAtlassianDocumentFormat(description),
-            },
-          },
-        });
-
-        logger.info(`Jira issue ${issue.key} updated`);
-
-        return 'updated';
-      }
-    } else {
-      await jiraHttp.postJson(`/rest/api/3/issue`, {
-        body: {
-          fields: {
-            project: {
-              key: config.jiraProjectKey,
-            },
-            summary: title,
-            description:
-              utils.convertMarkdownToAtlassianDocumentFormat(description),
-            issuetype: {
-              name: 'Task',
-            },
-            labels: ['RENOVATE'],
-          },
-        },
-      });
-
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      logger.info(`Jira issue created in project ${config.jiraProjectKey}`);
-
-      return 'created';
-    }
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Could not ensure jira issue');
-  }
-  return null;
-}
-
 /* istanbul ignore next */
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
@@ -800,7 +645,7 @@ export async function getIssueList(): Promise<Issue[]> {
     return await getBitbucketIssueList();
   }
 
-  return await getJiraIssueList();
+  return await jiraIssues.getIssueList(config.jiraProjectKey);
 }
 
 async function getBitbucketIssueList(): Promise<Issue[]> {
@@ -824,39 +669,6 @@ async function getBitbucketIssueList(): Promise<Issue[]> {
   }
 }
 
-async function getJiraIssueList(): Promise<Issue[]> {
-  try {
-    const jql = encodeURIComponent(
-      [
-        `project = "${config.jiraProjectKey}"`,
-        `reporter = currentUser()`,
-        'status != "done"',
-      ].join(' AND ')
-    );
-
-    const jiraIssues = await jiraHttp.getJson<JiraSearchResponse>(
-      `/rest/api/3/search?jql=${jql}`
-    );
-
-    const issues: Issue[] = [];
-    for (const issue of jiraIssues.body.issues) {
-      issues.push({
-        number: issue.id,
-        title: issue.fields.summary,
-        body: utils.convertAtlassianDocumentFormatToMarkdown(
-          issue.fields.description
-        ),
-        state: 'OPEN', // TODO Fix me
-      });
-    }
-
-    return issues;
-  } catch (err) {
-    logger.warn({ err }, 'Error finding jira issues');
-    return [];
-  }
-}
-
 export async function ensureIssueClosing(title: string): Promise<void> {
   /* istanbul ignore if */
   if (!config.hasBitbucketIssuesEnabled && !config.hasJiraProjectLinked) {
@@ -870,9 +682,9 @@ export async function ensureIssueClosing(title: string): Promise<void> {
     }
   }
 
-  const issues = await findOpenJiraIssues(title);
+  const issues = await jiraIssues.findOpenIssues(title, config.jiraProjectKey);
   for (const issue of issues) {
-    await closeJiraIssue(issue.key);
+    await jiraIssues.closeIssue(issue.key);
   }
 }
 
