@@ -1,9 +1,9 @@
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { NpmDatasource } from '../../datasource/npm';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   const npmDepends = regEx(/\nNpm\.depends\({([\s\S]*?)}\);/).exec(content);
   if (!npmDepends) {

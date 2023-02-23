@@ -1,6 +1,6 @@
 import { newlineRegex, regEx } from '../../../util/regex';
 import { ClojureDatasource } from '../../datasource/clojure';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { ExtractContext, ExtractedVariables } from './types';
 
 export function trimAtKey(str: string, kwName: string): string | null {
@@ -187,7 +187,7 @@ function collectDeps(
   return result;
 }
 
-export function extractPackageFile(content: string): PackageFile {
+export function extractPackageFile(content: string): PackageFileContent {
   const registryUrls = extractLeinRepos(content);
   const vars = extractVariables(content);
 

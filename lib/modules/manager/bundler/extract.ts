@@ -4,7 +4,7 @@ import { readLocalFile } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import { RubyGemsDatasource } from '../../datasource/rubygems';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { delimiters, extractRubyVersion } from './common';
 import { extractLockFileEntries } from './locked-version';
 
@@ -15,8 +15,8 @@ function formatContent(input: string): string {
 export async function extractPackageFile(
   content: string,
   fileName?: string
-): Promise<PackageFile | null> {
-  const res: PackageFile = {
+): Promise<PackageFileContent | null> {
+  const res: PackageFileContent = {
     registryUrls: [],
     deps: [],
   };

@@ -269,6 +269,76 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
+    it('Grouped pin & pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('Grouped pin can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'3.2.0'",
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('grouped pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'abcd',
+          newValue: 'v3',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'dcba',
+          newMajor: 2,
+          newValue: 'v2',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch = partial<BranchUpgradeConfig>([
         {

@@ -2,12 +2,8 @@ import JSON5 from 'json5';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  checkoutBranch,
-  getFile,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { checkoutBranch, getFile } from '../../../../util/git';
 import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
@@ -20,7 +16,7 @@ export async function rebaseMigrationBranch(
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
@@ -50,8 +46,8 @@ export async function rebaseMigrationBranch(
   contents = await MigratedDataFactory.applyPrettierFormatting(
     migratedConfigData
   );
-  return commitAndPush({
-    baseBranch: config.defaultBranch!,
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName,
     files: [
       {

@@ -74,6 +74,7 @@ nodejs 18.12.0
 ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
+pnpm 7.26.2
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
@@ -81,6 +82,7 @@ scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
 terraform 1.3.3
+terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
 dummy 1.2.3
@@ -296,6 +298,13 @@ dummy 1.2.3
             extractVersion: '^php-(?<version>\\S+)',
           },
           {
+            currentValue: '7.26.2',
+            datasource: 'npm',
+            packageName: 'pnpm',
+            depName: 'pnpm',
+            versioning: 'semver',
+          },
+          {
             currentValue: '3.11.0',
             datasource: 'github-tags',
             packageName: 'python/cpython',
@@ -340,6 +349,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
             depName: 'terraform',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.43.2',
+            datasource: 'github-releases',
+            packageName: 'gruntwork-io/terragrunt',
+            depName: 'terragrunt',
             extractVersion: '^v(?<version>\\S+)',
           },
           {

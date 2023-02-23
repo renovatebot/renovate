@@ -584,7 +584,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'success' }])
+        .reply(200, [
+          { context: 'renovate/stability-days', status: 'success' },
+          { context: 'renovate/other', status: 'success' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
@@ -1568,7 +1571,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1684,7 +1686,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1736,7 +1737,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1788,7 +1788,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1947,7 +1946,6 @@ describe('modules/platform/gitlab/index', () => {
         bodyStruct: {
           hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
         },
-        displayNumber: 'Merge Request #12345',
         hasAssignees: false,
         headPipelineStatus: undefined,
         labels: undefined,

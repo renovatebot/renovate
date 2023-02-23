@@ -29,11 +29,27 @@ export class GithubTagsDatasource extends Datasource {
     packageName: string,
     tag: string
   ): Promise<string | null> {
+    logger.trace(`github-tags.getTagCommit(${packageName}, ${tag})`);
     try {
       const tags = await queryTags({ packageName, registryUrl }, this.http);
+      // istanbul ignore if
+      if (!tags.length) {
+        logger.debug(
+          `github-tags.getTagCommit(): No tags found for ${packageName}`
+        );
+      }
       const tagItem = tags.find(({ version }) => version === tag);
       if (tagItem) {
-        return tagItem.hash;
+        if (tagItem.hash) {
+          return tagItem.hash;
+        }
+        logger.debug(
+          `github-tags.getTagCommit(): Tag ${tag} has no hash for ${packageName}`
+        );
+      } else {
+        logger.debug(
+          `github-tags.getTagCommit(): Tag ${tag} not found for ${packageName}`
+        );
       }
     } catch (err) {
       logger.debug(
