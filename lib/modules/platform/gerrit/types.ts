@@ -25,7 +25,6 @@ export interface GerritBranchInfo {
 
 export interface GerritFindPRConfig extends FindPRConfig {
   targetBranch?: string;
-  hashtag?: string;
   label?: string;
 }
 

@@ -1,10 +1,8 @@
-import { createHash, randomUUID } from 'crypto';
 import JSON5 from 'json5';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import * as git from '../../../util/git';
-import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
@@ -31,6 +29,7 @@ import { repoFingerprint } from '../util';
 
 import { smartTruncate } from '../utils/pr-body';
 import { client } from './client';
+import { configureScm } from './scm';
 import type {
   GerritChange,
   GerritFindPRConfig,
@@ -56,7 +55,6 @@ let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  approveAvailable: boolean;
   labels: { [key: string]: GerritLabelTypeInfo };
   labelMappings?: {
     stabilityDaysLabel?: string;
@@ -64,7 +62,6 @@ let config: {
   };
   gerritUsername?: string;
 } = {
-  approveAvailable: true,
   labels: {},
   labelMappings: {
     stabilityDaysLabel: 'Renovate-Stability',
@@ -126,13 +123,11 @@ export async function initRepo({
     repository,
     head: branchInfo.revision,
     config: projectInfo,
-    approveAvailable: projectInfo.labels
-      ? projectInfo.labels['Code-Review'] !== undefined
-      : false,
     labels: projectInfo.labels ?? {},
   };
   const baseUrl = endpoint ?? defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
+  configureScm(repository, config.gerritUsername!);
 
   // Initialize Git storage
   await git.initRepo({ url });
@@ -149,84 +144,12 @@ export async function initRepo({
   }
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
-    isFork: false, //TODO: wozu dient das?
+    isFork: false,
     repoFingerprint: repoFingerprint('', url), //TODO: understand the semantic? what cache could be stale/wrong?
   };
   return repoConfig;
 }
 
-export async function isBranchModified(branchName: string): Promise<boolean> {
-  const change = await findOwnPr({ branchName, state: 'open' }, true).then(
-    (res) => res.pop()
-  );
-  if (change) {
-    const currentGerritPatchset = change.revisions![change.current_revision!];
-    return currentGerritPatchset.uploader.username !== config.gerritUsername;
-  }
-  return false;
-}
-
-export async function isBranchBehindBase(
-  branchName: string,
-  baseBranch: string
-): Promise<boolean> {
-  const change = await findOwnPr(
-    { branchName, targetBranch: baseBranch, state: 'open' },
-    true
-  ).then((res) => res.pop());
-  if (change) {
-    const currentGerritPatchset = change.revisions![change.current_revision!];
-    return currentGerritPatchset.actions?.['rebase'].enabled === true;
-  }
-  return true;
-}
-
-export async function isBranchConflicted(
-  baseBranch: string,
-  branch: string
-): Promise<boolean> {
-  const change = await findOwnPr({
-    branchName: branch,
-    targetBranch: baseBranch,
-    //state: 'open',
-  }).then((res) => res.pop());
-  if (change) {
-    const mergeInfo = await client.getMergeableInfo(change);
-    return !mergeInfo.mergeable;
-  } else {
-    throw new Error( //TODO: is this correct? what about closed changes?
-      `There is no change with branch=${branch} and baseBranch=${baseBranch}`
-    );
-  }
-}
-
-export async function branchExists(branchName: string): Promise<boolean> {
-  const change = await findOwnPr({ branchName, state: 'open' }).then((res) =>
-    res.pop()
-  );
-  if (change) {
-    return true;
-  }
-  return git.branchExists(branchName);
-}
-
-export async function getBranchCommit(
-  branchName: string
-): Promise<CommitSha | null> {
-  const change = await findOwnPr({ branchName, state: 'open' }).then((res) =>
-    res.pop()
-  );
-  if (change) {
-    return change.current_revision!;
-  }
-  return git.getBranchCommit(branchName);
-}
-
-/**
- * in Gerrit: "Searching Changes"
- *  /changes/?q=$QUERY
- *  QUERY="owner:self+status:$STATE"
- */
 async function findOwnPr(
   findPRConfig: GerritFindPRConfig,
   refreshCache?: boolean
@@ -282,8 +205,8 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   if (prConfig.prBody) {
     await updatePullRequestBody(prConfig.number, prConfig.prBody);
   }
-  if (prConfig.platformOptions?.gerritAutoApprove && config.approveAvailable) {
-    await approveChange(prConfig.number);
+  if (prConfig.platformOptions?.gerritAutoApprove) {
+    await client.approveChange(prConfig.number);
   }
   if (prConfig.state && prConfig.state === 'closed') {
     await client.abandonChange(prConfig.number);
@@ -306,11 +229,8 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   ).then((res) => res.pop());
   if (pr) {
     await updatePullRequestBody(pr._number, prConfig.prBody);
-    if (
-      prConfig.platformOptions?.gerritAutoApprove &&
-      config.approveAvailable
-    ) {
-      await approveChange(pr._number);
+    if (prConfig.platformOptions?.gerritAutoApprove) {
+      await client.approveChange(pr._number);
     }
     return getPr(pr._number);
   } else {
@@ -368,27 +288,6 @@ async function checkForExistingMessage(
   );
 }
 
-async function approveChange(changeId: number): Promise<void> {
-  const isApproved = await checkForCodeReviewLabel(changeId, 'approved');
-  if (!isApproved) {
-    await client.setLabel(changeId, 'Code-Review', +2);
-  }
-}
-
-/**
- * check if the Label "Code-Review" not exists or is not approved
- * @param changeId
- * @param labelResult
- */
-async function checkForCodeReviewLabel(
-  changeId: number,
-  labelResult: 'approved' | 'rejected'
-): Promise<boolean> {
-  const change = await client.getChangeDetails(changeId);
-  const reviewLabels = change?.labels && change.labels['Code-Review'];
-  return reviewLabels === undefined || reviewLabels[labelResult] !== undefined;
-}
-
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   const change = (await findOwnPr({ branchName, state: 'open' })).pop();
   if (change) {
@@ -444,7 +343,7 @@ export async function getBranchStatus(
       return 'red';
     }
   }
-  return 'yellow'; //TODO: after create a new change it's not visible thru rest-api for some time..(eventual consistency)
+  return 'yellow';
 }
 
 /**
@@ -609,79 +508,6 @@ export function massageMarkdown(prBody: string): string {
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
-}
-
-/**
- * IMPORTANT: This acts as a wrapper to allow reuse of existing change-id in the commit message.
- * @param commit
- */
-export async function commitFiles(
-  commit: CommitFilesConfig
-): Promise<CommitSha | null> {
-  logger.info(`commitFiles(${commit.branchName}, ${commit.platformCommit!})`);
-  const existingChange = await findOwnPr(
-    {
-      targetBranch: commit.baseBranch,
-      branchName: commit.branchName,
-      state: 'open',
-    },
-    true
-  ).then((res) => res.pop());
-  let hasChanges = true;
-  const origMsg =
-    typeof commit.message === 'string' ? [commit.message] : commit.message;
-  commit.message = [
-    ...origMsg,
-    `Change-Id: ${existingChange?.change_id ?? generateChangeId()}`,
-  ];
-  const commitResult = await git.prepareCommit(commit);
-  if (commitResult) {
-    const { commitSha } = commitResult;
-    if (existingChange?.revisions && existingChange.current_revision) {
-      const fetchRefSpec =
-        existingChange.revisions[existingChange.current_revision].ref;
-      await git.fetchRevSpec(fetchRefSpec); //fetch current ChangeSet for git diff
-      hasChanges = await git.hasDiff('HEAD', 'FETCH_HEAD'); //avoid empty patchsets
-    }
-    if (hasChanges || commit.force) {
-      const pushResult = await git.pushCommit({
-        sourceRef: commit.branchName,
-        targetRef: `refs/for/${commit.baseBranch!}%t=sourceBranch-${
-          commit.branchName
-        }`,
-        files: commit.files,
-      });
-      if (pushResult) {
-        if (
-          existingChange &&
-          config.approveAvailable &&
-          wasApprovedByMe(existingChange)
-        ) {
-          //change was the old change before commit/push. we need to approve again only if it was previously approved from renovate only
-          await approveChange(existingChange._number);
-        }
-        return commitSha;
-      }
-    }
-  }
-  //empty commit, no changes in this Gerrit-Change
-  return null;
-}
-
-/**
- * This function should generate a Gerrit Change-ID analogous to the commit hook. We avoid the commit hook cause of security concerns.
- * random=$( (whoami ; hostname ; date; cat $1 ; echo $RANDOM) | git hash-object --stdin) prefixed with an 'I'.
- * TODO: Gerrit don't accept longer Change-IDs (sha256), but what happens with this https://git-scm.com/docs/hash-function-transition/ ?
- */
-function generateChangeId(): string {
-  return 'I' + createHash('sha1').update(randomUUID()).digest('hex');
-}
-
-function wasApprovedByMe(change: GerritChange): boolean | undefined {
-  return (
-    change.labels?.['Code-Review'].approved &&
-    change.labels['Code-Review'].approved.username === config.gerritUsername
-  );
 }
 
 export function deleteLabel(number: number, label: string): Promise<void> {

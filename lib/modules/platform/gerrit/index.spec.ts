@@ -34,11 +34,8 @@ const clientMock = mocked(_client);
 
 describe('modules/platform/gerrit/index', () => {
   beforeEach(async () => {
-    jest.resetModules();
-    jest.resetAllMocks();
     mergeToConfig({
       repository: 'test/repo',
-      approveAvailable: true,
       labels: {},
     });
     await gerrit.initPlatform({
@@ -107,9 +104,13 @@ describe('modules/platform/gerrit/index', () => {
         isFork: false,
         repoFingerprint: repoFingerprint(
           '',
-          `${gerritEndpointUrl}/a/test/repo`
+          `${gerritEndpointUrl}/a/${encodeURIComponent('test/repo')}`
         ),
       });
+      expect(git.initRepo).toHaveBeenCalledWith({
+        url: 'https://dev.gerrit.com/renovate/a/test%2Frepo',
+      });
+      expect(git.syncGit).toHaveBeenCalled();
     });
 
     it('initRepo() - abandon rejected changes', async () => {
@@ -134,181 +135,6 @@ describe('modules/platform/gerrit/index', () => {
         undefined,
       ]);
       expect(clientMock.abandonChange.mock.calls).toEqual([[1], [2]]);
-    });
-  });
-
-  describe('isBranchModified()', () => {
-    it('no open change for with branchname found -> not modified', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      await expect(
-        gerrit.isBranchModified('myBranchName')
-      ).resolves.toBeFalse();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-        ],
-        true
-      );
-    });
-
-    it('open change found for branchname, but not modified', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].uploader.username = 'user'; //== gerritUsername
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
-        gerrit.isBranchModified('myBranchName')
-      ).resolves.toBeFalse();
-    });
-
-    it('open change found for branchname, but modified from other user', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].uploader.username =
-        'other_user'; //!== gerritUsername
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
-        gerrit.isBranchModified('myBranchName')
-      ).resolves.toBeTrue();
-    });
-  });
-
-  describe('isBranchBehindBase()', () => {
-    it('no open change for with branchname found -> isBehind == true', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      await expect(
-        gerrit.isBranchBehindBase('myBranchName', 'baseBranch')
-      ).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-          'branch:baseBranch',
-        ],
-        true
-      );
-    });
-
-    it('open change found for branchname, rebase action is available -> isBehind == true ', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].actions = {
-        rebase: { enabled: true },
-      };
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
-        gerrit.isBranchBehindBase('myBranchName', 'baseBranch')
-      ).resolves.toBeTrue();
-    });
-
-    it('open change found for branch name, but rebase action is not available -> isBehind == false ', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].actions = { rebase: {} };
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
-        gerrit.isBranchBehindBase('myBranchName', 'baseBranch')
-      ).resolves.toBeFalse();
-    });
-  });
-
-  describe('isBranchConflicted()', () => {
-    it('no open change for with branch name found -> throws an error', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      await expect(
-        gerrit.isBranchConflicted('target', 'myBranchName')
-      ).rejects.toThrow(
-        `There is no change with branch=myBranchName and baseBranch=target`
-      );
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          '-is:wip',
-          'hashtag:sourceBranch-myBranchName',
-          'branch:target',
-        ],
-        undefined
-      );
-    });
-
-    it('open change found for branch name/baseBranch and its mergeable', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      clientMock.getMergeableInfo.mockResolvedValueOnce({
-        submit_type: 'MERGE_IF_NECESSARY',
-        mergeable: true,
-      });
-      await expect(
-        gerrit.isBranchConflicted('target', 'myBranchName')
-      ).resolves.toBeFalse();
-      expect(clientMock.getMergeableInfo).toHaveBeenCalledWith(change);
-    });
-
-    it('open change found for branch name/baseBranch and its NOT mergeable', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      clientMock.getMergeableInfo.mockResolvedValueOnce({
-        submit_type: 'MERGE_IF_NECESSARY',
-        mergeable: false,
-      });
-      await expect(
-        gerrit.isBranchConflicted('target', 'myBranchName')
-      ).resolves.toBeTrue();
-      expect(clientMock.getMergeableInfo).toHaveBeenCalledWith(change);
-    });
-  });
-
-  describe('branchExists()', () => {
-    it('no change found for branch name -> return result from git.branchExists', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(true);
-      await expect(gerrit.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-        ],
-        undefined
-      );
-      expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
-    });
-
-    it('open change found for branch name -> return true', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      await expect(gerrit.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(git.branchExists).not.toHaveBeenCalledWith('myBranchName');
-    });
-  });
-
-  describe('getBranchCommit()', () => {
-    it('no change found for branch name -> return result from git.getBranchCommit', async () => {
-      git.getBranchCommit.mockReturnValueOnce('shaHashValue');
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      await expect(gerrit.getBranchCommit('myBranchName')).resolves.toBe(
-        'shaHashValue'
-      );
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-        ],
-        undefined
-      );
-    });
-
-    it('open change found for branchname -> return true', () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(gerrit.getBranchCommit('myBranchName')).resolves.toBe(
-        change.current_revision
-      );
     });
   });
 
@@ -363,7 +189,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('updatePr()', () => {
     beforeAll(() => {
-      gerrit.mergeToConfig({ approveAvailable: true, labels: {} });
+      gerrit.mergeToConfig({ labels: {} });
     });
 
     it('updatePr() - new prTitle => copy to commit msg', async () => {
@@ -387,9 +213,6 @@ describe('modules/platform/gerrit/index', () => {
     it('updatePr() - auto approve enabled', async () => {
       const input = Fixtures.getJson('change-data.json');
       clientMock.getChange.mockResolvedValueOnce(input);
-      clientMock.getChangeDetails.mockResolvedValueOnce(
-        partial<GerritChange>({ labels: { 'Code-Review': {} } })
-      );
       await gerrit.updatePr({
         number: 123456,
         prTitle: input.subject,
@@ -397,11 +220,7 @@ describe('modules/platform/gerrit/index', () => {
           gerritAutoApprove: true,
         },
       });
-      expect(clientMock.setLabel).toHaveBeenCalledWith(
-        123456,
-        'Code-Review',
-        +2
-      );
+      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
 
     it('updatePr() - closed => abandon the change', async () => {
@@ -467,7 +286,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('createPr() - success', () => {
     beforeAll(() => {
-      gerrit.mergeToConfig({ approveAvailable: true, labels: {} });
+      gerrit.mergeToConfig({ labels: {} });
     });
 
     beforeEach(() => {
@@ -482,7 +301,7 @@ describe('modules/platform/gerrit/index', () => {
       ]);
     });
 
-    it('createPr() - update body/title and WITHOUT approve', async () => {
+    it('createPr() - update body/title WITHOUT approve', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -498,14 +317,10 @@ describe('modules/platform/gerrit/index', () => {
         'body',
         TAG_PULL_REQUEST_BODY
       );
+      expect(clientMock.approveChange).not.toHaveBeenCalled();
     });
 
-    it('createPr() - update body/title and ALREADY approved', async () => {
-      clientMock.getChangeDetails.mockResolvedValueOnce(
-        partial<GerritChange>({
-          labels: { 'Code-Review': { approved: { _account_id: 10000 } } },
-        })
-      );
+    it('createPr() - update body/title and approve', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
@@ -521,33 +336,7 @@ describe('modules/platform/gerrit/index', () => {
         'body',
         TAG_PULL_REQUEST_BODY
       );
-      expect(clientMock.setLabel).not.toHaveBeenCalled();
-    });
-
-    it('createPr() - update body/title and NOT approved => approve', async () => {
-      clientMock.getChangeDetails.mockResolvedValueOnce(
-        partial<GerritChange>({ labels: { 'Code-Review': {} } })
-      );
-      const pr = await gerrit.createPr({
-        sourceBranch: 'source',
-        targetBranch: 'target',
-        prTitle: 'title',
-        prBody: 'body',
-        platformOptions: {
-          gerritAutoApprove: true,
-        },
-      });
-      expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessage).toHaveBeenCalledWith(
-        123456,
-        'body',
-        TAG_PULL_REQUEST_BODY
-      );
-      expect(clientMock.setLabel).toHaveBeenCalledWith(
-        123456,
-        'Code-Review',
-        +2
-      );
+      expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
     });
   });
 
@@ -657,7 +446,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('getBranchStatusCheck()', () => {
     describe('GerritLabel is not available', () => {
       beforeAll(() => {
-        mergeToConfig({ approveAvailable: true, labels: {} });
+        mergeToConfig({ labels: {} });
       });
 
       it.each([
@@ -675,7 +464,6 @@ describe('modules/platform/gerrit/index', () => {
     describe('GerritLabel is available', () => {
       beforeEach(() => {
         mergeToConfig({
-          approveAvailable: true,
           labelMappings: {
             stabilityDaysLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
@@ -728,7 +516,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('setBranchStatus()', () => {
     describe('GerritLabel is not available', () => {
       beforeEach(() => {
-        mergeToConfig({ approveAvailable: true, labels: {} });
+        mergeToConfig({ labels: {} });
       });
 
       it('setBranchStatus(renovate/stability-days)', async () => {
@@ -758,7 +546,6 @@ describe('modules/platform/gerrit/index', () => {
     describe('GerritLabel is available', () => {
       beforeEach(() => {
         mergeToConfig({
-          approveAvailable: true,
           labelMappings: {
             stabilityDaysLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
@@ -932,7 +719,6 @@ describe('modules/platform/gerrit/index', () => {
       mergeToConfig({
         repository: 'repo',
         head: 'master',
-        approveAvailable: true,
         labels: {},
       });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
@@ -947,7 +733,6 @@ describe('modules/platform/gerrit/index', () => {
       mergeToConfig({
         repository: undefined,
         head: undefined,
-        approveAvailable: true,
         labels: {},
       });
       await expect(gerrit.getRawFile('renovate.json')).resolves.toBe('{}');
@@ -982,132 +767,6 @@ describe('modules/platform/gerrit/index', () => {
       );
     });
     //TODO: add some tests for Gerrit-specific replacements..
-  });
-
-  describe('commitFiles()', () => {
-    it('commitFiles() - empty commit', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      git.prepareCommit.mockResolvedValueOnce(null); //empty commit
-
-      await expect(
-        gerrit.commitFiles({
-          branchName: 'renovate/dependency-1.x',
-          baseBranch: 'main',
-          message: 'commit msg',
-          files: [],
-        })
-      ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-renovate/dependency-1.x',
-          'branch:main',
-        ],
-        true
-      );
-    });
-
-    it('commitFiles() - create first Patch', async () => {
-      clientMock.findChanges.mockResolvedValueOnce([]);
-      git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
-        files: [],
-      });
-      git.pushCommit.mockResolvedValueOnce(true);
-
-      expect(
-        await gerrit.commitFiles({
-          branchName: 'renovate/dependency-1.x',
-          baseBranch: 'main',
-          message: 'commit msg',
-          files: [],
-        })
-      ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
-        baseBranch: 'main',
-        branchName: 'renovate/dependency-1.x',
-        files: [],
-        message: ['commit msg', expect.stringMatching(/Change-Id: I.{32}/)],
-      });
-      expect(git.pushCommit).toHaveBeenCalledWith({
-        files: [],
-        sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
-      });
-    });
-
-    it('commitFiles() - existing change-set without new changes', async () => {
-      const existingChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
-      git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
-        files: [],
-      });
-      git.pushCommit.mockResolvedValueOnce(true);
-      git.hasDiff.mockResolvedValueOnce(false); //no changes
-
-      expect(
-        await gerrit.commitFiles({
-          branchName: 'renovate/dependency-1.x',
-          baseBranch: 'main',
-          message: ['commit msg'],
-          files: [],
-        })
-      ).toBeNull();
-      expect(git.prepareCommit).toHaveBeenCalledWith({
-        baseBranch: 'main',
-        branchName: 'renovate/dependency-1.x',
-        files: [],
-        message: ['commit msg', 'Change-Id: ...'],
-      });
-      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
-      expect(git.pushCommit).toHaveBeenCalledTimes(0);
-    });
-
-    it('commitFiles() - existing change-set with new changes - auto-approve again', async () => {
-      const existingChange = Fixtures.getJson('change-data.json');
-      clientMock.findChanges.mockResolvedValueOnce([existingChange]);
-      clientMock.getChangeDetails.mockResolvedValueOnce(
-        partial<GerritChange>({ labels: { 'Code-Review': {} } })
-      );
-      git.prepareCommit.mockResolvedValueOnce({
-        commitSha: 'commitSha',
-        parentCommitSha: 'parentSha',
-        files: [],
-      });
-      git.pushCommit.mockResolvedValueOnce(true);
-      git.hasDiff.mockResolvedValueOnce(true);
-
-      expect(
-        await gerrit.commitFiles({
-          branchName: 'renovate/dependency-1.x',
-          baseBranch: 'main',
-          message: 'commit msg',
-          files: [],
-        })
-      ).toBe('commitSha');
-      expect(git.prepareCommit).toHaveBeenCalledWith({
-        baseBranch: 'main',
-        branchName: 'renovate/dependency-1.x',
-        files: [],
-        message: ['commit msg', 'Change-Id: ...'],
-      });
-      expect(git.fetchRevSpec).toHaveBeenCalledWith('refs/changes/1/2');
-      expect(git.pushCommit).toHaveBeenCalledWith({
-        files: [],
-        sourceRef: 'renovate/dependency-1.x',
-        targetRef: 'refs/for/main%t=sourceBranch-renovate/dependency-1.x',
-      });
-      expect(clientMock.setLabel).toHaveBeenCalledWith(
-        123456,
-        'Code-Review',
-        +2
-      );
-    });
   });
 
   describe('currently unused/not-implemented functions', () => {

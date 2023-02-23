@@ -4,7 +4,11 @@ import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { GerritClient } from './client';
-import type { GerritChangeMessageInfo, GerritMergeableInfo } from './types';
+import type {
+  GerritChange,
+  GerritChangeMessageInfo,
+  GerritMergeableInfo,
+} from './types';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
@@ -113,20 +117,11 @@ describe('modules/platform/gerrit/client', () => {
       const input = Fixtures.getJson('change-data.json');
       httpMock
         .scope(gerritEndpointUrl)
-        .get('/a/changes/123456')
+        .get(
+          '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION'
+        )
         .reply(200, gerritRestResponse(input), jsonResultHeader);
       return expect(client.getChange(123456)).resolves.toEqual(input);
-    });
-  });
-
-  describe('getChangeDetails()', () => {
-    it('get', () => {
-      const input = Fixtures.getJson('change-data.json');
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/changes/123456/detail')
-        .reply(200, gerritRestResponse(input), jsonResultHeader);
-      return expect(client.getChangeDetails(123456)).resolves.toEqual(input);
     });
   });
 
@@ -228,7 +223,7 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('setLabel', () => {
+  describe('setLabel()', () => {
     it('setLabel', () => {
       httpMock
         .scope(gerritEndpointUrl)
@@ -240,7 +235,7 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('addReviewer', () => {
+  describe('addReviewer()', () => {
     it('add', () => {
       httpMock
         .scope(gerritEndpointUrl)
@@ -252,7 +247,7 @@ describe('modules/platform/gerrit/client', () => {
     });
   });
 
-  describe('addAssignee', () => {
+  describe('addAssignee()', () => {
     it('add', () => {
       httpMock
         .scope(gerritEndpointUrl)
@@ -275,6 +270,102 @@ describe('modules/platform/gerrit/client', () => {
       return expect(
         client.getFile('test/repo', 'main', 'renovate.json')
       ).resolves.toBe('{}');
+    });
+  });
+
+  describe('approveChange()', () => {
+    it('already approved - do nothing', async () => {
+      const input = Fixtures.getJson('change-data.json');
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get((url) => url.includes('/a/changes/123456?o='))
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
+      await expect(client.approveChange(123456)).toResolve();
+    });
+
+    it('label not available - do nothing', async () => {
+      const input = Fixtures.getJson('change-data.json');
+      input.labels = {};
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get((url) => url.includes('/a/changes/123456?o='))
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
+
+      await expect(client.approveChange(123456)).toResolve();
+    });
+
+    it('not already approved - approve now', async () => {
+      const input = Fixtures.getJson('change-data.json');
+      input.labels = { 'Code-Review': {} };
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get((url) => url.includes('/a/changes/123456?o='))
+        .reply(200, gerritRestResponse(input), jsonResultHeader);
+      const approveMock = httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/revisions/current/review', {
+          labels: { 'Code-Review': +2 },
+        })
+        .reply(200, gerritRestResponse(''), jsonResultHeader);
+      await expect(client.approveChange(123456)).toResolve();
+      expect(approveMock.isDone()).toBeTrue();
+    });
+  });
+
+  describe('wasApprovedBy()', () => {
+    it('label not exists', () => {
+      expect(
+        client.wasApprovedBy(partial<GerritChange>({}), 'user')
+      ).toBeUndefined();
+    });
+
+    it('not approved by anyone', () => {
+      expect(
+        client.wasApprovedBy(
+          partial<GerritChange>({
+            labels: {
+              'Code-Review': {},
+            },
+          }),
+          'user'
+        )
+      ).toBeUndefined();
+    });
+
+    it('approved by given user', () => {
+      expect(
+        client.wasApprovedBy(
+          partial<GerritChange>({
+            labels: {
+              'Code-Review': {
+                approved: {
+                  _account_id: 1,
+                  username: 'user',
+                },
+              },
+            },
+          }),
+          'user'
+        )
+      ).toBeTrue();
+    });
+
+    it('approved by given other', () => {
+      expect(
+        client.wasApprovedBy(
+          partial<GerritChange>({
+            labels: {
+              'Code-Review': {
+                approved: {
+                  _account_id: 1,
+                  username: 'other',
+                },
+              },
+            },
+          }),
+          'user'
+        )
+      ).toBeFalse();
     });
   });
 });

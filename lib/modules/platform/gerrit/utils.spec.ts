@@ -28,13 +28,13 @@ describe('modules/platform/gerrit/utils', () => {
         password: '123',
       });
       const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl);
-      expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web/apps');
+      expect(repoUrl).toBe('https://abc:123@gerrit.example.com/a/web%2Fapps');
     });
 
     it('create a git url without username/password', () => {
       hostRules.find.mockReturnValue({});
       const repoUrl = utils.getGerritRepoUrl('web/apps', baseUrl);
-      expect(repoUrl).toBe('https://gerrit.example.com/a/web/apps');
+      expect(repoUrl).toBe('https://gerrit.example.com/a/web%2Fapps');
     });
 
     it('throws on invalid endpoint', () => {

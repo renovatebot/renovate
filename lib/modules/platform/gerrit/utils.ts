@@ -26,7 +26,7 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   url.protocol = url.protocol.slice(0, -1);
   url.username = opts.username ?? '';
   url.password = opts.password ?? '';
-  url.pathname = `${url.pathname}a/${repository}`;
+  url.pathname = `${url.pathname}a/${encodeURIComponent(repository)}`;
   logger.debug(
     { url: url.toString() },
     'using URL based on configured endpoint'

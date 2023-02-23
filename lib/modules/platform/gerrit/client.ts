@@ -54,7 +54,7 @@ export class GerritClient {
   ): Promise<GerritChange[]> {
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
-        filter.filter((s) => typeof s !== 'undefined').join('+') +
+        filter.join('+') +
         this.requestDetails.map((det) => '&o=' + det).join(''),
       { useCache: !refreshCache }
     );
@@ -63,17 +63,10 @@ export class GerritClient {
 
   async getChange(changeNumber: number): Promise<GerritChange> {
     const changes = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}` //TODO: add requestDetails options
+      `a/changes/${changeNumber}?` +
+        this.requestDetails.map((det) => 'o=' + det).join('&')
     );
     return changes.body;
-  }
-
-  async getChangeDetails(changeNumber: number): Promise<GerritChange> {
-    const change = await this.gerritHttp.getJson<GerritChange>(
-      `a/changes/${changeNumber}/detail`,
-      { useCache: false }
-    );
-    return change.body;
   }
 
   async getMergeableInfo(change: GerritChange): Promise<GerritMergeableInfo> {
@@ -156,6 +149,26 @@ export class GerritClient {
       )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`
     );
     return Promise.resolve(atob(base64Content.body)); //TODO: switch to Buffer.from...
+  }
+
+  async approveChange(changeId: number): Promise<void> {
+    const isApproved = await this.checkIfApproved(changeId);
+    if (!isApproved) {
+      await this.setLabel(changeId, 'Code-Review', +2);
+    }
+  }
+
+  async checkIfApproved(changeId: number): Promise<boolean> {
+    const change = await client.getChange(changeId);
+    const reviewLabels = change?.labels && change.labels['Code-Review'];
+    return reviewLabels === undefined || reviewLabels.approved !== undefined;
+  }
+
+  wasApprovedBy(change: GerritChange, username: string): boolean | undefined {
+    return (
+      change.labels?.['Code-Review'].approved &&
+      change.labels['Code-Review'].approved.username === username
+    );
   }
 }
 
