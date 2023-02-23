@@ -1971,6 +1971,14 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
+    name: 'forkModeDisallowMaintainerEdits',
+    description:
+      'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
+    type: 'boolean',
+    supportedPlatforms: ['github'],
+    default: false,
+  },
+  {
     name: 'confidential',
     description:
       'If enabled, issues created by Renovate are set as confidential.',
