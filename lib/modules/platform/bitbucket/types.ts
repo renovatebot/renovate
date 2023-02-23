@@ -47,7 +47,11 @@ export interface RepoInfoBody {
   mainbranch: { name: string };
   has_issues: boolean;
   uuid: string;
-  links: { html: { href: string } };
+  links: {
+    html: {
+      href: string;
+    };
+  };
 }
 
 export interface MergeRequestBody {
