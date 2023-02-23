@@ -1,5 +1,4 @@
 import type { LogLevel } from 'bunyan';
-import type { Range } from 'semver';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
@@ -317,7 +316,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   matchCurrentValue?: string;
-  matchCurrentVersion?: string | Range;
+  matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
