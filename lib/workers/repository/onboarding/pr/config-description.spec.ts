@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import type { PackageFileContent } from '../../../../modules/manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
@@ -18,7 +18,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
     });
 
     it('returns a full list', () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [],
         dockerfile: [],
       };

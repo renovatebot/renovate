@@ -16,10 +16,12 @@ import {
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { fingerprint } from '../../../../util/fingerprint';
+import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -32,6 +34,8 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
+import { getPrCache, setPrCache } from './pr-cache';
+import { generatePrFingerprintConfig, validatePrCache } from './pr-fingerprint';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -97,16 +101,27 @@ export async function ensurePr(
   );
 
   const config: BranchConfig = { ...prConfig };
-
+  const filteredPrConfig = generatePrFingerprintConfig(config);
+  const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
-  // Check if existing PR exists
+  // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
+  const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
+    if (prCache) {
+      logger.trace({ prCache }, 'Found existing PR cache');
+      // return if pr cache is valid and pr was not changed in the past 24hrs
+      if (validatePrCache(prCache, prFingerprint)) {
+        return { type: 'with-pr', pr: existingPr };
+      }
+    } else if (config.repositoryCache === 'enabled') {
+      logger.debug('PR cache not found');
+    }
   }
   config.upgrades = [];
 
@@ -306,6 +321,8 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
+        // adds or-cache for existing PRs
+        setPrCache(branchName, prFingerprint, false);
         logger.debug(
           `Pull Request #${existingPr.number} does not need updating`
         );
@@ -339,6 +356,7 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        setPrCache(branchName, prFingerprint, true);
       }
       return { type: 'with-pr', pr: existingPr };
     }
@@ -389,7 +407,7 @@ export async function ensurePr(
             { branch: branchName },
             'Deleting branch due to server error'
           );
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
         return { type: 'without-pr', prBlockedBy: 'Error' };
       }
@@ -430,6 +448,7 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
+      setPrCache(branchName, prFingerprint, true);
       logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }

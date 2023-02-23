@@ -136,17 +136,13 @@ function getDepName(url: string | null): string | null {
   }
 }
 
-export function extractPackageFile(
-  content: string,
-  packageFile: string | null = null
-): PackageFileContent | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   if (!content) {
     return null;
   }
 
   const deps: PackageDependency[] = [];
   const result: PackageFileContent = {
-    packageFile,
     deps,
   };
 

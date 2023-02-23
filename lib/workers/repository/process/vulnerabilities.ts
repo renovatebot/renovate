@@ -9,7 +9,7 @@ import { logger } from '../../../logger';
 import { getDefaultVersioning } from '../../../modules/datasource';
 import type {
   PackageDependency,
-  PackageFileContent,
+  PackageFile,
 } from '../../../modules/manager/types';
 import {
   VersioningApi,
@@ -52,7 +52,7 @@ export class Vulnerabilities {
 
   async fetchVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFileContent[]>
+    packageFiles: Record<string, PackageFile[]>
   ): Promise<void> {
     const managers = Object.keys(packageFiles);
     const allManagerJobs = managers.map((manager) =>
@@ -63,7 +63,7 @@ export class Vulnerabilities {
 
   private async fetchManagerVulnerabilities(
     config: RenovateConfig,
-    packageFiles: Record<string, PackageFileContent[]>,
+    packageFiles: Record<string, PackageFile[]>,
     manager: string
   ): Promise<void> {
     const managerConfig = getManagerConfig(config, manager);
@@ -86,7 +86,7 @@ export class Vulnerabilities {
   private async fetchManagerPackageFileVulnerabilities(
     config: RenovateConfig,
     managerConfig: RenovateConfig,
-    pFile: PackageFileContent
+    pFile: PackageFile
   ): Promise<void> {
     const { packageFile } = pFile;
     const packageFileConfig = mergeChildConfig(managerConfig, pFile);
@@ -108,7 +108,7 @@ export class Vulnerabilities {
   }
 
   private async fetchDependencyVulnerabilities(
-    packageFileConfig: RenovateConfig & PackageFileContent,
+    packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency
   ): Promise<PackageRule[]> {
     const ecosystem = Vulnerabilities.datasourceEcosystemMap[dep.datasource!];
@@ -199,10 +199,11 @@ export class Vulnerabilities {
 
       this.sortByFixedVersion(packageRules, versioningApi);
     } catch (err) {
-      logger.debug(
+      logger.warn(
         { err },
         `Error fetching vulnerability information for ${packageName}`
       );
+      return [];
     }
 
     return packageRules;
@@ -237,9 +238,11 @@ export class Vulnerabilities {
     for (const event of events) {
       if (event.introduced === '0') {
         zeroEvent = event;
-        continue;
+      } else if (versioningApi.isVersion(Object.values(event)[0])) {
+        sortedCopy.push(event);
+      } else {
+        logger.debug({ event }, 'Skipping OSV event with invalid version');
       }
-      sortedCopy.push(event);
     }
 
     sortedCopy.sort((a, b) =>
@@ -341,9 +344,15 @@ export class Vulnerabilities {
       }
 
       for (const event of range.events) {
-        if (is.nonEmptyString(event.fixed)) {
+        if (
+          is.nonEmptyString(event.fixed) &&
+          versioningApi.isVersion(event.fixed)
+        ) {
           fixedVersions.push(event.fixed);
-        } else if (is.nonEmptyString(event.last_affected)) {
+        } else if (
+          is.nonEmptyString(event.last_affected) &&
+          versioningApi.isVersion(event.last_affected)
+        ) {
           lastAffectedVersions.push(event.last_affected);
         }
       }
@@ -394,7 +403,7 @@ export class Vulnerabilities {
   }
 
   private convertToPackageRule(
-    packageFileConfig: RenovateConfig & PackageFileContent,
+    packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency,
     packageName: string,
     depVersion: string,

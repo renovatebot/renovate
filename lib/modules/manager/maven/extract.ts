@@ -6,11 +6,7 @@ import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { MavenDatasource } from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type { MavenProp } from './types';
 
 export function parsePom(raw: string): XmlDocument | null {
@@ -249,15 +245,15 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
-interface MavenInterimPackageFile extends PackageFileContent {
+interface MavenInterimPackageFile extends PackageFile {
   mavenProps?: Record<string, any>;
   parent?: string;
 }
 
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
-): PackageFileContent<Record<string, any>> | null {
+  packageFile: string
+): PackageFile | null {
   if (!rawContent) {
     return null;
   }
@@ -373,16 +369,14 @@ export function parseSettings(raw: string): XmlDocument | null {
   return null;
 }
 
-export function resolveParents(
-  packages: PackageFileContent[]
-): PackageFileContent[] {
+export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
   const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -460,9 +454,7 @@ export function resolveParents(
   return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: MavenInterimPackageFile[]
-): PackageFileContent<Record<string, any>>[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
     delete packageFile.parent;
@@ -476,8 +468,8 @@ function cleanResult(
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFileContent[]> {
-  const packages: PackageFileContent[] = [];
+): Promise<PackageFile[]> {
+  const packages: PackageFile[] = [];
   const additionalRegistryUrls: string[] = [];
 
   for (const packageFile of packageFiles) {
