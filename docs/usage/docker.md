@@ -292,7 +292,8 @@ To obtain a login password, using the command `aws ecr get-login-password` or th
 
 ##### Using an authorization token
 
-To authenticate using an authorization token, provide only the token in your config. For example:
+To authenticate with an authorization token, put the token in your config.
+For example:
 
 ```json
 {
