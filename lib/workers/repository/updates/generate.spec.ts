@@ -270,7 +270,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades different version', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -323,7 +323,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades different version but same value', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -366,7 +366,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades different value but same version', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -409,7 +409,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple digest updates', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'foo/bar',
@@ -466,7 +466,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('fixes different messages', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depA',
@@ -762,7 +762,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles @types specially', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           commitBodyTable: true,
@@ -827,7 +827,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles @types specially (reversed)', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -942,7 +942,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('combines prBodyColumns', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -959,7 +959,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('sorts upgrades, without position first', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -1000,7 +1000,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('passes through pendingChecks', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1024,7 +1024,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('filters pendingChecks', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1047,7 +1047,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('displays pending versions', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1081,7 +1081,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('merge excludeCommitPaths if appears in upgrade', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -1137,7 +1137,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('prevents issue with duplicating "v" character', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -1171,7 +1171,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('dedupes duplicate table rows', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           commitBodyTable: true,
           manager: 'some-manager',
