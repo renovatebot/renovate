@@ -69,6 +69,7 @@ describe('modules/platform/index', () => {
         {
           hostType: 'bitbucket',
           matchHost: 'api.bitbucket.org',
+          resolvedHost: 'api.bitbucket.org',
           password: '123',
           username: 'abc',
         },
@@ -109,6 +110,7 @@ describe('modules/platform/index', () => {
         {
           hostType: 'github',
           matchHost: 'ghe.renovatebot.com',
+          resolvedHost: 'ghe.renovatebot.com',
           token: '123',
           username: 'abc',
         },
