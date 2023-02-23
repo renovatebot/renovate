@@ -378,7 +378,6 @@ describe('modules/platform/azure/index', () => {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
         createdAt: undefined,
-        displayNumber: 'Pull Request #1',
         labels: [],
         number: 1,
         pullRequestId: 1,
@@ -570,7 +569,12 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');
@@ -673,7 +677,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -695,7 +698,6 @@ describe('modules/platform/azure/index', () => {
           ({
             createPullRequest: jest.fn(() => ({
               pullRequestId: 456,
-              displayNumber: `Pull Request #456`,
             })),
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
@@ -715,7 +717,6 @@ describe('modules/platform/azure/index', () => {
       const prResult = {
         pullRequestId: 456,
         title: 'The Title',
-        displayNumber: `Pull Request #456`,
         createdBy: {
           id: 123,
         },
@@ -758,7 +759,6 @@ describe('modules/platform/azure/index', () => {
       await initRepo({ repository: 'some/repo' });
       const prResult = {
         pullRequestId: 456,
-        displayNumber: 'Pull Request #456',
         createdBy: {
           id: 123,
           url: 'user-url',

@@ -36,7 +36,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
   dotnet: {
-    datasource: 'dotnet',
+    datasource: 'dotnet-version',
     depName: 'dotnet-sdk',
     versioning: semverVersioningId,
   },
@@ -71,7 +71,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   java: {
-    datasource: 'adoptium-java',
+    datasource: 'java-version',
     depName: 'java',
     versioning: npmVersioningId,
   },

@@ -4,6 +4,9 @@ exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
 {
   "maven": [
     {
+      "constraints": {
+        "some": "constraint",
+      },
       "deps": [
         {
           "datasource": "maven",

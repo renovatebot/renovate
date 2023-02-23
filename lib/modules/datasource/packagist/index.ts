@@ -1,15 +1,15 @@
-import URL from 'url';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { ensureTrailingSlash, joinUrlParts } from '../../../util/url';
+import { joinUrlParts, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as schema from './schema';
+import { extractDepReleases } from './schema';
 import type {
   AllPackages,
   PackageMeta,
@@ -41,7 +41,7 @@ export class PackagistDatasource extends Datasource {
   }
 
   private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-    const url = URL.resolve(ensureTrailingSlash(regUrl), 'packages.json');
+    const url = resolveBaseUrl(regUrl, 'packages.json');
     const opts = PackagistDatasource.getHostOpts(url);
     const res = (await this.http.getJson<PackageMeta>(url, opts)).body;
     const meta: RegistryMeta = {
@@ -118,30 +118,6 @@ export class PackagistDatasource extends Datasource {
     return packagistFile;
   }
 
-  /* istanbul ignore next */
-  private static extractDepReleases(
-    composerReleases: unknown
-  ): ReleaseResult | null {
-    const parsedRecord =
-      schema.ComposerReleasesRecord.safeParse(composerReleases);
-    if (parsedRecord.success) {
-      return schema.extractReleaseResult(Object.values(parsedRecord.data));
-    }
-
-    const parsedArray =
-      schema.ComposerReleasesArray.safeParse(composerReleases);
-    if (parsedArray.success) {
-      logger.once.info('Packagist: extracting releases from array');
-      return schema.extractReleaseResult(parsedArray.data);
-    }
-
-    logger.once.info(
-      { composerReleases },
-      'Packagist: unknown format to extract from'
-    );
-    return null;
-  }
-
   @cache({
     namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => regUrl,
@@ -179,7 +155,7 @@ export class PackagistDatasource extends Datasource {
       tasks.push(async () => {
         const res = await this.getPackagistFile(regUrl, file);
         for (const [key, val] of Object.entries(res.packages ?? {})) {
-          includesPackages[key] = PackagistDatasource.extractDepReleases(val);
+          includesPackages[key] = extractDepReleases(val);
         }
       });
     }
@@ -240,9 +216,7 @@ export class PackagistDatasource extends Datasource {
         includesPackages,
       } = allPackages;
       if (packages?.[packageName]) {
-        const dep = PackagistDatasource.extractDepReleases(
-          packages[packageName]
-        );
+        const dep = extractDepReleases(packages[packageName]);
         return dep;
       }
       if (includesPackages?.[packageName]) {
@@ -250,14 +224,14 @@ export class PackagistDatasource extends Datasource {
       }
       let pkgUrl: string;
       if (packageName in providerPackages) {
-        pkgUrl = URL.resolve(
+        pkgUrl = resolveBaseUrl(
           registryUrl,
           providersUrl!
             .replace('%package%', packageName)
             .replace('%hash%', providerPackages[packageName])
         );
       } else if (providersLazyUrl) {
-        pkgUrl = URL.resolve(
+        pkgUrl = resolveBaseUrl(
           registryUrl,
           providersLazyUrl.replace('%package%', packageName)
         );
@@ -268,7 +242,7 @@ export class PackagistDatasource extends Datasource {
       // TODO: fix types (#9610)
       const versions = (await this.http.getJson<any>(pkgUrl, opts)).body
         .packages[packageName];
-      const dep = PackagistDatasource.extractDepReleases(versions);
+      const dep = extractDepReleases(versions);
       logger.trace({ dep }, 'dep');
       return dep;
     } catch (err) /* istanbul ignore next */ {

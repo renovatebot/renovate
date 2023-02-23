@@ -359,20 +359,24 @@ export async function updateArtifacts({
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();
-    if (!status.modified.includes(sumFileName)) {
+    if (
+      !status.modified.includes(sumFileName) &&
+      !status.modified.includes(goModFileName)
+    ) {
       return null;
     }
 
-    logger.debug('Returning updated go.sum');
-    const res: UpdateArtifactsResult[] = [
-      {
+    const res: UpdateArtifactsResult[] = [];
+    if (status.modified.includes(sumFileName)) {
+      logger.debug('Returning updated go.sum');
+      res.push({
         file: {
           type: 'addition',
           path: sumFileName,
           contents: await readLocalFile(sumFileName),
         },
-      },
-    ];
+      });
+    }
 
     // Include all the .go file import changes
     if (isImportPathUpdateRequired) {

@@ -16,8 +16,8 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'foo/bar',
-      currentValue: 'abcdef0123abcdef0123abcdef0123abcdef0123',
+      packageName: 'foo/bar',
+      currentDigest: 'abcdef0123abcdef0123abcdef0123abcdef0123',
     });
 
     // Archive of a release
@@ -27,7 +27,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-releases',
-      repo: 'foo/bar',
+      packageName: 'foo/bar',
       currentValue: '1.2.3',
     });
 
@@ -38,7 +38,7 @@ describe('modules/manager/bazel/rules/index', () => {
       )
     ).toEqual({
       datasource: 'github-tags',
-      repo: 'aspect-build/rules_js',
+      packageName: 'aspect-build/rules_js',
       currentValue: 'v1.1.2',
     });
   });
@@ -357,10 +357,16 @@ describe('modules/manager/bazel/rules/index', () => {
           artifacts: [
             'com.example1:foo:1.1.1',
             {
-              artifact: 'bar',
-              function: 'maven.artifact',
+              _function: 'maven.artifact',
               group: 'com.example2',
+              artifact: 'bar',
               version: '2.2.2',
+            },
+            {
+              _function: 'maven.artifact',
+              '0': 'com.example3',
+              '1': 'baz',
+              '2': '3.3.3',
             },
           ],
           repositories: [
@@ -384,6 +390,16 @@ describe('modules/manager/bazel/rules/index', () => {
           datasource: 'maven',
           depType: 'maven_install',
           depName: 'com.example2:bar',
+          registryUrls: [
+            'https://example1.com/maven2',
+            'https://example2.com/maven2',
+          ],
+        },
+        {
+          currentValue: '3.3.3',
+          datasource: 'maven',
+          depType: 'maven_install',
+          depName: 'com.example3:baz',
           registryUrls: [
             'https://example1.com/maven2',
             'https://example2.com/maven2',
