@@ -10,7 +10,6 @@ const sbtDependencyFile = Fixtures.get(`dependency-file.scala`);
 const sbtPrivateVariableDependencyFile = Fixtures.get(
   `private-variable-dependency-file.scala`
 );
-const sbtBuildProperties = Fixtures.get('build.properties');
 
 describe('modules/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
@@ -381,16 +380,21 @@ describe('modules/manager/sbt/extract', () => {
     });
 
     it('extract sbt version', () => {
-      expect(extractPackageFile(sbtBuildProperties)).toMatchObject({
+      expect(
+        extract(
+          `sbt.version=1.6.0
+      `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
         deps: [
           {
-            datasource: 'github-tags',
+            datasource: 'github-releases',
             packageName: 'sbt/sbt',
             depName: 'sbt/sbt',
             currentValue: '1.6.0',
             versioning: 'semver',
             extractVersion: '^v(?<version>\\S+)',
-            registryUrls: ['https://github.com'],
           },
         ],
         packageFileVersion: undefined,

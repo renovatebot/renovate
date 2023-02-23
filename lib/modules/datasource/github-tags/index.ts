@@ -12,14 +12,10 @@ import type {
   ReleaseResult,
 } from '../types';
 
-export const GITHUB_TAGS_REPO = 'https://github.com';
-
-export const defaultRegistryUrls = [GITHUB_TAGS_REPO];
-
 export class GithubTagsDatasource extends Datasource {
   static readonly id = 'github-tags';
 
-  override readonly defaultRegistryUrls = defaultRegistryUrls;
+  override readonly defaultRegistryUrls = ['https://github.com'];
 
   override http: GithubHttp;
 
