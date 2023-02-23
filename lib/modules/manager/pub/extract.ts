@@ -53,7 +53,6 @@ export function extractPackageFile(
 
     if (deps.length) {
       return {
-        packageFile,
         datasource: DartDatasource.id,
         deps,
       };

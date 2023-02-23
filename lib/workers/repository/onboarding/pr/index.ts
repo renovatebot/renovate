@@ -2,16 +2,12 @@ import is from '@sindresorhus/is';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import type { PackageFileContent } from '../../../../modules/manager/types';
+import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import {
-  deleteBranch,
-  getFile,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hasha';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
@@ -30,7 +26,7 @@ import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFileContent[]> | null,
+  packageFiles: Record<string, PackageFile[]> | null,
   branches: BranchConfig[]
 ): Promise<void> {
   if (
@@ -85,8 +81,7 @@ If you need any further assistance then you can also [request help here](${
     let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
-        // TODO: types (#7154)
-        managerFiles.map((file) => ` * \`${file.packageFile!}\` (${manager})`)
+        managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
       );
     }
     prBody =
@@ -101,13 +96,13 @@ If you need any further assistance then you can also [request help here](${
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#7154)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
-  } else if (await isBranchModified(config.onboardingBranch!)) {
+  } else if (await scm.isBranchModified(config.onboardingBranch!)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
         config.productLinks!.help
       }) if you have any doubts and would like it reviewed.\n\n`
     );
-    const isConflicted = await isBranchConflicted(
+    const isConflicted = await scm.isBranchConflicted(
       config.baseBranch!,
       config.onboardingBranch!
     );
@@ -194,7 +189,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
       );
-      await deleteBranch(config.onboardingBranch!);
+      await scm.deleteBranch(config.onboardingBranch!);
       return;
     }
     throw err;

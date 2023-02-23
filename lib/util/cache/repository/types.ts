@@ -2,14 +2,14 @@ import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
 } from '../../../config/types';
-import type { PackageFileContent } from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
   extractionFingerprints: Record<string, string | undefined>; // matching manager fingerprints
-  packageFiles: Record<string, PackageFileContent[]>; // extract result
+  packageFiles: Record<string, PackageFile[]>; // extract result
 }
 
 export interface BranchUpgradeCache {
@@ -26,9 +26,17 @@ export interface BranchUpgradeCache {
   sourceUrl?: string;
 }
 
+export interface PrCache {
+  fingerprint: string;
+  /**
+   * last PR modified ISO timestamp
+   */
+  lastEdited: string;
+}
+
 export interface BranchCache {
   /**
-   *Whether this branch has automerge enabled
+   * Whether this branch has automerge enabled
    */
   automerge: boolean;
   /**
@@ -40,7 +48,7 @@ export interface BranchCache {
    */
   baseBranchSha: string | null;
   /**
-   * Hash of the manager fingerprints and the update branch config
+   * Hash of the manager fingerprints and the filtered update branch config
    */
   branchFingerprint?: string;
   /**
@@ -75,6 +83,10 @@ export interface BranchCache {
    * Details on the dependency upgrades that have been applied in this branch
    */
   upgrades: BranchUpgradeCache[];
+  /**
+   * Object that has PR info
+   */
+  prCache?: PrCache | null;
 }
 
 export interface RepoCacheData {

@@ -92,6 +92,7 @@ export type PlatformPrOptions = {
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  forkModeDisallowMaintainerEdits?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -211,4 +212,14 @@ export interface Platform {
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+}
+
+export interface PlatformScm {
+  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  deleteBranch(branchName: string): Promise<void>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
 }
