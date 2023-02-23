@@ -166,7 +166,7 @@ async function findOwnPr(
     filter.push(`label:Code-Review=${findPRConfig.label}`);
   }
   const changes = await client.findChanges(filter, refreshCache);
-  logger.info(`findOwnPr(${filter.join(', ')}) => ${changes.length}`);
+  logger.debug(`findOwnPr(${filter.join(', ')}) => ${changes.length}`);
   return changes;
 }
 
@@ -228,6 +228,10 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     true
   ).then((res) => res.pop());
   if (pr) {
+    //Workaround for "Known Problems.1"
+    if (pr.subject !== prConfig.prTitle) {
+      await updatePullRequestTitle(pr._number, pr.change_id, prConfig.prTitle);
+    }
     await updatePullRequestBody(pr._number, prConfig.prBody);
     if (prConfig.platformOptions?.gerritAutoApprove) {
       await client.approveChange(pr._number);
@@ -328,7 +332,7 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
 export async function getBranchStatus(
   branchName: string
 ): Promise<BranchStatus> {
-  logger.info(`getBranchStatus(${branchName})`);
+  logger.debug(`getBranchStatus(${branchName})`);
   const changes = await findOwnPr({ state: 'open', branchName }, true);
   if (changes.length > 0) {
     const allSubmittable =
@@ -347,6 +351,8 @@ export async function getBranchStatus(
 }
 
 /**
+ * check the gerrit-change for the presence of the corresponding "$context" Gerrit label if configured,
+ *  return 'yellow' if not configured or not set
  * @param branchName
  * @param context renovate/stability-days || ...
  */
@@ -356,7 +362,7 @@ export async function getBranchStatusCheck(
 ): Promise<BranchStatus | null> {
   const { labelName } = mapBranchStateContextToLabel(context);
   if (labelName) {
-    const change = (await findOwnPr({ branchName, state: 'open' })).pop();
+    const change = (await findOwnPr({ branchName, state: 'open' }, true)).pop();
     if (change) {
       const labelRes = change.labels?.[labelName];
       if (labelRes) {
@@ -369,7 +375,7 @@ export async function getBranchStatusCheck(
       }
     }
   }
-  return getBranchStatus(branchName);
+  return 'yellow';
 }
 
 /**
@@ -464,7 +470,7 @@ export async function addAssignees(
 export async function ensureComment(
   ensureComment: EnsureCommentConfig
 ): Promise<boolean> {
-  logger.info(
+  logger.debug(
     `ensureComment(${ensureComment.number}, ${ensureComment.topic!}, ${
       ensureComment.content
     })`

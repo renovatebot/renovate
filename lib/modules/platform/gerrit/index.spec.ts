@@ -289,8 +289,9 @@ describe('modules/platform/gerrit/index', () => {
       gerrit.mergeToConfig({ labels: {} });
     });
 
+    const input = Fixtures.getJson('change-data.json');
+
     beforeEach(() => {
-      const input = Fixtures.getJson('change-data.json');
       clientMock.findChanges.mockResolvedValueOnce([input]);
       clientMock.getChange.mockResolvedValueOnce(input);
       clientMock.getMessages.mockResolvedValueOnce([
@@ -318,13 +319,17 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY
       );
       expect(clientMock.approveChange).not.toHaveBeenCalled();
+      expect(clientMock.setCommitMessage).toHaveBeenCalledWith(
+        123456,
+        'title\n\nChange-Id: ...\n'
+      );
     });
 
-    it('createPr() - update body/title and approve', async () => {
+    it('createPr() - update body and approve', async () => {
       const pr = await gerrit.createPr({
         sourceBranch: 'source',
         targetBranch: 'target',
-        prTitle: 'title',
+        prTitle: input.subject,
         prBody: 'body',
         platformOptions: {
           gerritAutoApprove: true,
@@ -337,6 +342,7 @@ describe('modules/platform/gerrit/index', () => {
         TAG_PULL_REQUEST_BODY
       );
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
+      expect(clientMock.setCommitMessage).not.toHaveBeenCalled();
     });
   });
 
@@ -453,11 +459,11 @@ describe('modules/platform/gerrit/index', () => {
         'unknownCtx',
         'renovate/stability-days',
         'renovate/merge-confidence',
-      ])('getBranchStatusCheck() - %s ', (ctx) => {
-        clientMock.findChanges.mockResolvedValueOnce([]);
-        return expect(
+      ])('getBranchStatusCheck() - %s ', async (ctx) => {
+        await expect(
           gerrit.getBranchStatusCheck('renovate/dependency-1.x', ctx)
         ).resolves.toBe('yellow');
+        expect(clientMock.findChanges).not.toHaveBeenCalled();
       });
     });
 

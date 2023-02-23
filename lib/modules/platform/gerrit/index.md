@@ -52,3 +52,15 @@ The Gerrit-Label names can be configured in your Renovate config file:
 ## Unsupported platform features/concepts
 
 - Creating issues (not a gerrit concept) / Renovate-Dashboard.
+
+## Known Problems
+
+### PR-title don't match first commit-msg line
+
+Sometimes the pull-request title parameter to `platform.createPr(...)/updatePr(...)` is different from the first line of the commit message. \
+For example:
+
+Commit-Message=`Update keycloak.version to v21` \
+Pull-Request-Title=`Update keycloak.version to v21 (major)`
+
+In this case the Gerrit-Platform implementation tries to detect this and change the commit-message on a second patch-set.
