@@ -521,7 +521,7 @@ export async function findJiraIssue(title: string): Promise<Issue | null> {
 
   return {
     number: issue.id,
-    body: utils.convertAtlassianWikiNotationToMarkdown(
+    body: utils.convertAtlassianDocumentFormatToMarkdown(
       issue.fields.description
     ),
   };
@@ -565,7 +565,7 @@ async function findOpenJiraIssues(title: string): Promise<JiraIssue[]> {
     return (
       (
         await jiraHttp.getJson<{ issues: JiraIssue[] }>(
-          `/rest/api/2/search?jql=${jql}`
+          `/rest/api/3/search?jql=${jql}`
         )
       ).body.issues || /* istanbul ignore next */ []
     );
@@ -586,14 +586,14 @@ async function closeBitbucketIssue(issueNumber: number): Promise<void> {
 
 async function closeJiraIssue(issueKey: string): Promise<void> {
   const transitions = await jiraHttp.getJson<JiraTransitionsResponse>(
-    `/rest/api/2/issue/${issueKey}/transitions`
+    `/rest/api/3/issue/${issueKey}/transitions`
   );
 
   for (const transition of transitions.body.transitions) {
     if (transition.to.statusCategory.key === 'done') {
       logger.debug(`closeJiraIssue: closing issue ${issueKey}`);
 
-      await jiraHttp.postJson(`/rest/api/2/issue/${issueKey}/transitions`, {
+      await jiraHttp.postJson(`/rest/api/3/issue/${issueKey}/transitions`, {
         body: {
           transition: {
             id: transition.id,
@@ -608,17 +608,33 @@ async function closeJiraIssue(issueKey: string): Promise<void> {
   logger.debug('Error closeJiraIssue');
 }
 
-export function massageMarkdown(input: string): string {
+export function massageBitbucketMarkdown(input: string): string {
+  // Remove any HTML we use
+  return massageCommonMarkdown(input)
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
+}
+
+export function massageJiraMarkdown(input: string, config: Config): string {
+  // Remove any HTML we use
+  return massageCommonMarkdown(input)
+    .replace(
+      regEx(/\]\(\.\.\/pull\//g),
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `](${config.repositoryUrl}/pull-requests/`
+    )
+    .replace(regEx(/WARN:/g), '⚠️'); // WARN to use emoji
+}
+
+function massageCommonMarkdown(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"'
     )
-    .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
@@ -646,7 +662,7 @@ export async function ensureBitbucketIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureBitbucketIssue()`);
-  const description = massageMarkdown(sanitize(body));
+  const description = massageBitbucketMarkdown(sanitize(body));
 
   try {
     let issues = await findOpenBitbucketIssues(title);
@@ -710,7 +726,7 @@ export async function ensureJiraIssue({
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureJiraIssue()`);
   let description = readOnlyIssueBody(sanitize(body));
-  description = massageMarkdown(description);
+  description = massageJiraMarkdown(description, config);
 
   try {
     let issues = await findOpenJiraIssues(title);
@@ -726,39 +742,33 @@ export async function ensureJiraIssue({
 
       if (
         issue.fields.summary !== title ||
-        utils
-          .convertAtlassianWikiNotationToMarkdown(issue.fields.description)
-          .trim() !== description.trim()
+        issue.fields.description !==
+          utils.convertMarkdownToAtlassianDocumentFormat(description.trim())
       ) {
-        logger.info(`Jira issue ${issue.key} updated`);
-        await jiraHttp.putJson(`/rest/api/2/issue/${issue.key}`, {
+        await jiraHttp.putJson(`/rest/api/3/issue/${issue.key}`, {
           body: {
             fields: {
               summary: title,
-              description: utils.convertIssueBodyToAtlassianWikiNotation(
-                description,
-                config
-              ),
+              description:
+                utils.convertMarkdownToAtlassianDocumentFormat(description),
             },
           },
         });
 
+        logger.info(`Jira issue ${issue.key} updated`);
+
         return 'updated';
       }
     } else {
-      logger.info('Jira issue created');
-
-      await jiraHttp.postJson(`/rest/api/2/issue`, {
+      await jiraHttp.postJson(`/rest/api/3/issue`, {
         body: {
           fields: {
             project: {
               key: config.jiraProjectKey,
             },
             summary: title,
-            description: utils.convertIssueBodyToAtlassianWikiNotation(
-              description,
-              config
-            ),
+            description:
+              utils.convertMarkdownToAtlassianDocumentFormat(description),
             issuetype: {
               name: 'Task',
             },
@@ -766,6 +776,10 @@ export async function ensureJiraIssue({
           },
         },
       });
+
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      logger.info(`Jira issue created in project ${config.jiraProjectKey}`);
+
       return 'created';
     }
   } catch (err) /* istanbul ignore next */ {
@@ -822,7 +836,7 @@ async function getJiraIssueList(): Promise<Issue[]> {
     );
 
     const jiraIssues = await jiraHttp.getJson<JiraSearchResponse>(
-      `/rest/api/2/search?jql=${jql}`
+      `/rest/api/3/search?jql=${jql}`
     );
 
     const issues: Issue[] = [];
@@ -830,7 +844,7 @@ async function getJiraIssueList(): Promise<Issue[]> {
       issues.push({
         number: issue.id,
         title: issue.fields.summary,
-        body: utils.convertAtlassianWikiNotationToMarkdown(
+        body: utils.convertAtlassianDocumentFormatToMarkdown(
           issue.fields.description
         ),
         state: 'OPEN', // TODO Fix me

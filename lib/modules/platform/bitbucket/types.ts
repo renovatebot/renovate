@@ -1,4 +1,3 @@
-import type { JSONDocNode } from '@atlaskit/editor-json-transformer';
 import type { Pr } from '../types';
 
 export type BitbucketMergeStrategy = 'fast_forward' | 'merge_commit' | 'squash';
@@ -158,4 +157,37 @@ export interface JiraTransition {
       key: string; // TODO Add types
     };
   };
+}
+
+export interface AtlassianDocumentFormat {
+  type: string;
+  version: number;
+  content?: AtlassianDocumentContent;
+}
+
+export interface AtlassianDocumentContent {
+  type?: string;
+  text?: string;
+  attrs?: AtlassianDocumentAttributes;
+  marks?: AtlassianDocumentMarks[];
+  content?: AtlassianDocumentContent[];
+}
+
+export interface AtlassianDocumentMarks {
+  type: string;
+  attrs?: AtlassianDocumentAttributes;
+}
+
+export interface AtlassianDocumentAttributes {
+  href?: string;
+  level?: number;
+}
+
+export interface MarkdownASTNode {
+  type: string;
+  value: string;
+  children: MarkdownASTNode[];
+  url?: string;
+  depth?: number;
+  ordered?: boolean;
 }

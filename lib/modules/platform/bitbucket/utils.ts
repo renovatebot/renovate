@@ -1,15 +1,19 @@
 import url from 'url';
+import is from '@sindresorhus/is';
+import remark from 'remark';
+import github from 'remark-github';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type {
+  AtlassianDocumentContent,
+  AtlassianDocumentFormat,
   BitbucketBranchState,
   BitbucketMergeStrategy,
-  Config,
+  MarkdownASTNode,
   MergeRequestBody,
   PrResponse,
   RepoInfo,
@@ -135,35 +139,141 @@ export function prInfo(pr: PrResponse): Pr {
 }
 
 /**
- * See https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa
+ * See https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
  */
-export function convertIssueBodyToAtlassianWikiNotation(
-  issueBody: string,
-  config: Config
-): string {
-  return (
-    issueBody
-      .replace(regEx(/#### /g), 'h4. ') // Heading 4
-      .replace(regEx(/### /g), 'h3. ') //  Heading 3
-      .replace(regEx(/## /g), 'h2. ') //  Heading 2
-      .replace(regEx(/# /g), 'h1. ') //  Heading 1
-      .replace(regEx(/\*\*/g), '*') //  Strong
-      .replace(regEx(/\[security\]/g), '- security') //  Security
-      .replace(regEx(/\]\(/g), '|') // Link opening tag
-      // .replace(regEx(/\)\n/g), ']') // Link closing tag
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      .replace(regEx(/\.\.\/\.\./g), `${config.repositoryUrl}`) // Update PR url to absolute
-      .replace(regEx(/WARN:/g), '(!)') // Warning emoji
-      .replace(regEx(/\(`/g), '[`') //
-      .replace(regEx(/`\)/g), '`]') //
-      .replace(regEx(/`/g), '_') // Backticks aren't supported, so using emphasis instead
-  );
+export function convertMarkdownToAtlassianDocumentFormat(
+  issueBody: string
+): AtlassianDocumentFormat {
+  const markdownAST = remark().use(github).parse(issueBody) as MarkdownASTNode;
+  const atlassianDocumentFormat: AtlassianDocumentFormat = {
+    type: 'doc',
+    version: 1,
+    content: convertMarkdownToAtlassianDocumentContent(markdownAST),
+  };
+
+  return atlassianDocumentFormat;
 }
-/**
- * See https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa
- */
-export function convertAtlassianWikiNotationToMarkdown(
-  issueDescription: string
+
+export function convertAtlassianDocumentFormatToMarkdown(
+  description: AtlassianDocumentFormat
 ): string {
+  // const markdown = remark().use(github).process(description);
+
+  /**
+   * TODO: This is a naive implementation where we don't try to convert ADF back to markdown,
+   * which will result in Jira Issues always being updated
+   */
   return '';
+}
+
+function convertMarkdownToAtlassianDocumentContent(
+  node: MarkdownASTNode,
+  parent?: MarkdownASTNode
+): AtlassianDocumentContent {
+  let content: AtlassianDocumentContent = {};
+
+  switch (node.type) {
+    case 'paragraph':
+    case 'listItem':
+      content = {
+        type: node.type,
+      };
+      break;
+    case 'heading':
+      content = {
+        type: node.type,
+        attrs: {
+          level: node.depth,
+        },
+      };
+      break;
+    case 'text':
+      switch (parent?.type) {
+        case 'link':
+        case 'inlineCode':
+        case 'strong':
+        case 'emphasis':
+          break;
+        default:
+          content = {
+            type: node.type,
+            text: node.value,
+          };
+      }
+      break;
+    case 'link':
+      content = {
+        type: 'text',
+        text: node.children[0].value,
+        marks: [
+          {
+            type: 'link',
+            attrs: {
+              href: node.url,
+            },
+          },
+        ],
+      };
+      break;
+    case 'inlineCode':
+      content = {
+        type: 'text',
+        text: node.value,
+        marks: [
+          {
+            type: 'code',
+          },
+        ],
+      };
+      break;
+    case 'strong':
+      content = {
+        type: 'text',
+        text: node.children[0].value,
+        marks: [
+          {
+            type: 'strong',
+          },
+        ],
+      };
+      break;
+    case 'emphasis':
+      content = {
+        type: 'text',
+        text: node.children[0].value,
+        marks: [
+          {
+            type: 'em',
+          },
+        ],
+      };
+      break;
+    case 'list':
+      content = {
+        type: node.ordered ? 'orderedList' : 'bulletList',
+      };
+      break;
+    default:
+  }
+
+  if ('children' in node) {
+    const adfContent: AtlassianDocumentContent[] = [];
+    for (const childNode of node.children) {
+      const childADF = convertMarkdownToAtlassianDocumentContent(
+        childNode,
+        node
+      );
+      if (is.nonEmptyObject(childADF)) {
+        adfContent.push(
+          convertMarkdownToAtlassianDocumentContent(childNode, node)
+        );
+      }
+    }
+
+    if (is.nonEmptyArray(adfContent)) {
+      content.content = adfContent;
+    }
+  }
+
+  return content;
 }
