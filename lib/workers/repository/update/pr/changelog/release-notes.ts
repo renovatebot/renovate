@@ -82,7 +82,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false
     ),
@@ -90,7 +90,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
@@ -399,14 +399,13 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   return 14495; // 5 minutes shy of 10 days
 }
 
-// TODO #7154 allow `null` and `undefined`
 export async function addReleaseNotes(
-  input: ChangeLogResult,
+  input: ChangeLogResult | null | undefined,
   config: BranchUpgradeConfig
-): Promise<ChangeLogResult> {
+): Promise<ChangeLogResult | null> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
-    return input;
+    return input ?? null;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
   const { repository, sourceDirectory } = input.project;

@@ -31,7 +31,7 @@ export interface RenovateSharedConfig {
   branchPrefixOld?: string;
   branchName?: string;
   branchNameStrict?: boolean;
-  manager?: string | null;
+  manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -188,6 +188,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -230,6 +231,7 @@ export interface RenovateConfig
   postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+  forkModeDisallowMaintainerEdits?: boolean;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -251,6 +253,8 @@ export interface RenovateConfig
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
@@ -454,7 +458,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string | null;
+  manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }

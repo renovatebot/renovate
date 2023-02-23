@@ -61,6 +61,5 @@ exports[`modules/manager/swift/index extractPackageFile() parses multiple packag
       "packageName": "https://github.com/apple/swift-package-manager.git",
     },
   ],
-  "packageFile": null,
 }
 `;

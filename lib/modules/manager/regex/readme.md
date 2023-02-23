@@ -180,8 +180,8 @@ For example:
       "fileMatch": [".*y[a]?ml$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
-        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
-        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+        "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions/gitlab/fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
       ],
       "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
       "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",

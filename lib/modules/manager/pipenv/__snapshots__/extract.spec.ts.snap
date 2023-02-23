@@ -2,9 +2,6 @@
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
 {
-  "constraints": {
-    "python": "== 3.6.*",
-  },
   "deps": [
     {
       "currentValue": "==0.3.1",
@@ -51,6 +48,9 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts dependenci
       "managerData": {},
     },
   ],
+  "extractedConstraints": {
+    "python": "== 3.6.*",
+  },
   "lockFiles": [
     "Pipfile.lock",
   ],
@@ -63,9 +63,6 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts dependenci
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
 {
-  "constraints": {
-    "python": "== 2.7.*",
-  },
   "deps": [
     {
       "depName": "requests",
@@ -127,6 +124,9 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
       },
     },
   ],
+  "extractedConstraints": {
+    "python": "== 2.7.*",
+  },
   "lockFiles": [
     "Pipfile.lock",
   ],
@@ -138,9 +138,6 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
 
 exports[`modules/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
 {
-  "constraints": {
-    "python": "== 3.6.*",
-  },
   "deps": [
     {
       "currentValue": "==1",
@@ -178,6 +175,9 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts multiple d
       "managerData": {},
     },
   ],
+  "extractedConstraints": {
+    "python": "== 3.6.*",
+  },
   "lockFiles": [
     "Pipfile.lock",
   ],
@@ -189,7 +189,6 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts multiple d
 
 exports[`modules/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
 {
-  "constraints": {},
   "deps": [
     {
       "currentValue": "==0.21.0",
@@ -204,6 +203,7 @@ exports[`modules/manager/pipenv/extract extractPackageFile() supports custom ind
       ],
     },
   ],
+  "extractedConstraints": {},
   "lockFiles": [
     "Pipfile.lock",
   ],

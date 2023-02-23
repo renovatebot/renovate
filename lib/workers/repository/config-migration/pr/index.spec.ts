@@ -5,9 +5,9 @@ import { Fixtures } from '../../../../../test/fixtures';
 import {
   RenovateConfig,
   getConfig,
-  git,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -16,8 +16,6 @@ import { hashBody } from '../../../../modules/platform/pr-body';
 import { ConfigMigrationCommitMessageFactory } from '../branch/commit-message';
 import type { MigratedData } from '../branch/migrated-data';
 import { ensureConfigMigrationPr } from '.';
-
-jest.mock('../../../../util/git');
 
 describe('workers/repository/config-migration/pr/index', () => {
   const spy = jest.spyOn(platform, 'massageMarkdown');
@@ -255,13 +253,13 @@ describe('workers/repository/config-migration/pr/index', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       GlobalConfig.reset();
-      git.deleteBranch.mockResolvedValue();
+      scm.deleteBranch.mockResolvedValue();
     });
 
     it('throws when trying to create a new PR', async () => {
       platform.createPr.mockRejectedValueOnce(err);
       await expect(ensureConfigMigrationPr(config, migratedData)).toReject();
-      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
     });
 
     it('deletes branch when PR already exists but cannot find it', async () => {
@@ -274,7 +272,7 @@ describe('workers/repository/config-migration/pr/index', () => {
         { err },
         'Migration PR already exists but cannot find it. It was probably created by a different user.'
       );
-      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
   });
 });

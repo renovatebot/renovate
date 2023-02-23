@@ -314,7 +314,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
       },
     ],
   },
@@ -333,6 +333,15 @@ const staticGroups = {
       {
         extends: 'packages:postcss',
         groupName: 'postcss packages',
+      },
+    ],
+  },
+  react: {
+    description: 'Group React and corresponding `@types` packages together.',
+    packageRules: [
+      {
+        groupName: 'react monorepo',
+        matchPackageNames: ['@types/react', '@types/react-dom'],
       },
     ],
   },
@@ -359,6 +368,7 @@ const staticGroups = {
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
+      'group:react',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
