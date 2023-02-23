@@ -519,11 +519,9 @@ export async function findJiraIssue(title: string): Promise<Issue | null> {
   }
   const [issue] = issues;
 
-  // Convert from Atlassian Document Format to Markdown
-
   return {
     number: issue.id,
-    body: utils.convertAtlassianDocumentFormatToMarkdown(
+    body: utils.convertAtlassianWikiNotationToMarkdown(
       issue.fields.description
     ),
   };
@@ -567,7 +565,7 @@ async function findOpenJiraIssues(title: string): Promise<JiraIssue[]> {
     return (
       (
         await jiraHttp.getJson<{ issues: JiraIssue[] }>(
-          `/rest/api/3/search?jql=${jql}`
+          `/rest/api/2/search?jql=${jql}`
         )
       ).body.issues || /* istanbul ignore next */ []
     );
@@ -586,16 +584,16 @@ async function closeBitbucketIssue(issueNumber: number): Promise<void> {
   );
 }
 
-async function closeJiraIssue(issueNumber: number): Promise<void> {
+async function closeJiraIssue(issueKey: string): Promise<void> {
   const transitions = await jiraHttp.getJson<JiraTransitionsResponse>(
-    `/rest/api/3/issue/${issueNumber}/transitions`
+    `/rest/api/2/issue/${issueKey}/transitions`
   );
 
   for (const transition of transitions.body.transitions) {
     if (transition.to.statusCategory.key === 'done') {
-      logger.debug(`closeJiraIssue: closing issue ${issueNumber}`);
+      logger.debug(`closeJiraIssue: closing issue ${issueKey}`);
 
-      await jiraHttp.postJson(`/rest/api/3/issue/${issueNumber}/transitions`, {
+      await jiraHttp.postJson(`/rest/api/2/issue/${issueKey}/transitions`, {
         body: {
           transition: {
             id: transition.id,
@@ -622,19 +620,6 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
-}
-
-export function massageMarkdownJira(input: string): string {
-  // Remove any HTML we use
-  return massageMarkdown(input)
-    .replace(regEx(/<blockquote>\n\n\*\*/g), '<blockquote>\n\n#### ') // Convert package files to level 4 heading
-    .replace(regEx(/\n\n<\/blockquote>/g), '') // Remove closing blockquote
-    .replace(regEx(/\*\*\n<blockquote>/g), '\n') // Remove opening blockquote
-    .replace(regEx(/\n\n\*\*/g), '\n\n### ') // Convert managers to level 3 heading
-    .replace(regEx(/\*\*\n\n/g), '\n\n') // Remove closing bold tags
-    .replace(regEx(/\n - \n/g), '\n') // Empty list item
-    .replace(regEx(/\]\(\.\.\/\.\.\//g), `](${config.repositoryUrl}/`) // Update PR url to absolute
-    .replace(regEx(/WARN:/g), '⚠️'); // Replace with symbol
 }
 
 export async function ensureIssue({
@@ -725,7 +710,7 @@ export async function ensureJiraIssue({
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureJiraIssue()`);
   let description = readOnlyIssueBody(sanitize(body));
-  description = massageMarkdownJira(description);
+  description = massageMarkdown(description);
 
   try {
     let issues = await findOpenJiraIssues(title);
@@ -735,23 +720,25 @@ export async function ensureJiraIssue({
     if (issues.length) {
       // Close any duplicates
       for (const issue of issues.slice(1)) {
-        await closeJiraIssue(issue.id);
+        await closeJiraIssue(issue.key);
       }
       const [issue] = issues;
 
       if (
         issue.fields.summary !== title ||
         utils
-          .convertAtlassianDocumentFormatToMarkdown(issue.fields.description)
+          .convertAtlassianWikiNotationToMarkdown(issue.fields.description)
           .trim() !== description.trim()
       ) {
-        logger.debug(`Jira issue ${issue.id} updated`);
-        await jiraHttp.putJson(`/rest/api/3/issue/${issue.id}`, {
+        logger.info(`Jira issue ${issue.key} updated`);
+        await jiraHttp.putJson(`/rest/api/2/issue/${issue.key}`, {
           body: {
             fields: {
               summary: title,
-              description:
-                utils.convertIssueBodyToAtlassianDocumentFormat(description),
+              description: utils.convertIssueBodyToAtlassianWikiNotation(
+                description,
+                config
+              ),
             },
           },
         });
@@ -761,15 +748,17 @@ export async function ensureJiraIssue({
     } else {
       logger.info('Jira issue created');
 
-      await jiraHttp.postJson(`/rest/api/3/issue`, {
+      await jiraHttp.postJson(`/rest/api/2/issue`, {
         body: {
           fields: {
             project: {
               key: config.jiraProjectKey,
             },
             summary: title,
-            description:
-              utils.convertIssueBodyToAtlassianDocumentFormat(description),
+            description: utils.convertIssueBodyToAtlassianWikiNotation(
+              description,
+              config
+            ),
             issuetype: {
               name: 'Task',
             },
@@ -833,7 +822,7 @@ async function getJiraIssueList(): Promise<Issue[]> {
     );
 
     const jiraIssues = await jiraHttp.getJson<JiraSearchResponse>(
-      `/rest/api/3/search?jql=${jql}`
+      `/rest/api/2/search?jql=${jql}`
     );
 
     const issues: Issue[] = [];
@@ -841,7 +830,7 @@ async function getJiraIssueList(): Promise<Issue[]> {
       issues.push({
         number: issue.id,
         title: issue.fields.summary,
-        body: utils.convertAtlassianDocumentFormatToMarkdown(
+        body: utils.convertAtlassianWikiNotationToMarkdown(
           issue.fields.description
         ),
         state: 'OPEN', // TODO Fix me
@@ -870,7 +859,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
 
   const issues = await findOpenJiraIssues(title);
   for (const issue of issues) {
-    await closeJiraIssue(issue.id);
+    await closeJiraIssue(issue.key);
   }
 }
 

@@ -1,19 +1,15 @@
 import url from 'url';
-import { defaultSchema } from '@atlaskit/adf-schema/schema-default';
-import {
-  JSONDocNode,
-  JSONTransformer,
-} from '@atlaskit/editor-json-transformer';
-import { MarkdownTransformer } from '@atlaskit/editor-markdown-transformer';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
+import { regEx } from '../../../util/regex';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
 import type {
   BitbucketBranchState,
   BitbucketMergeStrategy,
+  Config,
   MergeRequestBody,
   PrResponse,
   RepoInfo,
@@ -138,21 +134,36 @@ export function prInfo(pr: PrResponse): Pr {
   };
 }
 
-export function convertIssueBodyToAtlassianDocumentFormat(
-  issueBody: string
-): JSONDocNode | null {
-  const jsonTransformer = new JSONTransformer();
-  const markdownTransformer = new MarkdownTransformer(defaultSchema);
-  return jsonTransformer.encode(markdownTransformer.parse(issueBody));
-}
-
 /**
- * Note: the Atlassian MarkdownTransformer.encode() function is currently unimplemented,
- * which would be needed for ADF --> Markdown/CommonMark conversion.
- * For now, we'll naively return an empty string which means the issue body will always be updated
+ * See https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa
  */
-export function convertAtlassianDocumentFormatToMarkdown(
-  document: JSONDocNode
+export function convertIssueBodyToAtlassianWikiNotation(
+  issueBody: string,
+  config: Config
+): string {
+  return (
+    issueBody
+      .replace(regEx(/#### /g), 'h4. ') // Heading 4
+      .replace(regEx(/### /g), 'h3. ') //  Heading 3
+      .replace(regEx(/## /g), 'h2. ') //  Heading 2
+      .replace(regEx(/# /g), 'h1. ') //  Heading 1
+      .replace(regEx(/\*\*/g), '*') //  Strong
+      .replace(regEx(/\[security\]/g), '- security') //  Security
+      .replace(regEx(/\]\(/g), '|') // Link opening tag
+      // .replace(regEx(/\)\n/g), ']') // Link closing tag
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      .replace(regEx(/\.\.\/\.\./g), `${config.repositoryUrl}`) // Update PR url to absolute
+      .replace(regEx(/WARN:/g), '(!)') // Warning emoji
+      .replace(regEx(/\(`/g), '[`') //
+      .replace(regEx(/`\)/g), '`]') //
+      .replace(regEx(/`/g), '_') // Backticks aren't supported, so using emphasis instead
+  );
+}
+/**
+ * See https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa
+ */
+export function convertAtlassianWikiNotationToMarkdown(
+  issueDescription: string
 ): string {
   return '';
 }
