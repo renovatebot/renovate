@@ -272,7 +272,8 @@ define the session token also, for example:
 
 ##### Using the login password (basic auth)
 
-To authenticate using basic auth, simply provide the password in your config. For example:
+To authenticate with basic authentication, put the encrypted password in your config.
+For example:
 
 ```json
 {
