@@ -162,7 +162,7 @@ export interface JiraTransition {
 export interface AtlassianDocumentFormat {
   type: string;
   version: number;
-  content?: AtlassianDocumentContent;
+  content?: AtlassianDocumentContent[];
 }
 
 export interface AtlassianDocumentContent {

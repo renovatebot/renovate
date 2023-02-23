@@ -145,10 +145,13 @@ export function convertMarkdownToAtlassianDocumentFormat(
   issueBody: string
 ): AtlassianDocumentFormat {
   const markdownAST = remark().use(github).parse(issueBody) as MarkdownASTNode;
+  const atlassianDocumentContent: AtlassianDocumentContent =
+    convertMarkdownToAtlassianDocumentContent(markdownAST);
+
   const atlassianDocumentFormat: AtlassianDocumentFormat = {
     type: 'doc',
     version: 1,
-    content: convertMarkdownToAtlassianDocumentContent(markdownAST),
+    content: atlassianDocumentContent.content,
   };
 
   return atlassianDocumentFormat;

@@ -608,25 +608,7 @@ async function closeJiraIssue(issueKey: string): Promise<void> {
   logger.debug('Error closeJiraIssue');
 }
 
-export function massageBitbucketMarkdown(input: string): string {
-  // Remove any HTML we use
-  return massageCommonMarkdown(input)
-    .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/');
-}
-
-export function massageJiraMarkdown(input: string, config: Config): string {
-  // Remove any HTML we use
-  return massageCommonMarkdown(input)
-    .replace(
-      regEx(/\]\(\.\.\/pull\//g),
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      `](${config.repositoryUrl}/pull-requests/`
-    )
-    .replace(regEx(/WARN:/g), '⚠️'); // WARN to use emoji
-}
-
-function massageCommonMarkdown(input: string): string {
+export function massageMarkdown(input: string): string {
   // Remove any HTML we use
   return smartTruncate(input, 50000)
     .replace(
@@ -636,7 +618,22 @@ function massageCommonMarkdown(input: string): string {
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+}
+
+export function massageJiraMarkdown(input: string, config: Config): string {
+  // Remove any HTML we use
+  return massageMarkdown(input)
+    .replace(
+      regEx(/\]\(\.\.\/\.\.\/pull-requests\//g),
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `](${config.repositoryUrl}/pull-requests/`
+    )
+    .replace(regEx(/\*\*\n\n\n\*\*/g), '\n#### ') // Level 4 heading for package types
+    .replace(regEx(/\n\n\*\*/g), '\n### ') // Level 3 heading for managers
+    .replace(regEx(/\*\*/g), '') // Remove closing bold tags
+    .replace(regEx(/WARN:/g), '⚠️'); // WARN to use emoji
 }
 
 export async function ensureIssue({
@@ -663,7 +660,7 @@ export async function ensureBitbucketIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureBitbucketIssue()`);
-  const description = massageBitbucketMarkdown(sanitize(body));
+  const description = massageMarkdown(sanitize(body));
 
   try {
     let issues = await findOpenBitbucketIssues(title);
