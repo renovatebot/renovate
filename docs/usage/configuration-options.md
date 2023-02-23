@@ -2174,6 +2174,90 @@ Table with options:
 | `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
 | `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
+## postUpgradeTasks
+
+<!-- prettier-ignore -->
+!!! note
+    Post-upgrade tasks can only be used on self-hosted Renovate instances.
+
+Post-upgrade tasks are commands that are executed by Renovate after a dependency has been updated but before the commit is created.
+The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+Each command must match at least one of the patterns defined in `allowedUpgradeCommands` (a global-only configuration option) in order to be executed.
+If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "postUpgradeTasks": {
+    "commands": ["tslint --fix"],
+    "fileFilters": ["yarn.lock", "**/*.js"],
+    "executionMode": "update"
+  }
+}
+```
+
+The `postUpgradeTasks` configuration consists of three fields:
+
+### commands (postUpgradeTasks)
+
+A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
+
+You can use variable templating in your commands if [`allowUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowUpgradeCommandTemplating) is enabled.
+
+### fileFilters (postUpgradeTasks)
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+
+### executionMode (postUpgradeTasks)
+
+Defaults to `update`, but can also be set to `branch`.
+This sets the level the postUpgradeTask runs on, if set to `update` the postUpgradeTask will be executed for every dependency on the branch.
+If set to `branch` the postUpgradeTask is executed for the whole branch.
+
+## preUpgradeTasks
+
+<!-- prettier-ignore -->
+!!! note
+    Pre-upgrade tasks can only be used on self-hosted Renovate instances.
+
+Pre-upgrade tasks are commands that are executed by Renovate before a dependency has been updated but after the checkout on the dependency branch.
+The intention is to run any additional command line tools that would modify existing files or generate new files when a dependency changes.
+
+Each command must match at least one of the patterns defined in `allowedUpgradeCommands` (a global-only configuration option) in order to be executed.
+If the list of allowed tasks is empty then no tasks will be executed.
+
+e.g.
+
+```json
+{
+  "preUpgradeTasks": {
+    "commands": ["xcodegen generate"],
+    "fileFilters": [],
+    "executionMode": "update"
+  }
+}
+```
+
+The `preUpgradeTasks` configuration consists of three fields:
+
+### commands (preUpgradeTasks)
+
+A list of commands that are executed before Renovate has updated a dependency but after the checkout is made.
+
+You can use variable templating in your commands if [`allowUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowUpgradeCommandTemplating) is enabled.
+
+### fileFilters (preUpgradeTasks)
+
+A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+
+### executionMode (preUpgradeTasks)
+
+Defaults to `update`, but can also be set to `branch`.
+This sets the level the preUpgradeTask runs on, if set to `update` the preUpgradeTask will be executed for every dependency on the branch.
+If set to `branch` the preUpgradeTask is executed for the whole branch.
+
 ## prBodyColumns
 
 Use this array to provide a list of column names you wish to include in the PR tables.
