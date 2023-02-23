@@ -96,24 +96,21 @@ export async function closeIssue(issueKey: string): Promise<void> {
 
 export function massageMarkdown(input: string, repositoryUrl: string): string {
   // Remove any HTML we use
-  return (
-    smartTruncate(input, 50000)
-      .replace(
-        'you tick the rebase/retry checkbox',
-        'by renaming this PR to start with "rebase!"'
-      )
-      .replace(regEx(/<\/?summary>/g), '**')
-      .replace(regEx(/<\/?(details|blockquote)>/g), '')
-      .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      .replace(regEx(/\]\(\.\.\/pull\//g), `](${repositoryUrl}/pull-requests/`)
-      .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
-      .replace(regEx(/\]\(\.\.\/\.\.\/pull-requests\//g), ``)
-      .replace(regEx(/\*\*\n\n\n\*\*/g), '\n#### ') // Level 4 heading for package types
-      .replace(regEx(/\n\n\*\*/g), '\n### ') // Level 3 heading for managers
-      .replace(regEx(/\*\*/g), '') // Remove closing bold tags
-      .replace(regEx(/WARN:/g), '⚠️')
-  ); // WARN to use emoji
+  return smartTruncate(input, 50000)
+    .replace(
+      'you tick the rebase/retry checkbox',
+      'by renaming this PR to start with "rebase!"'
+    )
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?(details|blockquote)>/g), '')
+    .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
+    .replace(regEx(/\]\(\.\.\/pull\//g), `](${repositoryUrl}/pull-requests/`)
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+    .replace(regEx(/\]\(\.\.\/\.\.\/pull-requests\//g), ``)
+    .replace(regEx(/\*\*\n\n\n\*\*/g), '\n#### ') // Level 4 heading for package types
+    .replace(regEx(/\n\n\*\*/g), '\n### ') // Level 3 heading for managers
+    .replace(regEx(/\*\*/g), '') // Remove closing bold tags
+    .replace(regEx(/WARN:/g), '⚠️'); // WARN to use emoji
 }
 
 export async function ensureIssue(
@@ -174,7 +171,6 @@ export async function ensureIssue(
         },
       });
 
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       logger.info(`Jira issue created in project ${projectKey}`);
 
       return 'created';
