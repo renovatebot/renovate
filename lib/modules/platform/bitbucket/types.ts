@@ -133,7 +133,7 @@ export interface JiraIssue {
   id: number;
   key: string;
   fields: {
-    description: JSONDocNode;
+    description: AtlassianDocumentFormat;
     summary: string;
   };
 }

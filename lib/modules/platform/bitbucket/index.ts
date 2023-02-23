@@ -633,7 +633,8 @@ function massageCommonMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"'
     )
-    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(/<\/?summary>/g), '**')
+    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
@@ -675,6 +676,7 @@ export async function ensureBitbucketIssue({
         await closeBitbucketIssue(issue.id);
       }
       const [issue] = issues;
+
       if (
         issue.title !== title ||
         String(issue.content?.raw).trim() !== description.trim()
