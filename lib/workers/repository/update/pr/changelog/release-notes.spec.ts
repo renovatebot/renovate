@@ -102,10 +102,12 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(
         await addReleaseNotes(null, partial<BranchUpgradeConfig>({}))
       ).toBeNull();
-        await addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>({}))
-      ).toStrictEqual({
-        versions: [],
-      });
+      expect(
+        await addReleaseNotes(
+          { versions: [] },
+          partial<BranchUpgradeConfig>({})
+        )
+      ).toStrictEqual({ versions: [] });
     });
 
     it('returns ChangeLogResult', async () => {
@@ -365,7 +367,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-         }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -407,7 +409,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-          }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -491,7 +493,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-         }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -533,7 +535,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-         }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toBeNull();
@@ -568,7 +570,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-          }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -612,7 +614,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-         }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -656,7 +658,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-           }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -699,7 +701,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-          }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -737,7 +739,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-         }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -811,7 +813,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.1',
           gitRef: '1.0.1',
-            }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -878,7 +880,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.0',
           gitRef: '1.0.0',
-          }),
+        }),
         partial<BranchUpgradeConfig>({})
       );
       expect(res).toEqual({
@@ -912,7 +914,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         partial<ChangeLogRelease>({
           version: '1.0.0',
           gitRef: '1.0.0',
-          }),
+        }),
         partial<BranchUpgradeConfig>({
           extractVersion: 'app-(?<version>[0-9.]*)',
         })
