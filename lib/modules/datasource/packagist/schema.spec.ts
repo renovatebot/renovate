@@ -3,6 +3,7 @@ import {
   ComposerRelease,
   ComposerReleases,
   MinifiedArray,
+  RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
@@ -240,6 +241,19 @@ describe('modules/datasource/packagist/schema', () => {
           },
         ],
       } satisfies ReleaseResult);
+    });
+  });
+
+  describe('RegistryMeta', () => {
+    it('falls back to default values', () => {
+      expect(RegistryMeta.parse('nonsense')).toEqual({
+        files: [],
+        includesFiles: [],
+        packages: {},
+        providerPackages: {},
+        providersLazyUrl: null,
+        providersUrl: null,
+      });
     });
   });
 });
