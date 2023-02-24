@@ -2,7 +2,7 @@
 
 ## Authentication
 
-First, ![HTTP access token](/assets/images/gerrit-http-password.png) for the bot account.
+First, ![HTTP access token](/assets/images/gerrit-http-password.png) for the Renovate account.
 
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
@@ -10,23 +10,24 @@ Let Renovate use your HTTP access token by doing _one_ of the following:
 - Set your HTTP access token as an environment variable `RENOVATE_PASSWORD`
 - Set your HTTP access token when you run Renovate in the CLI with `--password=`
 
-Make sure this user is allowed to assign the Code-Review label with "+2" to his own changes or "automerge" can't work.
+Make sure this user is allowed to assign the Code-Review label with "+2" to their own changes or "automerge" can't work.
 
 Remember to set `platform=gerrit` somewhere in your Renovate config file.
 
 ## Renovate PR/Branch-Model with Gerrit and needed Permissions
 
 If you use the "Code-Review" label and want `automerge` working, then you have to enable `gerritAutoApprove=true` in your Renovate config.
-In this case the bot will automatically add the _Code-Review_ label with the value "+2" to each created "pull-request" (Gerrit-Change).
+In this case Renovate will automatically add the _Code-Review_ label with the value "+2" to each created "pull-request" (Gerrit-Change).
 
-_Important: The login should be allowed to give +2 for the Code-Review label._
+!!! note
+The login should be allowed to give +2 for the Code-Review label.
 
 The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used.
 It works similar to the default option `"pr"`.
 
-## optional Features
+## Optional Features
 
-The [StabilityDays](https://docs.renovatebot.com/configuration-options/#stabilitydays) feature can be used.
+The [stabilityDays](https://docs.renovatebot.com/configuration-options/#stabilitydays) feature can be used.
 It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and the permission to set the min/max value.
 
 There is no special Submit-Rule necessary to block submits for renovate usage, (i.e. can be _Trigger Votes_ only)
@@ -51,13 +52,14 @@ The Gerrit-Label names can be configured in your Renovate config file:
 
 ## Unsupported platform features/concepts
 
-- Creating issues (not a gerrit concept) / Renovate-Dashboard.
+- Creating issues (not a Gerrit concept)
+- Dependency Dashboard (needs issues first)
 
-## Known Problems
+## Known problems
 
-### PR-title don't match first commit-msg line
+### PR-title doesn't match first commit-msg line
 
-Sometimes the pull-request title parameter to `platform.createPr(...)/updatePr(...)` is different from the first line of the commit message. \
+Sometimes the pull-request title parameter to `platform.createPr(...)/updatePr(...)` is different from the first line of the commit message.
 For example:
 
 Commit-Message=`Update keycloak.version to v21` \
