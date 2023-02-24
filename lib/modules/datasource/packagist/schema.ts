@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { looseObject, looseValue } from '../../../util/schema';
+import { looseObject, looseRecord, looseValue } from '../../../util/schema';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -56,10 +56,10 @@ export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
 export const ComposerReleases = z
   .union([
-    z.array(looseValue(ComposerRelease)),
     z
       .record(looseValue(ComposerRelease))
       .transform((map) => Object.values(map)),
+    z.array(looseValue(ComposerRelease)),
   ])
   .catch([])
   .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
@@ -153,4 +153,66 @@ export function parsePackagesResponses(
     parsePackagesResponse(packageName, pkgResp)
   );
   return extractReleaseResult(...releaseArrays);
+}
+
+export const RegistryMeta = z
+  .preprocess(
+    (x) => (is.plainObject(x) ? x : {}),
+    z.object({
+      ['includes']: looseRecord(
+        z.object({
+          sha256: z.string(),
+        })
+      ).transform((x) =>
+        Object.entries(x).map(([name, { sha256 }]) => ({
+          key: name.replace(sha256, '%hash%'),
+          sha256,
+        }))
+      ),
+      ['packages']: looseRecord(ComposerReleases),
+      ['provider-includes']: looseRecord(
+        z.object({
+          sha256: z.string(),
+        })
+      ).transform((x) =>
+        Object.entries(x).map(([key, { sha256 }]) => ({ key, sha256 }))
+      ),
+      ['providers']: looseRecord(
+        z.object({
+          sha256: looseValue(z.string()),
+        })
+      ).transform((x) =>
+        Object.fromEntries(
+          Object.entries(x).map(([key, { sha256 }]) => [key, sha256])
+        )
+      ),
+      ['providers-lazy-url']: looseValue(z.string()),
+      ['providers-url']: looseValue(z.string()),
+    })
+  )
+  .transform(
+    ({
+      ['includes']: includesFiles,
+      ['packages']: packages,
+      ['provider-includes']: files,
+      ['providers']: providerPackages,
+      ['providers-lazy-url']: providersLazyUrl,
+      ['providers-url']: providersUrl,
+    }) => ({
+      packages,
+      includesFiles,
+      providerPackages,
+      files,
+      providersUrl,
+      providersLazyUrl,
+    })
+  );
+export type RegistryMeta = z.infer<typeof RegistryMeta>;
+
+export interface AllPackages
+  extends Pick<
+    RegistryMeta,
+    'packages' | 'providersUrl' | 'providersLazyUrl' | 'providerPackages'
+  > {
+  includesPackages: Record<string, ReleaseResult | null>;
 }

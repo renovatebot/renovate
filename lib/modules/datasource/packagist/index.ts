@@ -10,13 +10,7 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import * as schema from './schema';
 import { extractDepReleases } from './schema';
-import type {
-  AllPackages,
-  PackageMeta,
-  PackagistFile,
-  RegistryFile,
-  RegistryMeta,
-} from './types';
+import type { PackagistFile, RegistryFile } from './types';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
@@ -40,45 +34,11 @@ export class PackagistDatasource extends Datasource {
     return username && password ? { username, password } : {};
   }
 
-  private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
+  private async getRegistryMeta(regUrl: string): Promise<schema.RegistryMeta> {
     const url = resolveBaseUrl(regUrl, 'packages.json');
     const opts = PackagistDatasource.getHostOpts(url);
-    const res = (await this.http.getJson<PackageMeta>(url, opts)).body;
-    const meta: RegistryMeta = {
-      providerPackages: {},
-      packages: res.packages,
-    };
-    if (res.includes) {
-      meta.includesFiles = [];
-      for (const [name, val] of Object.entries(res.includes)) {
-        const file = {
-          key: name.replace(val.sha256, '%hash%'),
-          sha256: val.sha256,
-        };
-        meta.includesFiles.push(file);
-      }
-    }
-    if (res['providers-url']) {
-      meta.providersUrl = res['providers-url'];
-    }
-    if (res['providers-lazy-url']) {
-      meta.providersLazyUrl = res['providers-lazy-url'];
-    }
-    if (res['provider-includes']) {
-      meta.files = [];
-      for (const [key, val] of Object.entries(res['provider-includes'])) {
-        const file = {
-          key,
-          sha256: val.sha256,
-        };
-        meta.files.push(file);
-      }
-    }
-    if (res.providers) {
-      for (const [key, val] of Object.entries(res.providers)) {
-        meta.providerPackages[key] = val.sha256;
-      }
-    }
+    const { body } = await this.http.getJson(url, opts);
+    const meta = schema.RegistryMeta.parse(body);
     return meta;
   }
 
@@ -122,23 +82,19 @@ export class PackagistDatasource extends Datasource {
     namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => regUrl,
   })
-  async getAllPackages(regUrl: string): Promise<AllPackages | null> {
+  async getAllPackages(regUrl: string): Promise<schema.AllPackages> {
     const registryMeta = await this.getRegistryMeta(regUrl);
-    // istanbul ignore if: needs test
-    if (!registryMeta) {
-      return null;
-    }
 
     const {
       packages,
       providersUrl,
       providersLazyUrl,
-      files = [],
-      includesFiles = [],
+      files,
+      includesFiles,
       providerPackages,
     } = registryMeta;
 
-    const includesPackages: Record<string, ReleaseResult | null> = {};
+    const includesPackages: schema.AllPackages['includesPackages'] = {};
 
     const tasks: (() => Promise<void>)[] = [];
 
@@ -162,7 +118,7 @@ export class PackagistDatasource extends Datasource {
 
     await p.all(tasks);
 
-    const allPackages: AllPackages = {
+    const allPackages: schema.AllPackages = {
       packages,
       providersUrl,
       providersLazyUrl,
@@ -204,10 +160,6 @@ export class PackagistDatasource extends Datasource {
         return packagistResult;
       }
       const allPackages = await this.getAllPackages(registryUrl);
-      // istanbul ignore if: needs test
-      if (!allPackages) {
-        return null;
-      }
       const {
         packages,
         providersUrl,
@@ -223,13 +175,13 @@ export class PackagistDatasource extends Datasource {
         return includesPackages[packageName];
       }
       let pkgUrl: string;
-      if (packageName in providerPackages) {
-        pkgUrl = resolveBaseUrl(
-          registryUrl,
-          providersUrl!
-            .replace('%package%', packageName)
-            .replace('%hash%', providerPackages[packageName])
-        );
+      if (providersUrl && packageName in providerPackages) {
+        let url = providersUrl.replace('%package%', packageName);
+        const hash = providerPackages[packageName];
+        if (hash) {
+          url = url.replace('%hash%', hash);
+        }
+        pkgUrl = resolveBaseUrl(registryUrl, url);
       } else if (providersLazyUrl) {
         pkgUrl = resolveBaseUrl(
           registryUrl,
