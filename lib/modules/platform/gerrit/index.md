@@ -30,8 +30,8 @@ It works similar to the default option `"pr"`.
 The [stabilityDays](https://docs.renovatebot.com/configuration-options/#stabilitydays) feature can be used.
 It needs only a corresponding Gerrit-Label (default `Renovate-Stability`) and the permission to set the min/max value.
 
-There is no special Submit-Rule necessary to block submits for renovate usage, (i.e. can be _Trigger Votes_ only)
-because Renovate will query the label and prevent `automerge` accordingly.
+You don't need a special Submit-Rule to block submits for Renovate usage (i.e. can be _Trigger Votes_ only).
+This is because Renovate will query the label and prevent `automerge` accordingly.
 
 The same applies to the (upcoming beta?) feature [Merge-Confidence](https://docs.renovatebot.com/merge-confidence/).
 
