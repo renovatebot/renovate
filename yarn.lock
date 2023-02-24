@@ -8185,10 +8185,10 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.5.0.tgz#235ae5a49d5fda5cfd1d82c4c42cd91433478c14"
-  integrity sha512-SpwcJnxrK9Y0HRM6KxSFqkAEOSWEabCH/c8dII/+y2e5f6KvuDG5ZE7JXaPBaVJNE4VUZZeTphxXDoZD0KOHrw==
+openpgp@5.6.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.6.0.tgz#2bbcce109f789d7d9b317fbdec7cc3cd4dc7dbac"
+  integrity sha512-m0UGCSefapbPssLmxJ7z7KydLEdpWjaY5gXoxZgTuNeWDfeRG5lzaORWNxyKg1K4tJnRwSoTp01Vtt8Cenbmgw==
   dependencies:
     asn1.js "^5.0.0"
 
