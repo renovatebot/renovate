@@ -109,7 +109,7 @@ export async function upgradeCommandExecutor(
 
       logger.trace(
         { cmd: compiledCmd },
-        `Executing ${taskType.toLowerCase()} task'
+        `Executing ${taskType.toLowerCase()} task`
       );
       const execResult = await exec(compiledCmd, {
         cwd: GlobalConfig.get('localDir'),
@@ -117,7 +117,7 @@ export async function upgradeCommandExecutor(
 
       logger.debug(
         { cmd: compiledCmd, ...execResult },
-        'Executed ' + taskType.toLowerCase() + ' task'
+        `Executed ${taskType.toLowerCase()} task`
       );
     } catch (error) {
       artifactErrors.push({
@@ -131,7 +131,7 @@ export async function upgradeCommandExecutor(
         cmd,
         allowedUpgradeCommands,
       },
-      taskType + ' task did not match any on allowedPostUpgradeCommands list'
+      `${taskType} task did not match any on allowedPostUpgradeCommands list`
     );
     artifactErrors.push({
       lockFile: upgrade.packageFile,
@@ -154,7 +154,7 @@ export async function updateUpdatedArtifacts(
   for (const relativePath of status.modified.concat(status.not_added)) {
     for (const pattern of fileFilters) {
       if (minimatch(relativePath, pattern)) {
-        logger.debug({ file: relativePath, pattern }, taskType + ' file saved');
+        logger.debug({ file: relativePath, pattern }, `${taskType} file saved`);
         const existingContent = await readLocalFile(relativePath);
         const existingUpdatedArtifacts = updatedUpdatedArtifacts.find(
           (ua) => ua.path === relativePath
@@ -181,7 +181,7 @@ export async function updateUpdatedArtifacts(
       if (minimatch(relativePath, pattern)) {
         logger.debug(
           { file: relativePath, pattern },
-          taskType + ' file removed'
+          `${taskType} file removed`
         );
         updatedUpdatedArtifacts.push({
           type: 'deletion',
