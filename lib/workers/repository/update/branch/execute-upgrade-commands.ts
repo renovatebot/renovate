@@ -109,7 +109,7 @@ export async function upgradeCommandExecutor(
 
       logger.trace(
         { cmd: compiledCmd },
-        'Executing ' + taskType.toLowerCase() + ' task'
+        `Executing ${taskType.toLowerCase()} task'
       );
       const execResult = await exec(compiledCmd, {
         cwd: GlobalConfig.get('localDir'),
