@@ -17,8 +17,8 @@ describe('workers/repository/changelog/index', () => {
     mockedFunction(getChangeLogJSON).mockResolvedValueOnce(null);
     const branches = [
       partial<BranchUpgradeConfig>({ logJSON: null }),
-      partial<BranchUpgradeConfig>({}),
-      partial<BranchUpgradeConfig>({}),
+      partial<BranchUpgradeConfig>(),
+      partial<BranchUpgradeConfig>(),
     ];
     await expect(embedChangelogs(branches)).toResolve();
     expect(branches).toEqual([
@@ -29,7 +29,7 @@ describe('workers/repository/changelog/index', () => {
   });
 
   it('needsChangelogs', () => {
-    expect(needsChangelogs(partial<BranchUpgradeConfig>({}))).toBeFalse();
+    expect(needsChangelogs(partial<BranchUpgradeConfig>())).toBeFalse();
     expect(
       needsChangelogs(
         partial<BranchUpgradeConfig>({

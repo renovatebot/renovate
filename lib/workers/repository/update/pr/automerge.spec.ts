@@ -18,7 +18,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config = {
         ...getConfig(),
       } as BranchConfig;
-      pr = partial<Pr>({});
+      pr = partial<Pr>();
     });
 
     it('should not automerge if not configured', async () => {
