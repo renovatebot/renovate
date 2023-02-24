@@ -17,6 +17,8 @@ export class GithubTagsDatasource extends Datasource {
 
   override readonly defaultRegistryUrls = ['https://github.com'];
 
+  static readonly registryStrategy = 'merge';
+
   override http: GithubHttp;
 
   constructor() {
