@@ -197,24 +197,21 @@ export async function doAutoReplace(
       newString = replaceString!;
       if (currentValue && newValue) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), 'g'),
+          regEx(escapeRegExp(currentValue)),
           newValue
         );
       }
       if (depName && newName) {
-        newString = newString.replace(
-          regEx(escapeRegExp(depName), 'g'),
-          newName
-        );
+        newString = newString.replace(regEx(escapeRegExp(depName)), newName);
       }
       if (currentDigest && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), 'g'),
+          regEx(escapeRegExp(currentDigest)),
           newDigest
         );
       } else if (currentDigestShort && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), 'g'),
+          regEx(escapeRegExp(currentDigestShort)),
           newDigest
         );
       }
