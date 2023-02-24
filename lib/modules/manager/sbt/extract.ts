@@ -39,7 +39,7 @@ interface Ctx {
 const scala = lang.createLang('scala');
 
 const sbtVersionRegex = regEx(
-  '\\s*sbt\\.version\\s*=\\s*(\\d*\\.\\d*\\.\\d*)\\s*'
+  '^\\s*sbt\\.version\\s*=\\s*(?<version>\\d+\\.\\d+\\.\\d+)\\s*$'
 );
 
 const scalaVersionMatch = q
@@ -291,13 +291,11 @@ const query = q.tree<Ctx>({
 
 export function extractPackageFile(
   content: string,
-  _packageFile: string
+  packageFile: string
 ): PackageFileContent | null {
-  let parsedResult: Ctx | null = null;
-
-  if (_packageFile === 'project/build.properties') {
-    const sbtRegexArgs = sbtVersionRegex.exec(content);
-    const sbtVersion = sbtRegexArgs?.[1];
+  if (packageFile === 'project/build.properties') {
+    const groups = sbtVersionRegex.exec(content)?.groups;
+    const sbtVersion = groups?.version;
     if (sbtVersion) {
       const sbtDependency: PackageDependency = {
         datasource: GithubReleasesDatasource.id,
@@ -307,13 +305,16 @@ export function extractPackageFile(
         currentValue: sbtVersion,
         extractVersion: '^v(?<version>\\S+)',
       };
-      parsedResult = {
-        vars: {},
+
+      return {
         deps: [sbtDependency],
-        registryUrls: [],
       };
+    } else {
+      return null;
     }
   } else {
+    let parsedResult: Ctx | null = null;
+
     try {
       parsedResult = scala.query(content, query, {
         vars: {},
@@ -323,17 +324,17 @@ export function extractPackageFile(
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ err }, 'Sbt parsing error');
     }
+
+    if (!parsedResult) {
+      return null;
+    }
+
+    const { deps, packageFileVersion } = parsedResult;
+
+    if (!deps.length) {
+      return null;
+    }
+
+    return { deps, packageFileVersion };
   }
-
-  if (!parsedResult) {
-    return null;
-  }
-
-  const { deps, packageFileVersion } = parsedResult;
-
-  if (!deps.length) {
-    return null;
-  }
-
-  return { deps, packageFileVersion };
 }

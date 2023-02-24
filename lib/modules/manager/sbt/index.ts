@@ -18,7 +18,7 @@ export const defaultConfig = {
   fileMatch: [
     '\\.sbt$',
     'project/[^/]*\\.scala$',
-    'project/build\\.properties',
+    'project/build\\.properties$',
   ],
   versioning: ivyVersioning.id,
 };

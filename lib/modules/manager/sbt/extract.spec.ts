@@ -397,7 +397,6 @@ describe('modules/manager/sbt/extract', () => {
             extractVersion: '^v(?<version>\\S+)',
           },
         ],
-        packageFileVersion: undefined,
       });
     });
   });
