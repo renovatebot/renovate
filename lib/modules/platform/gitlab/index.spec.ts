@@ -584,7 +584,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'success' }])
+        .reply(200, [
+          { context: 'renovate/stability-days', status: 'success' },
+          { context: 'renovate/other', status: 'success' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )

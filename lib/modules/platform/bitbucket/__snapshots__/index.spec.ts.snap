@@ -140,7 +140,17 @@ exports[`modules/platform/bitbucket/index initRepo() works with username and pas
 }
 `;
 
-exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `"**foo**bartext"`;
+exports[`modules/platform/bitbucket/index massageMarkdown() returns diff files 1`] = `
+"**foo**
+
+
+**text**
+
+
+
+
+"
+`;
 
 exports[`modules/platform/bitbucket/index updatePr() rethrows exception when PR update error due to unknown reviewers error 1`] = `"Response code 400 (Bad Request)"`;
 

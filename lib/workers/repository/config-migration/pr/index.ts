@@ -4,8 +4,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import { deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import { joinUrlParts } from '../../../../util/url';
 import { getPlatformPrOptions } from '../../update/pr';
@@ -124,7 +124,7 @@ ${
         { err },
         'Migration PR already exists but cannot find it. It was probably created by a different user.'
       );
-      await deleteBranch(branchName);
+      await scm.deleteBranch(branchName);
       return;
     }
     throw err;

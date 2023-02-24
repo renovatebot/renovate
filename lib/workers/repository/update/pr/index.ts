@@ -16,11 +16,12 @@ import {
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
 import { fingerprint } from '../../../../util/fingerprint';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -50,6 +51,7 @@ export function getPlatformPrOptions(
     azureWorkItemId: config.azureWorkItemId,
     bbUseDefaultReviewers: config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -95,16 +97,15 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
-  );
-
   const config: BranchConfig = { ...prConfig };
   const filteredPrConfig = generatePrFingerprintConfig(config);
   const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const getBranchStatus = memoize(() =>
+    resolveBranchStatus(branchName, ignoreTests)
+  );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
   // Check if PR already exists
@@ -406,7 +407,7 @@ export async function ensurePr(
             { branch: branchName },
             'Deleting branch due to server error'
           );
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
         return { type: 'without-pr', prBlockedBy: 'Error' };
       }
