@@ -37,18 +37,17 @@ export class PackagistDatasource extends Datasource {
   private async getJson<T, U extends z.ZodSchema<T>>(
     url: string,
     schema: U
-  ): Promise<z.infer<typeof schema> | null> {
+  ): Promise<z.infer<typeof schema>> {
     const opts = PackagistDatasource.getHostOpts(url);
     const { body } = await this.http.getJson(url, opts);
-    const parsed = schema.safeParse(body);
-    return parsed.success ? parsed.data : null;
+    return schema.parse(body);
   }
 
   @cache({
     namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
   })
-  async getRegistryMeta(regUrl: string): Promise<schema.RegistryMeta | null> {
+  async getRegistryMeta(regUrl: string): Promise<schema.RegistryMeta> {
     const url = resolveBaseUrl(regUrl, 'packages.json');
     const result = await this.getJson(url, schema.RegistryMeta);
     return result;
@@ -80,7 +79,7 @@ export class PackagistDatasource extends Datasource {
   async getPackagistFile(
     regUrl: string,
     regFile: schema.RegistryFile
-  ): Promise<schema.PackagistFile | null> {
+  ): Promise<schema.PackagistFile> {
     const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
     const packagistFile = await this.getJson(url, schema.PackagistFile);
     return packagistFile;
@@ -92,7 +91,7 @@ export class PackagistDatasource extends Datasource {
   ): Promise<void> {
     await p.map(meta.files, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
-      Object.assign(meta.providerPackages, res?.providers);
+      Object.assign(meta.providerPackages, res.providers);
     });
   }
 
@@ -102,10 +101,8 @@ export class PackagistDatasource extends Datasource {
   ): Promise<void> {
     await p.map(meta.includesFiles, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
-      if (res) {
-        for (const [key, val] of Object.entries(res.packages)) {
-          meta.includesPackages[key] = extractDepReleases(val);
-        }
+      for (const [key, val] of Object.entries(res.packages)) {
+        meta.includesPackages[key] = extractDepReleases(val);
       }
     });
   }
@@ -170,9 +167,6 @@ export class PackagistDatasource extends Datasource {
       }
 
       const meta = await this.getRegistryMeta(registryUrl);
-      if (!meta) {
-        return null;
-      }
 
       if (meta.packages[packageName]) {
         const result = extractDepReleases(meta.packages[packageName]);
@@ -191,9 +185,6 @@ export class PackagistDatasource extends Datasource {
       }
 
       const pkgRes = await this.getJson(pkgUrl, schema.PackagesResponse);
-      if (!pkgRes) {
-        return null;
-      }
 
       const dep = extractDepReleases(pkgRes.packages[packageName]);
       logger.trace({ dep }, 'dep');
