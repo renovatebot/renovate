@@ -9,8 +9,14 @@ import { joinUrlParts, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import * as schema from './schema';
-import { extractDepReleases } from './schema';
+import {
+  PackagesResponse,
+  PackagistFile,
+  RegistryFile,
+  RegistryMeta,
+  extractDepReleases,
+  parsePackagesResponses,
+} from './schema';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
@@ -47,9 +53,9 @@ export class PackagistDatasource extends Datasource {
     namespace: `datasource-${PackagistDatasource.id}`,
     key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
   })
-  async getRegistryMeta(regUrl: string): Promise<schema.RegistryMeta> {
+  async getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
     const url = resolveBaseUrl(regUrl, 'packages.json');
-    const result = await this.getJson(url, schema.RegistryMeta);
+    const result = await this.getJson(url, RegistryMeta);
     return result;
   }
 
@@ -60,7 +66,7 @@ export class PackagistDatasource extends Datasource {
 
   private static getPackagistFileUrl(
     regUrl: string,
-    regFile: schema.RegistryFile
+    regFile: RegistryFile
   ): string {
     const { key, sha256 } = regFile;
     const fileName = key.replace('%hash%', sha256);
@@ -70,7 +76,7 @@ export class PackagistDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${PackagistDatasource.id}-public-files`,
-    key: (regUrl: string, regFile: schema.RegistryFile) =>
+    key: (regUrl: string, regFile: RegistryFile) =>
       PackagistDatasource.getPackagistFileUrl(regUrl, regFile),
     cacheable: (regUrl: string) =>
       !PackagistDatasource.isPrivatePackage(regUrl),
@@ -78,16 +84,16 @@ export class PackagistDatasource extends Datasource {
   })
   async getPackagistFile(
     regUrl: string,
-    regFile: schema.RegistryFile
-  ): Promise<schema.PackagistFile> {
+    regFile: RegistryFile
+  ): Promise<PackagistFile> {
     const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
-    const packagistFile = await this.getJson(url, schema.PackagistFile);
+    const packagistFile = await this.getJson(url, PackagistFile);
     return packagistFile;
   }
 
   async fetchProviderPackages(
     regUrl: string,
-    meta: schema.RegistryMeta
+    meta: RegistryMeta
   ): Promise<void> {
     await p.map(meta.files, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
@@ -97,7 +103,7 @@ export class PackagistDatasource extends Datasource {
 
   async fetchIncludesPackages(
     regUrl: string,
-    meta: schema.RegistryMeta
+    meta: RegistryMeta
   ): Promise<void> {
     await p.map(meta.includesFiles, async (file) => {
       const res = await this.getPackagistFile(regUrl, file);
@@ -119,13 +125,13 @@ export class PackagistDatasource extends Datasource {
     const results = await p.map([pkgUrl, devUrl], (url) =>
       this.http.getJson(url).then(({ body }) => body)
     );
-    return schema.parsePackagesResponses(name, results);
+    return parsePackagesResponses(name, results);
   }
 
   public getPkgUrl(
     packageName: string,
     registryUrl: string,
-    registryMeta: schema.RegistryMeta
+    registryMeta: RegistryMeta
   ): string | null {
     if (
       registryMeta.providersUrl &&
@@ -184,8 +190,7 @@ export class PackagistDatasource extends Datasource {
         return null;
       }
 
-      const pkgRes = await this.getJson(pkgUrl, schema.PackagesResponse);
-
+      const pkgRes = await this.getJson(pkgUrl, PackagesResponse);
       const dep = extractDepReleases(pkgRes.packages[packageName]);
       logger.trace({ dep }, 'dep');
       return dep;
