@@ -27,7 +27,7 @@ function lernaPkgFileWithoutLernaDep(
   };
 }
 
-const config = partial<PostUpdateConfig>({});
+const config = partial<PostUpdateConfig>();
 
 describe('modules/manager/npm/post-update/lerna', () => {
   const globalConfig: RepoGlobalConfig = {
