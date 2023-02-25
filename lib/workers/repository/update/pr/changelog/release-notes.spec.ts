@@ -97,16 +97,13 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
       expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>({}))
+        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>())
       ).toEqual(input);
       expect(
-        await addReleaseNotes(null, partial<BranchUpgradeConfig>({}))
+        await addReleaseNotes(null, partial<BranchUpgradeConfig>())
       ).toBeNull();
       expect(
-        await addReleaseNotes(
-          { versions: [] },
-          partial<BranchUpgradeConfig>({})
-        )
+        await addReleaseNotes({ versions: [] }, partial<BranchUpgradeConfig>())
       ).toStrictEqual({ versions: [] });
     });
 
@@ -120,7 +117,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         versions: [{ version: '3.10.0', compare: { url: '' } }],
       };
       expect(
-        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>({}))
+        await addReleaseNotes(input as never, partial<BranchUpgradeConfig>())
       ).toEqual({
         a: 1,
         hasReleaseNotes: false,
@@ -155,7 +152,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
         ],
       } as ChangeLogResult;
       expect(
-        await addReleaseNotes(input, partial<BranchUpgradeConfig>({}))
+        await addReleaseNotes(input, partial<BranchUpgradeConfig>())
       ).toEqual({
         a: 1,
         hasReleaseNotes: false,
@@ -333,7 +330,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.0',
           gitRef: '1.0.0',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toBeNull();
     });
@@ -368,7 +365,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -410,7 +407,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: '',
@@ -452,7 +449,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body\n',
@@ -494,7 +491,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body\n',
@@ -536,7 +533,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toBeNull();
     });
@@ -571,7 +568,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -615,7 +612,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -659,7 +656,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -702,7 +699,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)\n',
@@ -740,7 +737,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -777,7 +774,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -814,7 +811,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         body: 'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
@@ -881,7 +878,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.0',
           gitRef: '1.0.0',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toEqual({
         url: 'correct/url/tag.com',
