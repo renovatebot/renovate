@@ -14,7 +14,7 @@ const githubApiHost = 'https://api.github.com';
 const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
 const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
 
-const upgrade: BranchConfig = partial<BranchConfig>({
+const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versioning: semverVersioning.id,
