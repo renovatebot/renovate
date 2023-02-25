@@ -1841,7 +1841,18 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    it('handles replacements', async () => {
+    it('handles replacements - name only', async () => {
+      config.currentValue = '1.4.1';
+      config.depName = 'q';
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'r';
+      config.datasource = NpmDatasource.id;
+      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
+
+    it('handles replacements - name and version', async () => {
       config.currentValue = '1.4.1';
       config.depName = 'q';
       // This config is normally set when packageRules are applied

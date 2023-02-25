@@ -154,6 +154,15 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
+
+      if (config.replacementName && !config.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: config.replacementName,
+          newValue: currentValue!,
+        });
+      }
+
       if (config.replacementName && config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
