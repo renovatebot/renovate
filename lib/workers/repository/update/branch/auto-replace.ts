@@ -71,9 +71,15 @@ export async function confirmIfDepUpdated(
   if (!upgrade.newDigest) {
     return true;
   }
+
   if (upgrade.newDigest === newUpgrade.currentDigest) {
     return true;
   }
+
+  if (upgrade.newDigest === newUpgrade.currentDigestShort) {
+    return true;
+  }
+
   if (!upgrade.currentDigest && !upgrade.pinDigests) {
     return true;
   }
