@@ -29,7 +29,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   const migratedData: MigratedData = {
     content: migratedContent,
     filename: configFileName,
-    indent: partial<Indent>({}),
+    indent: partial<Indent>(),
   };
   let config: RenovateConfig;
 
@@ -49,7 +49,7 @@ describe('workers/repository/config-migration/pr/index', () => {
   describe('ensureConfigMigrationPr()', () => {
     beforeEach(() => {
       spy.mockImplementation((input) => input);
-      platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
+      platform.createPr.mockResolvedValueOnce(partial<Pr>());
     });
 
     let createPrBody: string;
@@ -166,7 +166,7 @@ describe('workers/repository/config-migration/pr/index', () => {
       await ensureConfigMigrationPr(config, {
         content: migratedContent,
         filename: 'renovate.json5',
-        indent: partial<Indent>({}),
+        indent: partial<Indent>(),
       });
       expect(platform.createPr).toHaveBeenCalledTimes(1);
       expect(platform.createPr.mock.calls[0][0].prBody).toMatchSnapshot();
