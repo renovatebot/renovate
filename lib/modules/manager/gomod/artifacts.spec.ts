@@ -1249,12 +1249,13 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+        ],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
@@ -1287,40 +1288,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
   });
 
-  it('returns go.mod if only go.mod changes', async () => {
-    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
-    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
-    const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce(
-      partial<StatusResult>({
-        modified: ['go.mod'],
-      })
-    );
-    fs.readLocalFile.mockResolvedValueOnce('New go.mod');
-    expect(
-      await gomod.updateArtifacts({
-        packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
-        newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          updateType: 'major',
-          newMajor: 28,
-          postUpdateOptions: [],
-        },
-      })
-    ).toEqual([
-      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
-    ]);
-    expect(execSnapshots).toMatchObject([
-      {
-        cmd: 'go get -d -t ./...',
-        options: { cwd: '/tmp/github/some/repo' },
-      },
-    ]);
-  });
-
-  it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
+  it('updates correct import paths with gomodUpdateImportPaths and multiple dependencies', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
@@ -1331,16 +1299,75 @@ describe('modules/manager/gomod/artifacts', () => {
     );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New main.go')
       .mockResolvedValueOnce('New go.mod');
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'github.com/pkg/errors' }],
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+          { depName: 'github.com/caarlos0/env/v6', newVersion: 'v7.0.0' },
+        ],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 1,
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      })
+    ).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'main.go', contents: 'New main.go' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go install github.com/marwan-at-work/mod/cmd/mod@latest',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/google/go-github/v24 -t=28',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'mod upgrade --mod-name=github.com/caarlos0/env/v6 -t=7',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('skips updating import paths with gomodUpdateImportPaths on v0 to v1', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [
+          { depName: 'github.com/pkg/errors', newVersion: 'v1.0.0' },
+        ],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
@@ -1351,6 +1378,57 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(execSnapshots).toMatchObject([
       {
         cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+    ]);
+  });
+
+  it('skips updating import paths when invalid major version', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readLocalFile
+      .mockResolvedValueOnce('New go.sum')
+      .mockResolvedValueOnce('New go.mod');
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [
+          { depName: 'github.com/pkg/errors', newVersion: 'vx.0.0' },
+        ],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          updateType: 'major',
+          postUpdateOptions: ['gomodUpdateImportPaths'],
+        },
+      })
+    ).toEqual([
+      { file: { type: 'addition', path: 'go.sum', contents: 'New go.sum' } },
+      { file: { type: 'addition', path: 'go.mod', contents: 'New go.mod' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t ./...',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
+        options: { cwd: '/tmp/github/some/repo' },
+      },
+      {
+        cmd: 'go mod tidy',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -1446,12 +1524,13 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+        ],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
           postUpdateOptions: ['gomodUpdateImportPaths'],
           constraints: {
             gomodMod: 'v1.2.3',
@@ -1504,12 +1583,13 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+        updatedDeps: [
+          { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+        ],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
           postUpdateOptions: ['gomodUpdateImportPaths'],
           constraints: {
             gomodMod: 'a.b.c',
@@ -1560,12 +1640,11 @@ describe('modules/manager/gomod/artifacts', () => {
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
-        updatedDeps: [{ depName: 'gopkg.in/yaml.v2' }],
+        updatedDeps: [{ depName: 'gopkg.in/yaml.v2', newVersion: 'v28.0.0' }],
         newPackageFileContent: gomod1,
         config: {
           ...config,
           updateType: 'major',
-          newMajor: 28,
           postUpdateOptions: ['gomodUpdateImportPaths'],
         },
       })
@@ -1609,11 +1688,12 @@ describe('modules/manager/gomod/artifacts', () => {
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      updatedDeps: [
+        { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+      ],
       newPackageFileContent: gomod1,
       config: {
         updateType: 'major',
-        newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
       },
     });
@@ -1667,11 +1747,12 @@ describe('modules/manager/gomod/artifacts', () => {
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      updatedDeps: [
+        { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+      ],
       newPackageFileContent: gomod1,
       config: {
         updateType: 'major',
-        newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
       },
     });
@@ -1739,11 +1820,12 @@ describe('modules/manager/gomod/artifacts', () => {
     });
     const res = await gomod.updateArtifacts({
       packageFileName: 'go.mod',
-      updatedDeps: [{ depName: 'github.com/google/go-github/v24' }],
+      updatedDeps: [
+        { depName: 'github.com/google/go-github/v24', newVersion: 'v28.0.0' },
+      ],
       newPackageFileContent: gomod1,
       config: {
         updateType: 'major',
-        newMajor: 28,
         postUpdateOptions: ['gomodUpdateImportPaths'],
         constraints: {
           go: '1.14',

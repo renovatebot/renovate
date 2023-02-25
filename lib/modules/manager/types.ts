@@ -73,32 +73,6 @@ export interface PackageFile<T = Record<string, any>>
   packageFile: string;
 }
 
-export interface Package<T> extends ManagerData<T> {
-  currentValue?: string | null;
-  currentDigest?: string;
-  depName?: string;
-  depType?: string;
-  fileReplacePosition?: number;
-  groupName?: string;
-  lineNumber?: number;
-  packageName?: string | null;
-  target?: string;
-  versioning?: string;
-  dataType?: string;
-  enabled?: boolean;
-
-  // npm manager
-  bumpVersion?: ReleaseType | string;
-  npmPackageAlias?: boolean;
-  packageFileVersion?: string;
-  gitRef?: boolean;
-  sourceUrl?: string | null;
-  pinDigests?: boolean;
-  currentRawValue?: string;
-  major?: { enabled?: boolean };
-  prettyDepType?: string;
-}
-
 export interface LookupUpdate {
   bucket?: string;
   branchName?: string;
@@ -127,7 +101,29 @@ export interface LookupUpdate {
   registryUrl?: string;
 }
 
-export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+export interface PackageDependency<T = Record<string, any>>
+  extends ManagerData<T> {
+  currentValue?: string | null;
+  currentDigest?: string;
+  depName?: string;
+  depType?: string;
+  fileReplacePosition?: number;
+  groupName?: string;
+  lineNumber?: number;
+  packageName?: string | null;
+  target?: string;
+  versioning?: string;
+  dataType?: string;
+  enabled?: boolean;
+  bumpVersion?: ReleaseType | string;
+  npmPackageAlias?: boolean;
+  packageFileVersion?: string;
+  gitRef?: boolean;
+  sourceUrl?: string | null;
+  pinDigests?: boolean;
+  currentRawValue?: string;
+  major?: { enabled?: boolean };
+  prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
@@ -155,7 +151,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   variableName?: string;
 }
 
-export interface Upgrade<T = Record<string, any>> extends Package<T> {
+export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
