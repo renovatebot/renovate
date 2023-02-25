@@ -423,6 +423,5 @@ describe('modules/manager/sbt/extract', () => {
         ],
       });
     });
-
   });
 });
