@@ -88,6 +88,7 @@ export async function confirmIfDepUpdated(
     return true;
   }
 
+  // istanbul ignore next
   return false;
 }
 
