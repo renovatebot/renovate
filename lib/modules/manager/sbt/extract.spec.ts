@@ -393,11 +393,36 @@ describe('modules/manager/sbt/extract', () => {
             packageName: 'sbt/sbt',
             depName: 'sbt/sbt',
             currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
             versioning: 'semver',
             extractVersion: '^v(?<version>\\S+)',
           },
         ],
       });
     });
+
+    it('extract sbt version if the file contains other properties', () => {
+      expect(
+        extract(
+          `sbt.version=1.6.0
+          another.conf=1.4.0
+      `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt/sbt',
+            currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
   });
 });
