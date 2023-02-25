@@ -251,6 +251,7 @@ describe('modules/datasource/packagist/schema', () => {
         includesFiles: [],
         packages: {},
         providerPackages: {},
+        includesPackages: {},
         providersLazyUrl: null,
         providersUrl: null,
       });
