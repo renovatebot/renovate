@@ -29,7 +29,7 @@ describe('workers/repository/config-migration/branch/create', () => {
     migratedConfigData = {
       content: renovateConfig,
       filename,
-      indent: partial<Indent>({}),
+      indent: partial<Indent>(),
     };
     prettierSpy.mockResolvedValueOnce(migratedConfigData.content);
   });

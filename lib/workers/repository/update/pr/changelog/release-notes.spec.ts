@@ -174,8 +174,8 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
       const res = await getReleaseList(
-        partial<ChangeLogProject>({}),
-        partial<ChangeLogRelease>({})
+        partial<ChangeLogProject>(),
+        partial<ChangeLogRelease>()
       );
       expect(res).toBeEmptyArray();
     });
@@ -205,7 +205,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           ...githubProject,
           repository: 'some/yet-other-repository',
         },
-        partial<ChangeLogRelease>({})
+        partial<ChangeLogRelease>()
       );
       expect(res).toMatchObject([
         {
@@ -240,7 +240,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           ...gitlabProject,
           repository: 'some/yet-other-repository',
         },
-        partial<ChangeLogRelease>({})
+        partial<ChangeLogRelease>()
       );
       expect(res).toMatchObject([
         {
@@ -279,7 +279,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           apiBaseUrl: 'https://my.custom.domain/api/v4/',
           baseUrl: 'https://my.custom.domain/',
         },
-        partial<ChangeLogRelease>({})
+        partial<ChangeLogRelease>()
       );
       expect(res).toMatchObject([
         {
@@ -833,7 +833,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
           version: '1.0.1',
           gitRef: '1.0.1',
         }),
-        partial<BranchUpgradeConfig>({})
+        partial<BranchUpgradeConfig>()
       );
       expect(res).toBeNull();
     });
