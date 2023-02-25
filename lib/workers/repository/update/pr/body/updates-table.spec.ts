@@ -16,7 +16,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
   });
 
   it('checks results for getPrUpdatesTable', () => {
-    const upgrade0: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+    const upgrade0 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
@@ -33,7 +33,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       updateType: 'lockFileMaintenance',
     });
 
-    const upgrade1: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+    const upgrade1 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
@@ -60,7 +60,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       displayTo: '1.7.0',
     });
 
-    const upgrade2: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+    const upgrade2 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {

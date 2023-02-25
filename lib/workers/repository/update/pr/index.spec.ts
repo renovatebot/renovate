@@ -627,7 +627,7 @@ describe('workers/repository/update/pr/index', () => {
         date: '',
       };
 
-      const dummyUpgrade: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+      const dummyUpgrade = partial<BranchUpgradeConfig>({
         branchName: sourceBranch,
         depType: 'foo',
         depName: 'bar',
@@ -702,7 +702,7 @@ describe('workers/repository/update/pr/index', () => {
       it('removes duplicate changelogs', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
-        const upgrade: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+        const upgrade = partial<BranchUpgradeConfig>({
           ...dummyUpgrade,
           sourceUrl: 'https://github.com/foo/bar',
           sourceDirectory: '/src',

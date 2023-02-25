@@ -15,7 +15,7 @@ beforeEach(() => {
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -36,7 +36,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles lockFileMaintenance', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -60,7 +60,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles lockFileUpdate', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -102,7 +102,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('does not group same upgrades', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -132,7 +132,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades same version', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -204,7 +204,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups major updates with different versions but same newValue, no recreateClosed', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -240,7 +240,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple digest updates immortally', () => {
-      const branch: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',

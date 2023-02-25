@@ -10,7 +10,7 @@ import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
-const upgrade: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   depName: 'renovate',
@@ -369,7 +369,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         ])
       );
 
-      const upgradeData: BranchUpgradeConfig = partial<BranchUpgradeConfig>({
+      const upgradeData = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: '',
         depName: 'correctPrefix/target',

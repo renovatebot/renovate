@@ -10,7 +10,7 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
     it('handles an artifact which is a directory', async () => {
-      const commands: BranchUpgradeConfig[] = partial<BranchUpgradeConfig>([
+      const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'main',
