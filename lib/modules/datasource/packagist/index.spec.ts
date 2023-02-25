@@ -435,5 +435,41 @@ describe('modules/datasource/packagist/index', () => {
         })
       ).toMatchSnapshot();
     });
+
+    it('fetches packagist V2 packages', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/packages.json')
+        .reply(200, {
+          'metadata-url': 'https://example.com/p2/%package%.json',
+        })
+        .get('/p2/drewm/mailchimp-api.json')
+        .reply(200, {
+          minified: 'composer/2.0',
+          packages: {
+            'drewm/mailchimp-api': [
+              {
+                name: 'drewm/mailchimp-api',
+                version: 'v2.5.4',
+              },
+            ],
+          },
+        })
+        .get('/p2/drewm/mailchimp-api~dev.json')
+        .reply(404);
+      config.registryUrls = ['https://example.com'];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'drewm/mailchimp-api',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [{ gitRef: 'v2.5.4', version: '2.5.4' }],
+      });
+    });
   });
 });

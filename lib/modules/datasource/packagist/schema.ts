@@ -205,6 +205,7 @@ export const RegistryMeta = z
         ),
         ['providers-lazy-url']: looseValue(z.string()),
         ['providers-url']: looseValue(z.string()),
+        ['metadata-url']: looseValue(z.string()),
       })
     )
   )
@@ -216,6 +217,7 @@ export const RegistryMeta = z
       ['providers']: providerPackages,
       ['providers-lazy-url']: providersLazyUrl,
       ['providers-url']: providersUrl,
+      ['metadata-url']: metadataUrl,
     }) => ({
       packages,
       includesFiles,
@@ -223,6 +225,7 @@ export const RegistryMeta = z
       files,
       providersUrl,
       providersLazyUrl,
+      metadataUrl,
       includesPackages: {} as Record<string, ReleaseResult | null>,
     })
   );
