@@ -14,15 +14,7 @@ export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    depIndex,
-    currentDigest,
-    pinDigests,
-  } = upgrade;
+  const { manager, packageFile, depIndex } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade: PackageDependency;
   try {
@@ -63,12 +55,12 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (newValue && newUpgrade.currentValue !== newValue) {
+  if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
     logger.debug(
       {
         manager,
         packageFile,
-        expectedValue: newValue,
+        expectedValue: upgrade.newValue,
         foundValue: newUpgrade.currentValue,
       },
       'Value is not updated'
@@ -76,21 +68,20 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (!newDigest) {
+  if (!upgrade.newDigest) {
     return true;
   }
-  if (newUpgrade.currentDigest === newDigest) {
+  if (upgrade.newDigest === newUpgrade.currentDigest) {
     return true;
   }
-  if (!currentDigest) {
-    if (!pinDigests) {
-      return true;
-    } else if (newDigest) {
-      return true;
-    }
+  if (!upgrade.currentDigest && !upgrade.pinDigests) {
+    return true;
   }
 
-  // istanbul ignore next
+  if (upgrade.updateType === 'replacement') {
+    return true;
+  }
+
   return false;
 }
 
@@ -179,6 +170,8 @@ export async function doAutoReplace(
     const depIndex = existingContent.indexOf(depName!);
     const valIndex = existingContent.indexOf(currentValue!);
     searchIndex = depIndex < valIndex ? depIndex : valIndex;
+    // } else if (upgrade.replacementPrefix) {
+    // searchIndex = existingContent.indexOf(depName!);
   } else {
     searchIndex = existingContent.indexOf(replaceString!);
   }
