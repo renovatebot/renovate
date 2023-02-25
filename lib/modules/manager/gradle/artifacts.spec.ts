@@ -83,7 +83,7 @@ describe('modules/manager/gradle/artifacts', () => {
         content = 'New gradle.lockfile';
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.4-bin.zip';
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
       }
 
       return Promise.resolve(content);
