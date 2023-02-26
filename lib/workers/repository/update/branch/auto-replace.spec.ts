@@ -233,6 +233,24 @@ describe('workers/repository/update/branch/auto-replace', () => {
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
 
+    it('fails with digest mismatch', async () => {
+      const dockerfile = codeBlock`
+        FROM java:11@sha256-1234 as build
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'java';
+      upgrade.currentValue = '11';
+      upgrade.currentDigest = 'sha256-1234';
+      upgrade.depIndex = 0;
+      upgrade.newName = 'java';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256-5678';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
     it('updates with docker replacement', async () => {
       const dockerfile = 'FROM bitnami/redis:6.0.8';
       upgrade.manager = 'dockerfile';
