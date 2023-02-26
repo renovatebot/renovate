@@ -293,7 +293,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFileContent | null {
-  if (packageFile === 'project/build.properties') {
+  if (packageFile === 'project/build.properties' || packageFile.endsWith('/project/build.properties')) {
     const regexResult = sbtVersionRegex.exec(content);
     const sbtVersion = regexResult?.groups?.version;
     const matchString = regexResult?.[0];
