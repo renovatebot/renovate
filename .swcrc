@@ -9,7 +9,8 @@
     },
     "transform": null,
     "target": "es2020",
-    "preserveAllComments": true
+    "preserveAllComments": true,
+    "externalHelpers": true
   },
   "module": {
     "type": "commonjs"
