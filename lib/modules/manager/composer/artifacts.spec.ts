@@ -292,6 +292,46 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('does not set gitlab COMPOSER_AUTH with composerGitlabToken in postUpdateOptions', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    hostRules.add({
+      hostType: 'gitlab',
+      matchHost: 'gitlab.com',
+      token: 'gitlab-token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      postUpdateOptions: ['composerGitlabToken'],
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
+          },
+        },
+      },
+    ]);
+  });
+
   it('returns updated composer.lock', async () => {
     fs.readLocalFile.mockResolvedValueOnce('{}');
     const execSnapshots = mockExecAll();

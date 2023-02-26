@@ -20,7 +20,11 @@ import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
-import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../types';
 import type { AuthJson, ComposerLock } from './types';
 import {
   extractConstraints,
@@ -31,7 +35,7 @@ import {
   takePersonalAccessTokenIfPossible,
 } from './utils';
 
-function getAuthJson(): string | null {
+function getAuthJson(config: UpdateArtifactsConfig): string | null {
   const authJson: AuthJson = {};
 
   const githubToken = findGithubToken({
@@ -55,7 +59,10 @@ function getAuthJson(): string | null {
   }
 
   hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
-    if (gitlabHostRule?.token) {
+    if (
+      !config.postUpdateOptions?.includes('composerGitlabToken') &&
+      gitlabHostRule?.token
+    ) {
       const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
@@ -127,7 +134,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: await ensureCacheDir('composer'),
-        COMPOSER_AUTH: getAuthJson(),
+        COMPOSER_AUTH: getAuthJson(config),
       },
       toolConstraints: [phpToolConstraint, composerToolConstraint],
       docker: {},

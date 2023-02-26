@@ -1998,6 +1998,7 @@ const options: RenovateOptions[] = [
     default: [],
     allowedValues: [
       'bundlerConservative',
+      'composerGitlabToken',
       'helmUpdateSubChartArchives',
       'gomodMassage',
       'gomodUpdateImportPaths',
