@@ -84,6 +84,8 @@ describe('modules/datasource/packagist/index', () => {
         .replyWithError({ code: 'ETIMEDOUT' });
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/vendor/package-name2.json')
         .reply(200)
         .get('/p2/vendor/package-name2~dev.json')
@@ -104,6 +106,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(403);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/vendor/package-name.json')
         .reply(200)
         .get('/p2/vendor/package-name~dev.json')
@@ -124,6 +128,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(404);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
         .reply(200)
         .get('/p2/drewm/mailchimp-api~dev.json')
@@ -287,6 +293,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(200, fileJson);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/some/other.json')
         .reply(200, beytJson)
         .get('/p2/some/other~dev.json')
@@ -383,6 +391,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(200, packagesJson);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/some/other.json')
         .reply(200, beytJson)
         .get('/p2/some/other~dev.json')
@@ -399,10 +409,10 @@ describe('modules/datasource/packagist/index', () => {
     it('processes real versioned data', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
-        .reply(200, mailchimpJson);
-      httpMock
-        .scope(baseUrl)
+        .reply(200, mailchimpJson)
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = ['https://packagist.org'];
@@ -419,10 +429,10 @@ describe('modules/datasource/packagist/index', () => {
     it('adds packagist source implicitly', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
-        .reply(200, mailchimpJson);
-      httpMock
-        .scope(baseUrl)
+        .reply(200, mailchimpJson)
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = [];

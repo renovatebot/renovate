@@ -178,16 +178,6 @@ export class PackagistDatasource extends Datasource {
     }
 
     try {
-      if (registryUrl === 'https://packagist.org') {
-        const metadataUrl = '/p2/%package%.json';
-        const packagistResult = await this.packagistV2Lookup(
-          registryUrl,
-          metadataUrl,
-          packageName
-        );
-        return packagistResult;
-      }
-
       const meta = await this.getRegistryMeta(registryUrl);
 
       if (meta.metadataUrl) {
