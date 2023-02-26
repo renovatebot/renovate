@@ -39,8 +39,7 @@ interface Ctx {
 const scala = lang.createLang('scala');
 
 const sbtVersionRegex = regEx(
-  '^[ ]*sbt\\.version[ ]*=[ ]*(?<version>\\d+\\.\\d+\\.\\d+)[ ]*$',
-  'm'
+  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
 );
 
 const scalaVersionMatch = q

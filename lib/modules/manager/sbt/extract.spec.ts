@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile as extract } from '.';
 
@@ -382,8 +383,9 @@ describe('modules/manager/sbt/extract', () => {
     it('extract sbt version', () => {
       expect(
         extract(
-          `sbt.version=1.6.0
-      `,
+          codeBlock`
+            sbt.version=1.6.0
+          `,
           'project/build.properties'
         )
       ).toMatchObject({
@@ -404,9 +406,10 @@ describe('modules/manager/sbt/extract', () => {
     it('extract sbt version if the file contains other properties', () => {
       expect(
         extract(
-          `sbt.version=1.6.0
-          another.conf=1.4.0
-      `,
+          codeBlock`
+            sbt.version=1.6.0
+            another.conf=1.4.0
+          `,
           'project/build.properties'
         )
       ).toMatchObject({
@@ -422,6 +425,17 @@ describe('modules/manager/sbt/extract', () => {
           },
         ],
       });
+    });
+
+    it('ignores build.properties file if does not contain sbt version', () => {
+      expect(
+        extract(
+          codeBlock`
+            another.conf=1.4.0
+          `,
+          'project/build.properties'
+        )
+      ).toBeNull();
     });
   });
 });
