@@ -1,5 +1,7 @@
+import fs from 'fs';
 import os from 'os';
 import v8 from 'v8';
+import JSON5 from 'json5';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -37,6 +39,8 @@ function jestGithubRunnerSpecs(): JestConfig {
   };
 }
 
+const swcrc = JSON5.parse(fs.readFileSync(`./.swcrc`, 'utf-8'));
+
 const config: JestConfig = {
   cacheDirectory: '.cache/jest',
   clearMocks: true,
@@ -60,12 +64,10 @@ const config: JestConfig = {
     },
   },
   transform: {
-    '\\.ts$': [
-      'ts-jest',
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
       {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        diagnostics: false,
-        isolatedModules: true,
+        ...swcrc,
       },
     ],
   },
