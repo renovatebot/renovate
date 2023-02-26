@@ -94,9 +94,7 @@ export async function confirmIfDepUpdated(
             manager,
             packageFile,
             expectedValue: upgrade.newDigest,
-            foundValue: newUpgrade.currentDigest
-              ? newUpgrade.currentDigest
-              : newUpgrade.currentDigestShort,
+            foundValue: newUpgrade.currentDigest,
           },
           'Digest is not updated'
         );
