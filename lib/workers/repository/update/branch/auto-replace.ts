@@ -55,6 +55,19 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
+  if (upgrade.newName && upgrade.newName !== newUpgrade.depName) {
+    logger.debug(
+      {
+        manager,
+        packageFile,
+        currentDepName: upgrade.depName,
+        newDepName: newUpgrade.depName,
+      },
+      'depName is not updated'
+    );
+    return false;
+  }
+
   if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
     logger.debug(
       {
@@ -68,28 +81,32 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (!upgrade.newDigest) {
-    return true;
-  }
-
-  if (upgrade.newDigest === newUpgrade.currentDigest) {
-    return true;
-  }
-
-  if (upgrade.newDigest === newUpgrade.currentDigestShort) {
-    return true;
-  }
-
-  if (!upgrade.currentDigest && !upgrade.pinDigests) {
-    return true;
-  }
-
-  if (upgrade.updateType === 'replacement') {
-    return true;
+  if (upgrade.newDigest) {
+    if (
+      (upgrade.pinDigests &&
+        !upgrade.currentDigest &&
+        upgrade.updateType === 'pinDigest') ||
+      upgrade.currentDigest
+    ) {
+      if (upgrade.newDigest !== newUpgrade.currentDigest) {
+        logger.debug(
+          {
+            manager,
+            packageFile,
+            expectedValue: upgrade.newDigest,
+            foundValue: newUpgrade.currentDigest
+              ? newUpgrade.currentDigest
+              : newUpgrade.currentDigestShort,
+          },
+          'Digest is not updated'
+        );
+        return false;
+      }
+    }
   }
 
   // istanbul ignore next
-  return false;
+  return true;
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
