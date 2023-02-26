@@ -177,8 +177,6 @@ export async function doAutoReplace(
     const depIndex = existingContent.indexOf(depName!);
     const valIndex = existingContent.indexOf(currentValue!);
     searchIndex = depIndex < valIndex ? depIndex : valIndex;
-    // } else if (upgrade.replacementPrefix) {
-    // searchIndex = existingContent.indexOf(depName!);
   } else {
     searchIndex = existingContent.indexOf(replaceString!);
   }
