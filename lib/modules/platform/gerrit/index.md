@@ -19,8 +19,9 @@ Remember to set `platform=gerrit` somewhere in your Renovate config file.
 If you use the "Code-Review" label and want `automerge` working, then you have to enable `gerritAutoApprove=true` in your Renovate config.
 In this case Renovate will automatically add the _Code-Review_ label with the value "+2" to each created "pull-request" (Gerrit-Change).
 
+<!-- prettier-ignore -->
 !!! note
-The login should be allowed to give +2 for the Code-Review label.
+    The login must be allowed to give +2 for the Code-Review label.
 
 The Renovate option `automergeType: "branch"` makes no sense for Gerrit, because there are no branches used.
 It works similar to the default option `"pr"`.
