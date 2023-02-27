@@ -5721,10 +5721,10 @@ graceful-fs@4.2.10, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, 
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
 
-graph-data-structure@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.1.1.tgz#9c45dbd61ff22f2cbf1790c888d6fdff85c5c1c8"
-  integrity sha512-8hN+cbuxQPX16u6XsNHD365ywgsizdb3/4EQgCADNb/XUpqIWSNfZ2oCuEs59kn0XezVaxz/LK7oJ+kOE7wmMQ==
+graph-data-structure@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.2.0.tgz#db7886a69a2073c76291eef75c973d532eea3b48"
+  integrity sha512-GtMD5xvFX947d04IzH0dIPnncglFVQKZpLqLb0jy7OM+dMcm4gY9QNAUfHJryNc0Gd0cSvlMfwulUQ/CPyGczg==
 
 grapheme-splitter@^1.0.4:
   version "1.0.4"
