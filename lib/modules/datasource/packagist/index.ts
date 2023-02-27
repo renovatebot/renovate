@@ -5,7 +5,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { joinUrlParts, parseUrl, resolveBaseUrl } from '../../../util/url';
+import { joinUrlParts, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -133,10 +133,9 @@ export class PackagistDatasource extends Datasource {
     registryUrl: string,
     registryMeta: RegistryMeta
   ): string | null {
-    const registryHost = parseUrl(registryUrl)?.origin;
+    const { origin: registryHost } = new URL(registryUrl);
 
     if (
-      registryHost &&
       registryMeta.providersUrl &&
       packageName in registryMeta.providerPackages
     ) {
@@ -148,7 +147,7 @@ export class PackagistDatasource extends Datasource {
       return resolveBaseUrl(registryHost, url);
     }
 
-    if (registryHost && registryMeta.providersLazyUrl) {
+    if (registryMeta.providersLazyUrl) {
       return resolveBaseUrl(
         registryHost,
         registryMeta.providersLazyUrl.replace('%package%', packageName)
