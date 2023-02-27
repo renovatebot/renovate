@@ -21,7 +21,6 @@ describe('modules/manager/cargo/extract', () => {
     let config: ExtractConfig;
     let adminConfig: RepoGlobalConfig;
     let tmpDir: DirectoryResult;
-    const OLD_ENV = process.env;
 
     beforeEach(async () => {
       config = {};
@@ -32,13 +31,13 @@ describe('modules/manager/cargo/extract', () => {
       };
 
       GlobalConfig.set(adminConfig);
-      process.env = { ...OLD_ENV };
+      delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
+      delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
     });
 
     afterEach(async () => {
       await tmpDir.cleanup();
       GlobalConfig.reset();
-      process.env = OLD_ENV;
     });
 
     it('returns null for invalid toml', async () => {
