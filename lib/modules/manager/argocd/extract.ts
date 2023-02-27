@@ -112,10 +112,8 @@ export function processAppSpec(
     deps.push(processSource(spec.source));
   }
 
-  if (is.array(spec.sources)) {
-    for (const source of coerceArray(spec.sources)) {
-      deps.push(processSource(source));
-    }
+  for (const source of coerceArray(spec.sources)) {
+    deps.push(processSource(source));
   }
 
   return deps.filter(is.truthy);
