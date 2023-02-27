@@ -1,4 +1,4 @@
-import type { Range, SemVer } from 'semver';
+import type { SemVer } from 'semver';
 import type { RangeStrategy } from '../../types';
 
 export interface NewValueConfig {
@@ -94,7 +94,7 @@ export interface VersioningApi {
   /**
    * Check whether the `version` satisfies the `range` constraint.
    */
-  matches(version: string, range: string | Range): boolean;
+  matches(version: string, range: string): boolean;
 
   valueToVersion?(version: string): string;
 }

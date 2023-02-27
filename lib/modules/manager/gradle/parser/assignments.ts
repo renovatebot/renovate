@@ -1,4 +1,4 @@
-import { query as q } from 'good-enough-parser';
+import { parser, query as q } from 'good-enough-parser';
 import { regEx } from '../../../../util/regex';
 import type { Ctx } from '../types';
 import {
@@ -81,6 +81,27 @@ const qGroovySingleMapOfVarAssignment = q
     return ctx;
   });
 
+const qGroovyMapOfExpr = (
+  search: q.QueryBuilder<Ctx, parser.Node>
+): q.QueryBuilder<Ctx, parser.Node> =>
+  q.alt(
+    q
+      .sym(storeVarToken)
+      .op(':')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '[',
+        endsWith: ']',
+        search,
+        postHandler: (ctx: Ctx) => {
+          ctx.varTokens.pop();
+          return ctx;
+        },
+      }),
+    qGroovySingleMapOfVarAssignment
+  );
+
 // versions = [ android: [ buildTools: '30.0.3' ], kotlin: '1.4.30' ]
 const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
   .alt(q.op('='), q.op('+='))
@@ -89,39 +110,7 @@ const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
     maxDepth: 1,
     startsWith: '[',
     endsWith: ']',
-    search: q.alt(
-      q
-        .sym(storeVarToken)
-        .op(':')
-        .tree({
-          type: 'wrapped-tree',
-          maxDepth: 1,
-          startsWith: '[',
-          endsWith: ']',
-          search: q.alt(
-            q
-              .sym(storeVarToken)
-              .op(':')
-              .tree({
-                type: 'wrapped-tree',
-                maxDepth: 1,
-                startsWith: '[',
-                endsWith: ']',
-                search: qGroovySingleMapOfVarAssignment,
-                postHandler: (ctx) => {
-                  ctx.varTokens.pop();
-                  return ctx;
-                },
-              }),
-            qGroovySingleMapOfVarAssignment
-          ),
-          postHandler: (ctx) => {
-            ctx.varTokens.pop();
-            return ctx;
-          },
-        }),
-      qGroovySingleMapOfVarAssignment
-    ),
+    search: qGroovyMapOfExpr(qGroovyMapOfExpr(qGroovySingleMapOfVarAssignment)),
   })
   .handler(cleanupTempVars);
 
@@ -143,6 +132,27 @@ const qKotlinSingleMapOfVarAssignment = qStringValue
     return ctx;
   });
 
+const qKotlinMapOfExpr = (
+  search: q.QueryBuilder<Ctx, parser.Node>
+): q.QueryBuilder<Ctx, parser.Node> =>
+  q.alt(
+    qStringValue
+      .sym('to')
+      .sym('mapOf')
+      .tree({
+        type: 'wrapped-tree',
+        maxDepth: 1,
+        startsWith: '(',
+        endsWith: ')',
+        search,
+        postHandler: (ctx: Ctx) => {
+          ctx.varTokens.pop();
+          return ctx;
+        },
+      }),
+    qKotlinSingleMapOfVarAssignment
+  );
+
 // val versions = mapOf("foo1" to "bar1", "foo2" to "bar2", "foo3" to "bar3")
 const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
   .op('=')
@@ -152,39 +162,7 @@ const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q.alt(
-      qStringValue
-        .sym('to')
-        .sym('mapOf')
-        .tree({
-          type: 'wrapped-tree',
-          maxDepth: 1,
-          startsWith: '(',
-          endsWith: ')',
-          search: q.alt(
-            qStringValue
-              .sym('to')
-              .sym('mapOf')
-              .tree({
-                type: 'wrapped-tree',
-                maxDepth: 1,
-                startsWith: '(',
-                endsWith: ')',
-                search: qKotlinSingleMapOfVarAssignment,
-                postHandler: (ctx: Ctx) => {
-                  ctx.varTokens.pop();
-                  return ctx;
-                },
-              }),
-            qKotlinSingleMapOfVarAssignment
-          ),
-          postHandler: (ctx: Ctx) => {
-            ctx.varTokens.pop();
-            return ctx;
-          },
-        }),
-      qKotlinSingleMapOfVarAssignment
-    ),
+    search: qKotlinMapOfExpr(qKotlinMapOfExpr(qKotlinSingleMapOfVarAssignment)),
   })
   .handler(cleanupTempVars);
 
