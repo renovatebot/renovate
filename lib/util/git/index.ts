@@ -705,7 +705,7 @@ export async function isBranchConflicted(
   await syncGit();
   await writeGitAuthor();
 
-  const origBranch = config.currentBranch;
+  const origBranch = (await git.branch()).current;
   try {
     await git.reset(ResetMode.HARD);
     //TODO: see #18600
