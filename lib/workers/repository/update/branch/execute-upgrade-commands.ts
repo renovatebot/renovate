@@ -44,8 +44,29 @@ export async function upgradeTaskExecutor(
     `Checking for ${taskType.toLowerCase()} tasks`
   );
 
-  const commands = upgradeTask?.commands ?? [];
-  const fileFilters = upgradeTask?.fileFilters ?? [];
+  const commands = [];
+  for (const cmd of upgradeTask?.commands ?? []) {
+    if (
+      (allowedUpgradeCommands ?? []).some((pattern) => regEx(pattern).test(cmd))
+    ) {
+      commands.push(cmd);
+    } else {
+      logger.warn(
+        {
+          cmd,
+          allowedUpgradeCommands,
+        },
+        `${taskType} task did not match any on allowedPostUpgradeCommands list`
+      );
+      artifactErrors.push({
+        lockFile: upgrade.packageFile,
+        stderr: sanitize(
+          `${taskType} command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
+        ),
+      });
+    }
+  }
+
   if (is.nonEmptyArray(commands)) {
     // Persist updated files in file system so any executed commands can see them
     const filesToPersist = (config.updatedPackageFiles ?? []).concat(
@@ -65,8 +86,8 @@ export async function upgradeTaskExecutor(
       artifactErrors = [...artifactErrors, ...commandError];
     }
 
-    currentUpdatedArtifacts = await updateUpdatedArtifacts(
-      fileFilters,
+    currentUpdatedArtifacts = await syncUpdatedArtifacts(
+      upgradeTask?.fileFilters ?? [],
       currentUpdatedArtifacts,
       taskType
     );
@@ -74,7 +95,7 @@ export async function upgradeTaskExecutor(
   return { updatedArtifacts: currentUpdatedArtifacts, artifactErrors };
 }
 
-export async function persistUpdatedFiles(
+async function persistUpdatedFiles(
   filesToPersist: FileChange[]
 ): Promise<void> {
   for (const file of filesToPersist) {
@@ -92,7 +113,7 @@ export async function persistUpdatedFiles(
   }
 }
 
-export async function upgradeCommandExecutor(
+async function upgradeCommandExecutor(
   allowedUpgradeCommands: string[],
   cmd: string,
   allowUpgradeCommandTemplating: undefined | boolean,
@@ -101,49 +122,33 @@ export async function upgradeCommandExecutor(
   taskType: string
 ): Promise<ArtifactError[]> {
   const artifactErrors = [];
-  if (allowedUpgradeCommands.some((pattern) => regEx(pattern).test(cmd))) {
-    try {
-      const compiledCmd = allowUpgradeCommandTemplating
-        ? compile(cmd, mergeChildConfig(config, upgrade))
-        : cmd;
+  try {
+    const compiledCmd = allowUpgradeCommandTemplating
+      ? compile(cmd, mergeChildConfig(config, upgrade))
+      : cmd;
 
-      logger.trace(
-        { cmd: compiledCmd },
-        `Executing ${taskType.toLowerCase()} task`
-      );
-      const execResult = await exec(compiledCmd, {
-        cwd: GlobalConfig.get('localDir'),
-      });
-
-      logger.debug(
-        { cmd: compiledCmd, ...execResult },
-        `Executed ${taskType.toLowerCase()} task`
-      );
-    } catch (error) {
-      artifactErrors.push({
-        lockFile: upgrade.packageFile,
-        stderr: sanitize(error.message),
-      });
-    }
-  } else {
-    logger.warn(
-      {
-        cmd,
-        allowedUpgradeCommands,
-      },
-      `${taskType} task did not match any on allowedPostUpgradeCommands list`
+    logger.trace(
+      { cmd: compiledCmd },
+      `Executing ${taskType.toLowerCase()} task`
     );
+    const execResult = await exec(compiledCmd, {
+      cwd: GlobalConfig.get('localDir'),
+    });
+
+    logger.debug(
+      { cmd: compiledCmd, ...execResult },
+      `Executed ${taskType.toLowerCase()} task`
+    );
+  } catch (error) {
     artifactErrors.push({
       lockFile: upgrade.packageFile,
-      stderr: sanitize(
-        `${taskType} command '${cmd}' has not been added to the allowed list in allowedPostUpgradeCommands`
-      ),
+      stderr: sanitize(error.message),
     });
   }
   return artifactErrors;
 }
 
-export async function updateUpdatedArtifacts(
+async function syncUpdatedArtifacts(
   fileFilters: string[],
   updatedArtifacts: FileChange[],
   taskType: string
