@@ -74,6 +74,32 @@ describe('modules/manager/argocd/extract', () => {
             datasource: 'docker',
             depName: 'somecontainer.registry.io:443/some/image3',
           },
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image3',
+          },
+          {
+            currentValue: 'v1.2.0',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image3',
+          },
+          {
+            currentValue: 'v1.2.0',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            currentValue: '0.0.2',
+            datasource: 'helm',
+            depName: 'traefik',
+            registryUrls: ['gs://helm-charts-internal'],
+          },
         ],
       });
     });
@@ -109,6 +135,21 @@ describe('modules/manager/argocd/extract', () => {
             datasource: 'helm',
             depName: 'podinfo',
             registryUrls: ['https://stefanprodan.github.io/podinfo'],
+          },
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image3',
+          },
+          {
+            currentValue: 'v1.2.0',
+            datasource: 'git-tags',
+            depName: 'https://git.example.com/foo/bar.git',
+          },
+          {
+            currentValue: '1.0.0',
+            datasource: 'docker',
+            depName: 'somecontainer.registry.io:443/some/image3',
           },
         ],
       });

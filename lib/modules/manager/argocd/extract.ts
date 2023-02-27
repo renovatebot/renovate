@@ -15,17 +15,66 @@ import { fileTestRegex } from './util';
 
 function createDependency(
   definition: ApplicationDefinition
-): PackageDependency | null {
-  let source: ApplicationSource;
+): Array<PackageDependency | null> {
   switch (definition.kind) {
     case 'Application':
-      source = definition?.spec?.source;
+      if (definition?.spec?.source) {
+        return processMultipleSources([definition?.spec?.source]);
+      }
+      if (definition?.spec?.sources) {
+        return processMultipleSources(definition?.spec?.sources);
+      }
       break;
     case 'ApplicationSet':
-      source = definition?.spec?.template?.spec?.source;
+      if (definition?.spec?.template?.spec?.source) {
+        return processMultipleSources([
+          definition?.spec?.template?.spec?.source,
+        ]);
+      }
+      if (definition?.spec?.template?.spec?.sources) {
+        return processMultipleSources(
+          definition?.spec?.template?.spec?.sources
+        );
+      }
       break;
   }
 
+  return [];
+}
+
+export function extractPackageFile(
+  content: string,
+  fileName: string,
+  _config?: ExtractConfig
+): PackageFileContent | null {
+  // check for argo reference. API version for the kind attribute is used
+  if (fileTestRegex.test(content) === false) {
+    return null;
+  }
+
+  let definitions: ApplicationDefinition[];
+  try {
+    definitions = loadAll(content) as ApplicationDefinition[];
+  } catch (err) {
+    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
+    return null;
+  }
+
+  const deps: Array<Array<PackageDependency>> = definitions
+    .filter(is.plainObject)
+    .map((definition) => createDependency(definition).filter(is.truthy))
+    .filter(is.truthy);
+
+  const output = new Array<PackageDependency>()
+    .concat(...deps)
+    .filter(is.truthy);
+
+  return output.length ? { deps: output } : null;
+}
+
+export function processSingleSource(
+  source: ApplicationSource
+): PackageDependency | null {
   if (
     !source ||
     !is.nonEmptyString(source.repoURL) ||
@@ -66,28 +115,13 @@ function createDependency(
   };
 }
 
-export function extractPackageFile(
-  content: string,
-  fileName: string,
-  _config?: ExtractConfig
-): PackageFileContent | null {
-  // check for argo reference. API version for the kind attribute is used
-  if (fileTestRegex.test(content) === false) {
-    return null;
+export function processMultipleSources(
+  sources: Array<ApplicationSource>
+): Array<PackageDependency | null> {
+  const deps: Array<PackageDependency | null> = [];
+  for (const source of sources) {
+    deps.push(processSingleSource(source));
   }
 
-  let definitions: ApplicationDefinition[];
-  try {
-    definitions = loadAll(content) as ApplicationDefinition[];
-  } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
-    return null;
-  }
-
-  const deps = definitions
-    .filter(is.plainObject)
-    .map((definition) => createDependency(definition))
-    .filter(is.truthy);
-
-  return deps.length ? { deps } : null;
+  return deps;
 }
