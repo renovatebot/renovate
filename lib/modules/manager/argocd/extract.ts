@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { trimTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -10,33 +11,21 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { ApplicationDefinition, ApplicationSource } from './types';
+import type {
+  ApplicationDefinition,
+  ApplicationSource,
+  ApplicationSpec,
+} from './types';
 import { fileTestRegex } from './util';
 
 function createDependency(
   definition: ApplicationDefinition
-): Array<PackageDependency | null> {
+): PackageDependency[] {
   switch (definition.kind) {
     case 'Application':
-      if (definition?.spec?.source) {
-        return processMultipleSources([definition?.spec?.source]);
-      }
-      if (definition?.spec?.sources) {
-        return processMultipleSources(definition?.spec?.sources);
-      }
-      break;
+      return processAppSpec(definition?.spec);
     case 'ApplicationSet':
-      if (definition?.spec?.template?.spec?.source) {
-        return processMultipleSources([
-          definition?.spec?.template?.spec?.source,
-        ]);
-      }
-      if (definition?.spec?.template?.spec?.sources) {
-        return processMultipleSources(
-          definition?.spec?.template?.spec?.sources
-        );
-      }
-      break;
+      return processAppSpec(definition?.spec?.template?.spec);
   }
 
   return [];
@@ -60,19 +49,14 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: Array<Array<PackageDependency>> = definitions
+  const deps: Array<PackageDependency> = definitions
     .filter(is.plainObject)
-    .map((definition) => createDependency(definition).filter(is.truthy))
-    .filter(is.truthy);
+    .flatMap(createDependency);
 
-  const output = new Array<PackageDependency>()
-    .concat(...deps)
-    .filter(is.truthy);
-
-  return output.length ? { deps: output } : null;
+  return deps.length ? { deps } : null;
 }
 
-export function processSingleSource(
+export function processSource(
   source: ApplicationSource
 ): PackageDependency | null {
   if (
@@ -115,13 +99,24 @@ export function processSingleSource(
   };
 }
 
-export function processMultipleSources(
-  sources: Array<ApplicationSource>
-): Array<PackageDependency | null> {
-  const deps: Array<PackageDependency | null> = [];
-  for (const source of sources) {
-    deps.push(processSingleSource(source));
+export function processAppSpec(
+  spec: ApplicationSpec | null | undefined
+): PackageDependency[] {
+  if (is.nullOrUndefined(spec)) {
+    return [];
   }
 
-  return deps;
+  const deps: Array<PackageDependency | null> = [];
+
+  if (is.nonEmptyObject(spec.source)) {
+    deps.push(processSource(spec.source));
+  }
+
+  if (is.array(spec.sources)) {
+    for (const source of coerceArray(spec.sources)) {
+      deps.push(processSource(source));
+    }
+  }
+
+  return deps.filter(is.truthy);
 }

@@ -6,25 +6,23 @@ export interface ApplicationSource {
   chart?: string;
   repoURL: string;
   targetRevision: string;
-  ref?: string;
+}
+
+export interface ApplicationSpec {
+  source?: ApplicationSource;
+  sources?: ApplicationSource[];
 }
 
 export interface Application extends KubernetesResource {
   kind: 'Application';
-  spec: {
-    source?: ApplicationSource;
-    sources?: Array<ApplicationSource>;
-  };
+  spec: ApplicationSpec;
 }
 
 export interface ApplicationSet extends KubernetesResource {
   kind: 'ApplicationSet';
   spec: {
     template: {
-      spec: {
-        source?: ApplicationSource;
-        sources?: Array<ApplicationSource>;
-      };
+      spec: ApplicationSpec;
     };
   };
 }
