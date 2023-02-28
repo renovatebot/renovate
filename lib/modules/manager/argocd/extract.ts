@@ -27,8 +27,6 @@ function createDependency(
     case 'ApplicationSet':
       return processAppSpec(definition?.spec?.template?.spec);
   }
-
-  return [];
 }
 
 export function extractPackageFile(
