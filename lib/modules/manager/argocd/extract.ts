@@ -49,9 +49,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps: Array<PackageDependency> = definitions
-    .filter(is.plainObject)
-    .flatMap(createDependency);
+  const deps = definitions.filter(is.plainObject).flatMap(createDependency);
 
   return deps.length ? { deps } : null;
 }
@@ -106,7 +104,7 @@ export function processAppSpec(
     return [];
   }
 
-  const deps: Array<PackageDependency | null> = [];
+  const deps: (PackageDependency | null)[] = [];
 
   if (is.nonEmptyObject(spec.source)) {
     deps.push(processSource(spec.source));
