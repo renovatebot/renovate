@@ -1,4 +1,4 @@
-import { loadAll } from 'js-yaml';
+import { load } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -20,7 +20,7 @@ describe('modules/manager/argocd/extract', () => {
   describe('createDependency', () => {
     it('return null for kubernetes manifest', () => {
       const result = createDependency(
-        (loadAll(randomManifest) as ApplicationDefinition[])[0]
+        load(randomManifest) as ApplicationDefinition
       );
       expect(result).toEqual([]);
     });
