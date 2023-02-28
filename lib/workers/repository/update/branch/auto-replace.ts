@@ -15,7 +15,6 @@ export async function confirmIfDepUpdated(
   newContent: string
 ): Promise<boolean> {
   const { manager, packageFile, depIndex } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade: PackageDependency;
   try {
     const newExtract = await extractPackageFile(
