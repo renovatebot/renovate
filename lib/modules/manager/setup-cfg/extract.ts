@@ -102,8 +102,6 @@ export function extractPackageFile(
       let line = rawLine;
       const newSectionName = getSectionName(line);
       const newSectionRecord = getSectionRecord(line);
-
-
       if (newSectionName) {
         sectionName = newSectionName;
       }
