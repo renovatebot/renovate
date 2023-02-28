@@ -11,7 +11,7 @@ function getSectionName(str: string): string {
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) ?? [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s*=/).exec(str) ?? [];
   return sectionRecord;
 }
 
@@ -41,6 +41,10 @@ function parseDep(
   section: string | null,
   record: string | null
 ): PackageDependency | null {
+  logger.debug(
+    `parseDep args: ${line} ${section ? section : ''} ${record ? record : ''}`
+  );
+
   const packagePattern = '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
   const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
@@ -82,6 +86,9 @@ function parseDep(
     dep.currentVersion = currentValue.replace(/^==\s*/, '');
   }
 
+  logger.debug(`parseDep result:`);
+  logger.debug(dep);
+
   return dep;
 }
 
@@ -102,6 +109,24 @@ export function extractPackageFile(
       let line = rawLine;
       const newSectionName = getSectionName(line);
       const newSectionRecord = getSectionRecord(line);
+      logger.debug(`extractPackageFile in first forEach line: ${line}`);
+      logger.debug(
+        `extractPackageFile in first forEach newSectionName: ${newSectionName}`
+      );
+      logger.debug(
+        `extractPackageFile in first forEach newSectionRecord: ${newSectionRecord}`
+      );
+      logger.debug(
+        `extractPackageFile in first forEach newSectionName: ${
+          sectionName ?? ''
+        }`
+      );
+      logger.debug(
+        `extractPackageFile in first forEach newSectionRecord: ${
+          sectionRecord ?? ''
+        }`
+      );
+
       if (newSectionName) {
         sectionName = newSectionName;
       }
@@ -110,6 +135,17 @@ export function extractPackageFile(
         // Propably there are also requirements in this line.
         line = rawLine.replace(regEx(/^[^=]*=\s*/), '');
         line.split(';').forEach((part) => {
+          logger.debug(`extractPackageFile in second forEach part: ${part}`);
+          logger.debug(
+            `extractPackageFile in second sectionName sectionName: ${
+              sectionName ?? ''
+            }`
+          );
+          logger.debug(
+            `extractPackageFile in second forEach sectionRecord: ${
+              sectionRecord ?? ''
+            }`
+          );
           const dep = parseDep(part, sectionName, sectionRecord);
           if (dep) {
             deps.push(dep);
@@ -123,6 +159,15 @@ export function extractPackageFile(
         deps.push(dep);
       }
     });
+
+  const result = deps.length ? { deps } : null;
+
+  if (result) {
+    result.deps.forEach((r) => {
+      logger.debug(`extractPackageFile result:`);
+      logger.debug(r);
+    });
+  }
 
   return deps.length ? { deps } : null;
 }
