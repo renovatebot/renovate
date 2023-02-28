@@ -1,4 +1,9 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { DockerDatasource } from '../../datasource/docker';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { HelmDatasource } from '../../datasource/helm';
+import { processAppSpec, processSource } from './extract';
+import type { ApplicationSource, ApplicationSpec } from './types';
 import { extractPackageFile } from '.';
 
 const validApplication = Fixtures.get('validApplication.yml');
@@ -152,6 +157,249 @@ describe('modules/manager/argocd/extract', () => {
             depName: 'somecontainer.registry.io:443/some/image3',
           },
         ],
+      });
+    });
+  });
+
+  describe('processSource()', () => {
+    it('returns null for empty target revision', () => {
+      const source: ApplicationSource = {
+        targetRevision: '',
+        repoURL: 'some-repo',
+      };
+      expect(processSource(source)).toBeNull();
+    });
+
+    it('returns null for empty repourl', () => {
+      const source: ApplicationSource = {
+        targetRevision: '1.0.3',
+        repoURL: '',
+      };
+      expect(processSource(source)).toBeNull();
+    });
+
+    it('test OCI chart', () => {
+      const source: ApplicationSource = {
+        targetRevision: '1.0.3',
+        repoURL: 'oci://foo',
+        chart: 'bar',
+      };
+      expect(processSource(source)).toEqual({
+        depName: `foo/bar`,
+        currentValue: '1.0.3',
+        datasource: DockerDatasource.id,
+      });
+    });
+
+    it('test chartmuseum chart', () => {
+      const source: ApplicationSource = {
+        targetRevision: '1.0.3',
+        repoURL: 'https://foo.io/repo',
+        chart: 'bar',
+      };
+      expect(processSource(source)).toEqual({
+        depName: `bar`,
+        registryUrls: ['https://foo.io/repo'],
+        currentValue: '1.0.3',
+        datasource: HelmDatasource.id,
+      });
+    });
+
+    it('test git repo', () => {
+      const source: ApplicationSource = {
+        targetRevision: '1.0.3',
+        repoURL: 'https://foo.io/repo',
+      };
+      expect(processSource(source)).toEqual({
+        depName: `https://foo.io/repo`,
+        currentValue: '1.0.3',
+        datasource: GitTagsDatasource.id,
+      });
+    });
+  });
+
+  describe('processAppSpec()', () => {
+    describe('simple source', () => {
+      it('returns null for empty', () => {
+        expect(processAppSpec(null)).toEqual([]);
+      });
+
+      it('returns null for empty target revision', () => {
+        const spec: ApplicationSpec = {
+          source: { targetRevision: '', repoURL: 'some-repo' },
+        };
+        expect(processAppSpec(spec)).toEqual([]);
+      });
+
+      it('returns null for empty repourl', () => {
+        const spec: ApplicationSpec = {
+          source: { targetRevision: '1.0.3', repoURL: '' },
+        };
+        expect(processAppSpec(spec)).toEqual([]);
+      });
+
+      it('test OCI chart', () => {
+        const spec: ApplicationSpec = {
+          source: {
+            targetRevision: '1.0.3',
+            repoURL: 'oci://foo',
+            chart: 'bar',
+          },
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `foo/bar`,
+            currentValue: '1.0.3',
+            datasource: DockerDatasource.id,
+          },
+        ]);
+      });
+
+      it('test chartmuseum chart', () => {
+        const spec: ApplicationSpec = {
+          source: {
+            targetRevision: '1.0.3',
+            repoURL: 'https://foo.io/repo',
+            chart: 'bar',
+          },
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `bar`,
+            registryUrls: ['https://foo.io/repo'],
+            currentValue: '1.0.3',
+            datasource: HelmDatasource.id,
+          },
+        ]);
+      });
+
+      it('test git repo', () => {
+        const spec: ApplicationSpec = {
+          source: { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `https://foo.io/repo`,
+            currentValue: '1.0.3',
+            datasource: GitTagsDatasource.id,
+          },
+        ]);
+      });
+    });
+
+    describe('multiple source', () => {
+      it('returns null for empty', () => {
+        expect(processAppSpec(null)).toEqual([]);
+      });
+
+      it('returns null for empty target revision', () => {
+        const spec: ApplicationSpec = {
+          sources: [{ targetRevision: '', repoURL: 'some-repo' }],
+        };
+        expect(processAppSpec(spec)).toEqual([]);
+      });
+
+      it('returns null for empty repourl', () => {
+        const spec: ApplicationSpec = {
+          sources: [{ targetRevision: '1.0.3', repoURL: '' }],
+        };
+        expect(processAppSpec(spec)).toEqual([]);
+      });
+
+      it('test partial values', () => {
+        const spec: ApplicationSpec = {
+          sources: [
+            { targetRevision: '1.0.3', repoURL: '' },
+            {
+              targetRevision: '1.0.3',
+              repoURL: 'oci://foo',
+              chart: 'bar',
+            },
+          ],
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `foo/bar`,
+            currentValue: '1.0.3',
+            datasource: DockerDatasource.id,
+          },
+        ]);
+      });
+
+      it('test OCI chart', () => {
+        const spec: ApplicationSpec = {
+          sources: [
+            { targetRevision: '1.0.3', repoURL: 'oci://foo', chart: 'bar' },
+          ],
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `foo/bar`,
+            currentValue: '1.0.3',
+            datasource: DockerDatasource.id,
+          },
+        ]);
+      });
+
+      it('test chartmuseum chart', () => {
+        const spec: ApplicationSpec = {
+          sources: [
+            {
+              targetRevision: '1.0.3',
+              repoURL: 'https://foo.io/repo',
+              chart: 'bar',
+            },
+          ],
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `bar`,
+            registryUrls: ['https://foo.io/repo'],
+            currentValue: '1.0.3',
+            datasource: HelmDatasource.id,
+          },
+        ]);
+      });
+
+      it('test git repo', () => {
+        const spec: ApplicationSpec = {
+          sources: [
+            { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+          ],
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `https://foo.io/repo`,
+            currentValue: '1.0.3',
+            datasource: GitTagsDatasource.id,
+          },
+        ]);
+      });
+
+      it('test chart and git repo combo', () => {
+        const spec: ApplicationSpec = {
+          sources: [
+            {
+              targetRevision: '1.0.3',
+              repoURL: 'https://foo.io/repo',
+              chart: 'bar',
+            },
+            { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+          ],
+        };
+        expect(processAppSpec(spec)).toEqual([
+          {
+            depName: `bar`,
+            registryUrls: ['https://foo.io/repo'],
+            currentValue: '1.0.3',
+            datasource: HelmDatasource.id,
+          },
+          {
+            depName: `https://foo.io/repo`,
+            currentValue: '1.0.3',
+            datasource: GitTagsDatasource.id,
+          },
+        ]);
       });
     });
   });
