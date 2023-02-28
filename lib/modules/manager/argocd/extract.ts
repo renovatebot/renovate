@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { fileTestRegex } from './util';
 
-function createDependency(
+export function createDependency(
   definition: ApplicationDefinition
 ): PackageDependency[] {
   switch (definition.kind) {
@@ -27,6 +27,8 @@ function createDependency(
     case 'ApplicationSet':
       return processAppSpec(definition?.spec?.template?.spec);
   }
+
+  return [];
 }
 
 export function extractPackageFile(

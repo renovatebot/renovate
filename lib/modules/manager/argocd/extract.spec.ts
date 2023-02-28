@@ -1,9 +1,14 @@
+import { loadAll } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import { processAppSpec, processSource } from './extract';
-import type { ApplicationSource, ApplicationSpec } from './types';
+import { createDependency, processAppSpec, processSource } from './extract';
+import type {
+  ApplicationDefinition,
+  ApplicationSource,
+  ApplicationSpec,
+} from './types';
 import { extractPackageFile } from '.';
 
 const validApplication = Fixtures.get('validApplication.yml');
@@ -12,6 +17,15 @@ const randomManifest = Fixtures.get('randomManifest.yml');
 const validApplicationSet = Fixtures.get('validApplicationSet.yml');
 
 describe('modules/manager/argocd/extract', () => {
+  describe('createDependency', () => {
+    it('return null for kubernetes manifest', () => {
+      const result = createDependency(
+        (loadAll(randomManifest) as ApplicationDefinition[])[0]
+      );
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'applications.yml')).toBeNull();
