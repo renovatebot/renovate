@@ -68,8 +68,8 @@ export class PackagistDatasource extends Datasource {
     regUrl: string,
     regFile: RegistryFile
   ): string {
-    const { key, sha256 } = regFile;
-    const fileName = key.replace('%hash%', sha256);
+    const { key, hash } = regFile;
+    const fileName = hash ? key.replace('%hash%', hash) : key;
     const url = `${regUrl}/${fileName}`;
     return url;
   }

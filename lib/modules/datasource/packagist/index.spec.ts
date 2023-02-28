@@ -170,6 +170,35 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).not.toBeNull();
     });
 
+    it('supports older sha1 hashes', async () => {
+      hostRules.find = jest.fn(() => ({
+        username: 'some-username',
+        password: 'some-password',
+      }));
+      const packagesJson = {
+        packages: [],
+        includes: {
+          'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
+            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesJson)
+        .get('/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json')
+        .reply(200, includesJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'guzzlehttp/guzzle',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+
     it('supports lazy repositories', async () => {
       const packagesJson = {
         packages: [],
