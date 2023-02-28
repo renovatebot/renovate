@@ -88,9 +88,9 @@ export async function confirmIfDepUpdated(
   if (
     upgrade.newDigest !== newUpgrade.currentDigest &&
     (upgrade.currentDigest ||
-      (upgrade.pinDigests && upgrade.updateType === 'pinDigest'
-        !upgrade.currentDigest &&
-        ))
+      (upgrade.pinDigests &&
+        upgrade.updateType === 'pinDigest' &&
+        !upgrade.currentDigest))
   ) {
     logger.debug(
       {
