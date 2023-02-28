@@ -195,8 +195,40 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         depName: 'guzzlehttp/guzzle',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toMatchObject({
+        homepage: 'http://guzzlephp.org/',
+        registryUrl: 'https://composer.renovatebot.com',
+        releases: [
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.0.2' },
+          { version: '3.0.3' },
+          { version: '3.0.4' },
+          { version: '3.0.5' },
+          { version: '3.0.6' },
+          { version: '3.0.7' },
+          { version: '3.1.0' },
+          { version: '3.1.1' },
+          { version: '3.1.2' },
+          { version: '3.2.0' },
+          { version: '3.3.0' },
+          { version: '3.3.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.4.2' },
+          { version: '3.4.3' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.7.2' },
+          { version: '3.7.3' },
+          { version: '3.7.4' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+        ],
+        sourceUrl: 'https://github.com/guzzle/guzzle',
+      });
     });
 
     it('supports lazy repositories', async () => {
