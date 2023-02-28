@@ -133,6 +133,8 @@ export class PackagistDatasource extends Datasource {
     registryUrl: string,
     registryMeta: RegistryMeta
   ): string | null {
+    const { origin: registryHost } = new URL(registryUrl);
+
     if (
       registryMeta.providersUrl &&
       packageName in registryMeta.providerPackages
@@ -142,12 +144,12 @@ export class PackagistDatasource extends Datasource {
       if (hash) {
         url = url.replace('%hash%', hash);
       }
-      return resolveBaseUrl(registryUrl, url);
+      return resolveBaseUrl(registryHost, url);
     }
 
     if (registryMeta.providersLazyUrl) {
       return resolveBaseUrl(
-        registryUrl,
+        registryHost,
         registryMeta.providersLazyUrl.replace('%package%', packageName)
       );
     }
