@@ -921,6 +921,7 @@ export async function prepareCommit({
     await gitRetry(() =>
       git.checkout(['-B', branchName, 'origin/' + config.currentBranch])
     );
+    config.currentBranch = branchName;
     const deletedFiles: string[] = [];
     const addedModifiedFiles: string[] = [];
     const ignoredFiles: string[] = [];
@@ -1024,6 +1025,7 @@ export async function prepareCommit({
       }),
     };
 
+    config.currentBranchSha = commitSha;
     return result;
   } catch (err) /* istanbul ignore next */ {
     return handleCommitError(files, branchName, err);
