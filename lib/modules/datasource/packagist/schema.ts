@@ -155,10 +155,20 @@ export function parsePackagesResponses(
   return extractReleaseResult(...releaseArrays);
 }
 
-export const RegistryFile = z.object({
-  key: z.string(),
-  sha256: z.string(),
-});
+export const HashSpec = z.union([
+  z
+    .object({ sha256: z.string().nullable() })
+    .transform(({ sha256 }) => ({ hash: sha256 })),
+  z
+    .object({ sha1: z.string().nullable() })
+    .transform(({ sha1 }) => ({ hash: sha1 })),
+]);
+export type HashSpec = z.infer<typeof HashSpec>;
+
+export const RegistryFile = z.intersection(
+  HashSpec,
+  z.object({ key: z.string() })
+);
 export type RegistryFile = z.infer<typeof RegistryFile>;
 
 export const PackagesResponse = z.object({
@@ -168,13 +178,9 @@ export type PackagesResponse = z.infer<typeof PackagesResponse>;
 
 export const PackagistFile = PackagesResponse.merge(
   z.object({
-    providers: looseRecord(
-      z.object({
-        sha256: looseValue(z.string()),
-      })
-    ).transform((x) =>
+    providers: looseRecord(HashSpec).transform((x) =>
       Object.fromEntries(
-        Object.entries(x).map(([key, { sha256 }]) => [key, sha256])
+        Object.entries(x).map(([key, { hash }]) => [key, hash])
       )
     ),
   })
@@ -186,22 +192,11 @@ export const RegistryMeta = z
     (x) => (is.plainObject(x) ? x : {}),
     PackagistFile.merge(
       z.object({
-        ['includes']: looseRecord(
-          z.object({
-            sha256: z.string(),
-          })
-        ).transform((x) =>
-          Object.entries(x).map(([name, { sha256 }]) => ({
-            key: name.replace(sha256, '%hash%'),
-            sha256,
-          }))
+        ['includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
         ),
-        ['provider-includes']: looseRecord(
-          z.object({
-            sha256: z.string(),
-          })
-        ).transform((x) =>
-          Object.entries(x).map(([key, { sha256 }]) => ({ key, sha256 }))
+        ['provider-includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
         ),
         ['providers-lazy-url']: looseValue(z.string()),
         ['providers-url']: looseValue(z.string()),

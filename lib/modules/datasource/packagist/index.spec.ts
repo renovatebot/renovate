@@ -176,6 +176,67 @@ describe('modules/datasource/packagist/index', () => {
       expect(res).not.toBeNull();
     });
 
+    it('supports older sha1 hashes', async () => {
+      hostRules.find = jest.fn(() => ({
+        username: 'some-username',
+        password: 'some-password',
+      }));
+      const packagesJson = {
+        packages: [],
+        includes: {
+          'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
+            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesJson)
+        .get('/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json')
+        .reply(200, includesJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'guzzlehttp/guzzle',
+      });
+      expect(res).toMatchObject({
+        homepage: 'http://guzzlephp.org/',
+        registryUrl: 'https://composer.renovatebot.com',
+        releases: [
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.0.2' },
+          { version: '3.0.3' },
+          { version: '3.0.4' },
+          { version: '3.0.5' },
+          { version: '3.0.6' },
+          { version: '3.0.7' },
+          { version: '3.1.0' },
+          { version: '3.1.1' },
+          { version: '3.1.2' },
+          { version: '3.2.0' },
+          { version: '3.3.0' },
+          { version: '3.3.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.4.2' },
+          { version: '3.4.3' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.7.2' },
+          { version: '3.7.3' },
+          { version: '3.7.4' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+        ],
+        sourceUrl: 'https://github.com/guzzle/guzzle',
+      });
+    });
+
     it('supports lazy repositories', async () => {
       const packagesJson = {
         packages: [],
