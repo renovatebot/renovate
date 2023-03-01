@@ -1,4 +1,5 @@
 export const programmingLanguages = [
+  'bicep',
   'dart',
   'docker',
   'elixir',
