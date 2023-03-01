@@ -1,14 +1,9 @@
-import { load } from 'js-yaml';
 import { Fixtures } from '../../../../test/fixtures';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import { createDependency, processAppSpec, processSource } from './extract';
-import type {
-  ApplicationDefinition,
-  ApplicationSource,
-  ApplicationSpec,
-} from './types';
+import { processAppSpec, processSource } from './extract';
+import type { ApplicationDefinition, ApplicationSource } from './types';
 import { extractPackageFile } from '.';
 
 const validApplication = Fixtures.get('validApplication.yml');
@@ -17,15 +12,6 @@ const randomManifest = Fixtures.get('randomManifest.yml');
 const validApplicationSet = Fixtures.get('validApplicationSet.yml');
 
 describe('modules/manager/argocd/extract', () => {
-  describe('createDependency', () => {
-    it('return null for kubernetes manifest', () => {
-      const result = createDependency(
-        load(randomManifest) as ApplicationDefinition
-      );
-      expect(result).toEqual([]);
-    });
-  });
-
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
       expect(extractPackageFile('nothing here', 'applications.yml')).toBeNull();
@@ -233,34 +219,64 @@ describe('modules/manager/argocd/extract', () => {
   });
 
   describe('processAppSpec()', () => {
-    describe('simple source', () => {
-      it('returns null for empty', () => {
-        expect(processAppSpec(null)).toEqual([]);
-      });
+    it('returns empty for empty spec', () => {
+      const definition: ApplicationDefinition = {
+        apiVersion: 'argoproj.io/v1alpha1',
+        kind: 'Application',
+        spec: {},
+      };
+      expect(processAppSpec(definition)).toEqual([]);
+    });
 
+    it('returns empty for empty spec on applicationset', () => {
+      const definition: ApplicationDefinition = {
+        apiVersion: 'argoproj.io/v1alpha1',
+        kind: 'ApplicationSet',
+        spec: {
+          template: {
+            spec: {},
+          },
+        },
+      };
+      expect(processAppSpec(definition)).toEqual([]);
+    });
+
+    describe('simple source', () => {
       it('returns null for empty target revision', () => {
-        const spec: ApplicationSpec = {
-          source: { targetRevision: '', repoURL: 'some-repo' },
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            source: { targetRevision: '', repoURL: 'some-repo' },
+          },
         };
-        expect(processAppSpec(spec)).toEqual([]);
+        expect(processAppSpec(definition)).toEqual([]);
       });
 
       it('returns null for empty repourl', () => {
-        const spec: ApplicationSpec = {
-          source: { targetRevision: '1.0.3', repoURL: '' },
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            source: { targetRevision: '1.0.3', repoURL: '' },
+          },
         };
-        expect(processAppSpec(spec)).toEqual([]);
+        expect(processAppSpec(definition)).toEqual([]);
       });
 
       it('test OCI chart', () => {
-        const spec: ApplicationSpec = {
-          source: {
-            targetRevision: '1.0.3',
-            repoURL: 'oci://foo',
-            chart: 'bar',
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            source: {
+              targetRevision: '1.0.3',
+              repoURL: 'oci://foo',
+              chart: 'bar',
+            },
           },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `foo/bar`,
             currentValue: '1.0.3',
@@ -270,14 +286,18 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test chartmuseum chart', () => {
-        const spec: ApplicationSpec = {
-          source: {
-            targetRevision: '1.0.3',
-            repoURL: 'https://foo.io/repo',
-            chart: 'bar',
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            source: {
+              targetRevision: '1.0.3',
+              repoURL: 'https://foo.io/repo',
+              chart: 'bar',
+            },
           },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `bar`,
             registryUrls: ['https://foo.io/repo'],
@@ -288,10 +308,14 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test git repo', () => {
-        const spec: ApplicationSpec = {
-          source: { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            source: { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `https://foo.io/repo`,
             currentValue: '1.0.3',
@@ -302,36 +326,44 @@ describe('modules/manager/argocd/extract', () => {
     });
 
     describe('multiple source', () => {
-      it('returns null for empty', () => {
-        expect(processAppSpec(null)).toEqual([]);
-      });
-
       it('returns null for empty target revision', () => {
-        const spec: ApplicationSpec = {
-          sources: [{ targetRevision: '', repoURL: 'some-repo' }],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [{ targetRevision: '', repoURL: 'some-repo' }],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([]);
+        expect(processAppSpec(definition)).toEqual([]);
       });
 
       it('returns null for empty repourl', () => {
-        const spec: ApplicationSpec = {
-          sources: [{ targetRevision: '1.0.3', repoURL: '' }],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [{ targetRevision: '1.0.3', repoURL: '' }],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([]);
+        expect(processAppSpec(definition)).toEqual([]);
       });
 
       it('test partial values', () => {
-        const spec: ApplicationSpec = {
-          sources: [
-            { targetRevision: '1.0.3', repoURL: '' },
-            {
-              targetRevision: '1.0.3',
-              repoURL: 'oci://foo',
-              chart: 'bar',
-            },
-          ],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [
+              { targetRevision: '1.0.3', repoURL: '' },
+              {
+                targetRevision: '1.0.3',
+                repoURL: 'oci://foo',
+                chart: 'bar',
+              },
+            ],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `foo/bar`,
             currentValue: '1.0.3',
@@ -341,12 +373,16 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test OCI chart', () => {
-        const spec: ApplicationSpec = {
-          sources: [
-            { targetRevision: '1.0.3', repoURL: 'oci://foo', chart: 'bar' },
-          ],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [
+              { targetRevision: '1.0.3', repoURL: 'oci://foo', chart: 'bar' },
+            ],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `foo/bar`,
             currentValue: '1.0.3',
@@ -356,16 +392,20 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test chartmuseum chart', () => {
-        const spec: ApplicationSpec = {
-          sources: [
-            {
-              targetRevision: '1.0.3',
-              repoURL: 'https://foo.io/repo',
-              chart: 'bar',
-            },
-          ],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [
+              {
+                targetRevision: '1.0.3',
+                repoURL: 'https://foo.io/repo',
+                chart: 'bar',
+              },
+            ],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `bar`,
             registryUrls: ['https://foo.io/repo'],
@@ -376,12 +416,16 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test git repo', () => {
-        const spec: ApplicationSpec = {
-          sources: [
-            { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
-          ],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [
+              { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+            ],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `https://foo.io/repo`,
             currentValue: '1.0.3',
@@ -391,17 +435,21 @@ describe('modules/manager/argocd/extract', () => {
       });
 
       it('test chart and git repo combo', () => {
-        const spec: ApplicationSpec = {
-          sources: [
-            {
-              targetRevision: '1.0.3',
-              repoURL: 'https://foo.io/repo',
-              chart: 'bar',
-            },
-            { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
-          ],
+        const definition: ApplicationDefinition = {
+          apiVersion: 'argoproj.io/v1alpha1',
+          kind: 'Application',
+          spec: {
+            sources: [
+              {
+                targetRevision: '1.0.3',
+                repoURL: 'https://foo.io/repo',
+                chart: 'bar',
+              },
+              { targetRevision: '1.0.3', repoURL: 'https://foo.io/repo' },
+            ],
+          },
         };
-        expect(processAppSpec(spec)).toEqual([
+        expect(processAppSpec(definition)).toEqual([
           {
             depName: `bar`,
             registryUrls: ['https://foo.io/repo'],

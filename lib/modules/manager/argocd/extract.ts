@@ -18,19 +18,6 @@ import type {
 } from './types';
 import { fileTestRegex } from './util';
 
-export function createDependency(
-  definition: ApplicationDefinition
-): PackageDependency[] {
-  switch (definition.kind) {
-    case 'Application':
-      return processAppSpec(definition?.spec);
-    case 'ApplicationSet':
-      return processAppSpec(definition?.spec?.template?.spec);
-  }
-
-  return [];
-}
-
 export function extractPackageFile(
   content: string,
   fileName: string,
@@ -49,7 +36,7 @@ export function extractPackageFile(
     return null;
   }
 
-  const deps = definitions.filter(is.plainObject).flatMap(createDependency);
+  const deps = definitions.filter(is.plainObject).flatMap(processAppSpec);
 
   return deps.length ? { deps } : null;
 }
@@ -98,8 +85,13 @@ export function processSource(
 }
 
 export function processAppSpec(
-  spec: ApplicationSpec | null | undefined
+  definition: ApplicationDefinition
 ): PackageDependency[] {
+  const spec: ApplicationSpec | null | undefined =
+    definition.kind === 'Application'
+      ? definition?.spec
+      : definition?.spec.template?.spec;
+
   if (is.nullOrUndefined(spec)) {
     return [];
   }
