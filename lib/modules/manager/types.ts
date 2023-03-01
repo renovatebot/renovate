@@ -143,7 +143,6 @@ export interface PackageDependency<T = Record<string, any>>
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
-  depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;

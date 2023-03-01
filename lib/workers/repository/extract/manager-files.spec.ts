@@ -59,7 +59,7 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
-          deps: [{ depIndex: 0 }, { depIndex: 1, replaceString: 'abc' }],
+          deps: [{}, { replaceString: 'abc' }],
         },
       ]);
     });
