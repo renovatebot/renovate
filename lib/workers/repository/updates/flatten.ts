@@ -91,10 +91,12 @@ export async function flattenUpdates(
         packageFileConfig.parentDir = '';
         packageFileConfig.packageFileDir = '';
       }
+      let depIndex = 0;
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
           delete depConfig.deps;
+          depConfig.depIndex = depIndex; // used for autoreplace
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
@@ -128,6 +130,7 @@ export async function flattenUpdates(
             updates.push(updateConfig);
           }
         }
+        depIndex += 1;
       }
       if (
         get(manager, 'supportsLockFileMaintenance') &&
