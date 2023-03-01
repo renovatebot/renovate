@@ -1470,11 +1470,6 @@ Renovate only adds labels when it creates the PR, which means:
 The `labels` array is non-mergeable, meaning if multiple `packageRules` match then Renovate uses the last value for `labels`.
 If you want to add/combine labels, use the `addLabels` config option, which is mergeable.
 
-<!-- prettier-ignore -->
-!!! tip "Labels and forking mode"
-    If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
-    The `triage` level allows the PAT to apply/dismiss existing labels.
-
 ## lockFileMaintenance
 
 This feature can be used to refresh lock files and keep them up-to-date.
