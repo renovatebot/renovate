@@ -7772,10 +7772,10 @@ node-gyp@^9.0.0, node-gyp@^9.1.0, node-gyp@^9.3.0:
     tar "^6.1.2"
     which "^2.0.2"
 
-node-html-parser@6.1.4:
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.4.tgz#763cd362497e427d51fc73dda3dcd8ac52ba85a3"
-  integrity sha512-3muP9Uy/Pz7bQa9TNYVQzWJhNZMqyCx7xJle8kz2/y1UgzAUyXXShc1IcPaJy6u07CE3K5rQcRwlvHzmlySRjg==
+node-html-parser@6.1.5:
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-6.1.5.tgz#c819dceb13a10a7642ff92f94f870b4f77968097"
+  integrity sha512-fAaM511feX++/Chnhe475a0NHD8M7AxDInsqQpz6x63GRF7xYNdS8Vo5dKsIVPgsOvG7eioRRTZQnWBrhDHBSg==
   dependencies:
     css-select "^5.1.0"
     he "1.2.0"
@@ -8135,10 +8135,10 @@ opener@^1.5.2:
   resolved "https://registry.yarnpkg.com/opener/-/opener-1.5.2.tgz#5d37e1f35077b9dcac4301372271afdeb2a13598"
   integrity sha512-ur5UIdyw5Y7yEj9wLzhqXiy6GZ3Mwx0yGI+5sMn2r0N0v3cKJvUmFH5yPP+WXh9e0xfyzyJX95D8l088DNFj7A==
 
-openpgp@5.6.0:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.6.0.tgz#2bbcce109f789d7d9b317fbdec7cc3cd4dc7dbac"
-  integrity sha512-m0UGCSefapbPssLmxJ7z7KydLEdpWjaY5gXoxZgTuNeWDfeRG5lzaORWNxyKg1K4tJnRwSoTp01Vtt8Cenbmgw==
+openpgp@5.7.0:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.7.0.tgz#fe0a346f26171ffb726636ae7ccb24a504281dbc"
+  integrity sha512-wchYJQfFbSaocUvUIYqNrWD+lRSmFSG1d3Ak2CHeXFocDSEsf7Uc1zUzHjSdlZPTvGeeXPQ+MJrwVtalL4QCBg==
   dependencies:
     asn1.js "^5.0.0"
 
