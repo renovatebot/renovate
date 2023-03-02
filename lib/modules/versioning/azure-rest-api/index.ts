@@ -20,6 +20,7 @@ export const api: VersioningApi = {
     return !version.endsWith('-preview');
   },
   isValid(input: string): boolean {
+    // TODO: https://github.com/Azure/bicep/blob/a1d217e3bb3d049fc5c6c21b466c3a29585a6c69/src/Bicep.Core/Analyzers/Linter/ApiVersions/ApiVersionHelper.cs#L10
     return regEx(
       /^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])(?:-preview)?$/
     ).test(input);
