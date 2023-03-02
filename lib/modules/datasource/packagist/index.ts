@@ -70,7 +70,7 @@ export class PackagistDatasource extends Datasource {
   ): string {
     const { key, hash } = regFile;
     const fileName = hash ? key.replace('%hash%', hash) : key;
-    const url = `${regUrl}/${fileName}`;
+    const url = resolveBaseUrl(regUrl, fileName);
     return url;
   }
 
