@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'azure-rest-api';
@@ -5,19 +6,24 @@ export const id = 'azure-rest-api';
 // TODO
 export const api: VersioningApi = {
   isCompatible(version: string, current?: string | undefined): boolean {
-    throw new Error('Function not implemented.');
+    return version === current;
   },
   isSingleVersion(version: string): boolean {
-    throw new Error('Function not implemented.');
+    return true;
   },
   isStable(version: string): boolean {
-    throw new Error('Function not implemented.');
+    return !version.endsWith('-preview');
   },
   isValid(input: string): boolean {
-    throw new Error('Function not implemented.');
+    return regEx(
+      /^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])(?:-preview)?$/
+    ).test(input);
   },
   isVersion(input: string | null | undefined): boolean {
-    throw new Error('Function not implemented.');
+    if (!input) {
+      return false;
+    }
+    return this.isValid(input);
   },
   getMajor(version: string | import('semver/classes/semver')): number | null {
     throw new Error('Function not implemented.');
@@ -29,7 +35,7 @@ export const api: VersioningApi = {
     throw new Error('Function not implemented.');
   },
   equals(version: string, other: string): boolean {
-    throw new Error('Function not implemented.');
+    return version === other;
   },
   isGreaterThan(version: string, other: string): boolean {
     throw new Error('Function not implemented.');
