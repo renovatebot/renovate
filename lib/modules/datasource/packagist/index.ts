@@ -1,11 +1,11 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { joinUrlParts, resolveBaseUrl } from '../../../util/url';
+import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -68,9 +68,9 @@ export class PackagistDatasource extends Datasource {
     regUrl: string,
     regFile: RegistryFile
   ): string {
-    const { key, sha256 } = regFile;
-    const fileName = key.replace('%hash%', sha256);
-    const url = `${regUrl}/${fileName}`;
+    const { key, hash } = regFile;
+    const fileName = hash ? key.replace('%hash%', hash) : key;
+    const url = resolveBaseUrl(regUrl, fileName);
     return url;
   }
 
@@ -115,17 +115,32 @@ export class PackagistDatasource extends Datasource {
 
   @cache({
     namespace: `datasource-${PackagistDatasource.id}-org`,
-    key: (regUrl: string) => regUrl,
+    key: (registryUrl: string, metadataUrl: string, packageName: string) =>
+      `${registryUrl}:${metadataUrl}:${packageName}`,
     ttlMinutes: 10,
   })
-  async packagistOrgLookup(name: string): Promise<ReleaseResult | null> {
-    const regUrl = 'https://packagist.org';
-    const pkgUrl = joinUrlParts(regUrl, `/p2/${name}.json`);
-    const devUrl = joinUrlParts(regUrl, `/p2/${name}~dev.json`);
-    const results = await p.map([pkgUrl, devUrl], (url) =>
-      this.http.getJson(url).then(({ body }) => body)
+  async packagistV2Lookup(
+    registryUrl: string,
+    metadataUrl: string,
+    packageName: string
+  ): Promise<ReleaseResult | null> {
+    const pkgUrl = replaceUrlPath(
+      registryUrl,
+      metadataUrl.replace('%package%', packageName)
     );
-    return parsePackagesResponses(name, results);
+    const pkgPromise = this.getJson(pkgUrl, z.unknown());
+
+    const devUrl = replaceUrlPath(
+      registryUrl,
+      metadataUrl.replace('%package%', `${packageName}~dev`)
+    );
+    const devPromise = this.getJson(devUrl, z.unknown()).then(
+      (x) => x,
+      () => null
+    );
+
+    const results = await Promise.all([pkgPromise, devPromise]);
+    return parsePackagesResponses(packageName, results);
   }
 
   public getPkgUrl(
@@ -142,11 +157,11 @@ export class PackagistDatasource extends Datasource {
       if (hash) {
         url = url.replace('%hash%', hash);
       }
-      return resolveBaseUrl(registryUrl, url);
+      return replaceUrlPath(registryUrl, url);
     }
 
     if (registryMeta.providersLazyUrl) {
-      return resolveBaseUrl(
+      return replaceUrlPath(
         registryUrl,
         registryMeta.providersLazyUrl.replace('%package%', packageName)
       );
@@ -167,12 +182,16 @@ export class PackagistDatasource extends Datasource {
     }
 
     try {
-      if (registryUrl === 'https://packagist.org') {
-        const packagistResult = await this.packagistOrgLookup(packageName);
+      const meta = await this.getRegistryMeta(registryUrl);
+
+      if (meta.metadataUrl) {
+        const packagistResult = await this.packagistV2Lookup(
+          registryUrl,
+          meta.metadataUrl,
+          packageName
+        );
         return packagistResult;
       }
-
-      const meta = await this.getRegistryMeta(registryUrl);
 
       if (meta.packages[packageName]) {
         const result = extractDepReleases(meta.packages[packageName]);

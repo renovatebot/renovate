@@ -2,7 +2,7 @@
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { get } from '../../../../modules/manager';
+import { extractPackageFile } from '../../../../modules/manager';
 import type { PackageDependency } from '../../../../modules/manager/types';
 import { writeLocalFile } from '../../../../util/fs';
 import { escapeRegExp, regEx } from '../../../../util/regex';
@@ -23,12 +23,12 @@ export async function confirmIfDepUpdated(
     currentDigest,
     pinDigests,
   } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade: PackageDependency;
   try {
-    const newExtract = await extractPackageFile!(
+    const newExtract = await extractPackageFile(
+      manager,
       newContent,
-      packageFile,
+      packageFile!,
       upgrade
     );
     // istanbul ignore if
@@ -104,9 +104,13 @@ export async function checkBranchDepsMatchBaseDeps(
   branchContent: string
 ): Promise<boolean> {
   const { baseDeps, manager, packageFile } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
   try {
-    const res = await extractPackageFile!(branchContent, packageFile, upgrade)!;
+    const res = await extractPackageFile(
+      manager,
+      branchContent,
+      packageFile!,
+      upgrade
+    )!;
     const branchDeps = res!.deps;
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {

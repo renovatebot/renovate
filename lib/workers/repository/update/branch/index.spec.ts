@@ -2145,5 +2145,27 @@ describe('workers/repository/update/branch/index', () => {
       expect(automerge.tryBranchAutomerge).not.toHaveBeenCalled();
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
+
+    it('checks out baseBranch after committing files', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      config.baseBranch = 'main';
+      await branchWorker.processBranch(config);
+      expect(git.checkoutBranch).toHaveBeenLastCalledWith('main');
+      // Check that the last checkoutBranch call is after the only commitFilesToBranch call
+      const checkoutBranchCalledTimes = git.checkoutBranch.mock.calls.length;
+      expect(
+        commit.commitFilesToBranch.mock.invocationCallOrder[0]
+      ).toBeLessThan(
+        git.checkoutBranch.mock.invocationCallOrder[
+          checkoutBranchCalledTimes - 1
+        ]
+      );
+    });
   });
 });
