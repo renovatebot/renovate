@@ -1,13 +1,12 @@
 name: Bug report
-description: Confirmed bugs only. If in doubt, create a Discussion instead.
+description: Confirmed bugs only. Create a discussion first.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: markdown
     attributes:
       value: |
-        Before you begin to fill out the form, make sure you have actually found a bug.
-        If you're not sure then create a [discussion](https://github.com/renovatebot/renovate/discussions) first.
-        If you have questions or want help with Renovate, then also create a [discussion](https://github.com/renovatebot/renovate/discussions).
+        Please don't create these bug reports unless you're an experienced user or absolutely certain you found a bug.
+        It is preferred that you create a [discussion](https://github.com/renovatebot/renovate/discussions/new) first and allow maintainers to decide.
 
   - type: dropdown
     id: how-are-you-running-renovate
