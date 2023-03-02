@@ -3,6 +3,8 @@ import { regEx } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+// TODO: better solution: https://github.com/Azure/bicep-types-az/blob/main/generated/index.json
+
 const PROVIDER_NAMESPACE_REGEX = regEx(/^(?<providerNamespace>.*?)\//);
 
 const getProviderNamespacesQuery = `
