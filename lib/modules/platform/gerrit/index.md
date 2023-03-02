@@ -2,7 +2,10 @@
 
 ## Authentication
 
-First, ![HTTP access token](/assets/images/gerrit-http-password.png) for the Renovate account.
+<figure markdown>
+  ![Gerrit HTTP access token](/assets/images/gerrit-http-password.png){ loading=lazy }
+  <figcaption>First, create a HTTP access token for the Renovate account.</figcaption>
+</figure>
 
 Let Renovate use your HTTP access token by doing _one_ of the following:
 
