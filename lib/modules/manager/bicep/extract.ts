@@ -7,8 +7,7 @@ import type {
 } from '../types';
 
 const RESOURCE_REGEX = regEx(
-  /resource\s+[A-Za-z0-9_]+\s+'(?<name>.*)@(?<version>.*)'/,
-  'g'
+  /resource\s+[A-Za-z0-9_]+\s+'(?<depName>.*)@(?<currentValue>.*)'/
 );
 
 export function extractPackageFile(
@@ -16,7 +15,7 @@ export function extractPackageFile(
   packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  const packageDependencies: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
     const trimmedLine = line?.trim();
@@ -30,16 +29,16 @@ export function extractPackageFile(
       continue;
     }
 
-    const { name, version } = matches.groups;
+    const { depName, currentValue } = matches.groups;
 
-    packageDependencies.push({
-      depName: name,
+    deps.push({
       datasource: AzureBicepTypesDatasource.id,
-      currentValue: version,
+      depName,
+      currentValue,
+      autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
+      replaceString: "'{{depName}}@{{currentValue}}'",
     });
   }
 
-  return Promise.resolve({
-    deps: [],
-  });
+  return Promise.resolve({ deps });
 }
