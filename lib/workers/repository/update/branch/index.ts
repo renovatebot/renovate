@@ -498,6 +498,9 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+      // baseBranch is not checked out at the start of processBranch() due to pull/16246
+      await checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if
