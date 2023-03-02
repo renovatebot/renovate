@@ -2,6 +2,11 @@ import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
 export const id = 'azure-rest-api';
+export const displayName = 'azure-rest-api';
+
+export const urls = [];
+
+export const supportsRanges = false;
 
 // TODO
 export const api: VersioningApi = {
@@ -56,3 +61,5 @@ export const api: VersioningApi = {
     throw new Error('Function not implemented.');
   },
 };
+
+export default api;
