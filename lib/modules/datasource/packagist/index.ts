@@ -5,7 +5,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as hostRules from '../../../util/host-rules';
 import type { HttpOptions } from '../../../util/http/types';
 import * as p from '../../../util/promises';
-import { parseUrl, resolveBaseUrl } from '../../../util/url';
+import { replaceUrlPath, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -124,12 +124,16 @@ export class PackagistDatasource extends Datasource {
     metadataUrl: string,
     packageName: string
   ): Promise<ReleaseResult | null> {
-    let pkgUrl = metadataUrl.replace('%package%', packageName);
-    pkgUrl = parseUrl(pkgUrl) ? pkgUrl : resolveBaseUrl(registryUrl, pkgUrl);
+    const pkgUrl = replaceUrlPath(
+      registryUrl,
+      metadataUrl.replace('%package%', packageName)
+    );
     const pkgPromise = this.getJson(pkgUrl, z.unknown());
 
-    let devUrl = metadataUrl.replace('%package%', `${packageName}~dev`);
-    devUrl = parseUrl(devUrl) ? devUrl : resolveBaseUrl(registryUrl, devUrl);
+    const devUrl = replaceUrlPath(
+      registryUrl,
+      metadataUrl.replace('%package%', `${packageName}~dev`)
+    );
     const devPromise = this.getJson(devUrl, z.unknown()).then(
       (x) => x,
       () => null
@@ -144,8 +148,6 @@ export class PackagistDatasource extends Datasource {
     registryUrl: string,
     registryMeta: RegistryMeta
   ): string | null {
-    const { origin: registryHost } = new URL(registryUrl);
-
     if (
       registryMeta.providersUrl &&
       packageName in registryMeta.providerPackages
@@ -155,12 +157,12 @@ export class PackagistDatasource extends Datasource {
       if (hash) {
         url = url.replace('%hash%', hash);
       }
-      return resolveBaseUrl(registryHost, url);
+      return replaceUrlPath(registryUrl, url);
     }
 
     if (registryMeta.providersLazyUrl) {
-      return resolveBaseUrl(
-        registryHost,
+      return replaceUrlPath(
+        registryUrl,
         registryMeta.providersLazyUrl.replace('%package%', packageName)
       );
     }
