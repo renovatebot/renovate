@@ -1,8 +1,8 @@
 import { ArtifactoryDatasource } from './artifactory';
 import { AwsMachineImageDataSource } from './aws-machine-image';
 import { AwsRdsDataSource } from './aws-rds';
+import { AzureBicepTypesDatasource } from './azure-bicep-types';
 import { AzurePipelinesTasksDatasource } from './azure-pipelines-tasks';
-import { AzureRestApiSpecDatasource } from './azure-rest-api-spec';
 import { BitBucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
@@ -60,7 +60,7 @@ api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
 api.set(AzurePipelinesTasksDatasource.id, new AzurePipelinesTasksDatasource());
-api.set(AzureRestApiSpecDatasource.id, new AzureRestApiSpecDatasource());
+api.set(AzureBicepTypesDatasource.id, new AzureBicepTypesDatasource());
 api.set(BitBucketTagsDatasource.id, new BitBucketTagsDatasource());
 api.set(CdnJsDatasource.id, new CdnJsDatasource());
 api.set(ClojureDatasource.id, new ClojureDatasource());

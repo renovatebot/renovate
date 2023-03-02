@@ -1,6 +1,6 @@
 import type { ProgrammingLanguage } from '../../../constants/programming-language';
 import { regEx } from '../../../util/regex';
-import { AzureRestApiSpecDatasource } from '../../datasource/azure-rest-api-spec';
+import { AzureBicepTypesDatasource } from '../../datasource/azure-bicep-types';
 import type { ExtractConfig, PackageFileContent } from '../types';
 
 const RESOURCE_REGEX = regEx(
@@ -27,4 +27,4 @@ export function extractPackageFile(
   });
 }
 
-export const supportedDatasources = [AzureRestApiSpecDatasource.id];
+export const supportedDatasources = [AzureBicepTypesDatasource.id];
