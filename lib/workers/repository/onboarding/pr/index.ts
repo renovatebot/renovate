@@ -215,7 +215,7 @@ async function getRebaseCheckboxComponents(
   }
 
   // Create markdown checkbox
-  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, click this checkbox.\n`;
+  rebaseCheckBox = `\n\n---\n\n - [ ] <!-- rebase-check -->Rebase/refresh this PR from default branch (Warning: custom config changes will be lost).\n`;
 
   // Create hashMeta
   const configFile = defaultConfigFile(config);

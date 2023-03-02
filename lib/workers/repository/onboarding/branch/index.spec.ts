@@ -314,13 +314,24 @@ describe('workers/repository/onboarding/branch/index', () => {
         expect(git.commitFiles).toHaveBeenCalledTimes(0);
       });
 
-      it('handles unchecked rebase checkbox', async () => {
+      it('skip branch processing if rebase-checkbox in unchecked', async () => {
         const pr = { bodyStruct: { rebaseRequested: false } };
         platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
 
         await checkOnboardingBranch(config);
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
+        expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      });
+
+      it('processes branch if rebase-checkbox in checked', async () => {
+        const pr = { bodyStruct: { rebaseRequested: true } };
+        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+
+        await checkOnboardingBranch(config);
+
+        expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
         expect(git.commitFiles).toHaveBeenCalledTimes(0);
       });

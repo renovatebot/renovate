@@ -24,7 +24,7 @@ describe('workers/repository/onboarding/pr/index', () => {
     let branches: BranchConfig[];
 
     const bodyStruct = {
-      hash: '6aa71f8cb7b1503b883485c8f5bd564b31923b9c7fa765abe2a7338af40e03b1',
+      hash: 'a81ee80bd8e4002b366b57c588c1dba0885c347bbe98449cbf5d8a9a074222d6',
     };
 
     beforeEach(() => {

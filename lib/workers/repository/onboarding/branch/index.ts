@@ -34,12 +34,19 @@ export async function checkOnboardingBranch(
   logger.debug('Repo is not onboarded');
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
+  // TODO #7154
+  const branchList = [onboardingBranch!];
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    logger.debug('Onboarding PR already exists');
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
+
+      if (!OnboardingState.prUpdateRequested) {
+        logger.debug('Skip processing the onboarding branch');
+        return { ...config, repoIsOnboarded, onboardingBranch, branchList };
+      }
     }
-    logger.debug('Onboarding PR already exists');
     const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
     const commit = await rebaseOnboardingBranch(config, rawConfigHash);
     if (commit) {
@@ -85,8 +92,6 @@ export async function checkOnboardingBranch(
     // TODO #7154
     await checkoutBranch(onboardingBranch!);
   }
-  // TODO #7154
-  const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }
 
