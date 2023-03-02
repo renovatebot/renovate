@@ -1262,13 +1262,20 @@ For example, using this option could be used whenever authentication using Git f
 {
   "hostRules": [
     {
-      "matchHost": "https://gitlab.myorg.com/api/v4/packages/npm/",
+      "hostType": "gitlab",
+      "matchHost": "gitlab.myorg.com",
       "token": "abc123",
       "artifactAuth": ["composer"]
     }
   ]
 }
 ```
+
+Allowed hostType and artifactAuth combinations:
+
+| hostType | artifactAuth values |
+| -------- | ------------------- |
+| gitlab   | "composer"          |
 
 ### matchHost
 
