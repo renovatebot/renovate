@@ -1,7 +1,12 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { looseObject, looseRecord, looseValue } from '../../../util/schema';
+import {
+  looseArray,
+  looseObject,
+  looseRecord,
+  looseValue,
+} from '../../../util/schema';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -54,30 +59,37 @@ export const ComposerRelease = z
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
+const ComposerReleasesLooseArray = looseArray(ComposerRelease);
+type ComposerReleasesLooseArray = z.infer<typeof ComposerReleasesLooseArray>;
+
 export const ComposerReleases = z
   .union([
-    z
-      .record(looseValue(ComposerRelease))
-      .transform((map) => Object.values(map)),
-    z.array(looseValue(ComposerRelease)),
+    MinifiedArray.transform((xs) => ComposerReleasesLooseArray.parse(xs)),
+    looseRecord(ComposerRelease).transform((map) => Object.values(map)),
   ])
-  .catch([])
-  .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
+  .catch([]);
 export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
-export const ComposerPackagesResponse = z.object({
-  packages: z.record(z.unknown()),
-});
+export const ComposerPackagesResponse = z
+  .object({
+    packageName: z.string(),
+    packagesResponse: z.object({
+      packages: z.record(z.unknown()),
+    }),
+  })
+  .transform(
+    ({ packageName, packagesResponse }) =>
+      packagesResponse.packages[packageName]
+  )
+  .transform((xs) => ComposerReleases.parse(xs));
+export type ComposerPackagesResponse = z.infer<typeof ComposerPackagesResponse>;
 
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
 ): ComposerReleases {
   try {
-    const { packages } = ComposerPackagesResponse.parse(packagesResponse);
-    const array = MinifiedArray.parse(packages[packageName]);
-    const releases = ComposerReleases.parse(array);
-    return releases;
+    return ComposerPackagesResponse.parse({ packageName, packagesResponse });
   } catch (err) {
     logger.debug(
       { packageName, err },
