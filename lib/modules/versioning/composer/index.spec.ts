@@ -61,6 +61,14 @@ describe('modules/versioning/composer/index', () => {
     ${'1.2.3'}        | ${true}
     ${'2.5'}          | ${true}
     ${'v2.5'}         | ${true}
+    ${'^1.0|^2.0'}    | ${true}
+    ${'^1.0 | ^2.0'}  | ${true}
+    ${'^1.0||^2.0'}   | ${true}
+    ${'^1.0 || ^2.0'} | ${true}
+    ${'~1.0|~2.0'}    | ${true}
+    ${'~1.0 | ~2.0'}  | ${true}
+    ${'~1.0||~2.0'}   | ${true}
+    ${'~1.0 || ~2.0'} | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = !!semver.isValid(version);
     expect(res).toBe(expected);

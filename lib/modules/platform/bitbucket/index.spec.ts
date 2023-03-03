@@ -245,7 +245,7 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'foo',
+              key: 'renovate/stability-days',
               state: 'SUCCESSFUL',
             },
           ],
@@ -1059,8 +1059,10 @@ describe('modules/platform/bitbucket/index', () => {
   describe('massageMarkdown()', () => {
     it('returns diff files', () => {
       const prBody =
-        '<details><summary>foo</summary>bar</details>text<details>' +
-        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->';
+        '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
+        '\n\n</details>\n\n</blockquote>\n</details>';
+
       expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });

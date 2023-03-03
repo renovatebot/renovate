@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { PlatformId } from '../../../constants';
@@ -31,6 +32,8 @@ const githubApiUrls = new Set([
   'https://api.github.com',
   'https://api.github.com/',
 ]);
+
+const { major, valid } = semver;
 
 function getGitEnvironmentVariables(): NodeJS.ProcessEnv {
   let environmentVariables: NodeJS.ProcessEnv = {};
@@ -113,14 +116,33 @@ function addAuthFromHostRule(
 
 function getUpdateImportPathCmds(
   updatedDeps: PackageDependency[],
-  { constraints, newMajor }: UpdateArtifactsConfig
+  { constraints }: UpdateArtifactsConfig
 ): string[] {
+  // Check if we fail to parse any major versions and log that they're skipped
+  const invalidMajorDeps = updatedDeps.filter(
+    ({ newVersion }) => !valid(newVersion)
+  );
+  if (invalidMajorDeps.length > 0) {
+    invalidMajorDeps.forEach(({ depName }) =>
+      logger.warn(`Could not get major version of ${depName!}. Ignoring`)
+    );
+  }
+
   const updateImportCommands = updatedDeps
-    .map((dep) => dep.depName!)
-    .filter((x) => !x.startsWith('gopkg.in'))
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    .map((depName) => `mod upgrade --mod-name=${depName} -t=${newMajor}`);
+    .filter(({ newVersion }) => valid(newVersion))
+    .map(({ depName, newVersion }) => ({
+      depName: depName!,
+      newMajor: major(newVersion!),
+    }))
+    // Skip path upates going from v0 to v1
+    .filter(
+      ({ depName, newMajor }) => !depName.startsWith('gopkg.in') && newMajor > 1
+    )
+
+    .map(
+      ({ depName, newMajor }) =>
+        `mod upgrade --mod-name=${depName} -t=${newMajor}`
+    );
 
   if (updateImportCommands.length > 0) {
     let installMarwanModArgs =
@@ -275,11 +297,11 @@ export async function updateArtifacts({
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
-    // Update import paths on major updates above v1
+    // Update import paths on major updates
     const isImportPathUpdateRequired =
       config.postUpdateOptions?.includes('gomodUpdateImportPaths') &&
-      config.updateType === 'major' &&
-      config.newMajor! > 1;
+      config.updateType === 'major';
+
     if (isImportPathUpdateRequired) {
       const updateImportCmds = getUpdateImportPathCmds(updatedDeps, config);
       if (updateImportCmds.length > 0) {

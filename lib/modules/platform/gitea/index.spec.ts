@@ -1075,7 +1075,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should abort when response for created pull request is invalid', async () => {
-      helper.createPR.mockResolvedValueOnce(partial<PR>({}));
+      helper.createPR.mockResolvedValueOnce(partial<PR>());
 
       await initFakeRepo();
       await expect(
@@ -1940,7 +1940,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('returns null on missing content', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>({}));
+      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>());
       await initFakeRepo({ full_name: 'some/repo' });
       expect(await gitea.getJsonFile('file.json')).toBeNull();
     });
