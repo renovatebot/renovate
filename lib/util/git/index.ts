@@ -628,18 +628,24 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   logger.debug('branch.isModified(): using git to calculate');
 
   await syncGit();
-  // Retrieve the author of the most recent commit
-  let lastAuthor: string | undefined;
+  // Retrieve the commit authors
+  let lastAuthors: string[];
   try {
-    lastAuthor = (
-      await git.raw([
-        'log',
-        '-1',
-        '--pretty=format:%ae',
-        `origin/${branchName}`,
-        '--',
-      ])
-    ).trim();
+    const defaultBranch = await getDefaultBranch(git);
+    lastAuthors = [
+      ...new Set(
+        (
+          await git.raw([
+            'log',
+            '--pretty=format:%ae',
+            `origin/${branchName}...origin/${defaultBranch}`,
+            '--',
+          ])
+        )
+          .trim()
+          .split('\n')
+      ),
+    ];
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
@@ -651,23 +657,27 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail } = config;
-  if (
-    lastAuthor === gitAuthorEmail ||
-    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
-  ) {
-    // author matches - branch has not been modified
-    logger.debug('branch.isModified() = false');
-    config.branchIsModified[branchName] = false;
-    setCachedModifiedResult(branchName, false);
-    return false;
-  }
-  logger.debug(
-    { branchName, lastAuthor, gitAuthorEmail },
-    'branch.isModified() = true'
-  );
-  config.branchIsModified[branchName] = true;
-  setCachedModifiedResult(branchName, true);
-  return true;
+  return !!lastAuthors!.find((lastAuthor) => {
+    if (
+      lastAuthor === gitAuthorEmail ||
+      config.ignoredAuthors.some(
+        (ignoredAuthor) => lastAuthor === ignoredAuthor
+      )
+    ) {
+      // author matches - branch has not been modified
+      logger.debug('branch.isModified() = false');
+      config.branchIsModified[branchName] = false;
+      setCachedModifiedResult(branchName, false);
+      return false;
+    }
+    logger.debug(
+      { branchName, lastAuthor, gitAuthorEmail },
+      'branch.isModified() = true'
+    );
+    config.branchIsModified[branchName] = true;
+    setCachedModifiedResult(branchName, true);
+    return true;
+  });
 }
 
 export async function isBranchConflicted(
