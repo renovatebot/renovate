@@ -1,4 +1,3 @@
-import { atob } from 'buffer';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { GerritHttp } from '../../../util/http/gerrit';
 import type {
@@ -28,7 +27,7 @@ export class GerritClient {
       'a/projects/?type=CODE&state=ACTIVE',
       {}
     );
-    return Promise.resolve(Object.keys(res.body));
+    return Object.keys(res.body);
   }
 
   async getProjectInfo(repository: string): Promise<GerritProjectInfo> {
@@ -112,7 +111,7 @@ export class GerritClient {
     );
   }
 
-  async setLabel(
+  private async setLabel(
     changeNumber: number,
     label: string,
     value: number
@@ -148,7 +147,9 @@ export class GerritClient {
         repo
       )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`
     );
-    return Promise.resolve(atob(base64Content.body)); //TODO: switch to Buffer.from...
+    return Promise.resolve(
+      Buffer.from(base64Content.body, 'base64').toString()
+    );
   }
 
   async approveChange(changeId: number): Promise<void> {
