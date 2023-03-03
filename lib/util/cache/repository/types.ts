@@ -26,6 +26,11 @@ export interface BranchUpgradeCache {
   sourceUrl?: string;
 }
 
+export interface OnboardingBranchCache {
+  branchName: string;
+  defaultBranchSha: string;
+}
+
 export interface PrCache {
   fingerprint: string;
   /**
@@ -100,6 +105,7 @@ export interface RepoCacheData {
     github?: Record<string, unknown>;
   };
   prComments?: Record<number, Record<string, string>>;
+  onboardingBranchCache?: OnboardingBranchCache;
 }
 
 export interface RepoCache {
