@@ -3,7 +3,6 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
 import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
 import { api, id as composerVersioningId } from '../../versioning/composer';
@@ -173,8 +172,4 @@ export function takePersonalAccessTokenIfPossible(
   }
 
   return githubToken;
-}
-
-export function isArtifactAuthEnabled(rule: HostRule): boolean {
-  return !rule.artifactAuth || rule.artifactAuth.includes('composer');
 }

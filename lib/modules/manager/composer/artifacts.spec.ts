@@ -333,6 +333,67 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('does not set packagist COMPOSER_AUTH when artifactAuth does not include composer', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'packagist.renovatebot.com',
+      username: 'some-username',
+      password: 'some-password',
+      artifactAuth: [],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      username: 'some-other-username',
+      password: 'some-other-password',
+      artifactAuth: [],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      username: 'some-other-username',
+      password: 'some-other-password',
+      artifactAuth: [],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://packages-bearer.example.com/',
+      token: 'abcdef0123456789',
+      artifactAuth: [],
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      postUpdateOptions: ['composerGitlabToken'],
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
+          },
+        },
+      },
+    ]);
+  });
+
   it('does set gitlab COMPOSER_AUTH when artifactAuth does include composer', async () => {
     hostRules.add({
       hostType: GitTagsDatasource.id,
@@ -371,6 +432,73 @@ describe('modules/manager/composer/artifacts', () => {
               '{"github-oauth":{"github.com":"ghp_token"},' +
               '"gitlab-token":{"gitlab.com":"gitlab-token"},' +
               '"gitlab-domains":["gitlab.com"]}',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('does set packagist COMPOSER_AUTH when artifactAuth does include composer', async () => {
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'packagist.renovatebot.com',
+      username: 'some-username',
+      password: 'some-password',
+      artifactAuth: ['composer'],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      username: 'some-other-username',
+      password: 'some-other-password',
+      artifactAuth: ['composer'],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      username: 'some-other-username',
+      password: 'some-other-password',
+      artifactAuth: ['composer'],
+    });
+    hostRules.add({
+      hostType: PackagistDatasource.id,
+      matchHost: 'https://packages-bearer.example.com/',
+      token: 'abcdef0123456789',
+      artifactAuth: ['composer'],
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      postUpdateOptions: ['composerGitlabToken'],
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH:
+              '{"github-oauth":{"github.com":"ghp_token"},' +
+              '"http-basic":{' +
+              '"packagist.renovatebot.com":{"username":"some-username","password":"some-password"},' +
+              '"artifactory.yyyyyyy.com":{"username":"some-other-username","password":"some-other-password"}' +
+              '},' +
+              '"bearer":{"packages-bearer.example.com":"abcdef0123456789"}}',
           },
         },
       },
