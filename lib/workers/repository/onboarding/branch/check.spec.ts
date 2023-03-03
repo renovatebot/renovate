@@ -1,14 +1,15 @@
-import { RenovateConfig, git, mocked } from '../../../../../test/util';
+import { RenovateConfig, git, mocked, partial } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import * as _cache from '../../../../util/cache/repository';
 import { isOnboarded } from './check';
 
 jest.mock('../../../../util/cache/repository');
+jest.mock('../../../../util/git');
 
 const cache = mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
-  let config: RenovateConfig;
+  const config = partial<RenovateConfig>({ requireConfig: 'required' });
 
   it('skips normal onboarding check if onboardingCache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
@@ -39,6 +40,7 @@ describe('workers/repository/onboarding/branch/check', () => {
     git.getBranchCommit
       .mockReturnValueOnce('default-sha-1')
       .mockReturnValueOnce('onboarding-sha');
+    git.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
     expect(logger.debug).not.toHaveBeenCalledWith(
       'Onboarding cache is valid. Repo is not onboarded'
