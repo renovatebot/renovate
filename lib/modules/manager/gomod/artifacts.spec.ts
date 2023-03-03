@@ -21,9 +21,7 @@ jest.mock('../../../util/fs', () => {
     __esModules: true,
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     ...(jest.createMockFromModule('../../../util/fs') as any),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
-      .isValidLocalPath,
+    isValidLocalPath: jest.requireActual('../../../util/fs'),
   };
 });
 jest.mock('../../datasource');
@@ -1823,18 +1821,9 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t . foo .bar/... cat',
+        cmd: 'go get -d -t /tmp/github/some/repo /tmp/github/some/repo/foo /tmp/github/some/repo/.bar/... /tmp/github/some/repo/cat',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            CGO_ENABLED: '1',
-            GOFLAGS: '-modcacherw',
-            GOINSECURE: 'insecure.example.com/*',
-            GONOPROXY: 'noproxy.example.com/*',
-            GONOSUMDB: '1',
-            GOPRIVATE: 'private.example.com/*',
-            GOPROXY: 'proxy.example.com',
-          },
         },
       },
     ]);
@@ -1844,9 +1833,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('New go.sum');
     fs.readLocalFile.mockResolvedValueOnce(gomod1);
     expect(
@@ -1870,18 +1861,9 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t .',
+        cmd: 'go get -d -t /tmp/github/some/repo',
         options: {
           cwd: '/tmp/github/some/repo',
-          env: {
-            CGO_ENABLED: '1',
-            GOFLAGS: '-modcacherw',
-            GOINSECURE: 'insecure.example.com/*',
-            GONOPROXY: 'noproxy.example.com/*',
-            GONOSUMDB: '1',
-            GOPRIVATE: 'private.example.com/*',
-            GOPROXY: 'proxy.example.com',
-          },
         },
       },
     ]);

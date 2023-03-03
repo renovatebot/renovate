@@ -14,6 +14,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
+import { ensureLocalPath } from '../../../util/fs/util';
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
 import { find, getAll } from '../../../util/host-rules';
@@ -273,22 +274,22 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    let goGetDirs = './...';
+    let goGetDirs: string | undefined;
     if (config.goGetDirs) {
-      goGetDirs =
-        config.goGetDirs
-          .filter((dir) => {
-            const isValid = isValidLocalPath(dir);
-            if (!isValid) {
-              logger.warn(`Invalid path in goGetDirs: ${dir}`);
-            }
-            return isValid;
-          })
-          .map(quote)
-          .join(' ') ?? './...';
+      goGetDirs = config.goGetDirs
+        .filter((dir) => {
+          const isValid = isValidLocalPath(dir);
+          if (!isValid) {
+            logger.warn(`Invalid path in goGetDirs: ${dir}`);
+          }
+          return isValid;
+        })
+        .map(ensureLocalPath)
+        .map(quote)
+        .join(' ');
     }
 
-    let args = `get -d -t ${goGetDirs}`;
+    let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 
