@@ -1499,7 +1499,8 @@ export async function createPr({
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
-    options.body.maintainer_can_modify = true;
+    options.body.maintainer_can_modify =
+      platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (

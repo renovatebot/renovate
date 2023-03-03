@@ -569,7 +569,12 @@ describe('modules/platform/azure/index', () => {
         () =>
           ({
             getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
-            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch');

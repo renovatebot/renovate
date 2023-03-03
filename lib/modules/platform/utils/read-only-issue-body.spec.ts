@@ -14,7 +14,7 @@ describe('modules/platform/utils/read-only-issue-body', () => {
     it('removes all checkbox-related instructions', () => {
       expect(readOnlyIssueBody(issueBody)).toEqual(
         expect.not.stringMatching(
-          /click (?:(?:on |)a|their) checkbox|check the box below/gi
+          /click (?:(?:on |)a|their|this) checkbox|check the box below/gi
         )
       );
     });

@@ -494,6 +494,7 @@ describe('util/git/index', () => {
         },
       ];
       const commitConfig = {
+        baseBranch: 'renovate/something',
         branchName: 'renovate/something',
         files,
         message: 'Update something',
