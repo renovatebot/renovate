@@ -2248,6 +2248,7 @@ const options: RenovateOptions[] = [
     name: 'artifactAuth',
     description:
       'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
     type: 'array',
     subType: 'string',
     stage: 'repository',
