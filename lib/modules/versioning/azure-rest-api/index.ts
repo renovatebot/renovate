@@ -16,7 +16,7 @@ export const api: VersioningApi = {
     return true;
   },
   isStable(version: string): boolean {
-    return !version.endsWith('-preview');
+    return version.length <= 10;
   },
   isValid(input: string): boolean {
     return regEx(/^\d{4}-\d{2}-\d{2}(?:-[a-z]+)$/).test(input);
