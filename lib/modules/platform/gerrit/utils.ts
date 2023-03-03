@@ -10,7 +10,8 @@ import type {
   GerritChangeStatus,
   GerritLabelTypeInfo,
 } from './types';
-import { TAG_PULL_REQUEST_BODY } from './types';
+
+export const TAG_PULL_REQUEST_BODY = 'pull-request';
 
 export function getGerritRepoUrl(repository: string, endpoint: string): string {
   // Find options for current host and determine Git endpoint
@@ -23,11 +24,10 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   if (!url) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  url.protocol = url.protocol.slice(0, -1);
   url.username = opts.username ?? '';
   url.password = opts.password ?? '';
   url.pathname = `${url.pathname}a/${encodeURIComponent(repository)}`;
-  logger.debug(
+  logger.trace(
     { url: url.toString() },
     'using URL based on configured endpoint'
   );
@@ -79,7 +79,6 @@ export function mapGerritChangeStateToPrState(
   // istanbul ignore next
   return 'all';
 }
-
 export function extractSourceBranch(change: GerritChange): string | undefined {
   return change.hashtags
     ?.filter((tag) => tag.startsWith('sourceBranch-'))

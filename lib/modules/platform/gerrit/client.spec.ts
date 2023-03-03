@@ -1,4 +1,3 @@
-import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
@@ -38,7 +37,7 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('getProjectInfo()', () => {
-    it('inactive', () => {
+    it('inactive', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/projects/test%2Frepo')
@@ -51,12 +50,12 @@ describe('modules/platform/gerrit/client', () => {
           }),
           jsonResultHeader
         );
-      return expect(client.getProjectInfo('test/repo')).rejects.toThrow(
+      await expect(client.getProjectInfo('test/repo')).rejects.toThrow(
         REPOSITORY_ARCHIVED
       );
     });
 
-    it('active', () => {
+    it('active', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/projects/test%2Frepo')
@@ -69,7 +68,7 @@ describe('modules/platform/gerrit/client', () => {
           }),
           jsonResultHeader
         );
-      return expect(client.getProjectInfo('test/repo')).resolves.toEqual({
+      await expect(client.getProjectInfo('test/repo')).resolves.toEqual({
         id: 'repo1',
         name: 'test-repo',
         state: 'ACTIVE',
@@ -78,7 +77,7 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('getBranchInfo()', () => {
-    it('info', () => {
+    it('info', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/projects/test%2Frepo/branches/HEAD')
@@ -87,7 +86,7 @@ describe('modules/platform/gerrit/client', () => {
           gerritRestResponse({ ref: 'sha-hash....', revision: 'main' }),
           jsonResultHeader
         );
-      return expect(client.getBranchInfo('test/repo')).resolves.toEqual({
+      await expect(client.getBranchInfo('test/repo')).resolves.toEqual({
         ref: 'sha-hash....',
         revision: 'main',
       });
@@ -95,7 +94,7 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('findChanges()', () => {
-    it('by-label', () => {
+    it('by-label', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/')
@@ -106,27 +105,27 @@ describe('modules/platform/gerrit/client', () => {
           jsonResultHeader
         );
 
-      return expect(
+      await expect(
         client.findChanges(['label:Code-Review=-2'])
       ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
     });
   });
 
   describe('getChange()', () => {
-    it('get', () => {
-      const input = Fixtures.getJson('change-data.json');
+    it('get', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .get(
           '/a/changes/123456?o=SUBMITTABLE&o=CHECK&o=MESSAGES&o=DETAILED_ACCOUNTS&o=LABELS&o=CURRENT_ACTIONS&o=CURRENT_REVISION'
         )
-        .reply(200, gerritRestResponse(input), jsonResultHeader);
-      return expect(client.getChange(123456)).resolves.toEqual(input);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(client.getChange(123456)).resolves.toEqual(change);
     });
   });
 
   describe('getMergeableInfo()', () => {
-    it('get', () => {
+    it('get', async () => {
       const mergeInfo: GerritMergeableInfo = {
         mergeable: true,
         submit_type: 'MERGE_IF_NECESSARY',
@@ -135,53 +134,54 @@ describe('modules/platform/gerrit/client', () => {
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/revisions/current/mergeable')
         .reply(200, gerritRestResponse(mergeInfo), jsonResultHeader);
-      const input = Fixtures.getJson('change-data.json');
-      return expect(client.getMergeableInfo(input)).resolves.toEqual(mergeInfo);
+      await expect(
+        client.getMergeableInfo(partial<GerritChange>({ _number: 123456 }))
+      ).resolves.toEqual(mergeInfo);
     });
   });
 
   describe('abandonChange()', () => {
-    it('abandon', () => {
+    it('abandon', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/abandon')
         .reply(200, gerritRestResponse({}), jsonResultHeader);
-      return expect(client.abandonChange(123456)).toResolve();
+      await expect(client.abandonChange(123456)).toResolve();
     });
   });
 
   describe('submitChange()', () => {
-    it('submit', () => {
-      const change = Fixtures.getJson('change-data.json');
+    it('submit', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/submit')
         .reply(200, gerritRestResponse(change), jsonResultHeader);
-      return expect(client.submitChange(123456)).resolves.toEqual(change);
+      await expect(client.submitChange(123456)).resolves.toEqual(change);
     });
   });
 
   describe('setCommitMessage()', () => {
-    it('submit', () => {
-      const change = Fixtures.getJson('change-data.json');
+    it('submit', async () => {
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/message', { message: 'new message' })
         .reply(200, gerritRestResponse(change), jsonResultHeader);
-      return expect(client.setCommitMessage(123456, 'new message')).toResolve();
+      await expect(client.setCommitMessage(123456, 'new message')).toResolve();
     });
   });
 
   describe('getMessages()', () => {
-    it('no messages', () => {
+    it('no messages', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/messages')
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.getMessages(123456)).resolves.toEqual([]);
+      await expect(client.getMessages(123456)).resolves.toEqual([]);
     });
 
-    it('with messages', () => {
+    it('with messages', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get('/a/changes/123456/messages')
@@ -193,7 +193,7 @@ describe('modules/platform/gerrit/client', () => {
           ]),
           jsonResultHeader
         );
-      return expect(client.getMessages(123456)).resolves.toEqual([
+      await expect(client.getMessages(123456)).resolves.toEqual([
         { message: 'msg1' },
         { message: 'msg2' },
       ]);
@@ -201,7 +201,7 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('addMessage()', () => {
-    it('add with tag', () => {
+    it('add with tag', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
@@ -209,65 +209,65 @@ describe('modules/platform/gerrit/client', () => {
           tag: 'tag',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.addMessage(123456, 'message', 'tag')).toResolve();
+      await expect(client.addMessage(123456, 'message', 'tag')).toResolve();
     });
 
-    it('add without tag', () => {
+    it('add without tag', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           message: 'message',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.addMessage(123456, 'message')).toResolve();
+      await expect(client.addMessage(123456, 'message')).toResolve();
     });
   });
 
   describe('setLabel()', () => {
-    it('setLabel', () => {
+    it('setLabel', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {
           labels: { 'Code-Review': 2 },
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
+      await expect(client.setLabel(123456, 'Code-Review', +2)).toResolve();
     });
   });
 
   describe('addReviewer()', () => {
-    it('add', () => {
+    it('add', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/reviewers', {
           reviewer: 'username',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.addReviewer(123456, 'username')).toResolve();
+      await expect(client.addReviewer(123456, 'username')).toResolve();
     });
   });
 
   describe('addAssignee()', () => {
-    it('add', () => {
+    it('add', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/assignee', {
           assignee: 'username',
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
-      return expect(client.addAssignee(123456, 'username')).toResolve();
+      await expect(client.addAssignee(123456, 'username')).toResolve();
     });
   });
 
   describe('getFile()', () => {
-    it('getFile() - repo and branch', () => {
+    it('getFile() - repo and branch', async () => {
       httpMock
         .scope(gerritEndpointUrl)
         .get(
           '/a/projects/test%2Frepo/branches/main/files/renovate.json/content'
         )
         .reply(200, gerritFileResponse('{}'));
-      return expect(
+      await expect(
         client.getFile('test/repo', 'main', 'renovate.json')
       ).resolves.toBe('{}');
     });
@@ -275,32 +275,30 @@ describe('modules/platform/gerrit/client', () => {
 
   describe('approveChange()', () => {
     it('already approved - do nothing', async () => {
-      const input = Fixtures.getJson('change-data.json');
+      const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(input), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.approveChange(123456)).toResolve();
     });
 
     it('label not available - do nothing', async () => {
-      const input = Fixtures.getJson('change-data.json');
-      input.labels = {};
+      const change = partial<GerritChange>({ labels: {} });
       httpMock
         .scope(gerritEndpointUrl)
         .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(input), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
 
       await expect(client.approveChange(123456)).toResolve();
     });
 
     it('not already approved - approve now', async () => {
-      const input = Fixtures.getJson('change-data.json');
-      input.labels = { 'Code-Review': {} };
+      const change = partial<GerritChange>({ labels: { 'Code-Review': {} } });
       httpMock
         .scope(gerritEndpointUrl)
         .get((url) => url.includes('/a/changes/123456?o='))
-        .reply(200, gerritRestResponse(input), jsonResultHeader);
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
       const approveMock = httpMock
         .scope(gerritEndpointUrl)
         .post('/a/changes/123456/revisions/current/review', {

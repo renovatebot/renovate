@@ -36,8 +36,8 @@ import type {
   GerritLabelTypeInfo,
   GerritProjectInfo,
 } from './types';
-import { TAG_PULL_REQUEST_BODY } from './types';
 import {
+  TAG_PULL_REQUEST_BODY,
   getGerritRepoUrl,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,

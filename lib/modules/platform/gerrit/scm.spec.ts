@@ -1,8 +1,11 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { git, mocked } from '../../../../test/util';
+import { git, mocked, partial } from '../../../../test/util';
 import { client as _client } from './client';
 import { GerritScm, configureScm } from './scm';
-import type { GerritChange } from './types';
+import type {
+  GerritAccountInfo,
+  GerritChange,
+  GerritRevisionInfo,
+} from './types';
 
 jest.mock('../../../util/git');
 jest.mock('./client');
@@ -33,22 +36,38 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('open change found for branchname, rebase action is available -> isBehind == true ', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].actions = {
-        rebase: { enabled: true },
-      };
+    it('open change found for branchname, rebase action is available -> isBehind == true ', async () => {
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            actions: {
+              rebase: {
+                enabled: true,
+              },
+            },
+          }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
+      await expect(
         gerritScm.isBranchBehindBase('myBranchName', 'baseBranch')
       ).resolves.toBeTrue();
     });
 
-    it('open change found for branch name, but rebase action is not available -> isBehind == false ', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].actions = { rebase: {} };
+    it('open change found for branch name, but rebase action is not available -> isBehind == false ', async () => {
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            actions: {
+              rebase: {},
+            },
+          }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
+      await expect(
         gerritScm.isBranchBehindBase('myBranchName', 'baseBranch')
       ).resolves.toBeFalse();
     });
@@ -71,21 +90,32 @@ describe('modules/platform/gerrit/scm', () => {
       );
     });
 
-    it('open change found for branchname, but not modified', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].uploader.username = 'user';
+    it('open change found for branchname, but not modified', async () => {
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            uploader: partial<GerritAccountInfo>({ username: 'user' }),
+          }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
+      await expect(
         gerritScm.isBranchModified('myBranchName')
       ).resolves.toBeFalse();
     });
 
-    it('open change found for branchname, but modified from other user', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.revisions[change.current_revision].uploader.username =
-        'other_user'; //!== gerritLogin
+    it('open change found for branchname, but modified from other user', async () => {
+      const change = partial<GerritChange>({
+        current_revision: 'currentRevSha',
+        revisions: {
+          currentRevSha: partial<GerritRevisionInfo>({
+            uploader: partial<GerritAccountInfo>({ username: 'other_user' }), //!== gerritLogin
+          }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(
+      await expect(
         gerritScm.isBranchModified('myBranchName')
       ).resolves.toBeTrue();
     });
@@ -109,7 +139,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('open change found for branch name/baseBranch and its mergeable', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
+      const change = partial<GerritChange>({});
       clientMock.findChanges.mockResolvedValueOnce([change]);
       clientMock.getMergeableInfo.mockResolvedValueOnce({
         submit_type: 'MERGE_IF_NECESSARY',
@@ -122,7 +152,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('open change found for branch name/baseBranch and its NOT mergeable', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
+      const change = partial<GerritChange>({});
       clientMock.findChanges.mockResolvedValueOnce([change]);
       clientMock.getMergeableInfo.mockResolvedValueOnce({
         submit_type: 'MERGE_IF_NECESSARY',
@@ -150,7 +180,7 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('open change found for branch name -> return true', async () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
+      const change = partial<GerritChange>({});
       clientMock.findChanges.mockResolvedValueOnce([change]);
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
       expect(git.branchExists).not.toHaveBeenCalledWith('myBranchName');
@@ -172,17 +202,17 @@ describe('modules/platform/gerrit/scm', () => {
       ]);
     });
 
-    it('open change found for branchname -> return true', () => {
-      const change: GerritChange = Fixtures.getJson('change-data.json');
+    it('open change found for branchname -> return true', async () => {
+      const change = partial<GerritChange>({ current_revision: 'curSha' });
       clientMock.findChanges.mockResolvedValueOnce([change]);
-      return expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
-        change.current_revision
+      await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
+        'curSha'
       );
     });
   });
 
-  it('deleteBranch()', () => {
-    return expect(gerritScm.deleteBranch('branchName')).toResolve();
+  it('deleteBranch()', async () => {
+    await expect(gerritScm.deleteBranch('branchName')).toResolve();
   });
 
   describe('commitFiles()', () => {
@@ -241,7 +271,13 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitFiles() - existing change-set without new changes', async () => {
-      const existingChange = Fixtures.getJson('change-data.json');
+      const existingChange = partial<GerritChange>({
+        change_id: '...',
+        current_revision: 'commitSha',
+        revisions: {
+          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([existingChange]);
       git.prepareCommit.mockResolvedValueOnce({
         commitSha: 'commitSha',
@@ -270,7 +306,14 @@ describe('modules/platform/gerrit/scm', () => {
     });
 
     it('commitFiles() - existing change-set with new changes - auto-approve again', async () => {
-      const existingChange = Fixtures.getJson('change-data.json');
+      const existingChange = partial<GerritChange>({
+        _number: 123456,
+        change_id: '...',
+        current_revision: 'commitSha',
+        revisions: {
+          commitSha: partial<GerritRevisionInfo>({ ref: 'refs/changes/1/2' }),
+        },
+      });
       clientMock.findChanges.mockResolvedValueOnce([existingChange]);
       clientMock.wasApprovedBy.mockReturnValueOnce(true);
       git.prepareCommit.mockResolvedValueOnce({

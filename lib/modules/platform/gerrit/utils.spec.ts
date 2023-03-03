@@ -1,10 +1,16 @@
-import { Fixtures } from '../../../../test/fixtures';
-import { mocked } from '../../../../test/util';
+import { mocked, partial } from '../../../../test/util';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
-import type { GerritChangeStatus, GerritLabelTypeInfo } from './types';
+import { hashBody } from '../pr-body';
+import type {
+  GerritAccountInfo,
+  GerritChange,
+  GerritChangeMessageInfo,
+  GerritChangeStatus,
+  GerritLabelTypeInfo,
+} from './types';
 import * as utils from './utils';
 import { mapBranchStatusToLabel } from './utils';
 
@@ -75,40 +81,113 @@ describe('modules/platform/gerrit/utils', () => {
 
   describe('mapGerritChangeToPr()', () => {
     it('map a gerrit change to to Pr', () => {
-      expect(
-        utils.mapGerritChangeToPr(Fixtures.getJson('change-data.json'))
-      ).toMatchSnapshot();
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        hashtags: ['other', 'sourceBranch-renovate/dependency-1.x'],
+        branch: 'main',
+        subject: 'Fix for',
+        reviewers: {
+          REVIEWER: [partial<GerritAccountInfo>({ username: 'username' })],
+          REMOVED: [],
+          CC: [],
+        },
+        messages: [
+          partial<GerritChangeMessageInfo>({
+            id: '9d78ac236714cee8c2d86e95d638358925cf6853',
+            tag: 'pull-request',
+            message: 'Patch Set 1:\n\nOld PR-Body',
+          }),
+          partial<GerritChangeMessageInfo>({
+            id: '1d17c930381e88e177bbc59595c3ec941bd21028',
+            tag: 'pull-request',
+            message: 'Patch Set 12:\n\nLast PR-Body',
+          }),
+          partial<GerritChangeMessageInfo>({
+            id: '9d78ac236714cee8c2d86e95d638358925cf6853',
+            message: 'other message...',
+          }),
+        ],
+      });
+
+      expect(utils.mapGerritChangeToPr(change)).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'renovate/dependency-1.x',
+        targetBranch: 'main',
+        reviewers: ['username'],
+        bodyStruct: {
+          hash: hashBody('Last PR-Body'),
+        },
+      });
     });
 
-    it('map a gerrit change without sourceBranch-tag to Pr', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.hashtags = [];
-      expect(utils.mapGerritChangeToPr(change)).toMatchSnapshot();
+    it('map a gerrit change without sourceBranch-tag and reviewers to Pr', () => {
+      const change = partial<GerritChange>({
+        _number: 123456,
+        status: 'NEW',
+        hashtags: ['other'],
+        branch: 'main',
+        subject: 'Fix for',
+      });
+      expect(utils.mapGerritChangeToPr(change)).toEqual({
+        number: 123456,
+        state: 'open',
+        title: 'Fix for',
+        sourceBranch: 'main',
+        targetBranch: 'main',
+        reviewers: [],
+        bodyStruct: {
+          hash: hashBody(''),
+        },
+      });
     });
   });
 
   describe('extractSourceBranch()', () => {
     it('extract source branch from existing gerrit change', () => {
-      expect(
-        utils.extractSourceBranch(Fixtures.getJson('change-data.json'))
-      ).toMatchSnapshot();
+      const change = partial<GerritChange>({
+        hashtags: ['other', 'sourceBranch-renovate/dependency-1.x', 'another'],
+      });
+      expect(utils.extractSourceBranch(change)).toBe('renovate/dependency-1.x');
     });
   });
 
   describe('findPullRequestBody()', () => {
     it('find pull-request-body', () => {
-      expect(
-        utils.findPullRequestBody(Fixtures.getJson('change-data.json'))
-      ).toBe('Last PR-Body');
+      const change = partial<GerritChange>({
+        messages: [
+          partial<GerritChangeMessageInfo>({
+            id: '9d78ac236714cee8c2d86e95d638358925cf6853',
+            tag: 'pull-request',
+            message: 'Patch Set 1:\n\nOld PR-Body',
+          }),
+          partial<GerritChangeMessageInfo>({
+            id: '1d17c930381e88e177bbc59595c3ec941bd21028',
+            tag: 'pull-request',
+            message: 'Patch Set 12:\n\nLast PR-Body',
+          }),
+          partial<GerritChangeMessageInfo>({
+            id: '9d78ac236714cee8c2d86e95d638358925cf6853',
+            message: 'other message...',
+          }),
+        ],
+      });
+      expect(utils.findPullRequestBody(change)).toBe('Last PR-Body');
     });
 
     it('no pull-request-body message found', () => {
-      const change = Fixtures.getJson('change-data.json');
-      change.messages = undefined;
+      const change = partial<GerritChange>({});
       expect(utils.findPullRequestBody(change)).toBeUndefined();
       change.messages = [];
       expect(utils.findPullRequestBody(change)).toBeUndefined();
-      change.messages = [{ tag: 'other-tag', message: 'message' }];
+      change.messages = [
+        partial<GerritChangeMessageInfo>({
+          tag: 'other-tag',
+          message: 'message',
+        }),
+      ];
       expect(utils.findPullRequestBody(change)).toBeUndefined();
     });
   });

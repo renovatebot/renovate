@@ -917,6 +917,19 @@ This means Renovate assigns the Code-Review label = +2.
 
 You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
+## gerritLabelMapping
+
+The name of the Gerrit labels to use for the `StabilityDays` and `Merge-Confidence` status.
+
+```json
+{
+  "stabilityDaysLabel": "Renovate-Stability",
+  "mergeConfidenceLabel": "Renovate-Confidence"
+}
+```
+
+If one or both are unset, then these information will not be passed to the Gerrit changes.
+
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.

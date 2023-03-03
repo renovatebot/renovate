@@ -2538,6 +2538,17 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gerrit'],
   },
   {
+    name: 'gerritLabelMapping',
+    description:
+      'The name of the Gerrit labels to use for the `StabilityDays` and `Merge-Confidence` (branch)status.',
+    type: 'object',
+    default: {
+      stabilityDaysLabel: undefined,
+      mergeConfidenceLabel: undefined,
+    },
+    supportedPlatforms: ['gerrit'],
+  },
+  {
     name: 'branchNameStrict',
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',

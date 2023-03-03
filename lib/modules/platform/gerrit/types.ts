@@ -1,7 +1,5 @@
 import type { FindPRConfig } from '../types';
 
-export const TAG_PULL_REQUEST_BODY = 'pull-request';
-
 export interface GerritProjectInfo {
   id: string;
   name: string;
