@@ -111,7 +111,7 @@ export class GerritClient {
     );
   }
 
-  private async setLabel(
+  async setLabel(
     changeNumber: number,
     label: string,
     value: number

@@ -37,9 +37,7 @@ export class GerritHttp extends Http {
       response.headers['content-type']?.includes('application/json') &&
       is.string(response.body)
     ) {
-      const newBody = JSON5.parse(
-        response.body.replaceAll(this.magicPrefix, '')
-      );
+      const newBody = JSON5.parse(response.body.replace(this.magicPrefix, ''));
       return {
         ...response,
         body: newBody,

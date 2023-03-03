@@ -9,8 +9,6 @@ describe('util/http/gerrit', () => {
   beforeEach(() => {
     api = new GerritHttp();
     setBaseUrl(baseUrl);
-    // reset module
-    jest.resetAllMocks();
   });
 
   it('get', async () => {
