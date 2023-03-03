@@ -1,12 +1,13 @@
 name: Bug report
-description: Confirmed bugs only. Create a discussion first.
+description: STOP! Confirmed bugs only, and requires a minimal reproduction. Create a discussion first.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: markdown
     attributes:
       value: |
-        Please don't create these bug reports unless you're an experienced user or absolutely certain you found a bug.
-        It is preferred that you create a [discussion](https://github.com/renovatebot/renovate/discussions/new) first and allow maintainers to decide.
+        Please don't create these bug reports unless you're an experienced user or absolutely certain you found a bug, and you have a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
+        Otherwise, it is preferred that you create a [discussion](https://github.com/renovatebot/renovate/discussions/new) first and allow maintainers to decide.
+        Invalid bug reports can confuse users so will be _deleted_, not closed.
 
   - type: dropdown
     id: how-are-you-running-renovate
