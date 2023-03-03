@@ -1271,11 +1271,11 @@ For example, using this option could be used whenever authentication using Git f
 }
 ```
 
-Allowed hostType and artifactAuth combinations:
+Supported artifactAuth and hostType combinations:
 
-| hostType | artifactAuth values |
-| -------- | ------------------- |
-| gitlab   | "composer"          |
+| artifactAuth | hostTypes             |
+| ------------ | --------------------- |
+| `composer`   | `gitlab`, `packagist` |
 
 ### matchHost
 

@@ -27,6 +27,7 @@ import {
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
@@ -55,11 +56,11 @@ function getAuthJson(): string | null {
   }
 
   hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
-    if (
-      (!gitlabHostRule.artifactAuth ||
-        gitlabHostRule.artifactAuth.includes('composer')) &&
-      gitlabHostRule?.token
-    ) {
+    if (!isArtifactAuthEnabled(gitlabHostRule)) {
+      return;
+    }
+
+    if (gitlabHostRule?.token) {
       const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
       authJson['gitlab-token'][host] = gitlabHostRule.token;
@@ -74,6 +75,10 @@ function getAuthJson(): string | null {
   hostRules
     .findAll({ hostType: PackagistDatasource.id })
     ?.forEach((hostRule) => {
+      if (!isArtifactAuthEnabled(hostRule)) {
+        return;
+      }
+
       const { resolvedHost, username, password, token } = hostRule;
       if (resolvedHost && username && password) {
         authJson['http-basic'] = authJson['http-basic'] ?? {};
