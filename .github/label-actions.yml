@@ -172,7 +172,7 @@
 
 
     This issue has been marked as invalid and will be closed and potentially deleted too.
-    Deletion is done so that invalid issues (such as confused bug reports) don't show up in repository searches and confuse users.
+    Deletion is done so that invalid issues (such as mistaken bug reports) don't show up in repository searches and confuse future users.
 
     In future, please create _Discussions_ instead of Issues (including for the topic of this Issue if you still wish to discuss it).
 
