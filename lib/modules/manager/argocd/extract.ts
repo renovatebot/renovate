@@ -5,7 +5,11 @@ import { trimTrailingSlash } from '../../../util/url';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { ApplicationDefinition, ApplicationSource } from './types';
 import { fileTestRegex } from './util';
 
@@ -66,7 +70,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   _config?: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
   if (fileTestRegex.test(content) === false) {
     return null;

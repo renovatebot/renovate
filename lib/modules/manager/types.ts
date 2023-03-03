@@ -48,68 +48,30 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
   currentValue?: string;
   depName?: string;
   depType?: string;
-  manager?: string | null;
+  manager?: string;
   rangeStrategy: RangeStrategy;
 }
 
-export interface NpmLockFiles {
-  yarnLock?: string;
-  packageLock?: string;
-  shrinkwrapJson?: string;
-  pnpmShrinkwrap?: string;
-  npmLock?: string;
-  lockFiles?: string[];
-}
-
-export interface PackageFile<T = Record<string, any>>
-  extends NpmLockFiles,
-    ManagerData<T> {
+export interface PackageFileContent<T = Record<string, any>>
+  extends ManagerData<T> {
   autoReplaceStringTemplate?: string;
-  hasYarnWorkspaces?: boolean;
   constraints?: Record<string, string>;
   extractedConstraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   additionalRegistryUrls?: string[];
   deps: PackageDependency[];
-  lernaClient?: string;
-  lernaPackages?: string[];
-  mavenProps?: Record<string, any>;
+  lockFiles?: string[];
   npmrc?: string;
-  packageFile?: string | null;
-  packageJsonName?: string;
   packageFileVersion?: string;
-  parent?: string;
   skipInstalls?: boolean;
-  yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
 
-export interface Package<T> extends ManagerData<T> {
-  currentValue?: string | null;
-  currentDigest?: string;
-  depName?: string;
-  depType?: string;
-  fileReplacePosition?: number;
-  groupName?: string;
-  lineNumber?: number;
-  packageName?: string | null;
-  target?: string;
-  versioning?: string;
-  dataType?: string;
-  enabled?: boolean;
-
-  // npm manager
-  bumpVersion?: ReleaseType | string;
-  npmPackageAlias?: boolean;
-  packageFileVersion?: string;
-  gitRef?: boolean;
-  sourceUrl?: string | null;
-  pinDigests?: boolean;
-  currentRawValue?: string;
-  major?: { enabled?: boolean };
-  prettyDepType?: string;
+export interface PackageFile<T = Record<string, any>>
+  extends PackageFileContent<T> {
+  packageFile: string;
 }
 
 export interface LookupUpdate {
@@ -140,7 +102,29 @@ export interface LookupUpdate {
   registryUrl?: string;
 }
 
-export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+export interface PackageDependency<T = Record<string, any>>
+  extends ManagerData<T> {
+  currentValue?: string | null;
+  currentDigest?: string;
+  depName?: string;
+  depType?: string;
+  fileReplacePosition?: number;
+  groupName?: string;
+  lineNumber?: number;
+  packageName?: string | null;
+  target?: string;
+  versioning?: string;
+  dataType?: string;
+  enabled?: boolean;
+  bumpVersion?: ReleaseType | string;
+  npmPackageAlias?: boolean;
+  packageFileVersion?: string;
+  gitRef?: boolean;
+  sourceUrl?: string | null;
+  pinDigests?: boolean;
+  currentRawValue?: string;
+  major?: { enabled?: boolean };
+  prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
@@ -160,7 +144,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
-  depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
@@ -168,12 +151,11 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   variableName?: string;
 }
 
-export interface Upgrade<T = Record<string, any>>
-  extends Package<T>,
-    NpmLockFiles {
+export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
+  lockFiles?: string[];
   name?: string;
   newDigest?: string;
   newFrom?: string;
@@ -265,7 +247,7 @@ export interface ManagerApi extends ModuleApi {
     content: string,
     packageFile?: string,
     config?: ExtractConfig
-  ): Result<PackageFile | null>;
+  ): Result<PackageFileContent | null>;
 
   getRangeStrategy?(config: RangeConfig): RangeStrategy;
 
