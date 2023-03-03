@@ -71,6 +71,7 @@ describe('modules/platform/gerrit/utils', () => {
       ['NEW' as GerritChangeStatus, 'open'],
       ['MERGED' as GerritChangeStatus, 'merged'],
       ['ABANDONED' as GerritChangeStatus, 'closed'],
+      ['unknown' as GerritChangeStatus, 'all'],
     ])(
       'maps gerrit change state %p to PrState %p',
       (state: GerritChangeStatus, prState: any) => {
@@ -146,7 +147,21 @@ describe('modules/platform/gerrit/utils', () => {
   });
 
   describe('extractSourceBranch()', () => {
-    it('extract source branch from existing gerrit change', () => {
+    it('without hashtags', () => {
+      const change = partial<GerritChange>({
+        hashtags: undefined,
+      });
+      expect(utils.extractSourceBranch(change)).toBeUndefined();
+    });
+
+    it('no hashtag with "sourceBranch-" prefix', () => {
+      const change = partial<GerritChange>({
+        hashtags: ['other', 'another'],
+      });
+      expect(utils.extractSourceBranch(change)).toBeUndefined();
+    });
+
+    it('hashtag with "sourceBranch-" prefix', () => {
       const change = partial<GerritChange>({
         hashtags: ['other', 'sourceBranch-renovate/dependency-1.x', 'another'],
       });

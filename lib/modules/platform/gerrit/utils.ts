@@ -76,14 +76,12 @@ export function mapGerritChangeStateToPrState(
     case 'ABANDONED':
       return 'closed';
   }
-  // istanbul ignore next
   return 'all';
 }
 export function extractSourceBranch(change: GerritChange): string | undefined {
   return change.hashtags
-    ?.filter((tag) => tag.startsWith('sourceBranch-'))
-    .map((tag) => tag.replace('sourceBranch-', ''))
-    .shift();
+    ?.find((tag) => tag.startsWith('sourceBranch-'))
+    ?.replace('sourceBranch-', '');
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
@@ -100,7 +98,7 @@ export function mapBranchStatusToLabel(
   state: BranchStatus,
   label: GerritLabelTypeInfo
 ): number {
-  const numbers = Object.keys(label.values).map((x) => parseInt(x));
+  const numbers = Object.keys(label.values).map((x) => parseInt(x, 10));
   switch (state) {
     case 'green':
       return Math.max(...numbers);
