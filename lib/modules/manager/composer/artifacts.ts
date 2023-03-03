@@ -5,6 +5,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -27,10 +28,13 @@ import {
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
-  isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
+
+function isArtifactAuthEnabled(rule: HostRule): boolean {
+  return !rule.artifactAuth || rule.artifactAuth.includes('composer');
+}
 
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
