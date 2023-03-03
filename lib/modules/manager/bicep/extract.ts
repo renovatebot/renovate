@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { AzureBicepTypesDatasource } from '../../datasource/azure-bicep-types';
 import type {
@@ -33,12 +34,15 @@ export function extractPackageFile(
 
     deps.push({
       datasource: AzureBicepTypesDatasource.id,
+      versioning: 'azure-rest-api',
       depName,
       currentValue,
       autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
       replaceString: "'{{depName}}@{{currentValue}}'",
     });
   }
+
+  logger.info(JSON.stringify(deps));
 
   return Promise.resolve({ deps });
 }

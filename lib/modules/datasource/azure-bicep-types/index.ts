@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -8,7 +9,7 @@ const BICEP_TYPES_INDEX_URL =
   'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';
 
 export class AzureBicepTypesDatasource extends Datasource {
-  static readonly id = 'azure-rest-api-spec';
+  static readonly id = 'azure-bicep-types';
 
   constructor() {
     super(AzureBicepTypesDatasource.id);
@@ -19,12 +20,16 @@ export class AzureBicepTypesDatasource extends Datasource {
   ): Promise<ReleaseResult | null> {
     const { packageName } = getReleasesConfig;
 
+    logger.info('hello from datasource');
+
     const resourceVersionIndex = await this.getResourceVersionIndex();
     const versions = resourceVersionIndex.get(packageName.toLowerCase());
 
     if (!versions) {
       return null;
     }
+
+    logger.info(versions.join(', '));
 
     return {
       releases: versions.map((x) => ({
