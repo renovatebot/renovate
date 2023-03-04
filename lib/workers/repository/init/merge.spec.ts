@@ -54,7 +54,7 @@ describe('workers/repository/init/merge', () => {
         .mockReturnValueOnce(
           partial<RepoCacheData>({ configFileName: 'renovate.json' })
         );
-      platform.getRawFile.mockResolvedValueOnce(null);
+      platform.getRawFile.mockRejectedValueOnce(new Error());
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
