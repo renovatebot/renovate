@@ -38,5 +38,5 @@ Next, all hostRules with both a token and matchHost will be fetched, except for 
 
 Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
  - No hostType is defined, or
- - hostType is `go`, or
+ - `hostType` is `go`, or
  - hostType is a platform (`github`, `gitlab`, `azure`, etc.)
