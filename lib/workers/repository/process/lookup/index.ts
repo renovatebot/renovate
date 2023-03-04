@@ -89,7 +89,7 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug(`Found deprecationMessage for package ${packageName}`);
+        logger.debug(`Found deprecationMessage for ${datasource} package ${packageName}`);
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -451,11 +451,11 @@ export async function lookupUpdates(
         currentDigest,
         currentValue,
         datasource,
+        packageName,
         digestOneAndOnly,
         followTag,
         lockedVersion,
         packageFile,
-        packageName,
         pinDigests,
         rollbackPrs,
         isVulnerabilityAlert,

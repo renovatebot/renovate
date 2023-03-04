@@ -346,7 +346,7 @@ export async function getPkgReleases(
     logger.warn('No datasource found');
     return null;
   }
-  const { packageName } = config;
+  const packageName = config.packageName;
   if (!packageName) {
     logger.error({ config }, 'Datasource getReleases without packageName');
     return null;
