@@ -48,6 +48,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
