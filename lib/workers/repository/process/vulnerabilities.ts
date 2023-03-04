@@ -199,10 +199,11 @@ export class Vulnerabilities {
 
       this.sortByFixedVersion(packageRules, versioningApi);
     } catch (err) {
-      logger.debug(
+      logger.warn(
         { err },
         `Error fetching vulnerability information for ${packageName}`
       );
+      return [];
     }
 
     return packageRules;
@@ -237,9 +238,11 @@ export class Vulnerabilities {
     for (const event of events) {
       if (event.introduced === '0') {
         zeroEvent = event;
-        continue;
+      } else if (versioningApi.isVersion(Object.values(event)[0])) {
+        sortedCopy.push(event);
+      } else {
+        logger.debug({ event }, 'Skipping OSV event with invalid version');
       }
-      sortedCopy.push(event);
     }
 
     sortedCopy.sort((a, b) =>
@@ -341,9 +344,15 @@ export class Vulnerabilities {
       }
 
       for (const event of range.events) {
-        if (is.nonEmptyString(event.fixed)) {
+        if (
+          is.nonEmptyString(event.fixed) &&
+          versioningApi.isVersion(event.fixed)
+        ) {
           fixedVersions.push(event.fixed);
-        } else if (is.nonEmptyString(event.last_affected)) {
+        } else if (
+          is.nonEmptyString(event.last_affected) &&
+          versioningApi.isVersion(event.last_affected)
+        ) {
           lastAffectedVersions.push(event.last_affected);
         }
       }

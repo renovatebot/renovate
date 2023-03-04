@@ -10,7 +10,12 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { isSystemManifest } from './common';
 import type {
   FluxManagerData,
@@ -235,7 +240,7 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile<FluxManagerData> | null {
+): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;

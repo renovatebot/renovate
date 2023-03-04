@@ -1,3 +1,12 @@
+## Open
+
+These updates have all been created already. Click a checkbox below to force a retry/rebase of any.
+
+ - [ ] <!-- rebase-branch=branchName1 -->[pr1](../pull/1)
+ - [ ] <!-- rebase-branch=branchName2 -->[pr2](../pull/2) (`dep2`, `dep3`)
+ - [ ] <!-- rebase-branch=branchName3 -->[pr3](../pull/3)
+ - [ ] <!-- rebase-all-open-prs -->**Click on this checkbox to rebase all open PRs at once**
+
 ## Edited/Blocked
 
 These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, click on a checkbox.
