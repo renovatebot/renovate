@@ -1547,6 +1547,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'internalChecksAsSuccess',
+    description:
+      'Whether to consider passing internal checks such as stabilityDays when determining branch status.',
+    type: 'boolean',
+    default: false,
+  },
   /*
    * Undocumented experimental feature
   {
