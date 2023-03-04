@@ -4905,10 +4905,10 @@ eslint-config-prettier@8.6.0:
   resolved "https://registry.yarnpkg.com/eslint-config-prettier/-/eslint-config-prettier-8.6.0.tgz#dec1d29ab728f4fa63061774e1672ac4e363d207"
   integrity sha512-bAF0eLpLVqP5oEVUFKpMA+NnRFICwn9X8B5jrR9FcqnYBuPbqWEjTEspPWMj5ye6czoSLDweCzSo3Ko7gGrZaA==
 
-eslint-formatter-gha@1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/eslint-formatter-gha/-/eslint-formatter-gha-1.4.1.tgz#e787a68171c5486fb7e8b514224a722a5f59a8ec"
-  integrity sha512-c2L/p4Xtnzlb3ascN4vERcXTMNPePedxZNRZcKG19DDpViBIG1WLMyMIeC2FSW7yGLBANZNb9N66sV2PDCdIqQ==
+eslint-formatter-gha@1.4.2:
+  version "1.4.2"
+  resolved "https://registry.yarnpkg.com/eslint-formatter-gha/-/eslint-formatter-gha-1.4.2.tgz#95330dbf026a34faf877a5893c210d5e19b40e6c"
+  integrity sha512-V+i+jdUOAkkCWK0gESohLjYk/fJpgMgE0L6QPGd8b5jtBQlG+MT/zb7yy2/HlqccIkRBYq/brT2rLW2K8H9kqA==
   dependencies:
     "@actions/core" "^1.2.6"
     eslint-formatter-json "^8.0.0"
