@@ -1193,32 +1193,45 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it.each([[true], [false]])(
-      'jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image, abortOnError=%p',
-      async (abortOnError) => {
-        hostRules.find.mockReturnValue({ abortOnError });
-        const tags = ['18.0.0'];
-        httpMock
-          .scope('https://org.jfrog.io/v2')
-          .get('/virtual-mirror/node/tags/list?n=10000')
-          .reply(200, '', {})
-          .get('/virtual-mirror/node/tags/list?n=10000')
-          .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
-          .get('/virtual-mirror/library/node/tags/list?n=10000')
-          .reply(200, '', {})
-          .get('/virtual-mirror/library/node/tags/list?n=10000')
-          .reply(200, { tags }, {})
-          .get('/')
-          .reply(200, '', {})
-          .get('/virtual-mirror/node/manifests/18.0.0')
-          .reply(200, '', {});
-        const res = await getPkgReleases({
-          datasource: DockerDatasource.id,
-          depName: 'org.jfrog.io/virtual-mirror/node',
-        });
-        expect(res?.releases).toHaveLength(1);
-      }
-    );
+    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
+      const tags1: string[] = [...Array(10000)].map((_, i) => `${i}.0.0`);
+      const tags2: string[] = [...Array(50)].map((_, i) => `${i + 10000}.0.0`);
+      httpMock
+        .scope('https://org.jfrog.io/v2')
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(200, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/virtual-mirror/node/tags/list?n=10000')
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        .reply(200, '', {})
+        .get('/virtual-mirror/library/node/tags/list?n=10000')
+        // Note the Link is incorrect and should be `</virtual-mirror/library/node/tags/list?n=10000&last=10000>; rel="next", `
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        .reply(
+          200,
+          { tags: tags1 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=10000>; rel="next", ',
+          }
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=10000')
+        .reply(
+          200,
+          { tags: tags2 },
+          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' }
+        )
+        .get('/')
+        .reply(200, '', {})
+        .get('/virtual-mirror/node/manifests/10049.0.0')
+        .reply(200, '', {});
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        depName: 'org.jfrog.io/virtual-mirror/node',
+      });
+      expect(res?.releases).toHaveLength(10050);
+    });
 
     it('uses lower tag limit for ECR deps', async () => {
       httpMock
