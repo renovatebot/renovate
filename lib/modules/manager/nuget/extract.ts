@@ -5,7 +5,11 @@ import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { extractMsbuildGlobalManifest } from './extract/global-manifest';
 import type { DotnetToolsManifest } from './types';
 import { getConfiguredRegistries } from './util';
@@ -71,7 +75,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
   const registries = await getConfiguredRegistries(packageFile);
@@ -130,7 +134,7 @@ export async function extractPackageFile(
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
-  const res: PackageFile = { deps, packageFileVersion };
+  const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if
   if (await localPathExists(lockFileName)) {

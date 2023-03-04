@@ -1,6 +1,6 @@
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { getFileContentMap } from '../../../util/fs';
+import { getLocalFiles } from '../../../util/fs';
 import { MavenDatasource } from '../../datasource/maven';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import { parseCatalog } from './extract/catalog';
@@ -26,7 +26,7 @@ import {
   toAbsolutePath,
 } from './utils';
 
-const datasource = MavenDatasource.id;
+const mavenDatasource = MavenDatasource.id;
 
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
@@ -54,12 +54,12 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const reorderedFiles = reorderFiles(packageFiles);
-  const fileContents = await getFileContentMap(packageFiles, true);
+  const fileContents = await getLocalFiles(packageFiles);
 
   for (const packageFile of reorderedFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
-      datasource,
+      datasource: mavenDatasource,
       deps: [],
     };
 
@@ -132,17 +132,23 @@ export async function extractAllPackageFiles(
       if (!pkgFile) {
         pkgFile = {
           packageFile: key,
-          datasource,
+          datasource: mavenDatasource,
           deps: [],
         };
       }
 
-      dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
+      if (!dep.datasource) {
+        dep.datasource = mavenDatasource;
+      }
 
-      if (!dep.depType) {
-        dep.depType = key.startsWith('buildSrc')
-          ? 'devDependencies'
-          : 'dependencies';
+      if (dep.datasource === mavenDatasource) {
+        dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
+
+        if (!dep.depType) {
+          dep.depType = key.startsWith('buildSrc')
+            ? 'devDependencies'
+            : 'dependencies';
+        }
       }
 
       const depAlreadyInPkgFile = pkgFile.deps.some(

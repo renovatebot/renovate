@@ -38,6 +38,7 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+  depIndex?: number;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
@@ -185,4 +186,9 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+}
+
+export interface ExtractResult {
+  extractionFingerprints: Record<string, string | undefined>;
+  packageFiles: Record<string, PackageFile[]>;
 }

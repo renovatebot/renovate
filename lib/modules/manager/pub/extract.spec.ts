@@ -39,7 +39,6 @@ describe('modules/manager/pub/extract', () => {
             depType: 'dev_dependencies',
           },
         ],
-        packageFile: 'pubspec.yaml',
       });
     });
   });

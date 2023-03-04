@@ -2,10 +2,10 @@ import is from '@sindresorhus/is';
 import type { RenovateConfig } from '../../../config/types';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
 import { fingerprint } from '../../../util/fingerprint';
-import { branchExists, getBranchCommit } from '../../../util/git';
 import { setBranchNewCommit } from '../../../util/git/set-branch-commit';
 import { incLimitedValue, setMaxLimit } from '../../global/limits';
 import type { BranchConfig, UpgradeFingerprintConfig } from '../../types';
@@ -47,13 +47,13 @@ export function canSkipBranchUpdateCheck(
   return true;
 }
 
-export function syncBranchState(
+export async function syncBranchState(
   branchName: string,
   baseBranch: string
-): BranchCache {
+): Promise<BranchCache> {
   logger.debug('syncBranchState()');
-  const branchSha = getBranchCommit(branchName)!;
-  const baseBranchSha = getBranchCommit(baseBranch)!;
+  const branchSha = await scm.getBranchCommit(branchName)!;
+  const baseBranchSha = await scm.getBranchCommit(baseBranch)!;
 
   const cache = getCache();
   cache.branches ??= [];
@@ -138,8 +138,8 @@ export async function writeUpdates(
       meta['baseBranch'] = baseBranch;
     }
     addMeta(meta);
-    const branchExisted = branchExists(branchName);
-    const branchState = syncBranchState(branchName, baseBranch);
+    const branchExisted = await scm.branchExists(branchName);
+    const branchState = await syncBranchState(branchName, baseBranch);
 
     const managers = [
       ...new Set(
@@ -174,7 +174,7 @@ export async function writeUpdates(
       // Stop processing other branches because base branch has been changed
       return 'automerged';
     }
-    if (!branchExisted && branchExists(branch.branchName)) {
+    if (!branchExisted && (await scm.branchExists(branch.branchName))) {
       incLimitedValue('Branches');
     }
   }

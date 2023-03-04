@@ -22,6 +22,7 @@ import type {
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
+import { isDockerDigest } from '../../../util/string';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
@@ -908,10 +909,9 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
+    } catch (_err) /* istanbul ignore next */ {
+      const err = _err instanceof ExternalHostError ? _err.err : _err;
+
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         !dockerRepository.includes('/')
@@ -973,7 +973,7 @@ export class DockerDatasource extends Datasource {
       if (isDockerHost(registryHost)) {
         logger.info({ err }, 'Docker Hub lookup failure');
       }
-      throw err;
+      throw _err;
     }
   }
 
@@ -1018,7 +1018,7 @@ export class DockerDatasource extends Datasource {
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
-      if (currentDigest) {
+      if (currentDigest && isDockerDigest(currentDigest)) {
         architecture = await this.getImageArchitecture(
           registryHost,
           dockerRepository,

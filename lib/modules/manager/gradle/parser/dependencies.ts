@@ -4,9 +4,8 @@ import type { Ctx } from '../types';
 import {
   GRADLE_PLUGINS,
   cleanupTempVars,
-  qPropertyAccessIdentifier,
   qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -17,21 +16,23 @@ import {
   handleLongFormDep,
 } from './handlers';
 
-const qGroupId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'groupId'));
+const qGroupId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'groupId')
+);
 
-const qArtifactId = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'artifactId'));
+const qArtifactId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'artifactId')
+);
 
-const qVersion = q
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'version'));
+const qVersion = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'version')
+);
 
 // "foo:bar:1.2.3"
 // "foo:bar:$baz"
+// "foo" + "${bar}" + baz
 const qDependencyStrings = qTemplateString
+  .opt(q.op<Ctx>('+').join(qValueMatcher))
   .handler((ctx: Ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
   .handler(handleDepString)
   .handler(cleanupTempVars);
@@ -106,12 +107,7 @@ const qKotlinShortNotationDependencies = q
       .join(qArtifactId)
       .op(',')
       .opt(q.sym<Ctx>('version').op('='))
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      )
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .join(qVersion)
       .end(),
   })
   .handler(handleKotlinShortNotationDep)
@@ -174,16 +170,21 @@ const qImplicitGradlePlugin = q
     maxMatches: 1,
     startsWith: '{',
     endsWith: '}',
-    search: q
-      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
-      .op('=')
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      ),
+    search: q.sym<Ctx>(regEx(/^(?:toolVersion|version)$/)).alt(
+      // toolVersion = "1.2.3"
+      q.op<Ctx>('=').join(qVersion),
+      // toolVersion.set("1.2.3"), toolVersion.value("1.2.3")
+      q
+        .op<Ctx>('.')
+        .sym(regEx(/^(?:set|value)$/))
+        .tree({
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q.begin<Ctx>().join(qVersion).end(),
+        })
+    ),
   })
-  .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleImplicitGradlePlugin)
   .handler(cleanupTempVars);
 

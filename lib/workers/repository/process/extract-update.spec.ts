@@ -1,4 +1,4 @@
-import { git, logger, mocked } from '../../../../test/util';
+import { git, logger, mocked, scm } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
@@ -7,9 +7,21 @@ import { generateFingerprintConfig } from '../extract/extract-fingerprint-config
 import * as _branchify from '../updates/branchify';
 import { extract, isCacheExtractValid, lookup, update } from './extract-update';
 
+const createVulnerabilitiesMock = jest.fn();
+
 jest.mock('./write');
 jest.mock('./sort');
 jest.mock('./fetch');
+jest.mock('./vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 jest.mock('../updates/branchify');
 jest.mock('../extract');
 jest.mock('../../../util/cache/repository');
@@ -18,7 +30,7 @@ jest.mock('../../../util/git');
 const branchify = mocked(_branchify);
 const repositoryCache = mocked(_repositoryCache);
 
-branchify.branchifyUpgrades.mockResolvedValueOnce({
+branchify.branchifyUpgrades.mockResolvedValue({
   branches: [
     {
       manager: 'some-manager',
@@ -87,31 +99,72 @@ describe('workers/repository/process/extract-update', () => {
           master: {
             sha: '123test',
             configHash: fingerprint(generateFingerprintConfig(config)),
+            extractionFingerprints: {},
             packageFiles,
           },
         },
       });
-      git.getBranchCommit.mockReturnValueOnce('123test');
+      scm.getBranchCommit.mockResolvedValueOnce('123test');
       git.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });
+
+    it('fetches vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      git.checkoutBranch.mockResolvedValueOnce('123test');
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(fetchVulnerabilitiesMock).toHaveBeenCalledOnce();
+    });
+
+    it('handles exception when fetching vulnerabilities', async () => {
+      const config = {
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+        osvVulnerabilityAlerts: true,
+      };
+      createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
+      git.checkoutBranch.mockResolvedValueOnce('123test');
+
+      const packageFiles = await extract(config);
+      await lookup(config, packageFiles);
+
+      expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
+    });
   });
 
   describe('isCacheExtractValid()', () => {
-    let cachedExtract: BaseBranchCache = undefined as never;
+    let cachedExtract: BaseBranchCache;
+
+    beforeEach(() => {
+      cachedExtract = {
+        sha: 'sha',
+        configHash: undefined as never,
+        extractionFingerprints: {},
+        packageFiles: {},
+      };
+    });
 
     it('undefined cache', () => {
-      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(isCacheExtractValid('sha', 'hash', undefined)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
 
     it('partial cache', () => {
-      cachedExtract = {
-        sha: 'sha',
-        configHash: undefined as never,
-        packageFiles: {},
-      };
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
@@ -126,7 +179,6 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('config change', () => {
-      cachedExtract.sha = 'sha';
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -135,8 +187,30 @@ describe('workers/repository/process/extract-update', () => {
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
+    it('invalid if no extractionFingerprints', () => {
+      cachedExtract.configHash = 'hash';
+      const { extractionFingerprints, ...restOfCache } = cachedExtract;
+      expect(
+        isCacheExtractValid(
+          'sha',
+          'hash',
+          restOfCache as never as BaseBranchCache
+        )
+      ).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledWith(
+        'Cached extract is missing extractionFingerprints, so cannot be used'
+      );
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
+    it('invalid if changed fingerprints', () => {
+      cachedExtract.configHash = 'hash';
+      cachedExtract.extractionFingerprints = { npm: 'old-fingerprint' };
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
+      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
+    });
+
     it('valid cache and config', () => {
-      cachedExtract.sha = 'sha';
       cachedExtract.configHash = 'hash';
       expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
       expect(logger.logger.debug).toHaveBeenCalledWith(

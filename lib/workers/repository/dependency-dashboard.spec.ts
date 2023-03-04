@@ -161,6 +161,7 @@ describe('workers/repository/dependency-dashboard', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
       GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
     });
 
     it('do nothing if dependencyDashboard is disabled', async () => {

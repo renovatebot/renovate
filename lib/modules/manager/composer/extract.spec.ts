@@ -173,6 +173,9 @@ describe('modules/manager/composer/extract', () => {
             registryUrls: ['https://wpackagist.org'],
           },
         ],
+        extractedConstraints: {
+          php: '>=5.5',
+        },
         managerData: {
           composerJsonType: 'project',
         },

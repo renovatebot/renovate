@@ -31,8 +31,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getBranch
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -51,8 +49,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -71,8 +67,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -91,8 +85,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() c
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -111,8 +103,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() g
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -131,8 +121,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with no path getPr() g
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "displayNumber": "Pull Request #undefined",
-  "hasReviewers": false,
   "number": undefined,
   "reviewers": [],
   "sourceBranch": undefined,
@@ -247,8 +235,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getBranchPr(
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -267,8 +253,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -287,8 +271,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -307,8 +289,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() canR
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -327,8 +307,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets
     "hash": "7980dafc4eb6f0c79278fd929d3e8e5954b32b68ae118a22565c7c369fc2f591",
   },
   "createdAt": 1547853840016,
-  "displayNumber": "Pull Request #5",
-  "hasReviewers": true,
   "number": 5,
   "reviewers": [
     "userName2",
@@ -347,8 +325,6 @@ exports[`modules/platform/bitbucket-server/index endpoint with path getPr() gets
     "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   },
   "createdAt": undefined,
-  "displayNumber": "Pull Request #undefined",
-  "hasReviewers": false,
   "number": undefined,
   "reviewers": [],
   "sourceBranch": undefined,

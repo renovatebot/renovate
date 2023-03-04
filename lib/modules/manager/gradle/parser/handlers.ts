@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import { parseGradle } from '../parser';
+import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
@@ -14,6 +14,12 @@ import {
   interpolateString,
   loadFromTokenMap,
 } from './common';
+
+// needed to break circular dependency
+let parseGradle: typeof parseGradleCallback;
+export function setParseGradleFunc(func: typeof parseGradleCallback): void {
+  parseGradle = func;
+}
 
 export function handleAssignment(ctx: Ctx): Ctx {
   const key = loadFromTokenMap(ctx, 'keyToken')[0].value;
@@ -131,6 +137,7 @@ export function handleKotlinShortNotationDep(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = ctx.globalVars[versionTokens[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -222,6 +229,7 @@ export function handlePlugin(ctx: Ctx): Ctx {
   } else if (pluginVersion[0].type === 'symbol') {
     const varData = ctx.globalVars[pluginVersion[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
@@ -354,7 +362,7 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
   }
 
   if (!regEx(/\.gradle(\.kts)?$/).test(scriptFile)) {
-    logger.warn({ scriptFile }, `Only Gradle files can be included`);
+    logger.debug({ scriptFile }, `Only Gradle files can be included`);
     return ctx;
   }
 
@@ -408,6 +416,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   } else if (versionTokens[0].type === 'symbol') {
     const varData = ctx.globalVars[versionTokens[0].value];
     if (varData) {
+      dep.groupName = varData.key;
       dep.currentValue = varData.value;
       dep.managerData = {
         fileReplacePosition: varData.fileReplacePosition,
