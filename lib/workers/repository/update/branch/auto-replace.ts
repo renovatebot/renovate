@@ -81,11 +81,11 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  // if (!upgrade.currentDigest && !upgrade.isPinDigest) {
-  // return true;
-  // }
-
-  if (upgrade.newDigest && upgrade.newDigest !== newUpgrade.currentDigest) {
+  if (
+    upgrade.newDigest &&
+    (upgrade.isPinDigest || upgrade.currentDigest) &&
+    upgrade.newDigest !== newUpgrade.currentDigest
+  ) {
     logger.debug(
       {
         manager,
