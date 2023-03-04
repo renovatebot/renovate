@@ -8,6 +8,7 @@ import { logger, setMeta } from '../../logger';
 import { removeDanglingContainers } from '../../util/exec/docker';
 import { deleteLocalFile, privateCacheDir } from '../../util/fs';
 import { isCloned } from '../../util/git';
+import { detectSemanticCommits } from '../../util/git/semantic';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
@@ -18,8 +19,10 @@ import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
+import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
+import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
 import { printRequestStats } from './stats';
 
@@ -45,10 +48,16 @@ export async function renovateRepository(
     logger.debug('Using localDir: ' + localDir);
     config = await initRepo(config);
     addSplit('init');
-    const { branches, branchList, packageFiles } = await instrument(
-      'extract',
-      () => extractDependencies(config)
-    );
+    const performExtract =
+      config.repoIsOnboarded! ||
+      !config.onboardingRebaseCheckbox ||
+      OnboardingState.prUpdateRequested;
+    const { branches, branchList, packageFiles } = performExtract
+      ? await instrument('extract', () => extractDependencies(config))
+      : emptyExtract(config);
+    if (config.semanticCommits === 'auto') {
+      config.semanticCommits = await detectSemanticCommits();
+    }
     if (
       GlobalConfig.get('dryRun') !== 'lookup' &&
       GlobalConfig.get('dryRun') !== 'extract'
@@ -63,7 +72,9 @@ export async function renovateRepository(
       );
       setMeta({ repository: config.repository });
       addSplit('update');
-      await setBranchCache(branches);
+      if (performExtract) {
+        await setBranchCache(branches); // update branch cache if performed extraction
+      }
       if (res === 'automerged') {
         if (canRetry) {
           logger.info('Renovating repository again after automerge result');
@@ -104,4 +115,13 @@ export async function renovateRepository(
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
+}
+
+// istanbul ignore next: renovateRepository is ignored
+function emptyExtract(config: RenovateConfig): ExtractResult {
+  return {
+    branches: [],
+    branchList: [config.onboardingBranch!], // to prevent auto closing
+    packageFiles: {},
+  };
 }

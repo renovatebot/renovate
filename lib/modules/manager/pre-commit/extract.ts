@@ -6,7 +6,7 @@ import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
@@ -50,7 +50,6 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    ['gitea', GitlabTagsDatasource.id],
     ['github', GithubTagsDatasource.id],
     ['gitlab', GitlabTagsDatasource.id],
   ]) {
@@ -64,7 +63,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
+    'Provided hostname did not match any of the hostRules of hostType github nor gitlab'
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
@@ -148,7 +147,7 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   filename: string
-): PackageFile | null {
+): PackageFileContent | null {
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {

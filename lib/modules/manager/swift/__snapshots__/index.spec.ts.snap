@@ -23,6 +23,12 @@ exports[`modules/manager/swift/index extractPackageFile() parses multiple packag
       "packageName": "https://github.com/IBM-Swift/BlueSignals.git",
     },
     {
+      "currentValue": "1.2.1",
+      "datasource": "git-tags",
+      "depName": "apple/swift-argument-parser",
+      "packageName": "https://github.com/apple/swift-argument-parser",
+    },
+    {
       "currentValue": ""UpdateSocket"
         ",
       "datasource": "git-tags",
@@ -55,90 +61,5 @@ exports[`modules/manager/swift/index extractPackageFile() parses multiple packag
       "packageName": "https://github.com/apple/swift-package-manager.git",
     },
   ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 1`] = `
-{
-  "deps": [
-    {
-      "currentValue": "from:"1.2.3"",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 2`] = `
-{
-  "deps": [
-    {
-      "currentValue": ""1.2.3"...",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 3`] = `
-{
-  "deps": [
-    {
-      "currentValue": ""1.2.3"..."1.2.4"",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 4`] = `
-{
-  "deps": [
-    {
-      "currentValue": ""1.2.3"..<"1.2.4"",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 5`] = `
-{
-  "deps": [
-    {
-      "currentValue": "..."1.2.3"",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
-}
-`;
-
-exports[`modules/manager/swift/index extractPackageFile() parses package descriptions 6`] = `
-{
-  "deps": [
-    {
-      "currentValue": "..<"1.2.3"",
-      "datasource": "git-tags",
-      "depName": "vapor/vapor",
-      "packageName": "https://github.com/vapor/vapor.git",
-    },
-  ],
-  "packageFile": null,
 }
 `;

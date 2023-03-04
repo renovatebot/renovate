@@ -1,20 +1,17 @@
 /* istanbul ignore file */
 
+import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
+import { scm } from '../../modules/platform/scm';
 import { getCache } from '../../util/cache/repository';
 import type {
   BranchCache,
   BranchUpgradeCache,
 } from '../../util/cache/repository/types';
-import {
-  getBranchCommit,
-  isBranchBehindBase,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../util/git';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { getPrCache } from './update/pr/pr-cache';
 
 function generateBranchUpgradeCache(
   upgrade: BranchUpgradeConfig
@@ -51,8 +48,8 @@ async function generateBranchCache(
 ): Promise<BranchCache | null> {
   const { baseBranch, branchName } = branch;
   try {
-    const sha = getBranchCommit(branchName) ?? null;
-    const baseBranchSha = getBranchCommit(baseBranch);
+    const sha = await scm.getBranchCommit(branchName);
+    const baseBranchSha = await scm.getBranchCommit(baseBranch);
     const pristine = getCachedPristineResult(branchName);
     let prNo = null;
     let isModified = false;
@@ -63,15 +60,16 @@ async function generateBranchCache(
       if (branchPr) {
         prNo = branchPr.number;
       }
-      isModified = await isBranchModified(branchName);
-      isBehindBase = await isBranchBehindBase(branchName, baseBranch);
-      isConflicted = await isBranchConflicted(baseBranch, branchName);
+      isModified = await scm.isBranchModified(branchName);
+      isBehindBase = await scm.isBranchBehindBase(branchName, baseBranch);
+      isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
     }
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
+    const prCache = getPrCache(branchName);
     return {
       automerge,
       baseBranchSha,
@@ -82,6 +80,7 @@ async function generateBranchCache(
       isConflicted,
       isModified,
       pristine,
+      prCache,
       prNo,
       sha,
       upgrades,
@@ -93,6 +92,9 @@ async function generateBranchCache(
     if (errCodes.includes(err.response?.statusCode)) {
       logger.warn({ err, branchName }, 'HTTP error generating branch cache');
       return null;
+    }
+    if (err.message === REPOSITORY_CHANGED) {
+      throw err;
     }
     logger.error({ err, branchName }, 'Error generating branch cache');
     return null;

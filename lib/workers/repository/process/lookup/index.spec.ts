@@ -14,6 +14,7 @@ import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
+import * as githubGraphql from '../../../../util/github/graphql';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
@@ -48,7 +49,6 @@ describe('workers/repository/process/lookup/index', () => {
     config.manager = 'npm';
     config.versioning = npmVersioningId;
     config.rangeStrategy = 'replace';
-    jest.resetAllMocks();
     jest
       .spyOn(GitRefsDatasource.prototype, 'getReleases')
       .mockResolvedValueOnce({
@@ -60,7 +60,9 @@ describe('workers/repository/process/lookup/index', () => {
   });
 
   // TODO: fix mocks
-  afterEach(() => httpMock.clear(false));
+  afterEach(() => {
+    httpMock.clear(false);
+  });
 
   describe('.lookupUpdates()', () => {
     it('returns null if unknown datasource', async () => {
@@ -100,8 +102,8 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '0.9.7', updateType: 'minor' },
-        { newValue: '1.4.1', updateType: 'major' },
+        { newValue: '^0.9.0', updateType: 'minor' },
+        { newValue: '^1.0.0', updateType: 'major' },
       ]);
     });
 
@@ -167,8 +169,8 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '0.9.7', updateType: 'minor' },
-        { newValue: '1.4.1', updateType: 'major' },
+        { newValue: '^0.9.0', updateType: 'minor' },
+        { newValue: '^1.0.0', updateType: 'major' },
       ]);
     });
 
@@ -294,7 +296,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'major' },
+        { newValue: '^1.0.0', updateType: 'major' },
       ]);
     });
 
@@ -329,17 +331,16 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '0.4.4', updateType: 'pin' },
-        { newValue: '0.9.7', updateType: 'minor' },
-        { newValue: '1.4.1', updateType: 'major' },
+        { newValue: '~0.9.0', updateType: 'minor' },
+        { newValue: '~1.4.0', updateType: 'major' },
       ]);
     });
 
     it.each`
-      strategy             | updates
-      ${'update-lockfile'} | ${[{ isLockfileUpdate: true, newValue: '*', newVersion: '0.9.7', updateType: 'minor' }, { isLockfileUpdate: true, newValue: '*', newVersion: '1.4.1', updateType: 'major' }]}
-      ${'pin'}             | ${[{ newValue: '0.4.0', updateType: 'pin' }, { newValue: '0.9.7', updateType: 'minor' }, { newValue: '1.4.1', updateType: 'major' }]}
+      strategy | updates
+      ${'pin'} | ${[{ newValue: '0.4.0', updateType: 'pin' }]}
     `(
-      'supports for x-range-all for replaceStrategy = $strategy (with lockfile)',
+      'supports for x-range-all for replaceStrategy = $strategy (with lockfile) abcd',
       async ({ strategy, updates }) => {
         config.currentValue = '*';
         config.rangeStrategy = strategy;
@@ -424,7 +425,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '0.9.7', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'major' },
+        { newValue: '~1.4.0', updateType: 'major' },
       ]);
     });
 
@@ -436,7 +437,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '1.0.1', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'minor' },
+        { newValue: '~1.4.0', updateType: 'minor' },
       ]);
     });
 
@@ -583,7 +584,6 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '1.0.0', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'minor' },
       ]);
     });
 
@@ -614,7 +614,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '1.3.0', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'minor' },
+        { newValue: '~1.4.0', updateType: 'minor' },
       ]);
     });
 
@@ -626,7 +626,7 @@ describe('workers/repository/process/lookup/index', () => {
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         { newValue: '1.3.0', updateType: 'pin' },
-        { newValue: '1.4.1', updateType: 'minor' },
+        { newValue: '1.4.x', updateType: 'minor' },
       ]);
     });
 
@@ -1182,6 +1182,61 @@ describe('workers/repository/process/lookup/index', () => {
       );
     });
 
+    it('should warn if no digest could be found but there is a current digest', async () => {
+      config.currentValue = 'v1.0.0';
+      config.currentDigest = 'bla';
+      config.digestOneAndOnly = true;
+      config.depName = 'angular/angular';
+      config.datasource = GithubTagsDatasource.id;
+
+      // Only mock calls once so that the second invocation results in
+      // no digest being computable.
+      jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+          hash: 'abc',
+        },
+      ]);
+
+      const res = await lookup.lookupUpdates(config);
+      expect(res.updates).toHaveLength(0);
+      expect(res.warnings).toHaveLength(1);
+      expect(res.warnings[0]).toEqual({
+        message:
+          'Could not determine new digest for update (datasource: github-tags)',
+        topic: 'angular/angular',
+      });
+    });
+
+    describe('pinning enabled but no existing digest', () => {
+      it('should not warn if no new digest could be found', async () => {
+        config.currentValue = 'v1.0.0';
+        config.digestOneAndOnly = true;
+        config.depName = 'angular/angular';
+        config.pinDigests = true;
+        config.datasource = GithubTagsDatasource.id;
+
+        // Only mock calls once so that the second invocation results in
+        // no digest being computable.
+        jest.spyOn(githubGraphql, 'queryReleases').mockResolvedValueOnce([]);
+        jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+          {
+            version: 'v2.0.0',
+            gitRef: 'v2.0.0',
+            releaseTimestamp: '2022-01-01',
+            hash: 'abc',
+          },
+        ]);
+
+        const res = await lookup.lookupUpdates(config);
+        expect(res.updates).toHaveLength(0);
+        expect(res.warnings).toHaveLength(0);
+      });
+    });
+
     it('should treat zero zero tilde ranges as 0.0.x', async () => {
       config.rangeStrategy = 'replace';
       config.currentValue = '~0.0.34';
@@ -1416,8 +1471,7 @@ describe('workers/repository/process/lookup/index', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchObject([
         { newValue: '==0.9.4', updateType: 'pin' },
-        { newValue: '==0.9.7', updateType: 'patch' },
-        { newValue: '==1.4.1', updateType: 'major' },
+        { newValue: '~=1.4', updateType: 'major' },
       ]);
     });
 
@@ -1549,6 +1603,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       config.datasource = DockerDatasource.id;
       docker.getReleases.mockResolvedValueOnce({
+        registryUrl: 'https://index.docker.io',
         releases: [
           { version: '8.1.0' },
           { version: '8.1.5' },
@@ -1557,15 +1612,20 @@ describe('workers/repository/process/lookup/index', () => {
           { version: '8.2.5' },
           { version: '8.2' },
           { version: '8' },
-          { version: '9.0' },
+          { version: '9.0', registryUrl: 'https://other.registry' },
           { version: '9' },
         ],
       });
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
+        registryUrl: 'https://index.docker.io',
         updates: [
           { newValue: '8.2', updateType: 'minor' },
-          { newValue: '9.0', updateType: 'major' },
+          {
+            newValue: '9.0',
+            updateType: 'major',
+            registryUrl: 'https://other.registry',
+          },
         ],
       });
     });

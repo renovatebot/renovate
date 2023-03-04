@@ -37,7 +37,7 @@ Renovate works on these platforms:
 - [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [AWS CodeCommit](https://docs.renovatebot.com/modules/platform/codecommit/)
-- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 
 ## Who Uses Renovate?
 
@@ -86,16 +86,17 @@ There are two ways to run Renovate on Azure DevOps:
 Go to the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
 
-**Note:** This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
+> **Note**
+> This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
 
 #### Custom pipeline
 
 You can create a custom pipeline with a `yml` definition that triggers `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/modules/platform/azure/).
 
-### Bitbucket Cloud/Server, Gitea, GitLab
+### Bitbucket Cloud/Server, Forgejo, Gitea, GitLab
 
-For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
+For Bitbucket Cloud, Bitbucket Server, Forgejo, Gitea and GitLab, use our self-hosting option.
 
 ## Configuration
 
@@ -116,7 +117,7 @@ To run your own instance of Renovate you have several options:
 
 ## Contributing
 
-If you want to contribute to Renovate or get a local copy running, please read the instructions in [.github/contributing.md](.github/contributing.md).
+If you want to contribute to Renovate or get a local copy running, please read the instructions in [contributing guidelines](.github/contributing.md).
 To get started look at the [list of good first issues](https://github.com/renovatebot/renovate/contribute).
 
 ## Security / Disclosure

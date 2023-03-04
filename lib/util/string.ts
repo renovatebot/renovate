@@ -1,5 +1,3 @@
-import { logger } from '../logger';
-
 // Return true if the match string is found at index in content
 export function matchAt(
   content: string,
@@ -16,7 +14,6 @@ export function replaceAt(
   oldString: string,
   newString: string
 ): string {
-  logger.trace(`Replacing ${oldString} with ${newString} at index ${index}`);
   return (
     content.substring(0, index) +
     newString +
@@ -44,4 +41,18 @@ export function uniqueStrings(
   elements: string[]
 ): boolean {
   return elements.indexOf(element) === index;
+}
+
+export function looseEquals(
+  a: string | null | undefined,
+  b: string | null | undefined
+): boolean {
+  if (!(a && b)) {
+    return a === b;
+  }
+  return a.localeCompare(b, undefined, { sensitivity: 'base' }) === 0;
+}
+
+export function isDockerDigest(input: string): boolean {
+  return /^sha256:[a-f0-9]{64}$/i.test(input);
 }

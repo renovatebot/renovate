@@ -3,11 +3,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import {
-  branchExists,
-  checkoutBranch,
-  deleteBranch,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -97,11 +94,11 @@ async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
         content,
       });
     }
-    if (branchExists(pr.sourceBranch)) {
+    if (await scm.branchExists(pr.sourceBranch)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
       } else {
-        await deleteBranch(pr.sourceBranch);
+        await scm.deleteBranch(pr.sourceBranch);
       }
     }
   }

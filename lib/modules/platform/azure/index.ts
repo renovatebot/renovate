@@ -288,7 +288,6 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
@@ -392,7 +391,7 @@ export async function getBranchStatus(
     return 'yellow';
   }
   const noOfFailures = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.Error ||
       status.state === GitStatusState.Failed
   ).length;
@@ -400,7 +399,7 @@ export async function getBranchStatus(
     return 'red';
   }
   const noOfPending = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.NotSet ||
       status.state === GitStatusState.Pending
   ).length;

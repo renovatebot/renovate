@@ -118,7 +118,6 @@ function toRenovatePR(data: PR): Pr | null {
 
   return {
     number: data.number,
-    displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title,
     isDraft,
@@ -940,7 +939,7 @@ const platform: Platform = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
+/* eslint-disable @typescript-eslint/unbound-method */
 export const {
   addAssignees,
   addReviewers,

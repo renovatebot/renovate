@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../../../test/http-mock';
+import { partial } from '../../../../../../test/util';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -6,7 +7,7 @@ import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
-const upgrade: BranchUpgradeConfig = {
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   endpoint: 'https://gitlab.com/api/v4/ ',
@@ -26,7 +27,7 @@ const upgrade: BranchUpgradeConfig = {
     { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
     { version: '5.6.1' },
   ],
-};
+});
 
 const matchHost = 'https://gitlab.com/';
 
