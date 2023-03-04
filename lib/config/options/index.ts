@@ -1232,6 +1232,7 @@ const options: RenovateOptions[] = [
       'lockFileMaintenance',
       'rollback',
       'bump',
+      'replacement',
     ],
     allowString: true,
     stage: 'package',
