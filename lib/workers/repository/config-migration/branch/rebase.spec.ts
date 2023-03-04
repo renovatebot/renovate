@@ -43,7 +43,7 @@ describe('workers/repository/config-migration/branch/rebase', () => {
     const migratedConfigData: MigratedData = {
       content: '',
       filename: '',
-      indent: partial<Indent>({}),
+      indent: partial<Indent>(),
     };
 
     beforeEach(() => {

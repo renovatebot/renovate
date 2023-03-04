@@ -108,7 +108,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -150,7 +150,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -192,7 +192,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
     mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json
       .mockResolvedValue('lockfileVersion: 5.3\n'); // pnpm-lock.yaml

@@ -24,7 +24,7 @@ describe('workers/repository/config-migration/index', () => {
     mockedFunction(MigratedDataFactory.getAsync).mockResolvedValue({
       filename,
       content,
-      indent: partial<Indent>({}),
+      indent: partial<Indent>(),
     });
   });
 

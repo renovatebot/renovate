@@ -10,7 +10,7 @@ import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
-const upgrade: BranchUpgradeConfig = {
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   depName: 'renovate',
@@ -31,7 +31,7 @@ const upgrade: BranchUpgradeConfig = {
     { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
     { version: '2.5.2' },
   ],
-};
+});
 
 describe('workers/repository/update/pr/changelog/github', () => {
   afterEach(() => {
@@ -369,7 +369,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         ])
       );
 
-      const upgradeData: BranchUpgradeConfig = {
+      const upgradeData = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: '',
         depName: 'correctPrefix/target',
@@ -382,7 +382,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '1.0.1', gitRef: '123456' },
           { version: '0.1.1', gitRef: 'npm_1.0.0' },
         ],
-      };
+      });
       expect(
         await getChangeLogJSON({
           ...upgradeData,

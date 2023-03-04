@@ -499,7 +499,7 @@ export function massageMarkdown(input: string): string {
       'by renaming this PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -511,8 +511,6 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  const description = massageMarkdown(sanitize(body));
-
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
@@ -521,6 +519,8 @@ export async function ensureIssue({
   }
   try {
     let issues = await findOpenIssues(title);
+    const description = massageMarkdown(sanitize(body));
+
     if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
     }
@@ -530,6 +530,7 @@ export async function ensureIssue({
         await closeIssue(issue.id);
       }
       const [issue] = issues;
+
       if (
         issue.title !== title ||
         String(issue.content?.raw).trim() !== description.trim()

@@ -145,16 +145,20 @@ describe('modules/datasource/packagist/index', () => {
       const packagesJson = {
         packages: [],
         includes: {
-          'include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json': {
-            sha1: 'afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b',
-          },
+          'include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json':
+            {
+              sha256:
+                '093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86',
+            },
         },
       };
       httpMock
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesJson)
-        .get('/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json')
+        .get(
+          '/include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json'
+        )
         .reply(200, includesJson);
       const res = await getPkgReleases({
         ...config,

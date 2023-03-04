@@ -1,3 +1,4 @@
+import type { z } from 'zod';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
@@ -8,15 +9,14 @@ import { joinUrlParts, resolveBaseUrl } from '../../../util/url';
 import * as composerVersioning from '../../versioning/composer';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import * as schema from './schema';
-import { extractDepReleases } from './schema';
-import type {
-  AllPackages,
-  PackageMeta,
+import {
+  PackagesResponse,
   PackagistFile,
   RegistryFile,
   RegistryMeta,
-} from './types';
+  extractDepReleases,
+  parsePackagesResponses,
+} from './schema';
 
 export class PackagistDatasource extends Datasource {
   static readonly id = 'packagist';
@@ -40,46 +40,23 @@ export class PackagistDatasource extends Datasource {
     return username && password ? { username, password } : {};
   }
 
-  private async getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-    const url = resolveBaseUrl(regUrl, 'packages.json');
+  private async getJson<T, U extends z.ZodSchema<T>>(
+    url: string,
+    schema: U
+  ): Promise<z.infer<typeof schema>> {
     const opts = PackagistDatasource.getHostOpts(url);
-    const res = (await this.http.getJson<PackageMeta>(url, opts)).body;
-    const meta: RegistryMeta = {
-      providerPackages: {},
-      packages: res.packages,
-    };
-    if (res.includes) {
-      meta.includesFiles = [];
-      for (const [name, val] of Object.entries(res.includes)) {
-        const file = {
-          key: name.replace(val.sha256, '%hash%'),
-          sha256: val.sha256,
-        };
-        meta.includesFiles.push(file);
-      }
-    }
-    if (res['providers-url']) {
-      meta.providersUrl = res['providers-url'];
-    }
-    if (res['providers-lazy-url']) {
-      meta.providersLazyUrl = res['providers-lazy-url'];
-    }
-    if (res['provider-includes']) {
-      meta.files = [];
-      for (const [key, val] of Object.entries(res['provider-includes'])) {
-        const file = {
-          key,
-          sha256: val.sha256,
-        };
-        meta.files.push(file);
-      }
-    }
-    if (res.providers) {
-      for (const [key, val] of Object.entries(res.providers)) {
-        meta.providerPackages[key] = val.sha256;
-      }
-    }
-    return meta;
+    const { body } = await this.http.getJson(url, opts);
+    return schema.parse(body);
+  }
+
+  @cache({
+    namespace: `datasource-${PackagistDatasource.id}`,
+    key: (regUrl: string) => `getRegistryMeta:${regUrl}`,
+  })
+  async getRegistryMeta(regUrl: string): Promise<RegistryMeta> {
+    const url = resolveBaseUrl(regUrl, 'packages.json');
+    const result = await this.getJson(url, RegistryMeta);
+    return result;
   }
 
   private static isPrivatePackage(regUrl: string): boolean {
@@ -110,66 +87,30 @@ export class PackagistDatasource extends Datasource {
     regFile: RegistryFile
   ): Promise<PackagistFile> {
     const url = PackagistDatasource.getPackagistFileUrl(regUrl, regFile);
-    const opts = PackagistDatasource.getHostOpts(regUrl);
-    const { body: packagistFile } = await this.http.getJson<PackagistFile>(
-      url,
-      opts
-    );
+    const packagistFile = await this.getJson(url, PackagistFile);
     return packagistFile;
   }
 
-  @cache({
-    namespace: `datasource-${PackagistDatasource.id}`,
-    key: (regUrl: string) => regUrl,
-  })
-  async getAllPackages(regUrl: string): Promise<AllPackages | null> {
-    const registryMeta = await this.getRegistryMeta(regUrl);
-    // istanbul ignore if: needs test
-    if (!registryMeta) {
-      return null;
-    }
+  async fetchProviderPackages(
+    regUrl: string,
+    meta: RegistryMeta
+  ): Promise<void> {
+    await p.map(meta.files, async (file) => {
+      const res = await this.getPackagistFile(regUrl, file);
+      Object.assign(meta.providerPackages, res.providers);
+    });
+  }
 
-    const {
-      packages,
-      providersUrl,
-      providersLazyUrl,
-      files = [],
-      includesFiles = [],
-      providerPackages,
-    } = registryMeta;
-
-    const includesPackages: Record<string, ReleaseResult | null> = {};
-
-    const tasks: (() => Promise<void>)[] = [];
-
-    for (const file of files) {
-      tasks.push(async () => {
-        const res = await this.getPackagistFile(regUrl, file);
-        for (const [name, val] of Object.entries(res.providers)) {
-          providerPackages[name] = val.sha256;
-        }
-      });
-    }
-
-    for (const file of includesFiles) {
-      tasks.push(async () => {
-        const res = await this.getPackagistFile(regUrl, file);
-        for (const [key, val] of Object.entries(res.packages ?? {})) {
-          includesPackages[key] = extractDepReleases(val);
-        }
-      });
-    }
-
-    await p.all(tasks);
-
-    const allPackages: AllPackages = {
-      packages,
-      providersUrl,
-      providersLazyUrl,
-      providerPackages,
-      includesPackages,
-    };
-    return allPackages;
+  async fetchIncludesPackages(
+    regUrl: string,
+    meta: RegistryMeta
+  ): Promise<void> {
+    await p.map(meta.includesFiles, async (file) => {
+      const res = await this.getPackagistFile(regUrl, file);
+      for (const [key, val] of Object.entries(res.packages)) {
+        meta.includesPackages[key] = extractDepReleases(val);
+      }
+    });
   }
 
   @cache({
@@ -184,7 +125,34 @@ export class PackagistDatasource extends Datasource {
     const results = await p.map([pkgUrl, devUrl], (url) =>
       this.http.getJson(url).then(({ body }) => body)
     );
-    return schema.parsePackagesResponses(name, results);
+    return parsePackagesResponses(name, results);
+  }
+
+  public getPkgUrl(
+    packageName: string,
+    registryUrl: string,
+    registryMeta: RegistryMeta
+  ): string | null {
+    if (
+      registryMeta.providersUrl &&
+      packageName in registryMeta.providerPackages
+    ) {
+      let url = registryMeta.providersUrl.replace('%package%', packageName);
+      const hash = registryMeta.providerPackages[packageName];
+      if (hash) {
+        url = url.replace('%hash%', hash);
+      }
+      return resolveBaseUrl(registryUrl, url);
+    }
+
+    if (registryMeta.providersLazyUrl) {
+      return resolveBaseUrl(
+        registryUrl,
+        registryMeta.providersLazyUrl.replace('%package%', packageName)
+      );
+    }
+
+    return null;
   }
 
   public override async getReleases({
@@ -203,46 +171,27 @@ export class PackagistDatasource extends Datasource {
         const packagistResult = await this.packagistOrgLookup(packageName);
         return packagistResult;
       }
-      const allPackages = await this.getAllPackages(registryUrl);
-      // istanbul ignore if: needs test
-      if (!allPackages) {
+
+      const meta = await this.getRegistryMeta(registryUrl);
+
+      if (meta.packages[packageName]) {
+        const result = extractDepReleases(meta.packages[packageName]);
+        return result;
+      }
+
+      await this.fetchIncludesPackages(registryUrl, meta);
+      if (meta.includesPackages[packageName]) {
+        return meta.includesPackages[packageName];
+      }
+
+      await this.fetchProviderPackages(registryUrl, meta);
+      const pkgUrl = this.getPkgUrl(packageName, registryUrl, meta);
+      if (!pkgUrl) {
         return null;
       }
-      const {
-        packages,
-        providersUrl,
-        providersLazyUrl,
-        providerPackages,
-        includesPackages,
-      } = allPackages;
-      if (packages?.[packageName]) {
-        const dep = extractDepReleases(packages[packageName]);
-        return dep;
-      }
-      if (includesPackages?.[packageName]) {
-        return includesPackages[packageName];
-      }
-      let pkgUrl: string;
-      if (packageName in providerPackages) {
-        pkgUrl = resolveBaseUrl(
-          registryUrl,
-          providersUrl!
-            .replace('%package%', packageName)
-            .replace('%hash%', providerPackages[packageName])
-        );
-      } else if (providersLazyUrl) {
-        pkgUrl = resolveBaseUrl(
-          registryUrl,
-          providersLazyUrl.replace('%package%', packageName)
-        );
-      } else {
-        return null;
-      }
-      const opts = PackagistDatasource.getHostOpts(registryUrl);
-      // TODO: fix types (#9610)
-      const versions = (await this.http.getJson<any>(pkgUrl, opts)).body
-        .packages[packageName];
-      const dep = extractDepReleases(versions);
+
+      const pkgRes = await this.getJson(pkgUrl, PackagesResponse);
+      const dep = extractDepReleases(pkgRes.packages[packageName]);
       logger.trace({ dep }, 'dep');
       return dep;
     } catch (err) /* istanbul ignore next */ {

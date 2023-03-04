@@ -307,7 +307,7 @@ describe('workers/repository/process/write', () => {
           ],
         },
       ];
-      const repoCacheObj = partial<RepoCacheData>({});
+      const repoCacheObj = partial<RepoCacheData>();
       repoCache.getCache.mockReturnValueOnce(repoCacheObj);
       branchWorker.processBranch.mockResolvedValueOnce({
         branchExists: true,
@@ -377,7 +377,7 @@ describe('workers/repository/process/write', () => {
 
   describe('syncBranchState()', () => {
     it('creates minimal branch state when cache is not populated', () => {
-      const repoCacheObj = partial<RepoCacheData>({});
+      const repoCacheObj = partial<RepoCacheData>();
       repoCache.getCache.mockReturnValue(repoCacheObj);
       scm.getBranchCommit.mockResolvedValueOnce('sha');
       scm.getBranchCommit.mockResolvedValueOnce('base_sha');

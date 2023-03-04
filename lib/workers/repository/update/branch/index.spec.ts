@@ -108,7 +108,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'renovate/some-branch',
         errors: [],
         warnings: [],
-        upgrades: [partial<BranchUpgradeConfig>({ depName: 'some-dep-name' })],
+        upgrades: partial<BranchUpgradeConfig>([{ depName: 'some-dep-name' }]),
       } as BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test');
@@ -185,12 +185,12 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if not stabilityDays not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
-      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+      config.upgrades = partial<BranchUpgradeConfig>([
         {
           releaseTimestamp: '2099-12-31',
           stabilityDays: 1,
         },
-      ];
+      ]);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: false,
@@ -221,11 +221,11 @@ describe('workers/repository/update/branch/index', () => {
     it('processes branch if minimumConfidence is met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
-      (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
+      config.upgrades = partial<BranchUpgradeConfig>([
         {
           minimumConfidence: 'high',
         },
-      ];
+      ]);
       mergeConfidence.isActiveConfidenceLevel.mockReturnValue(true);
       mergeConfidence.satisfiesConfidenceLevel.mockReturnValueOnce(true);
       const res = await branchWorker.processBranch(config);
@@ -557,12 +557,12 @@ describe('workers/repository/update/branch/index', () => {
     it('returns if branch automerged', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -575,12 +575,12 @@ describe('workers/repository/update/branch/index', () => {
     it('returns if branch automerged and no checks', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(false);
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO: not needed?
@@ -596,12 +596,12 @@ describe('workers/repository/update/branch/index', () => {
     it('returns if branch automerged (dry-run)', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -616,12 +616,12 @@ describe('workers/repository/update/branch/index', () => {
     it('returns if branch exists and prCreation set to approval', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -642,12 +642,12 @@ describe('workers/repository/update/branch/index', () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -668,12 +668,12 @@ describe('workers/repository/update/branch/index', () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -694,12 +694,12 @@ describe('workers/repository/update/branch/index', () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -720,12 +720,12 @@ describe('workers/repository/update/branch/index', () => {
       expect.assertions(1);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -746,12 +746,12 @@ describe('workers/repository/update/branch/index', () => {
       expect.assertions(3);
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       const inconfig = {
         ...config,
@@ -777,18 +777,18 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR and tries automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -801,18 +801,18 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR when impossible to automerge', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('stale');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: false });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -828,7 +828,7 @@ describe('workers/repository/update/branch/index', () => {
 
     it('skips when automerge is off schedule', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
-        partial<PackageFilesResult>({})
+        partial<PackageFilesResult>()
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce(
         partial<WriteExistingFilesResult>({
@@ -864,18 +864,18 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR and adds lock file error comment if no releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -888,18 +888,18 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR and adds lock file error comment if old releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = '2018-04-26T05:15:51.877Z';
@@ -913,18 +913,18 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR and adds lock file error comment if new releaseTimestamp and branch exists', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
@@ -938,18 +938,18 @@ describe('workers/repository/update/branch/index', () => {
     it('throws error if lock file errors and new releaseTimestamp', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       config.releaseTimestamp = new Date().toISOString();
@@ -961,19 +961,19 @@ describe('workers/repository/update/branch/index', () => {
     it('ensures PR and adds lock file error comment recreate closed', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       config.recreateClosed = true;
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       prAutomerge.checkAutoMerge.mockResolvedValueOnce({ automerged: true });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
@@ -999,12 +999,12 @@ describe('workers/repository/update/branch/index', () => {
     it('throws and swallows branch errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [partial<ArtifactError>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO:not needed?
       const processBranchResult = await branchWorker.processBranch(config);
@@ -1020,12 +1020,12 @@ describe('workers/repository/update/branch/index', () => {
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
@@ -1089,13 +1089,13 @@ describe('workers/repository/update/branch/index', () => {
         },
       });
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [partial<FileChange>({})],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedPackageFiles: [partial<FileChange>()],
+        updatedArtifacts: [partial<FileChange>()],
         artifactErrors: [{}],
       });
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(pr);
@@ -1130,7 +1130,7 @@ describe('workers/repository/update/branch/index', () => {
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -1147,7 +1147,7 @@ describe('workers/repository/update/branch/index', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({
         type: 'with-pr',
-        pr: partial<Pr>({}),
+        pr: partial<Pr>(),
       });
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       GlobalConfig.set({ ...adminConfig, dryRun: 'full' });
@@ -1171,14 +1171,14 @@ describe('workers/repository/update/branch/index', () => {
     it('branch pr no schedule', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -1212,14 +1212,14 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch update if stopUpdatingLabel presents', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -1276,14 +1276,14 @@ describe('workers/repository/update/branch/index', () => {
     it('updates branch if stopUpdatingLabel presents and PR rebase/retry box checked', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -1318,14 +1318,14 @@ describe('workers/repository/update/branch/index', () => {
     it('updates branch if stopUpdatingLabel presents and dependency dashboard box checked', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [],
           updatedArtifacts: [],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -1597,15 +1597,14 @@ describe('workers/repository/update/branch/index', () => {
           fileFilters: ['modified_file', 'deleted_file'],
         },
         upgrades: [
-          {
-            ...getConfig(),
+          partial<BranchUpgradeConfig>({
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
-          } as BranchUpgradeConfig,
+          }),
         ],
       } as BranchConfig;
       const result = await branchWorker.processBranch(inconfig);
@@ -1705,9 +1704,8 @@ describe('workers/repository/update/branch/index', () => {
             'modified_then_deleted_file',
           ],
         },
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
-            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1719,9 +1717,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
+          },
           {
-            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'update',
@@ -1733,8 +1730,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
-        ],
+          },
+        ]),
       };
 
       const result = await branchWorker.processBranch(inconfig);
@@ -1856,9 +1853,8 @@ describe('workers/repository/update/branch/index', () => {
             'modified_then_deleted_file',
           ],
         },
-        upgrades: [
+        upgrades: partial<BranchUpgradeConfig>([
           {
-            ...getConfig(),
             depName: 'some-dep-name-1',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1870,9 +1866,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
+          },
           {
-            ...getConfig(),
             depName: 'some-dep-name-2',
             postUpgradeTasks: {
               executionMode: 'branch',
@@ -1884,8 +1879,8 @@ describe('workers/repository/update/branch/index', () => {
                 'modified_then_deleted_file',
               ],
             },
-          } as BranchUpgradeConfig,
-        ],
+          },
+        ]),
       };
 
       const result = await branchWorker.processBranch(inconfig);
@@ -2020,13 +2015,13 @@ describe('workers/repository/update/branch/index', () => {
     it('Dependency Dashboard All Pending approval', async () => {
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -2057,13 +2052,13 @@ describe('workers/repository/update/branch/index', () => {
     it('Dependency Dashboard open all rate-limited', async () => {
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
         })
       );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       scm.branchExists.mockResolvedValue(true);
       platform.getBranchPr.mockResolvedValueOnce(
@@ -2094,7 +2089,7 @@ describe('workers/repository/update/branch/index', () => {
     it('continues branch, skips automerge if there are artifact errors', async () => {
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
           artifactErrors: [{}],
         })
       );
@@ -2124,7 +2119,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.getBranchCommit.mockResolvedValueOnce('123test');
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [partial<FileChange>({})],
+        updatedArtifacts: [partial<FileChange>()],
       });
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -2133,7 +2128,7 @@ describe('workers/repository/update/branch/index', () => {
       );
       jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
         partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>({})],
+          updatedPackageFiles: [partial<FileChange>()],
         })
       );
       const inconfig = {
