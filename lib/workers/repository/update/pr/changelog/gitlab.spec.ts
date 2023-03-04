@@ -11,7 +11,7 @@ const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   endpoint: 'https://gitlab.com/api/v4/ ',
-  depName: 'renovate',
+  packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
   newVersion: '5.7.0',
@@ -85,7 +85,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -127,7 +127,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -162,7 +162,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -197,7 +197,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -266,7 +266,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab-enterprise.example.com/api/v4/',
           baseUrl: 'https://gitlab-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
@@ -301,7 +301,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://git.test.com/api/v4/',
           baseUrl: 'https://git.test.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
@@ -339,7 +339,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://git.test.com/api/v4/',
           baseUrl: 'https://git.test.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'replacement/sourceurl',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/replacement/sourceurl/',
