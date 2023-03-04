@@ -6,6 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
+import type { Registry } from './types';
 import * as util from './util';
 import * as nuget from '.';
 
@@ -424,7 +425,7 @@ describe('modules/manager/nuget/artifacts', () => {
         name: 'myRegistry2',
         url: 'https://my-registry2.example.org',
       },
-    ] as never);
+    ] satisfies Registry[]);
     hostRules.find.mockImplementation((search) => {
       if (search.hostType === 'nuget') {
         if (search.url === 'https://my-registry.example.org') {
