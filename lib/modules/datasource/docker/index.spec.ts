@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
+import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
 import {
@@ -1194,8 +1195,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
-      const tags1: string[] = [...Array(10000)].map((_, i) => `${i}.0.0`);
-      const tags2: string[] = [...Array(50)].map((_, i) => `${i + 10000}.0.0`);
+      const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
@@ -1224,7 +1225,7 @@ describe('modules/datasource/docker/index', () => {
         )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/10049.0.0')
+        .get('/virtual-mirror/node/manifests/10050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
