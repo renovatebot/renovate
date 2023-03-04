@@ -1178,7 +1178,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect(res.updates).toHaveLength(0);
       expect(res.warnings).toHaveLength(1);
       expect(res.warnings[0].message).toBe(
-        "Can't find version with tag foo for typescript"
+        "Can't find version with tag foo for npm package typescript"
       );
     });
 

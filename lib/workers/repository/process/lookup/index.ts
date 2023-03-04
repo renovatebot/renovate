@@ -81,7 +81,7 @@ export async function lookupUpdates(
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
           topic: packageName,
-          message: `Failed to look up ${datasource} dependency ${packageName}`,
+          message: `Failed to look up ${datasource} package ${packageName}`,
         };
         logger.debug({ dependency: packageName, packageFile }, warning.message);
         // TODO: return warnings in own field
@@ -89,7 +89,9 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug(`Found deprecationMessage for dependency ${packageName}`);
+        logger.debug(
+          `Found deprecationMessage for ${datasource} package ${packageName}`
+        );
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -123,7 +125,7 @@ export async function lookupUpdates(
         if (!taggedVersion) {
           res.warnings.push({
             topic: packageName,
-            message: `Can't find version with tag ${followTag} for ${packageName}`,
+            message: `Can't find version with tag ${followTag} for ${datasource} package ${packageName}`,
           });
           return res;
         }
@@ -147,7 +149,7 @@ export async function lookupUpdates(
           res.warnings.push({
             topic: packageName,
             // TODO: types (#7154)
-            message: `Can't find version matching ${currentValue!} for ${packageName}`,
+            message: `Can't find version matching ${currentValue!} for ${datasource} package ${packageName}`,
           });
           return res;
         }
@@ -326,7 +328,7 @@ export async function lookupUpdates(
       }
     } else if (currentValue) {
       logger.debug(
-        `Dependency ${packageName} has unsupported value ${currentValue}`
+        `Dependency ${packageName} has unsupported/unversioned value ${currentValue} (versioning=${config.versioning})`
       );
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
