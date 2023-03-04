@@ -27,16 +27,16 @@ Indirect updates are disabled by default. To enable them, add a package rule suc
 
 ### Private Modules Authentication
 
-Before executing `go` commands to update the `go.sum`, Renovate will export `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
+Before running the `go` commands to update the `go.sum`, Renovate exports `git` [`insteadOf`](https://git-scm.com/docs/git-config#Documentation/git-config.txt-urlltbasegtinsteadOf) directives in environment variables.
 
 The following logic is executed prior to "artifacts" updating:
 
 The token from the `hostRules` entry matching `hostType=github` and `matchHost=api.github.com` is added as the default authentication for `github.com`.
 For those running against `github.com`, this will be the default platform token.
 
-Next, all hostRules with both a token and matchHost will be fetched, except for any github.com one from above.
+Next, all `hostRules` with both a token and `matchHost` will be fetched, except for any github.com one from above.
 
 Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
- - No hostType is defined, or
+ - No `hostType` is defined, or
  - `hostType` is `go`, or
- - hostType is a platform (`github`, `gitlab`, `azure`, etc.)
+ - `hostType` is a platform (`github`, `gitlab`, `azure`, etc.)
