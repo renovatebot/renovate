@@ -2,7 +2,6 @@ import type { Merge } from 'type-fest';
 import type {
   GroupConfig,
   LegacyAdminConfig,
-  RegExManager,
   RenovateConfig,
   RenovateSharedConfig,
   ValidationMessage,
@@ -39,6 +38,7 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+  depIndex?: number;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
@@ -135,6 +135,7 @@ export interface BranchMetadata {
   baseBranchSha?: string | null;
   automerge: boolean;
   isModified?: boolean;
+  isPristine?: boolean;
 }
 
 export interface BaseBranchMetadata {
@@ -153,11 +154,8 @@ export interface WorkerExtractConfig extends ExtractConfig {
   manager: string;
   fileList: string[];
   fileMatch?: string[];
-  updateInternalDeps?: boolean;
   includePaths?: string[];
   ignorePaths?: string[];
-  regexManagers?: RegExManager[];
-  enabledManagers?: string[];
   enabled?: boolean;
 }
 
@@ -188,4 +186,9 @@ export interface UpgradeFingerprintConfig {
   newVersion?: string;
   packageFile?: string;
   replaceString?: string;
+}
+
+export interface ExtractResult {
+  extractionFingerprints: Record<string, string | undefined>;
+  packageFiles: Record<string, PackageFile[]>;
 }

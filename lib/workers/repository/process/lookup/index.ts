@@ -5,6 +5,7 @@ import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import {
   Release,
+  ReleaseResult,
   getDatasourceList,
   getDefaultVersioning,
   getDigest,
@@ -19,7 +20,6 @@ import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
-import { mergeConfigConstraints } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
@@ -45,6 +45,7 @@ export async function lookupUpdates(
     isVulnerabilityAlert,
     updatePinnedDependencies,
   } = config;
+  let dependency: ReleaseResult | null = null;
   const unconstrainedValue = !!lockedVersion && is.undefined(currentValue);
   const res: UpdateResult = {
     updates: [],
@@ -75,9 +76,7 @@ export async function lookupUpdates(
         return res;
       }
 
-      config = mergeConfigConstraints(config);
-
-      const dependency = clone(await getPkgReleases(config));
+      dependency = clone(await getPkgReleases(config));
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
@@ -95,6 +94,7 @@ export async function lookupUpdates(
       }
 
       res.sourceUrl = dependency?.sourceUrl;
+      res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
       if (dependency.sourceDirectory) {
         res.sourceDirectory = dependency.sourceDirectory;
       }
@@ -225,6 +225,10 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
+      if (rangeStrategy === 'pin') {
+        // Fall back to replace once pinning logic is done
+        rangeStrategy = 'replace';
+      }
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -245,7 +249,7 @@ export async function lookupUpdates(
           // Leave only compatible versions
           unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
-      if (isVulnerabilityAlert) {
+      if (isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};
@@ -377,6 +381,38 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+
+          // If the digest could not be determined, report this as otherwise the
+          // update will be omitted later on without notice.
+          if (update.newDigest === null) {
+            logger.debug(
+              {
+                depName,
+                currentValue,
+                datasource,
+                newValue: update.newValue,
+                bucket: update.bucket,
+              },
+              'Could not determine new digest for update.'
+            );
+
+            // Only report a warning if there is a current digest.
+            // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
+            if (currentDigest) {
+              res.warnings.push({
+                message: `Could not determine new digest for update (datasource: ${datasource})`,
+                topic: depName,
+              });
+            }
+          }
+        }
+        if (update.newVersion) {
+          const registryUrl = dependency?.releases?.find(
+            (release) => release.version === update.newVersion
+          )?.registryUrl;
+          if (registryUrl && registryUrl !== res.registryUrl) {
+            update.registryUrl = registryUrl;
+          }
         }
       }
     }
@@ -385,6 +421,7 @@ export async function lookupUpdates(
     }
     // Strip out any non-changed ones
     res.updates = res.updates
+      .filter((update) => update.newValue !== null || currentValue === null)
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>

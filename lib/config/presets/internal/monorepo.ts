@@ -7,6 +7,10 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
+  'algolia-instantsearch': [
+    'https://github.com/algolia/instantsearch',
+    'https://github.com/algolia/instantsearch.js',
+  ],
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
@@ -36,6 +40,8 @@ const repoGroups = {
     'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
   ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-lambda-powertools-typescript':
+    'https://github.com/awslabs/aws-lambda-powertools-typescript',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -95,6 +101,7 @@ const repoGroups = {
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   graphqlcodegenerator: [
+    'https://github.com/dotansimha/graphql-code-generator-community',
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
@@ -122,6 +129,7 @@ const repoGroups = {
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   mailing: 'https://github.com/sofn-xyz/mailing',
+  mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -132,6 +140,7 @@ const repoGroups = {
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
+  'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
@@ -151,6 +160,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nextra: 'https://github.com/shuding/nextra',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
@@ -214,6 +224,9 @@ const repoGroups = {
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
+  'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-java':
+    'https://github.com/testcontainers/testcontainers-java',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
@@ -222,6 +235,7 @@ const repoGroups = {
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
   vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
@@ -245,6 +259,8 @@ const orgGroups = {
   'semantic-release': 'https://github.com/semantic-release/',
 };
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'apache-camel': '^org.apache.camel:',
@@ -255,6 +271,8 @@ const patternGroups = {
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft\\/sp-', '^@microsoft\\/eslint-.+-spfx$'],
+  spock: '^org\\.spockframework:spock-',
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 

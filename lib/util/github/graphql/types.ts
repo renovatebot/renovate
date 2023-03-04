@@ -59,57 +59,21 @@ export interface GithubPackageConfig {
 }
 
 /**
- * GraphQL shape for releases
- */
-export interface GithubGraphqlRelease {
-  version: string;
-  releaseTimestamp: string;
-  isDraft: boolean;
-  isPrerelease: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
  * Result of GraphQL response transformation for releases (via adapter)
  */
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
- * GraphQL shape for tags
- */
-export interface GithubGraphqlTag {
-  version: string;
-  target:
-    | {
-        type: 'Commit';
-        newDigest: string;
-        releaseTimestamp: string;
-      }
-    | {
-        type: 'Tag';
-        target: {
-          newDigest: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
-      };
+  id?: number;
+  name?: string;
+  description?: string;
 }
 
 /**
  * Result of GraphQL response transformation for tags (via tags)
  */
 export interface GithubTagItem extends GithubDatasourceItem {
-  newDigest: string;
+  hash: string;
   gitRef: string;
 }
 
@@ -121,4 +85,19 @@ export interface GithubGraphqlRepoParams {
   name: string;
   cursor: string | null;
   count: number;
+}
+
+export interface GithubGraphqlCacheRecord<
+  GithubItem extends GithubDatasourceItem
+> {
+  items: Record<string, GithubItem>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GithubGraphqlCacheStrategy<
+  GithubItem extends GithubDatasourceItem
+> {
+  reconcile(items: GithubItem[]): Promise<boolean>;
+  finalize(): Promise<GithubItem[]>;
 }

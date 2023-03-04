@@ -28,6 +28,7 @@ import { api as semverCoerced } from '../../modules/versioning/semver-coerced';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import type { GitProtocol } from '../../types/git';
 import { incLimitedValue } from '../../workers/global/limits';
+import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
 import { getCachedBehindBaseResult } from './behind-base-branch-cache';
@@ -51,6 +52,7 @@ import type {
   CommitResult,
   CommitSha,
   LocalConfig,
+  PushFilesConfig,
   StatusResult,
   StorageConfig,
   TreeItem,
@@ -226,6 +228,10 @@ async function fetchBranchCommits(): Promise<void> {
     }
     throw err;
   }
+}
+
+export async function fetchRevSpec(revSpec: string): Promise<void> {
+  await gitRetry(() => git.fetch(['origin', revSpec]));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -460,6 +466,7 @@ export async function syncGit(): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit');
   }
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+  delete getCache()?.semanticCommits;
 }
 
 // istanbul ignore next
@@ -493,7 +500,7 @@ export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
-    n: 10,
+    n: 20,
     format: { message: '%s' },
   });
   return res.all.map((commit) => commit.message);
@@ -503,11 +510,9 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   logger.debug(`Setting current branch to ${branchName}`);
   await syncGit();
   try {
-    config.currentBranch = branchName;
-    config.currentBranchSha = (
-      await git.raw(['rev-parse', 'origin/' + branchName])
-    ).trim();
     await gitRetry(() => git.checkout(['-f', branchName, '--']));
+    config.currentBranch = branchName;
+    config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
     const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
@@ -703,6 +708,7 @@ export async function isBranchConflicted(
   const origBranch = config.currentBranch;
   try {
     await git.reset(ResetMode.HARD);
+    //TODO: see #18600
     if (origBranch !== baseBranch) {
       await git.checkout(baseBranch);
     }
@@ -853,10 +859,25 @@ export async function getFile(
   }
 }
 
-export async function hasDiff(branchName: string): Promise<boolean> {
+export async function getFiles(
+  fileNames: string[]
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = await getFile(fileName);
+  }
+
+  return fileContentMap;
+}
+
+export async function hasDiff(
+  sourceRef: string,
+  targetRef: string
+): Promise<boolean> {
   await syncGit();
   try {
-    return (await gitRetry(() => git.diff(['HEAD', branchName]))) !== '';
+    return (await gitRetry(() => git.diff([sourceRef, targetRef]))) !== '';
   } catch (err) {
     return true;
   }
@@ -983,7 +1004,7 @@ export async function prepareCommit({
       { deletedFiles, ignoredFiles, result: commitRes },
       `git commit`
     );
-    if (!force && !(await hasDiff(`origin/${branchName}`))) {
+    if (!force && !(await hasDiff('HEAD', `origin/${branchName}`))) {
       logger.debug(
         { branchName, deletedFiles, addedModifiedFiles, ignoredFiles },
         'No file changes detected. Skipping commit'
@@ -1010,11 +1031,12 @@ export async function prepareCommit({
 }
 
 export async function pushCommit({
-  branchName,
+  sourceRef,
+  targetRef,
   files,
-}: CommitFilesConfig): Promise<boolean> {
+}: PushFilesConfig): Promise<boolean> {
   await syncGit();
-  logger.debug(`Pushing branch ${branchName}`);
+  logger.debug(`Pushing refSpec ${sourceRef}:${targetRef ?? sourceRef}`);
   let result = false;
   try {
     const pushOptions: TaskOptions = {
@@ -1026,14 +1048,14 @@ export async function pushCommit({
     }
 
     const pushRes = await gitRetry(() =>
-      git.push('origin', `${branchName}:${branchName}`, pushOptions)
+      git.push('origin', `${sourceRef}:${targetRef ?? sourceRef}`, pushOptions)
     );
     delete pushRes.repo;
     logger.debug({ result: pushRes }, 'git push');
     incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
-    handleCommitError(files, branchName, err);
+    handleCommitError(files, sourceRef, err);
   }
   return result;
 }
@@ -1062,7 +1084,10 @@ export async function commitFiles(
   try {
     const commitResult = await prepareCommit(commitConfig);
     if (commitResult) {
-      const pushResult = await pushCommit(commitConfig);
+      const pushResult = await pushCommit({
+        sourceRef: commitConfig.branchName,
+        files: commitConfig.files,
+      });
       if (pushResult) {
         const { branchName } = commitConfig;
         const { commitSha } = commitResult;
@@ -1188,11 +1213,16 @@ export async function clearRenovateRefs(): Promise<void> {
       /* istanbul ignore else */
       if (bulkChangesDisallowed(err)) {
         for (const ref of obsoleteRefs) {
-          const pushOpts = ['--delete', 'origin', ref];
-          await git.push(pushOpts);
+          try {
+            const pushOpts = ['--delete', 'origin', ref];
+            await git.push(pushOpts);
+          } catch (err) /* istanbul ignore next */ {
+            logger.debug({ err }, 'Error deleting obsolete refs');
+            break;
+          }
         }
       } else {
-        throw err;
+        logger.warn({ err }, 'Error deleting obsolete refs');
       }
     }
   }

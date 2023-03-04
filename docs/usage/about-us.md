@@ -2,7 +2,7 @@
 
 Renovate was created by [Mend](https://www.mend.io/) staff and they continue to work on Renovate.
 
-More than 650 outside contributors helped improve Renovate.
+More than 750 outside contributors helped improve Renovate.
 
 ## Special thanks
 
@@ -16,6 +16,7 @@ Renovate is maintained by:
 - [@rarkins](https://github.com/rarkins)
 - [@viceice](https://github.com/viceice)
 - [@JamieMagee](https://github.com/JamieMagee)
+- [@secustor](https://github.com/secustor)
 
 ### Maintainers for features
 

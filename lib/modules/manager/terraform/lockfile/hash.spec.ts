@@ -121,6 +121,9 @@ describe('modules/manager/terraform/lockfile/hash', () => {
     expect(log.error.mock.calls).toMatchSnapshot();
     expect(result).not.toBeNull();
     expect(result).toBeArrayOfSize(2);
-    expect(result).toMatchSnapshot();
+    expect(result).toMatchObject([
+      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+      'h1:I2F2atKZqKEOYk1tTLe15Llf9rVqxz48ZL1eZB9g8zM=',
+    ]);
   });
 });

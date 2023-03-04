@@ -19,7 +19,7 @@ describe('util/github/graphql/index', () => {
                   version: '1.2.3',
                   target: {
                     type: 'Tag',
-                    target: { newDigest: 'abc123' },
+                    target: { oid: 'abc123' },
                     tagger: { releaseTimestamp: '2022-09-24' },
                   },
                 },
@@ -34,7 +34,7 @@ describe('util/github/graphql/index', () => {
     expect(res).toEqual([
       {
         gitRef: '1.2.3',
-        newDigest: 'abc123',
+        hash: 'abc123',
         releaseTimestamp: '2022-09-24',
         version: '1.2.3',
       },
@@ -52,12 +52,14 @@ describe('util/github/graphql/index', () => {
             payload: {
               nodes: [
                 {
+                  version: '1.2.3',
+                  releaseTimestamp: '2024-09-24',
+                  isDraft: false,
+                  isPrerelease: false,
+                  url: 'https://example.com',
                   id: 123,
                   name: 'name',
                   description: 'description',
-                  version: '1.2.3',
-                  releaseTimestamp: '2024-09-24',
-                  url: 'https://example.com',
                 },
               ],
             },
@@ -69,12 +71,12 @@ describe('util/github/graphql/index', () => {
 
     expect(res).toEqual([
       {
-        id: 123,
-        name: 'name',
-        description: 'description',
         version: '1.2.3',
         releaseTimestamp: '2024-09-24',
         url: 'https://example.com',
+        id: 123,
+        name: 'name',
+        description: 'description',
       },
     ]);
   });

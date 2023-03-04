@@ -47,10 +47,6 @@ describe('modules/datasource/docker/index', () => {
     hostRules.hosts.mockReturnValue([]);
   });
 
-  afterEach(() => {
-    jest.resetAllMocks();
-  });
-
   describe('getRegistryRepository', () => {
     it('handles local registries', () => {
       const res = getRegistryRepository(
@@ -781,7 +777,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -855,7 +852,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests without media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1005,7 +1003,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles error while retrieving image config blob', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1058,24 +1057,31 @@ describe('modules/datasource/docker/index', () => {
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, { token: 'some-token' })
-        .head('/library/some-dep/manifests/some-digest')
+        .head(
+          '/library/some-dep/manifests/sha256:0101010101010101010101010101010101010101010101010101010101010101'
+        )
         .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
+        .head(
+          '/library/some-dep/manifests/sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa',
+          undefined,
+          {
+            badheaders: ['authorization'],
+          }
+        )
         .reply(401);
 
       const res = await getDigest(
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentDigest: 'some-digest',
+          currentDigest:
+            'sha256:0101010101010101010101010101010101010101010101010101010101010101',
         },
-        'some-new-value'
+        'sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa'
       );
       expect(res).toBeNull();
     });
@@ -1187,28 +1193,32 @@ describe('modules/datasource/docker/index', () => {
       await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
-      const tags = ['18.0.0'];
-      httpMock
-        .scope('https://org.jfrog.io/v2')
-        .get('/virtual-mirror/node/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/virtual-mirror/node/tags/list?n=10000')
-        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
-        .get('/virtual-mirror/library/node/tags/list?n=10000')
-        .reply(200, '', {})
-        .get('/virtual-mirror/library/node/tags/list?n=10000')
-        .reply(200, { tags }, {})
-        .get('/')
-        .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/18.0.0')
-        .reply(200, '', {});
-      const res = await getPkgReleases({
-        datasource: DockerDatasource.id,
-        depName: 'org.jfrog.io/virtual-mirror/node',
-      });
-      expect(res?.releases).toHaveLength(1);
-    });
+    it.each([[true], [false]])(
+      'jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image, abortOnError=%p',
+      async (abortOnError) => {
+        hostRules.find.mockReturnValue({ abortOnError });
+        const tags = ['18.0.0'];
+        httpMock
+          .scope('https://org.jfrog.io/v2')
+          .get('/virtual-mirror/node/tags/list?n=10000')
+          .reply(200, '', {})
+          .get('/virtual-mirror/node/tags/list?n=10000')
+          .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+          .get('/virtual-mirror/library/node/tags/list?n=10000')
+          .reply(200, '', {})
+          .get('/virtual-mirror/library/node/tags/list?n=10000')
+          .reply(200, { tags }, {})
+          .get('/')
+          .reply(200, '', {})
+          .get('/virtual-mirror/node/manifests/18.0.0')
+          .reply(200, '', {});
+        const res = await getPkgReleases({
+          datasource: DockerDatasource.id,
+          depName: 'org.jfrog.io/virtual-mirror/node',
+        });
+        expect(res?.releases).toHaveLength(1);
+      }
+    );
 
     it('uses lower tag limit for ECR deps', async () => {
       httpMock

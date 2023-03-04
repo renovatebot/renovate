@@ -6,6 +6,7 @@ import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
+import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -182,14 +183,13 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (releaseMatch.url && !baseUrl.includes('gitlab')) {
-    // there is a ready link
-    releaseNotes.url = releaseMatch.url;
+  if (detectPlatform(baseUrl) === 'gitlab') {
+    releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
   } else {
-    // TODO: types (#7154)
-    releaseNotes.url = baseUrl.includes('gitlab')
-      ? `${baseUrl}${repository}/tags/${releaseMatch.tag!}`
-      : `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
+    releaseNotes.url = releaseMatch.url
+      ? releaseMatch.url
+      : /* istanbul ignore next */
+        `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
@@ -419,14 +419,13 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   return 14495; // 5 minutes shy of 10 days
 }
 
-// TODO #7154 allow `null` and `undefined`
 export async function addReleaseNotes(
-  input: ChangeLogResult,
+  input: ChangeLogResult | null | undefined,
   config: BranchUpgradeConfig
-): Promise<ChangeLogResult> {
+): Promise<ChangeLogResult | null> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
-    return input;
+    return input ?? null;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
   const { repository, sourceDirectory } = input.project;

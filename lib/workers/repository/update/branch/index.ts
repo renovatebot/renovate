@@ -21,17 +21,11 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedDays } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import {
-  checkoutBranch,
-  deleteBranch,
-  getBranchCommit,
-  branchExists as gitBranchExists,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -64,7 +58,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
-    await deleteBranch(branchName);
+    await scm.deleteBranch(branchName);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
@@ -85,14 +79,14 @@ export async function processBranch(
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  let branchExists = gitBranchExists(config.branchName);
+  let branchExists = await scm.branchExists(config.branchName);
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
       config.branchPrefixOld!
     );
-    branchExists = gitBranchExists(branchName);
+    branchExists = await scm.branchExists(branchName);
     if (branchExists) {
       config.branchName = branchName;
       logger.debug('Found existing branch with branchPrefixOld');
@@ -195,7 +189,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -231,7 +225,7 @@ export async function processBranch(
             result: 'pr-edited',
           };
         }
-        const branchSha = getBranchCommit(config.branchName);
+        const branchSha = await scm.getBranchCommit(config.branchName);
         const oldPrSha = oldPr?.sha;
         if (!oldPrSha || oldPrSha === branchSha) {
           logger.debug(
@@ -477,7 +471,7 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch, config.branchName));
+        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs
@@ -504,6 +498,9 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+      // baseBranch is not checked out at the start of processBranch() due to pull/16246
+      await checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

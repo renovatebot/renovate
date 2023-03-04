@@ -128,5 +128,82 @@ This is because Handlebars escapes special characters with double braces (by def
 By adding `renovate: datasource=` and `depName=` comments to the `Dockerfile` you only need _one_ `regexManager` instead of _four_.
 The `Dockerfile` is documented better as well.
 
-The syntax in the example is arbitrary and you can set your own syntax.
+The syntax in the example is arbitrary, and you can set your own syntax.
 If you do, update your `matchStrings` regex!
+
+You can use simple versions of such comments to increase readability.
+
+For example the `appVersion` property in a `Chart.yaml` of a Helm chart is always referenced to an Docker image.
+In such scenarios, some values can be hard-coded.
+For example:
+
+```yaml
+apiVersion: v2
+name: amazon-eks-pod-identity-webhook
+description: A Kubernetes webhook for pods that need AWS IAM access
+version: 1.0.3
+type: application
+# renovate: image=amazon/amazon-eks-pod-identity-webhook
+appVersion: 'v0.4.0'
+```
+
+Using the `regexManagers` below, Renovate looks for available Docker tags of the image `amazon/amazon-eks-pod-identity-webhook`.
+
+```json
+{
+  "regexManagers": [
+    {
+      "datasourceTemplate": "docker",
+      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "matchStrings": [
+        "#\\s?renovate: image=(?<depName>.*?)\\s?appVersion:\\s?\\\"?(?<currentValue>[\\w+\\.\\-]*)\""
+      ]
+    }
+  ]
+}
+```
+
+### Using regexManager to update the dependency name in addition to version
+
+#### Updating `gitlab-ci include` dep names
+
+You can use the regex manager to update the `depName` and the version.
+This can be handy when the location of files referenced in gitlab-ci `includes:` fields has changed.
+
+You may need to set a second `matchString` for the new name to ensure the regex manager can detect the new value.
+For example:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": [".*y[a]?ml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+      ],
+      "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
+      "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",
+      "datasourceTemplate": "gitlab-tags",
+      "versioningTemplate": "gitlab-tags"
+    }
+  ]
+}
+```
+
+The config above will migrate:
+
+```yaml
+- project: 'pipeline-fragments/docker-lint'
+  ref: 2-4-0
+  file: 'ci-include-docker-lint-base.yml'
+```
+
+To this:
+
+```yaml
+- project: 'pipeline-solutions/gitlab/fragments/docker-lint'
+  ref: 2-4-1
+  file: 'ci-include-docker-lint-base.yml'
+```

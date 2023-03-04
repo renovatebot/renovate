@@ -3,6 +3,26 @@
 This document explains our best practices.
 Follow these best practices when you're working on our code.
 
+## Git branch names
+
+Branch names should start with a [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) scope like `feat/` or `fix/`.
+If you're closing an issue with your PR then put the issue number after that.
+Finally, add some short human-readable text to make it easier to identify.
+
+For example:
+
+- `feat/13732-cacache-cleanup`
+- `fix/15431-gitea-automerge-strategy`
+- `refactor/jest-reset-mocks`
+- `docs/rewrite-packageRules-section`
+
+Avoid branch names like `patch-1`.
+
+If you don't know the correct Conventional Commit scope: give your branch a descriptive name like `issue-1-feature-foo`.
+
+If you forgot to pick a good branch name when you started work, then rename the branch before creating the pull request.
+Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-branches-in-your-repository/renaming-a-branch) to learn how to rename your branch on GitHub.
+
 ## General
 
 - Prefer full function declarations for readability and better stack traces, so avoid `const func = ():void => {}`
@@ -12,6 +32,7 @@ Follow these best practices when you're working on our code.
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
+- Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts

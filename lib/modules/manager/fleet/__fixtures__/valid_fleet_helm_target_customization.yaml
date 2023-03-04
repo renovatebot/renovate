@@ -1,0 +1,40 @@
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: cert-manager
+  version: v1.8.0
+  values:
+    installCRDs: true
+targetCustomizations:
+  - name: rke2
+    helm:
+      version: "v1.9.2"
+---
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: custom-cert-manager
+  version: v1.8.0
+  values:
+    installCRDs: true
+targetCustomizations:
+  - name: cluster1
+    helm:
+      version: "v1.8.2"
+      repo: https://charts.example.com
+
+---
+defaultNamespace: cert-manager
+helm:
+  chart: cert-manager
+  repo: https://charts.jetstack.io
+  releaseName: custom-cert-manager
+  version: v1.8.0
+  values:
+    installCRDs: true
+targetCustomizations:
+  - name: cluster1
+    values:
+      some: customization
