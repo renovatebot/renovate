@@ -4,11 +4,14 @@ import {
   getConfig,
   git,
   mocked,
+  partial,
   platform,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
+import * as repoCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
+import type { RepoCacheData } from '../../../util/cache/repository/types';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -40,6 +43,18 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('returns config if not found', async () => {
+      git.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      expect(await detectRepoFileConfig()).toEqual({});
+    });
+
+    it('returns config if not found - uses cache', async () => {
+      jest
+        .spyOn(repoCache, 'getCache')
+        .mockReturnValueOnce(
+          partial<RepoCacheData>({ configFileName: 'renovate.json' })
+        );
+      platform.getRawFile.mockResolvedValueOnce(null);
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       expect(await detectRepoFileConfig()).toEqual({});
