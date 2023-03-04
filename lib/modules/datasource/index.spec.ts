@@ -107,10 +107,6 @@ jest.mock('./metadata-manual', () => ({
 }));
 
 describe('modules/datasource/index', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   afterEach(() => {
     datasources.delete(datasource);
   });
@@ -252,7 +248,7 @@ describe('modules/datasource/index', () => {
       expect(
         await getDigest({
           datasource,
-          packageName,
+          packageName: 'pkgName',
           replacementName: 'replacement',
         })
       ).toBe('replacement');

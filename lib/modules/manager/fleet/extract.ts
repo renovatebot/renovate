@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { FleetFile, FleetHelmBlock, GitRepo } from './types';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
@@ -87,10 +87,15 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
   result.push(extractFleetHelmBlock(doc.helm));
 
   if (!is.undefined(doc.targetCustomizations)) {
+    // remove version from helm block to allow usage of variables defined in the global block, but do not create PRs
+    // if there is no version defined in the customization.
+    const helmBlockContext: FleetHelmBlock = { ...doc.helm };
+    delete helmBlockContext.version;
+
     for (const custom of doc.targetCustomizations) {
       const dep = extractFleetHelmBlock({
         // merge base config with customization
-        ...doc.helm,
+        ...helmBlockContext,
         ...custom.helm,
       });
       result.push({
@@ -106,7 +111,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   if (!content) {
     return null;
   }

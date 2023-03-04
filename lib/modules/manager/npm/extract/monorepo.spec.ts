@@ -5,14 +5,25 @@ jest.mock('./pnpm');
 
 describe('modules/manager/npm/extract/monorepo', () => {
   describe('.extractPackageFile()', () => {
+    it('handles no monorepo', async () => {
+      const packageFiles: Partial<PackageFile>[] = [
+        {
+          packageFile: 'package.json',
+          deps: [],
+        },
+      ];
+      await detectMonorepos(packageFiles);
+      expect(packageFiles).toHaveLength(1);
+    });
+
     it('uses lerna package settings', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['packages/*'],
           },
-          lernaPackages: ['packages/*'],
           deps: [
             {
               depName: '@org/a',
@@ -30,7 +41,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -45,7 +56,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       await detectMonorepos(packageFiles);
@@ -64,8 +75,8 @@ describe('modules/manager/npm/extract/monorepo', () => {
           packageFile: 'package.json',
           managerData: {
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['packages/*'],
           },
-          lernaPackages: ['packages/*'],
           deps: [
             {
               depName: '@org/a',
@@ -83,7 +94,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
           deps: [
             {
               depName: '@org/b',
@@ -98,7 +109,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       await detectMonorepos(packageFiles);
@@ -116,19 +127,19 @@ describe('modules/manager/npm/extract/monorepo', () => {
         {
           packageFile: 'package.json',
           managerData: {
+            lernaClient: 'yarn',
             lernaJsonFile: 'lerna.json',
+            lernaPackages: ['oldpackages/*'],
+            workspacesPackages: ['packages/*'],
           },
-          lernaPackages: ['oldpackages/*'],
-          lernaClient: 'yarn',
-          yarnWorkspacesPackages: ['packages/*'],
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
+          managerData: { packageJsonName: '@org/a' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       await detectMonorepos(packageFiles);
@@ -141,16 +152,15 @@ describe('modules/manager/npm/extract/monorepo', () => {
         {
           packageFile: 'package.json',
           npmrc: '@org:registry=//registry.some.org\n',
-          yarnWorkspacesPackages: 'packages/*',
+          managerData: { workspacesPackages: 'packages/*' },
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
         },
       ];
       await detectMonorepos(packageFiles);
@@ -161,32 +171,31 @@ describe('modules/manager/npm/extract/monorepo', () => {
       ]);
     });
 
-    it('uses yarn workspaces package settings with constraints', async () => {
+    it('uses yarn workspaces package settings with extractedConstraints', async () => {
       const packageFiles: Partial<PackageFile>[] = [
         {
           packageFile: 'package.json',
-          yarnWorkspacesPackages: ['docs'],
           skipInstalls: true, // coverage
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
-          yarnLock: 'yarn.lock',
           managerData: {
             hasPackageManager: true,
+            workspacesPackages: ['docs'],
           },
         },
         {
           packageFile: 'docs/package.json',
-          packageJsonName: 'docs',
-          yarnLock: 'yarn.lock',
-          constraints: { yarn: '^3.2.0' },
+          managerData: { packageJsonName: 'docs', yarnLock: 'yarn.lock' },
+
+          extractedConstraints: { yarn: '^3.2.0' },
         },
       ];
       await detectMonorepos(packageFiles);
       expect(packageFiles).toMatchObject([
         {
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '3.2.1',
           },
@@ -195,7 +204,7 @@ describe('modules/manager/npm/extract/monorepo', () => {
           },
         },
         {
-          constraints: {
+          extractedConstraints: {
             node: '^14.15.0 || >=16.13.0',
             yarn: '^3.2.0',
           },
@@ -211,20 +220,19 @@ describe('modules/manager/npm/extract/monorepo', () => {
         {
           packageFile: 'package.json',
           managerData: {
+            workspacesPackages: 'packages/*',
             yarnZeroInstall: true,
           },
           skipInstalls: false,
           npmrc: '@org:registry=//registry.some.org\n',
-          yarnWorkspacesPackages: 'packages/*',
         },
         {
           packageFile: 'packages/a/package.json',
-          packageJsonName: '@org/a',
-          yarnLock: 'yarn.lock',
+          managerData: { packageJsonName: '@org/a', yarnLock: 'yarn.lock' },
         },
         {
           packageFile: 'packages/b/package.json',
-          packageJsonName: '@org/b',
+          managerData: { packageJsonName: '@org/b' },
           skipInstalls: true,
         },
       ];

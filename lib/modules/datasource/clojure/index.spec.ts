@@ -158,7 +158,6 @@ describe('modules/datasource/clojure/index', () => {
       matchHost: 'custom.registry.renovatebot.com',
       token: '123test',
     });
-    jest.resetAllMocks();
   });
 
   afterEach(() => {

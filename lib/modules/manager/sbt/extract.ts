@@ -2,6 +2,7 @@ import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { parseUrl } from '../../../util/url';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
@@ -10,8 +11,9 @@ import {
 } from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
+import * as semverVersioning from '../../versioning/semver';
 import { REGISTRY_URLS } from '../gradle/parser/common';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { normalizeScalaVersion } from './util';
 
 type Vars = Record<string, string>;
@@ -35,6 +37,10 @@ interface Ctx {
 }
 
 const scala = lang.createLang('scala');
+
+const sbtVersionRegex = regEx(
+  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
+);
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
@@ -285,8 +291,34 @@ const query = q.tree<Ctx>({
 
 export function extractPackageFile(
   content: string,
-  _packageFile: string
-): PackageFile | null {
+  packageFile: string
+): PackageFileContent | null {
+  if (
+    packageFile === 'project/build.properties' ||
+    packageFile.endsWith('/project/build.properties')
+  ) {
+    const regexResult = sbtVersionRegex.exec(content);
+    const sbtVersion = regexResult?.groups?.version;
+    const matchString = regexResult?.[0];
+    if (sbtVersion) {
+      const sbtDependency: PackageDependency = {
+        datasource: GithubReleasesDatasource.id,
+        depName: 'sbt/sbt',
+        packageName: 'sbt/sbt',
+        versioning: semverVersioning.id,
+        currentValue: sbtVersion,
+        replaceString: matchString,
+        extractVersion: '^v(?<version>\\S+)',
+      };
+
+      return {
+        deps: [sbtDependency],
+      };
+    } else {
+      return null;
+    }
+  }
+
   let parsedResult: Ctx | null = null;
 
   try {
@@ -296,7 +328,7 @@ export function extractPackageFile(
       registryUrls: [REGISTRY_URLS.mavenCentral],
     });
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Sbt parsing error');
+    logger.warn({ err, packageFile }, 'Sbt parsing error');
   }
 
   if (!parsedResult) {

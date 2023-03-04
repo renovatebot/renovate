@@ -1,11 +1,9 @@
-import { getConfig, git, partial, platform } from '../../../../../test/util';
+import { getConfig, partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
 import * as schedule from '../branch/schedule';
 import * as prAutomerge from './automerge';
-
-jest.mock('../../../../util/git');
 
 describe('workers/repository/update/pr/automerge', () => {
   describe('checkAutoMerge(pr, config)', () => {
@@ -18,7 +16,7 @@ describe('workers/repository/update/pr/automerge', () => {
       config = {
         ...getConfig(),
       } as BranchConfig;
-      pr = partial<Pr>({});
+      pr = partial<Pr>();
     });
 
     it('should not automerge if not configured', async () => {
@@ -92,7 +90,7 @@ describe('workers/repository/update/pr/automerge', () => {
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce('green');
-      git.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,
@@ -125,7 +123,7 @@ describe('workers/repository/update/pr/automerge', () => {
 
     it('should not automerge if enabled and pr is unmergeable', async () => {
       config.automerge = true;
-      git.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
       const res = await prAutomerge.checkAutoMerge(pr, config);
       expect(res).toEqual({
         automerged: false,

@@ -5,8 +5,8 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
@@ -40,11 +40,11 @@ export async function handleClosedPr(
         });
       }
     }
-    if (branchExists(config.branchName)) {
+    if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
-        await deleteBranch(config.branchName);
+        await scm.deleteBranch(config.branchName);
       }
     }
   } else if (pr.state === 'merged') {
@@ -62,7 +62,7 @@ export async function handleModifiedPr(
 
   const editedPrCommentTopic = 'Edited/Blocked Notification';
   const content =
-    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n' +
+    'Renovate will not automatically rebase this PR, because it does not recognize the last commit author and assumes somebody else may have edited the PR.\n\n' +
     'You can manually request rebase by checking the rebase/retry box above.\n\n' +
     emojify(' :warning: **Warning**: custom changes will be lost.');
 

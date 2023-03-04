@@ -36,7 +36,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: npmVersioningId,
   },
   dotnet: {
-    datasource: 'dotnet',
+    datasource: 'dotnet-version',
     packageName: 'dotnet-sdk',
     versioning: semverVersioningId,
   },
@@ -65,8 +65,13 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'helm/helm',
     versioning: semverVersioningId,
   },
+  helmfile: {
+    datasource: 'github-releases',
+    packageName: 'helmfile/helmfile',
+    versioning: semverVersioningId,
+  },
   java: {
-    datasource: 'adoptium-java',
+    datasource: 'java-version',
     packageName: 'java',
     versioning: npmVersioningId,
   },

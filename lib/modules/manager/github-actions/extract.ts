@@ -5,7 +5,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { Workflow } from './types';
 
 const dockerActionRe = regEx(/^\s+uses: ['"]?docker:\/\/([^'"]+)\s*$/);
@@ -126,7 +126,7 @@ function extractWithYAMLParser(
 export function extractPackageFile(
   content: string,
   filename: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('github-actions.extractPackageFile()');
   const deps = [
     ...extractWithRegex(content),

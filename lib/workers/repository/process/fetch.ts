@@ -28,7 +28,8 @@ async function fetchDepUpdates(
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
-  if (!is.nonEmptyString(dep.depName)) {
+  dep.packageName ??= dep.depName;
+  if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
   }
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
@@ -87,6 +88,13 @@ async function fetchManagerPackagerFileUpdates(
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
+  if (pFile.extractedConstraints) {
+    pFile.constraints = {
+      ...pFile.extractedConstraints,
+      ...pFile.constraints,
+    };
+    delete pFile.extractedConstraints;
+  }
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(

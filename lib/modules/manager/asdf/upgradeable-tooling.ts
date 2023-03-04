@@ -1,9 +1,10 @@
-import { AdoptiumJavaDatasource } from '../../datasource/adoptium-java';
 import { DockerDatasource } from '../../datasource/docker';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
+import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeDatasource } from '../../datasource/node';
+import { NpmDatasource } from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
@@ -181,7 +182,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       );
       if (adoptOpenJdkMatches) {
         return {
-          datasource: AdoptiumJavaDatasource.id,
+          datasource: JavaVersionDatasource.id,
           packageName: 'java-jdk',
           currentValue: adoptOpenJdkMatches.groups!.version,
         };
@@ -191,7 +192,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       );
       if (adoptOpenJreMatches) {
         return {
-          datasource: AdoptiumJavaDatasource.id,
+          datasource: JavaVersionDatasource.id,
           packageName: 'java-jre',
           currentValue: adoptOpenJreMatches.groups!.version,
         };
@@ -277,6 +278,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^php-(?<version>\\S+)',
     },
   },
+  pnpm: {
+    asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pnpm',
+    config: {
+      datasource: NpmDatasource.id,
+      packageName: 'pnpm',
+      versioning: semverVersioning.id,
+    },
+  },
   python: {
     asdfPluginUrl: 'https://github.com/danhper/asdf-python',
     config: {
@@ -341,6 +350,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/terraform',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  terragrunt: {
+    asdfPluginUrl: 'https://github.com/ohmer/asdf-terragrunt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'gruntwork-io/terragrunt',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

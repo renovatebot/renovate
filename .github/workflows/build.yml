@@ -6,6 +6,7 @@ on:
       - main
 
   pull_request:
+  merge_group:
 
   workflow_dispatch:
     inputs:
@@ -71,7 +72,6 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
-          npm config set scripts-prepend-node-path true
           git --version
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
@@ -84,7 +84,7 @@ jobs:
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@627f0f41f6904a5b1efbaed9f96d9eb58e92e920 # v3.2.4
+        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # v3.2.6
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
@@ -122,7 +122,6 @@ jobs:
           git config --global core.symlinks true
           git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
-          npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 

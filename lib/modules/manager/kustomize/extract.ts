@@ -8,7 +8,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { splitImageParts } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { HelmChart, Image, Kustomize } from './types';
 
 // URL specifications should follow the hashicorp URL format
@@ -167,7 +167,7 @@ export function parseKustomize(content: string): Kustomize | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace('kustomize.extractPackageFile()');
   const deps: PackageDependency[] = [];
 
@@ -177,7 +177,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote bases
-  for (const base of coerceArray(pkg.bases)) {
+  for (const base of coerceArray(pkg.bases).filter(is.string)) {
     const dep = extractResource(base);
     if (dep) {
       deps.push({
@@ -188,7 +188,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote resources
-  for (const resource of coerceArray(pkg.resources)) {
+  for (const resource of coerceArray(pkg.resources).filter(is.string)) {
     const dep = extractResource(resource);
     if (dep) {
       deps.push({
@@ -199,7 +199,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
 
   // grab the remote components
-  for (const component of coerceArray(pkg.components)) {
+  for (const component of coerceArray(pkg.components).filter(is.string)) {
     const dep = extractResource(component);
     if (dep) {
       deps.push({

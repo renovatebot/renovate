@@ -7,7 +7,6 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
-import type { VulnerabilityAlert } from '../../../types';
 import * as repository from '../../../util/cache/repository';
 import * as _git from '../../../util/git';
 import * as _hostRules from '../../../util/host-rules';
@@ -275,7 +274,7 @@ describe('modules/platform/github/index', () => {
     repository: string,
     forkExisted: boolean,
     forkResult = 200,
-    forkDefaulBranch = 'master'
+    forkDefaultBranch = 'master'
   ): void {
     scope
       // repo info
@@ -308,7 +307,7 @@ describe('modules/platform/github/index', () => {
               {
                 full_name: 'forked/repo',
                 owner: { login: 'forked' },
-                default_branch: forkDefaulBranch,
+                default_branch: forkDefaultBranch,
               },
             ]
           : []
@@ -2181,6 +2180,96 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({ number: 123 });
     });
 
+    describe('with forkToken', () => {
+      let scope: httpMock.Scope;
+
+      beforeEach(async () => {
+        scope = httpMock.scope(githubApiHost);
+        forkInitRepoMock(scope, 'some/repo', false);
+        scope.get('/user').reply(200, {
+          login: 'forked',
+        });
+        scope.post('/repos/some/repo/forks').reply(200, {
+          full_name: 'forked/repo',
+          default_branch: 'master',
+        });
+
+        await github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        });
+      });
+
+      it('should allow maintainer edits if explicitly enabled via options', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is set in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR can be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: false,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should allow maintainer edits if not explicitly set', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should disallow maintainer edits if explicitly disabled', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === false
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: true,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+    });
+
     describe('automerge', () => {
       const createdPrResp = {
         number: 123,
@@ -2451,7 +2540,6 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({
         number: 2500,
         bodyStruct: { hash: expect.any(String) },
-        displayNumber: 'Pull Request #2500',
         sourceBranch: 'renovate/jest-monorepo',
         sourceRepo: 'some/repo',
         state: 'open',
@@ -2579,9 +2667,7 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: expect.any(String),
         },
-        displayNumber: 'Pull Request #1234',
         hasAssignees: true,
-        hasReviewers: true,
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2614,7 +2700,6 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        displayNumber: 'Pull Request #1234',
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2867,7 +2952,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },
@@ -2912,7 +2997,7 @@ describe('modules/platform/github/index', () => {
                       },
                       vulnerableManifestFilename: 'foo',
                       vulnerableManifestPath: 'bar',
-                    } as VulnerabilityAlert,
+                    },
                   },
                 ],
               },

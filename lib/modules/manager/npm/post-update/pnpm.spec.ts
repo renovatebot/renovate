@@ -69,6 +69,27 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
 
+  it('performs dedupe', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValue('package-lock-contents');
+    const postUpdateOptions = ['pnpmDedupe'];
+    const res = await pnpmHelper.generateLockFile(
+      'some-dir',
+      {},
+      { ...config, postUpdateOptions }
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toBe('package-lock-contents');
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pnpm install --recursive --lockfile-only --ignore-scripts --ignore-pnpmfile',
+      },
+      {
+        cmd: 'pnpm dedupe',
+      },
+    ]);
+  });
+
   it('uses the new version if packageManager is updated', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValue('package-lock-contents');
@@ -87,7 +108,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -129,7 +150,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -171,7 +192,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
     mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json
       .mockResolvedValue('lockfileVersion: 5.3\n'); // pnpm-lock.yaml

@@ -1,6 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
 import * as githubGraphql from '../../../util/github/graphql';
+import type { GithubTagItem } from '../../../util/github/graphql/types';
 import * as hostRules from '../../../util/host-rules';
 import { GithubTagsDatasource } from '.';
 
@@ -66,6 +67,24 @@ describe('modules/datasource/github-tags/index', () => {
       ]);
       const res = await github.getDigest({ packageName }, 'v2.0.0');
       expect(res).toBe('abc');
+    });
+
+    it('returns null for missing hash', async () => {
+      jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
+        {
+          version: 'v1.0.0',
+          gitRef: 'v1.0.0',
+          releaseTimestamp: '2021-01-01',
+          hash: '123',
+        },
+        {
+          version: 'v2.0.0',
+          gitRef: 'v2.0.0',
+          releaseTimestamp: '2022-01-01',
+        } as GithubTagItem,
+      ]);
+      const res = await github.getDigest({ packageName }, 'v2.0.0');
+      expect(res).toBeNull();
     });
 
     it('returns null for missing tagged commit digest', async () => {
