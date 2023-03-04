@@ -4,7 +4,11 @@ import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 const variableMarker = '$';
 
@@ -237,7 +241,7 @@ export function extractPackageFile(
   content: string,
   _filename: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};

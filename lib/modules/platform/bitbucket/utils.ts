@@ -5,51 +5,16 @@ import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
-import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
+import type {
+  BitbucketBranchState,
+  BitbucketMergeStrategy,
+  MergeRequestBody,
+  PrResponse,
+  RepoInfo,
+  RepoInfoBody,
+} from './types';
 
 const bitbucketHttp = new BitbucketHttp();
-
-export interface Config {
-  defaultBranch: string;
-  has_issues: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: Pr[];
-  repository: string;
-  username: string;
-  userUuid: string;
-  ignorePrAuthor: boolean;
-}
-
-export interface PagedResult<T = any> {
-  pagelen: number;
-  size?: number;
-  next?: string;
-  values: T[];
-}
-
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-}
-
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-}
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -152,34 +117,9 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export interface PrResponse {
-  id: number;
-  title: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<Account>;
-  created_on: string;
-}
-
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    displayNumber: `Pull Request #${pr.id}`,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
@@ -189,17 +129,4 @@ export function prInfo(pr: PrResponse): Pr {
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
-}
-
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
-}
-
-export interface EffectiveReviewer {
-  type: string;
-  reviewer_type: string;
-  user: Account;
 }

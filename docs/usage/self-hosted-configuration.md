@@ -116,7 +116,7 @@ All text inside the start and end `/` will be treated as a regular expression.
 }
 ```
 
-You can negate the regex by putting a `!` in front.
+You can negate the regex by putting an `!` in front.
 Only use a single negation and don't mix with other filters because all filters are combined with `or`.
 If using negations, all repositories except those who match the regex are added to the result:
 
@@ -199,6 +199,17 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## cacheHardTtlMinutes
+
+This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
+It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+
+When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
+Results which are soft expired are reused in the following manner:
+
+- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
 ## containerbaseDir
 
@@ -518,6 +529,8 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 ## onboardingPrTitle
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+
+## onboardingRebaseCheckbox
 
 ## optimizeForDisabled
 

@@ -6,11 +6,7 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import {
-  deleteBranch,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
@@ -54,7 +50,7 @@ export async function checkAutoMerge(
   }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch, config.branchName));
+    (await scm.isBranchConflicted(config.baseBranch, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
@@ -85,7 +81,7 @@ export async function checkAutoMerge(
     };
   }
   // Check if it's been touched
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,
@@ -148,7 +144,7 @@ export async function checkAutoMerge(
     }
     let branchRemoved = false;
     try {
-      await deleteBranch(branchName);
+      await scm.deleteBranch(branchName);
       branchRemoved = true;
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');

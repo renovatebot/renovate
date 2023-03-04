@@ -20,7 +20,6 @@ import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
-import { mergeConfigConstraints } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
@@ -76,8 +75,6 @@ export async function lookupUpdates(
         res.skipReason = 'is-pinned';
         return res;
       }
-
-      config = mergeConfigConstraints(config);
 
       dependency = clone(await getPkgReleases(config));
       if (!dependency) {
@@ -252,7 +249,7 @@ export async function lookupUpdates(
           // Leave only compatible versions
           unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
-      if (isVulnerabilityAlert) {
+      if (isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};
@@ -384,6 +381,30 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+
+          // If the digest could not be determined, report this as otherwise the
+          // update will be omitted later on without notice.
+          if (update.newDigest === null) {
+            logger.debug(
+              {
+                depName,
+                currentValue,
+                datasource,
+                newValue: update.newValue,
+                bucket: update.bucket,
+              },
+              'Could not determine new digest for update.'
+            );
+
+            // Only report a warning if there is a current digest.
+            // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
+            if (currentDigest) {
+              res.warnings.push({
+                message: `Could not determine new digest for update (datasource: ${datasource})`,
+                topic: depName,
+              });
+            }
+          }
         }
         if (update.newVersion) {
           const registryUrl = dependency?.releases?.find(

@@ -2,6 +2,7 @@
 import is from '@sindresorhus/is';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
+import { cache } from '../../../util/cache/package/decorator';
 import { queryReleases } from '../../../util/github/graphql';
 import type {
   GithubDigestFile,
@@ -43,6 +44,12 @@ export class GithubReleasesDatasource extends Datasource {
     this.http = new GithubHttp(GithubReleasesDatasource.id);
   }
 
+  @cache({
+    ttlMinutes: 1440,
+    namespace: 'datasource-github-releases',
+    key: (release: GithubRestRelease, digest: string) =>
+      `${release.html_url}:${digest}`,
+  })
   async findDigestFile(
     release: GithubRestRelease,
     digest: string
@@ -67,6 +74,12 @@ export class GithubReleasesDatasource extends Datasource {
     return null;
   }
 
+  @cache({
+    ttlMinutes: 1440,
+    namespace: 'datasource-github-releases',
+    key: (asset: GithubRestAsset, algorithm: string) =>
+      `${asset.browser_download_url}:${algorithm}:assetDigest`,
+  })
   async downloadAndDigest(
     asset: GithubRestAsset,
     algorithm: string

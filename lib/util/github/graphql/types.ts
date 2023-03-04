@@ -59,50 +59,14 @@ export interface GithubPackageConfig {
 }
 
 /**
- * GraphQL shape for releases
- */
-export interface GithubGraphqlRelease {
-  version: string;
-  releaseTimestamp: string;
-  isDraft: boolean;
-  isPrerelease: boolean;
-  url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
  * Result of GraphQL response transformation for releases (via adapter)
  */
 export interface GithubReleaseItem extends GithubDatasourceItem {
   isStable?: boolean;
   url: string;
-  id: number;
-  name: string;
-  description: string;
-}
-
-/**
- * GraphQL shape for tags
- */
-export interface GithubGraphqlTag {
-  version: string;
-  target:
-    | {
-        type: 'Commit';
-        oid: string;
-        releaseTimestamp: string;
-      }
-    | {
-        type: 'Tag';
-        target: {
-          oid: string;
-        };
-        tagger: {
-          releaseTimestamp: string;
-        };
-      };
+  id?: number;
+  name?: string;
+  description?: string;
 }
 
 /**

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { regEx } from '../../../util/regex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { isComment } from './common';
 
 const regex = regEx(
@@ -19,7 +19,7 @@ function setDepType(content: string, originalType: string): string {
   return depType;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   // only process sections where requirements are defined
   const sections = content.split(/def |\n\[/).filter(
     (part) =>

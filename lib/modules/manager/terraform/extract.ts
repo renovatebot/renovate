@@ -1,5 +1,6 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import { resourceExtractors } from './extractors';
 import * as hcl from './hcl';
 import {
@@ -11,7 +12,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace({ content }, 'terraform.extractPackageFile()');
 
   const passedExtractors = [];
@@ -37,6 +38,10 @@ export async function extractPackageFile(
 
   const dependencies = [];
   const hclMap = hcl.parseHCL(content);
+  if (is.nullOrUndefined(hclMap)) {
+    logger.trace({ fileName }, 'failed to parse HCL file');
+    return null;
+  }
 
   const locks = await extractLocksForPackageFile(fileName);
 

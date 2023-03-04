@@ -6,7 +6,6 @@ jest.mock('delay');
 
 describe('config/presets/npm/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     GlobalConfig.reset();
   });
 
