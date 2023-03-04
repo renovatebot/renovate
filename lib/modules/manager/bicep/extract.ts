@@ -1,4 +1,3 @@
-import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource';
 import type {
@@ -41,8 +40,6 @@ export function extractPackageFile(
       replaceString: `'${depName}@${currentValue}'`,
     });
   }
-
-  logger.info(JSON.stringify(deps));
 
   return Promise.resolve({ deps });
 }

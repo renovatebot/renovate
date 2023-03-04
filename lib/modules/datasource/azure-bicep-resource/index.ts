@@ -1,5 +1,4 @@
 import type { z } from 'zod';
-import { logger } from '../../../logger';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BicepTypeIndex } from './schema';
@@ -18,8 +17,6 @@ export class AzureBicepResourceDatasource extends Datasource {
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
     const { packageName } = getReleasesConfig;
-
-    logger.info('hello from datasource');
 
     const resourceVersionIndex = await this.getResourceVersionIndex();
     const versions = resourceVersionIndex.get(packageName.toLowerCase());

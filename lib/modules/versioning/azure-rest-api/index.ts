@@ -28,7 +28,7 @@ class AzureRestApiVersioningApi extends GenericVersioningApi {
     }
 
     return {
-      // decide: use date as major version so it is always a major upgrade?
+      // TODO: use date as major version so it is always a major upgrade?
       release: [1, 0, 0], // static because there is no semantic versioning
       suffix: matchGroups.version,
       prerelease: matchGroups.prerelease,
