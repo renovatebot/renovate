@@ -47,14 +47,14 @@ export class AzureBicepTypesDatasource extends Datasource {
 
     const releaseMap = new Map<string, string[]>();
 
-    for (const resourceReference of res.Resources.keys()) {
+    for (const resourceReference of Object.keys(res.Resources)) {
       const [type, version] = resourceReference.toLowerCase().split('@');
       releaseMap.set(type, [...(releaseMap.get(type) ?? []), version]);
     }
 
-    for (const functionResource of res.Functions.entries()) {
+    for (const functionResource in res.Functions) {
       const [type, versionMap] = functionResource;
-      const versions = [...versionMap.keys()];
+      const versions = [...Object.keys(versionMap)];
       releaseMap.set(type, versions);
     }
 

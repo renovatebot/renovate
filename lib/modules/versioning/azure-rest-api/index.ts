@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 
@@ -19,7 +20,9 @@ export const api: VersioningApi = {
     return version.length <= 10;
   },
   isValid(input: string): boolean {
-    return regEx(/^\d{4}-\d{2}-\d{2}(?:-[a-z]+)$/).test(input);
+    const isValid = regEx(/^\d{4}-\d{2}-\d{2}(?:-[a-z]+)?$/).test(input);
+    logger.info(`hello from is valid ${isValid}`);
+    return isValid;
   },
   isVersion(input: string | null | undefined): boolean {
     if (!input) {

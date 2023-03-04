@@ -1,16 +1,16 @@
 import { z } from 'zod';
 
 export const BicepTypeIndex = z.object({
-  Resources: z.map(
+  Resources: z.record(
     z.string(),
     z.object({
       RelativePath: z.string(),
       Index: z.number(),
     })
   ),
-  Functions: z.map(
+  Functions: z.record(
     z.string(),
-    z.map(
+    z.record(
       z.string(),
       z.array(
         z.object({
