@@ -38,7 +38,7 @@ async function addSourceCmds(
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
-    const { password, username = undefined } = hostRules.find({
+    const { password, username } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
