@@ -89,7 +89,9 @@ export async function lookupUpdates(
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug(`Found deprecationMessage for ${datasource} package ${packageName}`);
+        logger.debug(
+          `Found deprecationMessage for ${datasource} package ${packageName}`
+        );
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
