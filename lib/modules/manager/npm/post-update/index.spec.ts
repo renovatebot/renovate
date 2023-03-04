@@ -1,7 +1,7 @@
 // TODO: add tests
 import upath from 'upath';
 import { Fixtures } from '../../../../../test/fixtures';
-import { fs, git, logger, partial } from '../../../../../test/util';
+import { fs, git, logger, partial, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { FileChange } from '../../../../util/git/types';
 import type { PostUpdateConfig } from '../../types';
@@ -628,7 +628,7 @@ describe('modules/manager/npm/post-update/index', () => {
 
     it('lockfile maintenance branch exists', async () => {
       // TODO: can this really happen?
-      git.branchExists.mockReturnValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(true);
       expect(
         await getAdditionalFiles(
           {

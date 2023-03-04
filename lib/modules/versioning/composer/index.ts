@@ -67,28 +67,33 @@ function normalizeVersion(input: string): string {
 }
 
 function composer2npm(input: string): string {
-  const cleanInput = normalizeVersion(input);
-  if (npm.isVersion(cleanInput)) {
-    return cleanInput;
-  }
-  if (npm.isVersion(padZeroes(cleanInput))) {
-    return padZeroes(cleanInput);
-  }
-  const [versionId, stability] = getVersionParts(cleanInput);
-  let output = versionId;
+  return input
+    .split(regEx(/\s*\|\|?\s*/g))
+    .map((part): string => {
+      const cleanInput = normalizeVersion(part);
+      if (npm.isVersion(cleanInput)) {
+        return cleanInput;
+      }
+      if (npm.isVersion(padZeroes(cleanInput))) {
+        return padZeroes(cleanInput);
+      }
+      const [versionId, stability] = getVersionParts(cleanInput);
+      let output = versionId;
 
-  // ~4 to ^4 and ~4.1 to ^4.1
-  output = output.replace(
-    regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
-    '^$1'
-  );
-  // ~0.4 to >=0.4 <1
-  output = output.replace(
-    regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
-    '>=$1 <1'
-  );
+      // ~4 to ^4 and ~4.1 to ^4.1
+      output = output.replace(
+        regEx(/(?:^|\s)~([1-9][0-9]*(?:\.[0-9]*)?)(?: |$)/g),
+        '^$1'
+      );
+      // ~0.4 to >=0.4 <1
+      output = output.replace(
+        regEx(/(?:^|\s)~(0\.[1-9][0-9]*)(?: |$)/g),
+        '>=$1 <1'
+      );
 
-  return output + stability;
+      return output + stability;
+    })
+    .join(' || ');
 }
 
 function equals(a: string, b: string): boolean {
