@@ -199,7 +199,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'guzzlehttp/guzzle',
+        packageName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchObject({
         homepage: 'http://guzzlephp.org/',
@@ -534,7 +534,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'drewm/mailchimp-api',
+        packageName: 'drewm/mailchimp-api',
       });
 
       expect(res).toEqual({
