@@ -146,8 +146,8 @@ module.exports = {
 
 ## CodeBuild examples
 
-Create a repository with buildspec.yml.
-This repository will be your BuildProject job repository to run renovate on your repositories
+Create a repository with `buildspec.yml`.
+This repository will be your BuildProject job repository to run Renovate on your repositories.
 
 ### Renovate docker buildspec.yml 
 
@@ -170,6 +170,7 @@ phases:
 ```
 
 ### Renovate cli buildspec.yml 
+
 ```yml
 version: 0.2
 env:
@@ -188,11 +189,13 @@ phases:
       - npm install -g renovate
       - renovate
 ```
-### Note:
-In order to reduce renovate BuildProject time and avoid `npm install`.
 
-It is recommended to install renovate on the BuildProject renovate job repository.
+### Note:
+
+In order to reduce Renovate BuildProject time and avoid `npm install`.
+
+We recommend you install Renovate on the BuildProject Renovate job repository.
 
 You can add `config.js` global config to the repository.
 
-You can add the BuildProject repository to the `RENOVATE_REPOSITORIES` and get updates on new renovate versions.
+You can add the BuildProject repository to the `RENOVATE_REPOSITORIES` variable and get updates on new Renovate versions.
