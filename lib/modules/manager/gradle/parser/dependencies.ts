@@ -4,31 +4,37 @@ import type { Ctx } from '../types';
 import {
   GRADLE_PLUGINS,
   cleanupTempVars,
-  qPropertyAccessIdentifier,
-  qStringValue,
   qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
 import {
-  handleDepInterpolation,
-  handleDepSimpleString,
+  handleDepString,
   handleImplicitGradlePlugin,
   handleKotlinShortNotationDep,
   handleLongFormDep,
 } from './handlers';
 
-// "foo:bar:1.2.3"
-const qDependenciesSimpleString = qStringValue
-  .handler((ctx: Ctx) => storeInTokenMap(ctx, 'stringToken'))
-  .handler(handleDepSimpleString)
-  .handler(cleanupTempVars);
+const qGroupId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'groupId')
+);
 
+const qArtifactId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'artifactId')
+);
+
+const qVersion = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'version')
+);
+
+// "foo:bar:1.2.3"
 // "foo:bar:$baz"
-const qDependenciesInterpolation = qTemplateString
+// "foo" + "${bar}" + baz
+const qDependencyStrings = qTemplateString
+  .opt(q.op<Ctx>('+').join(qValueMatcher))
   .handler((ctx: Ctx) => storeInTokenMap(ctx, 'templateStringTokens'))
-  .handler(handleDepInterpolation)
+  .handler(handleDepString)
   .handler(cleanupTempVars);
 
 // dependencySet(group: 'foo', version: bar) { entry 'baz' }
@@ -44,13 +50,11 @@ const qDependencySet = q
       .begin<Ctx>()
       .sym('group')
       .alt(q.op(':'), q.op('='))
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .join(qGroupId)
       .op(',')
       .sym('version')
       .alt(q.op(':'), q.op('='))
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .join(qVersion)
       .end(),
   })
   .tree({
@@ -61,20 +65,15 @@ const qDependencySet = q
     search: q
       .sym<Ctx>('entry')
       .alt(
-        qTemplateString,
-        qVariableAccessIdentifier,
+        qArtifactId,
         q.tree({
           type: 'wrapped-tree',
           maxDepth: 1,
           startsWith: '(',
           endsWith: ')',
-          search: q
-            .begin<Ctx>()
-            .alt(qTemplateString, qVariableAccessIdentifier)
-            .end(),
+          search: q.begin<Ctx>().join(qArtifactId).end(),
         })
       )
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
       .handler(handleLongFormDep),
   })
   .handler(cleanupTempVars);
@@ -83,18 +82,15 @@ const qDependencySet = q
 const qGroovyMapNotationDependencies = q
   .sym<Ctx>('group')
   .op(':')
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+  .join(qGroupId)
   .op(',')
   .sym('name')
   .op(':')
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+  .join(qArtifactId)
   .op(',')
   .sym('version')
   .op(':')
-  .alt(qTemplateString, qVariableAccessIdentifier)
-  .handler((ctx) => storeInTokenMap(ctx, 'version'))
+  .join(qVersion)
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
 
@@ -108,16 +104,10 @@ const qKotlinShortNotationDependencies = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'moduleName'))
+      .join(qArtifactId)
       .op(',')
       .opt(q.sym<Ctx>('version').op('='))
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      )
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .join(qVersion)
       .end(),
   })
   .handler(handleKotlinShortNotationDep)
@@ -134,18 +124,15 @@ const qKotlinMapNotationDependencies = q
       .begin<Ctx>()
       .sym('group')
       .op('=')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .join(qGroupId)
       .op(',')
       .sym('name')
       .op('=')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .join(qArtifactId)
       .op(',')
       .sym('version')
       .op('=')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'version')),
+      .join(qVersion),
   })
   .handler(handleLongFormDep)
   .handler(cleanupTempVars);
@@ -163,14 +150,11 @@ export const qLongFormDep = q
     endsWith: ')',
     search: q
       .begin<Ctx>()
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .join(qGroupId)
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .join(qArtifactId)
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'version'))
+      .join(qVersion)
       .end(),
   })
   .handler(handleLongFormDep)
@@ -186,22 +170,26 @@ const qImplicitGradlePlugin = q
     maxMatches: 1,
     startsWith: '{',
     endsWith: '}',
-    search: q
-      .sym<Ctx>(regEx(/^(?:toolVersion|version)$/))
-      .op('=')
-      .alt(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      ),
+    search: q.sym<Ctx>(regEx(/^(?:toolVersion|version)$/)).alt(
+      // toolVersion = "1.2.3"
+      q.op<Ctx>('=').join(qVersion),
+      // toolVersion.set("1.2.3"), toolVersion.value("1.2.3")
+      q
+        .op<Ctx>('.')
+        .sym(regEx(/^(?:set|value)$/))
+        .tree({
+          maxDepth: 1,
+          startsWith: '(',
+          endsWith: ')',
+          search: q.begin<Ctx>().join(qVersion).end(),
+        })
+    ),
   })
-  .handler((ctx) => storeInTokenMap(ctx, 'version'))
   .handler(handleImplicitGradlePlugin)
   .handler(cleanupTempVars);
 
 export const qDependencies = q.alt(
-  qDependenciesSimpleString,
-  qDependenciesInterpolation,
+  qDependencyStrings,
   qDependencySet,
   qGroovyMapNotationDependencies,
   qKotlinShortNotationDependencies,

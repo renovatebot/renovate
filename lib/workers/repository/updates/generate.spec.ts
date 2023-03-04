@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { getConfig } from '../../../../test/util';
+import { getConfig, partial } from '../../../../test/util';
 import type { RenovateConfig, UpdateType } from '../../../config/types';
 import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
@@ -15,7 +15,7 @@ beforeEach(() => {
 describe('workers/repository/updates/generate', () => {
   describe('generateBranchConfig()', () => {
     it('does not group single upgrade', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -28,7 +28,7 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
@@ -36,14 +36,14 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles lockFileMaintenance', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           prTitle: 'some-title',
           isLockFileMaintenance: true,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res).toMatchSnapshot({
         branchName: 'some-branch',
@@ -60,7 +60,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles lockFileUpdate', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -72,7 +72,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '^1.0.0',
           newVersion: '1.0.1',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res).toMatchSnapshot({
         branchName: 'some-branch',
@@ -102,7 +102,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('does not group same upgrades', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -125,14 +125,14 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
     });
 
     it('groups multiple upgrades same version', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -191,7 +191,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-06T20:01:41+00:00',
           automerge: false,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
@@ -204,7 +204,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups major updates with different versions but same newValue, no recreateClosed', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -233,14 +233,14 @@ describe('workers/repository/updates/generate', () => {
           isMajor: true,
           newMajor: 5,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeDefined();
       expect(res.recreateClosed).toBeFalsy();
     });
 
     it('groups multiple digest updates immortally', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -263,14 +263,84 @@ describe('workers/repository/updates/generate', () => {
           newDigest: 'sha256:abcdef987654321',
           isDigest: true,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.groupName).toBeDefined();
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('groups multiple upgrades different version', () => {
+    it('Grouped pin & pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('Grouped pin can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'3.2.0'",
+          newVersion: '3.2.0',
+          newMajor: 3,
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('grouped pinDigest can be recreated', () => {
+      // TODO #7154 incompatible types
+      const branch: BranchUpgradeConfig[] = [
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'abcd',
+          newValue: 'v3',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+        {
+          ...defaultConfig,
+          isPinDigest: true,
+          newDigest: 'dcba',
+          newMajor: 2,
+          newValue: 'v2',
+          updateType: 'pinDigest',
+        } as BranchUpgradeConfig,
+      ];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBeTrue();
+    });
+
+    it('groups multiple upgrades different version', () => {
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -309,7 +379,7 @@ describe('workers/repository/updates/generate', () => {
           updateType: 'minor',
           separateMinorPatch: true,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res).toMatchObject({
         foo: 2,
@@ -323,7 +393,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades different version but same value', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -356,7 +426,7 @@ describe('workers/repository/updates/generate', () => {
           },
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
@@ -366,7 +436,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple upgrades different value but same version', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depB',
@@ -399,7 +469,7 @@ describe('workers/repository/updates/generate', () => {
           },
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
@@ -409,7 +479,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('groups multiple digest updates', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'foo/bar',
@@ -440,7 +510,7 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(2);
       expect(res.singleVersion).toBeUndefined();
@@ -466,7 +536,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('fixes different messages', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'depA',
@@ -499,7 +569,7 @@ describe('workers/repository/updates/generate', () => {
           },
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.foo).toBe(1);
       expect(res.groupName).toBeUndefined();
@@ -623,6 +693,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('use prettyVersion in pr title when there is a v', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -649,6 +720,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('use prettyVersion in pr title there is no v', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -675,6 +747,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('use newMajor in pr title with v', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -699,6 +772,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('Default commitMessageExtra pr title', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -758,7 +832,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles @types specially', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           commitBodyTable: true,
@@ -795,7 +869,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '1.0.0',
           group: {},
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBeFalse();
       expect(res.groupName).toBeUndefined();
@@ -823,7 +897,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('handles @types specially (reversed)', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -856,7 +930,7 @@ describe('workers/repository/updates/generate', () => {
           labels: ['a'],
           group: {},
         },
-      ];
+      ]);
       expect(generateBranchConfig(branch)).toMatchSnapshot({
         upgrades: [
           {
@@ -938,7 +1012,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('combines prBodyColumns', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
@@ -949,13 +1023,13 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prBodyColumns: ['column-c', 'column-b', 'column-a'],
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.prBodyColumns).toEqual(['column-a', 'column-b', 'column-c']);
     });
 
     it('sorts upgrades, without position first', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -988,7 +1062,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           fileReplacePosition: undefined,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(
         res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
@@ -996,7 +1070,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('passes through pendingChecks', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1013,14 +1087,14 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           pendingChecks: true,
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeTrue();
       expect(res.upgrades).toHaveLength(2);
     });
 
     it('filters pendingChecks', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1036,14 +1110,14 @@ describe('workers/repository/updates/generate', () => {
           branchName: 'some-branch',
           prTitle: 'some-title',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.pendingChecks).toBeUndefined();
       expect(res.upgrades).toHaveLength(1);
     });
 
     it('displays pending versions', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep',
@@ -1067,7 +1141,7 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'Two pending versions',
           pendingVersions: ['1.1.0', '1.1.1'],
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.upgrades.map((u) => u.displayPending)).toStrictEqual([
         '',
@@ -1077,7 +1151,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('merge excludeCommitPaths if appears in upgrade', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           depName: 'some-dep1',
@@ -1101,7 +1175,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.9.0',
           excludeCommitPaths: ['some/path', 'some/other-manager/path'],
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       const excludeCommitPaths = res.excludeCommitPaths ?? [];
       expect(excludeCommitPaths.sort()).toStrictEqual(
@@ -1133,19 +1207,20 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('prevents issue with duplicating "v" character', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'some-branch',
           commitMessage: 'update to vv1.2.0',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toBe('update to v1.2.0');
       expect(res.commitMessage).toBe('update to v1.2.0');
     });
 
     it('apply semanticCommits and commitMessagePrefix together', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,
@@ -1166,7 +1241,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('dedupes duplicate table rows', () => {
-      const branch: BranchUpgradeConfig[] = [
+      const branch = partial<BranchUpgradeConfig>([
         {
           commitBodyTable: true,
           manager: 'some-manager',
@@ -1211,7 +1286,7 @@ describe('workers/repository/updates/generate', () => {
           currentVersion: '5.1.1',
           newVersion: '5.1.2',
         },
-      ];
+      ]);
       const res = generateBranchConfig(branch);
       expect(res.commitMessage?.trim()).toBe(codeBlock`
         | datasource | package     | from  | to    |
@@ -1229,6 +1304,7 @@ describe('workers/repository/updates/generate', () => {
     });
 
     it('using commitMessagePrefix without separator', () => {
+      // TODO #7154 incompatible types
       const branch: BranchUpgradeConfig[] = [
         {
           ...defaultConfig,

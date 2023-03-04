@@ -1,13 +1,13 @@
 import { logger } from '../../../../logger';
-import { DotnetDatasource } from '../../../datasource/dotnet';
+import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
-import type { PackageDependency, PackageFile } from '../../types';
+import type { PackageDependency, PackageFileContent } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
 
 export function extractMsbuildGlobalManifest(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;
 
@@ -31,7 +31,7 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      datasource: DotnetDatasource.id,
+      datasource: DotnetVersionDatasource.id,
     });
   }
 

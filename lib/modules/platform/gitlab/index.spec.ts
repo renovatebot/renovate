@@ -584,7 +584,10 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'success' }])
+        .reply(200, [
+          { context: 'renovate/stability-days', status: 'success' },
+          { context: 'renovate/other', status: 'success' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
@@ -1118,9 +1121,33 @@ describe('modules/platform/gitlab/index', () => {
           .get('/api/v4/users?username=someuser')
           .reply(200, [{ id: 10 }])
           .get('/api/v4/users?username=someotheruser')
+          .reply(404)
+          .get('/api/v4/groups/someotheruser/members')
           .reply(404);
 
         await gitlab.addReviewers(42, ['someuser', 'foo', 'someotheruser']);
+        expect(scope.isDone()).toBeTrue();
+      });
+
+      it('should add gitlab group members as reviewers to MR', async () => {
+        const scope = httpMock
+          .scope(gitlabApiHost)
+          .get(
+            '/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1'
+          )
+          .reply(200, { reviewers: existingReviewers })
+          .get('/api/v4/users?username=someuser')
+          .reply(200, [{ id: 10 }])
+          .get('/api/v4/users?username=somegroup')
+          .reply(404)
+          .get('/api/v4/groups/somegroup/members')
+          .reply(200, [{ id: 11 }, { id: 12 }])
+          .put('/api/v4/projects/undefined/merge_requests/42', {
+            reviewer_ids: [1, 2, 10, 11, 12],
+          })
+          .reply(200);
+
+        await gitlab.addReviewers(42, ['someuser', 'foo', 'somegroup']);
         expect(scope.isDone()).toBeTrue();
       });
 
@@ -1544,7 +1571,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1660,7 +1686,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1712,7 +1737,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1764,7 +1788,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1895,6 +1918,46 @@ describe('modules/platform/gitlab/index', () => {
       expect(pr).toMatchSnapshot();
       expect(pr?.hasAssignees).toBeTrue();
     });
+
+    it('returns the PR with reviewers', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'do something',
+          description: 'a merge request',
+          state: 'merged',
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          assignees: [],
+          reviewers: [
+            { id: 1, username: 'foo' },
+            { id: 2, username: 'bar' },
+          ],
+        });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toEqual({
+        bodyStruct: {
+          hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
+        },
+        hasAssignees: false,
+        headPipelineStatus: undefined,
+        labels: undefined,
+        number: 12345,
+        reviewers: ['foo', 'bar'],
+        sha: undefined,
+        sourceBranch: 'some-branch',
+        state: 'merged',
+        targetBranch: 'master',
+        title: 'do something',
+      });
+    });
   });
 
   describe('updatePr(prNo, title, body)', () => {
@@ -2022,6 +2085,12 @@ These updates have all been created already. Click a checkbox below to force a r
 `;
 
   describe('massageMarkdown(input)', () => {
+    it('strips invalid unicode null characters', () => {
+      expect(
+        gitlab.massageMarkdown("The source contains 'Ruby\u0000' at: 2.7.6.219")
+      ).toBe("The source contains 'Ruby' at: 2.7.6.219");
+    });
+
     it('returns updated pr body', async () => {
       jest.mock('../utils/pr-body');
       const { smartTruncate } = require('../utils/pr-body');

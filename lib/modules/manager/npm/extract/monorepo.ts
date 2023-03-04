@@ -2,29 +2,31 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { getParentDir, getSiblingFileName } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 import { detectPnpmWorkspaces } from './pnpm';
 import { matchesAnyPattern } from './utils';
 
 export async function detectMonorepos(
-  packageFiles: Partial<PackageFile>[]
+  packageFiles: Partial<PackageFile<NpmManagerData>>[]
 ): Promise<void> {
   await detectPnpmWorkspaces(packageFiles);
   logger.debug('Detecting Lerna and Yarn Workspaces');
   for (const p of packageFiles) {
+    const { packageFile, npmrc, managerData = {}, skipInstalls } = p;
     const {
-      packageFile,
-      npmLock,
-      yarnLock,
-      npmrc,
-      managerData = {},
       lernaClient,
+      lernaJsonFile,
       lernaPackages,
-      yarnWorkspacesPackages,
-      skipInstalls,
-    } = p;
-    const { lernaJsonFile, yarnZeroInstall, hasPackageManager } = managerData;
+      npmLock,
+      yarnZeroInstall,
+      hasPackageManager,
+      workspacesPackages,
+      yarnLock,
+    } = managerData;
 
-    const packages = yarnWorkspacesPackages ?? lernaPackages;
+    const packages = (workspacesPackages ?? lernaPackages) as
+      | string[]
+      | undefined;
     if (packages?.length) {
       const internalPackagePatterns = (
         is.array(packages) ? packages : [packages]
@@ -36,7 +38,7 @@ export async function detectMonorepos(
         )
       );
       const internalPackageNames = internalPackageFiles
-        .map((sp) => sp.packageJsonName)
+        .map((sp) => sp.managerData?.packageJsonName)
         .filter(Boolean);
 
       p.deps?.forEach((dep) => {
@@ -50,19 +52,17 @@ export async function detectMonorepos(
         subPackage.managerData.lernaJsonFile = lernaJsonFile;
         subPackage.managerData.yarnZeroInstall = yarnZeroInstall;
         subPackage.managerData.hasPackageManager = hasPackageManager;
-        subPackage.lernaClient = lernaClient;
-        subPackage.yarnLock = subPackage.yarnLock ?? yarnLock;
-        subPackage.npmLock = subPackage.npmLock ?? npmLock;
+        subPackage.managerData.lernaClient = lernaClient;
+        subPackage.managerData.yarnLock ??= yarnLock;
+        subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
-        if (subPackage.yarnLock) {
-          subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
-          subPackage.npmrc = subPackage.npmrc ?? npmrc;
-        }
+        subPackage.managerData.hasWorkspaces = !!workspacesPackages;
+        subPackage.npmrc ??= npmrc;
 
-        if (p.constraints) {
-          subPackage.constraints = {
-            ...p.constraints,
-            ...subPackage.constraints,
+        if (p.extractedConstraints) {
+          subPackage.extractedConstraints = {
+            ...p.extractedConstraints,
+            ...subPackage.extractedConstraints,
           };
         }
 

@@ -5,13 +5,8 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  findUpLocal,
-  getFileContentMap,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
-import { getFileList, getRepoStatus } from '../../../util/git';
+import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
+import { getFileList, getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import {
   extraEnv,
@@ -128,9 +123,7 @@ export async function updateArtifacts({
   logger.debug('Updating found Gradle dependency lockfiles');
 
   try {
-    const oldLockFileContentMap = await getFileContentMap(lockFiles);
-
-    await writeLocalFile(packageFileName, newPackageFileContent);
+    const oldLockFileContentMap = await getFiles(lockFiles);
     await prepareGradleCommand(gradlewFile);
 
     let cmd = `${gradlewName} --console=plain -q`;
@@ -164,6 +157,7 @@ export async function updateArtifacts({
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
+    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);

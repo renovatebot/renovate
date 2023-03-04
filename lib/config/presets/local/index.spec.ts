@@ -15,7 +15,6 @@ const gitlab = mocked(_gitlab);
 
 describe('config/presets/local/index', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
     const preset = { resolved: 'preset' };
     platform.getRawFile.mockResolvedValue('{ resolved: "preset" }');
     gitea.getPresetFromEndpoint.mockResolvedValueOnce(preset);
@@ -232,7 +231,7 @@ describe('config/presets/local/index', () => {
 
     it('forwards to gitlab', async () => {
       GlobalConfig.set({
-        platform: 'GitLab',
+        platform: 'gitlab',
       });
       const content = await local.getPreset({
         repo: 'some/repo',
@@ -272,7 +271,7 @@ describe('config/presets/local/index', () => {
     });
 
     it('forwards to gitlab with a tag', async () => {
-      GlobalConfig.set({ platform: 'GitLab' });
+      GlobalConfig.set({ platform: 'gitlab' });
       const content = await local.getPreset({
         repo: 'some/repo',
         presetName: 'default',

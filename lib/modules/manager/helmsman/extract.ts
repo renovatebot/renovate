@@ -3,7 +3,11 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { HelmsmanDocument } from './types';
 
 const chartRegex = regEx('^(?<registryRef>[^/]*)/(?<packageName>[^/]*)$');
@@ -53,7 +57,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   try {
     // TODO: fix me (#9610)
     const doc = load(content, {

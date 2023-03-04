@@ -9,8 +9,11 @@ import type {
 } from '../../http/github';
 import type { HttpResponse } from '../../http/types';
 import { getApiBaseUrl } from '../url';
+import { GithubGraphqlMemoryCacheStrategy } from './cache-strategies/memory-cache-strategy';
+import { GithubGraphqlPackageCacheStrategy } from './cache-strategies/package-cache-strategy';
 import type {
   GithubDatasourceItem,
+  GithubGraphqlCacheStrategy,
   GithubGraphqlDatasourceAdapter,
   GithubGraphqlPayload,
   GithubGraphqlRepoParams,
@@ -65,7 +68,7 @@ export class GithubGraphqlDatasourceFetcher<
 
   private cursor: string | null = null;
 
-  private isCacheable = false;
+  private isCacheable: boolean | null = null;
 
   constructor(
     packageConfig: GithubPackageConfig,
@@ -80,13 +83,12 @@ export class GithubGraphqlDatasourceFetcher<
     this.baseUrl = getApiBaseUrl(registryUrl).replace(/\/v3\/$/, '/'); // Replace for GHE
   }
 
-  private getFingerprint(): string {
-    return [
-      this.baseUrl,
-      this.repoOwner,
-      this.repoName,
-      this.datasourceAdapter.key,
-    ].join(':');
+  private getCacheNs(): string {
+    return this.datasourceAdapter.key;
+  }
+
+  private getCacheKey(): string {
+    return [this.baseUrl, this.repoOwner, this.repoName].join(':');
   }
 
   private getRawQueryOptions(): GithubHttpOptions {
@@ -157,8 +159,10 @@ export class GithubGraphqlDatasourceFetcher<
 
     this.queryCount += 1;
 
-    if (!this.isCacheable && data.repository.isRepoPrivate === false) {
-      this.isCacheable = true;
+    if (this.isCacheable === null) {
+      // For values other than explicit `false`,
+      // we assume that items can not be cached.
+      this.isCacheable = data.repository.isRepoPrivate === false;
     }
 
     const res = data.repository.payload;
@@ -211,31 +215,58 @@ export class GithubGraphqlDatasourceFetcher<
     return res;
   }
 
-  private async doPaginatedQuery(): Promise<ResultItem[]> {
-    const resultItems: ResultItem[] = [];
+  private _cacheStrategy: GithubGraphqlCacheStrategy<ResultItem> | undefined;
 
-    let hasNextPage: boolean | undefined = true;
-    let cursor: string | undefined;
-    while (hasNextPage && !this.hasReachedQueryLimit()) {
+  private cacheStrategy(): GithubGraphqlCacheStrategy<ResultItem> {
+    if (this._cacheStrategy) {
+      return this._cacheStrategy;
+    }
+    const cacheNs = this.getCacheNs();
+    const cacheKey = this.getCacheKey();
+    this._cacheStrategy = this.isCacheable
+      ? new GithubGraphqlPackageCacheStrategy<ResultItem>(cacheNs, cacheKey)
+      : new GithubGraphqlMemoryCacheStrategy<ResultItem>(cacheNs, cacheKey);
+    return this._cacheStrategy;
+  }
+
+  private async doPaginatedQuery(): Promise<ResultItem[]> {
+    let hasNextPage = true;
+    let isPaginationDone = false;
+    let nextCursor: string | undefined;
+    while (hasNextPage && !isPaginationDone && !this.hasReachedQueryLimit()) {
       const queryResult = await this.doShrinkableQuery();
 
+      const resultItems: ResultItem[] = [];
       for (const node of queryResult.nodes) {
         const item = this.datasourceAdapter.transform(node);
-        // istanbul ignore if: will be tested later
         if (!item) {
+          logger.once.info(
+            {
+              packageName: `${this.repoOwner}/${this.repoName}`,
+              baseUrl: this.baseUrl,
+            },
+            `GitHub GraphQL datasource: skipping empty item`
+          );
           continue;
         }
         resultItems.push(item);
       }
 
-      hasNextPage = queryResult?.pageInfo?.hasNextPage;
-      cursor = queryResult?.pageInfo?.endCursor;
-      if (hasNextPage && cursor) {
-        this.cursor = cursor;
+      // It's important to call `getCacheStrategy()` after `doShrinkableQuery()`
+      // because `doShrinkableQuery()` may change `this.isCacheable`.
+      //
+      // Otherwise, cache items for public packages will never be persisted
+      // in long-term cache.
+      isPaginationDone = await this.cacheStrategy().reconcile(resultItems);
+
+      hasNextPage = !!queryResult?.pageInfo?.hasNextPage;
+      nextCursor = queryResult?.pageInfo?.endCursor;
+      if (hasNextPage && nextCursor) {
+        this.cursor = nextCursor;
       }
     }
 
-    return resultItems;
+    return this.cacheStrategy().finalize();
   }
 
   /**
@@ -244,8 +275,7 @@ export class GithubGraphqlDatasourceFetcher<
    * Instead, it ensures that same package release is not fetched twice.
    */
   private doConcurrentQuery(): Promise<ResultItem[]> {
-    const packageFingerprint = this.getFingerprint();
-    const cacheKey = `github-datasource-promises:${packageFingerprint}`;
+    const cacheKey = `github-pending:${this.getCacheNs()}:${this.getCacheKey()}`;
     const resultPromise =
       memCache.get<Promise<ResultItem[]>>(cacheKey) ?? this.doPaginatedQuery();
     memCache.set(cacheKey, resultPromise);

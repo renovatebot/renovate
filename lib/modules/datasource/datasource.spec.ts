@@ -30,7 +30,7 @@ describe('modules/datasource/datasource', () => {
     httpMock.scope(exampleUrl).get('/').reply(429);
 
     await expect(
-      testDatasource.getReleases(partial<GetReleasesConfig>({}))
+      testDatasource.getReleases(partial<GetReleasesConfig>())
     ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
 });

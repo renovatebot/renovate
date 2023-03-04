@@ -6,9 +6,7 @@ import { qAssignments } from './assignments';
 import {
   REGISTRY_URLS,
   cleanupTempVars,
-  qPropertyAccessIdentifier,
-  qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -24,13 +22,9 @@ const qUri = q
   .alt(
     q.sym<Ctx>('uri').tree({
       maxDepth: 1,
-      search: q.alt<Ctx>(
-        qTemplateString,
-        qPropertyAccessIdentifier,
-        qVariableAccessIdentifier
-      ),
+      search: qValueMatcher,
     }),
-    q.alt(qTemplateString, qPropertyAccessIdentifier, qVariableAccessIdentifier)
+    qValueMatcher
   )
   .handler((ctx) => storeInTokenMap(ctx, 'registryUrl'));
 
@@ -76,11 +70,7 @@ const qCustomRegistryUrl = q
         q
           .sym<Ctx>('name')
           .opt(q.op('='))
-          .alt(
-            qTemplateString,
-            qPropertyAccessIdentifier,
-            qVariableAccessIdentifier
-          )
+          .join(qValueMatcher)
           .handler((ctx) => storeInTokenMap(ctx, 'name')),
         q.sym<Ctx>('url').opt(q.op('=')).join(qUri),
         q.sym<Ctx>('setUrl').tree({

@@ -1,7 +1,24 @@
+import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
+import * as _exec from '../exec';
 import * as template from '.';
 
+jest.mock('../exec');
+
+const exec = mocked(_exec);
+
 describe('util/template/index', () => {
+  beforeEach(() => {
+    exec.getChildEnv.mockReturnValue({
+      CUSTOM_FOO: 'foo',
+      HOME: '/root',
+    });
+  });
+
+  it('returns empty string if cannot compile', () => {
+    expect(template.safeCompile('{{abc', {})).toBe('');
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
@@ -83,6 +100,18 @@ describe('util/template/index', () => {
     const userTemplate = "{{{ lowercase 'FOO'}}}";
     const output = template.compile(userTemplate, undefined as never);
     expect(output).toBe('foo');
+  });
+
+  it('has access to basic environment variables (basicEnvVars)', () => {
+    const userTemplate = 'HOME is {{env.HOME}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('HOME is /root');
+  });
+
+  it('and has access to custom variables (customEnvVariables)', () => {
+    const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('CUSTOM_FOO is foo');
   });
 
   describe('proxyCompileInput', () => {

@@ -1,10 +1,16 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
-import { queryTags } from '../../../util/github/graphql';
-import type { GithubRestRef } from '../../../util/github/types';
+import { queryReleases, queryTags } from '../../../util/github/graphql';
+import type { GithubReleaseItem } from '../../../util/github/graphql/types';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
-import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
+import type {
+  DigestConfig,
+  GetReleasesConfig,
+  Release,
+  ReleaseResult,
+} from '../types';
 
 export class GithubTagsDatasource extends Datasource {
   static readonly id = 'github-tags';
@@ -20,29 +26,38 @@ export class GithubTagsDatasource extends Datasource {
 
   async getTagCommit(
     registryUrl: string | undefined,
-    githubRepo: string,
+    packageName: string,
     tag: string
   ): Promise<string | null> {
-    const apiBaseUrl = getApiBaseUrl(registryUrl);
-    let digest: string | null = null;
+    logger.trace(`github-tags.getTagCommit(${packageName}, ${tag})`);
     try {
-      const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
-      const res = (await this.http.getJson<GithubRestRef>(url)).body.object;
-      if (res.type === 'commit') {
-        digest = res.sha;
-      } else if (res.type === 'tag') {
-        digest = (await this.http.getJson<GithubRestRef>(res.url)).body.object
-          .sha;
+      const tags = await queryTags({ packageName, registryUrl }, this.http);
+      // istanbul ignore if
+      if (!tags.length) {
+        logger.debug(
+          `github-tags.getTagCommit(): No tags found for ${packageName}`
+        );
+      }
+      const tagItem = tags.find(({ version }) => version === tag);
+      if (tagItem) {
+        if (tagItem.hash) {
+          return tagItem.hash;
+        }
+        logger.debug(
+          `github-tags.getTagCommit(): Tag ${tag} has no hash for ${packageName}`
+        );
       } else {
-        logger.warn({ res }, 'Unknown git tag refs type');
+        logger.debug(
+          `github-tags.getTagCommit(): Tag ${tag} not found for ${packageName}`
+        );
       }
     } catch (err) {
       logger.debug(
-        { githubRepo, err },
+        { githubRepo: packageName, err },
         'Error getting tag commit from GitHub repo'
       );
     }
-    return digest;
+    return null;
   }
 
   async getCommit(
@@ -85,13 +100,37 @@ export class GithubTagsDatasource extends Datasource {
   ): Promise<ReleaseResult> {
     const { registryUrl, packageName: repo } = config;
     const sourceUrl = getSourceUrl(repo, registryUrl);
-    const tags = await queryTags(config, this.http);
-    const releases = tags.map(({ version, releaseTimestamp, gitRef }) => ({
-      version,
-      releaseTimestamp,
-      gitRef,
-    }));
-    const dependency: ReleaseResult = { sourceUrl, releases };
+    const tagsResult = await queryTags(config, this.http);
+    const releases: Release[] = tagsResult.map(
+      ({ version, releaseTimestamp, gitRef }) => ({
+        version,
+        releaseTimestamp,
+        gitRef,
+      })
+    );
+
+    try {
+      // Fetch additional data from releases endpoint when possible
+      const releasesResult = await queryReleases(config, this.http);
+      const releasesMap = new Map<string, GithubReleaseItem>();
+      for (const release of releasesResult) {
+        releasesMap.set(release.version, release);
+      }
+
+      for (const release of releases) {
+        const isReleaseStable = releasesMap.get(release.version)?.isStable;
+        if (is.boolean(isReleaseStable)) {
+          release.isStable = isReleaseStable;
+        }
+      }
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, `Error fetching additional info for GitHub tags`);
+    }
+
+    const dependency: ReleaseResult = {
+      sourceUrl,
+      releases,
+    };
     return dependency;
   }
 }

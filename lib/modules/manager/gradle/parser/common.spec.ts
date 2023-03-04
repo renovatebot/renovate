@@ -98,13 +98,13 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: 'symbol', value: 'foo' }]),
-        partial<PackageVariables>({})
+        partial<PackageVariables>()
       )
     ).toBeNull();
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: '_', value: 'foo' }]),
-        partial<PackageVariables>({})
+        partial<PackageVariables>()
       )
     ).toBeNull();
   });

@@ -8,7 +8,7 @@ import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
-import { regEx } from '../../../util/regex';
+import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
   BranchStatusConfig,
@@ -31,20 +31,25 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
-import * as utils from './utils';
-import {
+import type {
   Account,
+  BitbucketStatus,
+  BranchResponse,
+  Config,
   EffectiveReviewer,
+  PagedResult,
   PrResponse,
+  RepoInfo,
   RepoInfoBody,
-  mergeBodyTransformer,
-} from './utils';
+} from './types';
+import * as utils from './utils';
+import { mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
-let config: utils.Config = {} as any;
+let config: Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
@@ -127,7 +132,7 @@ export async function getRawFile(
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
-    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    // Branch name contains slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
@@ -164,8 +169,8 @@ export async function initRepo({
     repository,
     username: opts.username,
     ignorePrAuthor,
-  } as utils.Config;
-  let info: utils.RepoInfo;
+  } as Config;
+  let info: RepoInfo;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -290,24 +295,21 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     return null;
   }
 
-  const res: any = {
-    displayNumber: `Pull Request #${pr.id}`,
+  const res: Pr = {
     ...utils.prInfo(pr),
   };
 
-  res.hasReviewers = is.nonEmptyArray(pr.reviewers);
+  if (is.nonEmptyArray(pr.reviewers)) {
+    res.reviewers = pr.reviewers
+      .map(({ uuid }) => uuid)
+      .filter(is.nonEmptyString);
+  }
 
   return res;
 }
 
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
-
-interface BranchResponse {
-  target: {
-    hash: string;
-  };
-}
 
 // Return the commit SHA for a branch
 async function getBranchCommit(
@@ -341,9 +343,9 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 async function getStatus(
   branchName: string,
   useCache = true
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<utils.BitbucketStatus>(
+  return utils.accumulateValues<BitbucketStatus>(
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
@@ -481,10 +483,10 @@ export function massageMarkdown(input: string): string {
   return smartTruncate(input, 50000)
     .replace(
       'you tick the rebase/retry checkbox',
-      'rename PR to start with "rebase!"'
+      'by renaming this PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -496,8 +498,6 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  const description = massageMarkdown(sanitize(body));
-
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
@@ -506,6 +506,8 @@ export async function ensureIssue({
   }
   try {
     let issues = await findOpenIssues(title);
+    const description = massageMarkdown(sanitize(body));
+
     if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
     }
@@ -515,6 +517,7 @@ export async function ensureIssue({
         await closeIssue(issue.id);
       }
       const [issue] = issues;
+
       if (
         issue.title !== title ||
         String(issue.content?.raw).trim() !== description.trim()
@@ -619,7 +622,12 @@ export async function addReviewers(
 
   const body = {
     title,
-    reviewers: reviewers.map((username: string) => ({ username })),
+    reviewers: reviewers.map((username: string) => {
+      const key = isUUID(username) ? 'uuid' : 'username';
+      return {
+        [key]: username,
+      };
+    }),
   };
 
   await bitbucketHttp.putJson(
@@ -667,7 +675,7 @@ async function sanitizeReviewers(
       if (msg === 'Malformed reviewers list') {
         logger.debug(
           { err },
-          'PR contains inactive reviewer accounts. Will try setting only active reviewers'
+          'PR contains reviewers that may be either inactive or no longer a member of this workspace. Will try setting only active reviewers'
         );
 
         // Validate that each previous PR reviewer account is still active
@@ -677,10 +685,12 @@ async function sanitizeReviewers(
           ).body;
 
           if (reviewerUser.account_status === 'active') {
-            sanitizedReviewers.push(reviewer);
+            // There are cases where an active user may still not be a member of a workspace
+            if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
+              sanitizedReviewers.push(reviewer);
+            }
           }
         }
-
         // Bitbucket returns a 400 if any of the PR reviewer accounts are no longer members of this workspace
       } else if (
         msg.endsWith(
@@ -692,21 +702,10 @@ async function sanitizeReviewers(
           'PR contains reviewer accounts which are no longer member of this workspace. Will try setting only member reviewers'
         );
 
-        const workspace = config.repository.split('/')[0];
-
         // Validate that each previous PR reviewer account is still a member of this workspace
         for (const reviewer of reviewers) {
-          try {
-            await bitbucketHttp.get(
-              `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
-            );
-
+          if (await isAccountMemberOfWorkspace(reviewer, config.repository)) {
             sanitizedReviewers.push(reviewer);
-          } catch (err) {
-            // HTTP 404: User cannot be found, or the user is not a member of this workspace.
-            if (err.response?.statusCode !== 404) {
-              throw err;
-            }
           }
         }
       } else {
@@ -718,6 +717,33 @@ async function sanitizeReviewers(
   }
 
   return undefined;
+}
+
+async function isAccountMemberOfWorkspace(
+  reviewer: Account,
+  repository: string
+): Promise<boolean> {
+  const workspace = repository.split('/')[0];
+
+  try {
+    await bitbucketHttp.get(
+      `/2.0/workspaces/${workspace}/members/${reviewer.uuid}`
+    );
+
+    return true;
+  } catch (err) {
+    // HTTP 404: User cannot be found, or the user is not a member of this workspace.
+    if (err.statusCode === 404) {
+      logger.debug(
+        { err },
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        `User ${reviewer.display_name} is not a member of the workspace ${workspace}. Will be removed from the PR`
+      );
+
+      return false;
+    }
+    throw err;
+  }
 }
 
 // Creates PR and returns PR number
@@ -738,7 +764,7 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+      await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;
