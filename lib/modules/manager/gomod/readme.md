@@ -36,7 +36,7 @@ For those running against `github.com`, this will be the default platform token.
 
 Next, all hostRules with both a token and matchHost will be fetched, except for any github.com one from above.
 
-Rules from this list will be converted to environment variable directives it they matchy any of the following characteristics:
+Rules from this list are converted to environment variable directives if they match _any_ of the following characteristics:
  - No hostType is defined, or
  - hostType is `go`, or
  - hostType is a platform (`github`, `gitlab`, `azure`, etc.)
