@@ -821,7 +821,8 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   let commitStatus: CombinedBranchStatus;
@@ -841,6 +842,18 @@ export async function getBranchStatus(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result'
   );
+  if (commitStatus.statuses && !internalChecksAsSuccess) {
+    commitStatus.statuses = commitStatus.statuses.filter(
+      (status) =>
+        status.state !== 'success' || !status.context?.startsWith('renovate/')
+    );
+    if (!commitStatus.statuses.length) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      commitStatus.state = 'pending';
+    }
+  }
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
   // API is supported in oldest available GHE version 2.19
   try {

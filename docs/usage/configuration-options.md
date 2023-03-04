@@ -1432,6 +1432,16 @@ If you wish for Renovate to process only select paths in the repository, use `in
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
 
+## internalChecksAsSuccess
+
+By default, internal Renovate checks such as `renovate/stability-days` are not counted towards a branch being "green" or not.
+This is primarily to prevent automerge when the only check is a passing Renovate check.
+
+Internal checks will always be counted/considered if they are in pending or failed states.
+If there are multiple passing checks for a branch, including non-Renovate ones, then this setting won't make any difference.
+
+Change this setting to `true` if you want to use internal Renovate checks towards a passing branch result.
+
 ## internalChecksFilter
 
 This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.

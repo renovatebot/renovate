@@ -204,7 +204,10 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(branchName: string): Promise<BranchStatus>;
+  getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
