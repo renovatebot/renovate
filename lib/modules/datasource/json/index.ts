@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
-import { joinUrlParts } from '../../../util/url';
+import jsonata from 'jsonata';
+import { readLocalFile } from '../../../util/fs';
+import { parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -8,6 +10,10 @@ export class JsonDatasource extends Datasource {
 
   override caching = true;
   override customRegistrySupport = true;
+
+  constructor() {
+    super(JsonDatasource.id);
+  }
 
   async getReleases({
     registryUrl,
@@ -18,15 +24,44 @@ export class JsonDatasource extends Datasource {
       return null;
     }
 
-    const test = (
-      await this.http.getJson<ReleaseResult>(
-        joinUrlParts(registryUrl, packageName)
-      )
-    ).body;
+    const url = parseUrl(registryUrl);
+    if (is.nullOrUndefined(url)) {
+      //TODO add logging
+      return null;
+    }
+
+    let response: string | null = null;
+    switch (url.protocol) {
+      case 'http':
+      case 'https':
+        response = (await this.http.get(registryUrl)).body;
+        break;
+      case 'file':
+        response = await readLocalFile(
+          registryUrl.replace('file://', ''),
+          'utf8'
+        );
+        break;
+      default:
+        //TODO logging
+        return null;
+    }
+
+    if (!is.nonEmptyString(response)) {
+      // TODO logging
+      return null;
+    }
+
+    const expression = jsonata(packageName);
+
+    const parsedResponse = await expression.evaluate(response);
+    if (!isReleaseResult(parsedResponse)) {
+      //TODO add logging
+      return null;
+    }
 
     // manually copy to prevent leaking data into other systems
-
-    const releases = test.releases.map((value) => {
+    const releases = parsedResponse.releases.map((value) => {
       return {
         version: value.version,
         isDeprecated: value.isDeprecated,
@@ -38,13 +73,24 @@ export class JsonDatasource extends Datasource {
     });
 
     const result: ReleaseResult = {
-      sourceUrl: test.sourceUrl,
-      sourceDirectory: test.sourceDirectory,
-      changelogUrl: test.changelogUrl,
-      homepage: test.homepage,
+      sourceUrl: parsedResponse.sourceUrl,
+      sourceDirectory: parsedResponse.sourceDirectory,
+      changelogUrl: parsedResponse.changelogUrl,
+      homepage: parsedResponse.homepage,
       releases,
     };
 
     return result;
   }
+}
+
+function isReleaseResult(input: unknown): input is ReleaseResult {
+  return (
+    is.plainObject(input) &&
+    is.nonEmptyArray(input?.releases) &&
+    input.releases.every(
+      (release) =>
+        is.plainObject(release) && !is.nullOrUndefined(release?.version)
+    )
+  );
 }

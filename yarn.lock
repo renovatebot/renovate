@@ -6865,6 +6865,11 @@ json5@^1.0.2:
   dependencies:
     minimist "^1.2.0"
 
+jsonata@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/jsonata/-/jsonata-2.0.2.tgz#e41eb01e2aa05ac3cca3d25c04dd1ad3c4e0f723"
+  integrity sha512-CpwbpFNjuuukU+tIR6Qw+fhwQQ5iZGbB/Md8CVaU7/b/SI1RlQQVgf4rIEjoiG9/jDB7C45nKKwHXWKHQxvb7w==
+
 jsonfile@^6.0.1:
   version "6.1.0"
   resolved "https://registry.yarnpkg.com/jsonfile/-/jsonfile-6.1.0.tgz#bc55b2634793c679ec6403094eb13698a6ec0aae"

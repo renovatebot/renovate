@@ -1,18 +1,7 @@
 The `json` datasource allows to gather dependency information from generic endpoints or files.
-These files or endpoint have to contain or return valid json objects list in the following format
+These files or endpoints have to contain or return valid json objects in the following format:
 
-Allowed inputs:
-
-```js
-{
-  registryUrl: 'https://my.api.com/org';
-  packageName: 'mytest/package';
-}
-```
-
-Will result in a call to `https://my.api.com/org/mytest`
-
-Minimal JSON
+Minimal supported returned object:
 
 ```json
 {
@@ -47,3 +36,98 @@ Complete supported object
   "homepage": "https://demo.org"
 }
 ```
+
+`packageName` will be interpreted as [JSONata](https://jsonata.org/) query.
+`registryUrl` is used to define an endpoint ( prefixed with `http://` or `https://`) or a local file ( prefixed with `file://`)
+
+### Examples
+
+#### One endpoint per dependency
+
+API returns:
+
+```json
+{
+  "releases": [
+    {
+      "version": "v1.1.0"
+    },
+    {
+      "version": "v1.2.0"
+    }
+  ]
+}
+```
+
+Datasource input:
+
+```json
+{
+  "registryUrl": "https://my.api.com/org/mytest/package",
+  "packageName": "*"
+}
+```
+
+Will result in a call to `https://my.api.com/org/mytest/package` and the result will be directly used.
+
+#### Multiple packages per endpoint
+
+API returns:
+
+```json
+{
+  "package": {
+    "releases": [
+      {
+        "version": "v1.1.0"
+      },
+      {
+        "version": "v1.2.0"
+      }
+    ]
+  }
+}
+```
+
+Datasource input:
+
+```json
+{
+  "registryUrl": "https://my.api.com/org/mytest",
+  "packageName": "package"
+}
+```
+
+Will result in a call to `https://my.api.com/org/mytest` and a lookup for the `package` in the result.
+
+#### Multiple packages with namespaces
+
+API returns:
+
+```json
+{
+  "namespace": {
+    "package": {
+      "releases": [
+        {
+          "version": "v1.1.0"
+        },
+        {
+          "version": "v1.2.0"
+        }
+      ]
+    }
+  }
+}
+```
+
+Datasource input:
+
+```json
+{
+  "registryUrl": "https://my.api.com/org/mytest",
+  "packageName": "namespace.package"
+}
+```
+
+Will also result in a call to `https://my.api.com/org/mytest` and a lookup for the `package` in the result.
