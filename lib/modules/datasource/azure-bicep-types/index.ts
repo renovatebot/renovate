@@ -1,6 +1,5 @@
 import type { z } from 'zod';
 import { logger } from '../../../logger';
-import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BicepTypeIndex } from './schema';
@@ -38,10 +37,6 @@ export class AzureBicepTypesDatasource extends Datasource {
     };
   }
 
-  @cache({
-    namespace: `datasource-${AzureBicepTypesDatasource.id}`,
-    key: 'getResourceVersionIndex',
-  })
   async getResourceVersionIndex(): Promise<Map<string, string[]>> {
     const res = await this.getBicepTypeIndex();
 
