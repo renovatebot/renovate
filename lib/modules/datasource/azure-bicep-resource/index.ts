@@ -28,11 +28,18 @@ export class AzureBicepResourceDatasource extends Datasource {
       return null;
     }
 
-    logger.info(versions.join(', '));
+    const firstSlashIndex = packageName.indexOf('/');
+    const namespaceProvider = packageName
+      .slice(0, firstSlashIndex)
+      .toLowerCase();
+    const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
+
+    const changeLogUrl = `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
 
     return {
       releases: versions.map((x) => ({
         version: x,
+        changeLogUrl, // TODO: does not show up in PR yet?
       })),
     };
   }
