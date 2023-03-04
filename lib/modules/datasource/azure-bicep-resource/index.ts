@@ -7,11 +7,11 @@ import { BicepTypeIndex } from './schema';
 const BICEP_TYPES_INDEX_URL =
   'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';
 
-export class AzureBicepTypesDatasource extends Datasource {
-  static readonly id = 'azure-bicep-types';
+export class AzureBicepResourceDatasource extends Datasource {
+  static readonly id = 'azure-bicep-resource';
 
   constructor() {
-    super(AzureBicepTypesDatasource.id);
+    super(AzureBicepResourceDatasource.id);
   }
 
   async getReleases(

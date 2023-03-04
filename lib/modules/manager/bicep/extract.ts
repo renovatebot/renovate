@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { AzureBicepTypesDatasource } from '../../datasource/azure-bicep-types';
+import { AzureBicepResourceDatasource } from '../../datasource/azure-bicep-resource';
 import type {
   ExtractConfig,
   PackageDependency,
@@ -33,7 +33,7 @@ export function extractPackageFile(
     const { depName, currentValue } = matches.groups;
 
     deps.push({
-      datasource: AzureBicepTypesDatasource.id,
+      datasource: AzureBicepResourceDatasource.id,
       versioning: 'azure-rest-api',
       depName,
       currentValue,
