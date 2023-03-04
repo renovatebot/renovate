@@ -11,7 +11,7 @@ export const gitRefLabel = 'org.opencontainers.image.revision';
 const JFROG_ARTIFACTORY_RES_HEADER = 'x-jfrog-version';
 
 export function isArtifactoryServer(
-  res: HttpResponse | HttpResponse<{ tags: string[] }> | undefined
+  res: HttpResponse<unknown> | undefined
 ): boolean {
   return is.string(res?.headers[JFROG_ARTIFACTORY_RES_HEADER]);
 }
