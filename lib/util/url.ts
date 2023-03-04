@@ -30,6 +30,12 @@ export function trimLeadingSlash(path: string): string {
   return path.replace(/^\/+/, '');
 }
 
+/**
+ * Resolves an input path against a base URL
+ *
+ * @param baseUrl - base URL to resolve against
+ * @param input - input path (if this is a full URL, it will be returned)
+ */
 export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   const inputString = input.toString();
 
@@ -42,6 +48,21 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
   }
 
   return host ? inputString : urlJoin(baseUrl, pathname || '');
+}
+
+/**
+ * Replaces the path of a URL with a new path
+ *
+ * @param baseUrl - source URL
+ * @param path - replacement path (if this is a full URL, it will be returned)
+ */
+export function replaceUrlPath(baseUrl: string | URL, path: string): string {
+  if (parseUrl(path)) {
+    return path;
+  }
+
+  const { origin } = is.string(baseUrl) ? new URL(baseUrl) : baseUrl;
+  return urlJoin(origin, path);
 }
 
 export function getQueryString(params: Record<string, any>): string {
