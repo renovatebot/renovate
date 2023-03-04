@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile as extract } from '.';
 
@@ -377,6 +378,64 @@ describe('modules/manager/sbt/extract', () => {
         ],
         packageFileVersion: undefined,
       });
+    });
+
+    it('extract sbt version', () => {
+      expect(
+        extract(
+          codeBlock`
+            sbt.version=1.6.0
+          `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt/sbt',
+            currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
+    it('extract sbt version if the file contains other properties', () => {
+      expect(
+        extract(
+          codeBlock`
+            sbt.version=1.6.0
+            another.conf=1.4.0
+          `,
+          'project/build.properties'
+        )
+      ).toMatchObject({
+        deps: [
+          {
+            datasource: 'github-releases',
+            packageName: 'sbt/sbt',
+            depName: 'sbt/sbt',
+            currentValue: '1.6.0',
+            replaceString: 'sbt.version=1.6.0',
+            versioning: 'semver',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+        ],
+      });
+    });
+
+    it('ignores build.properties file if does not contain sbt version', () => {
+      expect(
+        extract(
+          codeBlock`
+            another.conf=1.4.0
+          `,
+          'project/build.properties'
+        )
+      ).toBeNull();
     });
   });
 });

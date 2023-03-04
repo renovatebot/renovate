@@ -14,15 +14,15 @@ export function getElapsedMinutes(date: Date): number {
 }
 
 export function getElapsedHours(date: Date | string): number {
-  const lastDate =
+  const pastDate =
     typeof date === 'string'
       ? DateTime.fromISO(date)
       : DateTime.fromJSDate(date);
 
-  if (!lastDate.isValid) {
+  if (!pastDate.isValid) {
     return 0;
   }
 
-  const diff = DateTime.now().diff(lastDate, 'hours');
+  const diff = DateTime.now().diff(pastDate, 'hours');
   return Math.floor(diff.hours);
 }

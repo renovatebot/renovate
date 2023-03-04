@@ -57,10 +57,10 @@ describe('modules/datasource/packagist/index', () => {
       const packagesOnly = {
         packages: {
           'vendor/package-name': {
-            'dev-master': {},
-            '1.0.x-dev': {},
-            '0.0.1': {},
-            '1.0.0': {},
+            'dev-master': { version: 'dev-master' },
+            '1.0.x-dev': { version: '1.0.x-dev' },
+            '0.0.1': { version: '0.0.1' },
+            '1.0.0': { version: '1.0.0' },
           },
         },
       };
@@ -84,6 +84,8 @@ describe('modules/datasource/packagist/index', () => {
         .replyWithError({ code: 'ETIMEDOUT' });
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/vendor/package-name2.json')
         .reply(200)
         .get('/p2/vendor/package-name2~dev.json')
@@ -104,6 +106,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(403);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/vendor/package-name.json')
         .reply(200)
         .get('/p2/vendor/package-name~dev.json')
@@ -124,6 +128,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(404);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
         .reply(200)
         .get('/p2/drewm/mailchimp-api~dev.json')
@@ -138,6 +144,39 @@ describe('modules/datasource/packagist/index', () => {
     });
 
     it('supports includes packages', async () => {
+      hostRules.find = jest.fn(() => ({
+        username: 'some-username',
+        password: 'some-password',
+      }));
+      const packagesJson = {
+        packages: [],
+        includes: {
+          'include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json':
+            {
+              sha256:
+                '093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86',
+            },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/packages.json')
+        .reply(200, packagesJson)
+        .get(
+          '/include/all$093530b127abe74defbf21affc9589bf713e4e08f898bf11986842f9956eda86.json'
+        )
+        .reply(200, includesJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'guzzlehttp/guzzle',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+
+    it('supports older sha1 hashes', async () => {
       hostRules.find = jest.fn(() => ({
         username: 'some-username',
         password: 'some-password',
@@ -162,8 +201,40 @@ describe('modules/datasource/packagist/index', () => {
         versioning,
         depName: 'guzzlehttp/guzzle',
       });
-      expect(res).toMatchSnapshot();
-      expect(res).not.toBeNull();
+      expect(res).toMatchObject({
+        homepage: 'http://guzzlephp.org/',
+        registryUrl: 'https://composer.renovatebot.com',
+        releases: [
+          { version: '3.0.0' },
+          { version: '3.0.1' },
+          { version: '3.0.2' },
+          { version: '3.0.3' },
+          { version: '3.0.4' },
+          { version: '3.0.5' },
+          { version: '3.0.6' },
+          { version: '3.0.7' },
+          { version: '3.1.0' },
+          { version: '3.1.1' },
+          { version: '3.1.2' },
+          { version: '3.2.0' },
+          { version: '3.3.0' },
+          { version: '3.3.1' },
+          { version: '3.4.0' },
+          { version: '3.4.1' },
+          { version: '3.4.2' },
+          { version: '3.4.3' },
+          { version: '3.5.0' },
+          { version: '3.6.0' },
+          { version: '3.7.0' },
+          { version: '3.7.1' },
+          { version: '3.7.2' },
+          { version: '3.7.3' },
+          { version: '3.7.4' },
+          { version: '3.8.0' },
+          { version: '3.8.1' },
+        ],
+        sourceUrl: 'https://github.com/guzzle/guzzle',
+      });
     });
 
     it('supports lazy repositories', async () => {
@@ -283,6 +354,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(200, fileJson);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/some/other.json')
         .reply(200, beytJson)
         .get('/p2/some/other~dev.json')
@@ -379,6 +452,8 @@ describe('modules/datasource/packagist/index', () => {
         .reply(200, packagesJson);
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/some/other.json')
         .reply(200, beytJson)
         .get('/p2/some/other~dev.json')
@@ -395,10 +470,10 @@ describe('modules/datasource/packagist/index', () => {
     it('processes real versioned data', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
-        .reply(200, mailchimpJson);
-      httpMock
-        .scope(baseUrl)
+        .reply(200, mailchimpJson)
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = ['https://packagist.org'];
@@ -415,10 +490,10 @@ describe('modules/datasource/packagist/index', () => {
     it('adds packagist source implicitly', async () => {
       httpMock
         .scope(baseUrl)
+        .get('/packages.json')
+        .reply(200, { 'metadata-url': '/p2/%package%.json' })
         .get('/p2/drewm/mailchimp-api.json')
-        .reply(200, mailchimpJson);
-      httpMock
-        .scope(baseUrl)
+        .reply(200, mailchimpJson)
         .get('/p2/drewm/mailchimp-api~dev.json')
         .reply(200, mailchimpDevJson);
       config.registryUrls = [];
@@ -430,6 +505,42 @@ describe('modules/datasource/packagist/index', () => {
           depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
+    });
+
+    it('fetches packagist V2 packages', async () => {
+      httpMock
+        .scope('https://example.com')
+        .get('/packages.json')
+        .reply(200, {
+          'metadata-url': 'https://example.com/p2/%package%.json',
+        })
+        .get('/p2/drewm/mailchimp-api.json')
+        .reply(200, {
+          minified: 'composer/2.0',
+          packages: {
+            'drewm/mailchimp-api': [
+              {
+                name: 'drewm/mailchimp-api',
+                version: 'v2.5.4',
+              },
+            ],
+          },
+        })
+        .get('/p2/drewm/mailchimp-api~dev.json')
+        .reply(404);
+      config.registryUrls = ['https://example.com'];
+
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'drewm/mailchimp-api',
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://example.com',
+        releases: [{ gitRef: 'v2.5.4', version: '2.5.4' }],
+      });
     });
   });
 });

@@ -2,7 +2,7 @@ import upath from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { DotnetDatasource } from '../../datasource/dotnet';
+import { DotnetVersionDatasource } from '../../datasource/dotnet-version';
 import type { ExtractConfig } from '../types';
 import { extractPackageFile } from '.';
 
@@ -250,7 +250,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            datasource: DotnetDatasource.id,
+            datasource: DotnetVersionDatasource.id,
           },
           {
             currentValue: '0.2.0',
@@ -273,7 +273,7 @@ describe('modules/manager/nuget/extract', () => {
             currentValue: '5.0.302',
             depName: 'dotnet-sdk',
             depType: 'dotnet-sdk',
-            datasource: DotnetDatasource.id,
+            datasource: DotnetVersionDatasource.id,
           },
         ],
       });

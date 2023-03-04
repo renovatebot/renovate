@@ -17,10 +17,6 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
   const cacheGet = jest.spyOn(packageCache, 'get');
   const cacheSet = jest.spyOn(packageCache, 'set');
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
   it('reconciles old cache record with new items', async () => {
     const oldItems = {
       '1': { version: '1', releaseTimestamp: isoTs('2020-01-01 10:00') },

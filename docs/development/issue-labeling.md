@@ -99,7 +99,7 @@ Use [this search](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is
 
 </details>
 
-Use these to assign a impact level to an issue.
+Use these to assign an impact level to an issue.
 Impact means risk to the end users or their use cases.
 It's used to identify which changes can be made relatively quickly versus those which require great care before merging, due to their chance of negatively impacting a wide number of users if there's a bug.
 It does _not_ mean "amount of work for the maintainers".

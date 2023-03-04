@@ -8,14 +8,18 @@ import {
 } from '../../datasource/kubernetes-api';
 import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { KubernetesConfiguration } from './types';
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
   const isKubernetesManifest =

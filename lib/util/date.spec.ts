@@ -30,7 +30,7 @@ describe('util/date', () => {
       expect(getElapsedHours(Jan1)).toBe(elapsedHours); // JS Date
     });
 
-    it('throws when invalid date is passed', () => {
+    it('returns zero when date passed is invalid', () => {
       expect(getElapsedHours(new Date('invalid_date_string'))).toBe(0);
     });
   });

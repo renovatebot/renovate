@@ -1,12 +1,13 @@
+import { codeBlock } from 'common-tags';
 import { parse } from './parser';
 import { extract } from './rules';
 
 describe('modules/manager/bazel/parser', () => {
   it('parses rules input', () => {
-    const input = [
-      'go_repository(name = "foo")',
-      'maybe(go_repository, name = "bar", deps = ["baz", "qux"])',
-    ].join('\n');
+    const input = codeBlock`
+      go_repository(name = "foo")
+      maybe(go_repository, name = "bar", deps = ["baz", "qux"])
+    `;
 
     const res = parse(input);
 
@@ -46,7 +47,7 @@ describe('modules/manager/bazel/parser', () => {
   });
 
   it('parses multiple archives', () => {
-    const input = `
+    const input = codeBlock`
       http_archive(
           name = "aspect_rules_js",
           sha256 = "db9f446752fe4100320cf8487e8fd476b9af0adf6b99b601bcfd70b289bb0598",
@@ -57,7 +58,8 @@ describe('modules/manager/bazel/parser', () => {
         name = "rules_nodejs",
         sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
         urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz"],
-      )`;
+      )
+    `;
 
     const res = parse(input);
 
@@ -120,11 +122,13 @@ describe('modules/manager/bazel/parser', () => {
   });
 
   it('parses http_archive', () => {
-    const input = `http_archive(
-          name = "rules_nodejs",
-          sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
-          url = "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz",
-    )`;
+    const input = codeBlock`
+      http_archive(
+        name = "rules_nodejs",
+        sha256 = "5aef09ed3279aa01d5c928e3beb248f9ad32dde6aafe6373a8c994c3ce643064",
+        url = "https://github.com/bazelbuild/rules_nodejs/releases/download/5.5.3/rules_nodejs-core-5.5.3.tar.gz",
+      )
+    `;
 
     const res = parse(input);
 
@@ -157,7 +161,8 @@ describe('modules/manager/bazel/parser', () => {
   });
 
   it('parses http_archive with prefixes and multiple urls', () => {
-    const input = `http_archive(
+    const input = codeBlock`
+      http_archive(
         name = "bazel_toolchains",
         sha256 = "4b1468b254a572dbe134cc1fd7c6eab1618a72acd339749ea343bd8f55c3b7eb",
         strip_prefix = "bazel-toolchains-d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4",
@@ -165,7 +170,8 @@ describe('modules/manager/bazel/parser', () => {
             "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
             "https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz",
         ],
-    )`;
+      )
+    `;
 
     const res = parse(input);
 
@@ -208,6 +214,58 @@ describe('modules/manager/bazel/parser', () => {
         urls: [
           'https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
           'https://github.com/bazelbuild/bazel-toolchains/archive/d665ccfa3e9c90fa789671bf4ef5f7c19c5715c4.tar.gz',
+        ],
+      },
+    ]);
+  });
+
+  it('parses Maven', () => {
+    const input = codeBlock`
+      maven_install(
+        artifacts = [
+          "com.example1:foo:1.1.1",
+          maven.artifact(
+            group = "com.example2",
+            artifact = "bar",
+            version = "2.2.2",
+          ),
+          maven.artifact(
+            "com.example3",
+            "baz",
+            "3.3.3",
+            neverlink = True
+          )
+        ],
+        repositories = [
+          "https://example1.com/maven2",
+          "https://example2.com/maven2",
+        ]
+      )
+    `;
+
+    const res = parse(input);
+
+    expect(res?.map(extract)).toEqual([
+      {
+        rule: 'maven_install',
+        artifacts: [
+          'com.example1:foo:1.1.1',
+          {
+            _function: 'maven.artifact',
+            group: 'com.example2',
+            artifact: 'bar',
+            version: '2.2.2',
+          },
+          {
+            _function: 'maven.artifact',
+            '0': 'com.example3',
+            '1': 'baz',
+            '2': '3.3.3',
+          },
+        ],
+        repositories: [
+          'https://example1.com/maven2',
+          'https://example2.com/maven2',
         ],
       },
     ]);

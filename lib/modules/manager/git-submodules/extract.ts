@@ -7,7 +7,7 @@ import { simpleGitConfig } from '../../../util/git/config';
 import { getHttpUrl, getRemoteUrlWithToken } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GitRefsDatasource } from '../../datasource/git-refs';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import type { GitModule } from './types';
 
 async function getUrl(
@@ -93,7 +93,7 @@ export default async function extractPackageFile(
   _content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   const { localDir } = GlobalConfig.get();
   const git = Git(localDir, simpleGitConfig());
   const gitModulesPath = upath.join(localDir, fileName);

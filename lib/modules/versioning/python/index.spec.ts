@@ -97,6 +97,6 @@ describe('modules/versioning/python/index', () => {
   );
 
   test('getNewValue()', () => {
-    expect(versioning.getNewValue(partial<NewValueConfig>({}))).toBeNull();
+    expect(versioning.getNewValue(partial<NewValueConfig>())).toBeNull();
   });
 });

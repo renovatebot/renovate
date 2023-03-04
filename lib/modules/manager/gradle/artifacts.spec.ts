@@ -36,12 +36,11 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -84,7 +83,7 @@ describe('modules/manager/gradle/artifacts', () => {
         content = 'New gradle.lockfile';
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.4-bin.zip';
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
       }
 
       return Promise.resolve(content);

@@ -14,7 +14,7 @@ const githubApiHost = 'https://api.github.com';
 const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
 const githubReleasesMock = jest.spyOn(githubGraphql, 'queryReleases');
 
-const upgrade: BranchConfig = partial<BranchConfig>({
+const upgrade = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
   depName: 'renovate',
   versioning: semverVersioning.id,
@@ -38,7 +38,6 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/repository/update/pr/changelog/index', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      jest.resetAllMocks();
       hostRules.clear();
       hostRules.add({
         hostType: 'github',
@@ -86,7 +85,12 @@ describe('workers/repository/update/pr/changelog/index', () => {
 
     it('works without Github', async () => {
       githubTagsMock.mockRejectedValueOnce(new Error('Unknown'));
-      githubReleasesMock.mockRejectedValueOnce(new Error('Unknown'));
+      // 4 versions, so 4 calls without cache
+      githubReleasesMock
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'))
+        .mockRejectedValueOnce(new Error('Unknown'));
       httpMock
         .scope(githubApiHost)
         .get('/repos/chalk/chalk')
@@ -182,8 +186,9 @@ describe('workers/repository/update/pr/changelog/index', () => {
     });
 
     it('supports node engines', async () => {
-      githubTagsMock.mockRejectedValueOnce([]);
-      githubReleasesMock.mockRejectedValueOnce([]);
+      githubTagsMock.mockResolvedValueOnce([]);
+      githubReleasesMock.mockResolvedValueOnce([]);
+      httpMock.scope(githubApiHost).get(/.*/).reply(200, []).persist();
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -207,8 +212,6 @@ describe('workers/repository/update/pr/changelog/index', () => {
           { version: '2.2.2' },
         ],
       });
-      // FIXME: missing mocks
-      httpMock.clear(false);
     });
 
     it('handles no sourceUrl', async () => {

@@ -3,6 +3,7 @@ import {
   ComposerRelease,
   ComposerReleases,
   MinifiedArray,
+  RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
@@ -111,18 +112,15 @@ describe('modules/datasource/packagist/schema', () => {
   });
 
   describe('ComposerReleases', () => {
-    it('rejects ComposerReleases', () => {
-      expect(() => ComposerReleases.parse(null)).toThrow();
-      expect(() => ComposerReleases.parse(undefined)).toThrow();
-      expect(() => ComposerReleases.parse('')).toThrow();
-      expect(() => ComposerReleases.parse({})).toThrow();
-    });
-
     it('parses ComposerReleases', () => {
-      expect(ComposerReleases.parse([])).toEqual([]);
-      expect(ComposerReleases.parse([null])).toEqual([]);
-      expect(ComposerReleases.parse([1, 2, 3])).toEqual([]);
-      expect(ComposerReleases.parse(['foobar'])).toEqual([]);
+      expect(ComposerReleases.parse(null)).toBeEmptyArray();
+      expect(ComposerReleases.parse(undefined)).toBeEmptyArray();
+      expect(ComposerReleases.parse('')).toBeEmptyArray();
+      expect(ComposerReleases.parse({})).toBeEmptyArray();
+      expect(ComposerReleases.parse([])).toBeEmptyArray();
+      expect(ComposerReleases.parse([null])).toBeEmptyArray();
+      expect(ComposerReleases.parse([1, 2, 3])).toBeEmptyArray();
+      expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
       expect(
         ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
       ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
@@ -140,6 +138,14 @@ describe('modules/datasource/packagist/schema', () => {
           packages: {
             'foo/bar': [{ version: '1.2.3' }],
             'baz/qux': [{ version: '4.5.6' }],
+          },
+        })
+      ).toEqual([{ version: '1.2.3' }]);
+      expect(
+        parsePackagesResponse('foo/bar', {
+          packages: {
+            'foo/bar': { '1.2.3': { version: '1.2.3' } },
+            'baz/qux': { '4.5.6': { version: '4.5.6' } },
           },
         })
       ).toEqual([{ version: '1.2.3' }]);
@@ -243,6 +249,21 @@ describe('modules/datasource/packagist/schema', () => {
           },
         ],
       } satisfies ReleaseResult);
+    });
+  });
+
+  describe('RegistryMeta', () => {
+    it('falls back to default values', () => {
+      expect(RegistryMeta.parse('nonsense')).toEqual({
+        files: [],
+        includesFiles: [],
+        packages: {},
+        providerPackages: {},
+        includesPackages: {},
+        providersLazyUrl: null,
+        providersUrl: null,
+        metadataUrl: null,
+      });
     });
   });
 });
