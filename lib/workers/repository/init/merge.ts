@@ -17,6 +17,7 @@ import {
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
@@ -55,6 +56,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     try {
       configFileRaw = await platform.getRawFile(configFileName);
     } catch (err) {
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
       configFileRaw = null;
     }
     if (configFileRaw) {
