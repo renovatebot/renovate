@@ -81,27 +81,19 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (!upgrade.newDigest) {
-    return true;
-  }
-
-  if (
-    upgrade.newDigest !== newUpgrade.currentDigest &&
-    (upgrade.currentDigest ||
-      (upgrade.pinDigests &&
-        upgrade.updateType === 'pinDigest' &&
-        !upgrade.currentDigest))
-  ) {
-    logger.debug(
-      {
-        manager,
-        packageFile,
-        expectedValue: upgrade.newDigest,
-        foundValue: newUpgrade.currentDigest,
-      },
-      'Digest is not updated'
-    );
-    return false;
+  if (upgrade.pinDigests || upgrade.currentDigest) {
+    if (upgrade.newDigest && upgrade.newDigest !== newUpgrade.currentDigest) {
+      logger.debug(
+        {
+          manager,
+          packageFile,
+          expectedValue: upgrade.newDigest,
+          foundValue: newUpgrade.currentDigest,
+        },
+        'Digest is not updated'
+      );
+      return false;
+    }
   }
 
   // istanbul ignore next
