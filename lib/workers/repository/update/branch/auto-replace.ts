@@ -81,7 +81,10 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (upgrade.pinDigests || upgrade.currentDigest) {
+  if (
+    upgrade.updateType !== 'replacement' &&
+    (upgrade.pinDigests || upgrade.currentDigest)
+  ) {
     if (upgrade.newDigest && upgrade.newDigest !== newUpgrade.currentDigest) {
       logger.debug(
         {
