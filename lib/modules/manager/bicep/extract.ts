@@ -23,13 +23,13 @@ export function extractPackageFile(
       continue;
     }
 
-    const matches = RESOURCE_REGEX.exec(trimmedLine);
+    const match = RESOURCE_REGEX.exec(trimmedLine);
 
-    if (!matches?.groups) {
+    if (!match?.groups) {
       continue;
     }
 
-    const { depName, currentValue } = matches.groups;
+    const { depName, currentValue } = match.groups;
 
     deps.push({
       datasource: AzureBicepResourceDatasource.id,
@@ -37,7 +37,7 @@ export function extractPackageFile(
       depName,
       currentValue,
       autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
-      replaceString: `'${depName}@${currentValue}'`,
+      replaceString: match[0],
     });
   }
 
