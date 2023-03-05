@@ -47,11 +47,13 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: config.azureAutoApprove,
-    azureWorkItemId: config.azureWorkItemId,
-    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
-    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
+    azureAutoApprove: Boolean(config.azureAutoApprove),
+    azureWorkItemId: Number(config.azureWorkItemId),
+    bbUseDefaultReviewers: Boolean(config.bbUseDefaultReviewers),
+    gitLabIgnoreApprovals: Boolean(config.gitLabIgnoreApprovals),
+    forkModeDisallowMaintainerEdits: Boolean(
+      config.forkModeDisallowMaintainerEdits
+    ),
     usePlatformAutomerge,
   };
 }
@@ -385,7 +387,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: config.draftPR,
+          draftPR: Boolean(config.draftPR),
         });
 
         incLimitedValue('PullRequests');
