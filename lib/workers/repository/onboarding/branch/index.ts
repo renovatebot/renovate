@@ -28,7 +28,7 @@ export async function checkOnboardingBranch(
     logger.debug('Repo is onboarded');
     return { ...config, repoIsOnboarded };
   }
-  if (config.isFork && !config.includeForks) {
+  if (config.isFork && config.forkProcessing !== 'enabled') {
     throw new Error(REPOSITORY_FORKED);
   }
   logger.debug('Repo is not onboarded');

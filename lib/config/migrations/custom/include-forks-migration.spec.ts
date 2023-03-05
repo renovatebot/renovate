@@ -1,10 +1,10 @@
-import { RenovateForkMigration } from './renovate-fork-migration';
+import { RenovateForkMigration } from './include-forks-migration';
 
-describe('config/migrations/custom/renovate-fork-migration', () => {
+describe('config/migrations/custom/include-forks-migration', () => {
   it('should migrate true', () => {
     expect(RenovateForkMigration).toMigrate(
       {
-        renovateFork: true,
+        includeForks: true,
       },
       {
         forkProcessing: 'enabled',
@@ -15,7 +15,7 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
   it('should migrate false', () => {
     expect(RenovateForkMigration).toMigrate(
       {
-        renovateFork: false,
+        includeForks: false,
       },
       {
         forkProcessing: 'disabled',
@@ -26,7 +26,7 @@ describe('config/migrations/custom/renovate-fork-migration', () => {
   it('should not migrate non boolean value', () => {
     expect(RenovateForkMigration).toMigrate(
       {
-        renovateFork: 'test',
+        includeForks: 'test',
       },
       {}
     );

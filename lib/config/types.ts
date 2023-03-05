@@ -213,7 +213,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
