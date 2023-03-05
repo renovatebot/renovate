@@ -923,6 +923,16 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 !!! note
     This option is only relevant if you set `forkToken`.
 
+## forkProcessing
+
+By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
+This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
+
+If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
+
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
@@ -1416,14 +1426,6 @@ Renovate will also not "jump" unstable versions automatically, e.g. if you are o
 If you need to force permanent unstable updates for a package, you can add a package rule setting `ignoreUnstable` to `false`.
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
-
-## includeForks
-
-By default, Renovate will skip over any repositories that are forked.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
-
-If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
 
 ## includePaths
 

@@ -419,12 +419,13 @@ const options: RenovateOptions[] = [
     experimentalIssues: [17633],
   },
   {
-    name: 'includeForks',
+    name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
     stage: 'repository',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'forkToken',
