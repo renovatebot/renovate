@@ -134,9 +134,9 @@ function getUpdateImportPathCmds(
       depName: depName!,
       newMajor: major(newVersion!),
     }))
-    // Skip path upates going from v0 to v1
+    // Skip path updates going from v0 to v1
     .filter(
-      ({ depName, newMajor }) => !depName.startsWith('gopkg.in') && newMajor > 1
+      ({ depName, newMajor }) => depName.startsWith('gopkg.in') || newMajor > 1
     )
 
     .map(

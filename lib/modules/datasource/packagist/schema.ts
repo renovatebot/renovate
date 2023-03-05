@@ -1,7 +1,12 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { looseObject, looseRecord, looseValue } from '../../../util/schema';
+import {
+  looseArray,
+  looseObject,
+  looseRecord,
+  looseValue,
+} from '../../../util/schema';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -54,30 +59,37 @@ export const ComposerRelease = z
   );
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
+const ComposerReleasesLooseArray = looseArray(ComposerRelease);
+type ComposerReleasesLooseArray = z.infer<typeof ComposerReleasesLooseArray>;
+
 export const ComposerReleases = z
   .union([
-    z
-      .record(looseValue(ComposerRelease))
-      .transform((map) => Object.values(map)),
-    z.array(looseValue(ComposerRelease)),
+    MinifiedArray.transform((xs) => ComposerReleasesLooseArray.parse(xs)),
+    looseRecord(ComposerRelease).transform((map) => Object.values(map)),
   ])
-  .catch([])
-  .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
+  .catch([]);
 export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
-export const ComposerPackagesResponse = z.object({
-  packages: z.record(z.unknown()),
-});
+export const ComposerPackagesResponse = z
+  .object({
+    packageName: z.string(),
+    packagesResponse: z.object({
+      packages: z.record(z.unknown()),
+    }),
+  })
+  .transform(
+    ({ packageName, packagesResponse }) =>
+      packagesResponse.packages[packageName]
+  )
+  .transform((xs) => ComposerReleases.parse(xs));
+export type ComposerPackagesResponse = z.infer<typeof ComposerPackagesResponse>;
 
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
 ): ComposerReleases {
   try {
-    const { packages } = ComposerPackagesResponse.parse(packagesResponse);
-    const array = MinifiedArray.parse(packages[packageName]);
-    const releases = ComposerReleases.parse(array);
-    return releases;
+    return ComposerPackagesResponse.parse({ packageName, packagesResponse });
   } catch (err) {
     logger.debug(
       { packageName, err },
@@ -155,10 +167,20 @@ export function parsePackagesResponses(
   return extractReleaseResult(...releaseArrays);
 }
 
-export const RegistryFile = z.object({
-  key: z.string(),
-  sha256: z.string(),
-});
+export const HashSpec = z.union([
+  z
+    .object({ sha256: z.string().nullable() })
+    .transform(({ sha256 }) => ({ hash: sha256 })),
+  z
+    .object({ sha1: z.string().nullable() })
+    .transform(({ sha1 }) => ({ hash: sha1 })),
+]);
+export type HashSpec = z.infer<typeof HashSpec>;
+
+export const RegistryFile = z.intersection(
+  HashSpec,
+  z.object({ key: z.string() })
+);
 export type RegistryFile = z.infer<typeof RegistryFile>;
 
 export const PackagesResponse = z.object({
@@ -168,13 +190,9 @@ export type PackagesResponse = z.infer<typeof PackagesResponse>;
 
 export const PackagistFile = PackagesResponse.merge(
   z.object({
-    providers: looseRecord(
-      z.object({
-        sha256: looseValue(z.string()),
-      })
-    ).transform((x) =>
+    providers: looseRecord(HashSpec).transform((x) =>
       Object.fromEntries(
-        Object.entries(x).map(([key, { sha256 }]) => [key, sha256])
+        Object.entries(x).map(([key, { hash }]) => [key, hash])
       )
     ),
   })
@@ -186,25 +204,15 @@ export const RegistryMeta = z
     (x) => (is.plainObject(x) ? x : {}),
     PackagistFile.merge(
       z.object({
-        ['includes']: looseRecord(
-          z.object({
-            sha256: z.string(),
-          })
-        ).transform((x) =>
-          Object.entries(x).map(([name, { sha256 }]) => ({
-            key: name.replace(sha256, '%hash%'),
-            sha256,
-          }))
+        ['includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
         ),
-        ['provider-includes']: looseRecord(
-          z.object({
-            sha256: z.string(),
-          })
-        ).transform((x) =>
-          Object.entries(x).map(([key, { sha256 }]) => ({ key, sha256 }))
+        ['provider-includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
         ),
         ['providers-lazy-url']: looseValue(z.string()),
         ['providers-url']: looseValue(z.string()),
+        ['metadata-url']: looseValue(z.string()),
       })
     )
   )
@@ -216,6 +224,7 @@ export const RegistryMeta = z
       ['providers']: providerPackages,
       ['providers-lazy-url']: providersLazyUrl,
       ['providers-url']: providersUrl,
+      ['metadata-url']: metadataUrl,
     }) => ({
       packages,
       includesFiles,
@@ -223,6 +232,7 @@ export const RegistryMeta = z
       files,
       providersUrl,
       providersLazyUrl,
+      metadataUrl,
       includesPackages: {} as Record<string, ReleaseResult | null>,
     })
   );

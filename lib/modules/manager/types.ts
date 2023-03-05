@@ -110,7 +110,7 @@ export interface PackageDependency<T = Record<string, any>>
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  packageName?: string | null;
+  packageName?: string;
   target?: string;
   versioning?: string;
   dataType?: string;
@@ -143,7 +143,6 @@ export interface PackageDependency<T = Record<string, any>>
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
-  depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
