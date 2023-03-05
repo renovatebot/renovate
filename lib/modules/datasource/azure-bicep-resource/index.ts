@@ -1,4 +1,5 @@
 import type { z } from 'zod';
+import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BicepTypeIndex } from './schema';
@@ -13,6 +14,10 @@ export class AzureBicepResourceDatasource extends Datasource {
     super(AzureBicepResourceDatasource.id);
   }
 
+  @cache({
+    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+    key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
+  })
   async getReleases(
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
@@ -41,7 +46,12 @@ export class AzureBicepResourceDatasource extends Datasource {
     };
   }
 
-  private async getResourceVersionIndex(): Promise<Map<string, string[]>> {
+  @cache({
+    namespace: `datasource-${AzureBicepResourceDatasource.id}`,
+    key: 'getResourceVersionIndex',
+    ttlMinutes: 24 * 60,
+  })
+  async getResourceVersionIndex(): Promise<Map<string, string[]>> {
     const res = await this.getBicepTypeIndex();
 
     const releaseMap = new Map<string, string[]>();
