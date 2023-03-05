@@ -230,7 +230,13 @@ export async function doAutoReplace(
         );
       }
     }
-
+    if (!firstUpdate && (await confirmIfDepUpdated(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Package file is already updated - no work to do'
+      );
+      return existingContent;
+    }
     logger.debug(
       { packageFile, depName },
       `Starting search at index ${searchIndex}`
