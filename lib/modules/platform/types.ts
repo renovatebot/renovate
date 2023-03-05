@@ -38,7 +38,7 @@ export interface RepoParams {
   endpoint?: string;
   gitUrl?: GitUrlOption;
   forkToken?: string;
-  includeForks?: boolean;
+  forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
