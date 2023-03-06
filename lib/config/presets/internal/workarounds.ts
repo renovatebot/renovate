@@ -37,7 +37,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         allowedVersions: '<20000000',
-        matchCurrentVersion: '<20000000',
+        matchCurrentVersion: '!/^\\d{8}$/',
         matchDatasources: ['docker'],
         matchPackageNames: ['alpine'],
       },
@@ -76,13 +76,13 @@ export const presets: Record<string, Preset> = {
     ],
   },
   javaLTSVersions: {
-    description: 'Limit Java runtime versions to LTS releases',
+    description: 'Limit Java runtime versions to LTS releases.',
     packageRules: [
       {
-        allowedVersions: '/^(?:8|11|17|21|25|29)(?:\\.|$)/',
+        allowedVersions: '/^(?:8|11|17)(?:\\.|-|$)/',
         description:
           'Limit Java runtime versions to LTS releases. To receive all major releases add `workarounds:javaLTSVersions` to the `ignorePresets` array.',
-        matchDatasources: ['docker', 'adoptium-java'],
+        matchDatasources: ['docker', 'java-version'],
         matchPackageNames: [
           'eclipse-temurin',
           'amazoncorretto',
@@ -119,7 +119,7 @@ export const presets: Record<string, Preset> = {
   },
   supportRedHatImageVersion: {
     description:
-      'Use specific versioning for Red Hat-maintained container images',
+      'Use specific versioning for Red Hat-maintained container images.',
     packageRules: [
       {
         matchDatasources: ['docker'],

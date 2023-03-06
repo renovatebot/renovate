@@ -7,7 +7,7 @@
     ":updateNotScheduled",
     ":automergeDisabled",
     ":maintainLockFilesDisabled",
-    ":autodetectPinVersions",
+    ":autodetectRangeStrategy",
     "group:monorepos"
   ],
   "onboarding": false,

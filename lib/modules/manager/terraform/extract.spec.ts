@@ -4,6 +4,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as hashicorp from '../../versioning/hashicorp';
 import { extractPackageFile } from '.';
 
 const modules = Fixtures?.get('modules.tf');
@@ -401,8 +402,8 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts docker resources', async () => {
       const res = await extractPackageFile(docker, 'docker.tf', {});
-      expect(res?.deps).toHaveLength(8);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
           autoReplaceStringTemplate:
@@ -414,6 +415,7 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          depType: 'docker_image',
           skipReason: 'invalid-dependency-specification',
         },
         {
@@ -434,6 +436,7 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          depType: 'docker_container',
           skipReason: 'invalid-dependency-specification',
         },
         {
@@ -445,12 +448,6 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'repo.mycompany.com:8080/foo-service',
           depType: 'docker_service',
           replaceString: 'repo.mycompany.com:8080/foo-service:v1',
-        },
-        {
-          skipReason: 'invalid-dependency-specification',
-        },
-        {
-          skipReason: 'invalid-value',
         },
       ]);
     });
@@ -504,7 +501,10 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.21.5',
           depType: 'kubernetes_job',
         },
-        { skipReason: 'invalid-value' },
+        {
+          depType: 'kubernetes_job',
+          skipReason: 'invalid-dependency-specification',
+        },
         {
           depName: 'nginx',
           currentValue: '1.21.6',
@@ -553,9 +553,20 @@ describe('modules/manager/terraform/extract', () => {
       ]);
     });
 
-    it('returns null if only local deps', async () => {
+    it('returns dep with skipReason local', async () => {
       const src = codeBlock`
         module "relative" {
+          source = "../fe"
+        }
+      `;
+      expect(await extractPackageFile(src, '2.tf', {})).toMatchObject({
+        deps: [{ skipReason: 'local' }],
+      });
+    });
+
+    it('returns null with only not added resources', async () => {
+      const src = codeBlock`
+        resource "test_resource" "relative" {
           source = "../fe"
         }
       `;
@@ -564,7 +575,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extract helm releases', async () => {
       const res = await extractPackageFile(helm, 'helm.tf', {});
-      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toHaveLength(8);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
@@ -584,7 +595,6 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: './charts/example',
           depType: 'helm_release',
-          registryUrls: [undefined],
           skipReason: 'local-chart',
         },
         {
@@ -607,7 +617,19 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: 'redis',
           depType: 'helm_release',
-          registryUrls: [undefined],
+        },
+        {
+          currentValue: 'v0.22.1',
+          datasource: 'docker',
+          depName: 'public.ecr.aws/karpenter/karpenter',
+          depType: 'helm_release',
+        },
+        {
+          currentValue: 'v0.22.1',
+          datasource: 'docker',
+          depName: 'karpenter',
+          depType: 'helm_release',
+          registryUrls: ['https://public.ecr.aws/karpenter'],
         },
       ]);
     });
@@ -666,6 +688,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'hashicorp/terraform',
           depType: 'required_version',
           extractVersion: 'v(?<version>.*)$',
+          versioning: hashicorp.id,
         },
       ]);
     });
@@ -697,6 +720,17 @@ describe('modules/manager/terraform/extract', () => {
           extractVersion: 'v(?<version>.*)$',
         },
       ]);
+    });
+
+    it('return null if invalid HCL file', async () => {
+      const res = await extractPackageFile(
+        `
+          resource my provider
+        `,
+        'tfeWorkspace.tf',
+        {}
+      );
+      expect(res).toBeNull();
     });
   });
 });

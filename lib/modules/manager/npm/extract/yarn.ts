@@ -51,14 +51,22 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
 }
 
 export function getZeroInstallPaths(yarnrcYml: string): string[] {
-  const conf = parseSyml(yarnrcYml);
+  let conf: any;
+  try {
+    conf = parseSyml(yarnrcYml);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error parsing .yarnrc.yml');
+  }
   const paths = [
-    conf.cacheFolder || './.yarn/cache',
+    conf?.cacheFolder || './.yarn/cache',
     '.pnp.cjs',
     '.pnp.js',
     '.pnp.loader.mjs',
   ];
-  if (miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false) {
+  if (
+    conf &&
+    miscUtils.tryParseOptionalBoolean(conf.pnpEnableInlining) === false
+  ) {
     paths.push(conf.pnpDataPath || './.pnp.data.json');
   }
   return paths;

@@ -12,7 +12,6 @@ export const urls = [
 export const supportsRanges = true;
 export const supportedRangeStrategies: RangeStrategy[] = [
   'bump',
-  'widen',
   'pin',
   'replace',
 ];
@@ -94,7 +93,7 @@ function getNewValue({
   newVersion,
 }: NewValueConfig): string {
   if (!currentValue || currentValue === '*') {
-    return currentValue;
+    return rangeStrategy === 'pin' ? `=${newVersion}` : currentValue;
   }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';

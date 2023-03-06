@@ -5,6 +5,7 @@ import {
 } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
+import { range } from '../../../../lib/util/range';
 import * as httpMock from '../../../../test/http-mock';
 import { logger, mocked } from '../../../../test/util';
 import {
@@ -45,10 +46,6 @@ describe('modules/datasource/docker/index', () => {
       password: 'some-password',
     });
     hostRules.hosts.mockReturnValue([]);
-  });
-
-  afterEach(() => {
-    jest.resetAllMocks();
   });
 
   describe('getRegistryRepository', () => {
@@ -781,7 +778,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests with media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -855,7 +853,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('supports architecture-specific digest in OCI manifests without media type', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1005,7 +1004,8 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('handles error while retrieving image config blob', async () => {
-      const currentDigest = 'some-image-digest';
+      const currentDigest =
+        'sha256:0101010101010101010101010101010101010101010101010101010101010101';
 
       httpMock
         .scope(authUrl)
@@ -1058,24 +1058,31 @@ describe('modules/datasource/docker/index', () => {
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, { token: 'some-token' })
-        .head('/library/some-dep/manifests/some-digest')
+        .head(
+          '/library/some-dep/manifests/sha256:0101010101010101010101010101010101010101010101010101010101010101'
+        )
         .reply(404, {});
       httpMock
         .scope(baseUrl)
         .get('/', undefined, { badheaders: ['authorization'] })
         .reply(200, '', {})
-        .head('/library/some-dep/manifests/some-new-value', undefined, {
-          badheaders: ['authorization'],
-        })
+        .head(
+          '/library/some-dep/manifests/sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa',
+          undefined,
+          {
+            badheaders: ['authorization'],
+          }
+        )
         .reply(401);
 
       const res = await getDigest(
         {
           datasource: 'docker',
           depName: 'some-dep',
-          currentDigest: 'some-digest',
+          currentDigest:
+            'sha256:0101010101010101010101010101010101010101010101010101010101010101',
         },
-        'some-new-value'
+        'sha256:fafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafafa'
       );
       expect(res).toBeNull();
     });
@@ -1188,26 +1195,43 @@ describe('modules/datasource/docker/index', () => {
     });
 
     it('jfrog artifactory - retry tags for official images by injecting `/library` after repository and before image', async () => {
-      const tags = ['18.0.0'];
+      const tags1 = [...range(1, 10000)].map((i) => `${i}.0.0`);
+      const tags2 = [...range(10000, 10050)].map((i) => `${i}.0.0`);
       httpMock
         .scope('https://org.jfrog.io/v2')
         .get('/virtual-mirror/node/tags/list?n=10000')
-        .reply(200, '', {})
+        .reply(200, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
         .get('/virtual-mirror/node/tags/list?n=10000')
         .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
         .get('/virtual-mirror/library/node/tags/list?n=10000')
         .reply(200, '', {})
         .get('/virtual-mirror/library/node/tags/list?n=10000')
-        .reply(200, { tags }, {})
+        // Note the Link is incorrect and should be `</virtual-mirror/library/node/tags/list?n=10000&last=10000>; rel="next", `
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        .reply(
+          200,
+          { tags: tags1 },
+          {
+            'x-jfrog-version': 'Artifactory/7.42.2 74202900',
+            link: '</library/node/tags/list?n=10000&last=10000>; rel="next", ',
+          }
+        )
+        .get('/virtual-mirror/library/node/tags/list?n=10000&last=10000')
+        .reply(
+          200,
+          { tags: tags2 },
+          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' }
+        )
         .get('/')
         .reply(200, '', {})
-        .get('/virtual-mirror/node/manifests/18.0.0')
+        .get('/virtual-mirror/node/manifests/10050.0.0')
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
         depName: 'org.jfrog.io/virtual-mirror/node',
       });
-      expect(res?.releases).toHaveLength(1);
+      expect(res?.releases).toHaveLength(10050);
     });
 
     it('uses lower tag limit for ECR deps', async () => {

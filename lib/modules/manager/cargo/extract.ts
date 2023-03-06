@@ -3,7 +3,11 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import { CrateDatasource } from '../../datasource/crate';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type {
   CargoConfig,
   CargoManifest,
@@ -15,7 +19,8 @@ function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
   cargoRegistries: CargoRegistries,
-  target?: string
+  target?: string,
+  depTypeOverride?: string
 ): PackageDependency[] {
   const deps: PackageDependency[] = [];
   const sectionContent = parsedContent[section];
@@ -34,6 +39,7 @@ function extractFromSection(
       const path = currentValue.path;
       const git = currentValue.git;
       const registryName = currentValue.registry;
+      const workspace = currentValue.workspace;
 
       packageName = currentValue.package;
 
@@ -60,6 +66,9 @@ function extractFromSection(
       } else if (git) {
         currentValue = '';
         skipReason = 'git-dependency';
+      } else if (workspace) {
+        currentValue = '';
+        skipReason = 'inherited-dependency';
       } else {
         currentValue = '';
         skipReason = 'invalid-dependency-specification';
@@ -83,6 +92,9 @@ function extractFromSection(
     }
     if (packageName) {
       dep.packageName = packageName;
+    }
+    if (depTypeOverride) {
+      dep.depType = depTypeOverride;
     }
     deps.push(dep);
   });
@@ -133,7 +145,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   _config?: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
 
   const cargoConfig = await readCargoConfig();
@@ -152,6 +164,7 @@ export async function extractPackageFile(
     [dev-dependencies]
     [build-dependencies]
     [target.*.dependencies]
+    [workspace.dependencies]
   */
   const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
@@ -184,17 +197,31 @@ export async function extractPackageFile(
       targetDeps = targetDeps.concat(deps);
     });
   }
+
+  const workspaceSection = cargoManifest.workspace;
+  let workspaceDeps: PackageDependency[] = [];
+  if (workspaceSection) {
+    workspaceDeps = extractFromSection(
+      workspaceSection,
+      'dependencies',
+      cargoRegistries,
+      undefined,
+      'workspace.dependencies'
+    );
+  }
+
   const deps = [
     ...extractFromSection(cargoManifest, 'dependencies', cargoRegistries),
     ...extractFromSection(cargoManifest, 'dev-dependencies', cargoRegistries),
     ...extractFromSection(cargoManifest, 'build-dependencies', cargoRegistries),
     ...targetDeps,
+    ...workspaceDeps,
   ];
   if (!deps.length) {
     return null;
   }
   const lockFileName = await findLocalSiblingOrParent(fileName, 'Cargo.lock');
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   // istanbul ignore if
   if (lockFileName) {
     res.lockFiles = [lockFileName];

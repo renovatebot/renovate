@@ -1,12 +1,12 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const pipeRegex = regEx(`^\\s*-\\s?pipe:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
 const dockerImageRegex = regEx(`^\\s*-?\\s?image:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   try {

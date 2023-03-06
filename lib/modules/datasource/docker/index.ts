@@ -21,6 +21,8 @@ import type {
 } from '../../../util/http/types';
 import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
+import { addSecretForSanitizing } from '../../../util/sanitize';
+import { isDockerDigest } from '../../../util/string';
 import {
   ensurePathPrefix,
   ensureTrailingSlash,
@@ -181,6 +183,8 @@ export async function getAuthHeaders(
       logger.warn('Failed to obtain docker registry token');
       return null;
     }
+    // sanitize token
+    addSecretForSanitizing(token);
     return {
       authorization: `Bearer ${token}`,
     };
@@ -247,6 +251,8 @@ async function getECRAuthToken(
     const data = await ecr.getAuthorizationToken({});
     const authorizationToken = data?.authorizationData?.[0]?.authorizationToken;
     if (authorizationToken) {
+      // sanitize token
+      addSecretForSanitizing(authorizationToken);
       return authorizationToken;
     }
     logger.warn(
@@ -877,7 +883,15 @@ export class DockerDatasource extends Datasource {
       }
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      if (isArtifactoryServer(res)) {
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        url = linkHeader?.next?.last
+          ? `${url}&last=${linkHeader.next.last}`
+          : null;
+      } else {
+        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      }
       page += 1;
     } while (url && page < 20);
     return tags;
@@ -903,10 +917,9 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
+    } catch (_err) /* istanbul ignore next */ {
+      const err = _err instanceof ExternalHostError ? _err.err : _err;
+
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         !dockerRepository.includes('/')
@@ -968,7 +981,7 @@ export class DockerDatasource extends Datasource {
       if (isDockerHost(registryHost)) {
         logger.info({ err }, 'Docker Hub lookup failure');
       }
-      throw err;
+      throw _err;
     }
   }
 
@@ -1013,7 +1026,7 @@ export class DockerDatasource extends Datasource {
     let digest: string | null = null;
     try {
       let architecture: string | null | undefined = null;
-      if (currentDigest) {
+      if (currentDigest && isDockerDigest(currentDigest)) {
         architecture = await this.getImageArchitecture(
           registryHost,
           dockerRepository,
