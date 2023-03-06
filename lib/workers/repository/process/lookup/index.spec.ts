@@ -1879,8 +1879,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValue('sha256:abcdef1234567890');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
@@ -1893,7 +1892,6 @@ describe('workers/repository/process/lookup/index', () => {
           isPinDigest: true,
           newDigest: 'sha256:abcdef1234567890',
           newValue: '17.0.0',
-          newVersion: undefined,
           updateType: 'pinDigest',
         },
       ]);
