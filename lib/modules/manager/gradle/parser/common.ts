@@ -1,4 +1,5 @@
 import { lexer, parser, query as q } from 'good-enough-parser';
+import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
 import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
 
@@ -36,6 +37,22 @@ export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
 
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
   ctx.varTokens.push(node);
+  return ctx;
+}
+
+export function increaseNestingDepth(ctx: Ctx): Ctx {
+  ctx.tmpNestingDepth.push(...ctx.varTokens);
+  ctx.varTokens = [];
+  return ctx;
+}
+
+export function reduceNestingDepth(ctx: Ctx): Ctx {
+  ctx.tmpNestingDepth.pop();
+  return ctx;
+}
+
+export function prependNestingDepth(ctx: Ctx): Ctx {
+  ctx.varTokens = [...clone(ctx.tmpNestingDepth), ...ctx.varTokens];
   return ctx;
 }
 
