@@ -4,9 +4,12 @@ import type { Ctx } from '../types';
 import {
   cleanupTempVars,
   coalesceVariable,
+  increaseNestingDepth,
+  prependNestingDepth,
   qStringValue,
   qTemplateString,
   qVariableAssignmentIdentifier,
+  reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
 } from './common';
@@ -65,40 +68,27 @@ const qKotlinSingleExtraVarAssignment = q
 // foo: "1.2.3"
 const qGroovySingleMapOfVarAssignment = q
   .sym(storeVarToken)
-  .handler((ctx) => {
-    ctx.tmpTokenStore.backupVarTokens = ctx.varTokens;
-    return ctx;
-  })
+  .handler(prependNestingDepth)
   .handler(coalesceVariable)
   .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
   .op(':')
   .join(qTemplateString)
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
-  .handler(handleAssignment)
-  .handler((ctx) => {
-    ctx.varTokens = ctx.tmpTokenStore.backupVarTokens!;
-    ctx.varTokens.pop();
-    return ctx;
-  });
+  .handler(handleAssignment);
 
 const qGroovyMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
-    q
-      .sym(storeVarToken)
-      .op(':')
-      .tree({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '[',
-        endsWith: ']',
-        search,
-        postHandler: (ctx: Ctx) => {
-          ctx.varTokens.pop();
-          return ctx;
-        },
-      }),
+    q.sym(storeVarToken).op(':').tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '[',
+      endsWith: ']',
+      preHandler: increaseNestingDepth,
+      search,
+      postHandler: reduceNestingDepth,
+    }),
     qGroovySingleMapOfVarAssignment
   );
 
@@ -110,46 +100,35 @@ const qGroovyMultiVarAssignment = qVariableAssignmentIdentifier
     maxDepth: 1,
     startsWith: '[',
     endsWith: ']',
+    preHandler: increaseNestingDepth,
     search: qGroovyMapOfExpr(qGroovyMapOfExpr(qGroovySingleMapOfVarAssignment)),
+    postHandler: reduceNestingDepth,
   })
   .handler(cleanupTempVars);
 
 // "foo1" to "bar1"
 const qKotlinSingleMapOfVarAssignment = qStringValue
   .sym('to')
-  .handler((ctx) => {
-    ctx.tmpTokenStore.backupVarTokens = ctx.varTokens;
-    return ctx;
-  })
+  .handler(prependNestingDepth)
   .handler(coalesceVariable)
   .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
   .join(qTemplateString)
   .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
-  .handler(handleAssignment)
-  .handler((ctx) => {
-    ctx.varTokens = ctx.tmpTokenStore.backupVarTokens!;
-    ctx.varTokens.pop();
-    return ctx;
-  });
+  .handler(handleAssignment);
 
 const qKotlinMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(
-    qStringValue
-      .sym('to')
-      .sym('mapOf')
-      .tree({
-        type: 'wrapped-tree',
-        maxDepth: 1,
-        startsWith: '(',
-        endsWith: ')',
-        search,
-        postHandler: (ctx: Ctx) => {
-          ctx.varTokens.pop();
-          return ctx;
-        },
-      }),
+    qStringValue.sym('to').sym('mapOf').tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      startsWith: '(',
+      endsWith: ')',
+      preHandler: increaseNestingDepth,
+      search,
+      postHandler: reduceNestingDepth,
+    }),
     qKotlinSingleMapOfVarAssignment
   );
 
@@ -162,7 +141,9 @@ const qKotlinMultiMapOfVarAssignment = qVariableAssignmentIdentifier
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
+    preHandler: increaseNestingDepth,
     search: qKotlinMapOfExpr(qKotlinMapOfExpr(qKotlinSingleMapOfVarAssignment)),
+    postHandler: reduceNestingDepth,
   })
   .handler(cleanupTempVars);
 

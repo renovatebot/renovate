@@ -6,6 +6,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
 import * as _hostRules from '../../../util/host-rules';
 import type { UpdateArtifactsConfig } from '../types';
+import type { Registry } from './types';
 import * as util from './util';
 import * as nuget from '.';
 
@@ -420,16 +421,23 @@ describe('modules/manager/nuget/artifacts', () => {
         name: 'myRegistry',
         url: 'https://my-registry.example.org',
       },
-    ] as never);
-    hostRules.find.mockImplementationOnce((search) => {
-      if (
-        search.hostType === 'nuget' &&
-        search.url === 'https://my-registry.example.org'
-      ) {
-        return {
-          username: 'some-username',
-          password: 'some-password',
-        };
+      {
+        name: 'myRegistry2',
+        url: 'https://my-registry2.example.org',
+      },
+    ] satisfies Registry[]);
+    hostRules.find.mockImplementation((search) => {
+      if (search.hostType === 'nuget') {
+        if (search.url === 'https://my-registry.example.org') {
+          return {
+            username: 'some-username',
+            password: 'some-password',
+          };
+        } else {
+          return {
+            password: 'some-password',
+          };
+        }
       }
       return {};
     });
@@ -454,6 +462,11 @@ describe('modules/manager/nuget/artifacts', () => {
         cmd:
           'dotnet nuget add source https://my-registry.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
           '--name myRegistry --username some-username --password some-password --store-password-in-clear-text',
+      },
+      {
+        cmd:
+          'dotnet nuget add source https://my-registry2.example.org/ --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config ' +
+          '--name myRegistry2 --password some-password --store-password-in-clear-text',
       },
       {
         cmd: 'dotnet restore project.csproj --force-evaluate --configfile /tmp/renovate/cache/__renovate-private-cache/nuget/nuget.config',
