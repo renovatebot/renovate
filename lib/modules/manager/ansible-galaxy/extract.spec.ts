@@ -4,6 +4,7 @@ import { extractPackageFile } from './';
 
 const yamlFile1 = Fixtures.get('requirements01.yml');
 const yamlFile2 = Fixtures.get('requirements02.yml');
+const yamlFile3 = Fixtures.get('requirements03.yml');
 const helmRequirements = Fixtures.get('helmRequirements.yml');
 const collections1 = Fixtures.get('collections1.yml');
 const collections2 = Fixtures.get('collections2.yml');
@@ -25,6 +26,12 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       const res = extractPackageFile(yamlFile2, 'requirements.yml');
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(2);
+    });
+
+    it('extracts dependencies from requirements.yml with a space at the end of line', () => {
+      const res = extractPackageFile(yamlFile3, 'requirements.yml');
+      expect(res?.deps).toMatchSnapshot();
+      expect(res?.deps).toHaveLength(1);
     });
 
     it('check if an empty file returns null', () => {
