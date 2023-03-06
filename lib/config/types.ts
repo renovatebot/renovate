@@ -256,7 +256,11 @@ export interface RenovateConfig
 export interface AllConfig
   extends RenovateConfig,
     GlobalOnlyConfig,
-    RepoGlobalConfig {}
+    RepoGlobalConfig {
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
+}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
