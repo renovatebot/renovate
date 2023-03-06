@@ -97,7 +97,7 @@ If you need any further assistance then you can also [request help here](${
     // TODO: types (#7154)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
   } else if (
-    await scm.isBranchModified(config.baseBranch!, config.onboardingBranch!)
+    await scm.isBranchModified(config.baseBranch, config.onboardingBranch!)
   ) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
@@ -105,7 +105,7 @@ If you need any further assistance then you can also [request help here](${
       }) if you have any doubts and would like it reviewed.\n\n`
     );
     const isConflicted = await scm.isBranchConflicted(
-      config.baseBranch!,
+      config.baseBranch,
       config.onboardingBranch!
     );
     if (isConflicted) {
@@ -169,7 +169,7 @@ If you need any further assistance then you can also [request help here](${
       // TODO #7154
       const pr = await platform.createPr({
         sourceBranch: config.onboardingBranch!,
-        targetBranch: config.defaultBranch!,
+        targetBranch: config.defaultBranch,
         prTitle: config.onboardingPrTitle!,
         prBody,
         labels,

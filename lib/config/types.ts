@@ -199,8 +199,8 @@ export interface RenovateConfig
   depName?: string;
   baseBranches?: string[];
   useBaseBranchConfig?: UseBaseBranchConfigType;
-  baseBranch?: string;
-  defaultBranch?: string;
+  baseBranch: string;
+  defaultBranch: string;
   branchList?: string[];
   description?: string | string[];
   force?: RenovateConfig;
