@@ -288,19 +288,27 @@ describe('util/git/index', () => {
     });
 
     it('should return false when branch is not found', async () => {
-      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/not_found')
+      ).toBeFalse();
     });
 
     it('should return false when author matches', async () => {
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
-      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
+      ).toBeFalse();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
+      ).toBeFalse();
     });
 
     it('should return false when author is ignored', async () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
-      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/custom_author')
+      ).toBeFalse();
     });
 
     it('should return false if every author is ignored with multiple commits', async () => {
@@ -308,12 +316,14 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
       });
       expect(
-        await git.isBranchModified('renovate/multiple_commits')
+        await git.isBranchModified(defaultBranch, 'renovate/multiple_commits')
       ).toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
-      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/custom_author')
+      ).toBeTrue();
     });
 
     it('should return true if any commit is modified', async () => {
@@ -321,13 +331,15 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com'],
       });
       expect(
-        await git.isBranchModified('renovate/multiple_commits')
+        await git.isBranchModified(defaultBranch, 'renovate/multiple_commits')
       ).toBeTrue();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
-      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
+      expect(
+        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
+      ).toBeTrue();
     });
   });
 
