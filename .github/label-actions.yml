@@ -167,6 +167,11 @@
     The Renovate team
 
 'invalid':
+  unlabel:
+    - 'type:bug'
+    - 'type:feature'
+    - 'priority-5-triage'
+    - 'status:requirements'
   comment: >
     Hi there,
 
@@ -180,3 +185,6 @@
 
 
     The Renovate team
+  close: true
+  lock: true
+  lock-reason: 'resolved'
