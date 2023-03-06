@@ -28,6 +28,7 @@ Docker
 Dockerfile
 dotnet
 ESLint
+Forgejo
 forkToken
 Gemfile
 Gitea
