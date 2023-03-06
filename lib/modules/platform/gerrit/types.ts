@@ -6,13 +6,13 @@ export interface GerritProjectInfo {
   parent?: string;
   description?: string;
   state?: 'ACTIVE' | 'READ_ONLY' | 'HIDDEN';
-  branches?: { [key: string]: string }; //TODO: always empty???
-  labels?: { [key: string]: GerritLabelTypeInfo };
+  branches?: Record<string, string>; //TODO: always empty???
+  labels?: Record<string, GerritLabelTypeInfo>;
   web_links?: any;
 }
 
 export interface GerritLabelTypeInfo {
-  values: { [val: number]: string };
+  values: Record<number, string>;
   default_value: number;
 }
 
@@ -65,19 +65,19 @@ export interface GerritChange {
   unresolved_comment_count?: number;
   _number: number;
   owner: GerritAccountInfo;
-  actions?: { [key: string]: GerritActionInfo };
+  actions?: Record<string, GerritActionInfo>;
   submit_records: any[]; // SubmitRecordInfo[]
   requirements?: any[]; //List of the requirements
   submit_requirements?: any[]; //List of the SubmitRequirementResultInfo
-  labels?: { [key: string]: GerritLabelInfo };
+  labels?: Record<string, GerritLabelInfo>;
   permitted_labels?: any[];
   removable_reviewers?: any[];
-  reviewers?: { [key in GerritReviewersType]: GerritAccountInfo[] }; //key = ReviewerState
+  reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>; //key = ReviewerState
   pending_reviewers?: any;
   reviewer_updates?: any;
   messages?: GerritChangeMessageInfo[];
   current_revision?: string;
-  revisions?: { [key: string]: GerritRevisionInfo }; //All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
+  revisions?: Record<string, GerritRevisionInfo>; //All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
   meta_rev_id?: string;
   tracking_ids?: any;
   _more_changes?: any;
@@ -99,7 +99,7 @@ export interface GerritRevisionInfo {
   created: Date; //TODO: map
   uploader: GerritAccountInfo;
   ref: string; //The Git reference for the patch set.
-  actions?: { [key: string]: GerritActionInfo };
+  actions?: Record<string, GerritActionInfo>;
   //... many more...still not necessary
 }
 

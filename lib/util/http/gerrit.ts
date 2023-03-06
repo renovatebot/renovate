@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
+import { regEx } from '../regex';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
 
@@ -13,7 +14,7 @@ export const setBaseUrl = (url: string): void => {
  * @see https://gerrit-review.googlesource.com/Documentation/rest-api.html
  */
 export class GerritHttp extends Http {
-  magicPrefix = /^\)]}'\n/g;
+  private static magicPrefix = regEx(/^\)]}'\n/g);
 
   constructor(options?: HttpOptions) {
     super('gerrit', options);
@@ -37,7 +38,9 @@ export class GerritHttp extends Http {
       response.headers['content-type']?.includes('application/json') &&
       is.string(response.body)
     ) {
-      const newBody = JSON5.parse(response.body.replace(this.magicPrefix, ''));
+      const newBody = JSON5.parse(
+        response.body.replace(GerritHttp.magicPrefix, '')
+      );
       return {
         ...response,
         body: newBody,
