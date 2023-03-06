@@ -129,7 +129,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles git su
 `;
 
 
-
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
 {
   "changelogUrl": undefined,
