@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
@@ -10,16 +9,10 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './types';
+import { loadDocs } from './utils';
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
-
-function extractYaml(content: string): string {
-  // regex remove go templated ({{ . }}) values
-  return content
-    .replace(regEx(/{{`.+?`}}/gs), '')
-    .replace(regEx(/{{.+?}}/g), '');
-}
 
 export function extractPackageFile(
   content: string,
@@ -30,7 +23,7 @@ export function extractPackageFile(
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
   try {
-    docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
+    docs = loadDocs(content);
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;

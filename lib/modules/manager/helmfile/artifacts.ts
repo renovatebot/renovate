@@ -11,6 +11,7 @@ import {
 } from '../../../util/fs';
 import { getFile } from '../../../util/git';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import { areKustomizationsUsed } from './utils';
 
 export async function updateArtifacts({
   packageFileName,
@@ -39,7 +40,7 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-
+    const needKustomize = await areKustomizationsUsed(packageFileName);
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},
@@ -52,6 +53,14 @@ export async function updateArtifacts({
           toolName: 'helmfile',
           constraint: config.constraints?.helmfile,
         },
+        ...(needKustomize
+          ? [
+              {
+                toolName: 'kustomize',
+                constraint: config.constraints?.kustomize,
+              },
+            ]
+          : []),
       ],
     };
     await exec(`helmfile deps -f ${quote(packageFileName)}`, execOptions);
