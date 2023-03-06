@@ -605,7 +605,10 @@ export async function isBranchBehindBase(
   }
 }
 
-export async function isBranchModified(branchName: string): Promise<boolean> {
+export async function isBranchModified(
+  baseBranch: string,
+  branchName: string
+): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
     return false;
@@ -631,14 +634,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // Retrieve the commit authors
   let lastAuthors: string[];
   try {
-    const defaultBranch = await getDefaultBranch(git);
     lastAuthors = [
       ...new Set(
         (
           await git.raw([
             'log',
             '--pretty=format:%ae',
-            `origin/${branchName}...origin/${defaultBranch}`,
+            `origin/${branchName}...origin/${baseBranch}`,
             '--',
           ])
         )

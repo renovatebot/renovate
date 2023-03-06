@@ -60,7 +60,7 @@ async function generateBranchCache(
       if (branchPr) {
         prNo = branchPr.number;
       }
-      isModified = await scm.isBranchModified(branchName);
+      isModified = await scm.isBranchModified(baseBranch, branchName);
       isBehindBase = await scm.isBranchBehindBase(branchName, baseBranch);
       isConflicted = await scm.isBranchConflicted(baseBranch, branchName);
     }
