@@ -1841,15 +1841,62 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    it('handles replacements - name only', async () => {
-      config.currentValue = '1.4.1';
-      config.depName = 'q';
+    it('handles replacements - name only without pinDigests enabled', async () => {
+      config.depName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
-      config.replacementName = 'r';
-      config.datasource = NpmDatasource.id;
-      httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res).toMatchSnapshot();
+      config.replacementName = 'eclipse-temurin';
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - name only with pinDigests enabled', async () => {
+      config.depName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.pinDigests = true;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+        ],
+      });
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+          newDigest: 'sha256:abcdef1234567890',
+        },
+        {
+          isPinDigest: true,
+          newDigest: 'sha256:abcdef1234567890',
+          newValue: '17.0.0',
+          newVersion: undefined,
+          updateType: 'pinDigest',
+        },
+      ]);
     });
 
     it('handles replacements - name and version', async () => {
@@ -1860,8 +1907,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementVersion = '2.0.0';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'r',
+          newValue: '2.0.0',
+        },
+      ]);
     });
 
     it('rollback for invalid version to last stable version', async () => {

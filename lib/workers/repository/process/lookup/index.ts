@@ -434,6 +434,7 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
+          (update.newName && update.newName !== depName) ||
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
           // TODO #7154

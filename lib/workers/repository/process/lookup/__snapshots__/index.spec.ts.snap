@@ -128,41 +128,6 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles git su
 }
 `;
 
-exports[`workers/repository/process/lookup/index .lookupUpdates() handles replacements - name and version 1`] = `
-{
-  "changelogUrl": undefined,
-  "currentVersion": "1.4.1",
-  "dependencyUrl": undefined,
-  "fixedVersion": "1.4.1",
-  "homepage": undefined,
-  "registryUrl": "https://registry.npmjs.org",
-  "sourceUrl": "https://github.com/kriskowal/q",
-  "updates": [
-    {
-      "newName": "r",
-      "newValue": "2.0.0",
-      "updateType": "replacement",
-    },
-  ],
-  "versioning": "npm",
-  "warnings": [],
-}
-`;
-
-exports[`workers/repository/process/lookup/index .lookupUpdates() handles replacements - name only 1`] = `
-{
-  "changelogUrl": undefined,
-  "currentVersion": "1.4.1",
-  "dependencyUrl": undefined,
-  "fixedVersion": "1.4.1",
-  "homepage": undefined,
-  "registryUrl": "https://registry.npmjs.org",
-  "sourceUrl": "https://github.com/kriskowal/q",
-  "updates": [],
-  "versioning": "npm",
-  "warnings": [],
-}
-`;
 
 
 exports[`workers/repository/process/lookup/index .lookupUpdates() handles sourceUrl packageRules with version restrictions 1`] = `
