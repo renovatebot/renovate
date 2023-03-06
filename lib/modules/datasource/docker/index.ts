@@ -1101,6 +1101,20 @@ export class DockerDatasource extends Datasource {
         logger.debug(`Got docker digest ${digest!}`);
       }
     } catch (err) /* istanbul ignore next */ {
+      if (
+        err instanceof ExternalHostError &&
+        'statusCode' in err.err &&
+        err.err.statusCode === 500 &&
+        !packageName.includes('/')
+      ) {
+        logger.debug(
+          `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`
+        );
+        return this.getDigest(
+          { registryUrl, packageName: 'library/' + packageName, currentDigest },
+          newValue
+        );
+      }
       if (err instanceof ExternalHostError) {
         throw err;
       }
