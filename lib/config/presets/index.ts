@@ -226,7 +226,7 @@ export async function getPreset(
       repo,
       presetPath,
       presetName,
-      tag ,
+      tag,
     });
     memCache.set(cacheKey, presetConfig);
   }
