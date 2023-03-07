@@ -14,15 +14,7 @@ export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    depIndex,
-    currentDigest,
-    pinDigests,
-  } = upgrade;
+  const { manager, packageFile, depIndex } = upgrade;
   let newUpgrade: PackageDependency;
   try {
     const newExtract = await extractPackageFile(
@@ -63,12 +55,25 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (newValue && newUpgrade.currentValue !== newValue) {
+  if (upgrade.newName && upgrade.newName !== newUpgrade.depName) {
     logger.debug(
       {
         manager,
         packageFile,
-        expectedValue: newValue,
+        currentDepName: upgrade.depName,
+        newDepName: newUpgrade.depName,
+      },
+      'depName is not updated'
+    );
+    return false;
+  }
+
+  if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
+    logger.debug(
+      {
+        manager,
+        packageFile,
+        expectedValue: upgrade.newValue,
         foundValue: newUpgrade.currentValue,
       },
       'Value is not updated'
@@ -76,22 +81,24 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (!newDigest) {
-    return true;
-  }
-  if (newUpgrade.currentDigest === newDigest) {
-    return true;
-  }
-  if (!currentDigest) {
-    if (!pinDigests) {
-      return true;
-    } else if (newDigest) {
-      return true;
-    }
+  if (
+    upgrade.newDigest &&
+    (upgrade.isPinDigest || upgrade.currentDigest) &&
+    upgrade.newDigest !== newUpgrade.currentDigest
+  ) {
+    logger.debug(
+      {
+        manager,
+        packageFile,
+        expectedValue: upgrade.newDigest,
+        foundValue: newUpgrade.currentDigest,
+      },
+      'Digest is not updated'
+    );
+    return false;
   }
 
-  // istanbul ignore next
-  return false;
+  return true;
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {

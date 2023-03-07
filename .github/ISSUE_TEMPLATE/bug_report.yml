@@ -1,12 +1,13 @@
 name: Bug report
-description: Confirmed bugs only. Create a discussion first.
+description: Bug reports require a minimal reproduction and should be preceded by a Discussion first.
 labels: ['type:bug', 'status:requirements', 'priority-5-triage']
 body:
   - type: markdown
     attributes:
       value: |
-        Please don't create these bug reports unless you're an experienced user or absolutely certain you found a bug.
-        It is preferred that you create a [discussion](https://github.com/renovatebot/renovate/discussions/new) first and allow maintainers to decide.
+        Don't create a Bug Report like this without a Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
+        Invalid bug reports waste the time of maintainers and can confuse other users so they will closed, locked and deleted.
+        You are always welcome to create Discussions and new users should always do that instead.
 
   - type: dropdown
     id: how-are-you-running-renovate
@@ -106,8 +107,7 @@ body:
       label: Have you created a minimal reproduction repository?
       description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
       options:
-        - 'No reproduction repository'
-        - 'No reproduction, but I have linked to a public repo where it occurs'
-        - 'I have linked to a minimal reproduction repository in the bug description'
+        - 'I have read the minimal reproductions documentation and linked to such a repository in the bug description'
+        - 'I have explained in the description why a minimal reproduction is impossible'
     validations:
       required: true

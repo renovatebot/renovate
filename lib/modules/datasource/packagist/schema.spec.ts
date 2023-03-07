@@ -141,6 +141,14 @@ describe('modules/datasource/packagist/schema', () => {
           },
         })
       ).toEqual([{ version: '1.2.3' }]);
+      expect(
+        parsePackagesResponse('foo/bar', {
+          packages: {
+            'foo/bar': { '1.2.3': { version: '1.2.3' } },
+            'baz/qux': { '4.5.6': { version: '4.5.6' } },
+          },
+        })
+      ).toEqual([{ version: '1.2.3' }]);
     });
 
     it('expands minified fields', () => {
