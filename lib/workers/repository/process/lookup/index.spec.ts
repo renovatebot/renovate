@@ -1866,6 +1866,7 @@ describe('workers/repository/process/lookup/index', () => {
         },
         {
           updateType: 'major',
+          newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
         },
@@ -1880,10 +1881,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
-      docker.getReleases.mockResolvedValueOnce({
+      docker.getReleases.mockResolvedValue({
         releases: [
           {
             version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
           },
         ],
       });
@@ -1897,6 +1901,12 @@ describe('workers/repository/process/lookup/index', () => {
           newDigest: 'sha256:abcdef1234567890',
         },
         {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+        {
           isPinDigest: true,
           newDigest: 'sha256:abcdef1234567890',
           newValue: '17.0.0',
@@ -1907,17 +1917,16 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('handles replacements - name only no version/tag', async () => {
       config.depName = 'openjdk';
+      config.currentValue = undefined;
       config.datasource = DockerDatasource.id;
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
-
-      docker.getDigest.mockResolvedValue('sha256:abcdef1234567890');
-
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
           updateType: 'replacement',
           newName: 'eclipse-temurin',
+          newValue: undefined,
         },
       ]);
     });
