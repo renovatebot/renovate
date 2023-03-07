@@ -342,6 +342,19 @@ export async function lookupUpdates(
       } else {
         delete res.skipReason;
       }
+    } else if (
+      !currentValue &&
+      config.replacementName &&
+      !config.replacementVersion
+    ) {
+      logger.debug(
+        `Handle name-only replacement for ${depName} without current version`
+      );
+      res.updates.push({
+        updateType: 'replacement',
+        newName: config.replacementName,
+        newValue: currentValue!,
+      });
     } else {
       res.skipReason = 'invalid-value';
     }
@@ -435,6 +448,7 @@ export async function lookupUpdates(
       .filter(
         (update) =>
           (update.newName && update.newName !== depName) ||
+          update.isReplacement ||
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
           // TODO #7154
