@@ -173,18 +173,11 @@
     - 'priority-5-triage'
     - 'status:requirements'
   comment: >
-    Hi there,
+    This issue has been labeled as `invalid` by a maintainer so is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
+    
+    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
 
-
-    This issue has been marked as invalid and will be closed and potentially deleted too.
-    Deletion is done so that invalid issues (such as mistaken bug reports) don't show up in repository searches and confuse future users.
-
-    In future, please create _Discussions_ instead of Issues (including for the topic of this Issue if you still wish to discuss it).
-
-    Good luck,
-
-
-    The Renovate team
+    Thanks, The Renovate team
   close: true
   lock: true
   lock-reason: 'resolved'
