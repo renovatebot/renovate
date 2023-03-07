@@ -1273,9 +1273,9 @@ For example, using this option could be used whenever authentication using Git f
 
 Supported artifactAuth and hostType combinations:
 
-| artifactAuth | hostTypes             |
-| ------------ | --------------------- |
-| `composer`   | `gitlab`, `packagist` |
+| artifactAuth | hostTypes                                   |
+| ------------ | ------------------------------------------- |
+| `composer`   | `gitlab`, `packagist`, `github`, `git-tags` |
 
 ### matchHost
 
