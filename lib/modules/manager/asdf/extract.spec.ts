@@ -49,12 +49,14 @@ bun 0.2.2
 cargo-make 0.36.2
 clojure 1.11.1.1182
 crystal 1.6.1
+dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
 dprint 0.32.2
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
+flutter 3.7.6
 gauche 0.9.12
 gohugo extended_0.104.3
 golang 1.19.2
@@ -131,6 +133,11 @@ dummy 1.2.3
             depName: 'crystal',
           },
           {
+            currentValue: '2.19.3',
+            datasource: 'dart-version',
+            depName: 'dart',
+          },
+          {
             currentValue: '1.26.2',
             datasource: 'github-releases',
             packageName: 'denoland/deno',
@@ -169,6 +176,11 @@ dummy 1.2.3
             versioning:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$',
             depName: 'erlang',
+          },
+          {
+            currentValue: '3.7.6',
+            datasource: 'flutter-version',
+            depName: 'flutter',
           },
           {
             currentValue: '0.9.12',
