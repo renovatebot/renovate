@@ -45,20 +45,19 @@ function getAuthJson(): string | null {
     url: 'https://github.com',
   });
 
-  if (
-    isArtifactAuthEnabled(githubHostRule) &&
+  const selectedGithubToken = takePersonalAccessTokenIfPossible(
+    isArtifactAuthEnabled(githubHostRule)
+      ? findGithubToken(githubHostRule)
+      : undefined,
     isArtifactAuthEnabled(gitTagsHostRule)
-  ) {
-    const selectedGithubToken = takePersonalAccessTokenIfPossible(
-      findGithubToken(githubHostRule),
-      findGithubToken(gitTagsHostRule)
-    );
+      ? findGithubToken(gitTagsHostRule)
+      : undefined
+  );
 
-    if (selectedGithubToken) {
-      authJson['github-oauth'] = {
-        'github.com': selectedGithubToken,
-      };
-    }
+  if (selectedGithubToken) {
+    authJson['github-oauth'] = {
+      'github.com': selectedGithubToken,
+    };
   }
 
   hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {

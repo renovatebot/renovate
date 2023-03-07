@@ -292,7 +292,46 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
-  it('does not set github COMPOSER_AUTH when artifactAuth does not include composer, for only hostType github', async () => {
+  it('does set github COMPOSER_AUTH for github when only hostType git-tags artifactAuth does not include composer', async () => {
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'ghs_token',
+    });
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+      artifactAuth: [],
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghs_token"}}',
+          },
+        },
+      },
+    ]);
+  });
+
+  it('does set github COMPOSER_AUTH for git-tags when only hostType github artifactAuth does not include composer', async () => {
     hostRules.add({
       hostType: 'github',
       matchHost: 'api.github.com',
@@ -320,7 +359,15 @@ describe('modules/manager/composer/artifacts', () => {
         config: authConfig,
       })
     ).toBeNull();
-    expect(execSnapshots[0].options?.env).not.toContainKey('COMPOSER_AUTH');
+    expect(execSnapshots).toMatchObject([
+      {
+        options: {
+          env: {
+            COMPOSER_AUTH: '{"github-oauth":{"github.com":"ghp_token"}}',
+          },
+        },
+      },
+    ]);
   });
 
   it('does not set github COMPOSER_AUTH when artifactAuth does not include composer, for both hostType github & git-tags', async () => {
