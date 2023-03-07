@@ -1853,6 +1853,9 @@ describe('workers/repository/process/lookup/index', () => {
           {
             version: '17.0.0',
           },
+          {
+            version: '18.0.0',
+          },
         ],
       });
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
@@ -1860,6 +1863,11 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'replacement',
           newName: 'eclipse-temurin',
           newValue: '17.0.0',
+        },
+        {
+          updateType: 'major',
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
         },
       ]);
     });
