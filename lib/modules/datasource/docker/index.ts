@@ -628,12 +628,30 @@ export class DockerDatasource extends Datasource {
     currentDigest: string
   ): Promise<string | null | undefined> {
     try {
-      const manifestResponse = await this.getManifestResponse(
-        registryHost,
-        dockerRepository,
-        currentDigest,
-        'head'
-      );
+      let manifestResponse: HttpResponse<string> | null;
+
+      try {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+          'head'
+        );
+      } catch (_err) {
+        const err = _err instanceof ExternalHostError ? _err.err : _err;
+
+        if (
+          typeof err.statusCode === 'number' &&
+          err.statusCode >= 500 &&
+          err.statusCode < 600
+        ) {
+          // querying the digest manifest for a non existent image leads to a 500 statusCode
+          return null;
+        }
+
+        /* istanbul ignore next */
+        throw _err;
+      }
 
       if (
         manifestResponse?.headers['content-type'] !==
@@ -1096,25 +1114,29 @@ export class DockerDatasource extends Datasource {
         }
       }
 
-      if (manifestResponse) {
-        // TODO: fix types (#7154)
-        logger.debug(`Got docker digest ${digest!}`);
-      }
-    } catch (err) /* istanbul ignore next */ {
       if (
-        err instanceof ExternalHostError &&
-        'statusCode' in err.err &&
-        err.err.statusCode === 500 &&
+        !manifestResponse &&
+        !dockerRepository.includes('/') &&
         !packageName.includes('/')
       ) {
         logger.debug(
           `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`
         );
         return this.getDigest(
-          { registryUrl, packageName: 'library/' + packageName, currentDigest },
+          {
+            registryUrl,
+            packageName: 'library/' + packageName,
+            currentDigest,
+          },
           newValue
         );
       }
+
+      if (manifestResponse) {
+        // TODO: fix types (#7154)
+        logger.debug(`Got docker digest ${digest!}`);
+      }
+    } catch (err) /* istanbul ignore next */ {
       if (err instanceof ExternalHostError) {
         throw err;
       }
