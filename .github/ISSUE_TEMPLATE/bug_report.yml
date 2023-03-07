@@ -5,9 +5,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please don't create these bug reports unless you're an experienced user or absolutely certain you found a bug, and you have a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md).
-        Otherwise, it is preferred that you create a [discussion](https://github.com/renovatebot/renovate/discussions/new) first and allow maintainers to decide.
-        Invalid bug reports can confuse users so will be _deleted_, not closed.
+        Don't create a Bug Report like this without a Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
+        Invalid bug reports waste the time of maintainers and can confuse other users so they will closed, locked and deleted.
+        You are always welcome to create Discussions and new users should always do that instead.
 
   - type: dropdown
     id: how-are-you-running-renovate
