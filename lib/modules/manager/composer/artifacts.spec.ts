@@ -292,6 +292,69 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
   });
 
+  it('does not set github COMPOSER_AUTH when artifactAuth does not include composer, for only hostType github', async () => {
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'ghs_token',
+      artifactAuth: [],
+    });
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots[0].options?.env).not.toContainKey('COMPOSER_AUTH');
+  });
+
+  it('does not set github COMPOSER_AUTH when artifactAuth does not include composer, for both hostType github & git-tags', async () => {
+    hostRules.add({
+      hostType: 'github',
+      matchHost: 'api.github.com',
+      token: 'ghs_token',
+      artifactAuth: [],
+    });
+    hostRules.add({
+      hostType: GitTagsDatasource.id,
+      matchHost: 'github.com',
+      token: 'ghp_token',
+      artifactAuth: [],
+    });
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('{}');
+    const authConfig = {
+      ...config,
+      registryUrls: ['https://packagist.renovatebot.com'],
+    };
+    git.getRepoStatus.mockResolvedValueOnce(repoStatus);
+    expect(
+      await composer.updateArtifacts({
+        packageFileName: 'composer.json',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: authConfig,
+      })
+    ).toBeNull();
+    expect(execSnapshots[0].options?.env).not.toContainKey('COMPOSER_AUTH');
+  });
+
   it('does not set gitlab COMPOSER_AUTH when artifactAuth does not include composer', async () => {
     hostRules.add({
       hostType: GitTagsDatasource.id,
