@@ -5,7 +5,6 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { HostRule } from '../../../types';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
 import {
@@ -28,35 +27,38 @@ import {
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
 
-function isArtifactAuthEnabled(rule: HostRule): boolean {
-  return !rule.artifactAuth || rule.artifactAuth.includes('composer');
-}
-
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubToken = findGithubToken({
+  const githubHostRule = hostRules.find({
     hostType: 'github',
     url: 'https://api.github.com/',
   });
 
-  const gitTagsGithubToken = findGithubToken({
+  const gitTagsHostRule = hostRules.find({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
   });
 
-  const selectedGithubToken = takePersonalAccessTokenIfPossible(
-    githubToken,
-    gitTagsGithubToken
-  );
-  if (selectedGithubToken) {
-    authJson['github-oauth'] = {
-      'github.com': selectedGithubToken,
-    };
+  if (
+    isArtifactAuthEnabled(githubHostRule) &&
+    isArtifactAuthEnabled(gitTagsHostRule)
+  ) {
+    const selectedGithubToken = takePersonalAccessTokenIfPossible(
+      findGithubToken(githubHostRule),
+      findGithubToken(gitTagsHostRule)
+    );
+
+    if (selectedGithubToken) {
+      authJson['github-oauth'] = {
+        'github.com': selectedGithubToken,
+      };
+    }
   }
 
   hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {

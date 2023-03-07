@@ -308,21 +308,26 @@ describe('modules/manager/composer/utils', () => {
         matchHost: 'github.com',
         token: TOKEN_STRING,
       });
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toEqual(TOKEN_STRING);
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+
+      expect(findGithubToken(foundHostRule)).toEqual(TOKEN_STRING);
     });
 
-    it('returns undefined when no hostRule match search', () => {
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toBeUndefined();
+    it('returns undefined when no token is defined', () => {
+      hostRules.add({
+        hostType: GitTagsDatasource.id,
+        matchHost: 'github.com',
+      });
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+      expect(findGithubToken(foundHostRule)).toBeUndefined();
     });
 
     it('remove x-access-token token prefix', () => {
@@ -333,12 +338,12 @@ describe('modules/manager/composer/utils', () => {
         matchHost: 'github.com',
         token: TOKEN_STRING_WITH_PREFIX,
       });
-      expect(
-        findGithubToken({
-          hostType: GitTagsDatasource.id,
-          url: 'https://github.com',
-        })
-      ).toEqual(TOKEN_STRING);
+
+      const foundHostRule = hostRules.find({
+        hostType: GitTagsDatasource.id,
+        url: 'https://github.com',
+      });
+      expect(findGithubToken(foundHostRule)).toEqual(TOKEN_STRING);
     });
   });
 
