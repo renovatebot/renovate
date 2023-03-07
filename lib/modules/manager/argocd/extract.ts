@@ -41,9 +41,7 @@ export function extractPackageFile(
   return deps.length ? { deps } : null;
 }
 
-export function processSource(
-  source: ApplicationSource
-): PackageDependency | null {
+function processSource(source: ApplicationSource): PackageDependency | null {
   if (
     !source ||
     !is.nonEmptyString(source.repoURL) ||
@@ -84,7 +82,7 @@ export function processSource(
   };
 }
 
-export function processAppSpec(
+function processAppSpec(
   definition: ApplicationDefinition
 ): PackageDependency[] {
   const spec: ApplicationSpec | null | undefined =
