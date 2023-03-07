@@ -1897,6 +1897,23 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - name only no version/tag', async () => {
+      config.depName = 'openjdk';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+
+      docker.getDigest.mockResolvedValue('sha256:abcdef1234567890');
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+        },
+      ]);
+    });
+
     it('handles replacements - name and version', async () => {
       config.currentValue = '1.4.1';
       config.depName = 'q';
