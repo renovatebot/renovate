@@ -8,3 +8,8 @@ export interface PackageCache {
     ttlMinutes?: number
   ): Promise<void>;
 }
+
+export interface DecoratorCachedRecord<T> {
+  data: T;
+  cachedAt: string;
+}

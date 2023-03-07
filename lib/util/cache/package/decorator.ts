@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
 import { Decorator, decorate } from '../../decorator';
+import type { DecoratorCachedRecord } from './types';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
@@ -66,21 +68,43 @@ export function cache<T>({
       return callback();
     }
 
-    const cachedResult = await packageCache.get<unknown>(
+    finalKey = `cache-decorator:${finalKey}`;
+    const cacheRecord = await packageCache.get<DecoratorCachedRecord<T>>(
       finalNamespace,
       finalKey
     );
 
-    if (cachedResult !== undefined) {
-      return cachedResult;
+    const now = DateTime.local();
+    const hardTTLMinutes = ttlMinutes * 10;
+
+    if (cacheRecord) {
+      const ttlDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
+        minutes: ttlMinutes,
+      });
+      if (now < ttlDeadline) {
+        return cacheRecord.data;
+      }
     }
 
-    const result = await callback();
-
-    // only cache if we got a valid result
-    if (result !== undefined) {
-      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+    let data: T | undefined;
+    try {
+      data = (await callback()) as T | undefined;
+    } catch (err) {
+      if (cacheRecord) {
+        return cacheRecord.data;
+      }
+    } finally {
+      if (!is.undefined(data)) {
+        const cachedAt = now.toISO();
+        await packageCache.set(
+          finalNamespace,
+          finalKey,
+          { data, cachedAt },
+          hardTTLMinutes
+        );
+      }
     }
-    return result;
+
+    return data;
   });
 }
