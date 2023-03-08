@@ -37,7 +37,7 @@ export function extractPackageFile(
       depName,
       currentValue,
       autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
-      replaceString: match[0],
+      replaceString: `'${depName}@${currentValue}'`,
     });
   }
 
