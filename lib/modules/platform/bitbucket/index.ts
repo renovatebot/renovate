@@ -23,7 +23,6 @@ import type {
   PlatformParams,
   PlatformResult,
   Pr,
-  RepoBranchingModel,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -40,6 +39,7 @@ import type {
   EffectiveReviewer,
   PagedResult,
   PrResponse,
+  RepoBranchingModel,
   RepoInfo,
   RepoInfoBody,
 } from './types';
