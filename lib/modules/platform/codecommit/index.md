@@ -148,7 +148,7 @@ module.exports = {
 Create a repository with `buildspec.yml`.
 This repository will be your BuildProject job repository to run Renovate on your repositories.
 
-### Renovate Docker `buildspec.yml` 
+### Renovate Docker `buildspec.yml`
 
 ```yml
 version: 0.2
@@ -168,7 +168,7 @@ phases:
       - docker run --rm -e AWS_REGION -e RENOVATE_CONFIG -e RENOVATE_PLATFORM -e RENOVATE_REPOSITORIES -e LOG_LEVEL renovate/renovate
 ```
 
-### Renovate CLI `buildspec.yml` 
+### Renovate CLI `buildspec.yml`
 
 ```yml
 version: 0.2
