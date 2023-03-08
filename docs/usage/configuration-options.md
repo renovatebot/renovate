@@ -282,7 +282,7 @@ By default, Renovate will use the repositories `main branch`.
 
 Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
 
-If the `development branch` is configured but the branch itself does not exist (ie: it was deleted), Renovate will fall back to using the repositories `main branch`.
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's default branch.
 
 ## branchConcurrentLimit
 
