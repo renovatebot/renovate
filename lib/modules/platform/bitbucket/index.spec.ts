@@ -59,6 +59,12 @@ describe('modules/platform/bitbucket/index', () => {
       ...repoResp,
     });
 
+    scope.get(`/2.0/repositories/${repository}/branching-model`).reply(200, {
+      development: {
+        name: 'master',
+      },
+    });
+
     await bitbucket.initRepo({
       repository: 'some/repo',
       ...config,
@@ -141,7 +147,9 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, { development: { name: 'master' } });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
@@ -157,7 +165,9 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, { development: { name: 'master' } });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
