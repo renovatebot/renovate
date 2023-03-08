@@ -8,7 +8,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
   "fixedVersion": "8.0.0",
   "homepage": undefined,
   "isSingleVersion": true,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
@@ -54,7 +54,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
   "dependencyUrl": undefined,
   "fixedVersion": "8.1.0",
   "homepage": undefined,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
@@ -77,7 +77,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() handles digest
   "fixedVersion": "8.0.0",
   "homepage": undefined,
   "isSingleVersion": true,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
@@ -536,7 +536,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
   "fixedVersion": "8",
   "homepage": undefined,
   "isSingleVersion": true,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
@@ -595,7 +595,7 @@ exports[`workers/repository/process/lookup/index .lookupUpdates() skips uncompat
   "fixedVersion": "8.1.0",
   "homepage": undefined,
   "isSingleVersion": true,
-  "registryUrl": undefined,
+  "registryUrl": "https://index.docker.io",
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": [
     {
