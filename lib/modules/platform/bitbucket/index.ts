@@ -839,7 +839,6 @@ export async function updatePr({
   prTitle: title,
   prBody: description,
   state,
-  targetBranch
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
@@ -857,11 +856,7 @@ export async function updatePr({
           title,
           description: sanitize(description),
           reviewers: pr.reviewers,
-          destination: {
-            branch: {
-              name: targetBranch,
-            },
-          },  },
+        },
       }
     );
   } catch (err) {
@@ -878,11 +873,6 @@ export async function updatePr({
             title,
             description: sanitize(description),
             reviewers: sanitizedReviewers,
-            destination: {
-              branch: {
-                name: targetBranch,
-              },
-            },
           },
         }
       );

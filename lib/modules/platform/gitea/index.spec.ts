@@ -1185,11 +1185,7 @@ describe('modules/platform/gitea/index', () => {
     it('should update pull request with title', async () => {
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
-      await gitea.updatePr({
-        number: 1,
-        prTitle: 'New Title',
-        targetBranch: 'target_branch',
-      });
+      await gitea.updatePr({ number: 1, prTitle: 'New Title' });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -1204,7 +1200,6 @@ describe('modules/platform/gitea/index', () => {
         number: 1,
         prTitle: 'New Title',
         prBody: 'New Body',
-        targetBranch: 'target_branch',
       });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
@@ -1221,7 +1216,6 @@ describe('modules/platform/gitea/index', () => {
         number: 3,
         prTitle: 'New Title',
         prBody: 'New Body',
-        targetBranch: 'target_branch',
       });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
@@ -1239,7 +1233,6 @@ describe('modules/platform/gitea/index', () => {
         prTitle: 'New Title',
         prBody: 'New Body',
         state: 'closed',
-        targetBranch: 'target_branch',
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {

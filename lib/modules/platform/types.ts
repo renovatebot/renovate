@@ -105,7 +105,6 @@ export interface CreatePRConfig {
 }
 export interface UpdatePrConfig {
   number: number;
-  targetBranch: string;
   platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;

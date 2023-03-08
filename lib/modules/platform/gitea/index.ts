@@ -584,7 +584,6 @@ const platform: Platform = {
               number: pr.number,
               prTitle: title,
               prBody: body,
-              targetBranch
             });
             pr.title = title;
             pr.bodyStruct = getPrBodyStruct(body);
@@ -607,7 +606,6 @@ const platform: Platform = {
     prTitle,
     prBody: body,
     state,
-    targetBranch
   }: UpdatePrConfig): Promise<void> {
     let title = prTitle;
     if ((await getPrList()).find((pr) => pr.number === number)?.isDraft) {
@@ -618,7 +616,6 @@ const platform: Platform = {
       title,
       ...(body && { body }),
       ...(state && { state }),
-      base: targetBranch
     });
   },
 

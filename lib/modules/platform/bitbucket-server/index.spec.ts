@@ -1417,7 +1417,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: 5,
               prTitle: 'title',
               prBody: 'body',
-              targetBranch: 'target_branch',
             })
           ).toResolve();
         });
@@ -1444,7 +1443,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'closed',
-              targetBranch: 'target_branch',
             })
           ).toResolve();
         });
@@ -1471,7 +1469,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'open',
-              targetBranch: 'target_branch',
             })
           ).toResolve();
         });
@@ -1483,7 +1480,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               number: null as any,
               prTitle: 'title',
               prBody: 'body',
-              targetBranch: 'target_branch',
             })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
@@ -1496,12 +1492,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             )
             .reply(404);
           await expect(
-            bitbucket.updatePr({
-              number: 4,
-              prTitle: 'title',
-              prBody: 'body',
-              targetBranch: 'target_branch',
-            })
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1518,12 +1509,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(404);
 
           await expect(
-            bitbucket.updatePr({
-              number: 5,
-              prTitle: 'title',
-              prBody: 'body',
-              targetBranch: 'target_branch',
-            })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
         });
 
@@ -1572,7 +1558,6 @@ describe('modules/platform/bitbucket-server/index', () => {
               prTitle: 'title',
               prBody: 'body',
               state: 'open',
-              targetBranch: 'target_branch',
             })
           ).toResolve();
         });
@@ -1590,12 +1575,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(409);
 
           await expect(
-            bitbucket.updatePr({
-              number: 5,
-              prTitle: 'title',
-              prBody: 'body',
-              targetBranch: 'target_branch',
-            })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_CHANGED);
         });
 
@@ -1612,12 +1592,7 @@ describe('modules/platform/bitbucket-server/index', () => {
             .reply(405);
 
           await expect(
-            bitbucket.updatePr({
-              number: 5,
-              prTitle: 'title',
-              prBody: 'body',
-              targetBranch: 'target_branch',
-            })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrowErrorMatchingSnapshot();
         });
       });

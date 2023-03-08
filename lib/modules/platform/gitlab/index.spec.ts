@@ -1981,12 +1981,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({
-          number: 1,
-          prTitle: 'title',
-          prBody: 'body',
-          targetBranch: 'target_branch',
-        })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
 
@@ -2008,12 +2003,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({
-          number: 1,
-          prTitle: 'title',
-          prBody: 'body',
-          targetBranch: 'target_branch',
-        })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
 
@@ -2035,12 +2025,7 @@ describe('modules/platform/gitlab/index', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await expect(
-        gitlab.updatePr({
-          number: 1,
-          prTitle: 'title',
-          prBody: 'body',
-          targetBranch: 'target_branch',
-        })
+        gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' })
       ).toResolve();
     });
 
@@ -2067,7 +2052,6 @@ describe('modules/platform/gitlab/index', () => {
           prTitle: 'title',
           prBody: 'body',
           state: 'closed',
-          targetBranch: 'target_branch',
         })
       ).toResolve();
     });

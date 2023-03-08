@@ -37,7 +37,6 @@ async function cleanUpBranches(
                 number: pr.number,
                 prTitle: newPrTitle,
                 state: 'open',
-                targetBranch: 'target_branch',
               });
             }
 
@@ -66,7 +65,6 @@ async function cleanUpBranches(
             number: pr.number,
             prTitle: newPrTitle,
             state: 'closed',
-            targetBranch: 'target_branch',
           });
           await scm.deleteBranch(branchName);
         }

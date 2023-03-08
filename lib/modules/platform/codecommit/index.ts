@@ -392,7 +392,6 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
-  targetBranch
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 

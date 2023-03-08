@@ -851,7 +851,6 @@ export async function updatePr({
   prBody: rawDescription,
   state,
   bitbucketInvalidReviewers,
-  targetBranch,
 }: UpdatePrConfig & {
   bitbucketInvalidReviewers: string[] | undefined;
 }): Promise<void> {
@@ -879,9 +878,6 @@ export async function updatePr({
               (name: string) => !bitbucketInvalidReviewers?.includes(name)
             )
             .map((name: string) => ({ user: { name } })),
-          toRef: {
-            id: `refs/heads/${targetBranch}`,
-          },
         },
       }
     );
@@ -923,7 +919,6 @@ export async function updatePr({
           prBody: rawDescription,
           state,
           bitbucketInvalidReviewers: invalidReviewers,
-          targetBranch,
         });
       } else {
         throw new Error(REPOSITORY_CHANGED);

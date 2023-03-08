@@ -2715,7 +2715,6 @@ describe('modules/platform/github/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
-        targetBranch: 'target_branch'
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -2731,7 +2730,6 @@ describe('modules/platform/github/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'closed',
-        targetBranch: 'target_branch'
       };
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

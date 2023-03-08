@@ -41,7 +41,6 @@ export interface PrFingerprintConfig {
   pendingVersions?: string[];
 
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
-  baseBranch?: string;
 }
 
 export function generatePrFingerprintConfig(
@@ -77,7 +76,6 @@ export function generatePrFingerprintConfig(
     updateType: config.updateType,
     warnings: config.warnings,
     pendingVersions: config.pendingVersions,
-    baseBranch: config.baseBranch,
   };
 }
 

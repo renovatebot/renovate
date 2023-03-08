@@ -34,7 +34,6 @@ export async function raiseConfigWarningIssue(
           number: pr.number,
           prTitle: config.onboardingPrTitle!,
           prBody: body,
-          targetBranch: 'target_branch',
         });
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ err }, 'Error updating onboarding PR');

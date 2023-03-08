@@ -85,7 +85,6 @@ ${
         number: existingPr.number,
         prTitle,
         prBody,
-        targetBranch: 'target_branch'
       });
       logger.info({ pr: existingPr.number }, 'Migration PR updated');
     }

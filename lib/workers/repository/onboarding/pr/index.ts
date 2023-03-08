@@ -153,7 +153,6 @@ If you need any further assistance then you can also [request help here](${
         number: existingPr.number,
         prTitle: existingPr.title,
         prBody,
-        targetBranch: 'target_branch',
       });
       logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     }
