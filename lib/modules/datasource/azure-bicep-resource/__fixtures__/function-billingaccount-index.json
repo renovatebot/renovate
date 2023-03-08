@@ -1,0 +1,19 @@
+{
+  "Resources": {},
+  "Functions": {
+    "microsoft.billing/billingaccounts": {
+      "2019-10-01-preview": [
+        {
+          "RelativePath": "billing/microsoft.billing/2019-10-01-preview/types.json",
+          "Index": 307
+        }
+      ],
+      "2020-05-01": [
+        {
+          "RelativePath": "billing/microsoft.billing/2020-05-01/types.json",
+          "Index": 287
+        }
+      ]
+    }
+  }
+}
