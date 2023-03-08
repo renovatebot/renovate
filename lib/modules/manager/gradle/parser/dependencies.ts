@@ -179,7 +179,7 @@ const qImplicitGradlePlugin = q
             )
             .alt(
               // toolVersion = "1.2.3"
-              q.op<Ctx>('=').join(qVersion),
+              q.opt<Ctx>(q.op('=')).join(qVersion),
               // toolVersion.set("1.2.3"), toolVersion.value("1.2.3")
               q
                 .op<Ctx>('.')
