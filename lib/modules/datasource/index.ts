@@ -278,6 +278,7 @@ async function fetchReleases(
   const datasource = getDatasourceFor(datasourceName);
   // istanbul ignore if: needs test
   if (!datasource) {
+    logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
   registryUrls = resolveRegistryUrls(
