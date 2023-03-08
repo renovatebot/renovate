@@ -1626,7 +1626,7 @@ const options: RenovateOptions[] = [
   {
     name: 'bbUseDevelopmentBranch',
     description:
-      'Use the [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the default target branch for pull requests (Bitbucket only).',
+      'Use the repository's [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the repository's default branch.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['bitbucket'],
