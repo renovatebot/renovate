@@ -68,7 +68,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===
-      getBranchCommit(config.defaultBranch!)! &&
+      getBranchCommit(config.defaultBranch!) &&
     onboardingBranchCache.onboardingBranchSha ===
       getBranchCommit(config.onboardingBranch!)
   ) {

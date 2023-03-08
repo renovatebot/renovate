@@ -63,7 +63,7 @@ export async function checkOnboardingBranch(
       setOnboardingCache(
         config.onboardingBranch!,
         getBranchCommit(config.defaultBranch!)!,
-        getBranchCommit(config.onboardingBranch!)!
+        commit
       );
     }
     // istanbul ignore if
@@ -101,7 +101,7 @@ export async function checkOnboardingBranch(
       setOnboardingCache(
         config.onboardingBranch!,
         getBranchCommit(config.defaultBranch!)!,
-        getBranchCommit(config.onboardingBranch!)!
+        commit
       );
     }
   }

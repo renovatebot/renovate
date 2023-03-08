@@ -11,7 +11,7 @@ const cache = mocked(_cache);
 
 describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
   it('sets new cache', () => {
-    const dummyCache = {} as RepoCacheData;
+    const dummyCache = {} satisfies RepoCacheData;
     cache.getCache.mockReturnValueOnce(dummyCache);
     setOnboardingCache('configure/renovate', 'default-sha', 'onboarding-sha');
     expect(dummyCache).toEqual({
@@ -30,7 +30,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },
-    } as RepoCacheData;
+    } satisfies RepoCacheData;
     cache.getCache.mockReturnValueOnce(dummyCache);
     setOnboardingCache(
       'configure/renovate',
@@ -53,7 +53,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },
-    } as RepoCacheData;
+    } satisfies RepoCacheData;
     cache.getCache.mockReturnValueOnce(dummyCache);
     deleteOnboardingCache();
     expect(dummyCache.onboardingBranchCache).toBeUndefined();
