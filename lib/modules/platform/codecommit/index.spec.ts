@@ -698,6 +698,7 @@ describe('modules/platform/codecommit/index', () => {
           prTitle: 'title',
           prBody: 'body',
           state: 'open',
+          targetBranch: 'target_branch',
         })
       ).toResolve();
     });
@@ -725,6 +726,7 @@ describe('modules/platform/codecommit/index', () => {
           prTitle: 'title',
           prBody: 'new description',
           state: 'open',
+          targetBranch: 'target_branch',
         })
       ).toResolve();
     });
@@ -751,6 +753,7 @@ describe('modules/platform/codecommit/index', () => {
           prTitle: 'title',
           prBody: 'new description',
           state: 'open',
+          targetBranch: 'target_branch',
         })
       ).toResolve();
     });
@@ -767,6 +770,7 @@ describe('modules/platform/codecommit/index', () => {
           prTitle: 'title',
           prBody: 'body',
           state: 'open',
+          targetBranch: 'target_branch',
         })
       ).toResolve();
     });
@@ -781,6 +785,7 @@ describe('modules/platform/codecommit/index', () => {
           prTitle: 'title',
           prBody: 'body',
           state: 'closed',
+          targetBranch: 'target_branch',
         })
       ).toResolve();
     });

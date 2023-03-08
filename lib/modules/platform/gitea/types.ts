@@ -169,7 +169,6 @@ export interface IssueSearchParams {
 }
 
 export interface PRCreateParams extends PRUpdateParams {
-  base?: string;
   head?: string;
 }
 
@@ -179,6 +178,7 @@ export interface PRUpdateParams {
   assignees?: string[];
   labels?: number[];
   state?: PRState;
+  base?: string;
 }
 
 export interface PRSearchParams {

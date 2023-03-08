@@ -321,7 +321,7 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // adds or-cache for existing PRs
+        // adds pr-cache for existing PRs
         setPrCache(branchName, prFingerprint, false);
         logger.debug(
           `Pull Request #${existingPr.number} does not need updating`
@@ -350,6 +350,7 @@ export async function ensurePr(
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
         await platform.updatePr({
+          targetBranch: config.baseBranch ?? '',
           number: existingPr.number,
           prTitle,
           prBody,

@@ -808,6 +808,7 @@ describe('modules/platform/azure/index', () => {
         number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
+        targetBranch: 'target_branch',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -824,6 +825,7 @@ describe('modules/platform/azure/index', () => {
       await azure.updatePr({
         number: 1234,
         prTitle: 'The New Title - autoclose',
+        targetBranch: 'target_branch',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -842,6 +844,7 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'closed',
+        targetBranch: 'target_branch',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -860,6 +863,7 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: 'open',
+        targetBranch: 'target_branch',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
