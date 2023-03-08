@@ -21,7 +21,9 @@ jest.mock('../../../util/fs', () => {
     __esModules: true,
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
     ...(jest.createMockFromModule('../../../util/fs') as any),
-    isValidLocalPath: jest.requireActual('../../../util/fs').isValidLocalPath,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
+      .isValidLocalPath,
   };
 });
 jest.mock('../../datasource');
