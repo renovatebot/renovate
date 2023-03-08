@@ -709,6 +709,10 @@ Set this to an S3 URI to enable S3 backed repository cache.
     If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
 
+<!-- prettier-ignore -->
+!!! note
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
+
 ## requireConfig
 
 By default, Renovate needs a Renovate config file in each repository where it runs before it will propose any dependency updates.
