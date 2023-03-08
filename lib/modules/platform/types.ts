@@ -108,6 +108,7 @@ export interface UpdatePrConfig {
   platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
+  targetBranch?: string;
   state?: 'open' | 'closed';
 }
 export interface EnsureIssueConfig {

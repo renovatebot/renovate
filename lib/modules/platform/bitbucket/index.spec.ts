@@ -1080,7 +1080,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).toResolve();
     });
 
@@ -1143,7 +1148,12 @@ describe('modules/platform/bitbucket/index', () => {
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).toResolve();
     });
 
@@ -1187,7 +1197,12 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200);
 
       await expect(
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).toResolve();
     });
 
@@ -1219,7 +1234,12 @@ describe('modules/platform/bitbucket/index', () => {
         )
         .reply(401);
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).rejects.toThrow(new Error('Response code 401 (Unauthorized)'));
     });
 
@@ -1244,7 +1264,12 @@ describe('modules/platform/bitbucket/index', () => {
           },
         });
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
@@ -1269,7 +1294,12 @@ describe('modules/platform/bitbucket/index', () => {
           },
         });
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).rejects.toThrow(new Error('Response code 400 (Bad Request)'));
     });
 
@@ -1279,7 +1309,12 @@ describe('modules/platform/bitbucket/index', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(500, undefined);
       await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+        bitbucket.updatePr({
+          number: 5,
+          prTitle: 'title',
+          prBody: 'body',
+          targetBranch: 'main',
+        })
       ).rejects.toThrowErrorMatchingSnapshot();
     });
 
@@ -1298,6 +1333,7 @@ describe('modules/platform/bitbucket/index', () => {
           number: pr.id,
           prTitle: pr.title,
           state: 'closed',
+          targetBranch: 'main',
         })
       ).toBeUndefined();
     });

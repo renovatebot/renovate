@@ -353,6 +353,7 @@ export async function ensurePr(
           number: existingPr.number,
           prTitle,
           prBody,
+          targetBranch: config.baseBranch ?? '',
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);

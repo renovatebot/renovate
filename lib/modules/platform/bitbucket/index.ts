@@ -838,6 +838,7 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: description,
+  targetBranch,
   state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
@@ -856,6 +857,11 @@ export async function updatePr({
           title,
           description: sanitize(description),
           reviewers: pr.reviewers,
+          destination: {
+            branch: {
+              name: targetBranch,
+            },
+          },
         },
       }
     );
@@ -873,6 +879,11 @@ export async function updatePr({
             title,
             description: sanitize(description),
             reviewers: sanitizedReviewers,
+            destination: {
+              branch: {
+                name: targetBranch,
+              },
+            },
           },
         }
       );
