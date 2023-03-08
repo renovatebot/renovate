@@ -35,7 +35,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       packageName: 'Microsoft.Billing/billingAccounts',
     });
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       releases: [
         {
           version: '2019-10-01-preview',
@@ -62,7 +62,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       packageName: 'Microsoft.Storage/storageAccounts',
     });
 
-    expect(result).toMatchObject({
+    expect(result).toEqual({
       releases: [
         {
           version: '2015-05-01-preview',
