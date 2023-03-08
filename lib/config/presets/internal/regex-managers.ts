@@ -14,4 +14,28 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  githubActionsVersions: {
+    description:
+      'Update `_VERSION` environment variables in GitHub Action files.',
+    regexManagers: [
+      {
+        fileMatch: ['^.github/(?:workflows|actions)/.+\\.ya?ml$'],
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[a-z-0-9]+?))?\\s+[A-Za-z0-9_]+?_VERSION\\s*:\\s*["\']?(?<currentValue>.+?)["\']?\\s',
+        ],
+      },
+    ],
+  },
+  helmChartYamlAppVersions: {
+    description: 'Update `appVersion` value in Helm chart Chart.yaml.',
+    regexManagers: [
+      {
+        datasourceTemplate: 'docker',
+        fileMatch: ['(^|/)Chart\\.yaml$'],
+        matchStrings: [
+          '#\\s*renovate: image=(?<depName>.*?)\\s+appVersion:\\s*["\']?(?<currentValue>[\\w+\\.\\-]*)',
+        ],
+      },
+    ],
+  },
 };

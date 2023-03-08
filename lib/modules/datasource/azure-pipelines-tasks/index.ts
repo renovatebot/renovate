@@ -7,11 +7,16 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   static readonly id = 'azure-pipelines-tasks';
 
   private readonly builtInTasks: Record<string, string[]>;
+  private readonly marketplaceTasks: Record<string, string[]>;
 
   constructor() {
     super(AzurePipelinesTasksDatasource.id);
     this.builtInTasks = JSON.parse(
       dataFiles.get('data/azure-pipelines-tasks.json')!
+    );
+
+    this.marketplaceTasks = JSON.parse(
+      dataFiles.get('data/azure-pipelines-marketplace-tasks.json')!
     );
   }
 
@@ -22,7 +27,10 @@ export class AzurePipelinesTasksDatasource extends Datasource {
   getReleases({
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const versions = this.builtInTasks[packageName.toLowerCase()];
+    const versions =
+      this.builtInTasks[packageName.toLowerCase()] ??
+      this.marketplaceTasks[packageName.toLowerCase()];
+
     if (versions) {
       const releases = versions.map((version) => ({ version }));
       return Promise.resolve({ releases });

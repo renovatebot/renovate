@@ -179,7 +179,10 @@ export function generateBranchConfig(
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
-    } else if (newValue.length > 1 && upgrade.isDigest) {
+    } else if (
+      newValue.length > 1 &&
+      (upgrade.isDigest || upgrade.isPinDigest)
+    ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;

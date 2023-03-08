@@ -2,13 +2,17 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
   _filename: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('ansible.extractPackageFile()');
   let deps: PackageDependency[] = [];
   const re = regEx(/^\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/);

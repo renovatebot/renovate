@@ -167,7 +167,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
 - [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
-- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 - [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
 - [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 

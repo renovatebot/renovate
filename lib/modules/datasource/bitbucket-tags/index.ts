@@ -1,6 +1,7 @@
 import { cache } from '../../../util/cache/package/decorator';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import { ensureTrailingSlash } from '../../../util/url';
+import type { PagedResult, RepoInfoBody } from '../../platform/bitbucket/types';
 import * as utils from '../../platform/bitbucket/utils';
 import { Datasource } from '../datasource';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -97,7 +98,7 @@ export class BitBucketTagsDatasource extends Datasource {
   })
   async getMainBranch(repo: string): Promise<string> {
     return (
-      await this.bitbucketHttp.getJson<utils.RepoInfoBody>(
+      await this.bitbucketHttp.getJson<RepoInfoBody>(
         `/2.0/repositories/${repo}`
       )
     ).body.mainbranch.name;
@@ -122,7 +123,7 @@ export class BitBucketTagsDatasource extends Datasource {
 
     const url = `/2.0/repositories/${repo}/commits/${mainBranch}`;
     const bitbucketCommits = (
-      await this.bitbucketHttp.getJson<utils.PagedResult<BitbucketCommit>>(url)
+      await this.bitbucketHttp.getJson<PagedResult<BitbucketCommit>>(url)
     ).body;
 
     if (bitbucketCommits.values.length === 0) {

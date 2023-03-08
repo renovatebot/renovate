@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import type { CustomExtractConfig } from '../types';
@@ -445,6 +446,34 @@ describe('modules/manager/regex/index', () => {
           depName: 'org.jacoco:jacoco',
           currentValue: '0.8.7',
           datasource: 'maven',
+        },
+      ],
+    });
+  });
+
+  it('migrates', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: (?:packageName|lookupName)=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\sRUN install-[a-z]+? (?<depName>[a-z-]+?) (?<currentValue>.+?)(?:\\s|$)',
+      ],
+      versioningTemplate:
+        '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+    };
+    const res = await extractPackageFile(
+      codeBlock`
+        # renovate: datasource=dotnet packageName=dotnet-runtime
+        RUN install-tool dotnet 6.0.13
+      `,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'dotnet',
+          packageName: 'dotnet-runtime',
+          currentValue: '6.0.13',
+          datasource: 'dotnet-version',
         },
       ],
     });

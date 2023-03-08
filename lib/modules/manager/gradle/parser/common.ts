@@ -1,4 +1,5 @@
 import { lexer, parser, query as q } from 'good-enough-parser';
+import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
 import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
 
@@ -10,15 +11,19 @@ export const REGISTRY_URLS = {
 };
 
 export const GRADLE_PLUGINS = {
-  checkstyle: 'com.puppycrawl.tools:checkstyle',
-  codenarc: 'org.codenarc:CodeNarc',
-  detekt: 'io.gitlab.arturbosch.detekt:detekt-core',
-  findbugs: 'com.google.code.findbugs:findbugs',
-  googleJavaFormat: 'com.google.googlejavaformat:google-java-format',
-  jacoco: 'org.jacoco:jacoco',
-  lombok: 'org.projectlombok:lombok',
-  pmd: 'net.sourceforge.pmd:pmd-java',
-  spotbugs: 'com.github.spotbugs:spotbugs',
+  checkstyle: ['toolVersion', 'com.puppycrawl.tools:checkstyle'],
+  codenarc: ['toolVersion', 'org.codenarc:CodeNarc'],
+  detekt: ['toolVersion', 'io.gitlab.arturbosch.detekt:detekt-core'],
+  findbugs: ['toolVersion', 'com.google.code.findbugs:findbugs'],
+  googleJavaFormat: [
+    'toolVersion',
+    'com.google.googlejavaformat:google-java-format',
+  ],
+  jacoco: ['toolVersion', 'org.jacoco:jacoco'],
+  jmh: ['jmhVersion', 'org.openjdk.jmh:jmh-core'],
+  lombok: ['version', 'org.projectlombok:lombok'],
+  pmd: ['toolVersion', 'net.sourceforge.pmd:pmd-java'],
+  spotbugs: ['toolVersion', 'com.github.spotbugs:spotbugs'],
 };
 
 export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
@@ -36,6 +41,22 @@ export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
 
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
   ctx.varTokens.push(node);
+  return ctx;
+}
+
+export function increaseNestingDepth(ctx: Ctx): Ctx {
+  ctx.tmpNestingDepth.push(...ctx.varTokens);
+  ctx.varTokens = [];
+  return ctx;
+}
+
+export function reduceNestingDepth(ctx: Ctx): Ctx {
+  ctx.tmpNestingDepth.pop();
+  return ctx;
+}
+
+export function prependNestingDepth(ctx: Ctx): Ctx {
+  ctx.varTokens = [...clone(ctx.tmpNestingDepth), ...ctx.varTokens];
   return ctx;
 }
 
@@ -221,3 +242,9 @@ export const qConcatExpr = (
   ...matchers: q.QueryBuilder<Ctx, parser.Node>[]
 ): q.QueryBuilder<Ctx, parser.Node> =>
   q.alt(...matchers).many(q.op<Ctx>('+').alt(...matchers), 0, 32);
+
+export const qValueMatcher = qConcatExpr(
+  qTemplateString,
+  qPropertyAccessIdentifier,
+  qVariableAccessIdentifier
+);

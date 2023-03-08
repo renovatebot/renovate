@@ -385,6 +385,16 @@ describe('util/git/index', () => {
     });
   });
 
+  describe('getFiles(filePath)', () => {
+    it('gets the file', async () => {
+      const res = await git.getFiles(['master_file', 'some_missing_path']);
+      expect(res).toEqual({
+        master_file: defaultBranch,
+        some_missing_path: null,
+      });
+    });
+  });
+
   describe('hasDiff(sourceRef, targetRef)', () => {
     it('compare without changes', () => {
       return expect(git.hasDiff('HEAD', 'HEAD')).resolves.toBeFalse();
@@ -484,6 +494,7 @@ describe('util/git/index', () => {
         },
       ];
       const commitConfig = {
+        baseBranch: 'renovate/something',
         branchName: 'renovate/something',
         files,
         message: 'Update something',
@@ -1054,32 +1065,6 @@ describe('util/git/index', () => {
       //checkout this duplicate
       const sha = await git.checkoutBranch(`other/${defaultBranch}`);
       expect(sha).toBe(git.getBranchCommit(defaultBranch));
-    });
-  });
-
-  describe('installHook()', () => {
-    it('installHook()', async () => {
-      //git.getCommitMessages() only returns the first line (i.e. subject) of each msg
-      await git.installHook(
-        'commit-msg',
-        '#!/bin/sh\necho "APPENDED FROM COMMIT-MSG HOOK" >> $1;'
-      );
-      const files: FileChange[] = [
-        {
-          type: 'addition',
-          path: 'some-new-file',
-          contents: 'some new-contents',
-        },
-      ];
-      setNoVerify(['push']);
-      await git.commitFiles({
-        branchName: 'renovate/something',
-        files,
-        message: 'Orig-commit-msg',
-      });
-
-      const messages = await git.getCommitMessages();
-      expect(messages[0]).toBe('Orig-commit-msg APPENDED FROM COMMIT-MSG HOOK');
     });
   });
 });
