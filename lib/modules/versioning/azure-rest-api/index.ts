@@ -12,7 +12,7 @@ export const urls = [
 export const supportsRanges = false;
 
 const AZURE_REST_API_VERSION_REGEX = regEx(
-  /^(?<version>(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2}))(?<prerelease>-[a-z]+)?$/
+  /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})(?<prerelease>-[a-z]+)?$/
 );
 
 class AzureRestApiVersioningApi extends GenericVersioningApi {
@@ -27,11 +27,11 @@ class AzureRestApiVersioningApi extends GenericVersioningApi {
       return null;
     }
 
+    const { year, month, day, prerelease } = matchGroups;
+
     return {
-      // TODO: use date as major version so it is always a major upgrade?
-      release: [1, 0, 0], // static because there is no semantic versioning
-      suffix: matchGroups.version,
-      prerelease: matchGroups.prerelease,
+      release: [parseInt(`${year}${month}${day}`), 0, 0],
+      prerelease,
     };
   }
 

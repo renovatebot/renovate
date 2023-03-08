@@ -64,11 +64,11 @@ describe('modules/versioning/azure-rest-api/index', () => {
   });
 
   it.each`
-    version
-    ${'2023-01-01'}
-    ${'2023-01-01-preview'}
-  `('getMajor("$version") === 1', ({ version }) => {
-    expect(azureRestApi.getMajor(version)).toBe(1);
+    version                 | expected
+    ${'2023-01-01'}         | ${20230101}
+    ${'2023-01-01-preview'} | ${20230101}
+  `('getMajor("$version") === 1', ({ version, expected }) => {
+    expect(azureRestApi.getMajor(version)).toBe(expected);
   });
 
   it.each`
