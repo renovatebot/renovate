@@ -16,7 +16,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     setOnboardingCache('configure/renovate', 'default-sha', 'onboarding-sha');
     expect(dummyCache).toEqual({
       onboardingBranchCache: {
-        branchName: 'configure/renovate',
+        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },
