@@ -24,8 +24,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -50,8 +49,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -68,8 +66,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -86,8 +83,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -104,8 +100,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -122,8 +117,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -140,8 +134,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
-          replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01'",
+          replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
           versioning: 'azure-rest-api',
         },
         {
@@ -149,7 +142,7 @@ describe('modules/manager/bicep/extract', () => {
           currentValue: '2022-09-01',
           datasource: 'azure-bicep-resource',
           depName: 'blobServices',
-          replaceString: "resource blobServices 'blobServices@2022-09-01'",
+          replaceString: "'blobServices@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
@@ -167,7 +160,7 @@ describe('modules/manager/bicep/extract', () => {
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts/blobServices/containers',
           replaceString:
-            "resource storageAccount 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01'",
+            "'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
