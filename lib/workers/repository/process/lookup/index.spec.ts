@@ -1858,6 +1858,9 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
           updateType: 'replacement',
@@ -1881,7 +1884,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
-      docker.getReleases.mockResolvedValue({
+      docker.getReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
@@ -1891,7 +1894,16 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValue('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      docker.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+        ],
+      });
+      docker.getDigest.mockResolvedValueOnce('sha256:pin0987654321');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
@@ -1905,10 +1917,11 @@ describe('workers/repository/process/lookup/index', () => {
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          newDigest: 'sha256:0123456789abcdef',
         },
         {
           isPinDigest: true,
-          newDigest: 'sha256:abcdef1234567890',
+          newDigest: 'sha256:pin0987654321',
           newValue: '17.0.0',
           updateType: 'pinDigest',
         },
@@ -1922,6 +1935,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
+      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
           updateType: 'replacement',
