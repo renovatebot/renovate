@@ -111,7 +111,7 @@ export interface PackageDependency<T = Record<string, any>>
   fileReplacePosition?: number;
   groupName?: string;
   lineNumber?: number;
-  packageName?: string | null;
+  packageName?: string;
   target?: string;
   versioning?: string;
   dataType?: string;

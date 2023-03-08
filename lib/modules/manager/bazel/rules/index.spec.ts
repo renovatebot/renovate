@@ -378,6 +378,7 @@ describe('modules/manager/bazel/rules/index', () => {
         {
           currentValue: '1.1.1',
           datasource: 'maven',
+          versioning: 'gradle',
           depType: 'maven_install',
           depName: 'com.example1:foo',
           registryUrls: [
@@ -388,6 +389,7 @@ describe('modules/manager/bazel/rules/index', () => {
         {
           currentValue: '2.2.2',
           datasource: 'maven',
+          versioning: 'gradle',
           depType: 'maven_install',
           depName: 'com.example2:bar',
           registryUrls: [
@@ -398,6 +400,7 @@ describe('modules/manager/bazel/rules/index', () => {
         {
           currentValue: '3.3.3',
           datasource: 'maven',
+          versioning: 'gradle',
           depType: 'maven_install',
           depName: 'com.example3:baz',
           registryUrls: [
