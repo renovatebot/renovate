@@ -1229,7 +1229,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, '', {});
       const res = await getPkgReleases({
         datasource: DockerDatasource.id,
-        depName: 'org.jfrog.io/virtual-mirror/node',
+        packageName: 'org.jfrog.io/virtual-mirror/node',
       });
       expect(res?.releases).toHaveLength(10050);
     });
