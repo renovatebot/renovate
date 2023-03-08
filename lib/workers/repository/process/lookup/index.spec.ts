@@ -43,6 +43,13 @@ describe('workers/repository/process/lookup/index', () => {
     'getReleases'
   );
 
+  const getDockerReleases = jest.spyOn(
+    DockerDatasource.prototype,
+    'getReleases'
+  );
+
+  const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
+
   beforeEach(() => {
     // TODO: fix types #7154
     config = partial<LookupUpdateConfig>(getConfig() as never);
@@ -1848,7 +1855,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
@@ -1858,8 +1865,8 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
@@ -1884,7 +1891,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.versioning = dockerVersioningId;
       // This config is normally set when packageRules are applied
       config.replacementName = 'eclipse-temurin';
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
@@ -1894,16 +1901,16 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '17.0.0',
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:pin0987654321');
+      getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
