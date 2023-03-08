@@ -75,36 +75,52 @@ export function cache<T>({
     );
 
     const now = DateTime.local();
-    const hardTTLMinutes = ttlMinutes * 10;
+    const ttlHardMinutes = ttlMinutes * 10;
 
+    let oldData: T | undefined;
     if (cacheRecord) {
-      const ttlDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
+      const softDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
         minutes: ttlMinutes,
       });
-      if (now < ttlDeadline) {
+      const hardDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
+        minutes: ttlHardMinutes,
+      });
+
+      if (now < softDeadline) {
         return cacheRecord.data;
+      }
+
+      if (now < hardDeadline) {
+        oldData = cacheRecord.data;
       }
     }
 
-    let data: T | undefined;
-    try {
-      data = (await callback()) as T | undefined;
-    } catch (err) {
-      if (cacheRecord) {
-        return cacheRecord.data;
+    let newData: T | undefined;
+    if (oldData) {
+      try {
+        newData = (await callback()) as T | undefined;
+      } catch (err) {
+        return oldData;
       }
-    } finally {
-      if (!is.undefined(data)) {
-        const cachedAt = now.toISO();
-        await packageCache.set(
-          finalNamespace,
-          finalKey,
-          { data, cachedAt },
-          hardTTLMinutes
-        );
-      }
+    } else {
+      newData = (await callback()) as T | undefined;
     }
 
-    return data;
+    if (!is.undefined(newData)) {
+      const cachedAt = now.toISO();
+      const newCacheRecord: DecoratorCachedRecord<T> = {
+        cachedAt,
+        data: newData,
+      };
+
+      await packageCache.set(
+        finalNamespace,
+        finalKey,
+        newCacheRecord,
+        ttlHardMinutes
+      );
+    }
+
+    return newData;
   });
 }

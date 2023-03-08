@@ -10,7 +10,7 @@ jest.mock('./file');
 describe('util/cache/package/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     memCache.init();
     await packageCache.init({ cacheDir: os.tmpdir() });
   });
@@ -119,5 +119,66 @@ describe('util/cache/package/decorator', () => {
     );
 
     expect(await getNumber.value?.()).toBeNumber();
+  });
+
+  describe('Fallback', () => {
+    const inc = jest.fn();
+
+    class MyClass {
+      @cache({
+        namespace: (x: number) => x.toString(),
+        key: () => 'key',
+        ttlMinutes: 1,
+      })
+      public incNumber(x: number): Promise<number> {
+        return inc(x);
+      }
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false });
+      inc.mockImplementation((x: number) => Promise.resolve(x + 1));
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      inc.mockClear();
+    });
+
+    it('updates cached result', async () => {
+      const myInst = new MyClass();
+
+      expect(await myInst.incNumber(99)).toBe(100);
+
+      jest.advanceTimersByTime(60 * 1000 - 1);
+      expect(await myInst.incNumber(99)).toBe(100);
+      expect(inc).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(1);
+      expect(await myInst.incNumber(99)).toBe(100);
+      expect(inc).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns obsolete result on error', async () => {
+      const myInst = new MyClass();
+
+      expect(await myInst.incNumber(99)).toBe(100);
+
+      jest.advanceTimersByTime(60 * 1000);
+      inc.mockRejectedValueOnce(new Error('test'));
+      expect(await myInst.incNumber(99)).toBe(100);
+      expect(inc).toHaveBeenCalledTimes(2);
+    });
+
+    it('re-throws if older result is too old', async () => {
+      const myInst = new MyClass();
+
+      expect(await myInst.incNumber(99)).toBe(100);
+
+      jest.advanceTimersByTime(10 * 60 * 1000);
+      inc.mockRejectedValueOnce(new Error('test'));
+      await expect(myInst.incNumber(99)).rejects.toThrow('test');
+      expect(inc).toHaveBeenCalledTimes(2);
+    });
   });
 });
