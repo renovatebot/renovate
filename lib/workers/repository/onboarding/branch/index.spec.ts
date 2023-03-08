@@ -43,7 +43,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     let config: RenovateConfig;
     const dummyCache = {
       onboardingBranchCache: {
-        branchName: 'configure/renovate',
+        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },

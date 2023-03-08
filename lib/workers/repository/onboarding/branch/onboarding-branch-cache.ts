@@ -1,13 +1,13 @@
 import { getCache } from '../../../../util/cache/repository';
 
 export function setOnboardingCache(
-  branchName: string,
+  onboardingBranch: string,
   defaultBranchSha: string,
   onboardingBranchSha: string
 ): void {
   const cache = getCache();
   const onboardingCache = {
-    branchName,
+    onboardingBranch,
     defaultBranchSha,
     onboardingBranchSha,
   };

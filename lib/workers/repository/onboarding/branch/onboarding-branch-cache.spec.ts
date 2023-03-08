@@ -26,7 +26,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
   it('updates old cache', () => {
     const dummyCache = {
       onboardingBranchCache: {
-        branchName: 'configure/renovate',
+        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },
@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     );
     expect(dummyCache).toEqual({
       onboardingBranchCache: {
-        branchName: 'configure/renovate',
+        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha-1',
         onboardingBranchSha: 'onboarding-sha-1',
       },
@@ -49,7 +49,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
   it('deletes cache', () => {
     const dummyCache = {
       onboardingBranchCache: {
-        branchName: 'configure/renovate',
+        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
       },
