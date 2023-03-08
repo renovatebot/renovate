@@ -80,6 +80,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'jsonnet-bundler/jsonnet-bundler',
     versioning: semverVersioningId,
   },
+  kustomize: {
+    datasource: 'github-releases',
+    depName: 'kubernetes-sigs/kustomize',
+    versioning: semverVersioningId,
+  },
   lerna: {
     datasource: 'npm',
     packageName: 'lerna',
