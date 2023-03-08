@@ -13,6 +13,7 @@ import {
   storeInTokenMap,
   storeVarToken,
 } from './common';
+import { qGroovyMapNotationDependencies } from './dependencies';
 import { handleAssignment } from './handlers';
 
 // foo = "1.2.3"
@@ -65,16 +66,20 @@ const qKotlinSingleExtraVarAssignment = q
   })
   .handler(cleanupTempVars);
 
-// foo: "1.2.3"
-const qGroovySingleMapOfVarAssignment = q
-  .sym(storeVarToken)
-  .handler(prependNestingDepth)
-  .handler(coalesceVariable)
-  .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
-  .op(':')
-  .join(qTemplateString)
-  .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
-  .handler(handleAssignment);
+const qGroovySingleMapOfVarAssignment = q.alt(
+  // foo: [group: "foo", name: "bar", version: "1.2.3"]
+  q.begin<Ctx>().join(qGroovyMapNotationDependencies).end(),
+  // foo: "1.2.3"
+  q
+    .sym(storeVarToken)
+    .handler(prependNestingDepth)
+    .handler(coalesceVariable)
+    .handler((ctx) => storeInTokenMap(ctx, 'keyToken'))
+    .op(':')
+    .join(qTemplateString)
+    .handler((ctx) => storeInTokenMap(ctx, 'valToken'))
+    .handler(handleAssignment)
+);
 
 const qGroovyMapOfExpr = (
   search: q.QueryBuilder<Ctx, parser.Node>

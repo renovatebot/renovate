@@ -79,7 +79,7 @@ const qDependencySet = q
   .handler(cleanupTempVars);
 
 // group: "foo", name: "bar", version: "1.2.3"
-const qGroovyMapNotationDependencies = q
+export const qGroovyMapNotationDependencies = q
   .sym<Ctx>('group')
   .op(':')
   .join(qGroupId)

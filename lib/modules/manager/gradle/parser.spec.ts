@@ -157,6 +157,7 @@ describe('modules/manager/gradle/parser', () => {
             releaseCoroutines: "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.26.1-eap13"
             api: "org.slf4j:slf4j-api:$slfj4Version",
           ]
+          foo = [ group: "org.slf4j", name: "slf4j-ext", version: slfj4Version ]
         `;
 
         const { deps } = parseGradle(input);
@@ -173,6 +174,11 @@ describe('modules/manager/gradle/parser', () => {
           },
           {
             depName: 'org.slf4j:slf4j-api',
+            groupName: 'slfj4Version',
+            currentValue: '2.0.0',
+          },
+          {
+            depName: 'org.slf4j:slf4j-ext',
             groupName: 'slfj4Version',
             currentValue: '2.0.0',
           },
