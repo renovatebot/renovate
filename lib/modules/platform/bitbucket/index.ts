@@ -172,7 +172,7 @@ export async function initRepo({
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
-  let developmentBranch: string;
+  let developmentBranch: string | undefined;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -187,9 +187,11 @@ export async function initRepo({
       await bitbucketHttp.getJson<RepoBranchingModel>(
         `/2.0/repositories/${repository}/branching-model`
       )
-    ).body.development.name;
+    ).body.development?.branch?.name;
 
-    config.defaultBranch = developmentBranch;
+    config.defaultBranch = developmentBranch
+      ? developmentBranch
+      : info.mainBranch;
 
     config = {
       ...config,
@@ -231,7 +233,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: developmentBranch,
+    defaultBranch: developmentBranch ? developmentBranch : info.mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };

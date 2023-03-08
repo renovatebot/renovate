@@ -39,6 +39,9 @@ export interface RepoInfo {
 export interface RepoBranchingModel {
   development: {
     name: string;
+    branch?: {
+      name: string;
+    };
   };
 }
 
