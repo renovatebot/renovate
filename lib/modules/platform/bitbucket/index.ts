@@ -189,8 +189,7 @@ export async function initRepo({
       )
     ).body.development?.branch?.name;
 
-    config.defaultBranch = developmentBranch
-      ?? info.mainBranch;
+    config.defaultBranch = developmentBranch ?? info.mainBranch;
 
     config = {
       ...config,
@@ -232,7 +231,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: developmentBranch ? developmentBranch : info.mainBranch,
+    defaultBranch: developmentBranch ?? info.mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
