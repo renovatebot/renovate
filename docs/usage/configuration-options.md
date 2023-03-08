@@ -276,6 +276,14 @@ With a negation, all branches except those matching the regex will be added to t
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use the repositories `main branch`.
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repositories branching model.
+
+If the `development branch` is configured but the branch itself does not exist (ie: it was deleted), Renovate will fall back to using the repositories `main branch`. (Bitbucket only).
+
 ## branchConcurrentLimit
 
 By default, Renovate won't enforce any concurrent branch limits.

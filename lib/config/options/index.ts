@@ -1623,6 +1623,14 @@ const options: RenovateOptions[] = [
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
+  {
+    name: 'bbUseDevelopmentBranch',
+    description:
+      'Use the [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the default target branch for pull requests (Bitbucket only).  Otherwise, use the repositories `main branch`',
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+  },
   // Automatic merging
   {
     name: 'automerge',

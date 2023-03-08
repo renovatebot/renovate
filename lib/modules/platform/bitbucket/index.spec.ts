@@ -59,15 +59,6 @@ describe('modules/platform/bitbucket/index', () => {
       ...repoResp,
     });
 
-    scope.get(`/2.0/repositories/${repository}/branching-model`).reply(200, {
-      development: {
-        name: 'master',
-        branch: {
-          name: 'master',
-        },
-      },
-    });
-
     await bitbucket.initRepo({
       repository: 'some/repo',
       ...config,
@@ -150,11 +141,7 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-        .get('/2.0/repositories/some/repo/branching-model')
-        .reply(200, {
-          development: { name: 'master', branch: { name: 'master' } },
-        });
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
@@ -170,11 +157,7 @@ describe('modules/platform/bitbucket/index', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-        .get('/2.0/repositories/some/repo/branching-model')
-        .reply(200, {
-          development: { name: 'master', branch: { name: 'master' } },
-        });
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
@@ -188,38 +171,56 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  it('uses development branch if exists', async () => {
-    httpMock
-      .scope(baseUrl)
-      .get('/2.0/repositories/some/repo')
-      .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-      .get('/2.0/repositories/some/repo/branching-model')
-      .reply(200, {
-        development: { name: 'develop', branch: { name: 'develop' } },
+  describe('bbUseDevelopmentBranch', () => {
+    it('not enabled: defaults to using main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: false,
       });
 
-    const res = await bitbucket.initRepo({
-      repository: 'some/repo',
+      expect(res.defaultBranch).toBe('master');
     });
 
-    expect(res.defaultBranch).toBe('develop');
-  });
+    it('enabled: uses development branch when development branch exists', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop', branch: { name: 'develop' } },
+        });
 
-  it('falls back to mainbranch if development branch is defined but branch itself does not exist', async () => {
-    httpMock
-      .scope(baseUrl)
-      .get('/2.0/repositories/some/repo')
-      .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-      .get('/2.0/repositories/some/repo/branching-model')
-      .reply(200, {
-        development: { name: 'develop' },
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
       });
 
-    const res = await bitbucket.initRepo({
-      repository: 'some/repo',
+      expect(res.defaultBranch).toBe('develop');
     });
 
-    expect(res.defaultBranch).toBe('master');
+    it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop' },
+        });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
   });
 
   describe('getRepoForceRebase()', () => {

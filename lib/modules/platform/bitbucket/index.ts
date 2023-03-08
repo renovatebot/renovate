@@ -160,6 +160,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -173,6 +174,7 @@ export async function initRepo({
   } as Config;
   let info: RepoInfo;
   let developmentBranch: string | undefined;
+  let mainBranch: string;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -182,14 +184,20 @@ export async function initRepo({
       ).body
     );
 
-    // Fetch Bitbucket development branch
-    developmentBranch = (
-      await bitbucketHttp.getJson<RepoBranchingModel>(
-        `/2.0/repositories/${repository}/branching-model`
-      )
-    ).body.development?.branch?.name;
+    if (bbUseDevelopmentBranch) {
+      // Fetch Bitbucket development branch
+      developmentBranch = (
+        await bitbucketHttp.getJson<RepoBranchingModel>(
+          `/2.0/repositories/${repository}/branching-model`
+        )
+      ).body.development?.branch?.name;
 
-    config.defaultBranch = developmentBranch ?? info.mainBranch;
+      mainBranch = developmentBranch ?? info.mainBranch;
+    } else {
+      mainBranch = info.mainBranch;
+    }
+
+    config.defaultBranch = mainBranch;
 
     config = {
       ...config,
@@ -231,7 +239,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: developmentBranch ?? info.mainBranch,
+    defaultBranch: mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
