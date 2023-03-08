@@ -27,7 +27,7 @@ export interface BranchUpgradeCache {
 }
 
 export interface OnboardingBranchCache {
-  branchName: string;
+  onboardingBranch: string;
   defaultBranchSha: string;
   onboardingBranchSha: string;
 }
