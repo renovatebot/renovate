@@ -91,7 +91,6 @@ export type PlatformPrOptions = {
   azureAutoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
-  bbUseDevelopmentBranch?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
