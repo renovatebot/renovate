@@ -190,8 +190,7 @@ export async function initRepo({
     ).body.development?.branch?.name;
 
     config.defaultBranch = developmentBranch
-      ? developmentBranch
-      : info.mainBranch;
+      ?? info.mainBranch;
 
     config = {
       ...config,
