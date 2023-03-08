@@ -184,6 +184,8 @@ export async function initRepo({
       ).body
     );
 
+    mainBranch = info.mainBranch;
+
     if (bbUseDevelopmentBranch) {
       // Fetch Bitbucket development branch
       developmentBranch = (
@@ -192,9 +194,9 @@ export async function initRepo({
         )
       ).body.development?.branch?.name;
 
-      mainBranch = developmentBranch ?? info.mainBranch;
-    } else {
-      mainBranch = info.mainBranch;
+      if (developmentBranch) {
+        mainBranch = developmentBranch;
+      }
     }
 
     config.defaultBranch = mainBranch;
