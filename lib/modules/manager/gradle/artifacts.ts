@@ -157,6 +157,11 @@ export async function updateArtifacts({
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
 
+    // `./gradlew :dependencies` command can output huge text due to `:dependencies`
+    // that renders dependency graphs. Given the output can exceed `ExecOptions.maxBuffer` size,
+    // drop stdout from the command.
+    cmd += ' > /dev/null';
+
     await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);
 
