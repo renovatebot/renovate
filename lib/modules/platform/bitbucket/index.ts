@@ -23,6 +23,7 @@ import type {
   PlatformParams,
   PlatformResult,
   Pr,
+  RepoBranchingModel,
   RepoParams,
   RepoResult,
   UpdatePrConfig,
@@ -171,6 +172,7 @@ export async function initRepo({
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
+  let developmentBranch: string;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -179,7 +181,15 @@ export async function initRepo({
         )
       ).body
     );
-    config.defaultBranch = info.mainbranch;
+
+    // Fetch Bitbucket development branch
+    developmentBranch = (
+      await bitbucketHttp.getJson<RepoBranchingModel>(
+        `/2.0/repositories/${repository}/branching-model`
+      )
+    ).body.development.name;
+
+    config.defaultBranch = developmentBranch;
 
     config = {
       ...config,
@@ -221,7 +231,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: info.mainbranch,
+    defaultBranch: developmentBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
