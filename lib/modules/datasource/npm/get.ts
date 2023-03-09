@@ -172,7 +172,7 @@ export async function getDependency(
     });
     logger.trace({ dep }, 'dep');
     if (
-      (raw.headers?.['cache-control'] || '')
+      (raw.headers?.['cache-control'] ?? '')
         .split(',') // break into elements
         .map((el) => el.trim()) // remove exterior whitespace
         .includes('public') // this is what we care about
