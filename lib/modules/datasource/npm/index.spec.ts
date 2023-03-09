@@ -64,7 +64,7 @@ describe('modules/datasource/npm/index', () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .reply(200, npmResponse, { 'cache-control': 'public, expires=300' });
+      .reply(200, npmResponse, { 'Cache-control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
     expect(res?.isPrivate).toBeFalse();
