@@ -7,7 +7,7 @@ import type {
 } from '../types';
 
 const RESOURCE_REGEX = regEx(
-  /resource\s+[A-Za-z0-9_]+\s+'(?<depName>.+)@(?<currentValue>.+?)'/
+  /resource\s+[A-Za-z0-9_]+\s+'(?<depName>.+\..+\/.+)@(?<currentValue>.+?)'/
 );
 
 export function extractPackageFile(

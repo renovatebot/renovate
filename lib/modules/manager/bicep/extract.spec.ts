@@ -124,7 +124,7 @@ describe('modules/manager/bicep/extract', () => {
     });
   });
 
-  it('should extract a nested versioned resource', async () => {
+  it('should not extract a nested versioned resource', async () => {
     const result = await extractPackageFile(resourceNestedVersioned, '', {});
 
     expect(result).toEqual({
@@ -135,14 +135,6 @@ describe('modules/manager/bicep/extract', () => {
           datasource: 'azure-bicep-resource',
           depName: 'Microsoft.Storage/storageAccounts',
           replaceString: "'Microsoft.Storage/storageAccounts@2022-09-01'",
-          versioning: 'azure-rest-api',
-        },
-        {
-          autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
-          currentValue: '2022-09-01',
-          datasource: 'azure-bicep-resource',
-          depName: 'blobServices',
-          replaceString: "'blobServices@2022-09-01'",
           versioning: 'azure-rest-api',
         },
       ],
