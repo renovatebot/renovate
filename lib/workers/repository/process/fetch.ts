@@ -12,6 +12,8 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import * as memCache from '../../../util/cache/memory';
+import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
@@ -54,10 +56,15 @@ async function fetchDepUpdates(
   } else {
     if (depConfig.datasource) {
       try {
+        const start = Date.now();
         dep = {
           ...dep,
           ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
         };
+        const duration = Date.now() - start;
+        const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+        lookups.push({ datasource: depConfig.datasource, duration });
+        memCache.set('lookup-stats', lookups);
       } catch (err) {
         if (
           packageFileConfig.repoIsOnboarded ||
