@@ -88,7 +88,7 @@ function processAppSpec(
   const spec: ApplicationSpec | null | undefined =
     definition.kind === 'Application'
       ? definition?.spec
-      : definition?.spec.template?.spec;
+      : definition?.spec?.template?.spec;
 
   if (is.nullOrUndefined(spec)) {
     return [];
