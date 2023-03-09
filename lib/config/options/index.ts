@@ -1629,6 +1629,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
   },
   // Automatic merging
   {

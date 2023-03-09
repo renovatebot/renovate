@@ -139,6 +139,14 @@ For example:
 }
 ```
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
+
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch".
+
 ## binarySource
 
 Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
