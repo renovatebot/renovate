@@ -2748,6 +2748,12 @@ It will be compiled using Handlebars and the regex `groups` result.
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
 
+### autoReplaceRegexGlobalMatch
+
+Setting this to `false` will replace only the first match during replacements updates.
+
+This is useful for situations where values are repeated within the dependency string, such as when the "currentVersion" is also featured somewhere within the "currentDigest".
+
 ### autoReplaceStringTemplate
 
 Allows overwriting how the matched string is replaced.
