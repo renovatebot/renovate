@@ -64,9 +64,10 @@ describe('modules/datasource/npm/index', () => {
     httpMock
       .scope('https://registry.npmjs.org')
       .get('/foobar')
-      .reply(200, npmResponse);
+      .reply(200, npmResponse, { 'cache-control': 'public, expires=300' });
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
+    expect(res?.isPrivate).toBeFalse();
   });
 
   it('should parse repo url', async () => {
@@ -155,6 +156,7 @@ describe('modules/datasource/npm/index', () => {
       .reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
+    expect(res?.isPrivate).toBeTrue();
   });
 
   it('should handle no time', async () => {
@@ -307,6 +309,7 @@ describe('modules/datasource/npm/index', () => {
     const npmrc = `registry=https://npm.mycustomregistry.com/`;
     const res = await getPkgReleases({ datasource, depName: 'foobar', npmrc });
     expect(res).toMatchSnapshot();
+    expect(res?.isPrivate).toBeTrue();
   });
 
   it('should replace any environment variable in npmrc', async () => {

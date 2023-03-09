@@ -171,19 +171,8 @@ export async function getDependency(
       return release;
     });
     logger.trace({ dep }, 'dep');
-    // serialize first before saving
-    // TODO: use dynamic detection of public repos instead of a static list (#9587)
-    const whitelistedPublicScopes = [
-      '@graphql-codegen',
-      '@storybook',
-      '@types',
-      '@typescript-eslint',
-    ];
-    if (
-      !raw.authorization &&
-      (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
-        !packageName.startsWith('@'))
-    ) {
+    if (raw.headers?.['cache-control']?.startsWith('public,')) {
+      dep.isPrivate = false;
       const cacheData = { softExpireAt, etag };
       await packageCache.set(
         cacheNamespace,
@@ -191,6 +180,8 @@ export async function getDependency(
         { ...dep, cacheData },
         etag ? cacheHardTtlMinutes : cacheMinutes
       );
+    } else {
+      dep.isPrivate = true;
     }
     return dep;
   } catch (err) {
