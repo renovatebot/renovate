@@ -1861,8 +1861,6 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
@@ -1899,13 +1897,6 @@ describe('workers/repository/process/lookup/index', () => {
       });
       getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-        ],
-      });
       getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
