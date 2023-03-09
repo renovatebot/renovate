@@ -7,8 +7,10 @@ import {
 } from 'emojibase';
 import emojibaseEmojiRegex from 'emojibase-regex/emoji.js';
 import SHORTCODE_REGEX from 'emojibase-regex/shortcode.js';
+import { z } from 'zod';
 import type { RenovateConfig } from '../config/types';
 import dataFiles from '../data-files.generated';
+import { logger } from '../logger';
 import { regEx } from './regex';
 
 let unicodeEmoji = true;
@@ -17,13 +19,25 @@ let mappingsInitialized = false;
 const shortCodesByHex = new Map<string, string>();
 const hexCodesByShort = new Map<string, string>();
 
+const EmojiShortcodesSchema = z.record(
+  z.string(),
+  z.union([z.string(), z.array(z.string())])
+);
+
 function lazyInitMappings(): void {
   if (!mappingsInitialized) {
-    const table: Record<string, string | string[]> = JSON.parse(
-      dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
+    const result = EmojiShortcodesSchema.safeParse(
+      JSON.parse(
+        dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
+      )
     );
-    for (const [hex, val] of Object.entries(table)) {
-      const shortCodes: string[] = is.array<string>(val) ? val : [val];
+    // istanbul ignore if: not easily testable
+    if (!result.success) {
+      logger.warn({ error: result.error }, 'Unable to parse emoji shortcodes');
+      return;
+    }
+    for (const [hex, val] of Object.entries(result.data)) {
+      const shortCodes = is.array(val) ? val : [val];
       shortCodesByHex.set(hex, `:${shortCodes[0]}:`);
       shortCodes.forEach((shortCode) => {
         hexCodesByShort.set(`:${shortCode}:`, hex);
