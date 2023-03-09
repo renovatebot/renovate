@@ -30,7 +30,7 @@ export interface PagedResult<T = any> {
 export interface RepoInfo {
   isFork: boolean;
   owner: string;
-  mainBranch: string;
+  mainbranch: string;
   mergeMethod: string;
   has_issues: boolean;
   uuid: string;

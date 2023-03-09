@@ -20,7 +20,7 @@ export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
     isFork: !!repoInfoBody.parent,
     owner: repoInfoBody.owner.username,
-    mainBranch: repoInfoBody.mainbranch.name,
+    mainbranch: repoInfoBody.mainbranch.name,
     mergeMethod: 'merge',
     has_issues: repoInfoBody.has_issues,
     uuid: repoInfoBody.uuid,

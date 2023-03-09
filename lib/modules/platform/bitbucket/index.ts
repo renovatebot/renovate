@@ -184,7 +184,7 @@ export async function initRepo({
       ).body
     );
 
-    mainBranch = info.mainBranch;
+    mainBranch = info.mainbranch;
 
     if (bbUseDevelopmentBranch) {
       // Fetch Bitbucket development branch
