@@ -157,6 +157,7 @@ export async function doAutoReplace(
     currentDigest,
     currentDigestShort,
     newDigest,
+    autoReplaceRegexGlobalMatch,
     autoReplaceStringTemplate,
   } = upgrade;
   /*
@@ -195,23 +196,28 @@ export async function doAutoReplace(
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
+
+      const autoReplaceRegExpFlag = autoReplaceRegexGlobalMatch ? 'g' : '';
       if (currentValue && newValue) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue)),
+          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
           newValue
         );
       }
       if (depName && newName) {
-        newString = newString.replace(regEx(escapeRegExp(depName)), newName);
+        newString = newString.replace(
+          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
+          newName
+        );
       }
       if (currentDigest && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest)),
+          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
           newDigest
         );
       } else if (currentDigestShort && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort)),
+          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
           newDigest
         );
       }

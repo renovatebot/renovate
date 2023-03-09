@@ -25,6 +25,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceRegexGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;

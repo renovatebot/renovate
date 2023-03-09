@@ -30,6 +30,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';
+      upgrade.autoReplaceRegexGlobalMatch = true;
       reuseExistingBranch = false;
     });
 
@@ -1087,10 +1088,31 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('docker: updates with recurring values across version and digests', async () => {
+    it('autoReplaceGlobalMatch: throws error when globally replacing recurring values across version and digests', async () => {
       const dockerfile = codeBlock`
         FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
       `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('autoReplaceGlobalMatch: updates when replacing first match only of recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.autoReplaceRegexGlobalMatch = false;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'java';
       upgrade.currentValue = '6';

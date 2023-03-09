@@ -1189,6 +1189,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'autoReplaceRegexGlobalMatch',
+    description:
+      'Use the control whether replacement regular expressions are global matches or only the first match.',
+    type: 'boolean',
+    stage: 'branch',
+    parent: 'packageRules',
+    default: true,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',
