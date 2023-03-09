@@ -31,6 +31,7 @@ function lazyInitMappings(): void {
         dataFiles.get('node_modules/emojibase-data/en/shortcodes/github.json')!
       )
     );
+    // istanbul ignore if: not easily testable
     if (!result.success) {
       logger.warn({ error: result.error }, 'Unable to parse emoji shortcodes');
       return;
