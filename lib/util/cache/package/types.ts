@@ -9,7 +9,7 @@ export interface PackageCache {
   ): Promise<void>;
 }
 
-export interface DecoratorCachedRecord<T> {
-  data: T;
+export interface DecoratorCachedRecord {
+  data: unknown;
   cachedAt: string;
 }

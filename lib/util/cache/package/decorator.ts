@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
+import { logger } from '../../../logger';
 import { Decorator, decorate } from '../../decorator';
 import type { DecoratorCachedRecord } from './types';
 import * as packageCache from '.';
@@ -69,37 +71,35 @@ export function cache<T>({
     }
 
     finalKey = `cache-decorator:${finalKey}`;
-    const cacheRecord = await packageCache.get<DecoratorCachedRecord<T>>(
+    const oldRecord = await packageCache.get<DecoratorCachedRecord>(
       finalNamespace,
       finalKey
     );
 
-    const now = DateTime.local();
-    const ttlHardMinutes = ttlMinutes * 10;
+    const softTTL = process.env.RENOVATE_CACHE_DECORATOR_MINUTES
+      ? parseInt(process.env.RENOVATE_CACHE_DECORATOR_MINUTES, 10)
+      : ttlMinutes;
 
-    let oldData: T | undefined;
-    if (cacheRecord) {
-      const softDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
-        minutes: ttlMinutes,
-      });
-      const hardDeadline = DateTime.fromISO(cacheRecord.cachedAt).plus({
-        minutes: ttlHardMinutes,
-      });
-
-      if (now < softDeadline) {
-        return cacheRecord.data;
+    let oldData: unknown;
+    if (oldRecord) {
+      const now = DateTime.local();
+      const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
+      const deadline = cachedAt.plus({ minutes: softTTL });
+      if (now < deadline) {
+        return oldRecord.data;
       }
-
-      if (now < hardDeadline) {
-        oldData = cacheRecord.data;
-      }
+      oldData = oldRecord.data;
     }
 
-    let newData: T | undefined;
+    let newData: unknown;
     if (oldData) {
       try {
         newData = (await callback()) as T | undefined;
       } catch (err) {
+        logger.debug(
+          { err },
+          'Package cache decorator: callback error, returning old data'
+        );
         return oldData;
       }
     } else {
@@ -107,18 +107,12 @@ export function cache<T>({
     }
 
     if (!is.undefined(newData)) {
-      const cachedAt = now.toISO();
-      const newCacheRecord: DecoratorCachedRecord<T> = {
-        cachedAt,
+      const newRecord: DecoratorCachedRecord = {
+        cachedAt: DateTime.local().toISO(),
         data: newData,
       };
-
-      await packageCache.set(
-        finalNamespace,
-        finalKey,
-        newCacheRecord,
-        ttlHardMinutes
-      );
+      const hardTTL = GlobalConfig.get().cacheHardTtlMinutes ?? softTTL;
+      await packageCache.set(finalNamespace, finalKey, newRecord, hardTTL);
     }
 
     return newData;

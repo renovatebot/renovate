@@ -14,6 +14,10 @@ We do not follow Semantic Versioning for any experimental variables.
 These variables may be removed or have their behavior changed in **any** version.
 We will try to keep breakage to a minimum, but make no guarantees that an experimental variable will keep working.
 
+## `RENOVATE_CACHE_DECORATOR_MINUTES`
+
+If set to any integer, Renovate will use this integer instead of the time explicitly defined via `ttlMinutes` in decorators.
+
 ## `RENOVATE_CACHE_NPM_MINUTES`
 
 If set to any integer, Renovate will use this integer instead of the default npm cache time (15 minutes) for the npm datasource.

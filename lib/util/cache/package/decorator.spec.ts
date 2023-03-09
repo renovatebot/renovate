@@ -143,6 +143,7 @@ describe('util/cache/package/decorator', () => {
     afterEach(() => {
       jest.useRealTimers();
       inc.mockClear();
+      delete process.env.RENOVATE_CACHE_DECORATOR_MINUTES;
     });
 
     it('updates cached result', async () => {
@@ -159,6 +160,21 @@ describe('util/cache/package/decorator', () => {
       expect(inc).toHaveBeenCalledTimes(2);
     });
 
+    it('cache TTL can be overriden with RENOVATE_CACHE_DECORATOR_MINUTES', async () => {
+      process.env.RENOVATE_CACHE_DECORATOR_MINUTES = '3';
+      const myInst = new MyClass();
+
+      expect(await myInst.incNumber(99)).toBe(100);
+
+      jest.advanceTimersByTime(3 * 60 * 1000 - 1);
+      expect(await myInst.incNumber(99)).toBe(100);
+      expect(inc).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(1);
+      expect(await myInst.incNumber(99)).toBe(100);
+      expect(inc).toHaveBeenCalledTimes(2);
+    });
+
     it('returns obsolete result on error', async () => {
       const myInst = new MyClass();
 
@@ -167,17 +183,6 @@ describe('util/cache/package/decorator', () => {
       jest.advanceTimersByTime(60 * 1000);
       inc.mockRejectedValueOnce(new Error('test'));
       expect(await myInst.incNumber(99)).toBe(100);
-      expect(inc).toHaveBeenCalledTimes(2);
-    });
-
-    it('re-throws if older result is too old', async () => {
-      const myInst = new MyClass();
-
-      expect(await myInst.incNumber(99)).toBe(100);
-
-      jest.advanceTimersByTime(10 * 60 * 1000);
-      inc.mockRejectedValueOnce(new Error('test'));
-      await expect(myInst.incNumber(99)).rejects.toThrow('test');
       expect(inc).toHaveBeenCalledTimes(2);
     });
   });
