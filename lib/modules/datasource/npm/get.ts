@@ -171,12 +171,7 @@ export async function getDependency(
       return release;
     });
     logger.trace({ dep }, 'dep');
-    if (
-      (raw.headers?.['cache-control'] ?? '')
-        .split(',') // break into elements
-        .map((el) => el.trim()) // remove exterior whitespace
-        .includes('public') // this is what we care about
-    ) {
+    if (/(^|,)\s*public\s*(,|$)/.test(raw.headers?.['cache-control'] ?? '')) {
       dep.isPrivate = false;
       const cacheData = { softExpireAt, etag };
       await packageCache.set(
