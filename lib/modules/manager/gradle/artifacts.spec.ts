@@ -165,6 +165,47 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
   });
+  it('updates lock file in win32', async () => {
+    osPlatformSpy.mockReturnValue('win32');
+
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
+
+    // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'gradlew.bat --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
+  });
 
   it('prefers packageName over depName if provided', async () => {
     const execSnapshots = mockExecAll();
