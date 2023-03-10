@@ -9,7 +9,7 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import type { ParsedLine } from './types';
 
 const regexMappings = [
-  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(\\/(?<subspec>[^'"]+))?(['"])`),
+  regEx(`^\\s*pod\\s+(['"])(?<spec>[^'"/]+)(/(?<subspec>[^'"]+))?(['"])`),
   regEx(
     `^\\s*pod\\s+(['"])[^'"]+(['"])\\s*,\\s*(['"])(?<currentValue>[^'"]+)(['"])\\s*$`
   ),

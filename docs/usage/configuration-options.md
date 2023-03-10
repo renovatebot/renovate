@@ -544,6 +544,19 @@ If you need to _override_ constraints that Renovate detects from the repository,
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
+## constraintsFiltering
+
+This option controls whether Renovate filters new releases based on configured or detected `constraints`.
+Renovate supports two options:
+
+- `none`: No release filtering (all releases allowed)
+- `strict`: If the release's constraints match the package file constraints, then it's included
+
+We are working on adding more advanced filtering options.
+
+Note: There must be a `constraints` object in your Renovate config for this to work.
+This feature is limited to `pypi` datasource only.
+
 ## defaultRegistryUrls
 
 Override a datasource's default registries with this config option.
@@ -909,6 +922,16 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 <!-- prettier-ignore -->
 !!! note
     This option is only relevant if you set `forkToken`.
+
+## forkProcessing
+
+By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
+This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
+
+If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
 
 ## gitAuthor
 
@@ -1404,20 +1427,22 @@ If you need to force permanent unstable updates for a package, you can add a pac
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
-## includeForks
-
-By default, Renovate will skip over any repositories that are forked.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
-
-If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
-
 ## includePaths
 
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
 
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## internalChecksAsSuccess
+
+By default, internal Renovate checks such as `renovate/stability-days` are not counted towards a branch being "green" or not.
+This is primarily to prevent automerge when the only check is a passing Renovate check.
+
+Internal checks will always be counted/considered if they are in pending or failed states.
+If there are multiple passing checks for a branch, including non-Renovate ones, then this setting won't make any difference.
+
+Change this setting to `true` if you want to use internal Renovate checks towards a passing branch result.
 
 ## internalChecksFilter
 
@@ -1796,7 +1821,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["/^release\\/.*/"],
+      "matchBaseBranches": ["/^release/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -2769,7 +2794,7 @@ regex definition:
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
       "depNameTemplate": "my.new.registry/aRepository/andImage",
       "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",
