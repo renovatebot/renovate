@@ -3,6 +3,7 @@ import {
   ComposerRelease,
   ComposerReleases,
   MinifiedArray,
+  RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
@@ -140,6 +141,14 @@ describe('modules/datasource/packagist/schema', () => {
           },
         })
       ).toEqual([{ version: '1.2.3' }]);
+      expect(
+        parsePackagesResponse('foo/bar', {
+          packages: {
+            'foo/bar': { '1.2.3': { version: '1.2.3' } },
+            'baz/qux': { '4.5.6': { version: '4.5.6' } },
+          },
+        })
+      ).toEqual([{ version: '1.2.3' }]);
     });
 
     it('expands minified fields', () => {
@@ -240,6 +249,21 @@ describe('modules/datasource/packagist/schema', () => {
           },
         ],
       } satisfies ReleaseResult);
+    });
+  });
+
+  describe('RegistryMeta', () => {
+    it('falls back to default values', () => {
+      expect(RegistryMeta.parse('nonsense')).toEqual({
+        files: [],
+        includesFiles: [],
+        packages: {},
+        providerPackages: {},
+        includesPackages: {},
+        providersLazyUrl: null,
+        providersUrl: null,
+        metadataUrl: null,
+      });
     });
   });
 });

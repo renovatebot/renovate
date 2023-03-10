@@ -12,6 +12,8 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import * as memCache from '../../../util/cache/memory';
+import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
@@ -28,7 +30,8 @@ async function fetchDepUpdates(
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
-  if (!is.nonEmptyString(dep.depName)) {
+  dep.packageName ??= dep.depName;
+  if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
   }
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
@@ -44,6 +47,7 @@ async function fetchDepUpdates(
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
+  depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#7154)
     logger.debug(`Dependency: ${depName!}, is ignored`);
@@ -54,10 +58,15 @@ async function fetchDepUpdates(
   } else {
     if (depConfig.datasource) {
       try {
+        const start = Date.now();
         dep = {
           ...dep,
           ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
         };
+        const duration = Date.now() - start;
+        const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+        lookups.push({ datasource: depConfig.datasource, duration });
+        memCache.set('lookup-stats', lookups);
       } catch (err) {
         if (
           packageFileConfig.repoIsOnboarded ||

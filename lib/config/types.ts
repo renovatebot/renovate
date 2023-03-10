@@ -48,6 +48,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -187,6 +188,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -211,7 +213,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -251,6 +253,8 @@ export interface RenovateConfig
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
