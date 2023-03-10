@@ -70,7 +70,7 @@ describe('workers/repository/update/pr/body/config-description', () => {
     it('renders recreateClosed', () => {
       const res = getPrConfigDescription({
         ...config,
-        recreateClosed: true,
+        recreateClosed: 'always',
       });
       expect(res).toContain(`**Immortal**`);
     });

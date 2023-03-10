@@ -8,7 +8,7 @@ export async function prAlreadyExisted(
   config: BranchConfig
 ): Promise<Pr | null> {
   logger.trace({ config }, 'prAlreadyExisted');
-  if (config.recreateClosed) {
+  if (config.recreateClosed === 'always') {
     logger.debug('recreateClosed is true');
     return null;
   }

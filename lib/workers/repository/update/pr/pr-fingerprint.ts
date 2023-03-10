@@ -1,7 +1,11 @@
 // fingerprint config is based on the old skip pr update logic
 // https://github.com/renovatebot/renovate/blob/3d85b6048d6a8c57887b64ed4929e2e02ea41aa0/lib/workers/repository/update/pr/index.ts#L294-L306
 
-import type { UpdateType, ValidationMessage } from '../../../../config/types';
+import type {
+  RecreateClosed,
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
 import type { PrCache } from '../../../../util/cache/repository/types';
@@ -32,7 +36,7 @@ export interface PrFingerprintConfig {
   prHeader?: string;
   prTitle?: string;
   rebaseWhen?: string;
-  recreateClosed?: boolean;
+  recreateClosed?: RecreateClosed;
   schedule?: string[];
   stopUpdating?: boolean;
   timezone?: string;

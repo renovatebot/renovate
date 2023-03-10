@@ -20,6 +20,7 @@ export interface GroupConfig extends Record<string, unknown> {
   branchTopic?: string;
 }
 
+export type RecreateClosed = 'auto' | 'never' | 'always';
 // TODO: Proper typings
 export interface RenovateSharedConfig {
   $schema?: string;
@@ -64,7 +65,7 @@ export interface RenovateSharedConfig {
   respectLatest?: boolean;
   stopUpdatingLabel?: string;
   rebaseWhen?: string;
-  recreateClosed?: boolean;
+  recreateClosed?: RecreateClosed;
   repository?: string;
   repositoryCache?: RepositoryCacheConfig;
   repositoryCacheType?: RepositoryCacheType;

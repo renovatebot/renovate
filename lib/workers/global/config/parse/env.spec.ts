@@ -10,18 +10,20 @@ describe('workers/global/config/parse/env', () => {
     });
 
     it('supports boolean true', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'true' };
-      expect(env.getConfig(envParam).recreateClosed).toBeTrue();
+      const envParam: NodeJS.ProcessEnv = { RENOVATE_CONFIG_MIGRATION: 'true' };
+      expect(env.getConfig(envParam).configMigration).toBeTrue();
     });
 
     it('supports boolean false', () => {
-      const envParam: NodeJS.ProcessEnv = { RENOVATE_RECREATE_CLOSED: 'false' };
-      expect(env.getConfig(envParam).recreateClosed).toBeFalse();
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_CONFIG_MIGRATION: 'false',
+      };
+      expect(env.getConfig(envParam).configMigration).toBeFalse();
     });
 
     it('throws exception for invalid boolean value', () => {
       const envParam: NodeJS.ProcessEnv = {
-        RENOVATE_RECREATE_CLOSED: 'badvalue',
+        RENOVATE_CONFIG_MIGRATION: 'badvalue',
       };
       expect(() => env.getConfig(envParam)).toThrow(
         Error(
@@ -30,7 +32,7 @@ describe('workers/global/config/parse/env', () => {
       );
     });
 
-    delete process.env.RENOVATE_RECREATE_CLOSED;
+    delete process.env.RENOVATE_CONFIG_MIGRATION;
 
     it('supports list single', () => {
       const envParam: NodeJS.ProcessEnv = { RENOVATE_LABELS: 'a' };

@@ -1509,8 +1509,8 @@ const options: RenovateOptions[] = [
   {
     name: 'recreateClosed',
     description: 'Recreate PRs even if same ones were closed previously.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'auto',
   },
   {
     name: 'rebaseWhen',
@@ -1809,7 +1809,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       enabled: false,
-      recreateClosed: true,
+      recreateClosed: 'always',
       rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
       commitMessageAction: 'Lock file maintenance',
