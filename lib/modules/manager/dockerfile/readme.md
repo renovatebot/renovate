@@ -1,4 +1,4 @@
-Extracts all parent images in a `Dockerfile` and/or `Containerfile`.
+Extracts image references in a `Dockerfile` and/or `Containerfile`.
 
 Renovate's managers does not understand versioning, that's up to Renovate's versioning modules.
 The default `docker` versioning for container image datasources treats suffixes as "compatibility", for example: `-alpine`.
