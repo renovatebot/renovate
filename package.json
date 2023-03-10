@@ -127,12 +127,12 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": "^14.15.0 || >=16.13.0",
+    "node": ">=18.12.0",
     "yarn": "^1.17.0"
   },
   "engines-next": {
     "description": "Versions other than the below are deprecated and a warning will be logged",
-    "node": ">= 18.12.0"
+    "node": ">=18.12.0"
   },
   "dependencies": {
     "@aws-sdk/client-codecommit": "3.282.0",
@@ -278,7 +278,7 @@
     "@types/marshal": "0.5.1",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "16.18.13",
+    "@types/node": "16.18.14",
     "@types/parse-link-header": "2.0.1",
     "@types/semver": "7.3.13",
     "@types/semver-stable": "3.0.0",
@@ -321,7 +321,7 @@
     "mockdate": "3.0.5",
     "nock": "13.3.0",
     "npm-run-all": "4.1.5",
-    "rimraf": "4.1.2",
+    "rimraf": "4.2.0",
     "semantic-release": "20.1.1",
     "shelljs": "0.8.5",
     "strip-ansi": "6.0.1",

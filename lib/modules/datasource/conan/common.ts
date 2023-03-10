@@ -11,7 +11,7 @@ export const conanDatasourceRegex = regEx(
 );
 
 export function getConanPackage(packageName: string): ConanPackage {
-  const depName = packageName.split('/')[0];
+  const conanName = packageName.split('/')[0];
   const userAndChannel = packageName.split('@')[1];
-  return { depName, userAndChannel };
+  return { conanName, userAndChannel };
 }

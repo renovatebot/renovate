@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 
 /**
@@ -16,10 +17,18 @@ export function hashicorp2npm(input: string): string {
         regEx(/^\s*(|=|!=|>|<|>=|<=|~>)\s*v?((\d+)(\.\d+){0,2}[\w-+]*)\s*$/)
       );
       if (!r) {
-        throw new Error('invalid hashicorp constraint');
+        logger.warn(
+          { constraint: input, element: single },
+          'Invalid hashicorp constraint'
+        );
+        throw new Error('Invalid hashicorp constraint');
       }
       if (r[1] === '!=') {
-        throw new Error('unsupported != in hashicorp constraint');
+        logger.warn(
+          { constraint: input, element: single },
+          'Unsupported hashicorp constraint'
+        );
+        throw new Error('Unsupported hashicorp constraint');
       }
       return {
         operator: r[1],

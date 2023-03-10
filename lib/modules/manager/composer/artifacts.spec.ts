@@ -784,7 +784,7 @@ describe('modules/manager/composer/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/sidecar',
+        cmd: 'docker pull containerbase/sidecar',
         options: {
           encoding: 'utf-8',
         },
@@ -804,7 +804,7 @@ describe('modules/manager/composer/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool php 7.3' +
           ' && ' +
