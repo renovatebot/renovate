@@ -165,6 +165,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
   });
+
   it('updates lock file in win32', async () => {
     osPlatformSpy.mockReturnValue('win32');
 
