@@ -54,7 +54,7 @@ describe('util/exec/index', () => {
   });
 
   const image = dockerModule.sideCarImage;
-  const fullImage = `renovate/${image}`;
+  const fullImage = `containerbase/${image}`;
   const name = `renovate_${image}`;
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
@@ -397,9 +397,9 @@ describe('util/exec/index', () => {
         inCmd,
         inOpts: { docker },
         outCmd: [
-          `docker pull ghcr.io/renovatebot/${image}`,
+          `docker pull ghcr.io/containerbase/${image}`,
           dockerRemoveCmd,
-          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/renovatebot/${image} bash -l -c "${inCmd}"`,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "${cwd}" ghcr.io/containerbase/${image} bash -l -c "${inCmd}"`,
         ],
         outOpts: [
           dockerPullOpts,
@@ -413,7 +413,7 @@ describe('util/exec/index', () => {
           },
         ],
         adminConfig: {
-          dockerImagePrefix: 'ghcr.io/renovatebot',
+          dockerImagePrefix: 'ghcr.io/containerbase',
           binarySource: 'docker',
         },
       },
@@ -792,17 +792,17 @@ describe('util/exec/index', () => {
     expect(actualCmd).toEqual([
       `echo hello`,
       `echo hello`,
-      `docker pull renovate/${image}`,
+      `docker pull ${fullImage}`,
       `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR renovate/${image} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR renovate/${image} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `echo hello`,
       `echo hello`,
       `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR renovate/${image} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
       `docker ps --filter name=renovate_${image} -aq`,
-      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR renovate/${image} bash -l -c "echo hello"`,
+      `docker run --rm --name=renovate_${image} --label=renovate_child ${defaultCacheVolume} -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR ${fullImage} bash -l -c "echo hello"`,
     ]);
   });
 
