@@ -27,6 +27,9 @@ export function nullRedirectionCommand(): string {
     GlobalConfig.get('binarySource') !== 'docker'
   ) {
     // TODO: Windows environment without docker needs to be implemented
+    logger.debug(
+      'Updating artifacts may fail due to excessive output from "gradle.bat :dependencies" command.'
+    );
     return '';
   }
   return ' > /dev/null';
