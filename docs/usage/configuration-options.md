@@ -2752,7 +2752,7 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 Setting this to `false` will replace only the first match during replacements updates.
 
-This is useful for situations where values are repeated within the dependency string, such as when the "currentVersion" is also featured somewhere within the "currentDigest".
+Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
 
 ### autoReplaceStringTemplate
 
