@@ -350,7 +350,7 @@ export async function lookupUpdates(
       !config.replacementVersion
     ) {
       logger.debug(
-        `Handle name-only replacement for ${depName} without current version`
+        `Handle name-only replacement for ${packageName} without current version`
       );
       res.updates.push({
         updateType: 'replacement',
@@ -449,7 +449,7 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
-          (update.newName && update.newName !== depName) ||
+          (update.newName && update.newName !== packageName) ||
           update.isReplacement ||
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||

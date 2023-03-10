@@ -1847,7 +1847,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - name only without pinDigests enabled', async () => {
-      config.depName = 'openjdk';
+      config.packageName = 'openjdk';
       config.currentValue = '17.0.0';
       config.datasource = DockerDatasource.id;
       config.versioning = dockerVersioningId;
@@ -1880,7 +1880,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - name only with pinDigests enabled', async () => {
-      config.depName = 'openjdk';
+      config.packageName = 'openjdk';
       config.currentValue = '17.0.0';
       config.pinDigests = true;
       config.datasource = DockerDatasource.id;
@@ -1925,7 +1925,7 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     it('handles replacements - name only no version/tag', async () => {
-      config.depName = 'openjdk';
+      config.packageName = 'openjdk';
       config.currentValue = undefined;
       config.datasource = DockerDatasource.id;
       config.versioning = dockerVersioningId;
