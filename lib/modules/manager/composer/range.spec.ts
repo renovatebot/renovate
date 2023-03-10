@@ -12,7 +12,7 @@ describe('modules/manager/composer/range', () => {
       rangeStrategy: 'auto',
       depType: 'require-dev',
     };
-    expect(getRangeStrategy(config)).toBe('replace');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 
   it('replaces project require', () => {
@@ -21,7 +21,7 @@ describe('modules/manager/composer/range', () => {
       managerData: { composerJsonType: 'project' },
       depType: 'require',
     };
-    expect(getRangeStrategy(config)).toBe('replace');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 
   it('widens complex ranges', () => {
@@ -42,9 +42,9 @@ describe('modules/manager/composer/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('defaults to replace', () => {
+  it('defaults to update-lockfile', () => {
     const config: RangeConfig = { rangeStrategy: 'auto', depType: 'require' };
-    expect(getRangeStrategy(config)).toBe('replace');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 
   it('defaults to widen for TYPO3 extensions', () => {

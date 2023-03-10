@@ -11,15 +11,23 @@ export const REGISTRY_URLS = {
 };
 
 export const GRADLE_PLUGINS = {
-  checkstyle: 'com.puppycrawl.tools:checkstyle',
-  codenarc: 'org.codenarc:CodeNarc',
-  detekt: 'io.gitlab.arturbosch.detekt:detekt-core',
-  findbugs: 'com.google.code.findbugs:findbugs',
-  googleJavaFormat: 'com.google.googlejavaformat:google-java-format',
-  jacoco: 'org.jacoco:jacoco',
-  lombok: 'org.projectlombok:lombok',
-  pmd: 'net.sourceforge.pmd:pmd-java',
-  spotbugs: 'com.github.spotbugs:spotbugs',
+  checkstyle: ['toolVersion', 'com.puppycrawl.tools:checkstyle'],
+  codenarc: ['toolVersion', 'org.codenarc:CodeNarc'],
+  composeOptions: [
+    'kotlinCompilerExtensionVersion',
+    'androidx.compose.compiler:compiler',
+  ],
+  detekt: ['toolVersion', 'io.gitlab.arturbosch.detekt:detekt-core'],
+  findbugs: ['toolVersion', 'com.google.code.findbugs:findbugs'],
+  googleJavaFormat: [
+    'toolVersion',
+    'com.google.googlejavaformat:google-java-format',
+  ],
+  jacoco: ['toolVersion', 'org.jacoco:jacoco'],
+  jmh: ['jmhVersion', 'org.openjdk.jmh:jmh-core'],
+  lombok: ['version', 'org.projectlombok:lombok'],
+  pmd: ['toolVersion', 'net.sourceforge.pmd:pmd-java'],
+  spotbugs: ['toolVersion', 'com.github.spotbugs:spotbugs'],
 };
 
 export const ANNOYING_METHODS: ReadonlySet<string> = new Set([

@@ -33,7 +33,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -52,7 +52,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -71,7 +71,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });
@@ -85,7 +85,7 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'azurerm',
+        packageName: 'azurerm',
       });
       expect(res).toEqual({
         homepage: 'https://registry.terraform.io/providers/hashicorp/azurerm',
@@ -114,7 +114,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -130,7 +130,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -146,7 +146,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
           registryUrls: ['https://registry.company.com'],
         })
       ).toBeNull();
@@ -161,7 +161,6 @@ describe('modules/datasource/terraform-provider/index', () => {
         .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'azure',
         packageName: 'hashicorp/azurerm',
         registryUrls: ['https://registry.company.com'],
       });
@@ -197,7 +196,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'google-beta',
+        packageName: 'google-beta',
       });
       expect(res).toEqual({
         registryUrl: 'https://releases.hashicorp.com',
@@ -233,7 +232,7 @@ describe('modules/datasource/terraform-provider/index', () => {
 
       const res = await getPkgReleases({
         datasource: TerraformProviderDatasource.id,
-        depName: 'datadog',
+        packageName: 'datadog',
       });
       expect(res).toBeNull();
     });
@@ -247,7 +246,7 @@ describe('modules/datasource/terraform-provider/index', () => {
       expect(
         await getPkgReleases({
           datasource: TerraformProviderDatasource.id,
-          depName: 'azurerm',
+          packageName: 'azurerm',
         })
       ).toBeNull();
     });

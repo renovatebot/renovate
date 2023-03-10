@@ -7,7 +7,7 @@ export class RenovateForkMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.boolean(value)) {
-      this.setSafely('includeForks', value);
+      this.setSafely('forkProcessing', value ? 'enabled' : 'disabled');
     }
   }
 }
