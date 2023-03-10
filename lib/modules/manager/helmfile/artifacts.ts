@@ -40,7 +40,10 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
-    const needKustomize = await areKustomizationsUsed(packageFileName);
+    const needKustomize = areKustomizationsUsed(
+      packageFileName,
+      newPackageFileContent
+    );
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},

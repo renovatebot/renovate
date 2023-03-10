@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
-import { getFile } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import type { Doc } from './types';
 
@@ -17,11 +16,10 @@ export function loadDocs(content: string): Doc[] {
 }
 
 /** Looks for kustomize specific keys in a helmfile and returns true if found */
-export async function areKustomizationsUsed(
-  packageFileName: string
-): Promise<boolean> {
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-  const content = (await getFile(packageFileName)) || '';
+export function areKustomizationsUsed(
+  packageFileName: string,
+  content: string
+): boolean {
   let docs: Doc[];
   try {
     docs = loadDocs(content);
