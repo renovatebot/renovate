@@ -21,6 +21,17 @@ export function gradleWrapperFileName(): string {
   return './gradlew';
 }
 
+export function nullRedirectionCommand(): string {
+  if (
+    os.platform() === 'win32' &&
+    GlobalConfig.get('binarySource') !== 'docker'
+  ) {
+    // TODO: Windows environment without docker needs to be implemented
+    return '';
+  }
+  return ' > /dev/null';
+}
+
 export async function prepareGradleCommand(
   gradlewFile: string
 ): Promise<string | null> {
