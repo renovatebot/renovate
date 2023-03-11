@@ -1200,7 +1200,7 @@ const options: RenovateOptions[] = [
   {
     name: 'autoReplaceRegexGlobalMatch',
     description:
-      'Use to control whether replacement regular expressions are global matches or only the first match.',
+      'Control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
     default: true,
   },
