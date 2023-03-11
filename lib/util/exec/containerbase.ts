@@ -83,6 +83,7 @@ const allToolConfig: Record<string, ToolConfig> = {
   kustomize: {
     datasource: 'github-releases',
     packageName: 'kubernetes-sigs/kustomize',
+    extractVersion: '^kustomize/v(?<version>.*)$',
     versioning: semverVersioningId,
   },
   lerna: {
