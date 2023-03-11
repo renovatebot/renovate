@@ -107,7 +107,7 @@ function extractIssues(
   return issuesMap;
 }
 
-function stringifyIssues(items: ItemsEntity[]): [string, number] {
+function stringifyIssues(items: ItemsEntity[]| undefined): [string, number] {
   if (!items) {
     return ['', 0];
   }
