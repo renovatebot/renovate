@@ -1191,10 +1191,9 @@ const options: RenovateOptions[] = [
   {
     name: 'autoReplaceRegexGlobalMatch',
     description:
-      'Use the control whether replacement regular expressions are global matches or only the first match.',
+      'Use to control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
     stage: 'branch',
-    parent: 'packageRules',
     default: true,
   },
   {

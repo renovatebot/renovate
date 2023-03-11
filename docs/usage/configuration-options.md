@@ -119,6 +119,12 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
+## autoReplaceRegexGlobalMatch
+
+Setting this to `false` will replace only the first match during replacements updates.
+
+Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
@@ -2747,12 +2753,6 @@ It will be compiled using Handlebars and the regex `groups` result.
 
 If the `registryUrls` for a dependency is not captured with a named group then it can be defined in config using this field.
 It will be compiled using Handlebars and the regex `groups` result.
-
-### autoReplaceRegexGlobalMatch
-
-Setting this to `false` will replace only the first match during replacements updates.
-
-Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
 
 ### autoReplaceStringTemplate
 

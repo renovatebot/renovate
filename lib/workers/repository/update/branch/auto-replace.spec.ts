@@ -30,7 +30,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade = getConfig() as BranchUpgradeConfig;
       upgrade.packageFile = 'test';
       upgrade.manager = 'html';
-      upgrade.autoReplaceRegexGlobalMatch = true;
       reuseExistingBranch = false;
     });
 
