@@ -11,12 +11,11 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>= 18.12.0`
+- Node.js `>=18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-If you are using Node.js `<= 18` you need to run `yarn install  --ignore-engines`, because we've some `devDependencies` which require Node.js v18+.
 
 #### Linux
 
@@ -170,17 +169,6 @@ To do this, see these GitHub guides:
 [Syncing a fork](https://help.github.com/articles/syncing-a-fork/)
 
 ## Tips and tricks
-
-### Running Renovate against forked repositories
-
-Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-But by default Renovate skips over repositories that are forked.
-To override this default, you need to specify the setting `includeForks` as `true`.
-
-Tell Renovate to run on your forked repository by doing one of the following:
-
-1. Add `"includeForks": true` to the `renovate.json` file in your forked repository
-1. Run Renovate with the CLI flag `--renovate-fork=true`
 
 ### Log files
 
