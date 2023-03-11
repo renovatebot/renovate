@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
@@ -9,10 +10,17 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './types';
-import { loadDocs } from './utils';
+import { areKustomizationsUsed } from './utils';
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
+
+function extractYaml(content: string): string {
+  // regex remove go templated ({{ . }}) values
+  return content
+    .replace(regEx(/{{`.+?`}}/gs), '')
+    .replace(regEx(/{{.+?}}/g), '');
+}
 
 export function extractPackageFile(
   content: string,
@@ -23,7 +31,7 @@ export function extractPackageFile(
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
   try {
-    docs = loadDocs(content);
+    docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
     logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
     return null;
@@ -85,7 +93,9 @@ export function extractPackageFile(
           .concat([config.registryAliases?.[repoName]] as string[])
           .filter(is.string),
       };
-
+      if (areKustomizationsUsed(dep)) {
+        res.managerData = { needKustomize: true };
+      }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
         (repo) => repo.name === repoName

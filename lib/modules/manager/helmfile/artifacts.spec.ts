@@ -65,28 +65,6 @@ releases:
           bar: BAR
 `;
 
-const helmfileYamlNoKustomize = codeBlock`
-repositories:
-  - name: backstage
-    url: https://backstage.github.io/charts
-  - name: oauth2-proxy
-    url: https://oauth2-proxy.github.io/manifests
-releases:
-  - name: backstage
-    chart: backstage/backstage
-    version: 0.12.0
-  - name: oauth-proxy
-    chart: oauth2-proxy/oauth2-proxy
-    version: 6.8.0
-`;
-const helmfileYamlNoReleases = codeBlock`
-repositories:
-  - name: backstage
-    url: https://backstage.github.io/charts
-  - name: oauth2-proxy
-    url: https://oauth2-proxy.github.io/manifests
-`;
-
 const lockFile = codeBlock`
 version: 0.151.0
 dependencies:
@@ -261,7 +239,9 @@ describe('modules/manager/helmfile/artifacts', () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: '5.0.0' }],
       });
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [
+        { depName: 'dep1', managerData: { needKustomize: true } },
+      ];
       expect(
         await helmfile.updateArtifacts({
           packageFileName: 'helmfile.yaml',
@@ -309,44 +289,6 @@ describe('modules/manager/helmfile/artifacts', () => {
           stderr: errorMessage,
         },
       },
-    ]);
-  });
-
-  it.each([
-    {
-      description: 'invalid yaml',
-      helmFileContent: '!!',
-    },
-    {
-      description: 'no kustomizations',
-      helmFileContent: helmfileYamlNoKustomize,
-    },
-    { description: 'no releases', helmFileContent: helmfileYamlNoReleases },
-  ])('handles helmfile.yaml with $description', async ({ helmFileContent }) => {
-    GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-    fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
-    git.getFile.mockResolvedValueOnce(lockFile);
-    git.getFile.mockResolvedValueOnce(helmFileContent);
-    const execSnapshots = mockExecAll();
-    // helm
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v3.7.2' }],
-    });
-    datasource.getPkgReleases.mockResolvedValueOnce({
-      releases: [{ version: 'v0.129.0' }],
-    });
-    const updatedDeps = [{ depName: 'dep1' }];
-    await helmfile.updateArtifacts({
-      packageFileName: 'helmfile.yaml',
-      updatedDeps,
-      newPackageFileContent: helmFileContent,
-      config,
-    });
-    // Should not install tools
-    expect(execSnapshots).toMatchObject([
-      { cmd: 'install-tool helm v3.7.2' },
-      { cmd: 'install-tool helmfile v0.129.0' },
-      { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
   });
 });

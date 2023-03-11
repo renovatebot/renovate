@@ -1,4 +1,4 @@
-interface Release {
+export interface Release {
   name: string;
   chart: string;
   version: string;
