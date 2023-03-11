@@ -3,6 +3,7 @@ import shell from 'shelljs';
 import { getProblems, logger } from '../lib/logger';
 import { generateConfig } from './docs/config';
 import { generateDatasources } from './docs/datasources';
+import { getOpenGitHubItems } from './docs/github-query-items';
 import { generateManagers } from './docs/manager';
 import { generateManagerAsdfSupportedPlugins } from './docs/manager-asdf-supported-plugins';
 import { generatePlatforms } from './docs/platforms';
@@ -36,8 +37,11 @@ process.on('unhandledRejection', (err) => {
       return;
     }
 
+    logger.info('* fetching open github issues');
+    const openGithubItems = await getOpenGitHubItems();
+
     logger.info('* platforms');
-    await generatePlatforms(dist);
+    await generatePlatforms(dist, openGithubItems);
 
     // versionings
     logger.info('* versionings');
@@ -49,7 +53,7 @@ process.on('unhandledRejection', (err) => {
 
     // managers
     logger.info('* managers');
-    await generateManagers(dist);
+    await generateManagers(dist, openGithubItems);
 
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');
