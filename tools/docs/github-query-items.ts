@@ -5,7 +5,7 @@ import { getQueryString } from '../../lib/util/url';
 
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
 
-export type GithubApiQueryResponse = {
+type GithubApiQueryResponse = {
   total_count: number;
   incomplete_results: boolean;
   items: ItemsEntity[];
@@ -18,16 +18,22 @@ export type ItemsEntity = {
   labels: LabelsEntity[];
 };
 
-export type LabelsEntity = {
+type LabelsEntity = {
   name: string;
 };
 
-export interface GitHubIssues {
+export interface OpenItems {
   bugs: ItemsEntity[];
   features: ItemsEntity[];
 }
 
-export async function getOpenGitHubItems(): Promise<ItemsEntity[]> {
+export interface RenovateOpenItems {
+  managers: Record<string, OpenItems>;
+  platforms: Record<string, OpenItems>;
+  datasources: Record<string, OpenItems>;
+}
+
+export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
   const per_page = 100;
   const githubApi = new GithubHttp();
@@ -40,22 +46,29 @@ export async function getOpenGitHubItems(): Promise<ItemsEntity[]> {
         paginate: true,
       }
     );
-    return res.body?.items ?? [];
+    const rawItems = res.body?.items ?? [];
+
+    const renovateOpenItems: RenovateOpenItems = {
+      managers: extractIssues(rawItems, 'manager:'),
+      platforms: extractIssues(rawItems, 'platform:'),
+      datasources: extractIssues(rawItems, 'datasource:'),
+    };
+
+    return renovateOpenItems;
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     throw err;
   }
-  return [];
 }
 
+// TODO - make this parse group by the prefix automatically and save passing around ItemsEntity[]
+// platform, manager, datasource
 export function extractIssues(
-  issuesMap: Record<string, GitHubIssues>,
   items: ItemsEntity[],
   labelPrefix: string
-): void {
-  if (!items || !issuesMap) {
-    return;
-  }
+): Record<string, OpenItems> {
+  const issuesMap: Record<string, OpenItems> = {};
+
   for (const item of items) {
     const type = item.labels
       .find((l) => l.name.startsWith('type:'))
@@ -83,9 +96,11 @@ export function extractIssues(
         break;
     }
   }
+
+  return issuesMap;
 }
 
-export function stringifyIssues(items: ItemsEntity[]): [string, number] {
+function stringifyIssues(items: ItemsEntity[]): [string, number] {
   if (!items) {
     return ['', 0];
   }
@@ -97,7 +112,7 @@ export function stringifyIssues(items: ItemsEntity[]): [string, number] {
 }
 
 export function generateFeatureAndBugMarkdown(
-  issuesMap: Record<string, GitHubIssues>,
+  issuesMap: Record<string, OpenItems>,
   key: string
 ): string {
   let md = '';

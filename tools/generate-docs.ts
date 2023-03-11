@@ -38,10 +38,10 @@ process.on('unhandledRejection', (err) => {
     }
 
     logger.info('* fetching open github issues');
-    const openGithubItems = await getOpenGitHubItems();
+    const openItems = await getOpenGitHubItems();
 
     logger.info('* platforms');
-    await generatePlatforms(dist, openGithubItems);
+    await generatePlatforms(dist, openItems.platforms);
 
     // versionings
     logger.info('* versionings');
@@ -49,11 +49,11 @@ process.on('unhandledRejection', (err) => {
 
     // datasources
     logger.info('* datasources');
-    await generateDatasources(dist);
+    await generateDatasources(dist, openItems.datasources);
 
     // managers
     logger.info('* managers');
-    await generateManagers(dist, openGithubItems);
+    await generateManagers(dist, openItems.managers);
 
     // managers/asdf supported plugins
     logger.info('* managers/asdf/supported-plugins');

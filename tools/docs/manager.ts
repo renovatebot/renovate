@@ -3,12 +3,7 @@ import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
 import * as hostRules from '../../lib/util/host-rules';
 import { readFile, updateFile } from '../utils';
-import {
-  GitHubIssues,
-  ItemsEntity,
-  extractIssues,
-  generateFeatureAndBugMarkdown,
-} from './github-query-items';
+import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
 
 if (process.env.GITHUB_TOKEN) {
@@ -30,20 +25,11 @@ function getManagerLink(manager: string): string {
   return `[\`${manager}\`](${manager}/)`;
 }
 
-export function getManagersGitHubIssues(
-  openGithubItems: ItemsEntity[]
-): Record<string, GitHubIssues> {
-  const managerIssuesMap: Record<string, GitHubIssues> = {};
-  extractIssues(managerIssuesMap, openGithubItems, 'manager:');
-  return managerIssuesMap;
-}
-
 export async function generateManagers(
   dist: string,
-  openGithubItems: ItemsEntity[]
+  managerIssuesMap: Record<string, OpenItems>
 ): Promise<void> {
   const managers = getManagers();
-  const managerIssuesMap = getManagersGitHubIssues(openGithubItems);
 
   const allLanguages: Record<string, string[]> = {};
   for (const [manager, definition] of managers) {

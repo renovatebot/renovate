@@ -2,12 +2,7 @@ import { logger } from '../../lib/logger';
 import { getPlatformList, getPlatforms } from '../../lib/modules/platform';
 import * as hostRules from '../../lib/util/host-rules';
 import { readFile, updateFile } from '../utils';
-import {
-  GitHubIssues,
-  ItemsEntity,
-  extractIssues,
-  generateFeatureAndBugMarkdown,
-} from './github-query-items';
+import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import { getModuleLink, replaceContent } from './utils';
 
 if (process.env.GITHUB_TOKEN) {
@@ -20,7 +15,7 @@ if (process.env.GITHUB_TOKEN) {
 
 export async function generatePlatforms(
   dist: string,
-  openGithubItems: ItemsEntity[]
+  platformIssuesMap: Record<string, OpenItems>
 ): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
@@ -40,21 +35,12 @@ export async function generatePlatforms(
   indexContent = replaceContent(indexContent, platformContent);
   await updateFile(`${dist}/modules/platform/index.md`, indexContent);
 
-  const platformIssuesMap = getPlatformGitHubIssues(openGithubItems);
   await generatePlatformOpenFeaturesAndBugs(dist, platformIssuesMap);
-}
-
-function getPlatformGitHubIssues(
-  openGithubItems: ItemsEntity[]
-): Record<string, GitHubIssues> {
-  const platformIssuesMap: Record<string, GitHubIssues> = {};
-  extractIssues(platformIssuesMap, openGithubItems, 'platform:');
-  return platformIssuesMap;
 }
 
 export async function generatePlatformOpenFeaturesAndBugs(
   dist: string,
-  platformIssuesMap: Record<string, GitHubIssues>
+  platformIssuesMap: Record<string, OpenItems>
 ): Promise<void> {
   const platforms = getPlatforms();
 
