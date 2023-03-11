@@ -2,7 +2,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -130,7 +130,7 @@ function resolveGitRepositoryPerSourceTag(
 
   const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitUrl)?.groups;
   if (bitbucketMatchGroups) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketMatchGroups.packageName;
     dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
     return;
