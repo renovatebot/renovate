@@ -1193,7 +1193,6 @@ const options: RenovateOptions[] = [
     description:
       'Use to control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',
-    stage: 'branch',
     default: true,
   },
   {
