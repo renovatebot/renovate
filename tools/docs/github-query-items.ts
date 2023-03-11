@@ -61,8 +61,6 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 }
 
-// TODO - make this parse group by the prefix automatically and save passing around ItemsEntity[]
-// platform, manager, datasource
 export function extractIssues(
   items: ItemsEntity[],
   labelPrefix: string
