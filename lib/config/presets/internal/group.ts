@@ -314,7 +314,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
       },
     ],
   },

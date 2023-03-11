@@ -41,7 +41,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
     it('should contain only stable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
-        depName: 'some-depname',
+        packageName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.0',
         newVersion: '1.1.0',
@@ -54,7 +54,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
     it('should contain currentVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
-        depName: 'some-depname',
+        packageName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1-rc0',
         newVersion: '1.1.0',
@@ -67,7 +67,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
     it('should contain newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
-        depName: 'some-depname',
+        packageName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1',
         newVersion: '1.2.0-rc1',
@@ -80,7 +80,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
     it('should contain both currentVersion newVersion unstable', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
-        depName: 'some-depname',
+        packageName: 'some-depname',
         versioning: npmVersioning.id,
         currentVersion: '1.0.1-rc0',
         newVersion: '1.2.0-rc1',
@@ -93,7 +93,7 @@ describe('workers/repository/update/pr/changelog/releases', () => {
     it('should valueToVersion', async () => {
       const config = partial<BranchUpgradeConfig>({
         datasource: 'some-datasource',
-        depName: 'some-depname',
+        packageName: 'some-depname',
         versioning: dockerVersioning.id,
         currentVersion: '1.0.1-rc0',
         newVersion: '1.2.0-rc0',

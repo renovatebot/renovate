@@ -32,6 +32,8 @@ export function getConfig(input: string[]): AllConfig {
         .replace(/^--dry-run$/, '--dry-run=true')
         .replace(/^--require-config$/, '--require-config=true')
         .replace('--aliases', '--registry-aliases')
+        .replace('--include-forks=true', '--fork-processing=enabled')
+        .replace('--include-forks', '--fork-processing=enabled')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
