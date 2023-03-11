@@ -1129,7 +1129,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const dockerfile = codeBlock`
         FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
       `;
-      upgrade.autoReplaceRegexGlobalMatch = false;
+      upgrade.autoReplaceGlobalMatch = false;
       upgrade.manager = 'dockerfile';
       upgrade.depName = 'java';
       upgrade.currentValue = '6';

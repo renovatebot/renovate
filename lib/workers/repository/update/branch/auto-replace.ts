@@ -168,7 +168,7 @@ export async function doAutoReplace(
     currentDigest,
     currentDigestShort,
     newDigest,
-    autoReplaceRegexGlobalMatch,
+    autoReplaceGlobalMatch,
     autoReplaceStringTemplate,
   } = upgrade;
   /*
@@ -208,7 +208,7 @@ export async function doAutoReplace(
     } else {
       newString = replaceString!;
 
-      const autoReplaceRegExpFlag = autoReplaceRegexGlobalMatch ? 'g' : '';
+      const autoReplaceRegExpFlag = autoReplaceGlobalMatch ? 'g' : '';
       if (currentValue && newValue) {
         newString = newString.replace(
           regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),

@@ -1198,7 +1198,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'autoReplaceRegexGlobalMatch',
+    name: 'autoReplaceGlobalMatch',
     description:
       'Control whether replacement regular expressions are global matches or only the first match.',
     type: 'boolean',

@@ -119,7 +119,7 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
-## autoReplaceRegexGlobalMatch
+## autoReplaceGlobalMatch
 
 Setting this to `false` will replace only the first match during replacements updates.
 
