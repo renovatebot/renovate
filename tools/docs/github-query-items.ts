@@ -113,7 +113,7 @@ export function generateFeatureAndBugMarkdown(
   issuesMap: Record<string, OpenItems>,
   key: string
 ): string {
-  let md = '';
+  let md = '\n\n';
   const [featureList] = stringifyIssues(issuesMap[key]?.features);
   const [bugList] = stringifyIssues(issuesMap[key]?.bugs);
 

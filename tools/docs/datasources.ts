@@ -60,8 +60,7 @@ export async function generateDatasources(
         '\n```\n';
     }
 
-    md +=
-      '\n\n' + generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);
+    md += generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);
 
     await updateFile(`${dist}/modules/datasource/${datasource}/index.md`, md);
   }

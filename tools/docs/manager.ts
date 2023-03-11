@@ -91,7 +91,7 @@ sidebar_label: ${displayName}
     if (manager !== 'regex') {
       md += '\n## Additional Information\n\n';
     }
-    md += managerReadmeContent + '\n\n';
+    md += managerReadmeContent;
 
     md += generateFeatureAndBugMarkdown(managerIssuesMap, manager);
 

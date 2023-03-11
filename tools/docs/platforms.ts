@@ -1,5 +1,5 @@
 import { logger } from '../../lib/logger';
-import { getPlatformList, getPlatforms } from '../../lib/modules/platform';
+import { getPlatformList } from '../../lib/modules/platform';
 import * as hostRules from '../../lib/util/host-rules';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
@@ -20,8 +20,11 @@ export async function generatePlatforms(
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
   for (const platform of platforms) {
-    const readme = await readFile(`lib/modules/platform/${platform}/index.md`);
-    await updateFile(`${dist}/modules/platform/${platform}/index.md`, readme);
+    let md = await readFile(`lib/modules/platform/${platform}/index.md`);
+
+    md += generateFeatureAndBugMarkdown(platformIssuesMap, platform);
+
+    await updateFile(`${dist}/modules/platform/${platform}/index.md`, md);
   }
 
   platformContent += platforms
@@ -30,29 +33,7 @@ export async function generatePlatforms(
 
   platformContent += '.\n';
 
-  const indexFileName = `docs/usage/modules/platform/index.md`;
-  let indexContent = await readFile(indexFileName);
+  let indexContent = await readFile(`docs/usage/modules/platform/index.md`);
   indexContent = replaceContent(indexContent, platformContent);
   await updateFile(`${dist}/modules/platform/index.md`, indexContent);
-
-  await generatePlatformOpenFeaturesAndBugs(dist, platformIssuesMap);
-}
-
-export async function generatePlatformOpenFeaturesAndBugs(
-  dist: string,
-  platformIssuesMap: Record<string, OpenItems>
-): Promise<void> {
-  const platforms = getPlatforms();
-
-  for (const [platform] of platforms) {
-    const platformReadmeContent = await readFile(
-      `lib/modules/platform/${platform}/index.md`
-    );
-
-    let md = platformReadmeContent + '\n\n';
-
-    md += generateFeatureAndBugMarkdown(platformIssuesMap, platform);
-
-    await updateFile(`${dist}/modules/platform/${platform}/index.md`, md);
-  }
 }
