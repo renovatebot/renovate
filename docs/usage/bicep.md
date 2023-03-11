@@ -18,7 +18,7 @@ Upgrading `module` versions is not supported.
 
 API version updates of nested resources are not supported.
 
-The API version of the `blobServices` resource below for example, will not be upgraded for example:
+The API version of the `blobServices` resource below for example, will not be upgraded:
 
 ```bicep
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-01-01' = {
