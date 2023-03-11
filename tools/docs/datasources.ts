@@ -12,7 +12,7 @@ import {
 
 export async function generateDatasources(
   dist: string,
-  datasourceIssuesMap: Record<string, OpenItems>
+  datasourceIssuesMap: OpenItems
 ): Promise<void> {
   const dsList = getDatasources();
   let datasourceContent = '\nSupported values for `datasource` are:\n\n';

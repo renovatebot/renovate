@@ -5,6 +5,7 @@ import { GithubHttp } from '../../lib/util/http/github';
 import { getQueryString } from '../../lib/util/url';
 
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
+const githubApi = new GithubHttp();
 
 if (process.env.GITHUB_TOKEN) {
   logger.debug('Using GITHUB_TOKEN from env');
@@ -31,21 +32,22 @@ type LabelsEntity = {
   name: string;
 };
 
-export interface OpenItems {
-  bugs: ItemsEntity[];
-  features: ItemsEntity[];
+export interface RenovateOpenItems {
+  managers: OpenItems;
+  platforms: OpenItems;
+  datasources: OpenItems;
 }
 
-export interface RenovateOpenItems {
-  managers: Record<string, OpenItems>;
-  platforms: Record<string, OpenItems>;
-  datasources: Record<string, OpenItems>;
+export type OpenItems = Record<string, Items> | undefined;
+
+export interface Items {
+  bugs: ItemsEntity[];
+  features: ItemsEntity[];
 }
 
 export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
   const per_page = 100;
-  const githubApi = new GithubHttp();
   try {
     const query = getQueryString({ q, per_page });
     const res = await githubApi.getJson<GithubApiQueryResponse>(
@@ -70,11 +72,8 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 }
 
-function extractIssues(
-  items: ItemsEntity[],
-  labelPrefix: string
-): Record<string, OpenItems> {
-  const issuesMap: Record<string, OpenItems> = {};
+function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
+  const issuesMap: OpenItems = {};
 
   for (const item of items) {
     const type = item.labels
@@ -107,7 +106,7 @@ function extractIssues(
   return issuesMap;
 }
 
-function stringifyIssues(items: ItemsEntity[]| undefined): [string, number] {
+function stringifyIssues(items: ItemsEntity[] | undefined): [string, number] {
   if (!items) {
     return ['', 0];
   }
@@ -119,9 +118,12 @@ function stringifyIssues(items: ItemsEntity[]| undefined): [string, number] {
 }
 
 export function generateFeatureAndBugMarkdown(
-  issuesMap: Record<string, OpenItems>,
+  issuesMap: OpenItems,
   key: string
 ): string {
+  if (!issuesMap) {
+    return '';
+  }
   let md = '\n\n';
   const [featureList] = stringifyIssues(issuesMap[key]?.features);
   const [bugList] = stringifyIssues(issuesMap[key]?.bugs);

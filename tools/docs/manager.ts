@@ -17,7 +17,7 @@ function getManagerLink(manager: string): string {
 
 export async function generateManagers(
   dist: string,
-  managerIssuesMap: Record<string, OpenItems>
+  managerIssuesMap: OpenItems
 ): Promise<void> {
   const managers = getManagers();
 

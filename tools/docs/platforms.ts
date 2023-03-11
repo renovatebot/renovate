@@ -5,7 +5,7 @@ import { getModuleLink, replaceContent } from './utils';
 
 export async function generatePlatforms(
   dist: string,
-  platformIssuesMap: Record<string, OpenItems>
+  platformIssuesMap: OpenItems
 ): Promise<void> {
   let platformContent = 'Supported values for `platform` are: ';
   const platforms = getPlatformList();
