@@ -320,7 +320,7 @@ dummy 1.2.3
           {
             currentValue: '3.57.1',
             datasource: 'github-releases',
-            packageName: 'pulumi',
+            packageName: 'pulumi/pulumi',
             depName: 'pulumi',
             versioning: '^v(?<version>\\S+)',
           },

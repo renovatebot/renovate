@@ -304,7 +304,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/canha/asdf-pulumi.git',
     config: {
       datasource: GithubReleasesDatasource.id,
-      packageName: 'pulumi',
+      packageName: 'pulumi/pulumi',
       versioning: '^v(?<version>\\S+)',
     },
   },
