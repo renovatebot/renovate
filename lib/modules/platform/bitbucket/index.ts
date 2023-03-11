@@ -173,7 +173,6 @@ export async function initRepo({
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
-  let developmentBranch: string | undefined;
   let mainBranch: string;
   try {
     info = utils.repoInfoTransformer(
