@@ -87,6 +87,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
+    if (m.updateLockedDependency) {
+      return 'update-lockfile';
+    }
     // default to 'replace' for auto
     return 'replace';
   }

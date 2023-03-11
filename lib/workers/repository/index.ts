@@ -24,7 +24,7 @@ import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
 import { ProcessResult, processResult } from './result';
-import { printRequestStats } from './stats';
+import { printLookupStats, printRequestStats } from './stats';
 
 // istanbul ignore next
 export async function renovateRepository(
@@ -109,6 +109,7 @@ export async function renovateRepository(
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
   printRequestStats();
+  printLookupStats();
   printDnsStats();
   clearDnsCache();
   schemaUtil.reportErrors();

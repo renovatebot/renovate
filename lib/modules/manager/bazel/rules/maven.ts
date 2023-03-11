@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { MavenDatasource } from '../../../datasource/maven';
+import { id as versioning } from '../../../versioning/gradle';
 import type { PackageDependency } from '../../types';
 
 export const mavenRules = ['maven_install'] as const;
@@ -52,6 +53,7 @@ export const MavenTarget = z
     }): PackageDependency[] =>
       artifacts.map(({ group, artifact, version: currentValue }) => ({
         datasource: MavenDatasource.id,
+        versioning,
         depName: `${group}:${artifact}`,
         currentValue,
         depType,

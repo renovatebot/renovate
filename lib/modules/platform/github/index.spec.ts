@@ -998,8 +998,30 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not consider internal statuses as success', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [
+            {
+              context: 'renovate/stability-days',
+              state: 'success',
+            },
+          ],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
+        .reply(200, []);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -1014,7 +1036,7 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -1029,7 +1051,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -1061,7 +1083,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -1099,7 +1121,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
     });
 
@@ -1130,7 +1152,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });

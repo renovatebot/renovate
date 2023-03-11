@@ -883,7 +883,15 @@ export class DockerDatasource extends Datasource {
       }
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      if (isArtifactoryServer(res)) {
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        url = linkHeader?.next?.last
+          ? `${url}&last=${linkHeader.next.last}`
+          : null;
+      } else {
+        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      }
       page += 1;
     } while (url && page < 20);
     return tags;
@@ -909,10 +917,9 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
+    } catch (_err) /* istanbul ignore next */ {
+      const err = _err instanceof ExternalHostError ? _err.err : _err;
+
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         !dockerRepository.includes('/')
@@ -974,7 +981,7 @@ export class DockerDatasource extends Datasource {
       if (isDockerHost(registryHost)) {
         logger.info({ err }, 'Docker Hub lookup failure');
       }
-      throw err;
+      throw _err;
     }
   }
 
