@@ -109,7 +109,10 @@ describe('workers/repository/update/branch/index', () => {
         errors: [],
         warnings: [],
         upgrades: partial<BranchUpgradeConfig>([{ depName: 'some-dep-name' }]),
-      } as BranchConfig;
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        major: undefined,
+      } satisfies BranchConfig;
       schedule.isScheduledNow.mockReturnValue(true);
       commit.commitFilesToBranch.mockResolvedValue('123test');
 
@@ -759,7 +762,7 @@ describe('workers/repository/update/branch/index', () => {
         prCreation: 'not-pending',
         commitBody: '[skip-ci]',
         fetchReleaseNotes: true,
-      } as BranchConfig;
+      } satisfies BranchConfig;
       mockedFunction(needsChangelogs).mockReturnValueOnce(true);
       scm.getBranchCommit.mockResolvedValue('123test'); //TODO:not needed?
       expect(await branchWorker.processBranch(inconfig)).toEqual({
@@ -1108,7 +1111,7 @@ describe('workers/repository/update/branch/index', () => {
         updateType: 'lockFileMaintenance',
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -1199,7 +1202,7 @@ describe('workers/repository/update/branch/index', () => {
         updateType: 'lockFileMaintenance',
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -1236,7 +1239,7 @@ describe('workers/repository/update/branch/index', () => {
       const inconfig = {
         ...config,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         prNo: undefined,
@@ -1304,7 +1307,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         reuseExistingBranch: false,
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -1343,7 +1346,7 @@ describe('workers/repository/update/branch/index', () => {
         ...config,
         dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
         updatedArtifacts: [{ type: 'deletion', path: 'dummy' }],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
@@ -1421,16 +1424,17 @@ describe('workers/repository/update/branch/index', () => {
         },
         upgrades: [
           {
-            ...getConfig(),
             depName: 'some-dep-name',
             postUpgradeTasks: {
               executionMode: 'update',
               commands: ['echo {{{versioning}}}', 'disallowed task'],
               fileFilters: ['modified_file', 'deleted_file'],
             },
-          },
+            branchName: 'renovate/some-branch',
+            manager: 'some-manager',
+          } satisfies BranchUpgradeConfig,
         ],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
@@ -1606,7 +1610,7 @@ describe('workers/repository/update/branch/index', () => {
             },
           }),
         ],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       const result = await branchWorker.processBranch(inconfig);
       expect(result).toEqual({
         branchExists: true,
@@ -2134,7 +2138,7 @@ describe('workers/repository/update/branch/index', () => {
       const inconfig = {
         ...config,
         prCreation: 'not-pending',
-      } as BranchConfig;
+      } satisfies BranchConfig;
       expect(await branchWorker.processBranch(inconfig)).toEqual({
         branchExists: true,
         updatesVerified: true,
