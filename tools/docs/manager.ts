@@ -1,18 +1,8 @@
 import type { RenovateConfig } from '../../lib/config/types';
-import { logger } from '../../lib/logger';
 import { getManagers } from '../../lib/modules/manager';
-import * as hostRules from '../../lib/util/host-rules';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
-
-if (process.env.GITHUB_TOKEN) {
-  logger.debug('Using GITHUB_TOKEN from env');
-  hostRules.add({
-    matchHost: 'api.github.com',
-    token: process.env.GITHUB_TOKEN,
-  });
-}
 
 function getTitle(manager: string, displayName: string): string {
   if (manager === 'regex') {

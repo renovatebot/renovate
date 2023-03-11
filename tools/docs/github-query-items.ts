@@ -1,9 +1,18 @@
 import { DateTime } from 'luxon';
 import { logger } from '../../lib/logger';
+import * as hostRules from '../../lib/util/host-rules';
 import { GithubHttp } from '../../lib/util/http/github';
 import { getQueryString } from '../../lib/util/url';
 
 const gitHubApiUrl = 'https://api.github.com/search/issues?';
+
+if (process.env.GITHUB_TOKEN) {
+  logger.debug('Using GITHUB_TOKEN from env');
+  hostRules.add({
+    matchHost: 'api.github.com',
+    token: process.env.GITHUB_TOKEN,
+  });
+}
 
 type GithubApiQueryResponse = {
   total_count: number;
@@ -11,7 +20,7 @@ type GithubApiQueryResponse = {
   items: ItemsEntity[];
 };
 
-export type ItemsEntity = {
+type ItemsEntity = {
   html_url: string;
   number: number;
   title: string;

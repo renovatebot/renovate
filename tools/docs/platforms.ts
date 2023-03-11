@@ -1,17 +1,7 @@
-import { logger } from '../../lib/logger';
 import { getPlatformList } from '../../lib/modules/platform';
-import * as hostRules from '../../lib/util/host-rules';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import { getModuleLink, replaceContent } from './utils';
-
-if (process.env.GITHUB_TOKEN) {
-  logger.debug('Using GITHUB_TOKEN from env');
-  hostRules.add({
-    matchHost: 'api.github.com',
-    token: process.env.GITHUB_TOKEN,
-  });
-}
 
 export async function generatePlatforms(
   dist: string,
