@@ -131,7 +131,7 @@ Consider this example:
 FROM java:8@sha256:0e8b2a860
 ```
 
-```
+```json
 {
   packageRules: [
     {
