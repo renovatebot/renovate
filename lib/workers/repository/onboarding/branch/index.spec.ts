@@ -327,7 +327,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
       it('processes branch if rebase-checkbox in checked', async () => {
         const pr = { bodyStruct: { rebaseRequested: true } };
-        platform.getBranchPr.mockResolvedValueOnce(mock<Pr>(pr));
+        platform.getBranchPr.mockResolvedValueOnce(partial<Pr>(pr));
 
         await checkOnboardingBranch(config);
 
