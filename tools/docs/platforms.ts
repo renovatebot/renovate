@@ -49,7 +49,7 @@ function extractIssues(
       continue;
     }
     const platform = item.labels
-      .find((l) => l.name.startsWith('manager:'))
+      .find((l) => l.name.startsWith('platform:'))
       ?.name.split(':')[1];
     if (!platform) {
       continue;
@@ -75,8 +75,8 @@ export async function getPlatformGitHubIssues(): Promise<
 > {
   const q = `repo:renovatebot/renovate type:issue is:open -label:priority-5-triage`;
   const per_page = 100;
-  const managerIssuesMap: Record<string, PlatformIssues> = {};
-  const githubApi = new GithubHttp('platform-issues');
+  const platformIssuesMap: Record<string, PlatformIssues> = {};
+  const githubApi = new GithubHttp();
   try {
     const query = getQueryString({ q, per_page });
     const res = await githubApi.getJson<GithubApiQueryResponse>(
@@ -88,14 +88,14 @@ export async function getPlatformGitHubIssues(): Promise<
     );
     const items = res.body?.items ?? [];
     extractIssues(
-      managerIssuesMap,
+      platformIssuesMap,
       items.sort((a, b) => a.number - b.number)
     );
   } catch (err) {
     logger.error({ err }, 'Error getting query results');
     throw err;
   }
-  return managerIssuesMap;
+  return platformIssuesMap;
 }
 
 export async function generatePlatforms(dist: string): Promise<void> {
@@ -125,9 +125,10 @@ export async function generatePlatformOpenFeaturesAndBugs(
 ): Promise<void> {
   const platforms = getPlatforms();
   const platformIssuesMap = await getPlatformGitHubIssues();
+
   for (const [platform] of platforms) {
     const platformReadmeContent = await readFile(
-      `lib/modules/platform/${platform}/readme.md`
+      `lib/modules/platform/${platform}/index.md`
     );
 
     let md = platformReadmeContent + '\n\n';
@@ -135,15 +136,20 @@ export async function generatePlatformOpenFeaturesAndBugs(
     const [featureList] = stringifyIssues(
       platformIssuesMap[platform]?.features
     );
+    const [bugList] = stringifyIssues(platformIssuesMap[platform]?.bugs);
+
+    if (featureList || bugList) {
+      md += '## Open issues\n\n';
+    }
+
     if (featureList) {
-      md += '## Open feature requests\n\n';
+      md += '### Feature requests\n\n';
       md += featureList;
       md += '\n';
     }
 
-    const [bugList] = stringifyIssues(platformIssuesMap[platform]?.bugs);
     if (bugList) {
-      md += '## Open bug reports\n\n';
+      md += '### Bug reports\n\n';
       md += bugList;
       md += '\n';
     }
@@ -153,7 +159,7 @@ export async function generatePlatformOpenFeaturesAndBugs(
       const lists = `list of ${featureList ? 'features' : ''}${
         featureList && bugList ? ' and ' : ''
       }${bugList ? 'bugs' : ''}`;
-      md += '\n\n';
+      md += '\n';
       md += `The above ${lists} were current when this page was generated on ${now}.\n`;
     }
 
