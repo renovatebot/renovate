@@ -61,7 +61,7 @@ export async function getOpenGitHubItems(): Promise<RenovateOpenItems> {
   }
 }
 
-export function extractIssues(
+function extractIssues(
   items: ItemsEntity[],
   labelPrefix: string
 ): Record<string, OpenItems> {
