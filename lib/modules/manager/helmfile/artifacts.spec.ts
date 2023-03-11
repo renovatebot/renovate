@@ -34,8 +34,6 @@ repositories:
     url: https://backstage.github.io/charts
   - name: oauth2-proxy
     url: https://oauth2-proxy.github.io/manifests
-  - name: incubator
-    url: https://charts.helm.sh/incubator
 releases:
   - name: backstage
     chart: backstage/backstage
@@ -43,26 +41,6 @@ releases:
   - name: oauth-proxy
     chart: oauth2-proxy/oauth2-proxy
     version: 6.8.0
-  - name: raw1
-    chart: incubator/raw
-    version: 0.1.0
-    values:
-    - resources:
-      - apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: raw1
-          namespace: default
-        data:
-          foo: FOO
-    strategicMergePatches:
-      - apiVersion: v1
-        kind: ConfigMap
-        metadata:
-          name: raw1
-          namespace: default
-        data:
-          bar: BAR
 `;
 
 const lockFile = codeBlock`
@@ -74,9 +52,6 @@ dependencies:
 - name: oauth2-proxy
   repository: https://oauth2-proxy.github.io/manifests
   version: 6.2.1
-- name: raw
-  repository: https://charts.helm.sh/incubator
-  version: 0.1.0
 digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
 generated: "2023-03-08T21:32:06.122276997+01:00"
 `;
@@ -89,9 +64,6 @@ dependencies:
 - name: oauth2-proxy
   repository: https://oauth2-proxy.github.io/manifests
   version: 6.8.0
-- name: raw
-  repository: https://charts.helm.sh/incubator
-  version: 0.1.0
 digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
 generated: "2023-03-08T21:30:48.273709455+01:00"
 `;
@@ -222,7 +194,6 @@ describe('modules/manager/helmfile/artifacts', () => {
       GlobalConfig.set({ ...adminConfig, binarySource });
       fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
       git.getFile.mockResolvedValueOnce(lockFile);
-      git.getFile.mockResolvedValueOnce(helmfileYaml);
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce(lockFileTwo);
       fs.privateCacheDir.mockReturnValue(
