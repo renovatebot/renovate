@@ -133,7 +133,7 @@ FROM java:8@sha256:0e8b2a860
 
 ```json
 {
-  packageRules: [
+  "packageRules": [
     {
       "matchPackageNames": ["java"],
       "replacementName": "eclipse-temurin",
