@@ -32,4 +32,3 @@ Remember to:
 
 ## Features requiring implementation
 
-- Creating issues not implemented yet, e.g. when there is a config error
