@@ -36,13 +36,13 @@ export class AzureBicepResourceDatasource extends Datasource {
       .toLowerCase();
     const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
 
-    const changeLogUrl = `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
+    const changelogUrl = `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
 
     return {
       releases: versions.map((x) => ({
         version: x,
-        changeLogUrl, // TODO: does not show up in PR yet?
       })),
+      changelogUrl,
     };
   }
 
