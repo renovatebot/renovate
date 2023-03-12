@@ -4,17 +4,13 @@ import { AzureBicepResourceDatasource } from './index';
 
 const gitHubHost = 'https://raw.githubusercontent.com';
 const indexPath = '/Azure/bicep-types-az/main/generated/index.json';
-const emptyIndex = Fixtures.getJson('empty-index.json');
-const functionBillingAccountIndex = Fixtures.getJson(
-  'function-billingaccount-index.json'
-);
-const resourceStorageAccountIndex = Fixtures.getJson(
-  'resource-storageaccount-index.json'
-);
 
 describe('modules/datasource/azure-bicep-resource/index', () => {
   it('should return null when no version is found', async () => {
-    httpMock.scope(gitHubHost).get(indexPath).reply(200, emptyIndex);
+    httpMock
+      .scope(gitHubHost)
+      .get(indexPath)
+      .reply(200, Fixtures.getJson('empty-index.json'));
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
     const result = await azureBicepResourceDatasource.getReleases({
@@ -28,7 +24,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     httpMock
       .scope(gitHubHost)
       .get(indexPath)
-      .reply(200, functionBillingAccountIndex);
+      .reply(200, Fixtures.getJson('function-billingaccount-index.json'));
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
     const result = await azureBicepResourceDatasource.getReleases({
@@ -55,7 +51,7 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
     httpMock
       .scope(gitHubHost)
       .get(indexPath)
-      .reply(200, resourceStorageAccountIndex);
+      .reply(200, Fixtures.getJson('resource-storageaccount-index.json'));
 
     const azureBicepResourceDatasource = new AzureBicepResourceDatasource();
     const result = await azureBicepResourceDatasource.getReleases({

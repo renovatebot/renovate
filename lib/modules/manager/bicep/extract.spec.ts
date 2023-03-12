@@ -1,21 +1,13 @@
 import { Fixtures } from './../../../../test/fixtures';
 import { extractPackageFile } from '.';
 
-const resourceCommentedOut = Fixtures.get('resource-commented-out.bicep');
-const resourceConditional = Fixtures.get('resource-conditional.bicep');
-const resourceExisting = Fixtures.get('resource-existing.bicep');
-const resourceLoopConditional = Fixtures.get('resource-loop-conditional.bicep');
-const resourceLoop = Fixtures.get('resource-loop.bicep');
-const resourceNestedUnversioned = Fixtures.get(
-  'resource-nested-unversioned.bicep'
-);
-const resourceNestedVersioned = Fixtures.get('resource-nested-versioned.bicep');
-const resourceNormal = Fixtures.get('resource-normal.bicep');
-const resourceSubresource = Fixtures.get('resource-subresource.bicep');
-
 describe('modules/manager/bicep/extract', () => {
   it('should extract a normal resource', async () => {
-    const result = await extractPackageFile(resourceNormal, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-normal.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -32,7 +24,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should not extract a commented out resource', async () => {
-    const result = await extractPackageFile(resourceCommentedOut, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-commented-out.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [],
@@ -40,7 +36,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should extract a conditional resource', async () => {
-    const result = await extractPackageFile(resourceConditional, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-conditional.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -57,7 +57,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should extract a existing resource', async () => {
-    const result = await extractPackageFile(resourceExisting, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-existing.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -74,7 +78,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should extract a conditional loop resource', async () => {
-    const result = await extractPackageFile(resourceLoopConditional, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-loop-conditional.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -91,7 +99,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should extract a loop resource', async () => {
-    const result = await extractPackageFile(resourceLoop, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-loop.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -108,7 +120,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should not extract a nested unversioned resource', async () => {
-    const result = await extractPackageFile(resourceNestedUnversioned, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-nested-unversioned.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -125,7 +141,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should not extract a nested versioned resource', async () => {
-    const result = await extractPackageFile(resourceNestedVersioned, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-nested-versioned.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
@@ -142,7 +162,11 @@ describe('modules/manager/bicep/extract', () => {
   });
 
   it('should extract a sub resource', async () => {
-    const result = await extractPackageFile(resourceSubresource, '', {});
+    const result = await extractPackageFile(
+      Fixtures.get('resource-subresource.bicep'),
+      '',
+      {}
+    );
 
     expect(result).toEqual({
       deps: [
