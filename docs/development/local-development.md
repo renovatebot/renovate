@@ -11,12 +11,11 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>= 18.12.0`
+- Node.js `>=18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-If you are using Node.js `<= 18` you need to run `yarn install  --ignore-engines`, because we've some `devDependencies` which require Node.js v18+.
 
 #### Linux
 

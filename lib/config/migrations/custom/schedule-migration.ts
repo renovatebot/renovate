@@ -13,7 +13,7 @@ export class ScheduleMigration extends AbstractMigration {
       if (is.string(value)) {
         schedules = [value];
       }
-      if (Array.isArray(value)) {
+      if (is.array<string>(value)) {
         schedules = [...value];
       }
       // split 'and'

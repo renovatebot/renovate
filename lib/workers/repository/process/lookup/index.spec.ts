@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
-import { getConfig, mocked, partial } from '../../../../../test/util';
+import { getConfig, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
@@ -18,8 +18,6 @@ import * as githubGraphql from '../../../../util/github/graphql';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
-jest.mock('../../../../modules/datasource/docker');
-
 const fixtureRoot = '../../../../config/npm';
 const qJson = {
   ...Fixtures.getJson('01.json', fixtureRoot),
@@ -33,8 +31,6 @@ const typescriptJson = Fixtures.get('typescript.json', fixtureRoot);
 const vueJson = Fixtures.get('vue.json', fixtureRoot);
 const webpackJson = Fixtures.get('webpack.json', fixtureRoot);
 
-const docker = mocked(DockerDatasource.prototype);
-
 let config: LookupUpdateConfig;
 
 describe('workers/repository/process/lookup/index', () => {
@@ -43,7 +39,16 @@ describe('workers/repository/process/lookup/index', () => {
     'getReleases'
   );
 
+  const getDockerReleases = jest.spyOn(
+    DockerDatasource.prototype,
+    'getReleases'
+  );
+
+  const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
+
   beforeEach(() => {
+    // TODO: fix wrong tests
+    jest.resetAllMocks();
     // TODO: fix types #7154
     config = partial<LookupUpdateConfig>(getConfig() as never);
     config.manager = 'npm';
@@ -1541,7 +1546,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1551,8 +1556,8 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         currentVersion: '8.0.0',
@@ -1578,7 +1583,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.versioning = dockerVersioningId;
       config.datasource = DockerDatasource.id;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           { version: '8.1.0' },
           { version: '8.1.5' },
@@ -1602,7 +1607,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.versioning = dockerVersioningId;
       config.datasource = DockerDatasource.id;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         registryUrl: 'https://index.docker.io',
         releases: [
           { version: '8.1.0' },
@@ -1635,7 +1640,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.versioning = dockerVersioningId;
       config.datasource = DockerDatasource.id;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           { version: '8.1.0' },
           { version: '8.1.5' },
@@ -1659,7 +1664,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1669,7 +1674,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -1688,7 +1693,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1701,7 +1706,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -1720,7 +1725,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'node';
       config.datasource = DockerDatasource.id;
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1733,7 +1738,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce(null);
+      getDockerDigest.mockResolvedValueOnce(null);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
@@ -1744,7 +1749,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = DockerDatasource.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: '8.0.0',
@@ -1754,8 +1759,8 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
-      docker.getDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -1779,7 +1784,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.datasource = DockerDatasource.id;
       config.currentDigest = 'sha256:zzzzzzzzzzzzzzz';
       config.pinDigests = true;
-      docker.getReleases.mockResolvedValueOnce({
+      getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
             version: 'alpine',
@@ -1792,7 +1797,7 @@ describe('workers/repository/process/lookup/index', () => {
           },
         ],
       });
-      docker.getDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot({
         updates: [
@@ -1841,7 +1846,102 @@ describe('workers/repository/process/lookup/index', () => {
       });
     });
 
-    it('handles replacements', async () => {
+    it('handles replacements - name only without pinDigests enabled', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+        },
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - name only with pinDigests enabled', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = '17.0.0';
+      config.pinDigests = true;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      getDockerDigest.mockResolvedValueOnce('sha256:0123456789abcdef');
+      getDockerDigest.mockResolvedValueOnce('sha256:pin0987654321');
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+          newDigest: 'sha256:abcdef1234567890',
+        },
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+          newDigest: 'sha256:0123456789abcdef',
+        },
+        {
+          isPinDigest: true,
+          newDigest: 'sha256:pin0987654321',
+          newValue: '17.0.0',
+          updateType: 'pinDigest',
+        },
+      ]);
+    });
+
+    it('handles replacements - name only no version/tag', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = undefined;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'eclipse-temurin';
+      getDockerDigest.mockResolvedValueOnce('sha256:abcdef1234567890');
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: undefined,
+        },
+      ]);
+    });
+
+    it('handles replacements - name and version', async () => {
       config.currentValue = '1.4.1';
       config.packageName = 'q';
       // This config is normally set when packageRules are applied
@@ -1849,8 +1949,13 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementVersion = '2.0.0';
       config.datasource = NpmDatasource.id;
       httpMock.scope('https://registry.npmjs.org').get('/q').reply(200, qJson);
-      const res = await lookup.lookupUpdates(config);
-      expect(res).toMatchSnapshot();
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'r',
+          newValue: '2.0.0',
+        },
+      ]);
     });
 
     it('rollback for invalid version to last stable version', async () => {
