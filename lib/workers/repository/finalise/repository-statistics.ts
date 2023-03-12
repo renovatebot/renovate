@@ -46,6 +46,8 @@ function branchCacheToMetadata({
   baseBranchSha,
   branchName,
   isModified,
+  isConflicted,
+  isBehindBase,
   pristine: isPristine,
   sha: branchSha,
 }: BranchCache): BranchMetadata {
@@ -57,6 +59,8 @@ function branchCacheToMetadata({
     branchSha,
     isModified,
     isPristine,
+    isConflicted,
+    isBehindBase,
   };
 }
 

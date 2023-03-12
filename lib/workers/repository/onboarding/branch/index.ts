@@ -9,8 +9,10 @@ import {
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
+import { setBranchNewCommit } from '../../../../util/git/set-branch-commit';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
+import { syncBranchState } from '../../process/write';
 import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
@@ -28,6 +30,7 @@ export async function checkOnboardingBranch(
     logger.debug('Repo is onboarded');
     return { ...config, repoIsOnboarded };
   }
+  await syncBranchState(config.onboardingBranch!, config.baseBranch!);
   if (config.isFork && !config.includeForks) {
     throw new Error(REPOSITORY_FORKED);
   }
@@ -47,6 +50,7 @@ export async function checkOnboardingBranch(
         { branch: config.onboardingBranch, commit, onboarding: true },
         'Branch updated'
       );
+      setBranchNewCommit(config.onboardingBranch!, config.baseBranch!, commit);
     }
     // istanbul ignore if
     if (platform.refreshPr) {
@@ -78,6 +82,7 @@ export async function checkOnboardingBranch(
         { branch: onboardingBranch, commit, onboarding: true },
         'Branch created'
       );
+      setBranchNewCommit(config.onboardingBranch!, config.baseBranch!, commit);
     }
   }
   if (!GlobalConfig.get('dryRun')) {

@@ -136,6 +136,8 @@ export interface BranchMetadata {
   automerge: boolean;
   isModified?: boolean;
   isPristine?: boolean;
+  isConflicted?: boolean;
+  isBehindBase?: boolean;
 }
 
 export interface BaseBranchMetadata {

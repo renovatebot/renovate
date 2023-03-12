@@ -14,6 +14,7 @@ import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
 import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
+import type { BranchConfig } from '../types';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
@@ -73,6 +74,15 @@ export async function renovateRepository(
       setMeta({ repository: config.repository });
       addSplit('update');
       if (performExtract) {
+        if (!config.repoIsOnboarded) {
+          branches.push({
+            branchName: config.onboardingBranch!,
+            baseBranch: config.defaultBranch!,
+            automerge: false,
+            upgrades: [],
+            manager: '' as never, // onboarding branch won't have this field
+          } satisfies BranchConfig);
+        }
         await setBranchCache(branches); // update branch cache if performed extraction
       }
       if (res === 'automerged') {
