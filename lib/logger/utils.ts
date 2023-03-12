@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
-import { clone } from '../util/clone';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -65,7 +64,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
-      headers: clone(err.options.headers),
+      headers: structuredClone(err.options.headers),
       url: err.options.url?.toString(),
       hostType: err.options.context.hostType,
     };
@@ -82,8 +81,10 @@ export default function prepareError(err: Error): Record<string, unknown> {
         statusCode: err.response?.statusCode,
         statusMessage: err.response?.statusMessage,
         body:
-          err.name === 'TimeoutError' ? undefined : clone(err.response.body),
-        headers: clone(err.response.headers),
+          err.name === 'TimeoutError'
+            ? undefined
+            : structuredClone(err.response.body),
+        headers: structuredClone(err.response.headers),
         httpVersion: err.response.httpVersion,
         retryCount: err.response.retryCount,
       };
