@@ -125,6 +125,7 @@ export function generateFeatureAndBugMarkdown(
     return '';
   }
   let md = '\n\n';
+
   const featureList = stringifyIssues(issuesMap[key]?.features);
   const bugList = stringifyIssues(issuesMap[key]?.bugs);
 
