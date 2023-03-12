@@ -10,6 +10,7 @@ const requirements3 = Fixtures.get('composer3.json');
 const requirements4 = Fixtures.get('composer4.json');
 const requirements5 = Fixtures.get('composer5.json');
 const requirements5Lock = Fixtures.get('composer5.lock');
+const requirements6 = Fixtures.get('composer6.json');
 
 describe('modules/manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -246,6 +247,11 @@ describe('modules/manager/composer/extract', () => {
         ],
         lockFiles: ['composer.lock'],
       });
+    });
+
+    it('ignores path repositories', async () => {
+      const res = await extractPackageFile(requirements6, packageFile);
+      expect(res).toBeNull();
     });
 
     it('extracts dependencies with lock file', async () => {
