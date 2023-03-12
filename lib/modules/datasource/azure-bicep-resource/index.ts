@@ -49,9 +49,9 @@ export class AzureBicepResourceDatasource extends Datasource {
     const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
 
     return {
-      releases: versions.map((x) => ({
-        version: x,
-        changelogUrl: `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}#${x}`,
+      releases: versions.map((version) => ({
+        version,
+        changelogUrl: `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}#${version}`,
       })),
     };
   }
