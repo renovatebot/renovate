@@ -48,7 +48,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'something/one',
+        packageName: 'something/one',
       });
       expect(res).toBeNull();
     });
@@ -72,7 +72,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'vendor/package-name',
+        packageName: 'vendor/package-name',
       });
       expect(res).toMatchSnapshot();
     });
@@ -94,7 +94,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'vendor/package-name2',
+        packageName: 'vendor/package-name2',
       });
       expect(res).toBeNull();
     });
@@ -116,7 +116,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'vendor/package-name',
+        packageName: 'vendor/package-name',
       });
       expect(res).toBeNull();
     });
@@ -138,7 +138,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'drewm/mailchimp-api',
+        packageName: 'drewm/mailchimp-api',
       });
       expect(res).toBeNull();
     });
@@ -170,7 +170,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'guzzlehttp/guzzle',
+        packageName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -199,7 +199,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'guzzlehttp/guzzle',
+        packageName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchObject({
         homepage: 'http://guzzlephp.org/',
@@ -270,7 +270,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'guzzlehttp/guzzle',
+        packageName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -315,7 +315,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'wpackagist-plugin/1beyt',
+        packageName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -364,7 +364,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'some/other',
+        packageName: 'some/other',
       });
       expect(res).toBeNull();
     });
@@ -396,7 +396,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'wpackagist-plugin/1beyt',
+        packageName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -425,7 +425,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'wpackagist-plugin/1beyt',
+        packageName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -462,7 +462,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'some/other',
+        packageName: 'some/other',
       });
       expect(res).toBeNull();
     });
@@ -482,7 +482,7 @@ describe('modules/datasource/packagist/index', () => {
           ...config,
           datasource,
           versioning,
-          depName: 'drewm/mailchimp-api',
+          packageName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
     });
@@ -502,7 +502,7 @@ describe('modules/datasource/packagist/index', () => {
           ...config,
           datasource,
           versioning,
-          depName: 'drewm/mailchimp-api',
+          packageName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
     });
@@ -534,7 +534,7 @@ describe('modules/datasource/packagist/index', () => {
         ...config,
         datasource,
         versioning,
-        depName: 'drewm/mailchimp-api',
+        packageName: 'drewm/mailchimp-api',
       });
 
       expect(res).toEqual({

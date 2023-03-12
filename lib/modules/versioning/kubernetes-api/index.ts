@@ -10,7 +10,7 @@ export const supportsRanges = false;
 
 export class KubernetesApiVersioningApi extends RegExpVersioningApi {
   private static readonly versionRegex =
-    '^(?:(?<compatibility>\\S+)\\/)?v(?<major>\\d+)(?<prerelease>(?:alpha|beta)\\d+)?$';
+    '^(?:(?<compatibility>\\S+)/)?v(?<major>\\d+)(?<prerelease>(?:alpha|beta)\\d+)?$';
 
   public constructor() {
     super(KubernetesApiVersioningApi.versionRegex);

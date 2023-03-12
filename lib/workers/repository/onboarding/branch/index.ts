@@ -31,7 +31,7 @@ export async function checkOnboardingBranch(
     return { ...config, repoIsOnboarded };
   }
   await syncBranchState(config.onboardingBranch!, config.baseBranch!);
-  if (config.isFork && !config.includeForks) {
+  if (config.isFork && config.forkProcessing !== 'enabled') {
     throw new Error(REPOSITORY_FORKED);
   }
   logger.debug('Repo is not onboarded');

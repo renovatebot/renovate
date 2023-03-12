@@ -42,7 +42,7 @@ export interface LookupUpdateConfig
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
   datasource: string;
-  depName: string;
+  packageName: string;
   minimumConfidence?: string;
   replacementName?: string;
   replacementVersion?: string;
