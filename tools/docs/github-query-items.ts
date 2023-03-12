@@ -106,15 +106,15 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
   return issuesMap;
 }
 
-function stringifyIssues(items: ItemsEntity[] | undefined): [string, number] {
+function stringifyIssues(items: ItemsEntity[] | undefined): string {
   if (!items) {
-    return ['', 0];
+    return '';
   }
   let list = '';
   for (const item of items) {
     list += ` - ${item.title} [#${item.number}](${item.html_url})\n`;
   }
-  return [list, items.length];
+  return list;
 }
 
 export function generateFeatureAndBugMarkdown(
@@ -125,8 +125,8 @@ export function generateFeatureAndBugMarkdown(
     return '';
   }
   let md = '\n\n';
-  const [featureList] = stringifyIssues(issuesMap[key]?.features);
-  const [bugList] = stringifyIssues(issuesMap[key]?.bugs);
+  const featureList = stringifyIssues(issuesMap[key]?.features);
+  const bugList = stringifyIssues(issuesMap[key]?.bugs);
 
   if (featureList || bugList) {
     md += '## Open items\n\n';
