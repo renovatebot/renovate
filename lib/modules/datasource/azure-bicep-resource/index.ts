@@ -1,4 +1,5 @@
 import { cache } from '../../../util/cache/package/decorator';
+import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BicepTypeIndex } from './schema';
@@ -18,6 +19,8 @@ export class AzureBicepResourceDatasource extends Datasource {
       Resource: '{{{depNameLinked}}}',
     },
   };
+
+  override readonly defaultVersioning = azureRestApiVersioningApi.id;
 
   constructor() {
     super(AzureBicepResourceDatasource.id);
