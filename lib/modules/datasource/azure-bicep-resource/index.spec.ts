@@ -39,15 +39,13 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       releases: [
         {
           version: '2019-10-01-preview',
-          changeLogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts',
         },
         {
           version: '2020-05-01',
-          changeLogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts',
         },
       ],
+      changelogUrl:
+        'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts',
     });
   });
 
@@ -66,15 +64,13 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       releases: [
         {
           version: '2015-05-01-preview',
-          changeLogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts',
         },
         {
           version: '2018-02-01',
-          changeLogUrl:
-            'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts',
         },
       ],
+      changelogUrl:
+        'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts',
     });
   });
 });
