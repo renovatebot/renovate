@@ -28,7 +28,7 @@ type ItemsEntity = {
   labels: LabelsEntity[];
 };
 
-type LabelsEntity = {
+export type LabelsEntity = {
   name: string;
 };
 
