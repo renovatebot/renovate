@@ -51,7 +51,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     key: 'getResourceVersionIndex',
     ttlMinutes: 24 * 60,
   })
-  async getResourceVersionIndex(): Promise<{ [key: string]: string[] }> {
+  async getResourceVersionIndex(): Promise<Record<string, string[]>> {
     const res = await this.getBicepTypeIndex();
 
     const releaseMap = new Map<string, string[]>();
