@@ -38,12 +38,11 @@ function getPythonConstraint(
       return undefined;
     }
     if (result.data._meta?.requires?.python_version) {
-      const pythonVersion: string = result.data._meta.requires.python_version;
+      const pythonVersion = result.data._meta.requires.python_version;
       return `== ${pythonVersion}.*`;
     }
     if (result.data._meta?.requires?.python_full_version) {
-      const pythonFullVersion: string =
-        result.data._meta.requires.python_full_version;
+      const pythonFullVersion = result.data._meta.requires.python_full_version;
       return `== ${pythonFullVersion}`;
     }
   } catch (err) {

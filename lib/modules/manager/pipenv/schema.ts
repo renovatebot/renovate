@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// TODO Full schema
 const PipfileLockEntrySchema = z
   .record(
     z.string(),
