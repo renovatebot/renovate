@@ -21,7 +21,7 @@ type GithubApiQueryResponse = {
   items: ItemsEntity[];
 };
 
-type ItemsEntity = {
+export type ItemsEntity = {
   html_url: string;
   number: number;
   title: string;
