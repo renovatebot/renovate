@@ -41,5 +41,5 @@ export function extractPackageFile(
     });
   }
 
-  return Promise.resolve({ deps });
+  return Promise.resolve(deps.length ? { deps } : null);
 }

@@ -30,9 +30,7 @@ describe('modules/manager/bicep/extract', () => {
       {}
     );
 
-    expect(result).toEqual({
-      deps: [],
-    });
+    expect(result).toBeNull();
   });
 
   it('should extract a conditional resource', async () => {
