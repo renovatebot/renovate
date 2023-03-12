@@ -7,7 +7,7 @@ import type {
 } from '../types';
 
 const RESOURCE_REGEX = regEx(
-  /resource\s+[A-Za-z0-9_]+\s+'(?<depName>.+\..+\/.+)@(?<currentValue>.+?)'/
+  /resource\s+[A-Za-z0-9_]+\s+'(?<replaceString>(?<depName>.+\..+\/.+)@(?<currentValue>.+?))'/
 );
 
 export function extractPackageFile(
@@ -29,7 +29,7 @@ export function extractPackageFile(
       continue;
     }
 
-    const { depName, currentValue } = match.groups;
+    const { depName, currentValue, replaceString } = match.groups;
 
     deps.push({
       datasource: AzureBicepResourceDatasource.id,
@@ -37,7 +37,7 @@ export function extractPackageFile(
       depName,
       currentValue,
       autoReplaceStringTemplate: "'{{depName}}@{{newValue}}'",
-      replaceString: `'${depName}@${currentValue}'`,
+      replaceString,
     });
   }
 
