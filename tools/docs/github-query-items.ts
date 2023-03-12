@@ -121,9 +121,6 @@ export function generateFeatureAndBugMarkdown(
   issuesMap: OpenItems,
   key: string
 ): string {
-  if (!issuesMap) {
-    return '';
-  }
   let md = '\n\n';
 
   const featureList = stringifyIssues(issuesMap[key]?.features);
