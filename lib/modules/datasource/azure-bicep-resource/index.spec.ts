@@ -48,8 +48,6 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
             'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2020-05-01',
         },
       ],
-      changelogUrl:
-        'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts',
     });
   });
 
@@ -77,8 +75,6 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
             'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2018-02-01',
         },
       ],
-      changelogUrl:
-        'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts',
     });
   });
 });

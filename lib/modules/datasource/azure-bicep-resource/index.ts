@@ -9,6 +9,16 @@ const BICEP_TYPES_INDEX_URL =
 export class AzureBicepResourceDatasource extends Datasource {
   static readonly id = 'azure-bicep-resource';
 
+  override readonly defaultConfig = {
+    commitMessageTopic: 'resource {{depName}}',
+    commitMessageExtra: 'to {{{newVersion}}}',
+    branchTopic: '{{{depNameSanitized}}}-{{{newVersion}}}',
+    prBodyColumns: ['Resource', 'Change'],
+    prBodyDefinitions: {
+      Resource: '{{{depNameLinked}}}',
+    },
+  };
+
   constructor() {
     super(AzureBicepResourceDatasource.id);
   }
@@ -35,14 +45,11 @@ export class AzureBicepResourceDatasource extends Datasource {
       .toLowerCase();
     const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
 
-    const changelogUrl = `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
-
     return {
       releases: versions.map((x) => ({
         version: x,
-        changelogUrl: `${changelogUrl}#${x}`,
+        changelogUrl: `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}#${x}`,
       })),
-      changelogUrl,
     };
   }
 
