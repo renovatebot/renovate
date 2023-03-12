@@ -38,7 +38,7 @@ export interface RenovateOpenItems {
   datasources: OpenItems;
 }
 
-export type OpenItems = Record<string, Items> | undefined;
+export type OpenItems = Record<string, Items | undefined>;
 
 export interface Items {
   bugs: ItemsEntity[];
