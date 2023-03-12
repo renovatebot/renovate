@@ -34,8 +34,13 @@ async function addSourceCmds(
   _config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const registries =
-    (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
+  const registries = (await getConfiguredRegistries(packageFileName)) ?? [];
+  const defaultRegistries = getDefaultRegistries();
+  for (const defaultRegistry of defaultRegistries) {
+    if (!registries.find((reg) => reg.url === defaultRegistry.url)) {
+      registries.push(defaultRegistry);
+    }
+  }
   const result: string[] = [];
   for (const registry of registries) {
     const { password, username } = hostRules.find({
