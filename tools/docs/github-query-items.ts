@@ -93,10 +93,10 @@ function extractIssues(items: ItemsEntity[], labelPrefix: string): OpenItems {
     }
     switch (type) {
       case 'bug':
-        issuesMap[label].bugs.push(item);
+        issuesMap[label]?.bugs.push(item);
         break;
       case 'feature':
-        issuesMap[label].features.push(item);
+        issuesMap[label]?.features.push(item);
         break;
       default:
         break;
