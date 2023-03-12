@@ -1208,6 +1208,26 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementPrefixAdd',
+    description:
+      'The name of the new prefix to add to the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementPrefixRemove',
+    description:
+      'The name of the new prefix to add to the old deprecated dependency.',
+    type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementVersion',
     description:
       'The version of the new dependency that replaces the old deprecated dependency.',

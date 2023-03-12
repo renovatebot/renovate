@@ -157,6 +157,28 @@ export async function lookupUpdates(
       }
       let rangeStrategy = getRangeStrategy(config);
 
+      if (
+        !config.replacementName &&
+        !config.replacementVersion &&
+        (config.replacementPrefixRemove || config.replacementPrefixAdd)
+      ) {
+        let replacePrefixesNewName = config.replacementPrefixRemove
+          ? packageName.replace(config.replacementPrefixRemove, '')
+          : packageName;
+
+        replacePrefixesNewName = config.replacementPrefixAdd
+          ? `${config.replacementPrefixAdd}${replacePrefixesNewName}`
+          : replacePrefixesNewName;
+
+        if (replacePrefixesNewName !== packageName) {
+          res.updates.push({
+            updateType: 'replacement',
+            newName: replacePrefixesNewName,
+            newValue: currentValue!,
+          });
+        }
+      }
+
       if (config.replacementName && !config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
