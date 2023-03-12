@@ -39,9 +39,13 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       releases: [
         {
           version: '2019-10-01-preview',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2019-10-01-preview',
         },
         {
           version: '2020-05-01',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.billing/change-log/billingaccounts#2020-05-01',
         },
       ],
       changelogUrl:
@@ -64,9 +68,13 @@ describe('modules/datasource/azure-bicep-resource/index', () => {
       releases: [
         {
           version: '2015-05-01-preview',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2015-05-01-preview',
         },
         {
           version: '2018-02-01',
+          changelogUrl:
+            'https://learn.microsoft.com/en-us/azure/templates/microsoft.storage/change-log/storageaccounts#2018-02-01',
         },
       ],
       changelogUrl:

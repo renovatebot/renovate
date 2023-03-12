@@ -40,6 +40,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     return {
       releases: versions.map((x) => ({
         version: x,
+        changelogUrl: `${changelogUrl}#${x}`,
       })),
       changelogUrl,
     };
