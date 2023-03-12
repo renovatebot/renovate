@@ -1,4 +1,3 @@
-import type { z } from 'zod';
 import { cache } from '../../../util/cache/package/decorator';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -70,15 +69,8 @@ export class AzureBicepResourceDatasource extends Datasource {
     return Object.fromEntries(releaseMap);
   }
 
-  private getBicepTypeIndex(): Promise<BicepTypeIndex> {
-    return this.getJson(BICEP_TYPES_INDEX_URL, BicepTypeIndex);
-  }
-
-  private async getJson<T, U extends z.ZodSchema<T>>(
-    url: string,
-    schema: U
-  ): Promise<z.infer<typeof schema>> {
-    const { body } = await this.http.getJson(url);
-    return schema.parse(body);
+  private async getBicepTypeIndex(): Promise<BicepTypeIndex> {
+    const res = await this.http.getJson(BICEP_TYPES_INDEX_URL, BicepTypeIndex);
+    return res.body;
   }
 }
