@@ -4,6 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
@@ -102,17 +103,7 @@ If you need any further assistance then you can also [request help here](${
         config.productLinks!.help
       }) if you have any doubts and would like it reviewed.\n\n`
     );
-    const isConflicted = await scm.isBranchConflicted(
-      config.baseBranch!,
-      config.onboardingBranch!
-    );
-    if (isConflicted) {
-      configDesc += emojify(
-        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
-      );
-    } else {
-      configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
-    }
+    configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
@@ -139,6 +130,19 @@ If you need any further assistance then you can also [request help here](${
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
+    // if branch is conflcited ensure comment and return
+    if (
+      await scm.isBranchConflicted(config.baseBranch!, config.onboardingBranch!)
+    ) {
+      await ensureComment({
+        number: existingPr.number,
+        topic: 'Branch Conflcited',
+        content: emojify(
+          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        ),
+      });
+      return;
+    }
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
