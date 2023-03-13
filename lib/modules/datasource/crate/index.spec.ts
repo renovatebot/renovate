@@ -126,7 +126,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
           registryUrls: [],
         })
       ).toBeNull();
@@ -136,7 +136,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
           registryUrls: ['3'],
         })
       ).toBeNull();
@@ -148,7 +148,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
@@ -163,7 +163,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
@@ -175,7 +175,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_crate',
+          packageName: 'non_existent_crate',
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
@@ -186,7 +186,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'some_crate',
+          packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
@@ -197,7 +197,7 @@ describe('modules/datasource/crate/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'some_crate',
+          packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -208,7 +208,7 @@ describe('modules/datasource/crate/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'some_crate',
+          packageName: 'some_crate',
           registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
@@ -223,7 +223,7 @@ describe('modules/datasource/crate/index', () => {
         .reply(200, Fixtures.get('libc'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'libc',
+        packageName: 'libc',
         registryUrls: ['https://crates.io'],
       });
       expect(res).toMatchSnapshot();
@@ -240,7 +240,7 @@ describe('modules/datasource/crate/index', () => {
         .reply(200, Fixtures.get('amethyst'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'amethyst',
+        packageName: 'amethyst',
         registryUrls: ['https://crates.io'],
       });
       expect(res).toMatchSnapshot();
@@ -254,7 +254,7 @@ describe('modules/datasource/crate/index', () => {
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
@@ -267,7 +267,7 @@ describe('modules/datasource/crate/index', () => {
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
       const res = await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
@@ -282,7 +282,7 @@ describe('modules/datasource/crate/index', () => {
       const url = 'https://github.com/mcorbin/testregistry';
       const res = await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalled();
@@ -297,12 +297,12 @@ describe('modules/datasource/crate/index', () => {
       const url = 'https://github.com/mcorbin/othertestregistry';
       await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
@@ -316,19 +316,19 @@ describe('modules/datasource/crate/index', () => {
       await Promise.all([
         getPkgReleases({
           datasource,
-          depName: 'mypkg',
+          packageName: 'mypkg',
           registryUrls: [url],
         }),
         getPkgReleases({
           datasource,
-          depName: 'mypkg-2',
+          packageName: 'mypkg-2',
           registryUrls: [url],
         }),
       ]);
 
       await getPkgReleases({
         datasource,
-        depName: 'mypkg-3',
+        packageName: 'mypkg-3',
         registryUrls: [url],
       });
 
@@ -342,12 +342,12 @@ describe('modules/datasource/crate/index', () => {
 
       const result = await getPkgReleases({
         datasource,
-        depName: 'mypkg',
+        packageName: 'mypkg',
         registryUrls: [url],
       });
       const result2 = await getPkgReleases({
         datasource,
-        depName: 'mypkg-2',
+        packageName: 'mypkg-2',
         registryUrls: [url],
       });
 

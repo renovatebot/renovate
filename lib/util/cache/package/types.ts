@@ -7,4 +7,6 @@ export interface PackageCache {
     value: T,
     ttlMinutes?: number
   ): Promise<void>;
+
+  cleanup?(): Promise<void>;
 }

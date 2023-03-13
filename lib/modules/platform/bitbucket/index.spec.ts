@@ -171,6 +171,58 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
+  describe('bbUseDevelopmentBranch', () => {
+    it('not enabled: defaults to using main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: false,
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
+
+    it('enabled: uses development branch when development branch exists', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop', branch: { name: 'develop' } },
+        });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
+      });
+
+      expect(res.defaultBranch).toBe('develop');
+    });
+
+    it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop' },
+        });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
+  });
+
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
@@ -225,7 +277,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master')).toBe('red');
+      expect(await bitbucket.getBranchStatus('master', true)).toBe('red');
     });
 
     it('getBranchStatus 4', async () => {
@@ -250,7 +302,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch')).toBe('green');
+      expect(await bitbucket.getBranchStatus('branch', true)).toBe('green');
     });
 
     it('getBranchStatus 5', async () => {
@@ -275,7 +327,9 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch')).toBe('yellow');
+      expect(await bitbucket.getBranchStatus('pending/branch', true)).toBe(
+        'yellow'
+      );
     });
 
     it('getBranchStatus 6', async () => {
@@ -297,9 +351,34 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [],
         });
-      expect(await bitbucket.getBranchStatus('branch-with-empty-status')).toBe(
-        'yellow'
-      );
+      expect(
+        await bitbucket.getBranchStatus('branch-with-empty-status', true)
+      ).toBe('yellow');
+    });
+
+    it('getBranchStatus 7', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/refs/branches/branch')
+        .reply(200, {
+          name: 'branch',
+          target: {
+            hash: 'branch_hash',
+            parents: [{ hash: 'master_hash' }],
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'renovate/stability-days',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+      expect(await bitbucket.getBranchStatus('branch', false)).toBe('yellow');
     });
   });
 
