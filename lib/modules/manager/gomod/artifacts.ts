@@ -131,9 +131,7 @@ function getUpdateImportPathCmds(
   const updateImportCommands = updatedDeps
     .filter(
       ({ newVersion }) =>
-        valid(newVersion) &&
-        newVersion !== undefined &&
-        !newVersion.endsWith('+incompatible')
+        valid(newVersion) && !newVersion!.endsWith('+incompatible')
     )
     .map(({ depName, newVersion }) => ({
       depName: depName!,
