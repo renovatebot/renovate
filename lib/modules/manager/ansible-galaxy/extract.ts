@@ -13,7 +13,7 @@ export function getSliceEndNumber(
   if (start < 0 || start > numberOfLines - 1) {
     return -1;
   }
-  let nearestEnd = numberOfLines - 1;
+  let nearestEnd = numberOfLines;
   for (const blocksKey of blocks) {
     if (start < blocksKey && blocksKey < nearestEnd) {
       nearestEnd = blocksKey;

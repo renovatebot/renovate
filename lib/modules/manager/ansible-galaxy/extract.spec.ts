@@ -7,7 +7,7 @@ const yamlFile1 = Fixtures.get('requirements01.yml');
 const yamlFile2 = Fixtures.get('requirements02.yml');
 const yamlFile3 = codeBlock`collections:
 - name: https://github.com/lowlydba/lowlydba.sqlserver.git
-  type: git
+  type: git 
   version: 1.1.3`;
 const helmRequirements = Fixtures.get('helmRequirements.yml');
 const collections1 = Fixtures.get('collections1.yml');
