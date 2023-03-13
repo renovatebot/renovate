@@ -3749,10 +3749,10 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
-aws-sdk-client-mock@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-2.0.1.tgz#c37ec569fa88688d8d88d7a7f028af26d6d2086e"
-  integrity sha512-Ib/AnI8ZdoIxOBbKSs28TUwJb7FI/AYVYn48PcXx6guk5fBs4GZJJEc+Ci9aImRtVmgO6jHN/6Etz17fr6j3qw==
+aws-sdk-client-mock@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk-client-mock/-/aws-sdk-client-mock-2.1.0.tgz#58247c0fb651cddedbd093c0c06d6bc0caf82e89"
+  integrity sha512-JkrPrcEvQ4JwylVdQ0njYQMFVwVaZzoVc557rsCorIMjEtmrFvlVYEfIKWoYw8psU4cLjOMyqpxg65NcAn9fvQ==
   dependencies:
     "@types/sinon" "^10.0.10"
     sinon "^14.0.2"
