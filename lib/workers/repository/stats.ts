@@ -2,6 +2,7 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { sortNumeric } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
+import type { LookupStats } from '../../util/cache/memory/types';
 import type { RequestStats } from '../../util/http/types';
 
 interface CacheStats {
@@ -9,6 +10,24 @@ interface CacheStats {
   avgMs?: number;
   medianMs?: number;
   maxMs?: number;
+}
+
+export function printLookupStats(): void {
+  const lookups = memCache.get<LookupStats[]>('lookup-stats') ?? [];
+  const datasourceDurations: Record<string, number[]> = {};
+  for (const lookup of lookups) {
+    datasourceDurations[lookup.datasource] ??= [];
+    datasourceDurations[lookup.datasource].push(lookup.duration);
+  }
+  const data: Record<string, unknown> = {};
+  for (const [datasource, durations] of Object.entries(datasourceDurations)) {
+    const count = durations.length;
+    const totalMs = durations.reduce((a, c) => a + c, 0);
+    const averageMs = Math.round(totalMs / count);
+    const maximumMs = Math.max(...durations);
+    data[datasource] = { count, averageMs, totalMs, maximumMs };
+  }
+  logger.debug(data, 'Package lookup durations');
 }
 
 export function printRequestStats(): void {
