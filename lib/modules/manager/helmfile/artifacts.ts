@@ -39,6 +39,7 @@ export async function updateArtifacts({
 
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
+
     const execOptions: ExecOptions = {
       docker: {},
       extraEnv: {},
