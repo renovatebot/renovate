@@ -702,8 +702,9 @@ const mui: PresetTemplate = {
 
 const K8sImagesSchema = z.array(z.string());
 
-const k8sImages = K8sImagesSchema.parse(dataFiles.get('data/k8s-images.json')!);
-
+const k8sImages = K8sImagesSchema.parse(
+  JSON.parse(dataFiles.get('data/k8s-images.json')!)
+);
 const k8Registry: PresetTemplate = {
   description:
     'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
