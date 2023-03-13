@@ -240,7 +240,7 @@
     "validate-npm-package-name": "5.0.0",
     "vuln-vects": "1.1.0",
     "xmldoc": "1.2.0",
-    "zod": "3.21.0"
+    "zod": "3.21.1"
   },
   "optionalDependencies": {
     "re2": "1.18.0"
