@@ -158,8 +158,8 @@ export async function lookupUpdates(
       }
       let rangeStrategy = getRangeStrategy(config);
 
-      if (areReplacementRulesPresent(config)) {
-        addReplacements(res.updates, config);
+      if (isReplacementRulesConfigured(config)) {
+        addReplacementUpdateIfValid(res.updates, config);
       }
 
       // istanbul ignore next
@@ -328,12 +328,12 @@ export async function lookupUpdates(
       } else {
         delete res.skipReason;
       }
-    } else if (!currentValue && areReplacementNameRulesPresent(config)) {
+    } else if (!currentValue && isReplacementNameRulesConfigured(config)) {
       logger.debug(
         `Handle name-only replacement for ${packageName} without current version`
       );
 
-      addReplacements(res.updates, config);
+      addReplacementUpdateIfValid(res.updates, config);
     } else {
       res.skipReason = 'invalid-value';
     }
@@ -473,7 +473,7 @@ export async function lookupUpdates(
   return res;
 }
 
-function addReplacements(
+function addReplacementUpdateIfValid(
   updates: LookupUpdate[],
   config: LookupUpdateConfig
 ): void {
@@ -492,7 +492,7 @@ function addReplacements(
   }
 }
 
-function areReplacementNameRulesPresent(config: LookupUpdateConfig): boolean {
+function isReplacementNameRulesConfigured(config: LookupUpdateConfig): boolean {
   if (
     config.replacementName ||
     config.replacementPrefixRemove ||
@@ -504,8 +504,8 @@ function areReplacementNameRulesPresent(config: LookupUpdateConfig): boolean {
   return false;
 }
 
-function areReplacementRulesPresent(config: LookupUpdateConfig): boolean {
-  if (areReplacementNameRulesPresent(config) || config.replacementVersion) {
+function isReplacementRulesConfigured(config: LookupUpdateConfig): boolean {
+  if (isReplacementNameRulesConfigured(config) || config.replacementVersion) {
     return true;
   }
 
