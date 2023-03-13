@@ -291,7 +291,7 @@
     "@types/xmldoc": "1.1.6",
     "@typescript-eslint/eslint-plugin": "5.54.0",
     "@typescript-eslint/parser": "5.54.0",
-    "aws-sdk-client-mock": "2.0.1",
+    "aws-sdk-client-mock": "2.1.0",
     "callsite": "1.0.0",
     "common-tags": "1.8.2",
     "conventional-changelog-conventionalcommits": "5.0.0",
