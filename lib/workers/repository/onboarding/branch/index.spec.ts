@@ -258,8 +258,25 @@ describe('workers/repository/onboarding/branch/index', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(git.mergeBranch).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+    });
+
+    it('ensures comment on pr when branch is conflicted', async () => {
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      git.getFileList.mockResolvedValue(['package.json']);
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({
+          number: 12,
+        })
+      );
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBeFalse();
+      expect(res.branchList).toEqual(['renovate/configure']);
+      expect(git.mergeBranch).toHaveBeenCalledTimes(0);
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
@@ -283,7 +300,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Platform '${pl}' does not support extended markdown`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.mergeBranch).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -297,7 +314,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           `No rebase checkbox was found in the onboarding PR`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.mergeBranch).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -312,7 +329,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         ``;
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.mergeBranch).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
@@ -323,7 +340,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         await checkOnboardingBranch(config);
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+        expect(git.mergeBranch).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });

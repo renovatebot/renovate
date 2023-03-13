@@ -201,21 +201,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       }
     );
 
-    it('updates PR when conflicted', async () => {
-      config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        })
-      );
-      scm.isBranchConflicted.mockResolvedValueOnce(true);
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      await ensureOnboardingPr(config, {}, branches);
-      expect(platform.createPr).toHaveBeenCalledTimes(0);
-      expect(platform.updatePr).toHaveBeenCalledTimes(1);
-    });
-
     it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
@@ -251,7 +236,6 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      scm.isBranchConflicted.mockResolvedValueOnce(true);
       scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(logger.info).toHaveBeenCalledWith(

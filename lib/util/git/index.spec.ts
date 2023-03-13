@@ -344,6 +344,12 @@ describe('util/git/index', () => {
       expect(merged.all).toContain('renovate/future_branch');
     });
 
+    it('does not push if pushToRemote=false', async () => {
+      const pushSpy = jest.spyOn(SimpleGit.prototype, 'push');
+      await git.mergeBranch('renovate/future_branch', false);
+      expect(pushSpy).toHaveBeenCalledTimes(0);
+    });
+
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
