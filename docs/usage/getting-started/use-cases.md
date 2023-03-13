@@ -52,7 +52,8 @@ A simplified example:
 ### Custom dependency extraction
 
 Renovate supports 60+ types of package files.
-Only some dependencies are found by default, this can be because:
+By default, Renovate finds most dependencies, but there are exceptions.
+This can be because:
 
 - The package manager/file format is not supported, or
 - The file format is not a standard or is proprietary
