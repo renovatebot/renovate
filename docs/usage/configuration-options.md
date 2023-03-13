@@ -478,11 +478,12 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 ## configMigration
 
-If enabled, Renovate will raise a pull request if config file migration is needed.
+If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
+Renovate only performs `configMigration` on `.json` and `.json5` files.
 
 We're adding new features to Renovate bot often.
-Most times you can keep using your Renovate config and benefit from the new features right away.
-But sometimes you need to change your Renovate configuration.
+Often you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to update your Renovate configuration.
 To help you with this, Renovate will create config migration pull requests.
 
 Example:
@@ -498,12 +499,14 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 
 <!-- prettier-ignore -->
 !!! info
-    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
-    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+    The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    Renovate may downgrade JSON5 content to plain JSON.
+    When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
 
 <!-- prettier-ignore -->
 !!! note
-    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
+    When you close a config migration PR, Renovate ignores it forever.
+    This also means that Renovate won't create a config migration PR in future.
 
 ## configWarningReuseIssue
 
