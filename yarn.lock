@@ -3987,6 +3987,11 @@ chalk@4.1.2, chalk@^4.0.0, chalk@^4.1.0, chalk@^4.1.2:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
 
+chalk@5.2.0, chalk@^5.0.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-5.2.0.tgz#249623b7d66869c673699fb66d65723e54dfcfb3"
+  integrity sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==
+
 chalk@^2.0.0, chalk@^2.3.2, chalk@^2.4.1:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -4003,11 +4008,6 @@ chalk@^3.0.0:
   dependencies:
     ansi-styles "^4.1.0"
     supports-color "^7.1.0"
-
-chalk@^5.0.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-5.2.0.tgz#249623b7d66869c673699fb66d65723e54dfcfb3"
-  integrity sha512-ree3Gqw/nazQAPuJJEy+avdl7QfZMcUvmHIKgEZkGL+xOBzRvup5Hxo6LHuMceSxOabuJLJm5Yp/92R9eMmMvA==
 
 changelog-filename-regex@2.0.1:
   version "2.0.1"
@@ -7071,13 +7071,13 @@ linkify-it@^4.0.1:
   dependencies:
     uc.micro "^1.0.1"
 
-lint-staged@13.1.3:
-  version "13.1.3"
-  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-13.1.3.tgz#5bf0ff98725e3354fb16dcd252b9a5e66bc8dcc7"
-  integrity sha512-PLbSCYUvW8lcwJ9koMFerBrJ16GsNivu1eDahMKgYlFa0f2rr2+rGVjj27L+1rg9JAz+DZesB+kXCAWHQJN9VQ==
+lint-staged@13.1.4:
+  version "13.1.4"
+  resolved "https://registry.yarnpkg.com/lint-staged/-/lint-staged-13.1.4.tgz#23969fea0bd89f266cb07227b2c9185e44e5b6fd"
+  integrity sha512-pJRmnRA4I4Rcc1k9GZIh9LQJlolCVDHqtJpIgPY7t99XY3uXXmUeDfhRLELYLgUFJPmEsWevTqarex9acSfx2A==
   dependencies:
+    chalk "5.2.0"
     cli-truncate "^3.1.0"
-    colorette "^2.0.19"
     commander "^10.0.0"
     debug "^4.3.4"
     execa "^7.0.0"
