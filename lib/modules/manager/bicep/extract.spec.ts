@@ -1,10 +1,21 @@
-import { Fixtures } from './../../../../test/fixtures';
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/bicep/extract', () => {
   it('should extract a normal resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-normal.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+        name: 'test'
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+      }
+      `,
       '',
       {}
     );
@@ -25,7 +36,18 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should not extract a commented out resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-commented-out.bicep'),
+      codeBlock`
+      // param location string = resourceGroup().location
+
+      // resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+      //   name: 'test'
+      //   kind: 'StorageV2'
+      //   sku: {
+      //     name: 'Standard_LRS'
+      //   }
+      //   location: location
+      // }
+      `,
       '',
       {}
     );
@@ -35,7 +57,18 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should extract a conditional resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-conditional.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = if(0 == 1) {
+        name: 'test'
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+      }
+      `,
       '',
       {}
     );
@@ -56,7 +89,13 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should extract a existing resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-existing.bicep'),
+      codeBlock`
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {
+        name: 'test'
+      }
+
+      output id string = storageAccount.id
+      `,
       '',
       {}
     );
@@ -77,7 +116,18 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should extract a conditional loop resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-loop-conditional.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = [for name in ['test', 'test2']: if(42 == 'the answer') {
+        name: name
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+      }]
+      `,
       '',
       {}
     );
@@ -98,7 +148,18 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should extract a loop resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-loop.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = [for name in ['test', 'test2']: {
+        name: name
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+      }]
+      `,
       '',
       {}
     );
@@ -119,7 +180,22 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should not extract a nested unversioned resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-nested-unversioned.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+        name: 'test'
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+
+        resource blobServices 'blobServices' = {
+          name: 'default'
+        }
+      }
+      `,
       '',
       {}
     );
@@ -140,7 +216,22 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should not extract a nested versioned resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-nested-versioned.bicep'),
+      codeBlock`
+      param location string = resourceGroup().location
+
+      resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+        name: 'test'
+        kind: 'StorageV2'
+        sku: {
+          name: 'Standard_LRS'
+        }
+        location: location
+
+        resource blobServices 'blobServices@2022-09-01' = {
+          name: 'default'
+        }
+      }
+      `,
       '',
       {}
     );
@@ -161,7 +252,11 @@ describe('modules/manager/bicep/extract', () => {
 
   it('should extract a sub resource', async () => {
     const result = await extractPackageFile(
-      Fixtures.get('resource-subresource.bicep'),
+      codeBlock`
+      resource storageAccount 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+        name: 'parent/child/this'
+      }
+      `,
       '',
       {}
     );
