@@ -13,7 +13,6 @@ export class AzureBicepResourceDatasource extends Datasource {
   override readonly defaultConfig = {
     commitMessageTopic: 'resource {{depName}}',
     commitMessageExtra: 'to {{{newVersion}}}',
-    branchTopic: '{{{depNameSanitized}}}-{{{newVersion}}}',
     prBodyColumns: ['Resource', 'Change'],
     prBodyDefinitions: {
       Resource: '{{{depNameLinked}}}',
