@@ -8,7 +8,9 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
+import { emojify } from '../../../../util/emoji';
 import { mergeBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
@@ -24,6 +26,7 @@ export async function checkOnboardingBranch(
   logger.debug('checkOnboarding()');
   logger.trace({ config });
   let onboardingBranch = config.onboardingBranch;
+  let isConflicted = false;
   const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
@@ -37,6 +40,21 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    isConflicted = await scm.isBranchConflicted(
+      config.baseBranch!,
+      config.onboardingBranch!
+    );
+    if (isConflicted) {
+      // if branch is conflcted ensure comment
+      await ensureComment({
+        number: onboardingPr.number,
+        topic: 'Branch Conflicted',
+        content: emojify(
+          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        ),
+      });
+    }
+
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
@@ -83,12 +101,7 @@ export async function checkOnboardingBranch(
   }
   if (!GlobalConfig.get('dryRun')) {
     // TODO #7154
-    if (
-      !(await scm.isBranchConflicted(
-        config.baseBranch!,
-        config.onboardingBranch!
-      ))
-    ) {
+    if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
       await mergeBranch(onboardingBranch!, false);
     }
