@@ -768,8 +768,9 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeBranchWithoutPushing(
-  branchName: string
+export async function mergeBranch(
+  branchName: string,
+  pushToRemote = true
 ): Promise<void> {
   let status: StatusResult | undefined;
   try {
@@ -786,42 +787,10 @@ export async function mergeBranchWithoutPushing(
       ])
     );
     status = await git.status();
-    await gitRetry(() => git.merge([branchName]));
-    incLimitedValue('Commits');
-  } catch (err) {
-    logger.debug(
-      {
-        baseBranch: config.currentBranch,
-        baseSha: config.currentBranchSha,
-        branchName,
-        branchSha: getBranchCommit(branchName),
-        status,
-        err,
-      },
-      'mergeBranch error'
-    );
-    throw err;
-  }
-}
-
-export async function mergeBranch(branchName: string): Promise<void> {
-  let status: StatusResult | undefined;
-  try {
-    await syncGit();
-    await git.reset(ResetMode.HARD);
-    await gitRetry(() =>
-      git.checkout(['-B', branchName, 'origin/' + branchName])
-    );
-    await gitRetry(() =>
-      git.checkout([
-        '-B',
-        config.currentBranch,
-        'origin/' + config.currentBranch,
-      ])
-    );
-    status = await git.status();
     await gitRetry(() => git.merge(['--ff-only', branchName]));
-    await gitRetry(() => git.push('origin', config.currentBranch));
+    if (pushToRemote) {
+      await gitRetry(() => git.push('origin', config.currentBranch));
+    }
     incLimitedValue('Commits');
   } catch (err) {
     logger.debug(

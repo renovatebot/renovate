@@ -11,7 +11,7 @@ import { Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import {
   checkoutBranch,
-  mergeBranchWithoutPushing,
+  mergeBranch,
   setGitAuthor,
 } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
@@ -95,7 +95,7 @@ export async function checkOnboardingBranch(
       await checkoutBranch(config.onboardingBranch!);
     } else {
       logger.debug('Merge onboarding branch in default branch');
-      await mergeBranchWithoutPushing(onboardingBranch!);
+      await mergeBranch(onboardingBranch!, false);
     }
   }
   // TODO #7154
