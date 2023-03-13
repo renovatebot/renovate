@@ -11,6 +11,7 @@ exports[`workers/repository/process/fetch fetchUpdates() fetches updates 1`] = `
         {
           "datasource": "maven",
           "depName": "bbb",
+          "packageName": "bbb",
           "updates": [
             "a",
             "b",
@@ -30,16 +31,19 @@ exports[`workers/repository/process/fetch fetchUpdates() handles ignored, skippe
       "deps": [
         {
           "depName": "abcd",
+          "packageName": "abcd",
           "skipReason": "ignored",
           "updates": [],
         },
         {
           "depName": "foo",
+          "packageName": "foo",
           "skipReason": "disabled",
           "updates": [],
         },
         {
           "depName": "skipped",
+          "packageName": "skipped",
           "skipReason": "some-reason",
           "updates": [],
         },

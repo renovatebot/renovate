@@ -32,7 +32,7 @@ e.g. apply one set of labels for `backend/package.json` and a different set of l
 module.exports = {
   npmrc: '//registry.npmjs.org/:_authToken=abc123',
   baseDir: '/tmp/renovate',
-  includeForks: true,
+  forkProcessing: 'enabled',
   gradle: { enabled: false },
 };
 ```

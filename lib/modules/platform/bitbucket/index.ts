@@ -39,6 +39,7 @@ import type {
   EffectiveReviewer,
   PagedResult,
   PrResponse,
+  RepoBranchingModel,
   RepoInfo,
   RepoInfoBody,
 } from './types';
@@ -159,6 +160,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -171,6 +173,7 @@ export async function initRepo({
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
+  let mainBranch: string;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -179,7 +182,23 @@ export async function initRepo({
         )
       ).body
     );
-    config.defaultBranch = info.mainbranch;
+
+    mainBranch = info.mainbranch;
+
+    if (bbUseDevelopmentBranch) {
+      // Fetch Bitbucket development branch
+      const developmentBranch = (
+        await bitbucketHttp.getJson<RepoBranchingModel>(
+          `/2.0/repositories/${repository}/branching-model`
+        )
+      ).body.development?.branch?.name;
+
+      if (developmentBranch) {
+        mainBranch = developmentBranch;
+      }
+    }
+
+    config.defaultBranch = mainBranch;
 
     config = {
       ...config,
@@ -221,7 +240,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: info.mainbranch,
+    defaultBranch: mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
@@ -355,7 +374,8 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatus(branchName);
@@ -375,6 +395,18 @@ export async function getBranchStatus(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/')
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   return 'green';
