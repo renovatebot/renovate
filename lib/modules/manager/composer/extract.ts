@@ -146,6 +146,12 @@ export async function extractPackageFile(
                   packageName = repositories[depName].url;
                   break;
                 case 'path':
+                  deps.push({
+                    depType,
+                    depName,
+                    currentValue,
+                    skipReason: 'path-dependency',
+                  });
                   continue;
               }
             }

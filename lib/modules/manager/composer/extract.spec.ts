@@ -249,9 +249,16 @@ describe('modules/manager/composer/extract', () => {
       });
     });
 
-    it('ignores path repositories', async () => {
+    it('skips path dependencies', async () => {
       const res = await extractPackageFile(requirements6, packageFile);
-      expect(res).toBeNull();
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '*',
+          depName: 'awesome/path1',
+          depType: 'require',
+          skipReason: 'path-dependency',
+        },
+      ]);
     });
 
     it('extracts dependencies with lock file', async () => {
