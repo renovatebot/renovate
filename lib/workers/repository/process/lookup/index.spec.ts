@@ -1963,7 +1963,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'mirror.some.org/library/';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -1995,7 +1994,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'mirror.some.com/registry/';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -2022,7 +2020,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '17.0.0';
       config.replacementPrefixAdd = 'mirror.some.org/library/';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -2055,7 +2052,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementPrefixRemove = 'old.registry.net/library/';
       config.replacementPrefixAdd = 'new.registry.io/library/';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -2088,7 +2084,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementPrefixRemove = 'old.registry.net/library/';
       config.replacementPrefixAdd = 'new.registry.io/library/';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -2122,7 +2117,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementPrefixAdd = 'new.registry.io/library/';
       config.replacementName = 'eclipse-temurin';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
@@ -2156,7 +2150,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.replacementPrefixAdd = 'new.registry.io/library/';
       config.replacementVersion = '18.0.0';
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
           {
