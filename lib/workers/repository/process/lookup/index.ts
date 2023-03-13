@@ -157,49 +157,10 @@ export async function lookupUpdates(
       }
       let rangeStrategy = getRangeStrategy(config);
 
-      if (
-        !config.replacementName &&
-        !config.replacementVersion &&
-        (config.replacementPrefixRemove || config.replacementPrefixAdd)
-      ) {
-        let replacePrefixesNewName = config.replacementPrefixRemove
-          ? packageName.replace(config.replacementPrefixRemove, '')
-          : packageName;
-
-        replacePrefixesNewName = config.replacementPrefixAdd
-          ? `${config.replacementPrefixAdd}${replacePrefixesNewName}`
-          : replacePrefixesNewName;
-
-        if (replacePrefixesNewName !== packageName) {
-          res.updates.push({
-            updateType: 'replacement',
-            newName: replacePrefixesNewName,
-            newValue: currentValue!,
-          });
-        }
+      if (areReplacementRulesPresent(config)) {
+        addReplacements(res.updates, config);
       }
 
-      if (config.replacementName && !config.replacementVersion) {
-        res.updates.push({
-          updateType: 'replacement',
-          newName: config.replacementName,
-          newValue: currentValue!,
-        });
-      }
-
-      if (config.replacementName && config.replacementVersion) {
-        res.updates.push({
-          updateType: 'replacement',
-          newName: config.replacementName,
-          newValue: versioning.getNewValue({
-            // TODO #7154
-            currentValue: currentValue!,
-            newVersion: config.replacementVersion,
-            rangeStrategy: rangeStrategy!,
-            isReplacement: true,
-          })!,
-        });
-      }
       // istanbul ignore next
       if (
         isVulnerabilityAlert &&
@@ -366,19 +327,12 @@ export async function lookupUpdates(
       } else {
         delete res.skipReason;
       }
-    } else if (
-      !currentValue &&
-      config.replacementName &&
-      !config.replacementVersion
-    ) {
+    } else if (!currentValue && areReplacementNameRulesPresent(config)) {
       logger.debug(
         `Handle name-only replacement for ${packageName} without current version`
       );
-      res.updates.push({
-        updateType: 'replacement',
-        newName: config.replacementName,
-        newValue: currentValue!,
-      });
+
+      addReplacements(res.updates, config);
     } else {
       res.skipReason = 'invalid-value';
     }
@@ -516,4 +470,86 @@ export async function lookupUpdates(
     res.skipReason = 'internal-error';
   }
   return res;
+}
+
+function addReplacements(
+  updates: LookupUpdate[],
+  config: LookupUpdateConfig
+): void {
+  const replacementNewName = determineNewReplacementName(config);
+  const replacementNewVValue = determineNewReplacementValue(config);
+
+  if (
+    config.packageName !== replacementNewName ||
+    config.currentValue !== replacementNewVValue
+  ) {
+    updates.push({
+      updateType: 'replacement',
+      newName: replacementNewName,
+      newValue: replacementNewVValue!,
+    });
+  }
+}
+
+function areReplacementNameRulesPresent(config: LookupUpdateConfig): boolean {
+  if (
+    config.replacementName ||
+    config.replacementPrefixRemove ||
+    config.replacementPrefixAdd
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function areReplacementRulesPresent(config: LookupUpdateConfig): boolean {
+  if (areReplacementNameRulesPresent(config) || config.replacementVersion) {
+    return true;
+  }
+
+  return false;
+}
+
+function determineNewReplacementName(config: LookupUpdateConfig): string {
+  let replacementNewName = config.packageName;
+
+  if (config.replacementName) {
+    replacementNewName = config.replacementName;
+  }
+
+  if (
+    config.replacementPrefixRemove &&
+    replacementNewName.startsWith(config.replacementPrefixRemove)
+  ) {
+    replacementNewName = replacementNewName.replace(
+      config.replacementPrefixRemove,
+      ''
+    );
+  }
+
+  if (config.replacementPrefixAdd) {
+    replacementNewName = `${config.replacementPrefixAdd}${replacementNewName}`;
+  }
+
+  return replacementNewName;
+}
+
+function determineNewReplacementValue(
+  config: LookupUpdateConfig
+): string | undefined {
+  const versioning = allVersioning.get(config.versioning);
+  const rangeStrategy = getRangeStrategy(config);
+
+  if (config.replacementVersion) {
+    return versioning.getNewValue({
+      // TODO #7154
+      currentValue: config.currentValue!,
+      newVersion: config.replacementVersion,
+      rangeStrategy: rangeStrategy!,
+      isReplacement: true,
+    })!;
+  }
+
+  return config.currentValue;
 }

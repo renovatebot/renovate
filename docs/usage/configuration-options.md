@@ -2134,20 +2134,28 @@ Managers which do not support replacement:
 - `regex`
 
 Use the `replacementName` config option to set the name of a replacement package.
-Must be used with `replacementVersion` (see example below).
+
+Can be used in combination with `replacementVersion`, `replacementPrefixAdd` and `replacmeentPrefixRemove`.
+
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementPrefixAdd
 
-Use the `replacementPrefixAdd` config option to add a prefix to the name of the replacement package.
-Must not be used with `replacementName` or `replacementVersion`.
-Can optionally be used with `replacementPrefixRemove`.
+Use the `replacementPrefixAdd` config option to add a new prefix to the name of the replacement package.
+
+This is useful for situations such as migrating container registries / mirrors.
+
+Can be used in combination with `replacementName`, `replacementVersion` and `replacmeentPrefixRemove`.
 
 ### replacementPrefixRemove
 
-Use the `replacementPrefixRemove` config option to remove a prefix fromthe replacement package.
-Must be used with `replacementName` or `replacementVersion`.
-Can optionally be used with `replacementPrefixAdd`.
+Use the `replacementPrefixRemove` config option to remove a prefix from the replacement package.
+
+This is useful for situations such as migrating container registries / mirrors.
+
+Can be used in combination with `replacementVersion` and `replacmeentPrefixAdd`.
+
+If a `replacementName` has been used in the package rule, this will take priority.
 
 ### replacementVersion
 

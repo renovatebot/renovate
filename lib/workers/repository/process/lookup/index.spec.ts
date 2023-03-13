@@ -1958,7 +1958,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - removes old prefix', async () => {
+    it('handles replacements - can remove old prefix', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'mirror.some.org/library/';
@@ -1990,7 +1990,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - does nothing if prefix does not match', async () => {
+    it('handles replacements - will skip if prefix to remove does not match', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'mirror.some.com/registry/';
@@ -2017,7 +2017,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - adds news prefix', async () => {
+    it('handles replacements - will add new prefix', async () => {
       config.packageName = 'openjdk';
       config.currentValue = '17.0.0';
       config.replacementPrefixAdd = 'mirror.some.org/library/';
@@ -2082,7 +2082,40 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - will skip prefix replacements if replacement name has also been set', async () => {
+    it('handles replacements - prefix to be removed not matched, but adds new prefix', async () => {
+      config.packageName = 'mirror.com/library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementPrefixRemove = 'old.registry.net/library/';
+      config.replacementPrefixAdd = 'new.registry.io/library/';
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/mirror.com/library/openjdk',
+          newValue: '17.0.0',
+        },
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - replace name and prefix', async () => {
       config.packageName = 'old.registry.net/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'old.registry.net/library/';
@@ -2104,7 +2137,7 @@ describe('workers/repository/process/lookup/index', () => {
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
           updateType: 'replacement',
-          newName: 'eclipse-temurin',
+          newName: 'new.registry.io/library/eclipse-temurin',
           newValue: '17.0.0',
         },
         {
@@ -2116,7 +2149,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - will skip prefix replacements if replacement version has also been set', async () => {
+    it('handles replacements - replace prefixes and version', async () => {
       config.packageName = 'old.registry.net/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementPrefixRemove = 'old.registry.net/library/';
@@ -2136,6 +2169,11 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '18.0.0',
+        },
         {
           updateType: 'major',
           newMajor: 18,
