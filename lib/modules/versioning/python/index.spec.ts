@@ -117,6 +117,7 @@ test.each`
   ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
   ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
   ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${false}
+  ${'1.2.3foo'}         | ${'~1.1.0'}           | ${undefined}
 `('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
   expect(versioning.subset!(a, b)).toBe(expected);
 });
