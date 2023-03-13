@@ -9,11 +9,7 @@ import {
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
-import {
-  checkoutBranch,
-  mergeBranch,
-  setGitAuthor,
-} from '../../../../util/git';
+import { mergeBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
@@ -89,11 +85,11 @@ export async function checkOnboardingBranch(
     logger.debug('Checkout onboarding branch.');
     // TODO #7154
     if (
-      await scm.isBranchConflicted(config.baseBranch!, config.onboardingBranch!)
+      !(await scm.isBranchConflicted(
+        config.baseBranch!,
+        config.onboardingBranch!
+      ))
     ) {
-      logger.debug('Checkout onboarding branch');
-      await checkoutBranch(config.onboardingBranch!);
-    } else {
       logger.debug('Merge onboarding branch in default branch');
       await mergeBranch(onboardingBranch!, false);
     }
