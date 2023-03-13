@@ -14,6 +14,7 @@ import {
   supportsDigests,
 } from '../../../../modules/datasource';
 import { getRangeStrategy } from '../../../../modules/manager';
+import type { LookupUpdate } from '../../../../modules/manager/types';
 import * as allVersioning from '../../../../modules/versioning';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { clone } from '../../../../util/clone';
