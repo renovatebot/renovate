@@ -577,8 +577,26 @@ describe('modules/platform/azure/index', () => {
             ]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -590,7 +608,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -603,7 +621,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -616,7 +634,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });
