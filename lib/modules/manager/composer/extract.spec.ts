@@ -256,13 +256,13 @@ describe('modules/manager/composer/extract', () => {
             "name": "acme/path-sources",
             "description": "Fetch Packages via path",
             "repositories": {
-              "awesome/path1": {
+              "acme/path1": {
                 "type": "path",
-                "url": "awesome-path1"
+                "url": "packages/acme/path1"
               }
             },
             "require": {
-              "awesome/path1": "*"
+              "acme/path1": "*"
             }
           }
         `,
@@ -271,7 +271,7 @@ describe('modules/manager/composer/extract', () => {
       expect(res?.deps).toEqual([
         {
           currentValue: '*',
-          depName: 'awesome/path1',
+          depName: 'acme/path1',
           depType: 'require',
           skipReason: 'path-dependency',
         },
