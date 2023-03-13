@@ -130,8 +130,8 @@ Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
 
 ```yaml
 on:
- pull_request:
- merge_group:
+  pull_request:
+  merge_group:
 ```
 
 On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
@@ -143,14 +143,14 @@ Finally, allow Renovate to automerge by setting `automerge=true` and `platformAu
 
 ```json
 {
- "platformAutomerge": true,
- "packageRules": [
-   {
-     "description": "Automerge non-major updates",
-     "matchUpdateTypes": ["minor", "patch"],
-     "automerge": true
-   }
- ]
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
 }
 ```
 
