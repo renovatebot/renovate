@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { extractPackageFile } from '.';
@@ -10,7 +11,6 @@ const requirements3 = Fixtures.get('composer3.json');
 const requirements4 = Fixtures.get('composer4.json');
 const requirements5 = Fixtures.get('composer5.json');
 const requirements5Lock = Fixtures.get('composer5.lock');
-const requirements6 = Fixtures.get('composer6.json');
 
 describe('modules/manager/composer/extract', () => {
   describe('extractPackageFile()', () => {
@@ -250,7 +250,24 @@ describe('modules/manager/composer/extract', () => {
     });
 
     it('skips path dependencies', async () => {
-      const res = await extractPackageFile(requirements6, packageFile);
+      const res = await extractPackageFile(
+        codeBlock`
+          {
+            "name": "acme/path-sources",
+            "description": "Fetch Packages via path",
+            "repositories": {
+              "awesome/path1": {
+                "type": "path",
+                "url": "awesome-path1"
+              }
+            },
+            "require": {
+              "awesome/path1": "*"
+            }
+          }
+        `,
+        packageFile
+      );
       expect(res?.deps).toEqual([
         {
           currentValue: '*',
