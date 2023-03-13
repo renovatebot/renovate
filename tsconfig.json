@@ -5,7 +5,7 @@
     "strictNullChecks": true,
     "outDir": "./dist",
     /* https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping */
-    "target": "es2020",
+    "target": "es2022",
     "module": "commonjs",
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
@@ -16,7 +16,7 @@
     "experimentalDecorators": true,
     "useUnknownInCatchVariables": false /* we aren't prepared for enabling this by default since ts 4.4*/,
     "isolatedModules": true /* required for esbuild */,
-    "lib": ["es2020"],
+    "lib": ["es2022"],
     "types": ["node", "jest-extended", "expect-more-jest"],
     "allowJs": true,
     "checkJs": true,

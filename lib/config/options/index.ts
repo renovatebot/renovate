@@ -1623,6 +1623,14 @@ const options: RenovateOptions[] = [
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
   },
+  {
+    name: 'bbUseDevelopmentBranch',
+    description: `Use the repository's [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the repository's default branch.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
+  },
   // Automatic merging
   {
     name: 'automerge',
