@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import dataFiles from '../../../data-files.generated';
 import type { Preset } from '../types';
 import {
@@ -699,7 +700,9 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
-const k8sImages: string[] = JSON.parse(dataFiles.get('data/k8s-images.json')!);
+const K8sImagesSchema = z.array(z.string());
+
+const k8sImages = K8sImagesSchema.parse(dataFiles.get('data/k8s-images.json')!);
 
 const k8Registry: PresetTemplate = {
   description:
