@@ -768,6 +768,42 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
+export async function mergeBranchWithoutPushing(
+  branchName: string
+): Promise<void> {
+  let status: StatusResult | undefined;
+  try {
+    await syncGit();
+    await git.reset(ResetMode.HARD);
+    await gitRetry(() =>
+      git.checkout(['-B', branchName, 'origin/' + branchName])
+    );
+    await gitRetry(() =>
+      git.checkout([
+        '-B',
+        config.currentBranch,
+        'origin/' + config.currentBranch,
+      ])
+    );
+    status = await git.status();
+    await gitRetry(() => git.merge([branchName]));
+    incLimitedValue('Commits');
+  } catch (err) {
+    logger.debug(
+      {
+        baseBranch: config.currentBranch,
+        baseSha: config.currentBranchSha,
+        branchName,
+        branchSha: getBranchCommit(branchName),
+        status,
+        err,
+      },
+      'mergeBranch error'
+    );
+    throw err;
+  }
+}
+
 export async function mergeBranch(branchName: string): Promise<void> {
   let status: StatusResult | undefined;
   try {
