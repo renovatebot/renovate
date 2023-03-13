@@ -787,9 +787,11 @@ export async function mergeBranch(
       ])
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
     if (pushToRemote) {
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
       await gitRetry(() => git.push('origin', config.currentBranch));
+    } else {
+      await gitRetry(() => git.merge([branchName]));
     }
     incLimitedValue('Commits');
   } catch (err) {
