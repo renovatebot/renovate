@@ -28,9 +28,9 @@ export function isReplacementNameRulesConfigured(
   config: LookupUpdateConfig
 ): boolean {
   return (
-    !is.nullOrUndefined(config.replacementName) ||
-    !is.nullOrUndefined(config.replacementPrefixAdd) ||
-    !is.nullOrUndefined(config.replacementPrefixRemove)
+    is.nonEmptyString(config.replacementName) ||
+    is.nonEmptyString(config.replacementPrefixAdd) ||
+    is.nonEmptyString(config.replacementPrefixRemove)
   );
 }
 
@@ -39,7 +39,7 @@ export function isReplacementRulesConfigured(
 ): boolean {
   return (
     isReplacementNameRulesConfigured(config) ||
-    !is.nullOrUndefined(config.replacementVersion)
+    is.nonEmptyString(config.replacementVersion)
   );
 }
 
