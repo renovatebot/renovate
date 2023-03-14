@@ -20,6 +20,7 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:k8s-registry-move',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:parcel-css-to-lightningcss',
