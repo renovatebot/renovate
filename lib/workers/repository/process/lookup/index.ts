@@ -20,7 +20,6 @@ import { clone } from '../../../../util/clone';
 import { applyPackageRules } from '../../../../util/package-rules';
 import { regEx } from '../../../../util/regex';
 import { getBucket } from './bucket';
-import { mergeConfigConstraints } from './common';
 import { getCurrentVersion } from './current';
 import { filterVersions } from './filter';
 import { filterInternalChecks } from './filter-checks';
@@ -36,11 +35,11 @@ export async function lookupUpdates(
     currentDigest,
     currentValue,
     datasource,
-    depName,
     digestOneAndOnly,
     followTag,
     lockedVersion,
     packageFile,
+    packageName,
     pinDigests,
     rollbackPrs,
     isVulnerabilityAlert,
@@ -53,7 +52,7 @@ export async function lookupUpdates(
     warnings: [],
   } as any;
   try {
-    logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
+    logger.trace({ dependency: packageName, currentValue }, 'lookupUpdates');
     // Use the datasource's default versioning if none is configured
     config.versioning ??= getDefaultVersioning(datasource);
     const versioning = allVersioning.get(config.versioning);
@@ -77,22 +76,22 @@ export async function lookupUpdates(
         return res;
       }
 
-      config = mergeConfigConstraints(config);
-
       dependency = clone(await getPkgReleases(config));
       if (!dependency) {
         // If dependency lookup fails then warn and return
         const warning: ValidationMessage = {
-          topic: depName,
-          message: `Failed to look up ${datasource} dependency ${depName}`,
+          topic: packageName,
+          message: `Failed to look up ${datasource} package ${packageName}`,
         };
-        logger.debug({ dependency: depName, packageFile }, warning.message);
+        logger.debug({ dependency: packageName, packageFile }, warning.message);
         // TODO: return warnings in own field
         res.warnings.push(warning);
         return res;
       }
       if (dependency.deprecationMessage) {
-        logger.debug(`Found deprecationMessage for dependency ${depName}`);
+        logger.debug(
+          `Found deprecationMessage for ${datasource} package ${packageName}`
+        );
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
@@ -104,7 +103,6 @@ export async function lookupUpdates(
       res.homepage = dependency.homepage;
       res.changelogUrl = dependency.changelogUrl;
       res.dependencyUrl = dependency?.dependencyUrl;
-      res.registryUrl = dependency.registryUrl;
 
       const latestVersion = dependency.tags?.latest;
       // Filter out any results from datasource that don't comply with our versioning
@@ -115,7 +113,7 @@ export async function lookupUpdates(
       // istanbul ignore if
       if (allVersions.length === 0) {
         const message = `Found no results from datasource that look like a version`;
-        logger.debug({ dependency: depName, result: dependency }, message);
+        logger.debug({ dependency: packageName, result: dependency }, message);
         if (!currentDigest) {
           return res;
         }
@@ -126,8 +124,8 @@ export async function lookupUpdates(
         const taggedVersion = dependency.tags?.[followTag];
         if (!taggedVersion) {
           res.warnings.push({
-            topic: depName,
-            message: `Can't find version with tag ${followTag} for ${depName}`,
+            topic: packageName,
+            message: `Can't find version with tag ${followTag} for ${datasource} package ${packageName}`,
           });
           return res;
         }
@@ -149,15 +147,24 @@ export async function lookupUpdates(
         // istanbul ignore if
         if (!rollback) {
           res.warnings.push({
-            topic: depName,
+            topic: packageName,
             // TODO: types (#7154)
-            message: `Can't find version matching ${currentValue!} for ${depName}`,
+            message: `Can't find version matching ${currentValue!} for ${datasource} package ${packageName}`,
           });
           return res;
         }
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
+
+      if (config.replacementName && !config.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: config.replacementName,
+          newValue: currentValue!,
+        });
+      }
+
       if (config.replacementName && config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
@@ -229,6 +236,10 @@ export async function lookupUpdates(
           newMajor: versioning.getMajor(currentVersion)!,
         });
       }
+      if (rangeStrategy === 'pin') {
+        // Fall back to replace once pinning logic is done
+        rangeStrategy = 'replace';
+      }
       // istanbul ignore if
       if (!versioning.isVersion(currentVersion!)) {
         res.skipReason = 'invalid-version';
@@ -249,7 +260,7 @@ export async function lookupUpdates(
           // Leave only compatible versions
           unconstrainedValue || versioning.isCompatible(v.version, currentValue)
       );
-      if (isVulnerabilityAlert) {
+      if (isVulnerabilityAlert && !config.osvVulnerabilityAlerts) {
         filteredReleases = filteredReleases.slice(0, 1);
       }
       const buckets: Record<string, [Release]> = {};
@@ -311,7 +322,7 @@ export async function lookupUpdates(
           // istanbul ignore if
           if (rangeStrategy === 'bump') {
             logger.trace(
-              { depName, currentValue, lockedVersion, newVersion },
+              { packageName, currentValue, lockedVersion, newVersion },
               'Skipping bump because newValue is the same'
             );
             continue;
@@ -326,13 +337,26 @@ export async function lookupUpdates(
       }
     } else if (currentValue) {
       logger.debug(
-        `Dependency ${depName} has unsupported value ${currentValue}`
+        `Dependency ${packageName} has unsupported/unversioned value ${currentValue} (versioning=${config.versioning})`
       );
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
       }
+    } else if (
+      !currentValue &&
+      config.replacementName &&
+      !config.replacementVersion
+    ) {
+      logger.debug(
+        `Handle name-only replacement for ${packageName} without current version`
+      );
+      res.updates.push({
+        updateType: 'replacement',
+        newName: config.replacementName,
+        newValue: currentValue!,
+      });
     } else {
       res.skipReason = 'invalid-value';
     }
@@ -381,6 +405,30 @@ export async function lookupUpdates(
           // TODO #7154
           update.newDigest =
             update.newDigest ?? (await getDigest(config, update.newValue))!;
+
+          // If the digest could not be determined, report this as otherwise the
+          // update will be omitted later on without notice.
+          if (update.newDigest === null) {
+            logger.debug(
+              {
+                packageName,
+                currentValue,
+                datasource,
+                newValue: update.newValue,
+                bucket: update.bucket,
+              },
+              'Could not determine new digest for update.'
+            );
+
+            // Only report a warning if there is a current digest.
+            // Context: https://github.com/renovatebot/renovate/pull/20175#discussion_r1102615059.
+            if (currentDigest) {
+              res.warnings.push({
+                message: `Could not determine new digest for update (datasource: ${datasource})`,
+                topic: packageName,
+              });
+            }
+          }
         }
         if (update.newVersion) {
           const registryUrl = dependency?.releases?.find(
@@ -397,9 +445,12 @@ export async function lookupUpdates(
     }
     // Strip out any non-changed ones
     res.updates = res.updates
+      .filter((update) => update.newValue !== null || currentValue === null)
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
+          (update.newName && update.newName !== packageName) ||
+          update.isReplacement ||
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
           // TODO #7154
@@ -426,7 +477,7 @@ export async function lookupUpdates(
         currentDigest,
         currentValue,
         datasource,
-        depName,
+        packageName,
         digestOneAndOnly,
         followTag,
         lockedVersion,

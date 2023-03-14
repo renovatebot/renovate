@@ -21,11 +21,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type {
-  BranchStatus,
-  HostRule,
-  VulnerabilityAlert,
-} from '../../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../../types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as git from '../../../util/git';
 import { listCommitTree, pushCommitToRenovateRef } from '../../../util/git';
@@ -133,6 +129,11 @@ export async function initPlatform({
   if (!token) {
     throw new Error('Init: You must configure a GitHub token');
   }
+  if (token.startsWith('github_pat_')) {
+    throw new Error(
+      'Init: Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.'
+    );
+  }
   token = token.replace(/^ghs_/, 'x-access-token:ghs_');
   platformConfig.isGHApp = token.startsWith('x-access-token:');
 
@@ -170,31 +171,14 @@ export async function initPlatform({
     }
   }
   logger.debug({ platformConfig, renovateUsername }, 'Platform config');
-  const gitHubRules: HostRule[] = [];
-  if (!platformConfig.isGhe) {
-    gitHubRules.push({
-      matchHost: 'ghcr.io',
-      username: 'dummy',
-      password: token,
-    });
-    gitHubRules.push({
-      matchHost: 'pkg.github.com',
-      token,
-    });
-    gitHubRules.push({
-      matchHost: 'nuget.pkg.github.com',
-      username: 'dummy',
-      password: token,
-    });
-  }
-
-  return {
+  const platformResult: PlatformResult = {
     endpoint: platformConfig.endpoint,
     gitAuthor: gitAuthor ?? discoveredGitAuthor,
     renovateUsername,
     token,
-    hostRules: gitHubRules,
   };
+
+  return platformResult;
 }
 
 // Get all repositories that the user has access to
@@ -837,7 +821,8 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   let commitStatus: CombinedBranchStatus;
@@ -857,6 +842,18 @@ export async function getBranchStatus(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result'
   );
+  if (commitStatus.statuses && !internalChecksAsSuccess) {
+    commitStatus.statuses = commitStatus.statuses.filter(
+      (status) =>
+        status.state !== 'success' || !status.context?.startsWith('renovate/')
+    );
+    if (!commitStatus.statuses.length) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      commitStatus.state = 'pending';
+    }
+  }
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
   // API is supported in oldest available GHE version 2.19
   try {
@@ -1515,7 +1512,8 @@ export async function createPr({
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
-    options.body.maintainer_can_modify = true;
+    options.body.maintainer_can_modify =
+      platformOptions?.forkModeDisallowMaintainerEdits !== true;
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const ghPr = (

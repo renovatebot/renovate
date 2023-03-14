@@ -4,6 +4,7 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
 [
   [
     {
+      "baseBranch": undefined,
       "branchName": "renovate/some-branch",
       "files": [
         {
@@ -15,26 +16,6 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
       "force": false,
       "message": "some commit message",
       "platformCommit": false,
-    },
-  ],
-]
-`;
-
-exports[`workers/repository/update/branch/commit commitFilesToBranch commits via platform 1`] = `
-[
-  [
-    {
-      "branchName": "renovate/some-branch",
-      "files": [
-        {
-          "contents": "some contents",
-          "path": "package.json",
-          "type": "addition",
-        },
-      ],
-      "force": false,
-      "message": "some commit message",
-      "platformCommit": true,
     },
   ],
 ]

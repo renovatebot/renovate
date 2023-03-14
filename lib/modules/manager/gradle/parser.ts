@@ -4,18 +4,22 @@ import type { PackageDependency } from '../types';
 import { qApplyFrom } from './parser/apply-from';
 import { qAssignments } from './parser/assignments';
 import { qDependencies, qLongFormDep } from './parser/dependencies';
+import { setParseGradleFunc } from './parser/handlers';
 import { qPlugins } from './parser/plugins';
 import { qRegistryUrls } from './parser/registry-urls';
 import { qVersionCatalogs } from './parser/version-catalogs';
 import type {
   Ctx,
   GradleManagerData,
+  PackageRegistry,
   PackageVariables,
   ParseGradleResult,
 } from './types';
 import { isDependencyString, parseDependencyString } from './utils';
 
 const groovy = lang.createLang('groovy');
+
+setParseGradleFunc(parseGradle);
 
 export function parseGradle(
   input: string,
@@ -26,7 +30,7 @@ export function parseGradle(
 ): ParseGradleResult {
   let vars: PackageVariables = { ...initVars };
   const deps: PackageDependency<GradleManagerData>[] = [];
-  const urls: string[] = [];
+  const urls: PackageRegistry[] = [];
 
   const query = q.tree<Ctx>({
     type: 'root-tree',
@@ -49,9 +53,10 @@ export function parseGradle(
 
     globalVars: initVars,
     deps: [],
-    depRegistryUrls: [],
+    registryUrls: [],
 
     varTokens: [],
+    tmpNestingDepth: [],
     tmpTokenStore: {},
     tokenMap: {},
   });
@@ -59,7 +64,7 @@ export function parseGradle(
   if (parsedResult) {
     deps.push(...parsedResult.deps);
     vars = { ...vars, ...parsedResult.globalVars };
-    urls.push(...parsedResult.depRegistryUrls);
+    urls.push(...parsedResult.registryUrls);
   }
 
   return { deps, urls, vars };

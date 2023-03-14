@@ -1,4 +1,6 @@
 import type { ProgrammingLanguage } from '../../../constants';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
 import * as hexVersioning from '../../versioning/hex';
 
@@ -12,4 +14,8 @@ export const defaultConfig = {
   versioning: hexVersioning.id,
 };
 
-export const supportedDatasources = [HexDatasource.id];
+export const supportedDatasources = [
+  GithubTagsDatasource.id,
+  GitTagsDatasource.id,
+  HexDatasource.id,
+];

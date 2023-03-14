@@ -36,9 +36,7 @@ export class GoDatasource extends Datasource {
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return process.env.GOPROXY
-      ? this.goproxy.getReleases(config)
-      : this.direct.getReleases(config);
+    return this.goproxy.getReleases(config);
   }
 
   /**
@@ -65,8 +63,11 @@ export class GoDatasource extends Datasource {
     }
 
     // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
     const tag =
-      value && !GoDatasource.pversionRegexp.test(value) ? value : undefined;
+      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
+        ? value
+        : undefined;
 
     switch (source.datasource) {
       case GitTagsDatasource.id: {
@@ -92,10 +93,9 @@ export class GoDatasource extends Datasource {
 // istanbul ignore if
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
-  if (uri?.username) {
-    addSecretForSanitizing(uri.username, 'global');
-  }
   if (uri?.password) {
     addSecretForSanitizing(uri.password, 'global');
+  } else if (uri?.username) {
+    addSecretForSanitizing(uri.username, 'global');
   }
 }

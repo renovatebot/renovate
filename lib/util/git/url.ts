@@ -41,7 +41,7 @@ export function getRemoteUrlWithToken(url: string, hostType?: string): string {
   try {
     coercedUrl = getHttpUrl(url);
   } catch {
-    logger.warn(`Attempting to use non-git url '${url}' for git operations`);
+    logger.warn({ url }, `Attempting to use non-git url for git operations`);
 
     coercedUrl = url;
   }

@@ -1,18 +1,22 @@
+import { codeBlock } from 'common-tags';
 import { getDatasources } from '../../lib/modules/datasource';
 import { readFile, updateFile } from '../utils';
+import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatDescription,
   formatUrls,
   getDisplayName,
+  getModuleLink,
   replaceContent,
 } from './utils';
 
-export async function generateDatasources(dist: string): Promise<void> {
+export async function generateDatasources(
+  dist: string,
+  datasourceIssuesMap: OpenItems
+): Promise<void> {
   const dsList = getDatasources();
-  let datasourceContent =
-    '\nSupported values for `datasource` are: ' +
-    [...dsList.keys()].map((v) => `\`${v}\``).join(', ') +
-    '.\n\n';
+  let datasourceContent = '\nSupported values for `datasource` are:\n\n';
+
   for (const [datasource, definition] of dsList) {
     const {
       id,
@@ -22,32 +26,46 @@ export async function generateDatasources(dist: string): Promise<void> {
       defaultVersioning,
     } = definition;
     const displayName = getDisplayName(datasource, definition);
-    datasourceContent += `\n### ${displayName} Datasource\n\n`;
-    datasourceContent += `**Identifier**: \`${id}\`\n\n`;
+    datasourceContent += `* ${getModuleLink(
+      datasource,
+      `\`${datasource}\``
+    )}\n`;
+    let md = codeBlock`
+      ---
+      title: ${displayName}
+      ---
+
+      # ${displayName} Datasource
+      `;
+    md += '\n\n';
+    md += `**Identifier**: \`${id}\`\n\n`;
     if (defaultVersioning) {
-      datasourceContent += `**Default versioning**: \`${defaultVersioning}\`\n\n`;
+      md += `**Default versioning**: \`${defaultVersioning}\`\n\n`;
     } else {
-      datasourceContent += `**Default versioning**: no default versioning\n\n`;
+      md += `**Default versioning**: no default versioning\n\n`;
     }
-    datasourceContent += formatUrls(urls);
-    datasourceContent += `**Custom registry support**: \n\n`;
+    md += formatUrls(urls);
+    md += `**Custom registry support**: \n\n`;
     if (customRegistrySupport) {
-      datasourceContent += `✅ Custom registries are supported.\n\n`;
+      md += `✅ Custom registries are supported.\n\n`;
     } else {
-      datasourceContent += `❌ No custom registry support.\n\n`;
+      md += `❌ No custom registry support.\n\n`;
     }
-    datasourceContent += await formatDescription('datasource', datasource);
+    md += await formatDescription('datasource', datasource);
 
     if (defaultConfig) {
-      datasourceContent +=
+      md +=
         '**Default configuration**:\n\n```json\n' +
         JSON.stringify(defaultConfig, undefined, 2) +
         '\n```\n';
     }
 
-    datasourceContent += `\n----\n\n`;
+    md += generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);
+
+    await updateFile(`${dist}/modules/datasource/${datasource}/index.md`, md);
   }
-  let indexContent = await readFile(`docs/usage/modules/datasource.md`);
+
+  let indexContent = await readFile(`docs/usage/modules/datasource/index.md`);
   indexContent = replaceContent(indexContent, datasourceContent);
-  await updateFile(`${dist}/modules/datasource.md`, indexContent);
+  await updateFile(`${dist}/modules/datasource/index.md`, indexContent);
 }

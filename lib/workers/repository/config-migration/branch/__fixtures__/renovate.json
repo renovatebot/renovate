@@ -1,4 +1,5 @@
 {
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     ":separateMajorReleases",
     ":prImmediately",
@@ -7,7 +8,6 @@
     ":updateNotScheduled",
     ":automergeDisabled",
     ":maintainLockFilesDisabled",
-    ":autodetectPinVersions",
     "group:monorepos",
     "helpers:oddIsUnstablePackages"
   ],

@@ -7,7 +7,7 @@ import { PodDatasource } from '.';
 const config = {
   versioning: rubyVersioning.id,
   datasource: PodDatasource.id,
-  depName: 'foo',
+  packageName: 'foo',
   registryUrls: [],
 };
 
@@ -31,7 +31,7 @@ describe('modules/datasource/pod/index', () => {
       expect(
         await getPkgReleases({
           datasource: PodDatasource.id,
-          depName: 'foobar',
+          packageName: 'foobar',
           registryUrls: [],
         })
       ).toBeNull();

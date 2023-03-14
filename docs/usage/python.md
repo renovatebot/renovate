@@ -5,13 +5,8 @@ description: Python/pip dependencies support in Renovate
 
 # Python package manager support
 
-Renovate supports the following Python package managers:
-
-- `pip` (e.g. `requirements.txt`, `requirements.pip`) files
-- `pipenv` (e.g. `Pipfile`)
-- `poetry` (e.g. `pyproject.toml`)
-- `setup.py` file
-- `setup.cfg` file
+Renovate supports several Python package managers, including `pip`, `pipenv`, `poetry`, etc.
+See [all supported managers](https://docs.renovatebot.com/modules/manager/).
 
 ## Versioning support
 
@@ -87,7 +82,7 @@ Fill the array with alternate index URL(s).
 
 <!-- prettier-ignore -->
 !!! tip
-    If a `requirements.txt` file has a index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
+    If a `requirements.txt` file has an index-url then Renovate follows that link, instead of following any link set in the `registryUrls` array.
     To override the URL found in `requirements.txt`, you must create a custom `packageRules` setting.
     This is because `packageRules` are applied _after_ package file extraction.
 

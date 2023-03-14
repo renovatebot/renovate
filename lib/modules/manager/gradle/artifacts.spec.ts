@@ -36,12 +36,11 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -68,7 +67,7 @@ describe('modules/manager/gradle/artifacts', () => {
       'gradle.lockfile',
       'gradle/wrapper/gradle-wrapper.properties',
     ]);
-    fs.getFileContentMap.mockResolvedValue({
+    git.getFiles.mockResolvedValue({
       'gradle.lockfile': 'Current gradle.lockfile',
     });
     git.getRepoStatus.mockResolvedValue(
@@ -84,7 +83,7 @@ describe('modules/manager/gradle/artifacts', () => {
         content = 'New gradle.lockfile';
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.4-bin.zip';
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
       }
 
       return Promise.resolve(content);
@@ -280,7 +279,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -291,7 +290,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
@@ -309,7 +308,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +

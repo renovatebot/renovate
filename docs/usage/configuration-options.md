@@ -244,9 +244,28 @@ Renovate also allows users to explicitly configure `baseBranches`, e.g. for use 
 
 - You wish Renovate to process only a non-default branch, e.g. `dev`: `"baseBranches": ["dev"]`
 - You have multiple release streams you need Renovate to keep up to date, e.g. in branches `main` and `next`: `"baseBranches": ["main", "next"]`
+- You want to update your main branch and consistently named release branches, e.g. `main` and `release/<version>`: `"baseBranches": ["main", "/^release\\/.*/"]`
 
 It's possible to add this setting into the `renovate.json` file as part of the "Configure Renovate" onboarding PR.
 If so then Renovate will reflect this setting in its description and use package file contents from the custom base branch(es) instead of default.
+
+`baseBranches` supports Regular Expressions that must begin and end with `/`, e.g.:
+
+```json
+{
+  "baseBranches": ["main", "/^release\\/.*/"]
+}
+```
+
+You can negate the regex by prefixing it with `!`.
+Only use a single negation and do not mix it with other branch names, since all branches are combined with `or`.
+With a negation, all branches except those matching the regex will be added to the result:
+
+```json
+{
+  "baseBranches": ["!/^pre-release\\/.*/"]
+}
+```
 
 <!-- prettier-ignore -->
 !!! note
@@ -408,8 +427,21 @@ Usually left empty except for internal use (multiple base branches, and vulnerab
 
 ## commitMessageTopic
 
-This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
-The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
+You can use `commitMessageTopic` to change the `commitMessage` and `prTitle` without copy/pasting the whole string.
+The "topic" usually refers to the dependency being updated, for example: `"dependency react"`.
+
+We recommend you use `matchManagers` and `commitMessageTopic` in a `packageRules` array to set the commit message topic, like this:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "commitMessageTopic": "{{depName}}"
+    }
+  ]
+}
+```
 
 ## composerIgnorePlatformReqs
 
@@ -446,12 +478,13 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 ## configMigration
 
-If enabled, Renovate will raise a pull request if config file migration is needed.
+If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
+Renovate only performs `configMigration` on `.json` and `.json5` files.
 
 We're adding new features to Renovate bot often.
-Most times you can keep using your Renovate config and benefit from the new features right away.
-But sometimes you need to change your Renovate configuration.
-To help you with this, Renovate will create config migration pull requests.
+Often you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to update your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
 
 Example:
 
@@ -465,13 +498,17 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 ```
 
 <!-- prettier-ignore -->
-!!! info
-    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
-    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+!!! caution
+    The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    Renovate may downgrade JSON5 content to plain JSON.
+    When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
+    This can happen because Renovate wrongly converts JSON5 to JSON, thus removing the comments.
 
 <!-- prettier-ignore -->
 !!! note
-    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
+    When you close a config migration PR, Renovate ignores it forever.
+    This also means that Renovate won't create a config migration PR in future.
+    If you closed the PR by accident, find the closed PR and re-name the PR title to get a new PR.
 
 ## configWarningReuseIssue
 
@@ -483,7 +520,7 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
-Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
+Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `helmfile`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -511,6 +548,19 @@ If you need to _override_ constraints that Renovate detects from the repository,
 <!-- prettier-ignore -->
 !!! note
     Make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
+
+## constraintsFiltering
+
+This option controls whether Renovate filters new releases based on configured or detected `constraints`.
+Renovate supports two options:
+
+- `none`: No release filtering (all releases allowed)
+- `strict`: If the release's constraints match the package file constraints, then it's included
+
+We are working on adding more advanced filtering options.
+
+Note: There must be a `constraints` object in your Renovate config for this to work.
+This feature is limited to `pypi` datasource only.
 
 ## defaultRegistryUrls
 
@@ -661,8 +711,8 @@ This option is evaluated at PR/MR creation time.
 
 <!-- prettier-ignore -->
 !!! note
-    GitLab and Gitea implement draft status by checking if the PR's title starts with certain strings.
-    This means that `draftPR` on GitLab and Gitea are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+    Forgejo, Gitea and GitLab implement draft status by checking if the PR's title starts with certain strings.
+    This means that `draftPR` on Forgejo, Gitea and GitLab are incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -804,11 +854,13 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 !!! note
     Renovate can only show release notes from some platforms and some package managers.
     We're planning improvements so that Renovate can show more release notes.
-    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get a overview of the planned work.
+    Read [issue 14138 on GitHub](https://github.com/renovatebot/renovate/issues/14138) to get an overview of the planned work.
 
 ## fileMatch
 
-`fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override the default values to customize for your project's needs.
+`fileMatch` is used by Renovate to know which files in a repository to parse and extract.
+`fileMatch` patterns in the user config are added to the default values and do not replace them.
+The default `fileMatch` patterns cannot be removed, so if you need to include or exclude specific paths then use the `ignorePaths` or `includePaths` configuration options.
 
 Sometimes file matches are really simple - for example with Go Modules Renovate looks for any `go.mod` file, and you probably don't need to change that default.
 
@@ -860,6 +912,32 @@ Renovate follows tags _strictly_, this can cause problems when a tagged stream i
 For example: you're following the `next` tag, but later the stream you actually want is called `stable` instead.
 If `next` is no longer getting updates, you must switch your `followTag` to `stable` to get updates again.
 
+## forkModeDisallowMaintainerEdits
+
+Use `forkModeDisallowMaintainerEdits` to disallow maintainers from editing Renovate's pull requests when in fork mode.
+
+If GitHub pull requests are created from a [fork repository](https://docs.github.com/en/get-started/quickstart/fork-a-repo), the PR author can decide to allow upstream repository to modify the PR directly.
+
+Allowing maintainers to edit pull requests directly is helpful when Renovate pull requests require additional changes.
+The reviewer can simply push to the pull request without having to create a new PR. [More details here](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/allowing-changes-to-a-pull-request-branch-created-from-a-fork).
+
+You may decide to disallow edits to Renovate pull requests in order to workaround issues in Renovate where modified fork branches are not deleted properly: [See this issue](https://github.com/renovatebot/renovate/issues/16657).
+If this option is enabled, reviewers will need to create a new PR if additional changes are needed.
+
+<!-- prettier-ignore -->
+!!! note
+    This option is only relevant if you set `forkToken`.
+
+## forkProcessing
+
+By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
+This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
+
+If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
+
 ## gitAuthor
 
 You can customize the Git author that's used whenever Renovate creates a commit.
@@ -890,7 +968,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch` and `platformAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
@@ -1321,6 +1399,19 @@ For example, consider this config:
 
 It would take the entire `"config:base"` preset - which has a lot of sub-presets - but ignore the `":prHourlyLimit2"` rule.
 
+## ignoreReviewers
+
+By default, Renovate does not add assignees or reviewers to PRs which are configured for automerge.
+If tests have failed, Renovate then does add them, but only if the assignees and reviewers list is empty.
+In the case that a user is automatically added as reviewer (such as Renovate Approve bot) and you want to ignore it for the purpose of this decision, add it to the `ignoreReviewers` list.
+
+```json
+{
+  "reviewers": ["foo"],
+  "ignoreReviewers": ["renovate-approve"]
+}
+```
+
 ## ignoreScripts
 
 Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
@@ -1341,20 +1432,22 @@ If you need to force permanent unstable updates for a package, you can add a pac
 
 Also check out the `followTag` configuration option above if you wish Renovate to keep you pinned to a particular release tag.
 
-## includeForks
-
-By default, Renovate will skip over any repositories that are forked.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate, you need to add `"includeForks": true` to your repository config or run the CLI command with `--include-forks=true`.
-
-If you are using the hosted Mend Renovate then this option will be configured to `true` automatically if you "Selected" repositories individually but remain as `false` if you installed for "All" repositories.
-
 ## includePaths
 
 If you wish for Renovate to process only select paths in the repository, use `includePaths`.
 
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
+
+## internalChecksAsSuccess
+
+By default, internal Renovate checks such as `renovate/stability-days` are not counted towards a branch being "green" or not.
+This is primarily to prevent automerge when the only check is a passing Renovate check.
+
+Internal checks will always be counted/considered if they are in pending or failed states.
+If there are multiple passing checks for a branch, including non-Renovate ones, then this setting won't make any difference.
+
+Change this setting to `true` if you want to use internal Renovate checks towards a passing branch result.
 
 ## internalChecksFilter
 
@@ -1413,14 +1506,23 @@ This feature can be used to refresh lock files and keep them up-to-date.
 "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest.
 Supported lock files are:
 
-- `package-lock.json`
-- `yarn.lock`
-- `pnpm-lock.yaml`
-- `composer.lock`
-- `Gemfile.lock`
-- `poetry.lock`
+- `.terraform.lock.hcl`
 - `Cargo.lock`
+- `Chart.lock`
+- `composer.lock`
+- `flake.lock`
+- `Gemfile.lock`
+- `gradle.lockfile`
 - `jsonnetfile.lock.json`
+- `package-lock.json`
+- `packages.lock.json`
+- `Pipfile.lock`
+- `pnpm-lock.yaml`
+- `poetry.lock`
+- `pubspec.lock`
+- `pyproject.toml`
+- `requirements.txt`
+- `yarn.lock`
 
 Others may be added via feature request.
 
@@ -1467,6 +1569,24 @@ A use case for the latter is if you are a Renovate bot admin and wish to provide
 
 If `false` (default), it means that defining `config.npmrc` will result in any `.npmrc` file in the repo being overridden and its values ignored.
 If configured to `true`, it means that any `.npmrc` file in the repo will have `config.npmrc` prepended to it before running `npm`.
+
+## osvVulnerabilityAlerts
+
+Renovate integrates with [OSV](https://osv.dev/), an open-source vulnerability database, to check if extracted dependencies have known vulnerabilities.
+Set `osvVulnerabilityAlerts` to `true` to get pull requests with vulnerability fixes (once they are available).
+
+You will only get OSV-based vulnerability alerts for _direct_ dependencies.
+Renovate only queries the OSV database for dependencies that use one of these datasources:
+
+- [`crate`](https://docs.renovatebot.com/modules/datasource/crate/)
+- [`go`](https://docs.renovatebot.com/modules/datasource/go/)
+- [`hex`](https://docs.renovatebot.com/modules/datasource/hex/)
+- [`maven`](https://docs.renovatebot.com/modules/datasource/maven/)
+- [`npm`](https://docs.renovatebot.com/modules/datasource/npm/)
+- [`nuget`](https://docs.renovatebot.com/modules/datasource/nuget/)
+- [`packagist`](https://docs.renovatebot.com/modules/datasource/packagist/)
+- [`pypi`](https://docs.renovatebot.com/modules/datasource/pypi/)
+- [`rubygems`](https://docs.renovatebot.com/modules/datasource/rubygems/)
 
 ## packageRules
 
@@ -1607,6 +1727,10 @@ Use the syntax `!/ /` like the following:
 Use this field if you want to limit a `packageRule` to certain `depType` values.
 Invalid if used outside of a `packageRule`.
 
+### excludeDepNames
+
+### excludeDepPatterns
+
 ### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`.
@@ -1702,7 +1826,7 @@ This field also supports Regular Expressions if they begin and end with `/`. e.g
 {
   "packageRules": [
     {
-      "matchBaseBranches": ["/^release\\/.*/"],
+      "matchBaseBranches": ["/^release/.*/"],
       "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
@@ -1837,6 +1961,10 @@ For example the following would match `package.json` but not `package/frontend/p
 ```
 
 Use `matchPaths` instead if you need more flexible matching.
+
+### matchDepNames
+
+### matchDepPatterns
 
 ### matchPackageNames
 
@@ -1996,19 +2124,31 @@ Example setting source URL for package "dummy":
 
 ### replacementName
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
 
-Use this field to define the name of a replacement package.
+Managers which do not support replacement:
+
+- `bazel`
+- `git-submodules`
+- `gomod`
+- `gradle`
+- `hermit`
+- `homebrew`
+- `maven`
+- `regex`
+
+Use the `replacementName` config option to set the name of a replacement package.
 Must be used with `replacementVersion` (see example below).
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
 
 ### replacementVersion
 
-This config option only works with the `npm` manager.
+This config option only works with some managers.
 We're working to support more managers, subscribe to issue [renovatebot/renovate#14149](https://github.com/renovatebot/renovate/issues/14149) to follow our progress.
+For a list of managers which do not support replacement read the `replacementName` config option docs.
 
-Use this field to define the version of a replacement package.
+Use the `replacementVersion` config option to set the version of a replacement package.
 Must be used with `replacementName`.
 For example to replace the npm package `jade` with version `2.0.0` of the package `pug`:
 
@@ -2072,6 +2212,8 @@ For example, GitHub might automerge a Renovate branch even if it's behind the ba
 
 Please check platform specific docs for version requirements.
 
+To learn how to use GitHub's Merge Queue feature with Renovate, read our [Key Concepts, Automerge, GitHub Merge Queue](./key-concepts/automerge.md#github-merge-queue) docs.
+
 ## platformCommit
 
 Only use this option if you run Renovate as a [GitHub App](https://docs.github.com/en/developers/apps/getting-started-with-apps/about-apps).
@@ -2082,14 +2224,20 @@ This way Renovate can use GitHub's [Commit signing support for bots and other Gi
 
 ## postUpdateOptions
 
-- `bundlerConservative`: Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies
-- `gomodMassage`: Enable massaging `replace` directives before calling `go` commands
-- `gomodTidy`: Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled
-- `gomodTidy1.17`: Run `go mod tidy -compat=1.17` after Go module updates.
-- `gomodUpdateImportPaths`: Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod)
-- `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
-- `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
+Table with options:
+
+| Name                     | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bundlerConservative`    | Enable conservative mode for `bundler` (Ruby dependencies). This will only update the immediate dependency in the lockfile instead of all subdependencies. |
+| `gomodMassage`           | Enable massaging `replace` directives before calling `go` commands.                                                                                        |
+| `gomodTidy`              | Run `go mod tidy` after Go module updates. This is implicitly enabled for major module updates when `gomodUpdateImportPaths` is enabled.                   |
+| `gomodTidy1.17`          | Run `go mod tidy -compat=1.17` after Go module updates.                                                                                                    |
+| `gomodTidyE`             | Run `go mod tidy -e` after Go module updates.                                                                                                              |
+| `gomodUpdateImportPaths` | Update source import paths on major module updates, using [mod](https://github.com/marwan-at-work/mod).                                                    |
+| `npmDedupe`              | Run `npm dedupe` after `package-lock.json` updates.                                                                                                        |
+| `pnpmDedupe`             | Run `pnpm dedupe` after `pnpm-lock.yaml` updates.                                                                                                          |
+| `yarnDedupeFewer`        | Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates.                                                                                         |
+| `yarnDedupeHighest`      | Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates.                                   |
 
 ## postUpgradeTasks
 
@@ -2251,7 +2399,7 @@ This config option slows down the _rate_ at which Renovate creates PRs.
 Slowing Renovate down can be handy when you're onboarding a repository with a lot of dependencies.
 What may happen if you don't set a `prHourlyLimit`:
 
-1. Renovate creates a Onboarding PR
+1. Renovate creates an Onboarding PR
 1. You merge the onboarding PR to activate Renovate
 1. Renovate creates a "Pin Dependencies" PR (if needed)
 1. You merge the "Pin Dependencies" PR
@@ -2651,7 +2799,7 @@ regex definition:
     {
       "fileMatch": ["values.yaml$"],
       "matchStrings": [
-        "image:\\s+(?<depName>my\\.old\\.registry\\/aRepository\\/andImage):(?<currentValue>[^\\s]+)"
+        "image:\\s+(?<depName>my\\.old\\.registry/aRepository/andImage):(?<currentValue>[^\\s]+)"
       ],
       "depNameTemplate": "my.new.registry/aRepository/andImage",
       "autoReplaceStringTemplate": "image: {{{depName}}}:{{{newValue}}}",

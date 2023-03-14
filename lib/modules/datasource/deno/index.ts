@@ -45,7 +45,7 @@ export class DenoDatasource extends Datasource {
     const massagedRegistryUrl = registryUrl!;
 
     const extractResult = regEx(
-      '^(https:\\/\\/deno.land\\/)(?<rawPackageName>[^@\\s]+)'
+      '^(https://deno.land/)(?<rawPackageName>[^@\\s]+)'
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
     if (is.nullOrUndefined(rawPackageName)) {

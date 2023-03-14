@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for this project.
+description: For maintainers only. For everyone else, please start an Ideas [discussion](https://github.com/renovatebot/renovate/discussions/new).
 labels: ['type:feature', 'status:requirements', 'priority-5-triage']
 body:
   - type: textarea

@@ -46,4 +46,11 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
+export interface CachedNpmDependency extends NpmDependency {
+  cacheData?: {
+    etag: string | undefined;
+    softExpireAt: string;
+  };
+}
+
 export type Npmrc = Record<string, any>;

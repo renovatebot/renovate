@@ -1,5 +1,4 @@
 import type { LogLevel } from 'bunyan';
-import type { Range } from 'semver';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
@@ -31,7 +30,7 @@ export interface RenovateSharedConfig {
   branchPrefixOld?: string;
   branchName?: string;
   branchNameStrict?: boolean;
-  manager?: string | null;
+  manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
   confidential?: boolean;
@@ -49,6 +48,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -114,6 +114,7 @@ export interface RepoGlobalConfig {
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
+  cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
@@ -142,6 +143,7 @@ export interface LegacyAdminConfig {
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
   onboardingNoDeps?: boolean;
+  onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -186,6 +188,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -210,7 +213,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -228,6 +231,7 @@ export interface RenovateConfig
   postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+  forkModeDisallowMaintainerEdits?: boolean;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -241,6 +245,7 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
+  osvVulnerabilityAlerts?: boolean;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -248,6 +253,8 @@ export interface RenovateConfig
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
@@ -259,6 +266,7 @@ export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;
@@ -301,14 +309,18 @@ export interface PackageRule
   matchManagers?: string | string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
+  matchDepNames?: string[];
+  matchDepPatterns?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  excludeDepNames?: string[];
+  excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   matchCurrentValue?: string;
-  matchCurrentVersion?: string | Range;
+  matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
@@ -437,6 +449,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depType?: string;
   depTypes?: string[];
   depName?: string;
+  packageName?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
   lockedVersion?: string;
@@ -445,7 +458,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string | null;
+  manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }

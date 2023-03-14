@@ -50,7 +50,7 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { getUserID, gitlabApi, isUserBusy } from './http';
+import { getMemberUserIDs, getUserID, gitlabApi, isUserBusy } from './http';
 import { getMR, updateMR } from './merge-request';
 import type {
   GitLabMergeRequest,
@@ -396,7 +396,8 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -426,6 +427,19 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    branchStatuses.every(
+      (check) =>
+        check.name?.startsWith('renovate/') &&
+        gitlabToRenovateStatusMapping[check.status] === 'green'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   let status: BranchStatus = 'green'; // default to green
@@ -603,7 +617,6 @@ export async function createPr({
   const pr = res.body;
   pr.number = pr.iid;
   pr.sourceBranch = sourceBranch;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -623,12 +636,11 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
-    displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
     hasAssignees: !!(mr.assignee?.id ?? mr.assignees?.[0]?.id),
-    hasReviewers: !!mr.reviewers?.length,
+    reviewers: mr.reviewers?.map(({ username }) => username),
     title: mr.title,
     labels: mr.labels,
     sha: mr.sha,
@@ -697,7 +709,9 @@ export function massageMarkdown(input: string): string {
   let desc = input
     .replace(regEx(/Pull Request/g), 'Merge Request')
     .replace(regEx(/PR/g), 'MR')
-    .replace(regEx(/\]\(\.\.\/pull\//g), '](!');
+    .replace(regEx(/\]\(\.\.\/pull\//g), '](!')
+    // Strip unicode null characters as GitLab markdown does not permit them
+    .replace(regEx(/\u0000/g), ''); // eslint-disable-line no-control-regex
 
   if (semver.lt(defaults.version, '13.4.0')) {
     logger.debug(
@@ -1013,11 +1027,26 @@ export async function addReviewers(
   // Gather the IDs for all the reviewers we want to add
   let newReviewerIDs: number[];
   try {
-    newReviewerIDs = await p.all(newReviewers.map((r) => () => getUserID(r)));
+    newReviewerIDs = (
+      await p.all(
+        newReviewers.map((r) => async () => {
+          try {
+            return [await getUserID(r)];
+          } catch (err) {
+            // Unable to fetch userId, try resolve as a group
+            return getMemberUserIDs(r);
+          }
+        })
+      )
+    ).flat();
   } catch (err) {
     logger.warn({ err }, 'Failed to get IDs of the new reviewers');
     return;
   }
+
+  // Multiple groups may have the same members, so
+  // filter out non-distinct values
+  newReviewerIDs = [...new Set(newReviewerIDs)];
 
   try {
     await updateMR(config.repository, iid, {

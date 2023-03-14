@@ -4,12 +4,19 @@ import {
   cleanupTempVars,
   qStringValue,
   qStringValueAsSymbol,
-  qTemplateString,
-  qVariableAccessIdentifier,
+  qValueMatcher,
   storeInTokenMap,
   storeVarToken,
 } from './common';
 import { handleLibraryDep } from './handlers';
+
+const qGroupId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'groupId')
+);
+
+const qArtifactId = qValueMatcher.handler((ctx) =>
+  storeInTokenMap(ctx, 'artifactId')
+);
 
 const qVersionCatalogVersion = q
   .op<Ctx>('.')
@@ -26,10 +33,7 @@ const qVersionCatalogVersion = q
       maxDepth: 1,
       startsWith: '(',
       endsWith: ')',
-      search: q
-        .begin<Ctx>()
-        .alt(qTemplateString, qVariableAccessIdentifier)
-        .end(),
+      search: q.begin<Ctx>().join(qValueMatcher).end(),
     })
   )
   .handler((ctx) => storeInTokenMap(ctx, 'version'));
@@ -48,11 +52,9 @@ const qVersionCatalogDependencies = q
       .join(qStringValue)
       .handler((ctx) => storeInTokenMap(ctx, 'alias'))
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
+      .join(qGroupId)
       .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
+      .join(qArtifactId)
       .end(),
   })
   .opt(qVersionCatalogVersion)
@@ -80,14 +82,7 @@ const qVersionCatalogAliasDependencies = q
     maxDepth: 1,
     startsWith: '(',
     endsWith: ')',
-    search: q
-      .begin<Ctx>()
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'groupId'))
-      .op(',')
-      .alt(qTemplateString, qVariableAccessIdentifier)
-      .handler((ctx) => storeInTokenMap(ctx, 'artifactId'))
-      .end(),
+    search: q.begin<Ctx>().join(qGroupId).op(',').join(qArtifactId).end(),
   })
   .opt(qVersionCatalogVersion)
   .handler(handleLibraryDep)

@@ -1,5 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, HostRule, VulnerabilityAlert } from '../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -23,7 +23,6 @@ export interface PlatformResult {
   renovateUsername?: string;
   token?: string;
   gitAuthor?: string;
-  hostRules?: HostRule[];
 }
 
 export interface RepoResult {
@@ -39,10 +38,11 @@ export interface RepoParams {
   endpoint?: string;
   gitUrl?: GitUrlOption;
   forkToken?: string;
-  includeForks?: boolean;
+  forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
@@ -66,9 +66,7 @@ export interface Pr {
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
-  displayNumber?: string;
   hasAssignees?: boolean;
-  hasReviewers?: boolean;
   labels?: string[];
   number: number;
   reviewers?: string[];
@@ -95,6 +93,7 @@ export type PlatformPrOptions = {
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  forkModeDisallowMaintainerEdits?: boolean;
 };
 export interface CreatePRConfig {
   sourceBranch: string;
@@ -206,9 +205,22 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(branchName: string): Promise<BranchStatus>;
+  getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+}
+
+export interface PlatformScm {
+  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  deleteBranch(branchName: string): Promise<void>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
 }

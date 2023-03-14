@@ -173,8 +173,11 @@ export async function updateArtifacts({
           .join(' ')}`
       );
     }
-    const constraint = getPythonConstraint(existingLockFileContent, config);
-    const poetryVersion =
+    const pythonConstraint = getPythonConstraint(
+      existingLockFileContent,
+      config
+    );
+    const poetryConstraint =
       config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
@@ -184,12 +187,10 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
-      toolConstraints: [{ toolName: 'python', constraint }],
-      preCommands: [
-        `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,
+      docker: {},
+      toolConstraints: [
+        { toolName: 'python', constraint: pythonConstraint },
+        { toolName: 'poetry', constraint: poetryConstraint },
       ],
     };
     await exec(cmd, execOptions);

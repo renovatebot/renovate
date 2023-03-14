@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
@@ -6,10 +7,11 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../modules/platform';
+import { Pr, platform } from '../../../../modules/platform';
 import { checkoutBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
+import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
@@ -26,7 +28,7 @@ export async function checkOnboardingBranch(
     logger.debug('Repo is onboarded');
     return { ...config, repoIsOnboarded };
   }
-  if (config.isFork && !config.includeForks) {
+  if (config.isFork && config.forkProcessing !== 'enabled') {
     throw new Error(REPOSITORY_FORKED);
   }
   logger.debug('Repo is not onboarded');
@@ -34,8 +36,12 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    if (config.onboardingRebaseCheckbox) {
+      handleOnboardingManualRebase(onboardingPr);
+    }
     logger.debug('Onboarding PR already exists');
-    const commit = await rebaseOnboardingBranch(config);
+    const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
+    const commit = await rebaseOnboardingBranch(config, rawConfigHash);
     if (commit) {
       logger.info(
         { branch: config.onboardingBranch, commit, onboarding: true },
@@ -44,7 +50,6 @@ export async function checkOnboardingBranch(
     }
     // istanbul ignore if
     if (platform.refreshPr) {
-      // TODO #7154
       await platform.refreshPr(onboardingPr.number);
     }
   } else {
@@ -55,13 +60,17 @@ export async function checkOnboardingBranch(
     onboardingBranch = mergedConfig.onboardingBranch;
 
     if (
-      Object.entries(await extractAllDependencies(mergedConfig)).length === 0
+      Object.entries((await extractAllDependencies(mergedConfig)).packageFiles)
+        .length === 0
     ) {
       if (!config?.onboardingNoDeps) {
         throw new Error(REPOSITORY_NO_PACKAGE_FILES);
       }
     }
     logger.debug('Need to create onboarding PR');
+    if (config.onboardingRebaseCheckbox) {
+      OnboardingState.prUpdateRequested = true;
+    }
     const commit = await createOnboardingBranch(mergedConfig);
     // istanbul ignore if
     if (commit) {
@@ -79,4 +88,19 @@ export async function checkOnboardingBranch(
   // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
+}
+
+function handleOnboardingManualRebase(onboardingPr: Pr): void {
+  const pl = GlobalConfig.get('platform')!;
+  const { rebaseRequested } = onboardingPr.bodyStruct ?? {};
+  if (!['github', 'gitlab', 'gitea'].includes(pl)) {
+    logger.trace(`Platform '${pl}' does not support extended markdown`);
+    OnboardingState.prUpdateRequested = true;
+  } else if (is.nullOrUndefined(rebaseRequested)) {
+    logger.debug('No rebase checkbox was found in the onboarding PR');
+    OnboardingState.prUpdateRequested = true;
+  } else if (rebaseRequested) {
+    logger.debug('Manual onboarding PR update requested');
+    OnboardingState.prUpdateRequested = true;
+  }
 }

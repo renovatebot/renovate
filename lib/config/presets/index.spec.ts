@@ -246,7 +246,7 @@ describe('config/presets/index', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(4);
+      expect(res.matchPackageNames).toHaveLength(6);
       expect(res.matchPackagePatterns).toHaveLength(1);
       expect(res.matchPackagePrefixes).toHaveLength(4);
     });
@@ -257,7 +257,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(4);
+      expect(rule.matchPackageNames).toHaveLength(6);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
     });
@@ -839,9 +839,6 @@ describe('config/presets/index', () => {
           ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
           ':ignoreModulesAndTests',
-          ':autodetectPinVersions',
-          ':prHourlyLimit2',
-          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
           'workarounds:all',
@@ -896,7 +893,7 @@ describe('config/presets/index', () => {
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(1);
+      expect(res.matchPackageNames).toHaveLength(3);
       expect(res.extends).toHaveLength(4);
     });
 

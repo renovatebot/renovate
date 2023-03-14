@@ -118,7 +118,6 @@ function toRenovatePR(data: PR): Pr | null {
 
   return {
     number: data.number,
-    displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title,
     isDraft,
@@ -388,7 +387,10 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(branchName: string): Promise<BranchStatus> {
+  async getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus> {
     let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -405,6 +407,17 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
+    if (
+      !internalChecksAsSuccess &&
+      ccs.worstStatus === 'success' &&
+      ccs.statuses.every((status) => status.context?.startsWith('renovate/'))
+    ) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      return 'yellow';
+    }
+
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -940,7 +953,7 @@ const platform: Platform = {
   },
 };
 
-// eslint-disable-next-line @typescript-eslint/unbound-method
+/* eslint-disable @typescript-eslint/unbound-method */
 export const {
   addAssignees,
   addReviewers,
