@@ -187,7 +187,8 @@ export async function exec(
     try {
       res = await rawExec(rawCmd, rawOptions);
     } catch (err) {
-      logger.debug({ err }, 'rawExec err');
+      const durationMs = Math.round(Date.now() - startTime);
+      logger.debug({ err, durationMs }, 'rawExec err');
       if (useDocker) {
         await removeDockerContainer(sideCarImage, dockerChildPrefix).catch(
           (removeErr: Error) => {
