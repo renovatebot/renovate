@@ -4,6 +4,10 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import {
+  ensureComment,
+  ensureCommentRemoval,
+} from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
@@ -39,6 +43,31 @@ export async function ensureOnboardingPr(
   logger.trace({ config });
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
+  if (existingPr) {
+    // skip pr-update if branch is conflicted
+    if (
+      await scm.isBranchConflicted(
+        config.defaultBranch!,
+        config.onboardingBranch!
+      )
+    ) {
+      // if branch is conflicted ensure comment
+      await ensureComment({
+        number: existingPr.number,
+        topic: 'Branch Conflicted',
+        content: emojify(
+          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+        ),
+      });
+      return;
+    } else {
+      await ensureCommentRemoval({
+        type: 'by-topic',
+        number: existingPr.number,
+        topic: 'Branch Conflicted',
+      });
+    }
+  }
   const { rebaseCheckBox, renovateConfigHashComment } =
     await getRebaseCheckboxComponents(config);
   logger.debug('Filling in onboarding PR template');
@@ -129,15 +158,6 @@ If you need any further assistance then you can also [request help here](${
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
-    // skip pr-update if branch is conflicted
-    if (
-      await scm.isBranchConflicted(
-        config.defaultBranch!,
-        config.onboardingBranch!
-      )
-    ) {
-      return;
-    }
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {

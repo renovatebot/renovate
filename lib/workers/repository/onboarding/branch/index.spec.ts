@@ -258,22 +258,6 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
-    it('ensures comment on pr when branch is conflicted', async () => {
-      scm.isBranchConflicted.mockResolvedValueOnce(true);
-      git.getFileList.mockResolvedValue(['package.json']);
-      platform.getBranchPr.mockResolvedValueOnce(
-        mock<Pr>({
-          number: 12,
-        })
-      );
-      const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBeFalse();
-      expect(res.branchList).toEqual(['renovate/configure']);
-      expect(git.mergeBranch).toHaveBeenCalledTimes(0);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-    });
-
     describe('tests onboarding rebase/retry checkbox handling', () => {
       beforeEach(() => {
         GlobalConfig.set({ platform: 'github' });

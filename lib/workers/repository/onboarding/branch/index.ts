@@ -8,12 +8,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
-import {
-  ensureComment,
-  ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
-import { emojify } from '../../../../util/emoji';
 import { mergeBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
@@ -51,21 +46,6 @@ export async function checkOnboardingBranch(
       config.baseBranch!,
       config.onboardingBranch!
     );
-    if (isConflicted) {
-      // if branch is conflicted ensure comment
-      await ensureComment({
-        number: onboardingPr.number,
-        topic: 'Branch Conflicted',
-        content: emojify(
-          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
-        ),
-      });
-    }
-    await ensureCommentRemoval({
-      type: 'by-topic',
-      number: onboardingPr.number,
-      topic: 'Branch Conflicted',
-    });
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
