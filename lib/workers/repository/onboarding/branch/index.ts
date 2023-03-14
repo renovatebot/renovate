@@ -48,9 +48,9 @@ export async function checkOnboardingBranch(
       // if branch is conflcted ensure comment
       await ensureComment({
         number: onboardingPr.number,
-        topic: 'Branch Conflicted',
+        topic: 'Branch Conflict',
         content: emojify(
-          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+          `:warning: This PR has a merge conflict so will no longer be updated by Renovate automatically. Please resolve the merge conflict manually.\n\n`
         ),
       });
     }

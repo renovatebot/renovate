@@ -770,7 +770,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 
 export async function mergeBranch(
   branchName: string,
-  pushToRemote = true
+  localOnly = false
 ): Promise<void> {
   let status: StatusResult | undefined;
   try {
@@ -787,11 +787,12 @@ export async function mergeBranch(
       ])
     );
     status = await git.status();
-    if (pushToRemote) {
+    if (localOnly) {
+      // fast-forward commit, don't push to origin
+      await gitRetry(() => git.merge([branchName]));
+    } else {
       await gitRetry(() => git.merge(['--ff-only', branchName]));
       await gitRetry(() => git.push('origin', config.currentBranch));
-    } else {
-      await gitRetry(() => git.merge([branchName]));
     }
     incLimitedValue('Commits');
   } catch (err) {
