@@ -229,7 +229,8 @@ export function generateBranchConfig(
     if (upgrade.toLowerCase) {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
-      splitMessage[0] = splitMessage[0].toLowerCase();
+      splitMessage[0] =
+        splitMessage[0].charAt(0).toLowerCase() + splitMessage[0].slice(1);
       upgrade.commitMessage = splitMessage.join('\n');
     }
 
