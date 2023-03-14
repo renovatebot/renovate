@@ -484,7 +484,7 @@ Renovate only performs `configMigration` on `.json` and `.json5` files.
 We're adding new features to Renovate bot often.
 Often you can keep using your Renovate config and benefit from the new features right away.
 But sometimes you need to update your Renovate configuration.
-To help you with this, Renovate will create config migration pull requests.
+To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
 
 Example:
 
@@ -498,15 +498,17 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 ```
 
 <!-- prettier-ignore -->
-!!! info
+!!! caution
     The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     Renovate may downgrade JSON5 content to plain JSON.
     When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
+    This can happen because Renovate wrongly converts JSON5 to JSON, thus removing the comments.
 
 <!-- prettier-ignore -->
 !!! note
     When you close a config migration PR, Renovate ignores it forever.
     This also means that Renovate won't create a config migration PR in future.
+    If you closed the PR by accident, find the closed PR and re-name the PR title to get a new PR.
 
 ## configWarningReuseIssue
 
