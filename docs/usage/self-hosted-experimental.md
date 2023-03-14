@@ -69,7 +69,12 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
 
-If set, Renovate will try to match against `packageName` after trying `depName` when using `matchPackageNames` and `matchPackagePatterns` matchers.
+If set, you'll get the following behavior.
+
+When using `matchPackageNames` and `matchPackagePatterns` matchers:
+
+1. Renovate first tries to match against `depName`
+2. If `depName` doesn't match then Renovate tries to match against `packageName`
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
