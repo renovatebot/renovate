@@ -119,6 +119,37 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
+## autoReplaceGlobalMatch
+
+Setting this to `false` will replace only the first match during replacements updates.
+
+Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
+
+Consider this example:
+
+```dockerfile
+FROM java:8@sha256:0e8b2a860
+```
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["java"],
+      "replacementName": "eclipse-temurin",
+      "replacementVersion": "11"
+    }
+  ]
+}
+```
+
+With the above replacement scenario, the current dependency has a version of `8`, which also features several times within the digest section.
+
+When using the default `autoReplaceGlobalMatch` configuration, Renovate will attempt to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
+This will replace more than is intended and will be caught during replacement validation steps, resulting in the replacement PR to not be created.
+
+When setting `autoReplaceGlobalMatch` configuration to `false`, Renovate will only replace the first occurrence of `8` and will successfully create a replacement PR.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
