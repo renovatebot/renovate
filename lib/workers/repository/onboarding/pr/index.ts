@@ -102,7 +102,7 @@ If you need any further assistance then you can also [request help here](${
         config.productLinks!.help
       }) if you have any doubts and would like it reviewed.\n\n`
     );
-    configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
+    configDesc += `Important: Now that this branch is edited, Renovate will use the onboarding branch to show updates.\n\n`;
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }

@@ -7,8 +7,11 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
-import { ensureComment } from '../../../../modules/platform/comment';
+import type { Pr } from '../../../../modules/platform';
+import {
+  ensureComment,
+  ensureCommentRemoval,
+} from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
 import { mergeBranch, setGitAuthor } from '../../../../util/git';
@@ -18,7 +21,6 @@ import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
-import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -40,37 +42,30 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    logger.debug('Onboarding PR already exists');
+    if (config.onboardingRebaseCheckbox) {
+      handleOnboardingManualRebase(onboardingPr);
+    }
+
     isConflicted = await scm.isBranchConflicted(
       config.baseBranch!,
       config.onboardingBranch!
     );
     if (isConflicted) {
-      // if branch is conflcted ensure comment
+      // if branch is conflicted ensure comment
       await ensureComment({
         number: onboardingPr.number,
-        topic: 'Branch Conflict',
+        topic: 'Branch Conflicted',
         content: emojify(
-          `:warning: This PR has a merge conflict so will no longer be updated by Renovate automatically. Please resolve the merge conflict manually.\n\n`
+          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
         ),
       });
     }
-
-    if (config.onboardingRebaseCheckbox) {
-      handleOnboardingManualRebase(onboardingPr);
-    }
-    logger.debug('Onboarding PR already exists');
-    const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
-    const commit = await rebaseOnboardingBranch(config, rawConfigHash);
-    if (commit) {
-      logger.info(
-        { branch: config.onboardingBranch, commit, onboarding: true },
-        'Branch updated'
-      );
-    }
-    // istanbul ignore if
-    if (platform.refreshPr) {
-      await platform.refreshPr(onboardingPr.number);
-    }
+    await ensureCommentRemoval({
+      type: 'by-topic',
+      number: onboardingPr.number,
+      topic: 'Branch Conflicted',
+    });
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
@@ -103,7 +98,7 @@ export async function checkOnboardingBranch(
     // TODO #7154
     if (!isConflicted) {
       logger.debug('Merge onboarding branch in default branch');
-      await mergeBranch(onboardingBranch!, false);
+      await mergeBranch(onboardingBranch!, true);
     }
   }
   // TODO #7154

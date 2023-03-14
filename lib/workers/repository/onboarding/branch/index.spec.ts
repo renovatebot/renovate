@@ -21,10 +21,8 @@ import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
-import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
-const rebase: any = _rebase;
 const configModule: any = _config;
 
 jest.mock('../../../repository/onboarding/branch/rebase');
@@ -254,7 +252,6 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
@@ -270,7 +267,6 @@ describe('workers/repository/onboarding/branch/index', () => {
           number: 12,
         })
       );
-      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('123test');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
@@ -286,7 +282,6 @@ describe('workers/repository/onboarding/branch/index', () => {
         OnboardingState.prUpdateRequested = false;
         git.getFileList.mockResolvedValueOnce(['package.json']);
         platform.findPr.mockResolvedValueOnce(null);
-        rebase.rebaseOnboardingBranch.mockResolvedValueOnce(null);
       });
 
       it('detects unsupported platfom', async () => {
