@@ -31,20 +31,26 @@ import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
-import * as utils from './utils';
-import {
+import type {
   Account,
+  BitbucketStatus,
+  BranchResponse,
+  Config,
   EffectiveReviewer,
+  PagedResult,
   PrResponse,
+  RepoBranchingModel,
+  RepoInfo,
   RepoInfoBody,
-  mergeBodyTransformer,
-} from './utils';
+} from './types';
+import * as utils from './utils';
+import { mergeBodyTransformer } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
-let config: utils.Config = {} as any;
+let config: Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
@@ -127,7 +133,7 @@ export async function getRawFile(
 
   let finalBranchOrTag = branchOrTag;
   if (branchOrTag?.includes(pathSeparator)) {
-    // Branch name contans slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
+    // Branch name contains slash, so we have to replace branch name with SHA1 of the head commit; otherwise the API will not work.
     finalBranchOrTag = await getBranchCommit(branchOrTag);
   }
 
@@ -154,6 +160,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -164,8 +171,9 @@ export async function initRepo({
     repository,
     username: opts.username,
     ignorePrAuthor,
-  } as utils.Config;
-  let info: utils.RepoInfo;
+  } as Config;
+  let info: RepoInfo;
+  let mainBranch: string;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -174,7 +182,23 @@ export async function initRepo({
         )
       ).body
     );
-    config.defaultBranch = info.mainbranch;
+
+    mainBranch = info.mainbranch;
+
+    if (bbUseDevelopmentBranch) {
+      // Fetch Bitbucket development branch
+      const developmentBranch = (
+        await bitbucketHttp.getJson<RepoBranchingModel>(
+          `/2.0/repositories/${repository}/branching-model`
+        )
+      ).body.development?.branch?.name;
+
+      if (developmentBranch) {
+        mainBranch = developmentBranch;
+      }
+    }
+
+    config.defaultBranch = mainBranch;
 
     config = {
       ...config,
@@ -216,7 +240,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: info.mainbranch,
+    defaultBranch: mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
@@ -306,12 +330,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 const escapeHash = (input: string): string =>
   input ? input.replace(regEx(/#/g), '%23') : input;
 
-interface BranchResponse {
-  target: {
-    hash: string;
-  };
-}
-
 // Return the commit SHA for a branch
 async function getBranchCommit(
   branchName: string
@@ -344,9 +362,9 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 async function getStatus(
   branchName: string,
   useCache = true
-): Promise<utils.BitbucketStatus[]> {
+): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<utils.BitbucketStatus>(
+  return utils.accumulateValues<BitbucketStatus>(
     // TODO: types (#7154)
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
@@ -356,7 +374,8 @@ async function getStatus(
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatus(branchName);
@@ -376,6 +395,18 @@ export async function getBranchStatus(
     (status: { state: string }) => status.state === 'INPROGRESS'
   ).length;
   if (noOfPending) {
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === 'SUCCESSFUL' && status.key?.startsWith('renovate/')
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   return 'green';
@@ -487,7 +518,7 @@ export function massageMarkdown(input: string): string {
       'by renaming this PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
-    .replace(regEx(/<\/?details>/g), '')
+    .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
@@ -499,8 +530,6 @@ export async function ensureIssue({
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
-  const description = massageMarkdown(sanitize(body));
-
   /* istanbul ignore if */
   if (!config.has_issues) {
     logger.warn('Issues are disabled - cannot ensureIssue');
@@ -509,6 +538,8 @@ export async function ensureIssue({
   }
   try {
     let issues = await findOpenIssues(title);
+    const description = massageMarkdown(sanitize(body));
+
     if (!issues.length && reuseTitle) {
       issues = await findOpenIssues(reuseTitle);
     }
@@ -518,6 +549,7 @@ export async function ensureIssue({
         await closeIssue(issue.id);
       }
       const [issue] = issues;
+
       if (
         issue.title !== title ||
         String(issue.content?.raw).trim() !== description.trim()
@@ -764,7 +796,7 @@ export async function createPr({
 
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await bitbucketHttp.getJson<utils.PagedResult<EffectiveReviewer>>(
+      await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
         `/2.0/repositories/${config.repository}/effective-default-reviewers`
       )
     ).body;

@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [16, 18]
+        node-version: [18]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
@@ -77,14 +77,14 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --ignore-engines # semantic release will fail to install otherwise
+        run: yarn install --frozen-lockfile
 
       # build before tests to for static file check
       - name: Build
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@69d9d449aced6a2ede0bc19182fadc3a0a42d2b0 # v3.2.6
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}

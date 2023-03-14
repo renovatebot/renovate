@@ -1,5 +1,4 @@
 import type { LogLevel } from 'bunyan';
-import type { Range } from 'semver';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
@@ -49,6 +48,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -192,6 +192,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -216,7 +217,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -256,6 +257,8 @@ export interface RenovateConfig
 
   constraints?: Record<string, string>;
   skipInstalls?: boolean;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
@@ -321,7 +324,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   matchCurrentValue?: string;
-  matchCurrentVersion?: string | Range;
+  matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];

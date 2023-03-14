@@ -19,7 +19,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(
         await getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'non-dotnet',
+          packageName: 'non-dotnet',
         })
       ).toBeNull();
     });
@@ -30,7 +30,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(
         await getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).toBeNull();
     });
@@ -46,7 +46,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(
         await getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).toBeNull();
     });
@@ -57,7 +57,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       await expect(
         getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -73,7 +73,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       await expect(
         getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -84,7 +84,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(
         await getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).toBeNull();
     });
@@ -100,7 +100,7 @@ describe('modules/datasource/dotnet-version/index', () => {
       expect(
         await getPkgReleases({
           datasource: DotnetVersionDatasource.id,
-          depName: 'dotnet-sdk',
+          packageName: 'dotnet-sdk',
         })
       ).toBeNull();
     });
@@ -121,7 +121,7 @@ describe('modules/datasource/dotnet-version/index', () => {
 
       const res = await getPkgReleases({
         datasource: DotnetVersionDatasource.id,
-        depName: 'dotnet-sdk',
+        packageName: 'dotnet-sdk',
       });
 
       expect(res).toBeDefined();
@@ -155,7 +155,7 @@ describe('modules/datasource/dotnet-version/index', () => {
 
       const res = await getPkgReleases({
         datasource: DotnetVersionDatasource.id,
-        depName: 'dotnet-runtime',
+        packageName: 'dotnet-runtime',
       });
 
       expect(res).toBeDefined();

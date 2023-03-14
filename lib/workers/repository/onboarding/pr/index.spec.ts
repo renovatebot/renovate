@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown = jest.fn((input) => input);
-      platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
+      platform.createPr.mockResolvedValueOnce(partial<Pr>());
       GlobalConfig.reset();
     });
 
