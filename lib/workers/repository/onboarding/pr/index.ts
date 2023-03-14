@@ -51,7 +51,6 @@ export async function ensureOnboardingPr(
         config.onboardingBranch!
       )
     ) {
-      // if branch is conflicted ensure comment
       await ensureComment({
         number: existingPr.number,
         topic: 'Branch Conflicted',
@@ -131,7 +130,6 @@ If you need any further assistance then you can also [request help here](${
         config.productLinks!.help
       }) if you have any doubts and would like it reviewed.\n\n`
     );
-    configDesc += `Important: Now that this branch is edited, Renovate will use the onboarding branch to show updates.\n\n`;
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }

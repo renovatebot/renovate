@@ -155,6 +155,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         config.baseBranch = 'some-branch';
         config.repository = 'test';
         config.onboardingRebaseCheckbox = onboardingRebaseCheckbox;
+        config.onboardingConfigFileName = undefined; // checks the case when fileName isn't available
         OnboardingState.prUpdateRequested = true; // case 'false' is tested in "breaks early when onboarding"
         await ensureOnboardingPr(
           {
