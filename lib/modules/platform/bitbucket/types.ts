@@ -36,6 +36,15 @@ export interface RepoInfo {
   uuid: string;
 }
 
+export interface RepoBranchingModel {
+  development: {
+    name: string;
+    branch?: {
+      name: string;
+    };
+  };
+}
+
 export interface BranchResponse {
   target: {
     hash: string;

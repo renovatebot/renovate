@@ -156,6 +156,15 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
+
+      if (config.replacementName && !config.replacementVersion) {
+        res.updates.push({
+          updateType: 'replacement',
+          newName: config.replacementName,
+          newValue: currentValue!,
+        });
+      }
+
       if (config.replacementName && config.replacementVersion) {
         res.updates.push({
           updateType: 'replacement',
@@ -335,6 +344,19 @@ export async function lookupUpdates(
       } else {
         delete res.skipReason;
       }
+    } else if (
+      !currentValue &&
+      config.replacementName &&
+      !config.replacementVersion
+    ) {
+      logger.debug(
+        `Handle name-only replacement for ${packageName} without current version`
+      );
+      res.updates.push({
+        updateType: 'replacement',
+        newName: config.replacementName,
+        newValue: currentValue!,
+      });
     } else {
       res.skipReason = 'invalid-value';
     }
@@ -427,6 +449,8 @@ export async function lookupUpdates(
       .filter((update) => update.newDigest !== null)
       .filter(
         (update) =>
+          (update.newName && update.newName !== packageName) ||
+          update.isReplacement ||
           update.newValue !== currentValue ||
           update.isLockfileUpdate ||
           // TODO #7154
