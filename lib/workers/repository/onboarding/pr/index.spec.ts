@@ -215,6 +215,20 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
 
+    it('skips updates PR when conflicted', async () => {
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+        })
+      );
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      await ensureOnboardingPr(config, {}, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
     it('creates PR (no require config)', async () => {
       config.requireConfig = 'optional';
       await ensureOnboardingPr(config, packageFiles, branches);

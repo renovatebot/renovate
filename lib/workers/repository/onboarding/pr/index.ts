@@ -129,6 +129,15 @@ If you need any further assistance then you can also [request help here](${
 
   if (existingPr) {
     logger.debug('Found open onboarding PR');
+    // skip pr-update if branch is conflicted
+    if (
+      await scm.isBranchConflicted(
+        config.defaultBranch!,
+        config.onboardingBranch!
+      )
+    ) {
+      return;
+    }
     // Check if existing PR needs updating
     const prBodyHash = hashBody(prBody);
     if (existingPr.bodyStruct?.hash === prBodyHash) {
