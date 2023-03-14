@@ -1,11 +1,11 @@
 # Self-hosted experimental environment variables
 
-The following environment variables are "experimental" because:
+The following environment variables are "experimental" because they:
 
-- They are not commonly needed
-- They are typically an effort to work around some other service's or platform's problem
-- They can be removed at any time
-- They are variables for Renovate's internal use to validate they work as intended
+- are not commonly needed
+- are typically an effort to work around some other service's or platform's problem
+- can be removed at any time
+- are variables for Renovate's internal use to validate they work as intended
 
 Experimental variables which are commonly used and for which there is no external solution in sight can be converted to an official configuration option by the Renovate bot developers.
 
@@ -38,7 +38,7 @@ If set to any string, Renovate will use this as the `user-agent` it sends with H
 ## `RENOVATE_X_HARD_EXIT`
 
 If set to any value, Renovate will use a "hard" `process.exit()` once all work is done, even if a sub-process is otherwise delaying Node.js from exiting.
-See <https://github.com/renovatebot/renovate/issues/8660> for background on why this was created.
+See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for background on why this was created.
 
 ## `RENOVATE_X_IGNORE_NODE_WARN`
 
@@ -53,15 +53,15 @@ Read [platform details](modules/platform/gitlab/index.md) to learn why we need t
 
 ## `RENOVATE_X_S3_ENDPOINT`
 
-If set, Renovate will use this string as the `endpoint` when instantiating the AWS s3 client.
+If set, Renovate will use this string as the `endpoint` when instantiating the AWS S3 client.
 
 ## `RENOVATE_X_S3_PATH_STYLE`
 
-If set, Renovate will enable `forcePathStyle` when instantiating the AWS s3 client.
+If set, Renovate will enable `forcePathStyle` when instantiating the AWS S3 client.
 
-> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`
+> Whether to force path style URLs for S3 objects (e.g., `https://s3.amazonaws.com//` instead of `https://.s3.amazonaws.com/`)
 
-Source: [AWS s3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
+Source: [AWS S3 documentation - Interface BucketEndpointInputConfig](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/bucketendpointinputconfig.html)
 
 ## `RENOVATE_X_EXEC_GPID_HANDLE`
 
@@ -69,7 +69,12 @@ If set, Renovate will terminate the whole process group of a terminated child pr
 
 ## `RENOVATE_X_MATCH_PACKAGE_NAMES_MORE`
 
-If set, Renovate will try to match against `packageName` after trying `depName` When using `matchPackageNames` & `matchPackagePatterns` matchers.
+If set, you'll get the following behavior.
+
+When using `matchPackageNames` and `matchPackagePatterns` matchers:
+
+1. Renovate first tries to match against `depName`
+2. If `depName` doesn't match then Renovate tries to match against `packageName`
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
