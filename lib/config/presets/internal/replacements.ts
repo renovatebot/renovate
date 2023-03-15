@@ -109,7 +109,8 @@ export const presets: Record<string, Preset> = {
     description: 'Replace containerbase dependencies.',
     packageRules: [
       {
-        description: 'Replace `containerbase/buildpack` with `containerbase/base`.',
+        description:
+          'Replace `containerbase/buildpack` with `containerbase/base`.',
         matchDatasources: ['docker'],
         matchPackageNames: ['containerbase/buildpack'],
         replacementName: 'containerbase/base',
