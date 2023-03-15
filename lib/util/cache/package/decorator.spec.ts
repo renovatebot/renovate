@@ -30,14 +30,9 @@ describe('util/cache/package/decorator', () => {
     }
     const obj = new Class();
 
-    const res1 = await obj.fn();
-    expect(res1).toBe('111');
-
-    const res2 = await obj.fn();
-    expect(res2).toBe('111');
-
-    const res3 = await obj.fn();
-    expect(res3).toBe('111');
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledOnceWith(
