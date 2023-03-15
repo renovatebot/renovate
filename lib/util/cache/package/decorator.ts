@@ -111,7 +111,12 @@ export function cache<T>({
         cachedAt: DateTime.local().toISO(),
         data: newData,
       };
-      const hardTTL = GlobalConfig.get().cacheHardTtlMinutes ?? softTTL;
+      const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
+      let hardTTL =
+        methodName === 'getReleases' || methodName === 'getDigest'
+          ? cacheHardTtlMinutes
+          : 0;
+      hardTTL = Math.max(hardTTL, softTTL);
       await packageCache.set(finalNamespace, finalKey, newRecord, hardTTL);
     }
 

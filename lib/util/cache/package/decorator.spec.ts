@@ -10,6 +10,8 @@ jest.mock('./file');
 describe('util/cache/package/decorator', () => {
   const spy = jest.fn(() => Promise.resolve());
 
+  const setCache = jest.spyOn(packageCache, 'set');
+
   beforeEach(async () => {
     memCache.init();
     await packageCache.init({ cacheDir: os.tmpdir() });
@@ -27,6 +29,12 @@ describe('util/cache/package/decorator', () => {
     expect(await myClass.getNumber()).toEqual(await myClass.getNumber());
     expect(await myClass.getNumber()).toBeDefined();
     expect(spy).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), data: expect.any(Number) },
+      30
+    );
   });
 
   it('Do not cache', async () => {
@@ -46,6 +54,7 @@ describe('util/cache/package/decorator', () => {
     expect(await myClass.getString('test', 'test')).toBe('test');
     expect(await myClass.getString('test', 'test')).toBe('test');
     expect(spy).toHaveBeenCalledTimes(4);
+    expect(setCache).not.toHaveBeenCalled();
   });
 
   it('Do cache null', async () => {
@@ -60,11 +69,16 @@ describe('util/cache/package/decorator', () => {
       }
     }
     const myClass = new MyClass();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('test', 'test')).toBe('test');
-    expect(await myClass.getString('test', 'test')).toBeDefined();
-    expect(spy).toHaveBeenCalledTimes(2);
+
+    expect(await myClass.getString('key', null)).toBeNull();
+    expect(await myClass.getString('key', null)).toBeNull();
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), data: null },
+      30
+    );
   });
 
   it('Do not cache undefined', async () => {
@@ -79,6 +93,7 @@ describe('util/cache/package/decorator', () => {
     expect(await myClass.getString()).toBeUndefined();
     expect(await myClass.getString()).toEqual(await myClass.getString());
     expect(spy).toHaveBeenCalledTimes(3);
+    expect(setCache).not.toHaveBeenCalled();
   });
 
   it('should cache function', async () => {
