@@ -15,40 +15,19 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
         const pipe = pipeMatch[1];
-        const [depName, currentValue] = pipe.split(':');
 
-        const dep: PackageDependency = {
-          depName,
-          currentValue,
-          datasource: 'bitbucket-tags',
-        };
-
-        logger.trace(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-          },
-          'Bitbucket pipe'
-        );
-        dep.depType = 'bitbucket-tags';
-        deps.push(dep);
+        if (pipe.startsWith('docker://')) {
+          const currentPipe = pipe.replace('docker://', '');
+          addDepAsDockerImage(deps, currentPipe);
+        } else {
+          addDepAsBitbucketTag(deps, pipe);
+        }
       }
 
       const dockerImageMatch = dockerImageRegex.exec(line);
       if (dockerImageMatch) {
         const currentFrom = dockerImageMatch[1];
-        const dep = getDep(currentFrom);
-
-        logger.trace(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-            currentDigest: dep.currentDigest,
-          },
-          'Docker image'
-        );
-        dep.depType = 'docker';
-        deps.push(dep);
+        addDepAsDockerImage(deps, currentFrom);
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -58,4 +37,44 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     return null;
   }
   return { deps };
+}
+function addDepAsBitbucketTag(
+  deps: PackageDependency<Record<string, any>>[],
+  pipe: string
+): void {
+  const [depName, currentValue] = pipe.split(':');
+
+  const dep: PackageDependency = {
+    depName,
+    currentValue,
+    datasource: 'bitbucket-tags',
+  };
+
+  logger.trace(
+    {
+      depName: dep.depName,
+      currentValue: dep.currentValue,
+    },
+    'Bitbucket pipe tag'
+  );
+  dep.depType = 'bitbucket-tags';
+  deps.push(dep);
+}
+
+function addDepAsDockerImage(
+  deps: PackageDependency<Record<string, any>>[],
+  currentDockerImage: string
+): void {
+  const dep = getDep(currentDockerImage);
+
+  logger.trace(
+    {
+      depName: dep.depName,
+      currentValue: dep.currentValue,
+      currentDigest: dep.currentDigest,
+    },
+    'Docker image'
+  );
+  dep.depType = 'docker';
+  deps.push(dep);
 }
