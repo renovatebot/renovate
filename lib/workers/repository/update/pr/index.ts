@@ -102,9 +102,15 @@ export async function ensurePr(
   const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const {
+    branchName,
+    ignoreTests,
+    internalChecksAsSuccess,
+    prTitle = '',
+    upgrades,
+  } = config;
   const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
+    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests)
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];

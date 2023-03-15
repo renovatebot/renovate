@@ -167,16 +167,25 @@
     The Renovate team
 
 'invalid':
+  unlabel:
+    - 'type:bug'
+    - 'type:feature'
+    - 'priority-5-triage'
+    - 'status:requirements'
   comment: >
-    Hi there,
+    This issue has been labeled as `invalid` by a maintainer so is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
 
+    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
 
-    This issue has been marked as invalid and will be closed and potentially deleted too.
-    Deletion is done so that invalid issues (such as mistaken bug reports) don't show up in repository searches and confuse future users.
+    Thanks, The Renovate team
+  close: true
+  lock: true
+  lock-reason: 'resolved'
 
-    In future, please create _Discussions_ instead of Issues (including for the topic of this Issue if you still wish to discuss it).
+'needs-code-formatting':
+  comment: >
+    Hi, you need to format code or logs here so that they're more readable for others.
 
-    Good luck,
+    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 
-
-    The Renovate team
+    Thanks, The Renovate team

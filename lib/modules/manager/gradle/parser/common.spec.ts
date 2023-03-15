@@ -4,8 +4,11 @@ import type { Ctx, PackageVariables } from '../types';
 import {
   cleanupTempVars,
   coalesceVariable,
+  increaseNestingDepth,
   interpolateString,
   loadFromTokenMap,
+  prependNestingDepth,
+  reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
   stripReservedPrefixFromKeyTokens,
@@ -13,7 +16,7 @@ import {
 
 describe('modules/manager/gradle/parser/common', () => {
   let ctx: Ctx;
-  const token = partial<lexer.Token>({});
+  const token = partial<lexer.Token>({ value: 'test' });
 
   beforeEach(() => {
     ctx = {
@@ -26,6 +29,7 @@ describe('modules/manager/gradle/parser/common', () => {
       registryUrls: [],
 
       varTokens: [],
+      tmpNestingDepth: [],
       tmpTokenStore: {},
       tokenMap: {},
     };
@@ -34,6 +38,33 @@ describe('modules/manager/gradle/parser/common', () => {
   it('storeVarToken', () => {
     storeVarToken(ctx, token);
     expect(ctx.varTokens).toStrictEqual([token]);
+  });
+
+  it('increaseNestingDepth', () => {
+    ctx.tmpNestingDepth = ctx.varTokens = [token];
+    increaseNestingDepth(ctx);
+    expect(ctx).toMatchObject({
+      tmpNestingDepth: [token, token],
+      varTokens: [],
+    });
+  });
+
+  it('reduceNestingDepth', () => {
+    ctx.tmpNestingDepth = [token, token];
+    reduceNestingDepth(ctx);
+    expect(ctx.tmpNestingDepth).toHaveLength(1);
+  });
+
+  it('prependNestingDepth', () => {
+    ctx.tmpNestingDepth = ctx.varTokens = [token];
+    prependNestingDepth(ctx);
+    expect(ctx.varTokens).toStrictEqual([token, token]);
+
+    coalesceVariable(ctx);
+    expect(ctx).toMatchObject({
+      tmpNestingDepth: [{ value: 'test' }],
+      varTokens: [{ value: 'test.test' }],
+    });
   });
 
   it('storeInTokenMap', () => {

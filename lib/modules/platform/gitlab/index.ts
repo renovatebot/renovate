@@ -396,7 +396,8 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -426,6 +427,19 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    branchStatuses.every(
+      (check) =>
+        check.name?.startsWith('renovate/') &&
+        gitlabToRenovateStatusMapping[check.status] === 'green'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   let status: BranchStatus = 'green'; // default to green

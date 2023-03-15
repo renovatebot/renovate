@@ -29,7 +29,7 @@ describe('modules/datasource/hex/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_package',
+          packageName: 'non_existent_package',
         })
       ).toBeNull();
     });
@@ -42,7 +42,7 @@ describe('modules/datasource/hex/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'non_existent_package',
+          packageName: 'non_existent_package',
         })
       ).toBeNull();
     });
@@ -50,35 +50,35 @@ describe('modules/datasource/hex/index', () => {
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(404);
       expect(
-        await getPkgReleases({ datasource, depName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' })
       ).toBeNull();
     });
 
     it('returns null for 401', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').reply(401);
       expect(
-        await getPkgReleases({ datasource, depName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' })
       ).toBeNull();
     });
 
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(429);
       await expect(
-        getPkgReleases({ datasource, depName: 'some_crate' })
+        getPkgReleases({ datasource, packageName: 'some_crate' })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/packages/some_crate').reply(502);
       await expect(
-        getPkgReleases({ datasource, depName: 'some_crate' })
+        getPkgReleases({ datasource, packageName: 'some_crate' })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/packages/some_package').replyWithError('');
       expect(
-        await getPkgReleases({ datasource, depName: 'some_package' })
+        await getPkgReleases({ datasource, packageName: 'some_package' })
       ).toBeNull();
     });
 
@@ -99,7 +99,7 @@ describe('modules/datasource/hex/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'certifi',
+        packageName: 'certifi',
       });
 
       expect(res).toBeNull();
@@ -112,7 +112,7 @@ describe('modules/datasource/hex/index', () => {
         .reply(200, certifiResponse);
       const res = await getPkgReleases({
         datasource,
-        depName: 'certifi',
+        packageName: 'certifi',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -127,7 +127,7 @@ describe('modules/datasource/hex/index', () => {
       hostRules.find.mockReturnValueOnce({});
       const res = await getPkgReleases({
         datasource,
-        depName: 'certifi',
+        packageName: 'certifi',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -151,7 +151,7 @@ describe('modules/datasource/hex/index', () => {
 
       const result = await getPkgReleases({
         datasource,
-        depName: 'private_package:renovate_test',
+        packageName: 'private_package:renovate_test',
       });
 
       expect(result).toMatchSnapshot();

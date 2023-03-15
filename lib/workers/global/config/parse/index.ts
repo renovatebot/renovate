@@ -99,6 +99,12 @@ export async function parseConfigs(
     config.endpoint = ensureTrailingSlash(config.endpoint);
   }
 
+  // Massage forkProcessing
+  if (!config.autodiscover && config.forkProcessing !== 'disabled') {
+    logger.debug('Enabling forkProcessing while in non-autodiscover mode');
+    config.forkProcessing = 'enabled';
+  }
+
   // Remove log file entries
   delete config.logFile;
   delete config.logFileLevel;
