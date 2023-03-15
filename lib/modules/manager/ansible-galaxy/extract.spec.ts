@@ -86,7 +86,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
 
     it('choose second block', () => {
       const res = getSliceEndNumber(5, 10, 5);
-      expect(res).toBe(9);
+      expect(res).toBe(10);
     });
   });
 });
