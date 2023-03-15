@@ -841,6 +841,7 @@ describe('config/presets/index', () => {
           ':ignoreModulesAndTests',
           'group:monorepos',
           'group:recommended',
+          'replacements:all',
           'workarounds:all',
         ],
       });

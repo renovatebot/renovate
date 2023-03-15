@@ -1,3 +1,5 @@
+import { z } from 'zod';
+import dataFiles from '../../../data-files.generated';
 import type { Preset } from '../types';
 import {
   PresetTemplate,
@@ -18,6 +20,7 @@ export const presets: Record<string, Preset> = {
       'replacements:jade-to-pug',
       'replacements:joi-to-scoped',
       'replacements:joi-to-unscoped',
+      'replacements:k8s-registry-move',
       'replacements:middie-to-scoped',
       'replacements:now-to-vercel',
       'replacements:parcel-css-to-lightningcss',
@@ -32,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'apollo-server-to-scoped': {
-    description: '`apollo-server` packages became scoped',
+    description: '`apollo-server` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.10.3',
@@ -113,7 +116,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'fastify-to-scoped': {
-    description: '`fastify` packages became scoped',
+    description: '`fastify` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -539,7 +542,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'parcel-css-to-lightningcss': {
-    description: '`@parcel/css` was renamed `lightningcss`.',
+    description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -576,7 +579,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-scripts-ts-to-react-scripts': {
-    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    description: '`react-scripts` supports TypeScript since version `2.1.0`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -698,6 +701,26 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
+const K8sImagesSchema = z.array(z.string());
+
+const k8sImages = K8sImagesSchema.parse(
+  JSON.parse(dataFiles.get('data/k8s-images.json')!)
+);
+const k8Registry: PresetTemplate = {
+  description:
+    'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
+  packageRules: [
+    {
+      matchDatasources: ['docker'],
+      replacements: k8sImages.map((k8sImage) => [
+        [`k8s.gcr.io/${k8sImage}`],
+        `registry.k8s.io/${k8sImage}`,
+      ]),
+    },
+  ],
+  title: 'k8s-registry-move',
+};
+
 const messageFormat: PresetTemplate = {
   description:
     'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
@@ -730,4 +753,4 @@ const messageFormat: PresetTemplate = {
   title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
 };
 
-addPresets(presets, messageFormat, mui);
+addPresets(presets, messageFormat, mui, k8Registry);
