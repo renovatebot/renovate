@@ -75,5 +75,6 @@ function addDepAsDockerImage(
     },
     'Docker image'
   );
+  dep.depType = 'docker';
   deps.push(dep);
 }
