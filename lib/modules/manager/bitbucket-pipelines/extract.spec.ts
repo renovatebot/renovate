@@ -42,6 +42,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
             "currentValue": "0.2.1",
             "datasource": "bitbucket-tags",
             "depName": "atlassian/aws-s3-deploy",
+            "depType": "bitbucket-tags",
           },
         ]
       `);

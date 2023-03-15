@@ -58,6 +58,7 @@ function addDepAsBitbucketTag(
     },
     'Bitbucket pipe tag'
   );
+  dep.depType = 'bitbucket-tags';
   deps.push(dep);
 }
 
