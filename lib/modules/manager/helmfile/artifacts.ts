@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
-import type { ExecOptions } from '../../../util/exec/types';
+import type { ToolConstraint } from '../../../util/exec/types';
 import {
   getSiblingFileName,
   readLocalFile,
@@ -40,30 +40,30 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const execOptions: ExecOptions = {
-      docker: {},
-      extraEnv: {},
-      toolConstraints: [
-        {
-          toolName: 'helm',
-          constraint: config.constraints?.helm,
-        },
-        {
-          toolName: 'helmfile',
-          constraint: config.constraints?.helmfile,
-        },
-      ],
-    };
+    const toolConstraints: ToolConstraint[] = [
+      {
+        toolName: 'helm',
+        constraint: config.constraints?.helm,
+      },
+      {
+        toolName: 'helmfile',
+        constraint: config.constraints?.helmfile,
+      },
+    ];
     const needKustomize = updatedDeps.some(
       (dep) => dep.managerData?.needKustomize
     );
     if (needKustomize) {
-      execOptions.toolConstraints?.push({
+      toolConstraints.push({
         toolName: 'kustomize',
         constraint: config.constraints?.kustomize,
       });
     }
-    await exec(`helmfile deps -f ${quote(packageFileName)}`, execOptions);
+    await exec(`helmfile deps -f ${quote(packageFileName)}`, {
+      docker: {},
+      extraEnv: {},
+      toolConstraints,
+    });
 
     const newHelmLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newHelmLockContent) {
