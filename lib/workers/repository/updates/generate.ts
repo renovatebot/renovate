@@ -200,9 +200,6 @@ export function generateBranchConfig(
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
-      upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
-        !upgrade.semanticCommitType!.startsWith(':');
     }
 
     // Compile a few times in case there are nested templates
@@ -226,12 +223,6 @@ export function generateBranchConfig(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    if (upgrade.toLowerCase) {
-      // We only need to lowercase the first line
-      const splitMessage = upgrade.commitMessage.split(newlineRegex);
-      splitMessage[0] = splitMessage[0].toLowerCase();
-      upgrade.commitMessage = splitMessage.join('\n');
-    }
 
     logger.trace(`commitMessage: ` + JSON.stringify(upgrade.commitMessage));
     if (upgrade.prTitle) {
@@ -248,9 +239,6 @@ export function generateBranchConfig(
           'Secrets were exposed in PR title'
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
-      }
-      if (upgrade.toLowerCase) {
-        upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {
       [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
