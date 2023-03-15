@@ -46,7 +46,7 @@ export function cache<T>({
   cacheable = () => true,
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
-  return decorate(async ({ args, instance, callback }) => {
+  return decorate(async ({ args, instance, callback, methodName }) => {
     if (!cacheable.apply(instance, args)) {
       return callback();
     }
