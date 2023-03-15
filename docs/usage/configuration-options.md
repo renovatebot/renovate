@@ -343,10 +343,10 @@ Solutions:
     We strongly recommended that you avoid configuring this field directly.
     Use at your own risk.
 
-    If you truly need to configure this then it probably means either:
+If you truly need to configure this then it probably means either:
 
-      - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-      - You have a use case we didn't expect, please open a discussion to see if we want to get a feature request from you
+- You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
+- You have a use case we didn't expect, please open a discussion to see if we want to get a feature request from you
 
 ## branchNameStrict
 
