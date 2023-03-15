@@ -55,7 +55,7 @@ export async function ensureOnboardingPr(
         number: existingPr.number,
         topic: 'Branch Conflicted',
         content: emojify(
-          `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
+          `:warning: This PR has a merge conflict which Renovate is unable to automatically resolve, so updates to this PR description are now paused. Please resolve the merge conflict manually.\n\n`
         ),
       });
       return;
