@@ -579,7 +579,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-scripts-ts-to-react-scripts': {
-    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    description: '`react-scripts` supports TypeScript since version `2.1.0`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
