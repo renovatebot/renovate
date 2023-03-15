@@ -1423,7 +1423,7 @@ const options: RenovateOptions[] = [
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
-      commitMessageAction: 'pin',
+      commitMessageAction: 'Pin',
       group: {
         commitMessageTopic: 'dependencies',
         commitMessageExtra: '',
@@ -1455,7 +1455,7 @@ const options: RenovateOptions[] = [
     default: {
       groupName: 'Pin Dependencies',
       groupSlug: 'pin-dependencies',
-      commitMessageAction: 'pin',
+      commitMessageAction: 'Pin',
       group: {
         commitMessageTopic: 'dependencies',
         commitMessageExtra: '',
@@ -1471,7 +1471,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       branchTopic: '{{{depNameSanitized}}}-rollback',
-      commitMessageAction: 'roll back',
+      commitMessageAction: 'Roll back',
       semanticCommitType: 'fix',
     },
     cli: false,
@@ -1484,7 +1484,7 @@ const options: RenovateOptions[] = [
     type: 'object',
     default: {
       branchTopic: '{{{depNameSanitized}}}-replacement',
-      commitMessageAction: 'replace',
+      commitMessageAction: 'Replace',
       commitMessageExtra:
         'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
       prBodyNotes: [
@@ -1843,7 +1843,7 @@ const options: RenovateOptions[] = [
       recreateClosed: true,
       rebaseStalePrs: true,
       branchTopic: 'lock-file-maintenance',
-      commitMessageAction: 'lock file maintenance',
+      commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
       commitMessageExtra: null,
       schedule: ['before 5am on monday'],

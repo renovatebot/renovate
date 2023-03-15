@@ -2,6 +2,57 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
+  angularTitles: {
+    description:
+      'Set default values of `{{commitMessageAction}}` to angular style with first letter lowercase',
+    lockFileMaintenance: {
+      branchTopic: 'lock-file-maintenance',
+      commitMessageAction: 'lock file maintenance',
+      commitMessageExtra: null,
+      commitMessageTopic: null,
+      enabled: false,
+      groupName: null,
+      prBodyDefinitions: {
+        Change: 'All locks refreshed',
+      },
+      rebaseStalePrs: true,
+      recreateClosed: true,
+      schedule: ['before 5am on monday'],
+    },
+    pin: {
+      commitMessageAction: 'pin',
+      group: {
+        commitMessageExtra: '',
+        commitMessageTopic: 'dependencies',
+      },
+      groupName: 'Pin Dependencies',
+      groupSlug: 'pin-dependencies',
+      rebaseWhen: 'behind-base-branch',
+    },
+    pinDigest: {
+      commitMessageAction: 'pin',
+      group: {
+        commitMessageExtra: '',
+        commitMessageTopic: 'dependencies',
+      },
+      groupName: 'Pin Dependencies',
+      groupSlug: 'pin-dependencies',
+    },
+    replacement: {
+      branchTopic: '{{{depNameSanitized}}}-replacement',
+      commitMessageAction: 'replace',
+      commitMessageExtra:
+        'with {{newName}} {{#if isMajor}}{{{prettyNewMajor}}}{{else}}{{#if isSingleVersion}}{{{prettyNewVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}',
+      prBodyNotes: [
+        'This is a special PR that replaces `{{{depNameSanitized}}}` with the community suggested minimal stable replacement version.',
+      ],
+    },
+    rollback: {
+      branchTopic: '{{{depNameSanitized}}}-rollback',
+      commitMessageAction: 'roll back',
+      semanticCommitType: 'fix',
+    },
+  },
   assignAndReview: {
     description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
