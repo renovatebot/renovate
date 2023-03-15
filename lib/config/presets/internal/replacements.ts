@@ -14,6 +14,7 @@ export const presets: Record<string, Preset> = {
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
+      'replacements:containerbase',
       'replacements:cucumber-to-scoped',
       'replacements:fastify-to-scoped',
       'replacements:hapi-to-scoped',
@@ -101,6 +102,38 @@ export const presets: Record<string, Preset> = {
         matchPackageNames: ['babel-eslint'],
         replacementName: '@babel/eslint-parser',
         replacementVersion: '7.11.0',
+      },
+    ],
+  },
+  containerbase: {
+    description: 'replace containerbase stuff',
+    packageRules: [
+      {
+        description: 'replace containerbase/buildpack to containerbase/base',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['containerbase/buildpack'],
+        replacementName: 'containerbase/base',
+      },
+      {
+        description:
+          'replace docker.io/containerbase/buildpack to docker.io/containerbase/base',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['docker.io/containerbase/buildpack'],
+        replacementName: 'docker.io/containerbase/base',
+      },
+      {
+        description:
+          'replace ghcr.io/containerbase/buildpack to ghcr.io/containerbase/base',
+        matchDatasources: ['docker'],
+        matchPackageNames: ['ghcr.io/containerbase/buildpack'],
+        replacementName: 'ghcr.io/containerbase/base',
+      },
+      {
+        description:
+          'replace renovatebot/internal-tools to containerbase/internal-tools',
+        matchDatasources: ['github-tags'],
+        matchPackageNames: ['renovatebot/internal-tools'],
+        replacementName: 'containerbase/internal-tools',
       },
     ],
   },
