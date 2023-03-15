@@ -35,7 +35,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'apollo-server-to-scoped': {
-    description: '`apollo-server` packages became scoped',
+    description: '`apollo-server` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.10.3',
@@ -116,7 +116,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'fastify-to-scoped': {
-    description: '`fastify` packages became scoped',
+    description: '`fastify` packages became scoped.',
     packageRules: [
       {
         matchCurrentVersion: '>=3.3.0 <4.0.0',
@@ -542,7 +542,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'parcel-css-to-lightningcss': {
-    description: '`@parcel/css` was renamed `lightningcss`.',
+    description: '`@parcel/css` was renamed to `lightningcss`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
@@ -579,7 +579,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'react-scripts-ts-to-react-scripts': {
-    description: '`react-scripts` supports typescripts since version 2.1.0.',
+    description: '`react-scripts` supports TypeScript since version `2.1.0`.',
     packageRules: [
       {
         matchDatasources: ['npm'],
