@@ -106,31 +106,31 @@ export const presets: Record<string, Preset> = {
     ],
   },
   containerbase: {
-    description: 'replace containerbase stuff',
+    description: 'Replace containerbase dependencies.',
     packageRules: [
       {
-        description: 'replace containerbase/buildpack to containerbase/base',
+        description: 'Replace `containerbase/buildpack` with `containerbase/base`.',
         matchDatasources: ['docker'],
         matchPackageNames: ['containerbase/buildpack'],
         replacementName: 'containerbase/base',
       },
       {
         description:
-          'replace docker.io/containerbase/buildpack to docker.io/containerbase/base',
+          'Replace `docker.io/containerbase/buildpack` with `docker.io/containerbase/base`.',
         matchDatasources: ['docker'],
         matchPackageNames: ['docker.io/containerbase/buildpack'],
         replacementName: 'docker.io/containerbase/base',
       },
       {
         description:
-          'replace ghcr.io/containerbase/buildpack to ghcr.io/containerbase/base',
+          'Replace `ghcr.io/containerbase/buildpack` with `ghcr.io/containerbase/base`.',
         matchDatasources: ['docker'],
         matchPackageNames: ['ghcr.io/containerbase/buildpack'],
         replacementName: 'ghcr.io/containerbase/base',
       },
       {
         description:
-          'replace renovatebot/internal-tools to containerbase/internal-tools',
+          'Replace `renovatebot/internal-tools` with `containerbase/internal-tools`.',
         matchDatasources: ['github-tags'],
         matchPackageNames: ['renovatebot/internal-tools'],
         replacementName: 'containerbase/internal-tools',
