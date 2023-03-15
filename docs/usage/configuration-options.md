@@ -2392,12 +2392,14 @@ The available sections are header, table, notes, changelogs, configDescription, 
 
 ## prConcurrentLimit
 
-This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
+This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs open at any time.
 
 This limit is enforced on a per-repository basis.
 
-Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
-Security PRs have `[SECURITY]` in their PR title.
+<!-- prettier-ignore -->
+!!! note
+    Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+    Security PRs have `[SECURITY]` in their PR title.
 
 ## prCreation
 
