@@ -2384,7 +2384,16 @@ e.g. if you wish to add an extra Warning to major updates:
 
 ## prBodyTemplate
 
-The available sections are `header`, `table`, `warnings`, `notes`, `changelogs`, `configDescription`, `controls`, `footer`.
+The available sections are:
+
+- `header`
+- `table`
+- `warnings`
+- `notes`
+- `changelogs`
+- `configDescription`
+- `controls`
+- `footer`
 
 ## prConcurrentLimit
 
