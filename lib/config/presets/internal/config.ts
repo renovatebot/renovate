@@ -33,7 +33,7 @@ export const presets: Record<string, Preset> = {
       ':maintainLockFilesMonthly',
     ],
     lockFileMaintenance: {
-      commitMessageAction: 'Update',
+      commitMessageAction: 'update',
       extends: ['group:all'],
     },
     separateMajorMinor: false,
