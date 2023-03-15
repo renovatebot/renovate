@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
+import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
+import { ReleaseResultZod } from './types';
 
 export class JsonDatasource extends Datasource {
   static readonly id = 'json';
@@ -20,77 +22,67 @@ export class JsonDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     if (is.nullOrUndefined(registryUrl)) {
-      // TODO add logging
       return null;
     }
 
     const url = parseUrl(registryUrl);
     if (is.nullOrUndefined(url)) {
-      //TODO add logging
+      logger.debug(`Failed to parse url ${registryUrl}`);
       return null;
     }
 
     let response: string | null = null;
     switch (url.protocol) {
-      case 'http':
-      case 'https':
+      case 'http:':
+      case 'https:':
         response = (await this.http.get(registryUrl)).body;
         break;
-      case 'file':
+      case 'file:':
         response = await readLocalFile(
           registryUrl.replace('file://', ''),
           'utf8'
         );
         break;
       default:
-        //TODO logging
+        logger.debug(`Scheme ${url.protocol} is not supported`);
         return null;
     }
 
     if (!is.nonEmptyString(response)) {
-      // TODO logging
       return null;
     }
 
     const expression = jsonata(packageName);
 
-    const parsedResponse = await expression.evaluate(response);
-    if (!isReleaseResult(parsedResponse)) {
-      //TODO add logging
+    const jsonObject = JSON.parse(response);
+
+    // wildcard means same object
+    const evaluated =
+      packageName === '*' ? jsonObject : await expression.evaluate(jsonObject);
+
+    const parsed = ReleaseResultZod.safeParse(evaluated);
+    if (!parsed.success) {
+      logger.debug({ err: parsed.error }, 'Response has failed validation');
       return null;
     }
 
+    const cleanedResponse = parsed.data;
     // manually copy to prevent leaking data into other systems
-    const releases = parsedResponse.releases.map((value) => {
-      return {
-        version: value.version,
-        isDeprecated: value.isDeprecated,
-        releaseTimestamp: value.releaseTimestamp,
-        changelogUrl: value.changelogUrl,
-        sourceUrl: value.sourceUrl,
-        sourceDirectory: value.sourceDirectory,
-      };
-    });
+    const releases = cleanedResponse.releases.map((value) => ({
+      version: value.version,
+      isDeprecated: value.isDeprecated,
+      releaseTimestamp: value.releaseTimestamp,
+      changelogUrl: value.changelogUrl,
+      sourceUrl: value.sourceUrl,
+      sourceDirectory: value.sourceDirectory,
+    }));
 
-    const result: ReleaseResult = {
-      sourceUrl: parsedResponse.sourceUrl,
-      sourceDirectory: parsedResponse.sourceDirectory,
-      changelogUrl: parsedResponse.changelogUrl,
-      homepage: parsedResponse.homepage,
+    return {
+      sourceUrl: cleanedResponse.sourceUrl,
+      sourceDirectory: cleanedResponse.sourceDirectory,
+      changelogUrl: cleanedResponse.changelogUrl,
+      homepage: cleanedResponse.homepage,
       releases,
     };
-
-    return result;
   }
-}
-
-function isReleaseResult(input: unknown): input is ReleaseResult {
-  return (
-    is.plainObject(input) &&
-    is.nonEmptyArray(input?.releases) &&
-    input.releases.every(
-      (release) =>
-        is.plainObject(release) && !is.nullOrUndefined(release?.version)
-    )
-  );
 }
