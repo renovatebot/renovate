@@ -44,20 +44,11 @@ function addDepAsBitbucketTag(
   pipe: string
 ): void {
   const [depName, currentValue] = pipe.split(':');
-
   const dep: PackageDependency = {
     depName,
     currentValue,
     datasource: BitBucketTagsDatasource.id,
   };
-
-  logger.trace(
-    {
-      depName: dep.depName,
-      currentValue: dep.currentValue,
-    },
-    'Bitbucket pipe tag'
-  );
   dep.depType = 'bitbucket-tags';
   deps.push(dep);
 }
@@ -67,15 +58,6 @@ function addDepAsDockerImage(
   currentDockerImage: string
 ): void {
   const dep = getDep(currentDockerImage);
-
-  logger.trace(
-    {
-      depName: dep.depName,
-      currentValue: dep.currentValue,
-      currentDigest: dep.currentDigest,
-    },
-    'Docker image'
-  );
   dep.depType = 'docker';
   deps.push(dep);
 }
