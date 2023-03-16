@@ -81,14 +81,13 @@ export function initPlatform({
   endpoint,
   username,
   password,
-  token,
 }: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
-  if (!(username && password) && !token) {
+  if (!(username && password)) {
     throw new Error(
-      'Init: You must configure either a Bitbucket Server token or username and password'
+      'Init: You must configure a Bitbucket Server username/password'
     );
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid (#9595)
