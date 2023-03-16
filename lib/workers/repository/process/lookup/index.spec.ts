@@ -1958,99 +1958,12 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - can remove old prefix', async () => {
+    it('handles replacements - can template replacement name without a replacement version', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageNameWithoutRegistry = 'library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'mirror.some.org/library/';
-      config.datasource = DockerDatasource.id;
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
-      });
-
-      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
-        {
-          updateType: 'replacement',
-          newName: 'openjdk',
-          newValue: '17.0.0',
-        },
-        {
-          updateType: 'major',
-          newMajor: 18,
-          newValue: '18.0.0',
-          newVersion: '18.0.0',
-        },
-      ]);
-    });
-
-    it('handles replacements - will skip if prefix to remove does not match', async () => {
-      config.packageName = 'mirror.some.org/library/openjdk';
-      config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'mirror.some.com/registry/';
-      config.datasource = DockerDatasource.id;
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
-      });
-
-      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
-        {
-          updateType: 'major',
-          newMajor: 18,
-          newValue: '18.0.0',
-          newVersion: '18.0.0',
-        },
-      ]);
-    });
-
-    it('handles replacements - will add new prefix', async () => {
-      config.packageName = 'openjdk';
-      config.currentValue = '17.0.0';
-      config.replacementPrefixAdd = 'mirror.some.org/library/';
-      config.datasource = DockerDatasource.id;
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
-      });
-
-      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
-        {
-          updateType: 'replacement',
-          newName: 'mirror.some.org/library/openjdk',
-          newValue: '17.0.0',
-        },
-        {
-          updateType: 'major',
-          newMajor: 18,
-          newValue: '18.0.0',
-          newVersion: '18.0.0',
-        },
-      ]);
-    });
-
-    it('handles replacements - can swap prefixes', async () => {
-      config.packageName = 'old.registry.net/library/openjdk';
-      config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'old.registry.net/library/';
-      config.replacementPrefixAdd = 'new.registry.io/library/';
+      config.replacementNameTemplate =
+        'new.registry.io/{{{packageNameWithoutRegistry}}}';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
@@ -2078,76 +1991,12 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - prefix to be removed not matched, but adds new prefix', async () => {
-      config.packageName = 'mirror.com/library/openjdk';
+    it('handles replacements - can template replacement name withg a replacement version', async () => {
+      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageNameWithoutRegistry = 'library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'old.registry.net/library/';
-      config.replacementPrefixAdd = 'new.registry.io/library/';
-      config.datasource = DockerDatasource.id;
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
-      });
-
-      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
-        {
-          updateType: 'replacement',
-          newName: 'new.registry.io/library/mirror.com/library/openjdk',
-          newValue: '17.0.0',
-        },
-        {
-          updateType: 'major',
-          newMajor: 18,
-          newValue: '18.0.0',
-          newVersion: '18.0.0',
-        },
-      ]);
-    });
-
-    it('handles replacements - replace name and prefix', async () => {
-      config.packageName = 'old.registry.net/library/openjdk';
-      config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'old.registry.net/library/';
-      config.replacementPrefixAdd = 'new.registry.io/library/';
-      config.replacementName = 'eclipse-temurin';
-      config.datasource = DockerDatasource.id;
-      getDockerReleases.mockResolvedValueOnce({
-        releases: [
-          {
-            version: '17.0.0',
-          },
-          {
-            version: '18.0.0',
-          },
-        ],
-      });
-
-      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
-        {
-          updateType: 'replacement',
-          newName: 'new.registry.io/library/eclipse-temurin',
-          newValue: '17.0.0',
-        },
-        {
-          updateType: 'major',
-          newMajor: 18,
-          newValue: '18.0.0',
-          newVersion: '18.0.0',
-        },
-      ]);
-    });
-
-    it('handles replacements - replace prefixes and version', async () => {
-      config.packageName = 'old.registry.net/library/openjdk';
-      config.currentValue = '17.0.0';
-      config.replacementPrefixRemove = 'old.registry.net/library/';
-      config.replacementPrefixAdd = 'new.registry.io/library/';
+      config.replacementNameTemplate =
+        'new.registry.io/{{{packageNameWithoutRegistry}}}';
       config.replacementVersion = '18.0.0';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
@@ -2166,6 +2015,40 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: 'replacement',
           newName: 'new.registry.io/library/openjdk',
           newValue: '18.0.0',
+        },
+        {
+          updateType: 'major',
+          newMajor: 18,
+          newValue: '18.0.0',
+          newVersion: '18.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - replacementName takes precedence over replacementNameTemplate', async () => {
+      config.packageName = 'mirror.some.org/library/openjdk';
+      config.packageNameWithoutRegistry = 'library/openjdk';
+      config.currentValue = '17.0.0';
+      config.replacementNameTemplate =
+        'new.registry.io/{{{packageNameWithoutRegistry}}}';
+      config.replacementName = 'eclipse-temurin';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '17.0.0',
+          },
+          {
+            version: '18.0.0',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
         },
         {
           updateType: 'major',

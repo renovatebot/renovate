@@ -115,6 +115,7 @@ export const allowedFields = {
   packageFileDir:
     'The directory with full path where the packageFile was found',
   packageName: 'The full name that was used to look up the dependency',
+  packageNameWithoutRegistry: 'The name of the package without the registry',
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',

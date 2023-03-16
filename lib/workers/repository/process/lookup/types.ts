@@ -45,8 +45,7 @@ export interface LookupUpdateConfig
   packageName: string;
   minimumConfidence?: string;
   replacementName?: string;
-  replacementPrefixAdd?: string;
-  replacementPrefixRemove?: string;
+  replacementNameTemplate: string;
   replacementVersion?: string;
 }
 

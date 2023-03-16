@@ -47,6 +47,7 @@ export interface BranchUpgradeConfig
   language?: string;
   manager: string;
   packageFile?: string;
+  packageNameWithoutRegistry?: string;
   lockFile?: string;
   lockFiles?: string[];
   reuseExistingBranch?: boolean;
