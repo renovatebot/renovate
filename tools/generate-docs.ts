@@ -37,7 +37,7 @@ process.on('unhandledRejection', (err) => {
       return;
     }
 
-    logger.info('* fetching open github issues');
+    logger.info('* fetching open GitHub issues');
     const openItems = await getOpenGitHubItems();
 
     logger.info('* platforms');

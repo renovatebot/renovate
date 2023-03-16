@@ -35,6 +35,7 @@ const defaultRegistriesMock: RegistriesMock = {
 };
 
 class DummyDatasource extends Datasource {
+  override defaultVersioning = 'python';
   override defaultRegistryUrls = ['https://reg1.com'];
 
   constructor(private registriesMock: RegistriesMock = defaultRegistriesMock) {
@@ -695,13 +696,31 @@ describe('modules/datasource/index', () => {
             'https://foo.bar': {
               releases: [
                 {
-                  version: '0.0.1',
+                  version: '0.0.5',
+                  constraints: {
+                    python: ['>= 3.0.0, < 4.0'],
+                  },
+                },
+                {
+                  version: '0.0.4',
+                  constraints: {
+                    python: ['>= 2.7, < 4.0'],
+                  },
+                },
+                {
+                  version: '0.0.3',
+                  constraints: {
+                    python: ['>= 2.7, < 3.0'],
+                  },
+                },
+                {
+                  version: '0.0.2',
                   constraints: {
                     python: ['2.7'],
                   },
                 },
                 {
-                  version: '0.0.2',
+                  version: '0.0.1',
                   constraints: {
                     python: ['1.0'],
                   },
@@ -714,11 +733,11 @@ describe('modules/datasource/index', () => {
             datasource,
             packageName,
             defaultRegistryUrls: ['https://foo.bar'],
-            constraints: { python: '2.7.0' },
+            constraints: { python: '>= 2.7, < 3.0' },
             constraintsFiltering: 'strict',
           });
           expect(res).toMatchObject({
-            releases: [{ version: '0.0.1' }],
+            releases: [{ version: '0.0.3' }, { version: '0.0.4' }],
           });
         });
       });

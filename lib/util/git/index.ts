@@ -31,7 +31,10 @@ import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
+import {
+  getCachedBehindBaseResult,
+  setCachedBehindBaseResult,
+} from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -595,6 +598,7 @@ export async function isBranchBehindBase(
       { currentBranch, currentBranchSha },
       `branch.isBehindBase(): ${isBehind}`
     );
+    setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);
