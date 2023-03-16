@@ -1,22 +1,28 @@
 import is from '@sindresorhus/is';
 import type { PackageRule, PackageRuleInputConfig } from '../../config/types';
-import type { MatchType, MatcherApi } from './types';
+import type { MatchType, MatcherApi, MatcherApiAsync } from './types';
 
-export function matcherOR(
+export async function matcherOR(
   matchType: MatchType,
-  groupMatchers: MatcherApi[],
+  groupMatchers: (MatcherApi | MatcherApiAsync)[],
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule
-): boolean | null {
+): Promise<boolean | null> {
   let matchApplied = false;
   for (const matcher of groupMatchers) {
     let isMatch;
     switch (matchType) {
       case 'excludes':
         isMatch = matcher.excludes(inputConfig, packageRule);
+        if (is.promise(isMatch)) {
+          isMatch = await isMatch;
+        }
         break;
       case 'matches':
         isMatch = matcher.matches(inputConfig, packageRule);
+        if (is.promise(isMatch)) {
+          isMatch = await isMatch;
+        }
         break;
     }
 

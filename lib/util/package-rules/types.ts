@@ -7,8 +7,21 @@ export interface MatcherApi {
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule
   ): boolean | null;
+
   excludes(
     inputConfig: PackageRuleInputConfig,
     packageRule: PackageRule
   ): boolean | null;
+}
+
+export interface MatcherApiAsync {
+  matches(
+    inputConfig: PackageRuleInputConfig,
+    packageRule: PackageRule
+  ): Promise<boolean | null>;
+
+  excludes(
+    inputConfig: PackageRuleInputConfig,
+    packageRule: PackageRule
+  ): Promise<boolean | null>;
 }

@@ -113,7 +113,7 @@ export async function flattenUpdates(
               depConfig.datasource
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = await applyPackageRules(updateConfig);
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
@@ -123,7 +123,7 @@ export async function flattenUpdates(
               delete updateConfig[updateType];
             }
             // Apply again in case any were added by the updateType config
-            updateConfig = applyPackageRules(updateConfig);
+            updateConfig = await applyPackageRules(updateConfig);
             updateConfig = applyUpdateConfig(updateConfig);
             updateConfig.baseDeps = packageFile.deps;
             update.branchName = updateConfig.branchName;
@@ -143,7 +143,7 @@ export async function flattenUpdates(
         );
         lockFileConfig.updateType = 'lockFileMaintenance';
         lockFileConfig.isLockFileMaintenance = true;
-        lockFileConfig = applyPackageRules(lockFileConfig);
+        lockFileConfig = await applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(
           lockFileConfig,

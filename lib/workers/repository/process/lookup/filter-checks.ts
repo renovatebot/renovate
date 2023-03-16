@@ -50,7 +50,7 @@ export async function filterInternalChecks(
         releaseConfig[releaseConfig.updateType]!
       );
       // Apply packageRules in case any apply to updateType
-      releaseConfig = applyPackageRules(releaseConfig);
+      releaseConfig = await applyPackageRules(releaseConfig);
       // Now check for a stabilityDays config
       const {
         minimumConfidence,

@@ -14,10 +14,10 @@ import { PackagePrefixesMatcher } from './package-prefixes';
 import { PathsMatcher } from './paths';
 import { SourceUrlPrefixesMatcher } from './sourceurl-prefixes';
 import { SourceUrlsMatcher } from './sourceurls';
-import type { MatcherApi } from './types';
+import type { MatcherApi, MatcherApiAsync } from './types';
 import { UpdateTypesMatcher } from './update-types';
 
-const matchers: MatcherApi[][] = [];
+const matchers: (MatcherApi | MatcherApiAsync)[][] = [];
 export default matchers;
 
 // each manager under the same key will use a logical OR, if multiple matchers are applied AND will be used

@@ -46,7 +46,7 @@ async function fetchDepUpdates(
   const datasourceDefaultConfig = await getDefaultConfig(depConfig.datasource!);
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
-  depConfig = applyPackageRules(depConfig);
+  depConfig = await applyPackageRules(depConfig);
   depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#7154)

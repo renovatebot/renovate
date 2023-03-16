@@ -6,15 +6,15 @@ import { logger } from '../../logger';
 import matchers from './matchers';
 import { matcherOR } from './utils';
 
-function matchesRule(
+async function matchesRule(
   inputConfig: PackageRuleInputConfig,
   packageRule: PackageRule
-): boolean {
+): Promise<boolean> {
   let positiveMatch = true;
   let matchApplied = false;
   // matches
   for (const groupMatchers of matchers) {
-    const isMatch = matcherOR(
+    const isMatch = await matcherOR(
       'matches',
       groupMatchers,
       inputConfig,
@@ -40,7 +40,7 @@ function matchesRule(
 
   // excludes
   for (const groupExcludes of matchers) {
-    const isExclude = matcherOR(
+    const isExclude = await matcherOR(
       'excludes',
       groupExcludes,
       inputConfig,
@@ -60,9 +60,9 @@ function matchesRule(
   return positiveMatch;
 }
 
-export function applyPackageRules<T extends PackageRuleInputConfig>(
+export async function applyPackageRules<T extends PackageRuleInputConfig>(
   inputConfig: T
-): T {
+): Promise<T> {
   let config = { ...inputConfig };
   const packageRules = config.packageRules ?? [];
   logger.trace(
@@ -71,7 +71,7 @@ export function applyPackageRules<T extends PackageRuleInputConfig>(
   );
   for (const packageRule of packageRules) {
     // This rule is considered matched if there was at least one positive match and no negative matches
-    if (matchesRule(config, packageRule)) {
+    if (await matchesRule(config, packageRule)) {
       // Package rule config overrides any existing config
       const toApply = { ...packageRule };
       if (config.groupSlug && packageRule.groupName && !packageRule.groupSlug) {
