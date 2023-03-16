@@ -76,19 +76,28 @@ export function cache<T>({
       finalKey
     );
 
-    const softTTL = process.env.RENOVATE_CACHE_DECORATOR_MINUTES
-      ? parseInt(process.env.RENOVATE_CACHE_DECORATOR_MINUTES, 10)
-      : ttlMinutes;
+    const softTTL = ttlMinutes;
+    const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
+    let hardTTL =
+      methodName === 'getReleases' || methodName === 'getDigest'
+        ? cacheHardTtlMinutes
+        : 0;
+    hardTTL = Math.max(hardTTL, softTTL);
 
     let oldData: unknown;
     if (oldRecord) {
       const now = DateTime.local();
       const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
-      const deadline = cachedAt.plus({ minutes: softTTL });
-      if (now < deadline) {
-        return oldRecord.data;
+
+      const softDeadline = cachedAt.plus({ minutes: softTTL });
+      if (now < softDeadline) {
+        return oldRecord.value;
       }
-      oldData = oldRecord.data;
+
+      const hardDeadline = cachedAt.plus({ minutes: hardTTL });
+      if (now < hardDeadline) {
+        oldData = oldRecord.value;
+      }
     }
 
     let newData: unknown;
@@ -109,14 +118,8 @@ export function cache<T>({
     if (!is.undefined(newData)) {
       const newRecord: DecoratorCachedRecord = {
         cachedAt: DateTime.local().toISO(),
-        data: newData,
+        value: newData,
       };
-      const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
-      let hardTTL =
-        methodName === 'getReleases' || methodName === 'getDigest'
-          ? cacheHardTtlMinutes
-          : 0;
-      hardTTL = Math.max(hardTTL, softTTL);
       await packageCache.set(finalNamespace, finalKey, newRecord, hardTTL);
     }
 

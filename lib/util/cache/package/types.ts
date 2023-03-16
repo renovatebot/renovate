@@ -12,6 +12,6 @@ export interface PackageCache {
 }
 
 export interface DecoratorCachedRecord {
-  data: unknown;
+  value: unknown;
   cachedAt: string;
 }

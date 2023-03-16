@@ -1,4 +1,5 @@
 import os from 'os';
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';
 import * as packageCache from '.';
@@ -38,7 +39,7 @@ describe('util/cache/package/decorator', () => {
     expect(setCache).toHaveBeenCalledOnceWith(
       'some-namespace',
       'cache-decorator:some-key',
-      { cachedAt: expect.any(String), data: '111' },
+      { cachedAt: expect.any(String), value: '111' },
       30
     );
   });
@@ -78,7 +79,7 @@ describe('util/cache/package/decorator', () => {
     expect(setCache).toHaveBeenCalledOnceWith(
       'namespace',
       'cache-decorator:key',
-      { cachedAt: expect.any(String), data: null },
+      { cachedAt: expect.any(String), value: null },
       30
     );
   });
@@ -126,7 +127,7 @@ describe('util/cache/package/decorator', () => {
     expect(setCache).toHaveBeenCalledOnceWith(
       'some-namespace',
       'cache-decorator:some-key',
-      { cachedAt: expect.any(String), data: '111' },
+      { cachedAt: expect.any(String), value: '111' },
       30
     );
   });
@@ -148,7 +149,7 @@ describe('util/cache/package/decorator', () => {
     expect(setCache).toHaveBeenCalledOnceWith(
       'namespace',
       'cache-decorator:key',
-      { cachedAt: expect.any(String), data: '111' },
+      { cachedAt: expect.any(String), value: '111' },
       30
     );
   });
@@ -160,92 +161,86 @@ describe('util/cache/package/decorator', () => {
         key: 'key',
         ttlMinutes: 1,
       })
-      public fn(): Promise<string> {
+      public getReleases(): Promise<string> {
         return getValue();
       }
     }
 
     beforeEach(() => {
       jest.useFakeTimers({ advanceTimers: false });
+      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
     });
 
     afterEach(() => {
       jest.useRealTimers();
-      delete process.env.RENOVATE_CACHE_DECORATOR_MINUTES;
+      GlobalConfig.reset();
     });
 
     it('updates cached result', async () => {
       const obj = new Class();
 
-      expect(await obj.fn()).toBe('111');
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
 
       jest.advanceTimersByTime(60 * 1000 - 1);
-      expect(await obj.fn()).toBe('111');
+      expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         'namespace',
         'cache-decorator:key',
-        { cachedAt: expect.any(String), data: '111' },
-        1
+        { cachedAt: expect.any(String), value: '111' },
+        2
       );
 
       jest.advanceTimersByTime(1);
-      expect(await obj.fn()).toBe('222');
+      expect(await obj.getReleases()).toBe('222');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenLastCalledWith(
         'namespace',
         'cache-decorator:key',
-        { cachedAt: expect.any(String), data: '222' },
-        1
-      );
-    });
-
-    it('cache TTL can be overriden with RENOVATE_CACHE_DECORATOR_MINUTES', async () => {
-      process.env.RENOVATE_CACHE_DECORATOR_MINUTES = '3';
-      const obj = new Class();
-
-      expect(await obj.fn()).toBe('111');
-      expect(getValue).toHaveBeenCalledTimes(1);
-      expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
-        'cache-decorator:key',
-        { cachedAt: expect.any(String), data: '111' },
-        3
-      );
-
-      jest.advanceTimersByTime(3 * 60 * 1000 - 1);
-      expect(await obj.fn()).toBe('111');
-      expect(getValue).toHaveBeenCalledTimes(1);
-      expect(setCache).toHaveBeenCalledTimes(1);
-
-      jest.advanceTimersByTime(1);
-      expect(await obj.fn()).toBe('222');
-      expect(getValue).toHaveBeenCalledTimes(2);
-      expect(setCache).toHaveBeenLastCalledWith(
-        'namespace',
-        'cache-decorator:key',
-        { cachedAt: expect.any(String), data: '222' },
-        3
+        { cachedAt: expect.any(String), value: '222' },
+        2
       );
     });
 
     it('returns obsolete result on error', async () => {
       const obj = new Class();
 
-      expect(await obj.fn()).toBe('111');
+      expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(1);
       expect(setCache).toHaveBeenLastCalledWith(
         'namespace',
         'cache-decorator:key',
-        { cachedAt: expect.any(String), data: '111' },
-        1
+        { cachedAt: expect.any(String), value: '111' },
+        2
       );
 
       jest.advanceTimersByTime(60 * 1000);
       getValue.mockRejectedValueOnce(new Error('test'));
-      expect(await obj.fn()).toBe('111');
+      expect(await obj.getReleases()).toBe('111');
       expect(getValue).toHaveBeenCalledTimes(2);
       expect(setCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops obsolete value after hard TTL is out', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(2 * 60 * 1000 - 1);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      expect(await obj.getReleases()).toBe('111');
+
+      jest.advanceTimersByTime(100);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      await expect(obj.getReleases()).rejects.toThrow('test');
     });
   });
 });
