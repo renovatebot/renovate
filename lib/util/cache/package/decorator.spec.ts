@@ -170,7 +170,7 @@ describe('util/cache/package/decorator', () => {
 
     beforeEach(() => {
       jest.useFakeTimers({ advanceTimers: false });
-      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
+      GlobalConfig.set({ cacheHardTtlMinutes: 1 });
     });
 
     afterEach(() => {
