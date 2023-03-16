@@ -154,13 +154,15 @@ describe('util/cache/package/decorator', () => {
     );
   });
 
-  describe('Fallback', () => {
+  describe('Fallbacks with hard TTL', () => {
     class Class {
       @cache({
         namespace: 'namespace',
         key: 'key',
         ttlMinutes: 1,
       })
+
+      // Hard TTL is enabled only for `getReleases` and `getDigest` methods
       public getReleases(): Promise<string> {
         return getValue();
       }
