@@ -240,7 +240,7 @@ describe('util/cache/package/decorator', () => {
       getValue.mockRejectedValueOnce(new Error('test'));
       expect(await obj.getReleases()).toBe('111');
 
-      jest.advanceTimersByTime(100);
+      jest.advanceTimersByTime(1);
       getValue.mockRejectedValueOnce(new Error('test'));
       await expect(obj.getReleases()).rejects.toThrow('test');
     });
