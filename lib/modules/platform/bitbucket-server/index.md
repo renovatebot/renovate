@@ -1,4 +1,4 @@
-# Bitbucket Server
+# Bitbucket Data Center and Server
 
 ## Authentication
 
