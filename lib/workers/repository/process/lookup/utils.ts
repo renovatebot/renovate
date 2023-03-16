@@ -54,9 +54,10 @@ export function determineNewReplacementName(
     ),
     ...config,
   };
+
   return (
     config.replacementName ??
-    template.compile(config.replacementNameTemplate, content, false)
+    template.compile(config.replacementNameTemplate!, content, false)
   );
 }
 
