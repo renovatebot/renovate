@@ -30,6 +30,15 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
             "replaceString": "node:10.15.2",
           },
           {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "2.0.2",
+            "datasource": "docker",
+            "depName": "jfrogecosystem/jfrog-setup-cli",
+            "depType": "docker",
+            "replaceString": "jfrogecosystem/jfrog-setup-cli:2.0.2",
+          },
+          {
             "currentValue": "0.2.1",
             "datasource": "bitbucket-tags",
             "depName": "atlassian/aws-s3-deploy",
@@ -37,7 +46,7 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
           },
         ]
       `);
-      expect(res?.deps).toHaveLength(3);
+      expect(res?.deps).toHaveLength(4);
     });
   });
 });

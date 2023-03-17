@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
-export class RenovateForkMigration extends AbstractMigration {
+export class IncludeForksMigration extends AbstractMigration {
   override readonly deprecated = true;
   override readonly propertyName = 'includeForks';
 
