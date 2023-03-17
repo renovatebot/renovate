@@ -129,14 +129,17 @@ function getUpdateImportPathCmds(
   }
 
   const updateImportCommands = updatedDeps
-    .filter(({ newVersion }) => valid(newVersion))
+    .filter(
+      ({ newVersion }) =>
+        valid(newVersion) && !newVersion!.endsWith('+incompatible')
+    )
     .map(({ depName, newVersion }) => ({
       depName: depName!,
       newMajor: major(newVersion!),
     }))
     // Skip path updates going from v0 to v1
     .filter(
-      ({ depName, newMajor }) => depName.startsWith('gopkg.in') || newMajor > 1
+      ({ depName, newMajor }) => depName.startsWith('gopkg.in/') || newMajor > 1
     )
 
     .map(
