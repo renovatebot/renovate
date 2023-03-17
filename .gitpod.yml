@@ -1,7 +1,6 @@
 tasks:
-  - init: >
-      nvm install 18 &&
-      nvm use 18 &&
-      yarn install &&
+  - init: |
+      nvm install 18
+      nvm use 18
+      yarn install
       yarn run build
-    command: yarn run start
