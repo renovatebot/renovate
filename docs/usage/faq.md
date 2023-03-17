@@ -33,8 +33,8 @@ If you're self hosting Renovate, use the latest release if possible.
 
 | Feature              | Platforms which lack feature                               | See Renovate issue(s)                                        |
 | -------------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Dependency Dashboard | Azure, BitBucket, BitBucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
-| Hosted app           | Azure, BitBucket, BitBucket Server, Forgejo, Gitea, GitLab |                                                              |
+| Dependency Dashboard | Azure, Bitbucket, Bitbucket Server                         | [#9592](https://github.com/renovatebot/renovate/issues/9592) |
+| Hosted app           | Azure, Bitbucket, Bitbucket Server, Forgejo, Gitea, GitLab |                                                              |
 
 ## Major platform features not supported by Renovate
 
