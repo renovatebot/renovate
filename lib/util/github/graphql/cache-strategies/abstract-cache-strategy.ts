@@ -1,3 +1,4 @@
+import { deepEqual } from 'fast-equals';
 import { DateTime } from 'luxon';
 import type {
   GithubDatasourceItem,
@@ -36,6 +37,21 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   private items: Record<string, GithubItem> | undefined;
   protected createdAt = this.now;
   protected updatedAt = this.now;
+
+  /**
+   * This flag helps to indicate whether the cache record
+   * should be persisted after the current cache access cycle,
+   * or we can update just the `updatedAt` field.
+   */
+  protected hasUpdatedItems = false;
+
+  /**
+   * Loading and persisting data is delegated to the concrete strategy.
+   */
+  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
+  abstract persist(
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+  ): Promise<void>;
 
   constructor(
     protected readonly cacheNs: string,
@@ -99,8 +115,14 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.
       const oldItem = cachedItems[version];
-      if (oldItem && this.isStabilized(oldItem)) {
-        isPaginationDone = true;
+      if (oldItem) {
+        if (this.isStabilized(oldItem)) {
+          isPaginationDone = true;
+        }
+
+        if (!deepEqual(oldItem, item)) {
+          this.hasUpdatedItems = true;
+        }
       }
 
       cachedItems[version] = item;
@@ -140,12 +162,4 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     };
     await this.persist(cacheRecord);
   }
-
-  /**
-   * Loading and persisting data is delegated to the concrete strategy.
-   */
-  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
-  abstract persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
-  ): Promise<void>;
 }

@@ -188,6 +188,7 @@
     "emojibase": "6.1.0",
     "emojibase-regex": "6.0.1",
     "extract-zip": "2.0.1",
+    "fast-equals": "5.0.0",
     "find-packages": "10.0.4",
     "find-up": "5.0.0",
     "fs-extra": "11.1.0",
