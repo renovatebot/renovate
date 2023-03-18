@@ -47,13 +47,11 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: Boolean(config.azureAutoApprove),
-    azureWorkItemId: Number(config.azureWorkItemId),
-    bbUseDefaultReviewers: Boolean(config.bbUseDefaultReviewers),
-    gitLabIgnoreApprovals: Boolean(config.gitLabIgnoreApprovals),
-    forkModeDisallowMaintainerEdits: Boolean(
-      config.forkModeDisallowMaintainerEdits
-    ),
+    azureAutoApprove: config.azureAutoApprove,
+    azureWorkItemId: config.azureWorkItemId,
+    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
+    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
