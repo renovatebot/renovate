@@ -5,18 +5,26 @@ import { NpmDatasource } from '../../../modules/datasource/npm';
 import type { BranchUpgradeConfig } from '../../types';
 import { generateBranchConfig } from './generate';
 
-const defaultConfig = getConfig();
-const requiredDefaultOptions = {
-  commitMessage: defaultConfig.commitMessage,
-  commitMessagePrefix: defaultConfig.commitMessagePrefix,
-  commitMessageAction: defaultConfig.commitMessageAction,
-  commitMessageTopic: defaultConfig.commitMessageTopic,
-  commitMessageExtra: defaultConfig.commitMessageExtra,
-  branchName: defaultConfig.branchName,
-};
+const {
+  commitMessage,
+  commitMessagePrefix,
+  commitMessageAction,
+  commitMessageTopic,
+  commitMessageExtra,
+  branchName,
+} = getConfig();
+let requiredDefaultOptions = {};
 
 beforeEach(() => {
   jest.resetAllMocks();
+  requiredDefaultOptions = {
+    commitMessage,
+    commitMessagePrefix,
+    commitMessageAction,
+    commitMessageTopic,
+    commitMessageExtra,
+    branchName,
+  };
 });
 
 describe('workers/repository/updates/generate', () => {

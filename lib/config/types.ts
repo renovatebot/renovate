@@ -33,6 +33,9 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -256,11 +259,7 @@ export interface RenovateConfig
 export interface AllConfig
   extends RenovateConfig,
     GlobalOnlyConfig,
-    RepoGlobalConfig {
-  commitMessageTopic?: string;
-  commitMessageAction?: string;
-  commitMessageExtra?: string;
-}
+    RepoGlobalConfig {}
 
 export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
