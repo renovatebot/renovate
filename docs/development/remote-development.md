@@ -46,7 +46,6 @@ Before you can run Renovate in Gitpod, you must do this **one-time** setup:
 
 Now you can run Renovate in Gitpod with `yarn run start`.
 
-
 The config file for Gitpod is `.gitpod.yml` in the root of the repository.
 
 Gitpod gives you 500 free credits each month, which is enough for about 50 hours of work.
