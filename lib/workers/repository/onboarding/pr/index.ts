@@ -109,8 +109,6 @@ If you need any further assistance then you can also [request help here](${
         '### Detected Package Files\n\n' + files.join('\n')
       ) + '\n';
   } else {
-    //  eslint-disable-next-line
-    console.log("here");
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';

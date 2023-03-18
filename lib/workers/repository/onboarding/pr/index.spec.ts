@@ -217,12 +217,17 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('creates PR even if package-files are not found', async () => {
+    it('updates PR-body when package-files are not found', async () => {
       config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockResolvedValueOnce(null);
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+        })
+      );
       await ensureOnboardingPr(config, {}, branches);
-      expect(platform.createPr).toHaveBeenCalledTimes(1);
-      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+      expect(platform.createPr).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
 
     it('creates PR (no require config)', async () => {
@@ -245,6 +250,23 @@ describe('workers/repository/onboarding/pr/index', () => {
       );
       expect(logger.info).toHaveBeenLastCalledWith(
         'DRY-RUN: Would create onboarding PR'
+      );
+    });
+
+    it('dryrun of updates PR', async () => {
+      GlobalConfig.set({ dryRun: 'full' });
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          bodyStruct,
+        })
+      );
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would check branch renovate/configure'
+      );
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'DRY-RUN: Would update onboarding PR'
       );
     });
 
