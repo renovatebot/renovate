@@ -202,21 +202,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       }
     );
 
-    it('updates PR when modified', async () => {
-      config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        })
-      );
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      await ensureOnboardingPr(config, {}, branches);
-      expect(platform.createPr).toHaveBeenCalledTimes(0);
-      expect(platform.updatePr).toHaveBeenCalledTimes(1);
-      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
-    });
-
     it('skips updates PR when conflicted', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
@@ -242,25 +227,6 @@ describe('workers/repository/onboarding/pr/index', () => {
       config.requireConfig = 'required';
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
-    });
-
-    it('dryrun of updates PR when modified', async () => {
-      GlobalConfig.set({ dryRun: 'full' });
-      config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockResolvedValueOnce(
-        partial<Pr>({
-          title: 'Configure Renovate',
-          bodyStruct,
-        })
-      );
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      await ensureOnboardingPr(config, {}, branches);
-      expect(logger.info).toHaveBeenCalledWith(
-        'DRY-RUN: Would check branch renovate/configure'
-      );
-      expect(logger.info).toHaveBeenLastCalledWith(
-        'DRY-RUN: Would update onboarding PR'
-      );
     });
 
     it('dryrun of creates PR', async () => {

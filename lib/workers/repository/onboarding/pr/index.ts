@@ -4,10 +4,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
-import {
-  ensureComment,
-  ensureCommentRemoval,
-} from '../../../../modules/platform/comment';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
@@ -59,12 +56,6 @@ export async function ensureOnboardingPr(
         ),
       });
       return;
-    } else {
-      await ensureCommentRemoval({
-        type: 'by-topic',
-        number: existingPr.number,
-        topic: 'Branch Conflicted',
-      });
     }
   }
   const { rebaseCheckBox, renovateConfigHashComment } =
@@ -124,12 +115,6 @@ If you need any further assistance then you can also [request help here](${
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#7154)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
-  } else if (await scm.isBranchModified(config.onboardingBranch!)) {
-    configDesc = emojify(
-      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
-        config.productLinks!.help
-      }) if you have any doubts and would like it reviewed.\n\n`
-    );
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
