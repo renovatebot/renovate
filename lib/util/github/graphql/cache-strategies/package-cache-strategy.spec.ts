@@ -30,7 +30,6 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-15 12:00'),
-      updatedAt: isoTs('2022-10-15 12:00'),
     };
     cacheGet.mockResolvedValueOnce(clone(cacheRecord));
 
