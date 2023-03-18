@@ -217,6 +217,14 @@ describe('workers/repository/onboarding/pr/index', () => {
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
+    it('creates PR even if package-files are not found', async () => {
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      await ensureOnboardingPr(config, {}, branches);
+      expect(platform.createPr).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+
     it('creates PR (no require config)', async () => {
       config.requireConfig = 'optional';
       await ensureOnboardingPr(config, packageFiles, branches);
