@@ -1,6 +1,6 @@
+image:
+  file: .devcontainer/Dockerfile
+
 tasks:
   - init: |
-      nvm install 18
-      nvm use 18
       yarn install
-      yarn run build
