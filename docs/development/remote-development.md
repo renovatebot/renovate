@@ -38,10 +38,13 @@ You can use [Gitpod](https://gitpod.io/) for light development work like:
 - Editing the docs
 - Running ESLint, Prettier
 
-To invoke renovte:
+Before you can run Renovate in Gitpod, you must do this **one-time** setup:
 
-- Define Gitpod [Environment Variable](https://gitpod.io/user/variables) RENOVATE_TOKEN. Populate it with your GitHub Personal Access Token (PAT)
-- Run: `yarn run start`
+1. Log in to your Gitpod account
+1. Create a [Gitpod environment variable](https://gitpod.io/user/variables) called `RENOVATE_TOKEN`
+1. Copy your GitHub Personal Access Token (PAT) into the `RENOVATE_TOKEN`
+
+Now you can run Renovate in Gitpod with `yarn run start`.
 
 For proper development, use GitHub Codespaces.
 
