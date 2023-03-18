@@ -387,7 +387,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: Boolean(config.draftPR),
+          draftPR: !!config.draftPR,
         });
 
         incLimitedValue('PullRequests');
