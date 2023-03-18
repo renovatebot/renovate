@@ -1,4 +1,4 @@
-import { deepEqual } from 'fast-equals';
+import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import type {
   GithubDatasourceItem,
@@ -116,7 +116,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
           isPaginationDone = true;
         }
 
-        if (!deepEqual(oldItem, item)) {
+        if (!dequal(oldItem, item)) {
           this.hasUpdatedItems = true;
         }
       }
