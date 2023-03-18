@@ -46,7 +46,6 @@ Before you can run Renovate in Gitpod, you must do this **one-time** setup:
 
 Now you can run Renovate in Gitpod with `yarn run start`.
 
-For proper development, use GitHub Codespaces.
 
 The config file for Gitpod is `.gitpod.yml` in the root of the repository.
 
