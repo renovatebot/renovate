@@ -200,9 +200,6 @@ export function generateBranchConfig(
         )})`;
       }
       upgrade.commitMessagePrefix = CommitMessage.formatPrefix(semanticPrefix!);
-      upgrade.toLowerCase =
-        regEx(/[A-Z]/).exec(upgrade.semanticCommitType!) === null &&
-        !upgrade.semanticCommitType!.startsWith(':');
     }
 
     // Compile a few times in case there are nested templates
@@ -226,11 +223,10 @@ export function generateBranchConfig(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    if (upgrade.toLowerCase) {
+    if (upgrade.commitMessageLowerCase) {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
-      splitMessage[0] =
-        splitMessage[0].charAt(0).toLowerCase() + splitMessage[0].slice(1);
+      splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
     }
 
@@ -250,7 +246,7 @@ export function generateBranchConfig(
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
-      if (upgrade.toLowerCase) {
+      if (upgrade.commitMessageLowerCase) {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {

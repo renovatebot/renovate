@@ -1507,6 +1507,12 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'deps',
   },
+  {
+    name: 'commitMessageLowerCase',
+    description: 'Lowercase PR- and commit titles.',
+    type: 'boolean',
+    default: false,
+  },
   // PR Behaviour
   {
     name: 'rollbackPrs',
