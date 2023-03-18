@@ -15,8 +15,6 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  username: string;
-  userUuid: string;
   ignorePrAuthor: boolean;
 }
 
