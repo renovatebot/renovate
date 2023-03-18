@@ -969,7 +969,7 @@ If you wish to enable processing of a forked repository by Renovate when autodis
 
 <!-- prettier-ignore -->
 !!! note
-    Only the filename `renovate.json` is supported for `forkProcessing`. You cannot use other filenames such as `.github/renovate.json`.
+    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
 
 If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
 
