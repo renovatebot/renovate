@@ -99,7 +99,7 @@ export async function getDependency(
   try {
     const options: HttpOptions = {};
     if (cachedResult?.cacheData?.etag) {
-      logger.debug('Using cached etag');
+      logger.trace({ packageName }, 'Using cached etag');
       options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
