@@ -965,7 +965,7 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 
 By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
 This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository `renovate.json` or run the CLI command with `--fork-processing=enabled`.
+If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
 
 <!-- prettier-ignore -->
 !!! note
