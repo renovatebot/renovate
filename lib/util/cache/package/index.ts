@@ -4,7 +4,7 @@ import * as fileCache from './file';
 import * as redisCache from './redis';
 import type { PackageCache } from './types';
 
-let cacheProxy: PackageCache;
+let cacheProxy: PackageCache | undefined;
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;
@@ -74,7 +74,7 @@ export async function cleanup(config: AllConfig): Promise<void> {
   if (config?.redisUrl) {
     await redisCache.end();
   }
-  if (cacheProxy.cleanup) {
+  if (cacheProxy?.cleanup) {
     await cacheProxy.cleanup();
   }
 }
