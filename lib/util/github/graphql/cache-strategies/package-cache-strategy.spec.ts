@@ -68,7 +68,6 @@ describe('util/github/graphql/cache-strategies/package-cache-strategy', () => {
         },
         15 * 24 * 60,
       ],
-      ['foo', 'bar:updatedAt', isoTs('2022-10-30 12:00'), 15 * 24 * 60],
     ]);
   });
 });

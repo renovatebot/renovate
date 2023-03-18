@@ -219,7 +219,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
         '8': { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
       },
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-31 15:30'),
     });
   });
 });

@@ -36,12 +36,10 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private items: Record<string, GithubItem> | undefined;
   protected createdAt = this.now;
-  protected updatedAt = this.now;
 
   /**
    * This flag helps to indicate whether the cache record
-   * should be persisted after the current cache access cycle,
-   * or we can update just the `updatedAt` field.
+   * should be persisted after the current cache access cycle.
    */
   protected hasUpdatedItems = false;
 
@@ -70,7 +68,6 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
       createdAt: this.createdAt.toISO(),
-      updatedAt: this.updatedAt.toISO(),
     };
 
     const storedData = await this.load();
@@ -84,7 +81,6 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     }
 
     this.createdAt = DateTime.fromISO(result.createdAt);
-    this.updatedAt = DateTime.fromISO(result.updatedAt);
     this.items = result.items;
     return this.items;
   }
@@ -151,14 +147,10 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     return Object.values(resultItems);
   }
 
-  /**
-   * Update `updatedAt` field and persist the data.
-   */
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
     const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
       items: cachedItems,
       createdAt: this.createdAt.toISO(),
-      updatedAt: this.now.toISO(),
     };
     await this.persist(cacheRecord);
   }
