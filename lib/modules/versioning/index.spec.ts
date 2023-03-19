@@ -3,6 +3,7 @@ import { loadModules } from '../../util/modules';
 import { isVersioningApiConstructor } from './common';
 import { GenericVersion, GenericVersioningApi } from './generic';
 import * as semverVersioning from './semver';
+import * as semverCoercedVersioning from './semver-coerced';
 import type { VersioningApi, VersioningApiConstructor } from './types';
 import * as allVersioning from '.';
 
@@ -57,12 +58,12 @@ describe('modules/versioning/index', () => {
     }
   });
 
-  it('should fallback to semver', () => {
+  it('should fallback to semver-coerced', () => {
     expect(allVersioning.get(undefined)).toBe(
-      allVersioning.get(semverVersioning.id)
+      allVersioning.get(semverCoercedVersioning.id)
     );
     expect(allVersioning.get('unknown')).toBe(
-      allVersioning.get(semverVersioning.id)
+      allVersioning.get(semverCoercedVersioning.id)
     );
   });
 
@@ -82,6 +83,7 @@ describe('modules/versioning/index', () => {
       'toLocaleString',
       'toString',
       'valueOf',
+      'subset',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))

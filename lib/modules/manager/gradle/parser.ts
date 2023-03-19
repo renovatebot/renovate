@@ -56,6 +56,7 @@ export function parseGradle(
     registryUrls: [],
 
     varTokens: [],
+    tmpNestingDepth: [],
     tmpTokenStore: {},
     tokenMap: {},
   });

@@ -6,6 +6,7 @@ pipelines:
         name: Build and Test
         image: node:10.15.2
         script:
+          - pipe: docker://jfrogecosystem/jfrog-setup-cli:2.0.2
           - npm install
           - npm test
           - npm run dist

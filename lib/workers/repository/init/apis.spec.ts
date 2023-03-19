@@ -15,7 +15,7 @@ describe('workers/repository/init/apis', () => {
       config.warnings = [];
       config.token = 'some-token';
       delete config.optimizeForDisabled;
-      delete config.includeForks;
+      delete config.forkProcessing;
     });
 
     afterEach(() => {
@@ -53,13 +53,28 @@ describe('workers/repository/init/apis', () => {
         isFork: true,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      platform.getJsonFile.mockResolvedValueOnce({
+        forkProcessing: 'disabled',
+      });
       await expect(
         initApis({
           ...config,
-          includeForks: false,
+          forkProcessing: 'disabled',
         })
       ).rejects.toThrow(REPOSITORY_FORKED);
+    });
+
+    it('does not throw for includeForks=true', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: true,
+        repoFingerprint: '123',
+      });
+      platform.getJsonFile.mockResolvedValueOnce({
+        includeForks: true,
+      });
+      const workerPlatformConfig = await initApis(config);
+      expect(workerPlatformConfig).toBeTruthy();
     });
 
     it('ignores platform.getJsonFile() failures', async () => {
@@ -73,7 +88,7 @@ describe('workers/repository/init/apis', () => {
         initApis({
           ...config,
           optimizeForDisabled: true,
-          includeForks: false,
+          forkProcessing: 'disabled',
           isFork: true,
         })
       ).resolves.not.toThrow();
@@ -85,7 +100,9 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      platform.getJsonFile.mockResolvedValueOnce({
+        forkProcessing: 'disabled',
+      });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,
@@ -107,7 +124,9 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      platform.getJsonFile.mockResolvedValueOnce({
+        forkProcessing: 'disabled',
+      });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,
@@ -124,7 +143,7 @@ describe('workers/repository/init/apis', () => {
         isFork: false,
         repoFingerprint: '123',
       });
-      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      platform.getJsonFile.mockResolvedValueOnce({ forkProcessing: false });
       const workerPlatformConfig = await initApis({
         ...config,
         optimizeForDisabled: true,

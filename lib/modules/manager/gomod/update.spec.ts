@@ -96,7 +96,7 @@ describe('modules/manager/gomod/update', () => {
         depType: 'require',
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
-      expect(res).not.toEqual(gomod2);
+      expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
     });
 
@@ -112,8 +112,25 @@ describe('modules/manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(gomod2);
+      expect(res).not.toEqual(gomod1);
       expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
+    });
+
+    it('skip replacing incompatible major updates', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        managerData: { lineNumber: 8 },
+        newMajor: 26,
+        updateType: 'major' as UpdateType,
+        currentValue: 'v25.1.0+incompatible',
+        newValue: 'v26.0.0+incompatible',
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
     });
 
     it('returns null if mismatch', () => {

@@ -6,7 +6,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON handles 
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://gitlab.com/meno/dropzone/",
@@ -55,7 +55,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON supports
   "project": {
     "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
     "baseUrl": "https://gitlab-enterprise.example.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://gitlab-enterprise.example.com/meno/dropzone/",
@@ -104,7 +104,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON supports
   "project": {
     "apiBaseUrl": "https://git.test.com/api/v4/",
     "baseUrl": "https://git.test.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://git.test.com/meno/dropzone/",
@@ -153,7 +153,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON uses Git
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://gitlab.com/meno/dropzone/",
@@ -222,7 +222,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON uses Git
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://gitlab.com/meno/dropzone/",
@@ -271,7 +271,7 @@ exports[`workers/repository/update/pr/changelog/gitlab getChangeLogJSON works wi
   "project": {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
-    "depName": "renovate",
+    "packageName": "renovate",
     "repository": "meno/dropzone",
     "sourceDirectory": undefined,
     "sourceUrl": "https://gitlab.com/meno/dropzone/",
