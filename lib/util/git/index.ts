@@ -572,11 +572,13 @@ export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
 ): Promise<boolean> {
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branchName);
   let isBehind = getCachedBehindBaseResult(
     branchName,
-    getBranchCommit(branchName), // branch sha
+    branchSha,
     baseBranch,
-    getBranchCommit(baseBranch) // base branch sha
+    baseBranchSha
   );
   if (isBehind !== null) {
     logger.debug(`branch.isBehindBase(): using cached result "${isBehind}"`);
