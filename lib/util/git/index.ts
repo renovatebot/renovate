@@ -242,6 +242,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
+  config.commitBranches = {};
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
@@ -587,13 +588,16 @@ export async function isBranchBehindBase(
   await syncGit();
   try {
     const { currentBranchSha, currentBranch } = config;
-    const branches = await git.branch([
-      '--remotes',
-      '--verbose',
-      '--contains',
-      config.currentBranchSha,
-    ]);
-    isBehind = !branches.all.map(localName).includes(branchName);
+    config.commitBranches[config.currentBranchSha] ??= (
+      await git.branch([
+        '--remotes',
+        '--verbose',
+        '--contains',
+        config.currentBranchSha,
+      ])
+    ).all.map(localName);
+    isBehind =
+      !config.commitBranches[config.currentBranchSha].includes(branchName);
     logger.debug(
       { currentBranch, currentBranchSha },
       `branch.isBehindBase(): ${isBehind}`
