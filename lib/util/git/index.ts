@@ -111,10 +111,6 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   throw lastError;
 }
 
-function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), '');
-}
-
 async function isDirectory(dir: string): Promise<boolean> {
   try {
     return (await fs.stat(dir)).isDirectory();
@@ -242,7 +238,6 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config.ignoredAuthors = [];
   config.additionalBranches = [];
   config.branchIsModified = {};
-  config.commitBranches = {};
   const { localDir } = GlobalConfig.get();
   git = simpleGit(localDir, simpleGitConfig()).env({
     ...process.env,
@@ -589,19 +584,12 @@ export async function isBranchBehindBase(
 
   await syncGit();
   try {
-    const { currentBranchSha, currentBranch } = config;
-    config.commitBranches[config.currentBranchSha] ??= (
-      await git.branch([
-        '--remotes',
-        '--verbose',
-        '--contains',
-        config.currentBranchSha,
-      ])
-    ).all.map(localName);
-    isBehind =
-      !config.commitBranches[config.currentBranchSha].includes(branchName);
+    const behindCount = (
+      await git.raw(['rev-list', '--count', `${branchSha!}..${baseBranchSha!}`])
+    ).trim();
+    isBehind = behindCount !== '0';
     logger.debug(
-      { currentBranch, currentBranchSha },
+      { baseBranch, branchName },
       `branch.isBehindBase(): ${isBehind}`
     );
     setCachedBehindBaseResult(branchName, isBehind);
