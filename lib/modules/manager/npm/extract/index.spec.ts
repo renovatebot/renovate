@@ -9,7 +9,7 @@ const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
 );
 
 const defaultExtractConfig = {
-  skipInstalls: null as never, // intentional
+  skipInstalls: null,
 } satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
