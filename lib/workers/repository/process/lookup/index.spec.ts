@@ -1941,6 +1941,16 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - skips if package and replacement names match', async () => {
+      config.packageName = 'openjdk';
+      config.currentValue = undefined;
+      config.datasource = DockerDatasource.id;
+      config.versioning = dockerVersioningId;
+      // This config is normally set when packageRules are applied
+      config.replacementName = 'openjdk';
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([]);
+    });
+
     it('handles replacements - name and version', async () => {
       config.currentValue = '1.4.1';
       config.packageName = 'q';
@@ -1989,7 +1999,7 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
-    it('handles replacements - can template replacement name withg a replacement version', async () => {
+    it('handles replacements - can template replacement name with a replacement version', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
       config.currentValue = '17.0.0';
       config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
