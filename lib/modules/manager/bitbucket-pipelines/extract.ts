@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
@@ -47,7 +47,7 @@ function addDepAsBitbucketTag(
   const dep: PackageDependency = {
     depName,
     currentValue,
-    datasource: BitBucketTagsDatasource.id,
+    datasource: BitbucketTagsDatasource.id,
   };
   dep.depType = 'bitbucket-tags';
   deps.push(dep);
