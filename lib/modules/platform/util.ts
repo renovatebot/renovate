@@ -1,5 +1,4 @@
 import hasha from 'hasha';
-import type { PlatformPrOptions } from './types';
 
 export function repoFingerprint(
   repoId: number | string,
@@ -15,13 +14,4 @@ export function getNewBranchName(branchName?: string): string | undefined {
     return `refs/heads/${branchName}`;
   }
   return branchName;
-}
-
-export function getDefaultPlatformPrOptions(): PlatformPrOptions {
-  return {
-    azureAutoApprove: false,
-    azureWorkItemId: 0,
-    bbUseDefaultReviewers: false,
-    gitLabIgnoreApprovals: 0,
-  };
 }

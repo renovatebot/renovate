@@ -5,7 +5,6 @@ import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
-import { getDefaultPlatformPrOptions } from '../../../../modules/platform/util';
 import { emojify } from '../../../../util/emoji';
 import * as template from '../../../../util/template';
 import { joinUrlParts } from '../../../../util/url';
@@ -105,7 +104,6 @@ ${
         prBody,
         labels,
         platformOptions: getPlatformPrOptions({
-          ...getDefaultPlatformPrOptions(),
           ...config,
           automerge: false,
         }),

@@ -87,10 +87,10 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove: boolean;
-  azureWorkItemId: number;
-  bbUseDefaultReviewers: boolean;
-  gitLabIgnoreApprovals: number;
+  azureAutoApprove?: boolean;
+  azureWorkItemId?: number;
+  bbUseDefaultReviewers?: boolean;
+  gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
 };

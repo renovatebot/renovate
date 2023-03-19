@@ -6,7 +6,6 @@ import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
-import { getDefaultPlatformPrOptions } from '../../../../modules/platform/util';
 import { emojify } from '../../../../util/emoji';
 import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hasha';
@@ -173,7 +172,6 @@ If you need any further assistance then you can also [request help here](${
         prBody,
         labels,
         platformOptions: getPlatformPrOptions({
-          ...getDefaultPlatformPrOptions(),
           ...config,
           automerge: false,
         }),
