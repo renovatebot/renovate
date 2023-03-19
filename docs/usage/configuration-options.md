@@ -2194,8 +2194,22 @@ For example to replace the registry for `docker` images:
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "excludePackagePatterns": ["^ghcr.io/.*)"],
-      "replacementNameTemplate": "ghcr.io/{{{packageNameWithoutRegistry}}}"
+      "matchPackagePrefix": ["^docker.io/.*)"],
+      "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
+    }
+  ]
+}
+```
+
+Or, to add a registry to all `docker` images
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
 }

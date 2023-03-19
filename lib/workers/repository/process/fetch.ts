@@ -49,9 +49,6 @@ async function fetchDepUpdates(
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
   depConfig.packageName ??= depConfig.depName;
-  depConfig.packageNameWithoutRegistry ??= getPackageNameWithoutRegistry(
-    depConfig.packageName!
-  );
   if (depConfig.ignoreDeps!.includes(depName!)) {
     // TODO: fix types (#7154)
     logger.debug(`Dependency: ${depName!}, is ignored`);
@@ -153,19 +150,4 @@ export async function fetchUpdates(
     { baseBranch: config.baseBranch },
     'Package releases lookups complete'
   );
-}
-
-// TODO - This is most certainly in the wrong location 😅
-function getPackageNameWithoutRegistry(packageName: string): string {
-  if (is.nonEmptyString(packageName)) {
-    const split = packageName.split('/');
-    if (
-      split.length > 1 &&
-      (split[0].includes('.') || split[0].includes(':'))
-    ) {
-      split.shift();
-      return split.join('/');
-    }
-  }
-  return packageName;
 }

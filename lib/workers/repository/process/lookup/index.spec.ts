@@ -1960,10 +1960,8 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('handles replacements - can template replacement name without a replacement version', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
-      config.packageNameWithoutRegistry = 'library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate =
-        'new.registry.io/{{{packageNameWithoutRegistry}}}';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
         releases: [
@@ -1993,10 +1991,8 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('handles replacements - can template replacement name withg a replacement version', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
-      config.packageNameWithoutRegistry = 'library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate =
-        'new.registry.io/{{{packageNameWithoutRegistry}}}';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
       config.replacementVersion = '18.0.0';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
@@ -2027,10 +2023,8 @@ describe('workers/repository/process/lookup/index', () => {
 
     it('handles replacements - replacementName takes precedence over replacementNameTemplate', async () => {
       config.packageName = 'mirror.some.org/library/openjdk';
-      config.packageNameWithoutRegistry = 'library/openjdk';
       config.currentValue = '17.0.0';
-      config.replacementNameTemplate =
-        'new.registry.io/{{{packageNameWithoutRegistry}}}';
+      config.replacementNameTemplate = `{{{replace 'mirror.some.org/' 'new.registry.io/' packageName}}}`;
       config.replacementName = 'eclipse-temurin';
       config.datasource = DockerDatasource.id;
       getDockerReleases.mockResolvedValueOnce({
