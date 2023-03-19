@@ -47,9 +47,8 @@ export function determineNewReplacementName(
   config: LookupUpdateConfig
 ): string {
   return (
-    // TODO - anything in config can be used as a replacement.  How do we limit this to only allowedFields from lib/util/template/index?
     config.replacementName ??
-    template.compile(config.replacementNameTemplate!, config)
+    template.compile(config.replacementNameTemplate!, config, true)
   );
 }
 
