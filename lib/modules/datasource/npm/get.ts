@@ -104,7 +104,7 @@ export async function getDependency(
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.debug({ packageName }, 'Cached npm result is revalidated');
+      logger.trace(`Cached npm result for ${packageName} is revalidated`);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
