@@ -31,7 +31,6 @@ async function fetchDepUpdates(
     dep.depName = dep.depName.trim();
   }
   dep.packageName ??= dep.depName;
-
   if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
   }
