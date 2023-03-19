@@ -376,7 +376,7 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if tagretBranch of update PR is changed by user', async () => {
       const pr = partial<Pr>({
         state: 'open',
-        targetBranch: 'old_base',
+        targetBranch: 'new_base',
       });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
@@ -386,7 +386,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(false);
       platform.getBranchPr.mockResolvedValueOnce(pr);
-      config.baseBranch = 'new_base';
+      config.baseBranch = 'old_base';
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
