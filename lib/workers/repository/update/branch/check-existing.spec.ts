@@ -25,7 +25,7 @@ describe('workers/repository/update/branch/check-existing', () => {
     });
 
     it('returns false if check misses', async () => {
-      config.recreatedClosed = true;
+      config.recreateClosed = 'always';
       expect(await prAlreadyExisted(config)).toBeNull();
       expect(platform.findPr).toHaveBeenCalledTimes(1);
     });

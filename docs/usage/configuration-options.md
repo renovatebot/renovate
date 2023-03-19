@@ -2581,6 +2581,12 @@ For example we override it to `always` in the following cases where branch names
 - When pinning versions
 - Lock file maintenance
 
+There are total three possible options:
+
+1. `always`: Recreates all closed/merged PRs
+2. `auto`: The default option. Recreates only immortal PRs
+3. `never`: No PR is recreated, doesn't matter if it is immortal or not.
+
 Typically you shouldn't need to modify this setting.
 
 ## regexManagers
