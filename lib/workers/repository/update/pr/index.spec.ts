@@ -114,7 +114,9 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
+        const prConfig = { ...config, isVulnerabilityAlert: true };
+        delete prConfig.prTitle; // for coverage
+        const res = await ensurePr(prConfig);
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();

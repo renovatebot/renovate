@@ -23,7 +23,7 @@ describe('modules/datasource/golang-version/index', () => {
         .reply(200, golangReleasesContent);
       const res = await getPkgReleases({
         datasource,
-        depName: 'golang',
+        packageName: 'golang',
       });
       expect(res?.releases).toHaveLength(132);
       expect(res?.releases[0]).toEqual({
@@ -44,7 +44,7 @@ describe('modules/datasource/golang-version/index', () => {
       const res = await getPkgReleases({
         ...config,
         datasource,
-        depName: 'golang',
+        packageName: 'golang',
       });
       expect(res?.releases).toHaveLength(132);
       expect(res?.releases[0]).toEqual({
@@ -61,7 +61,7 @@ describe('modules/datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'golang',
+          packageName: 'golang',
         })
       ).rejects.toThrow(ExternalHostError);
     });
@@ -74,7 +74,7 @@ describe('modules/datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'golang',
+          packageName: 'golang',
         })
       ).rejects.toThrow(ExternalHostError);
     });
@@ -85,7 +85,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, {});
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -95,7 +95,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent3);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -105,7 +105,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent4);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -115,7 +115,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(404);
       expect(
-        await getPkgReleases({ datasource, depName: 'golang' })
+        await getPkgReleases({ datasource, packageName: 'golang' })
       ).toBeNull();
     });
 
@@ -125,7 +125,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent5);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -135,7 +135,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent6);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
   });
