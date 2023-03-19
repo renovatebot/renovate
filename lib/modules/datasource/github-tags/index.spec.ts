@@ -114,7 +114,7 @@ describe('modules/datasource/github-tags/index', () => {
   });
 
   describe('getReleases', () => {
-    const depName = 'some/dep2';
+    const packageName = 'some/dep2';
 
     it('returns tags', async () => {
       jest.spyOn(githubGraphql, 'queryTags').mockResolvedValueOnce([
@@ -152,7 +152,7 @@ describe('modules/datasource/github-tags/index', () => {
         },
       ]);
 
-      const res = await getPkgReleases({ datasource: github.id, depName });
+      const res = await getPkgReleases({ datasource: github.id, packageName });
 
       expect(res).toEqual({
         registryUrl: 'https://github.com',

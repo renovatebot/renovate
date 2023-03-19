@@ -218,6 +218,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'constraintsFiltering',
+    description: 'Perform release filtering based on language constraints.',
+    type: 'string',
+    allowedValues: ['none', 'strict'],
+    cli: false,
+    default: 'none',
+  },
+  {
     name: 'repositoryCache',
     description:
       'This option decides if Renovate uses a JSON cache to speed up extractions.',
@@ -340,7 +348,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
     type: 'string',
-    default: 'docker.io/renovate',
+    default: 'docker.io/containerbase',
     globalOnly: true,
   },
   {
@@ -411,12 +419,13 @@ const options: RenovateOptions[] = [
     experimentalIssues: [17633],
   },
   {
-    name: 'includeForks',
+    name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
     stage: 'repository',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'forkToken',
@@ -954,7 +963,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchBaseBranches',
     description:
-      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release\\/.*/"]`). Valid only within a `packageRules` object.',
+      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release/.*/"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1189,6 +1198,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'autoReplaceGlobalMatch',
+    description:
+      'Control whether replacement regular expressions are global matches or only the first match.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',
@@ -1336,7 +1352,7 @@ const options: RenovateOptions[] = [
     name: 'rangeStrategy',
     description: 'Determines how to modify or update existing ranges.',
     type: 'string',
-    default: 'replace',
+    default: 'auto',
     allowedValues: [
       'auto',
       'pin',
@@ -1539,6 +1555,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'internalChecksAsSuccess',
+    description:
+      'Whether to consider passing internal checks such as stabilityDays when determining branch status.',
+    type: 'boolean',
+    default: false,
+  },
   /*
    * Undocumented experimental feature
   {
@@ -1573,16 +1596,16 @@ const options: RenovateOptions[] = [
   {
     name: 'prHourlyLimit',
     description:
-      'Rate limit PRs to maximum x created per hour. 0 (default) means no limit.',
+      'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 2,
   },
   {
     name: 'prConcurrentLimit',
     description:
-      'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
+      'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 10,
   },
   {
     name: 'branchConcurrentLimit',
@@ -1606,6 +1629,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+  },
+  {
+    name: 'bbUseDevelopmentBranch',
+    description: `Use the repository's [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the repository's default branch.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
   },
   // Automatic merging
   {
@@ -2250,9 +2281,8 @@ const options: RenovateOptions[] = [
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 0,
+    default: 24 * 60,
     globalOnly: true,
-    experimental: true,
   },
   {
     name: 'prBodyDefinitions',

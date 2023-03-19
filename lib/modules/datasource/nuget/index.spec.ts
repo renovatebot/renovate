@@ -55,7 +55,7 @@ const nlogMocks = [
 const configV3V2 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://www.nuget.org/api/v2/',
@@ -65,28 +65,28 @@ const configV3V2 = {
 const configV2 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 const configV3NotNugetOrg = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: ['https://myprivatefeed/index.json'],
 };
 
 const configV3Multiple = {
   datasource,
   versioning,
-  depName: 'nunit',
+  packageName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://myprivatefeed/index.json',
@@ -139,7 +139,7 @@ describe('modules/datasource/nuget/index', () => {
       const config = {
         datasource,
         versioning,
-        depName: 'nunit',
+        packageName: 'nunit',
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
@@ -155,7 +155,7 @@ describe('modules/datasource/nuget/index', () => {
       const config = {
         datasource,
         versioning,
-        depName: 'nunit',
+        packageName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
       expect(
@@ -389,7 +389,7 @@ describe('modules/datasource/nuget/index', () => {
       });
       const res = await getPkgReleases({
         ...configV3,
-        depName: 'nlog',
+        packageName: 'nlog',
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
