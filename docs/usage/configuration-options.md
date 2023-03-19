@@ -2190,7 +2190,7 @@ For example to replace the registry for `docker` images:
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^docker.io/(?<packageNameWithoutRegistry>.*)"],
+      "excludePackagePatterns": ["^ghcr.io/.*)"],
       "replacementNameTemplate": "ghcr.io/{{{packageNameWithoutRegistry}}}"
     }
   ]

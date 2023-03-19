@@ -46,18 +46,10 @@ export function isReplacementRulesConfigured(
 export function determineNewReplacementName(
   config: LookupUpdateConfig
 ): string {
-  // TODO - Discuss in PR.  What fields should be supported within replacementNameTemplate (all or a subset)
-  // TODO - Discuss in PR.  Where should packageNameWithoutRegistry be set?
-  const content = {
-    packageNameWithoutRegistry: getPackageNameWithoutRegistry(
-      config.packageName
-    ),
-    ...config,
-  };
-
   return (
+    // TODO - anything in config can be used as a replacement.  How do we limit this to only allowedFields from lib/util/template/index?
     config.replacementName ??
-    template.compile(config.replacementNameTemplate!, content, false)
+    template.compile(config.replacementNameTemplate!, config)
   );
 }
 
@@ -78,14 +70,4 @@ export function determineNewReplacementValue(
   }
 
   return config.currentValue;
-}
-
-// TODO - This will move to the same place that packageNameWithoutRegistry moves to
-function getPackageNameWithoutRegistry(packageName: string): string {
-  const split = packageName.split('/');
-  if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
-    split.shift();
-    return split.join('/');
-  }
-  return packageName;
 }
