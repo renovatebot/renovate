@@ -291,8 +291,8 @@ export async function findPr({
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
+      p.sourceBranch.toLowerCase() === branchName.toLowerCase() &&
+      (!prTitle || p.title.toLowerCase() === prTitle.toLowerCase()) &&
       matchesState(p.state, state)
   );
   if (pr) {

@@ -286,8 +286,8 @@ function matchesState(state: string, desiredState: string): boolean {
 const isRelevantPr =
   (branchName: string, prTitle: string | null | undefined, state: string) =>
   (p: Pr): boolean =>
-    p.sourceBranch === branchName &&
-    (!prTitle || p.title === prTitle) &&
+    p.sourceBranch.toLowerCase() === branchName.toLowerCase() &&
+    (!prTitle || p.title.toLowerCase() === prTitle.toLowerCase()) &&
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)

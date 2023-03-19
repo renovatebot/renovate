@@ -301,11 +301,15 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      (item) => item.sourceRefName === getNewBranchName(branchName)
+      (item) =>
+        item.sourceRefName.toLowerCase() ===
+        getNewBranchName(branchName).toLowerCase()
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toLowerCase() === prTitle.toLowerCase()
+      );
     }
 
     switch (state) {

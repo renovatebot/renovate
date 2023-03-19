@@ -712,11 +712,11 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   const pr = prList.find((p) => {
-    if (p.sourceBranch !== branchName) {
+    if (p.sourceBranch.toLowerCase() !== branchName.toLowerCase()) {
       return false;
     }
 
-    if (prTitle && prTitle !== p.title) {
+    if (prTitle && prTitle.toLowerCase() !== p.title.toLowerCase()) {
       return false;
     }
 
