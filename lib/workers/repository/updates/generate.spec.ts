@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { codeBlock } from 'common-tags';
 import { getConfig } from '../../../../test/util';
 import type { UpdateType } from '../../../config/types';
