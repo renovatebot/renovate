@@ -7,11 +7,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { getDep } from '../dockerfile/extract';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
+import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
   BatectConfig,
   BatectFileInclude,
@@ -153,10 +149,10 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFileContent[] | null> {
+): Promise<PackageFile[] | null> {
   const filesToExamine = new Set<string>(packageFiles);
   const filesAlreadyExamined = new Set<string>();
-  const results: PackageFileContent[] = [];
+  const results: PackageFile[] = [];
 
   while (filesToExamine.size > 0) {
     const packageFile = filesToExamine.values().next().value;

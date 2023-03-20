@@ -4,10 +4,10 @@ import type { Preset } from '../types';
 export type Replacement = [string[], string];
 
 export interface ReplacementRule {
-  matchCurrentVersion: string;
+  matchCurrentVersion?: string;
   matchDatasources: string[];
   replacements: Replacement[];
-  replacementVersion: string;
+  replacementVersion?: string;
 }
 
 export interface PresetTemplate {

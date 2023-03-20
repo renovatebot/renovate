@@ -13,7 +13,7 @@ export { updateLockedDependency } from './lockfile/update-locked';
 export { extractPackageFile } from './extract';
 
 export const supportedDatasources = [
-  BitBucketTagsDatasource.id,
+  BitbucketTagsDatasource.id,
   DockerDatasource.id,
   GitTagsDatasource.id,
   GithubTagsDatasource.id,

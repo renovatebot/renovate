@@ -61,6 +61,14 @@ describe('modules/versioning/composer/index', () => {
     ${'1.2.3'}        | ${true}
     ${'2.5'}          | ${true}
     ${'v2.5'}         | ${true}
+    ${'^1.0|^2.0'}    | ${true}
+    ${'^1.0 | ^2.0'}  | ${true}
+    ${'^1.0||^2.0'}   | ${true}
+    ${'^1.0 || ^2.0'} | ${true}
+    ${'~1.0|~2.0'}    | ${true}
+    ${'~1.0 | ~2.0'}  | ${true}
+    ${'~1.0||~2.0'}   | ${true}
+    ${'~1.0 || ~2.0'} | ${true}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     const res = !!semver.isValid(version);
     expect(res).toBe(expected);
@@ -106,6 +114,26 @@ describe('modules/versioning/composer/index', () => {
     ${'0.5.1'} | ${'~0.4'} | ${true}
   `('matches("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(semver.matches(a, b)).toBe(expected);
+  });
+
+  test.each`
+    a                     | b                     | expected
+    ${'1.0.0'}            | ${'1.0.0'}            | ${true}
+    ${'1.0.0'}            | ${'>=1.0.0'}          | ${true}
+    ${'1.1.0'}            | ${'^1.0.0'}           | ${true}
+    ${'>=1.0.0'}          | ${'>=1.0.0'}          | ${true}
+    ${'~1.0.0'}           | ${'~1.0.0'}           | ${true}
+    ${'^1.0.0'}           | ${'^1.0.0'}           | ${true}
+    ${'>=1.0.0'}          | ${'>=1.1.0'}          | ${false}
+    ${'~1.0.0'}           | ${'~1.1.0'}           | ${false}
+    ${'^1.0.0'}           | ${'^1.1.0'}           | ${false}
+    ${'>=1.0.0'}          | ${'<1.0.0'}           | ${false}
+    ${'~1.0.0'}           | ${'~0.9.0'}           | ${false}
+    ${'^1.0.0'}           | ${'^0.9.0'}           | ${false}
+    ${'^1.1.0 || ^2.0.0'} | ${'^1.0.0 || ^2.0.0'} | ${true}
+    ${'^1.0.0 || ^2.0.0'} | ${'^1.1.0 || ^2.0.0'} | ${false}
+  `('subset("$a", "$b") === $expected', ({ a, b, expected }) => {
+    expect(semver.subset!(a, b)).toBe(expected);
   });
 
   test.each`

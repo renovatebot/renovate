@@ -42,8 +42,9 @@ releases:
     chart: oauth2-proxy/oauth2-proxy
     version: 6.8.0
 `;
+
 const lockFile = codeBlock`
-version: 0.150.0
+version: 0.151.0
 dependencies:
 - name: backstage
   repository: https://backstage.github.io/charts
@@ -51,11 +52,11 @@ dependencies:
 - name: oauth2-proxy
   repository: https://oauth2-proxy.github.io/manifests
   version: 6.2.1
-digest: sha256:98c605fc3de51960ad1eb022f01dfae3bb0a1a06549e56fa39ec86db2a9a072d
-generated: "2023-01-23T12:13:46.487247+01:00"
+digest: sha256:e284706b71f37b757a536703da4cb148d67901afbf1ab431f7d60a9852ca6eef
+generated: "2023-03-08T21:32:06.122276997+01:00"
 `;
 const lockFileTwo = codeBlock`
-version: 0.150.0
+version: 0.151.0
 dependencies:
 - name: backstage
   repository: https://backstage.github.io/charts
@@ -63,8 +64,8 @@ dependencies:
 - name: oauth2-proxy
   repository: https://oauth2-proxy.github.io/manifests
   version: 6.8.0
-digest: sha256:8ceea14d17c0f3c108a26ba341c63380e2426db66484d2b2876ab6e636e52af4
-generated: "2023-01-23T12:16:41.881988+01:00"
+digest: sha256:9d83889176d005effb86041d30c20361625561cbfb439cbd16d7243225bac17c
+generated: "2023-03-08T21:30:48.273709455+01:00"
 `;
 
 describe('modules/manager/helmfile/artifacts', () => {
@@ -171,6 +172,8 @@ describe('modules/manager/helmfile/artifacts', () => {
             ' && ' +
             'install-tool helmfile v0.129.0' +
             ' && ' +
+            'install-tool kustomize 5.0.0' +
+            ' && ' +
             'helmfile deps -f helmfile.yaml' +
             '"',
         },
@@ -181,6 +184,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       expectedCommands: [
         { cmd: 'install-tool helm v3.7.2' },
         { cmd: 'install-tool helmfile v0.129.0' },
+        { cmd: 'install-tool kustomize 5.0.0' },
         { cmd: 'helmfile deps -f helmfile.yaml' },
       ],
     },
@@ -203,7 +207,12 @@ describe('modules/manager/helmfile/artifacts', () => {
       datasource.getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v0.129.0' }],
       });
-      const updatedDeps = [{ depName: 'dep1' }];
+      datasource.getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '5.0.0' }],
+      });
+      const updatedDeps = [
+        { depName: 'dep1', managerData: { needKustomize: true } },
+      ];
       expect(
         await helmfile.updateArtifacts({
           packageFileName: 'helmfile.yaml',

@@ -2,7 +2,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -13,6 +13,7 @@ import { getDep } from '../dockerfile/extract';
 import type {
   ExtractConfig,
   PackageDependency,
+  PackageFile,
   PackageFileContent,
 } from '../types';
 import { isSystemManifest } from './common';
@@ -129,7 +130,7 @@ function resolveGitRepositoryPerSourceTag(
 
   const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitUrl)?.groups;
   if (bitbucketMatchGroups) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketMatchGroups.packageName;
     dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
     return;
@@ -268,9 +269,9 @@ export function extractPackageFile(
 export async function extractAllPackageFiles(
   _config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFileContent<FluxManagerData>[] | null> {
+): Promise<PackageFile<FluxManagerData>[] | null> {
   const manifests: FluxManifest[] = [];
-  const results: PackageFileContent<FluxManagerData>[] = [];
+  const results: PackageFile<FluxManagerData>[] = [];
 
   for (const file of packageFiles) {
     const content = await readLocalFile(file, 'utf8');

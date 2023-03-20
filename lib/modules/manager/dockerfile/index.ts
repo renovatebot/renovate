@@ -5,7 +5,10 @@ import { extractPackageFile } from './extract';
 export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+  fileMatch: [
+    '(^|/|\\.)(Docker|Container)file$',
+    '(^|/)(Docker|Container)file[^/]*$',
+  ],
 };
 
 export const categories: Category[] = ['docker'];

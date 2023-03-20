@@ -141,3 +141,59 @@ module.exports = {
   ],
 };
 ```
+
+## CodeBuild examples
+
+Create a repository with `buildspec.yml`.
+This repository will be your BuildProject job repository to run Renovate on your repositories.
+
+### Renovate Docker `buildspec.yml`
+
+```yml
+version: 0.2
+env:
+  shell: bash
+  git-credential-helper: yes
+  variables:
+    RENOVATE_PLATFORM: 'codecommit'
+    RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
+    RENOVATE_CONFIG: '{"extends":["config:base"]}'
+    LOG_LEVEL: 'debug'
+    AWS_REGION: 'us-east-1'
+phases:
+  build:
+    on-failure: CONTINUE
+    commands:
+      - docker run --rm -e AWS_REGION -e RENOVATE_CONFIG -e RENOVATE_PLATFORM -e RENOVATE_REPOSITORIES -e LOG_LEVEL renovate/renovate
+```
+
+### Renovate CLI `buildspec.yml`
+
+```yml
+version: 0.2
+env:
+  shell: bash
+  git-credential-helper: yes
+  variables:
+    RENOVATE_PLATFORM: 'codecommit'
+    RENOVATE_REPOSITORIES: '["repoName1", "repoName2"]'
+    RENOVATE_CONFIG: '{"extends":["config:base"]}'
+    LOG_LEVEL: 'debug'
+    AWS_REGION: 'us-east-1'
+phases:
+  build:
+    on-failure: CONTINUE
+    commands:
+      - npm install -g renovate
+      - renovate
+```
+
+### Notes
+
+In order to reduce Renovate BuildProject time and avoid `npm install`.
+
+We recommend you install Renovate on the BuildProject Renovate job repository.
+
+You can add `config.js` global config to the repository.
+
+You can add the BuildProject repository to the `RENOVATE_REPOSITORIES` variable and get updates on new Renovate versions.

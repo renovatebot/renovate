@@ -9,6 +9,7 @@ import {
 
 export async function resolveBranchStatus(
   branchName: string,
+  internalChecksAsSuccess: boolean,
   ignoreTests = false
 ): Promise<BranchStatus> {
   logger.debug(
@@ -20,7 +21,10 @@ export async function resolveBranchStatus(
     return 'green';
   }
 
-  const status = await platform.getBranchStatus(branchName);
+  const status = await platform.getBranchStatus(
+    branchName,
+    internalChecksAsSuccess
+  );
   logger.debug(`Branch status ${status}`);
 
   return status;

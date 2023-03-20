@@ -2,7 +2,7 @@ import type { Osv, OsvOffline } from '@renovatebot/osv-offline';
 import { codeBlock } from 'common-tags';
 import { mockFn } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, logger } from '../../../../test/util';
-import type { PackageFileContent } from '../../../modules/manager/types';
+import type { PackageFile } from '../../../modules/manager/types';
 import { Vulnerabilities } from './vulnerabilities';
 
 const getVulnerabilitiesMock =
@@ -71,8 +71,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('unsupported datasource', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
-        dockerfile: [{ deps: [{ depName: 'node', datasource: 'docker' }] }],
+      const packageFiles: Record<string, PackageFile[]> = {
+        dockerfile: [
+          {
+            deps: [{ depName: 'node', datasource: 'docker' }],
+            packageFile: 'some-file',
+          },
+        ],
       };
 
       await vulnerabilities.fetchVulnerabilities(config, packageFiles);
@@ -82,8 +87,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('package found but no vulnerabilities', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
-        npm: [{ deps: [{ depName: 'lodash', datasource: 'npm' }] }],
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [{ depName: 'lodash', datasource: 'npm' }],
+            packageFile: 'some-file',
+          },
+        ],
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([]);
 
@@ -94,12 +104,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('vulnerability without affected field', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -115,7 +126,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('invalid dep version', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
@@ -125,6 +136,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'npm',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -138,9 +150,10 @@ describe('workers/repository/process/vulnerabilities', () => {
 
     it('exception while fetching vulnerabilities', async () => {
       const err = new Error('unknown');
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
+            packageFile: 'some-file',
             deps: [
               {
                 depName: 'lodash',
@@ -162,7 +175,7 @@ describe('workers/repository/process/vulnerabilities', () => {
 
     it('log event with invalid version', async () => {
       const event = { fixed: '^6.0' };
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
@@ -172,6 +185,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'npm',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -205,12 +219,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('no version or range affected', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -231,12 +246,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('no fixed version available', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'fake', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -260,12 +276,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('does not accidentally downgrade versions due to fixed version for other range', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'fake', currentValue: '1.5.1', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -298,12 +315,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('vulnerability with multiple unsorted events', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         gomod: [
           {
             deps: [
               { depName: 'stdlib', currentValue: '1.7.5', datasource: 'go' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -356,12 +374,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('vulnerability with multiple affected entries and version ranges', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
           {
             deps: [
               { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -424,12 +443,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('filters not applicable vulnerability', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'lodash', currentValue: '4.17.11', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -440,7 +460,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('returns a single packageRule for regex manager', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         regex: [
           {
             deps: [
@@ -450,6 +470,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'crate',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -539,12 +560,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('returns multiple packageRules for different vulnerabilities', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -595,12 +617,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('filters not applicable vulnerability based on last_affected version', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
           {
             deps: [
               { depName: 'quokka', currentValue: '1.2.3', datasource: 'pypi' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -634,12 +657,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('returns packageRule based on last_affected version', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'lodash', currentValue: '0.5.0', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -706,7 +730,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('handles invalid CVSS scores gracefully', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         poetry: [
           {
             deps: [
@@ -716,6 +740,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'pypi',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -785,12 +810,13 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('show severity text in GHSA advisories without CVSS score', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             deps: [
               { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
             ],
+            packageFile: 'some-file',
           },
         ],
       };
@@ -842,7 +868,7 @@ describe('workers/repository/process/vulnerabilities', () => {
     });
 
     it('formats headings of vulnerability details', async () => {
-      const packageFiles: Record<string, PackageFileContent[]> = {
+      const packageFiles: Record<string, PackageFile[]> = {
         regex: [
           {
             deps: [
@@ -852,6 +878,7 @@ describe('workers/repository/process/vulnerabilities', () => {
                 datasource: 'crate',
               },
             ],
+            packageFile: 'some-file',
           },
         ],
       };

@@ -1,5 +1,5 @@
 import type { FileChange } from '../../../../util/git/types';
-import type { PackageFileContent } from '../../types';
+import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 
 export interface DetermineLockFileDirsResult {
@@ -10,7 +10,7 @@ export interface DetermineLockFileDirsResult {
 }
 
 export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFileContent<NpmManagerData>>[];
+  npm?: Partial<PackageFile<NpmManagerData>>[];
 }
 
 export interface ArtifactError {

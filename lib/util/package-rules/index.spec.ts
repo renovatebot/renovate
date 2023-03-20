@@ -680,6 +680,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],
@@ -717,6 +718,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],

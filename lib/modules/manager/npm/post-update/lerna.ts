@@ -10,14 +10,18 @@ import type {
   ExtraEnv,
   ToolConstraint,
 } from '../../../../util/exec/types';
-import type { PackageFileContent, PostUpdateConfig } from '../../types';
+import type {
+  PackageFile,
+  PackageFileContent,
+  PostUpdateConfig,
+} from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult } from './types';
 
 // Exported for testability
 export function getLernaVersion(
-  lernaPackageFile: Partial<PackageFileContent<NpmManagerData>>
+  lernaPackageFile: Partial<PackageFile<NpmManagerData>>
 ): string | null {
   const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
   if (!lernaDep?.currentValue || !semver.validRange(lernaDep.currentValue)) {
@@ -36,7 +40,7 @@ export async function generateLockFiles(
   lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
-  skipInstalls?: boolean
+  skipInstalls?: boolean | null
 ): Promise<GenerateLockFileResult> {
   const lernaClient = lernaPackageFile.managerData?.lernaClient;
   if (!is.nonEmptyString(lernaClient)) {

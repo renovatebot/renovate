@@ -21,6 +21,20 @@ export function gradleWrapperFileName(): string {
   return './gradlew';
 }
 
+export function nullRedirectionCommand(): string {
+  if (
+    os.platform() === 'win32' &&
+    GlobalConfig.get('binarySource') !== 'docker'
+  ) {
+    // TODO: Windows environment without docker needs to be implemented
+    logger.debug(
+      'Updating artifacts may fail due to excessive output from "gradle.bat :dependencies" command.'
+    );
+    return '';
+  }
+  return ' > /dev/null';
+}
+
 export async function prepareGradleCommand(
   gradlewFile: string
 ): Promise<string | null> {
@@ -48,6 +62,10 @@ export function getJavaConstraint(
   gradleVersion: string | null | undefined
 ): string | null {
   const major = gradleVersion ? gradleVersioning.getMajor(gradleVersion) : null;
+  const minor = gradleVersion ? gradleVersioning.getMinor(gradleVersion) : null;
+  if (major && (major > 7 || (major >= 7 && minor && minor >= 3))) {
+    return '^17.0.0';
+  }
   if (major && major >= 7) {
     return '^16.0.0';
   }

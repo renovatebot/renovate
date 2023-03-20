@@ -105,7 +105,8 @@ export function updateDependency({
         );
       } else if (
         upgrade.newMajor! > 1 &&
-        !newLine.includes(`/v${upgrade.newMajor}`)
+        !newLine.includes(`/v${upgrade.newMajor}`) &&
+        !upgrade.newValue!.endsWith('+incompatible')
       ) {
         if (depName === depNameNoVersion) {
           // If package currently has no version, pin to latest one.
@@ -137,7 +138,10 @@ export function updateDependency({
     }
 
     if (depType === 'indirect') {
-      newLine += ' // indirect';
+      newLine = newLine.replace(
+        regEx(/\s*(?:\/\/\s*indirect(?:\s*;)?\s*)*$/),
+        ' // indirect'
+      );
     }
 
     lines[upgrade.managerData.lineNumber] = newLine;

@@ -418,12 +418,13 @@ const options: RenovateOptions[] = [
     experimentalIssues: [17633],
   },
   {
-    name: 'includeForks',
+    name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
     stage: 'repository',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'forkToken',
@@ -756,8 +757,9 @@ const options: RenovateOptions[] = [
   {
     name: 'baseBranches',
     description:
-      'An array of one or more custom base branches to be processed. If left empty, the default branch will be chosen.',
+      'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
+    subType: 'string',
     stage: 'package',
     cli: false,
   },
@@ -1195,6 +1197,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'autoReplaceGlobalMatch',
+    description:
+      'Control whether replacement regular expressions are global matches or only the first match.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',
@@ -1230,6 +1239,7 @@ const options: RenovateOptions[] = [
       'lockFileMaintenance',
       'rollback',
       'bump',
+      'replacement',
     ],
     allowString: true,
     stage: 'package',
@@ -1544,6 +1554,13 @@ const options: RenovateOptions[] = [
     type: 'integer',
     default: 0,
   },
+  {
+    name: 'internalChecksAsSuccess',
+    description:
+      'Whether to consider passing internal checks such as stabilityDays when determining branch status.',
+    type: 'boolean',
+    default: false,
+  },
   /*
    * Undocumented experimental feature
   {
@@ -1611,6 +1628,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+  },
+  {
+    name: 'bbUseDevelopmentBranch',
+    description: `Use the repository's [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the repository's default branch.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
   },
   // Automatic merging
   {
@@ -1683,7 +1708,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     experimental: true,
-    experimentalIssues: [20427],
+    experimentalIssues: [20542],
   },
   {
     name: 'pruneBranchAfterAutomerge',
@@ -1934,6 +1959,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['gitlab'],
+  },
+  {
+    name: 'forkModeDisallowMaintainerEdits',
+    description:
+      'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
+    type: 'boolean',
+    supportedPlatforms: ['github'],
+    default: false,
   },
   {
     name: 'confidential',

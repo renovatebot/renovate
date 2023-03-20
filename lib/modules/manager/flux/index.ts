@@ -24,7 +24,7 @@ export const supportedDatasources = [
   GithubTagsDatasource.id,
   GitlabTagsDatasource.id,
   GitTagsDatasource.id,
-  BitBucketTagsDatasource.id,
+  BitbucketTagsDatasource.id,
   HelmDatasource.id,
   DockerDatasource.id,
 ];
