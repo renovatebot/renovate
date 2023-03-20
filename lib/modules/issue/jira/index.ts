@@ -240,10 +240,18 @@ export class JiraIssueCollector extends IssueCollector {
   }
 }
 
+/**
+ * TODO - What is the best way to retrieve these per repository to use in the Jira Issue Collector?
+ * Retrieving this may vary between platforms(ie: Bitbucket repositories can be natively linked)
+ */
 function getProjectKey(): string {
   return 'RENO';
 }
 
+/**
+ * TODO - What is the best way to retrieve these per repository to use in the Jira Issue Collector?
+ * Retrieving this may vary between platforms(ie: Bitbucket repositories can be natively linked)
+ */
 function getRepositoryUrl(): string {
   return 'https://foo.com/bar';
 }
