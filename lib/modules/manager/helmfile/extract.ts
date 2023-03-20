@@ -10,6 +10,7 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './types';
+import { areKustomizationsUsed } from './utils';
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
@@ -92,7 +93,9 @@ export function extractPackageFile(
           .concat([config.registryAliases?.[repoName]] as string[])
           .filter(is.string),
       };
-
+      if (areKustomizationsUsed(dep)) {
+        res.managerData = { needKustomize: true };
+      }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
         (repo) => repo.name === repoName

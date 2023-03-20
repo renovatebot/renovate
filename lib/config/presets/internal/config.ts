@@ -11,6 +11,7 @@ export const presets: Record<string, Preset> = {
       ':ignoreModulesAndTests',
       'group:monorepos',
       'group:recommended',
+      'replacements:all',
       'workarounds:all',
     ],
   },
