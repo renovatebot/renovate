@@ -4,6 +4,7 @@ import upath from 'upath';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { AllConfig, RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
+import { initIssueCollector } from '../../modules/issue';
 import { initPlatform } from '../../modules/platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
@@ -71,6 +72,7 @@ export async function globalInitialize(
   config = await initPlatform(config);
   config = await setDirectories(config);
   await packageCache.init(config);
+  initIssueCollector(config);
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);

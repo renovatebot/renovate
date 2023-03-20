@@ -3,8 +3,9 @@ import { nameFromLevel } from 'bunyan';
 import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { getProblems, logger } from '../../logger';
+import { issueCollector } from '../../modules/issue';
 import type { PackageFile } from '../../modules/manager/types';
-import { platform } from '../../modules/platform';
+// import { platform } from '../../modules/platform';
 import { GitHubMaxPrBodyLen } from '../../modules/platform/github';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -110,7 +111,9 @@ export async function readDashboardBody(
   ) {
     config.dependencyDashboardTitle =
       config.dependencyDashboardTitle ?? `Dependency Dashboard`;
-    const issue = await platform.findIssue(config.dependencyDashboardTitle);
+    const issue = await issueCollector.findIssue(
+      config.dependencyDashboardTitle
+    );
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
       Object.assign(config, parseDashboardIssue(issue.body!));
@@ -193,7 +196,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await issueCollector.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
@@ -212,7 +215,7 @@ export async function ensureDependencyDashboard(
       );
     } else {
       logger.debug('Closing Dependency Dashboard');
-      await platform.ensureIssueClosing(config.dependencyDashboardTitle!);
+      await issueCollector.ensureIssueClosing(config.dependencyDashboardTitle!);
     }
     return;
   }
@@ -405,7 +408,7 @@ export async function ensureDependencyDashboard(
   issueBody += footer;
 
   if (config.dependencyDashboardIssue) {
-    const updatedIssue = await platform.getIssue?.(
+    const updatedIssue = await issueCollector.getIssue?.(
       config.dependencyDashboardIssue,
       false
     );
@@ -432,10 +435,10 @@ export async function ensureDependencyDashboard(
       'DRY-RUN: Would ensure Dependency Dashboard'
     );
   } else {
-    await platform.ensureIssue({
+    await issueCollector.ensureIssue({
       title: config.dependencyDashboardTitle!,
       reuseTitle,
-      body: platform.massageMarkdown(issueBody),
+      body: issueCollector.massageMarkdown(issueBody),
       labels: config.dependencyDashboardLabels,
       confidential: config.confidential,
     });

@@ -2,8 +2,9 @@
 import { GlobalConfig } from '../../../config/global';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import { issueCollector } from '../../../modules/issue';
 import type { PackageFile } from '../../../modules/manager/types';
-import { platform } from '../../../modules/platform';
+// import { platform } from '../../../modules/platform';
 
 export async function raiseDeprecationWarnings(
   config: RenovateConfig,
@@ -62,7 +63,7 @@ export async function raiseDeprecationWarnings(
         logger.info('DRY-RUN: Ensure deprecation warning issue for ' + depName);
       } else {
         const ensureOnce = true;
-        await platform.ensureIssue({
+        await issueCollector.ensureIssue({
           title: issueTitle,
           body: issueBody!,
           once: ensureOnce,
@@ -73,14 +74,14 @@ export async function raiseDeprecationWarnings(
     logger.debug(
       'Checking for existing deprecated package issues missing in current deprecatedPackages'
     );
-    const issueList = await platform.getIssueList();
+    const issueList = await issueCollector.getIssueList();
     if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
         (i) => i.title!.startsWith(issueTitlePrefix) && i.state === 'open'
       );
       for (const i of deprecatedIssues) {
         if (!issueTitleList.includes(i.title!)) {
-          await platform.ensureIssueClosing(i.title!);
+          await issueCollector.ensureIssueClosing(i.title!);
         }
       }
     }

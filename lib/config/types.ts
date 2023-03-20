@@ -1,5 +1,6 @@
 import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
+import type { IssueCollectorId } from '../modules/issue/issue-collector';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
 
@@ -94,6 +95,7 @@ export interface GlobalOnlyConfig {
   cacheDir?: string;
   containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
+  issueCollector?: IssueCollectorId;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
   gitPrivateKey?: string;

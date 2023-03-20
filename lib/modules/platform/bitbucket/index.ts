@@ -11,7 +11,6 @@ import { setBaseUrl as setJiraBaseUrl } from '../../../util/http/jira';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import * as jiraIssues from '../../issues/jira';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -497,29 +496,12 @@ export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
   /* istanbul ignore if */
-  if (!config.hasBitbucketIssuesEnabled && !config.hasJiraProjectLinked) {
+  if (!config.hasBitbucketIssuesEnabled) {
     logger.debug('Issues are disabled - cannot findIssue.');
     return null;
   }
 
-  if (config.hasBitbucketIssuesEnabled && config.hasJiraProjectLinked) {
-    logger.debug(
-      'Both bitbucket issues and jira issues are configured.  Please only enable one per repository.'
-    );
-    return null;
-  }
-
-  if (config.hasJiraProjectLinked) {
-    return await jiraIssues.findIssue(title, config.jiraProjectKey);
-  }
-
-  return await findBitbucketIssue(title);
-}
-
-export async function findBitbucketIssue(title: string): Promise<Issue | null> {
-  logger.debug(`findBitbucketIssue(${title})`);
-
-  const issues = await findOpenBitbucketIssues(title);
+  const issues = await findOpenIssues(title);
   if (!issues.length) {
     return null;
   }
@@ -530,9 +512,7 @@ export async function findBitbucketIssue(title: string): Promise<Issue | null> {
   };
 }
 
-async function findOpenBitbucketIssues(
-  title: string
-): Promise<BitbucketIssue[]> {
+async function findOpenIssues(title: string): Promise<BitbucketIssue[]> {
   try {
     const filters = [
       `title=${JSON.stringify(title)}`,
@@ -585,33 +565,19 @@ export async function ensureIssue({
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
 
-  if (config.hasBitbucketIssuesEnabled) {
-    return await ensureBitbucketIssue({ title, reuseTitle, body });
-  } else if (config.hasJiraProjectLinked) {
-    return await jiraIssues.ensureIssue(
-      { title, reuseTitle, body },
-      config.jiraProjectKey,
-      config.repositoryUrl
-    );
+  /* istanbul ignore if */
+  if (!config.hasBitbucketIssuesEnabled) {
+    logger.warn('Issues are disabled - cannot ensureIssue');
+    logger.debug(`Failed to ensure Issue with title:${title}`);
+    return null;
   }
 
-  logger.warn('Issues are disabled - cannot ensureIssue');
-  logger.debug(`Failed to ensure Issue with title:${title}`);
-  return null;
-}
-
-export async function ensureBitbucketIssue({
-  title,
-  reuseTitle,
-  body,
-}: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
-  logger.debug(`ensureBitbucketIssue()`);
-  const description = massageMarkdown(sanitize(body));
-
   try {
-    let issues = await findOpenBitbucketIssues(title);
+    let issues = await findOpenIssues(title);
+    const description = massageMarkdown(sanitize(body));
+
     if (!issues.length && reuseTitle) {
-      issues = await findOpenBitbucketIssues(reuseTitle);
+      issues = await findOpenIssues(reuseTitle);
     }
     if (issues.length) {
       // Close any duplicates
@@ -626,6 +592,7 @@ export async function ensureBitbucketIssue({
       ) {
         logger.debug('Bitbucket issue updated');
         await bitbucketHttp.putJson(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
@@ -668,19 +635,11 @@ export async function ensureBitbucketIssue({
 export async function getIssueList(): Promise<Issue[]> {
   logger.debug(`getIssueList()`);
 
-  if (!config.hasBitbucketIssuesEnabled && !config.hasJiraProjectLinked) {
+  if (!config.hasBitbucketIssuesEnabled) {
     logger.debug('Issues are disabled - cannot getIssueList');
     return [];
   }
 
-  if (config.hasBitbucketIssuesEnabled) {
-    return await getBitbucketIssueList();
-  }
-
-  return await jiraIssues.getIssueList(config.jiraProjectKey);
-}
-
-async function getBitbucketIssueList(): Promise<Issue[]> {
   try {
     const filters = ['(state = "new" OR state = "open")'];
     if (renovateUserUuid) {
@@ -702,20 +661,14 @@ async function getBitbucketIssueList(): Promise<Issue[]> {
 
 export async function ensureIssueClosing(title: string): Promise<void> {
   /* istanbul ignore if */
-  if (!config.hasBitbucketIssuesEnabled && !config.hasJiraProjectLinked) {
+  if (!config.hasBitbucketIssuesEnabled) {
     logger.debug('Issues are disabled - cannot ensureIssueClosing');
     return;
   }
-  if (config.hasBitbucketIssuesEnabled) {
-    const issues = await findOpenBitbucketIssues(title);
-    for (const issue of issues) {
-      await closeBitbucketIssue(issue.id);
-    }
-  }
 
-  const issues = await jiraIssues.findOpenIssues(title, config.jiraProjectKey);
+  const issues = await findOpenIssues(title);
   for (const issue of issues) {
-    await jiraIssues.closeIssue(issue.key);
+    await closeBitbucketIssue(issue.id);
   }
 }
 

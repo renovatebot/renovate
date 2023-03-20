@@ -10,6 +10,9 @@ export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 
+// Issue Collector Error
+export const ISSUE_COLLECTOR_NOT_FOUND = 'issue-collector-not-found';
+
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
 export const CONFIG_PRESETS_INVALID = 'config-presets-invalid';
