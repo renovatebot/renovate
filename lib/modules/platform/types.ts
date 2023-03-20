@@ -42,6 +42,7 @@ export interface RepoParams {
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
@@ -94,6 +95,7 @@ export type PlatformPrOptions = {
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
 };
+
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;

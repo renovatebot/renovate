@@ -13,6 +13,7 @@ import {
   extractGradleVersion,
   getJavaConstraint,
   gradleWrapperFileName,
+  nullRedirectionCommand,
   prepareGradleCommand,
 } from '../gradle-wrapper/utils';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -156,6 +157,14 @@ export async function updateArtifacts({
 
       cmd += ` --update-locks ${updatedDepNames.map(quote).join(',')}`;
     }
+
+    // `./gradlew :dependencies` command can output huge text due to `:dependencies`
+    // that renders dependency graphs. Given the output can exceed `ExecOptions.maxBuffer` size,
+    // drop stdout from the command.
+    //
+    // Note: Windows without docker doesn't supported this yet
+    const nullRedirection = nullRedirectionCommand();
+    cmd += nullRedirection;
 
     await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);

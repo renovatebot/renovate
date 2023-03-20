@@ -43,6 +43,7 @@ import type {
   EffectiveReviewer,
   PagedResult,
   PrResponse,
+  RepoBranchingModel,
   RepoInfo,
   RepoInfoBody,
 } from './types';
@@ -162,6 +163,7 @@ export async function initRepo({
   repository,
   cloneSubmodules,
   ignorePrAuthor,
+  bbUseDevelopmentBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -170,10 +172,10 @@ export async function initRepo({
   });
   config = {
     repository,
-    username: opts.username,
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
+  let mainBranch: string;
   try {
     info = utils.repoInfoTransformer(
       (
@@ -182,7 +184,23 @@ export async function initRepo({
         )
       ).body
     );
-    config.defaultBranch = info.mainbranch;
+
+    mainBranch = info.mainbranch;
+
+    if (bbUseDevelopmentBranch) {
+      // Fetch Bitbucket development branch
+      const developmentBranch = (
+        await bitbucketHttp.getJson<RepoBranchingModel>(
+          `/2.0/repositories/${repository}/branching-model`
+        )
+      ).body.development?.branch?.name;
+
+      if (developmentBranch) {
+        mainBranch = developmentBranch;
+      }
+    }
+
+    config.defaultBranch = mainBranch;
 
     config = {
       ...config,
@@ -257,7 +275,7 @@ export async function initRepo({
     cloneSubmodules,
   });
   const repoConfig: RepoResult = {
-    defaultBranch: info.mainbranch,
+    defaultBranch: mainBranch,
     isFork: info.isFork,
     repoFingerprint: repoFingerprint(info.uuid, defaults.endpoint),
   };
@@ -516,13 +534,14 @@ async function findOpenBitbucketIssues(
   title: string
 ): Promise<BitbucketIssue[]> {
   try {
-    const filter = encodeURIComponent(
-      [
-        `title=${JSON.stringify(title)}`,
-        '(state = "new" OR state = "open")',
-        `reporter.username="${config.username}"`,
-      ].join(' AND ')
-    );
+    const filters = [
+      `title=${JSON.stringify(title)}`,
+      '(state = "new" OR state = "open")',
+    ];
+    if (renovateUserUuid) {
+      filters.push(`reporter.uuid="${renovateUserUuid}"`);
+    }
+    const filter = encodeURIComponent(filters.join(' AND '));
     return (
       (
         await bitbucketHttp.getJson<{ values: BitbucketIssue[] }>(
@@ -663,12 +682,11 @@ export async function getIssueList(): Promise<Issue[]> {
 
 async function getBitbucketIssueList(): Promise<Issue[]> {
   try {
-    const filter = encodeURIComponent(
-      [
-        '(state = "new" OR state = "open")',
-        `reporter.username="${config.username}"`,
-      ].join(' AND ')
-    );
+    const filters = ['(state = "new" OR state = "open")'];
+    if (renovateUserUuid) {
+      filters.push(`reporter.uuid="${renovateUserUuid}"`);
+    }
+    const filter = encodeURIComponent(filters.join(' AND '));
     return (
       (
         await bitbucketHttp.getJson<{ values: Issue[] }>(

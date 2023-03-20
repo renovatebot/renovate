@@ -7,6 +7,9 @@ describe('util/cache/package/index', () => {
   it('returns undefined if not initialized', async () => {
     expect(await get('test', 'missing-key')).toBeUndefined();
     expect(await set('test', 'some-key', 'some-value', 5)).toBeUndefined();
+    expect(async () => {
+      await cleanup({});
+    }).not.toThrow();
   });
 
   it('sets and gets file', async () => {
