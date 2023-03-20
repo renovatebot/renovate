@@ -68,7 +68,7 @@ If you regularly wish to close immortal PRs, it's an indication that you may be 
 ### How to fix immortal PRs
 
 Avoid grouping dependencies together which have different versions, or which you have a high chance of wanting to ignore.
-If you still get immortal PRs then you can set `"recreateClosed": "never"`
+If you have immortal PRs which you'd like to remain closed you can set `"recreateClosed": "never"`.
 
 #### Major updates require Dependency Dashboard approval
 
