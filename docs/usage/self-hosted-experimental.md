@@ -76,6 +76,10 @@ When using `matchPackageNames` and `matchPackagePatterns` matchers:
 1. Renovate first tries to match against `depName`
 2. If `depName` doesn't match then Renovate tries to match against `packageName`
 
+## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
+
+If set, Renovate will query this api for Merge Confidence data.
+
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
 <!-- prettier-ignore -->

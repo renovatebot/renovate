@@ -2135,6 +2135,38 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### matchConfidence
+
+<!-- prettier-ignore -->
+!!! warning
+This configuration option is dependent on an API key, therefore it is effectively disabled if none is set.
+
+For example to group high merge confidence updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchConfidence": ["high", "very high"],
+      "groupName": "high merge confidence"
+    }
+  ]
+}
+```
+
+This feature requires an API token. Set it via Host rules under the `merge-confidence` HostType:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "merge-confidence",
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.

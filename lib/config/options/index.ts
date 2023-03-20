@@ -1225,6 +1225,21 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchConfidence',
+    description:
+      'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    experimental: true,
+  },
+  {
     name: 'matchUpdateTypes',
     description:
       'Update types to match against (`major`, `minor`, `pin`, `pinDigest`, etc). Valid only within `packageRules` object.',

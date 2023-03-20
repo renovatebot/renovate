@@ -1,3 +1,4 @@
+import * as hostRules from '../../../../../lib/util/host-rules';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getConfig, partial } from '../../../../../test/util';
@@ -14,7 +15,11 @@ import { id as gitVersioningId } from '../../../../modules/versioning/git';
 import { id as npmVersioningId } from '../../../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../../../modules/versioning/pep440';
 import { id as poetryVersioningId } from '../../../../modules/versioning/poetry';
+import type { HostRule } from '../../../../types';
+import * as memCache from '../../../../util/cache/memory';
 import * as githubGraphql from '../../../../util/github/graphql';
+import { initConfig, resetConfig } from '../../../../util/merge-confidence';
+import * as McApi from '../../../../util/merge-confidence';
 import type { LookupUpdateConfig } from './types';
 import * as lookup from '.';
 
@@ -67,6 +72,7 @@ describe('workers/repository/process/lookup/index', () => {
   // TODO: fix mocks
   afterEach(() => {
     httpMock.clear(false);
+    hostRules.clear();
   });
 
   describe('.lookupUpdates()', () => {
@@ -1978,6 +1984,105 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: `rollback`,
         },
       ]);
+    });
+
+    describe('handles merge confidence', () => {
+      const getMergeConfidenceSpy = jest.spyOn(
+        McApi,
+        'getMergeConfidenceLevel'
+      );
+      const apiBaseUrl = 'https://www.baseurl.com/';
+      const envOrg: NodeJS.ProcessEnv = process.env;
+      const hostRule: HostRule = {
+        hostType: 'merge-confidence',
+        token: 'some-token',
+      };
+
+      beforeEach(() => {
+        process.env = {
+          ...envOrg,
+          RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: apiBaseUrl,
+        };
+        hostRules.add(hostRule);
+        initConfig();
+        memCache.reset();
+      });
+
+      afterEach(() => {
+        process.env = envOrg;
+        hostRules.clear();
+        resetConfig();
+      });
+
+      it('gets a merge confidence level for a given update when corresponding packageRule is in use', async () => {
+        const datasource = NpmDatasource.id;
+        const packageName = 'webpack';
+        const newVersion = '3.8.1';
+        const currentValue = '3.7.0';
+        config.packageRules = [{ matchConfidence: ['high'] }];
+        config.currentValue = currentValue;
+        config.packageName = packageName;
+        config.datasource = datasource;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+        httpMock
+          .scope(apiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
+          )
+          .reply(200, { confidence: 'high' });
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(lookupUpdates).toMatchObject([
+          {
+            mergeConfidenceLevel: `high`,
+          },
+        ]);
+      });
+
+      it('doesnt get a merge confidence level when no packageRule is set', async () => {
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = NpmDatasource.id;
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(getMergeConfidenceSpy).toHaveBeenCalledTimes(0);
+        expect(lookupUpdates).not.toMatchObject([
+          {
+            mergeConfidenceLevel: expect.anything(),
+          },
+        ]);
+      });
+
+      it('doesnt set merge confidence value when api is not in use', async () => {
+        const datasource = NpmDatasource.id;
+        config.packageRules = [{ matchConfidence: ['high'] }];
+        config.currentValue = '3.7.0';
+        config.packageName = 'webpack';
+        config.datasource = datasource;
+        hostRules.clear(); // reset merge confidence
+        initConfig();
+        httpMock
+          .scope('https://registry.npmjs.org')
+          .get('/webpack')
+          .reply(200, webpackJson);
+
+        const lookupUpdates = (await lookup.lookupUpdates(config)).updates;
+
+        expect(lookupUpdates).not.toMatchObject([
+          {
+            mergeConfidenceLevel: expect.anything(),
+          },
+        ]);
+      });
     });
   });
 });
