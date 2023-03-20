@@ -179,7 +179,7 @@ export function generateBranchConfig(
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed =
-        config.recreateClosed === 'never' ? 'never' : 'always';
+        upgrade.recreateClosed === 'never' ? 'never' : 'always';
     } else if (
       newValue.length > 1 &&
       (upgrade.isDigest || upgrade.isPinDigest)
@@ -187,7 +187,7 @@ export function generateBranchConfig(
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed =
-        config.recreateClosed === 'never' ? 'never' : 'always';
+        upgrade.recreateClosed === 'never' ? 'never' : 'always';
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
     }
