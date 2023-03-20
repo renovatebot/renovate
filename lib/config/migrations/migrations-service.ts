@@ -144,7 +144,7 @@ export class MigrationsService {
     SemanticPrefixMigration,
     MatchDatasourcesMigration,
     DatasourceMigration,
-    RecreateClosedMigration
+    RecreateClosedMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
