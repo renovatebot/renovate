@@ -2139,7 +2139,7 @@ For example to apply a special label for Major updates:
 
 <!-- prettier-ignore -->
 !!! warning
-This configuration option is dependent on an API key, therefore it is effectively disabled if none is set.
+This configuration option is dependent on a Mend API key, and is in private beta testing only. API keys are not available for free or via this repository.
 
 For example to group high merge confidence updates:
 
@@ -2154,7 +2154,7 @@ For example to group high merge confidence updates:
 }
 ```
 
-This feature requires an API token. Set it via Host rules under the `merge-confidence` HostType:
+Tokens can be configured via `hostRules` using the `merge-confidence` `hostType`:
 
 ```json
 {
