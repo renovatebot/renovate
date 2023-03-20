@@ -1,3 +1,4 @@
+import { getIssueCollectorsList } from '../../modules/issue';
 import { getManagers } from '../../modules/manager';
 import { getPlatformList } from '../../modules/platform';
 import { getVersioningList } from '../../modules/versioning';
@@ -647,6 +648,13 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     supportedManagers: ['npm', 'composer'],
+  },
+  {
+    name: 'issueCollector',
+    description: 'The platform to use for raising issues.',
+    type: 'string',
+    allowedValues: getIssueCollectorsList(),
+    globalOnly: true,
   },
   {
     name: 'platform',

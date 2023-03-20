@@ -30,10 +30,15 @@ export function initIssueCollector(config: AllConfig): void {
 }
 
 function setIssueCollectorApi(config: AllConfig): void {
-  if (
-    is.nonEmptyString(config.issueCollector) &&
-    issueCollectors.has(config.issueCollector)
-  ) {
+  if (is.nonEmptyString(config.issueCollector)) {
+    if (!issueCollectors.has(config.issueCollector)) {
+      throw new Error(
+        `Init: Issue Collector "${
+          config.issueCollector
+        }" not found. Must be one of: ${getIssueCollectorsList().join(', ')}`
+      );
+    }
+
     _issueCollector = issueCollectors.get(config.issueCollector);
   } else if (
     is.nonEmptyString(config.platform) &&
