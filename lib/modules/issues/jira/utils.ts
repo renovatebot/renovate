@@ -7,6 +7,13 @@ import type {
   MarkdownASTNode,
 } from './types';
 
+export const StatusCategoryKey = [
+  'new',
+  'indeterminate',
+  'in-progress',
+  'done',
+] as const;
+
 /**
  * See https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
  */

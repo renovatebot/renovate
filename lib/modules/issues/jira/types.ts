@@ -15,13 +15,6 @@ export interface JiraTransitionsResponse {
   transitions: JiraTransition[];
 }
 
-export const StatusCategoryKey = [
-  'new',
-  'indeterminate',
-  'in-progress',
-  'done',
-] as const;
-
 export interface JiraTransition {
   id: number;
   name: string;
