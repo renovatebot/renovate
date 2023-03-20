@@ -101,7 +101,6 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       const oldItem = cachedItems[version];
       if (oldItem && this.isStabilized(oldItem)) {
         isPaginationDone = true;
-        break;
       }
 
       cachedItems[version] = item;

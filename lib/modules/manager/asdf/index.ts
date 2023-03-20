@@ -1,4 +1,6 @@
+import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
@@ -24,4 +26,6 @@ export const supportedDatasources = [
   NodeDatasource.id,
   NpmDatasource.id,
   RubyVersionDatasource.id,
+  DartVersionDatasource.id,
+  FlutterVersionDatasource.id,
 ];

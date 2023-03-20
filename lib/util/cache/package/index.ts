@@ -65,6 +65,7 @@ export async function init(config: AllConfig): Promise<void> {
     cacheProxy = {
       get: fileCache.get,
       set: fileCache.set,
+      cleanup: fileCache.cleanup,
     };
   }
 }
@@ -72,5 +73,8 @@ export async function init(config: AllConfig): Promise<void> {
 export async function cleanup(config: AllConfig): Promise<void> {
   if (config?.redisUrl) {
     await redisCache.end();
+  }
+  if (cacheProxy.cleanup) {
+    await cacheProxy.cleanup();
   }
 }

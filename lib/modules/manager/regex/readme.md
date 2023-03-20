@@ -20,7 +20,7 @@ Before Renovate can look up a dependency and decide about updates, it needs this
 
 - The dependency's name
 - Which `datasource` to use: npm, Docker, GitHub tags, and so on. For how to format this references see [datasource overview](https://docs.renovatebot.com/modules/datasource/#supported-datasources)
-- Which version scheme to use: defaults to `semver`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
+- Which version scheme to use: defaults to `semver-coerced`, but you may set another value like `pep440`. Supported versioning schemes can be found in the [versioning overview](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
 
 Configuration-wise, it works like this:
 
@@ -29,7 +29,7 @@ Configuration-wise, it works like this:
 - You can optionally have a `packageName` capture group or a `packageNameTemplate` if it differs from `depName`
 - You must have either a `datasource` capture group or a `datasourceTemplate` config field
 - You can optionally have a `depType` capture group or a `depTypeTemplate` config field
-- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver` will be used as the default
+- You can optionally have a `versioning` capture group or a `versioningTemplate` config field. If neither are present, `semver-coerced` will be used as the default
 - You can optionally have an `extractVersion` capture group or an `extractVersionTemplate` config field
 - You can optionally have a `currentDigest` capture group.
 - You can optionally have a `registryUrl` capture group or a `registryUrlTemplate` config field
@@ -119,7 +119,7 @@ You could configure Renovate to update the `Dockerfile` like this:
 }
 ```
 
-We could drop the `versioningTemplate` because Renovate defaults to `semver` versioning.
+We could drop the `versioningTemplate` because Renovate defaults to `∆semver-coerced` versioning.
 But we included the `versioningTemplate` config option to show you why we call these fields _templates_: because they are compiled using Handlebars and so can be composed from values you collect in named capture groups.
 
 You should use triple brace `{{{ }}}` templates like `{{{versioning}}}` to be safe.
@@ -180,8 +180,8 @@ For example:
       "fileMatch": [".*y[a]?ml$"],
       "matchStringsStrategy": "combination",
       "matchStrings": [
-        "['\"]?(?<depName>/pipeline-fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
-        "['\"]?(?<depName>pipeline-solutions\\/gitlab\\/fragments\\/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
+        "['\"]?(?<depName>/pipeline-fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?",
+        "['\"]?(?<depName>pipeline-solutions/gitlab/fragments/fragment-version-check)['\"]?\\s*ref:\\s['\"]?(?<currentValue>[\\d-]*)['\"]?"
       ],
       "depNameTemplate": "pipeline-solutions/gitlab/fragments/fragment-version-check",
       "autoReplaceStringTemplate": "'{{{depName}}}'\n    ref: {{{newValue}}}",

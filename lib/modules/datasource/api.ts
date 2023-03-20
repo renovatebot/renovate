@@ -19,6 +19,7 @@ import { GalaxyDatasource } from './galaxy';
 import { GalaxyCollectionDatasource } from './galaxy-collection';
 import { GitRefsDatasource } from './git-refs';
 import { GitTagsDatasource } from './git-tags';
+import { GithubReleaseAttachmentsDatasource } from './github-release-attachments';
 import { GithubReleasesDatasource } from './github-releases';
 import { GithubTagsDatasource } from './github-tags';
 import { GitlabPackagesDatasource } from './gitlab-packages';
@@ -76,6 +77,10 @@ api.set(GalaxyDatasource.id, new GalaxyDatasource());
 api.set(GalaxyCollectionDatasource.id, new GalaxyCollectionDatasource());
 api.set(GitRefsDatasource.id, new GitRefsDatasource());
 api.set(GitTagsDatasource.id, new GitTagsDatasource());
+api.set(
+  GithubReleaseAttachmentsDatasource.id,
+  new GithubReleaseAttachmentsDatasource()
+);
 api.set(GithubReleasesDatasource.id, new GithubReleasesDatasource());
 api.set(GithubTagsDatasource.id, new GithubTagsDatasource());
 api.set(GitlabPackagesDatasource.id, new GitlabPackagesDatasource());
