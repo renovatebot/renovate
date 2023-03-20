@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -455,7 +455,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             currentValue: '2020.5.6+staging.ze',
-            datasource: BitBucketTagsDatasource.id,
+            datasource: BitbucketTagsDatasource.id,
             depName: 'renovate-repo',
             packageName: 'renovatebot/renovate',
             sourceUrl: 'https://bitbucket.org/renovatebot/renovate',

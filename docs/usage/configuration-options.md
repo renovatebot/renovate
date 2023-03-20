@@ -119,6 +119,37 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
+## autoReplaceGlobalMatch
+
+Setting this to `false` will replace only the first match during replacements updates.
+
+Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
+
+Consider this example:
+
+```dockerfile
+FROM java:8@sha256:0e8b2a860
+```
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["java"],
+      "replacementName": "eclipse-temurin",
+      "replacementVersion": "11"
+    }
+  ]
+}
+```
+
+With the above replacement scenario, the current dependency has a version of `8`, which also features several times within the digest section.
+
+When using the default `autoReplaceGlobalMatch` configuration, Renovate will attempt to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
+This will replace more than is intended and will be caught during replacement validation steps, resulting in the replacement PR to not be created.
+
+When setting `autoReplaceGlobalMatch` configuration to `false`, Renovate will only replace the first occurrence of `8` and will successfully create a replacement PR.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
@@ -153,7 +184,9 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 }
 ```
 
-Important: Renovate won't automerge on GitHub if a PR has a negative review outstanding.
+<!-- prettier-ignore -->
+!!! warning "Negative reviews on GitHub block Renovate automerge"
+    Renovate won't automerge on GitHub if a PR has a negative review.
 
 <!-- prettier-ignore -->
 !!! note
@@ -478,12 +511,13 @@ If enabled, all issues created by Renovate are set as confidential, even in a pu
 
 ## configMigration
 
-If enabled, Renovate will raise a pull request if config file migration is needed.
+If enabled, Renovate raises a pull request when it needs to migrate the Renovate config file.
+Renovate only performs `configMigration` on `.json` and `.json5` files.
 
 We're adding new features to Renovate bot often.
-Most times you can keep using your Renovate config and benefit from the new features right away.
-But sometimes you need to change your Renovate configuration.
-To help you with this, Renovate will create config migration pull requests.
+Often you can keep using your Renovate config and benefit from the new features right away.
+But sometimes you need to update your Renovate configuration.
+To help you with this, Renovate will create config migration pull requests, when you enable `configMigration`.
 
 Example:
 
@@ -497,13 +531,17 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 ```
 
 <!-- prettier-ignore -->
-!!! info
-    This feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
-    JSON5 content can potentially be down leveled (`.json` files) and all comments will be removed.
+!!! caution
+    The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
+    Renovate may downgrade JSON5 content to plain JSON.
+    When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
+    This can happen because Renovate wrongly converts JSON5 to JSON, thus removing the comments.
 
 <!-- prettier-ignore -->
 !!! note
-    Closing the config migration PR will cause it to be ignored and not being reopend/recreated in the future.',
+    When you close a config migration PR, Renovate ignores it forever.
+    This also means that Renovate won't create a config migration PR in future.
+    If you closed the PR by accident, find the closed PR and re-name the PR title to get a new PR.
 
 ## configWarningReuseIssue
 
@@ -555,7 +593,7 @@ Renovate supports two options:
 We are working on adding more advanced filtering options.
 
 Note: There must be a `constraints` object in your Renovate config for this to work.
-This feature is limited to `pypi` datasource only.
+This feature is limited to `packagist`, `npm`, and `pypi` datasources.
 
 ## defaultRegistryUrls
 
@@ -926,8 +964,12 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 ## forkProcessing
 
 By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+<!-- prettier-ignore -->
+!!! note
+    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
 
 If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
 
@@ -963,7 +1005,7 @@ Example:
 
 Ignore the default project level approval(s), so that Renovate bot can automerge its merge requests, without needing approval(s).
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
-This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch` and `platformAutomerge=true`.
+This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
 ## golang
@@ -2354,12 +2396,14 @@ The available sections are header, table, notes, changelogs, configDescription, 
 
 ## prConcurrentLimit
 
-This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
+This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs open at any time.
 
 This limit is enforced on a per-repository basis.
 
-Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
-Security PRs have `[SECURITY]` in their PR title.
+<!-- prettier-ignore -->
+!!! note
+    Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+    Security PRs have `[SECURITY]` in their PR title.
 
 ## prCreation
 

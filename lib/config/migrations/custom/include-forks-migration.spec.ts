@@ -1,8 +1,8 @@
-import { RenovateForkMigration } from './include-forks-migration';
+import { IncludeForksMigration } from './include-forks-migration';
 
 describe('config/migrations/custom/include-forks-migration', () => {
   it('should migrate true', () => {
-    expect(RenovateForkMigration).toMigrate(
+    expect(IncludeForksMigration).toMigrate(
       {
         includeForks: true,
       },
@@ -13,7 +13,7 @@ describe('config/migrations/custom/include-forks-migration', () => {
   });
 
   it('should migrate false', () => {
-    expect(RenovateForkMigration).toMigrate(
+    expect(IncludeForksMigration).toMigrate(
       {
         includeForks: false,
       },
@@ -24,7 +24,7 @@ describe('config/migrations/custom/include-forks-migration', () => {
   });
 
   it('should not migrate non boolean value', () => {
-    expect(RenovateForkMigration).toMigrate(
+    expect(IncludeForksMigration).toMigrate(
       {
         includeForks: 'test',
       },

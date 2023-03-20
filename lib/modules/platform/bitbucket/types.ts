@@ -9,8 +9,6 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  username: string;
-  userUuid: string;
   ignorePrAuthor: boolean;
   repositoryUrl: string;
   hasJiraProjectLinked: boolean;
@@ -33,6 +31,21 @@ export interface RepoInfo {
   has_issues: boolean;
   uuid: string;
   repositoryUrl: string;
+}
+
+export interface RepoBranchingModel {
+  development: {
+    name: string;
+    branch?: {
+      name: string;
+    };
+  };
+}
+
+export interface BranchResponse {
+  target: {
+    hash: string;
+  };
 }
 
 export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
