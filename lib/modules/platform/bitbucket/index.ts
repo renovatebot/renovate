@@ -11,7 +11,7 @@ import { setBaseUrl as setJiraBaseUrl } from '../../../util/http/jira';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import * as jiraIssues from '../../issues/jira/index';
+import * as jiraIssues from '../../issues/jira';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
