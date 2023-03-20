@@ -54,7 +54,7 @@ export function determineNewReplacementName(
 
 export function determineNewReplacementValue(
   config: LookupUpdateConfig
-): string | undefined {
+): string | undefined | null {
   const versioning = allVersioning.get(config.versioning);
   const rangeStrategy = getRangeStrategy(config);
 
@@ -65,7 +65,7 @@ export function determineNewReplacementValue(
       newVersion: config.replacementVersion,
       rangeStrategy: rangeStrategy!,
       isReplacement: true,
-    })!;
+    });
   }
 
   return config.currentValue;
