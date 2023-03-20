@@ -304,6 +304,30 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe('always');
     });
 
+    it('Grouped pin & pinDigest cannot be recreated when closed if recreateClosed is never', () => {
+      const branch = [
+        {
+          ...requiredDefaultOptions,
+          isPinDigest: true,
+          updateType: 'pinDigest',
+          newValue: 'v2',
+          newDigest: 'dc323e67f16fb5f7663d20ff7941f27f5809e9b6',
+          recreateClosed: 'never',
+        },
+        {
+          ...requiredDefaultOptions,
+          updateType: 'pin',
+          isPin: true,
+          newValue: "'2.2.0'",
+          newVersion: '2.2.0',
+          newMajor: 2,
+          recreateClosed: 'never',
+        },
+      ] as BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res.recreateClosed).toBe('never');
+    });
+
     it('Grouped pin can be recreated', () => {
       const branch = [
         {
