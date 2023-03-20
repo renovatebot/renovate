@@ -16,6 +16,6 @@ export interface ConanYAML {
 }
 
 export interface ConanPackage {
-  depName: string;
+  conanName: string;
   userAndChannel: string;
 }

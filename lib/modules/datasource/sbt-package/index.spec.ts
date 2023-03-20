@@ -39,7 +39,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.scalatest:scalatest',
+        packageName: 'org.scalatest:scalatest',
         registryUrls: ['https://failed_repo/maven'],
       });
 
@@ -63,7 +63,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'com.example:empty',
+        packageName: 'com.example:empty',
         registryUrls: [],
       });
 
@@ -98,7 +98,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        packageName: 'org.example:example',
         registryUrls: [MAVEN_REPO],
       });
 
@@ -127,7 +127,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example_2.12',
+        packageName: 'org.example:example_2.12',
         registryUrls: [],
       });
 
@@ -168,7 +168,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'io.confluent:kafka-avro-serializer',
+        packageName: 'io.confluent:kafka-avro-serializer',
         registryUrls: ['https://packages.confluent.io/maven'],
       });
       expect(res).toEqual({
@@ -201,7 +201,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example',
+        packageName: 'org.example:example',
         registryUrls: [MAVEN_REPO],
       });
 
@@ -245,7 +245,7 @@ describe('modules/datasource/sbt-package/index', () => {
       const res = await getPkgReleases({
         versioning: mavenVersioning.id,
         datasource: SbtPackageDatasource.id,
-        depName: 'org.example:example_2.13',
+        packageName: 'org.example:example_2.13',
         registryUrls: [
           'https://gitlab.com/api/v4/projects/123/packages/maven/',
         ],
