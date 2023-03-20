@@ -55,7 +55,7 @@ export interface GithubPackageConfig {
   /**
    * Default: https://api.github.com
    */
-  registryUrl?: string;
+  registryUrl?: string | undefined;
 }
 
 /**
