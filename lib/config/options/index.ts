@@ -1527,6 +1527,7 @@ const options: RenovateOptions[] = [
     description: 'Recreate PRs even if same ones were closed previously.',
     type: 'string',
     default: 'auto',
+    allowedValues: ['auto', 'always', 'never'],
   },
   {
     name: 'rebaseWhen',
@@ -1598,7 +1599,7 @@ const options: RenovateOptions[] = [
     description:
       'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
-    // default: 2,
+    default: 2,
   },
   {
     name: 'prConcurrentLimit',
