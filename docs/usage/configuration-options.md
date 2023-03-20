@@ -119,6 +119,37 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
+## autoReplaceGlobalMatch
+
+Setting this to `false` will replace only the first match during replacements updates.
+
+Disabling this is useful for situations where values are repeated within the dependency string, such as when the `currentVersion` is also featured somewhere within the `currentDigest`, but you only want to replace the first instance.
+
+Consider this example:
+
+```dockerfile
+FROM java:8@sha256:0e8b2a860
+```
+
+```json
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["java"],
+      "replacementName": "eclipse-temurin",
+      "replacementVersion": "11"
+    }
+  ]
+}
+```
+
+With the above replacement scenario, the current dependency has a version of `8`, which also features several times within the digest section.
+
+When using the default `autoReplaceGlobalMatch` configuration, Renovate will attempt to replace all instances of `8` within the dependency string with the `replacementVersion` value of `11`.
+This will replace more than is intended and will be caught during replacement validation steps, resulting in the replacement PR to not be created.
+
+When setting `autoReplaceGlobalMatch` configuration to `false`, Renovate will only replace the first occurrence of `8` and will successfully create a replacement PR.
+
 ## automerge
 
 By default, Renovate raises PRs but leaves them to someone or something else to merge them.
@@ -153,7 +184,9 @@ So for example you could choose to automerge all (passing) `devDependencies` onl
 }
 ```
 
-Important: Renovate won't automerge on GitHub if a PR has a negative review outstanding.
+<!-- prettier-ignore -->
+!!! warning "Negative reviews on GitHub block Renovate automerge"
+    Renovate won't automerge on GitHub if a PR has a negative review.
 
 <!-- prettier-ignore -->
 !!! note
@@ -560,7 +593,7 @@ Renovate supports two options:
 We are working on adding more advanced filtering options.
 
 Note: There must be a `constraints` object in your Renovate config for this to work.
-This feature is limited to `pypi` datasource only.
+This feature is limited to `packagist`, `npm`, and `pypi` datasources.
 
 ## defaultRegistryUrls
 
@@ -931,8 +964,12 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 ## forkProcessing
 
 By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+<!-- prettier-ignore -->
+!!! note
+    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
 
 If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
 
@@ -2359,12 +2396,14 @@ The available sections are header, table, notes, changelogs, configDescription, 
 
 ## prConcurrentLimit
 
-This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
+This setting - if enabled - limits Renovate to a maximum of `x` concurrent PRs open at any time.
 
 This limit is enforced on a per-repository basis.
 
-Note: Renovate always creates security PRs, even if the concurrent PR limit is already reached.
-Security PRs have `[SECURITY]` in their PR title.
+<!-- prettier-ignore -->
+!!! note
+    Renovate always creates security PRs, even if the concurrent PR limit is already reached.
+    Security PRs have `[SECURITY]` in their PR title.
 
 ## prCreation
 

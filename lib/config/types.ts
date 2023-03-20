@@ -25,6 +25,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
@@ -33,6 +34,9 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -253,7 +257,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
 }

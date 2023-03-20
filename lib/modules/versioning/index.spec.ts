@@ -83,6 +83,7 @@ describe('modules/versioning/index', () => {
       'toLocaleString',
       'toString',
       'valueOf',
+      'subset',
     ];
     const npmApi = Object.keys(allVersioning.get(semverVersioning.id))
       .filter((val) => !optionalFunctions.includes(val))

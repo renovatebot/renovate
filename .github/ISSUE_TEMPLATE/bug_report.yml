@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Don't create a Bug Report like this without a Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
+        Don't create a Bug Report like this without a GitHub Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
         Invalid bug reports waste the time of maintainers and can confuse other users so they will closed, locked and deleted.
         You are always welcome to create Discussions and new users should always do that instead.
 

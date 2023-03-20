@@ -8,20 +8,21 @@ export interface ApplicationSource {
   targetRevision: string;
 }
 
+export interface ApplicationSpec {
+  source?: ApplicationSource;
+  sources?: ApplicationSource[];
+}
+
 export interface Application extends KubernetesResource {
   kind: 'Application';
-  spec: {
-    source: ApplicationSource;
-  };
+  spec: ApplicationSpec;
 }
 
 export interface ApplicationSet extends KubernetesResource {
   kind: 'ApplicationSet';
   spec: {
     template: {
-      spec: {
-        source: ApplicationSource;
-      };
+      spec: ApplicationSpec;
     };
   };
 }

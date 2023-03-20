@@ -169,7 +169,6 @@ export async function initRepo({
   });
   config = {
     repository,
-    username: opts.username,
     ignorePrAuthor,
   } as Config;
   let info: RepoInfo;
@@ -462,13 +461,14 @@ type BbIssue = { id: number; title: string; content?: { raw: string } };
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
-    const filter = encodeURIComponent(
-      [
-        `title=${JSON.stringify(title)}`,
-        '(state = "new" OR state = "open")',
-        `reporter.username="${config.username}"`,
-      ].join(' AND ')
-    );
+    const filters = [
+      `title=${JSON.stringify(title)}`,
+      '(state = "new" OR state = "open")',
+    ];
+    if (renovateUserUuid) {
+      filters.push(`reporter.uuid="${renovateUserUuid}"`);
+    }
+    const filter = encodeURIComponent(filters.join(' AND '));
     return (
       (
         await bitbucketHttp.getJson<{ values: BbIssue[] }>(
@@ -603,12 +603,11 @@ export async function getIssueList(): Promise<Issue[]> {
     return [];
   }
   try {
-    const filter = encodeURIComponent(
-      [
-        '(state = "new" OR state = "open")',
-        `reporter.username="${config.username}"`,
-      ].join(' AND ')
-    );
+    const filters = ['(state = "new" OR state = "open")'];
+    if (renovateUserUuid) {
+      filters.push(`reporter.uuid="${renovateUserUuid}"`);
+    }
+    const filter = encodeURIComponent(filters.join(' AND '));
     return (
       (
         await bitbucketHttp.getJson<{ values: Issue[] }>(

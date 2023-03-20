@@ -650,7 +650,7 @@ describe('modules/platform/github/index', () => {
     const pr1: GhRestPr = {
       number: 1,
       head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
-      base: { repo: { pushed_at: '' } },
+      base: { repo: { pushed_at: '' }, ref: 'repo/fork_branch' },
       state: 'open',
       title: 'PR #1',
       created_at: t1,
