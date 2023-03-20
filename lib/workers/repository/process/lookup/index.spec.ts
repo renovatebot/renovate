@@ -1945,8 +1945,6 @@ describe('workers/repository/process/lookup/index', () => {
       config.packageName = 'openjdk';
       config.currentValue = undefined;
       config.datasource = DockerDatasource.id;
-      config.versioning = dockerVersioningId;
-      // This config is normally set when packageRules are applied
       config.replacementName = 'openjdk';
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([]);
     });
