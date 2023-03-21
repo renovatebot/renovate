@@ -47,6 +47,11 @@ The reason for this is that a `go mod tidy` command may make changes to `go.mod`
 Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
 Renovate will commit all files changed within the `vendor/` folder.
 
+<!-- prettier-ignore -->
+!!! note
+    Renovate does not support vendoring major upgrades of Go modules.
+    Follow issue [#21010](https://github.com/renovatebot/renovate/issues/21010).
+
 ### Go binary version
 
 By default, Renovate will keep up with the latest version of the `go` binary.

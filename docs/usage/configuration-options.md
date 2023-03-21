@@ -964,8 +964,12 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 ## forkProcessing
 
 By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+<!-- prettier-ignore -->
+!!! note
+    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
 
 If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
 
@@ -2131,6 +2135,39 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### matchConfidence
+
+<!-- prettier-ignore -->
+!!! warning
+    This configuration option needs a Mend API key, and is in private beta testing only.
+    API keys are not available for free or via the `renovatebot/renovate` repository.
+
+For example to group high merge confidence updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchConfidence": ["high", "very high"],
+      "groupName": "high merge confidence"
+    }
+  ]
+}
+```
+
+Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "merge-confidence",
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
@@ -2172,8 +2209,48 @@ Managers which do not support replacement:
 - `regex`
 
 Use the `replacementName` config option to set the name of a replacement package.
-Must be used with `replacementVersion` (see example below).
+
+Can be used in combination with `replacementVersion`.
+
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementNameTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementName` will take precedence if used within the same package rule.
+
+Use the `replacementNameTemplate` config option to control the replacement name.
+
+Use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+For example, the following package rule can be used to replace the registry for `docker` images:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefix": ["^docker.io/.*)"],
+      "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
+    }
+  ]
+}
+```
+
+Or, to add a registry prefix to any `docker` images that do not contain an explicit registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
+    }
+  ]
+}
+```
 
 ### replacementVersion
 

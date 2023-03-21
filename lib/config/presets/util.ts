@@ -17,7 +17,7 @@ export async function fetchPreset({
   filePreset,
   presetPath,
   endpoint: _endpoint,
-  tag = null,
+  tag,
   fetch,
 }: FetchPresetConfig): Promise<Preset | undefined> {
   // TODO: fix me, can be undefiend #7154
