@@ -73,13 +73,14 @@ export async function filterInternalChecks(
 
       // TODO #7154
       if (isActiveConfidenceLevel(minimumConfidence!)) {
-        const confidenceLevel = await getMergeConfidenceLevel(
-          datasource!,
-          depName!,
-          currentVersion!,
-          newVersion,
-          updateType!
-        );
+        const confidenceLevel =
+          (await getMergeConfidenceLevel(
+            datasource!,
+            depName!,
+            currentVersion!,
+            newVersion,
+            updateType!
+          )) ?? 'neutral';
         // TODO #7154
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
