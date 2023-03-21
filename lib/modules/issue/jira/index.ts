@@ -26,7 +26,7 @@ export class JiraIssueCollector extends IssueCollector {
     setBaseUrl(getJiraCloudUrl());
   }
 
-  async getIssue(number: number, useCache?: boolean): Promise<Issue | null> {
+  getIssue(number: number, useCache?: boolean): Promise<Issue | null> {
     logger.warn(`getIssue() is not implemented`);
     return Promise.resolve(null);
   }
