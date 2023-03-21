@@ -9,7 +9,6 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
-import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 import { applyPackageRules } from '../../../../util/package-rules';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';
@@ -83,12 +82,7 @@ export async function filterInternalChecks(
             updateType!
           )) ?? 'neutral';
         // TODO #7154
-        if (
-          !satisfiesConfidenceLevel(
-            confidenceLevel,
-            minimumConfidence! as MergeConfidence
-          )
-        ) {
+        if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
           logger.trace(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
