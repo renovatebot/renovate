@@ -1,6 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
+import type { MergeConfidence } from './types';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -18,7 +19,9 @@ describe('util/merge-confidence/index', () => {
     });
 
     it('returns false if nonsense', () => {
-      expect(isActiveConfidenceLevel('nonsense')).toBeFalse();
+      expect(
+        isActiveConfidenceLevel('nonsense' as MergeConfidence)
+      ).toBeFalse();
     });
 
     it('returns true if valid value (high)', () => {
@@ -82,7 +85,7 @@ describe('util/merge-confidence/index', () => {
       ).toBe('high');
     });
 
-    it('returns neutral if no token', async () => {
+    it('returns undefined if no token', async () => {
       expect(
         await getMergeConfidenceLevel(
           'npm',
@@ -91,7 +94,7 @@ describe('util/merge-confidence/index', () => {
           '25.0.0',
           'major'
         )
-      ).toBe('neutral');
+      ).toBeUndefined();
     });
 
     it('returns valid confidence level', async () => {
@@ -117,7 +120,7 @@ describe('util/merge-confidence/index', () => {
       ).toBe('high');
     });
 
-    it('returns neutral if invalid confidence level', async () => {
+    it('returns undefined if invalid confidence level', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
@@ -137,10 +140,10 @@ describe('util/merge-confidence/index', () => {
           newVersion,
           'minor'
         )
-      ).toBe('neutral');
+      ).toBeUndefined();
     });
 
-    it('returns neutral if exception from API', async () => {
+    it('returns undefined if exception from API', async () => {
       hostRules.add({ hostType: 'merge-confidence', token: '123test' });
       const datasource = 'npm';
       const depName = 'renovate';
@@ -160,7 +163,7 @@ describe('util/merge-confidence/index', () => {
           newVersion,
           'minor'
         )
-      ).toBe('neutral');
+      ).toBeUndefined();
 
       // FIXME: no cache hit
       httpMock
@@ -178,7 +181,7 @@ describe('util/merge-confidence/index', () => {
           newVersion,
           'minor'
         )
-      ).toBe('neutral');
+      ).toBeUndefined();
     });
 
     it('returns high if pinning digest', async () => {
