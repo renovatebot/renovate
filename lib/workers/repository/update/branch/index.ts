@@ -306,11 +306,11 @@ export async function processBranch(
         }
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
-        const minimumConfidence = upgrade.minimumConfidence;
+        const minimumConfidence = upgrade.minimumConfidence!;
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
-        if (isActiveConfidenceLevel(minimumConfidence!)) {
+        if (isActiveConfidenceLevel(minimumConfidence)) {
           const confidence =
             (await getMergeConfidenceLevel(
               datasource,
@@ -319,7 +319,7 @@ export async function processBranch(
               newVersion,
               updateType
             )) ?? 'neutral';
-          if (satisfiesConfidenceLevel(confidence, minimumConfidence!)) {
+          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
             config.confidenceStatus = 'green';
           } else {
             logger.debug(

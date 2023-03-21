@@ -61,7 +61,7 @@ export interface BranchUpgradeConfig
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
-  minimumConfidence?: MergeConfidence;
+  minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
 
   updatedPackageFiles?: FileChange[];
