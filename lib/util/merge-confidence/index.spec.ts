@@ -1,6 +1,7 @@
 import * as httpMock from '../../../test/http-mock';
 import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
+import type { MergeConfidence } from './types';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -18,7 +19,9 @@ describe('util/merge-confidence/index', () => {
     });
 
     it('returns false if nonsense', () => {
-      expect(isActiveConfidenceLevel('nonsense')).toBeFalse();
+      expect(
+        isActiveConfidenceLevel('nonsense' as MergeConfidence)
+      ).toBeFalse();
     });
 
     it('returns true if valid value (high)', () => {

@@ -4,12 +4,10 @@ import * as memCache from '../cache/memory';
 import * as packageCache from '../cache/package';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { MERGE_CONFIDENCE } from './common';
+import type { MergeConfidence } from './types';
 
 const http = new Http('merge-confidence');
-
-const MERGE_CONFIDENCE = ['low', 'neutral', 'high', 'very high'];
-type MergeConfidenceTuple = typeof MERGE_CONFIDENCE;
-export type MergeConfidence = MergeConfidenceTuple[number];
 
 export const confidenceLevels: Record<MergeConfidence, number> = {
   low: -1,
@@ -18,7 +16,7 @@ export const confidenceLevels: Record<MergeConfidence, number> = {
   'very high': 2,
 };
 
-export function isActiveConfidenceLevel(confidence: string): boolean {
+export function isActiveConfidenceLevel(confidence: MergeConfidence): boolean {
   return confidence !== 'low' && MERGE_CONFIDENCE.includes(confidence);
 }
 
@@ -76,7 +74,7 @@ export async function getMergeConfidenceLevel(
   if (cachedResult) {
     return cachedResult;
   }
-  let confidence = 'neutral';
+  let confidence: MergeConfidence = 'neutral';
   try {
     const res = (await http.getJson<{ confidence: MergeConfidence }>(url)).body;
     if (MERGE_CONFIDENCE.includes(res.confidence)) {
