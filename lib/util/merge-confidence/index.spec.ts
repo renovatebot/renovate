@@ -65,7 +65,6 @@ describe('util/merge-confidence/index', () => {
     });
 
     afterEach(() => {
-      process.env = envOrg;
       hostRules.clear();
       resetConfig();
     });
