@@ -3044,6 +3044,11 @@ If configured to `enabled`, then the `semanticCommitScope` and `semanticCommitTy
 
 Renovate autodetects if your repository is already using semantic commits or not and follows suit, so you only need to configure this if you wish to _override_ Renovate's autodetected setting.
 
+## commitMessageLowerCase
+
+With `semanticCommits` pr- and commit-titles will be convert to all-lowercase. Set this to `auto` to keep this behaviour,
+or `never` to leave the titles untouched.
+
 ## separateMajorMinor
 
 Renovate's default behavior is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however).

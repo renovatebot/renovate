@@ -749,8 +749,8 @@ export async function findPr({
   return (
     prList.find(
       (p: { sourceBranch: string; title: string; state: string }) =>
-        p.sourceBranch.toLowerCase() === branchName.toLowerCase() &&
-        (!prTitle || p.title.toLowerCase() === prTitle.toLowerCase()) &&
+        p.sourceBranch === branchName &&
+        (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
         matchesState(p.state, state)
     ) ?? null
   );

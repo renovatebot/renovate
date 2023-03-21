@@ -202,13 +202,12 @@ export async function findPr({
     const prs = await getPrList();
     const refsHeadBranchName = getNewBranchName(branchName);
     prsFiltered = prs.filter(
-      (item) =>
-        item.sourceBranch.toLowerCase() === refsHeadBranchName?.toLowerCase()
+      (item) => item.sourceBranch === refsHeadBranchName
     );
 
     if (prTitle) {
       prsFiltered = prsFiltered.filter(
-        (item) => item.title.toLowerCase() === prTitle.toLowerCase()
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
       );
     }
 
