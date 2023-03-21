@@ -65,6 +65,8 @@ interface GiteaRepoConfig {
   cloneSubmodules: boolean;
 }
 
+export const id = 'gitea';
+
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {

@@ -50,6 +50,8 @@ interface Config {
   prList?: CodeCommitPr[];
 }
 
+export const id = 'codecommit';
+
 export const config: Config = {};
 
 export async function initPlatform({
