@@ -2183,11 +2183,15 @@ You can suggest a new community package rule by editing [the `replacements.ts` f
 
 ### replacementNameTemplate
 
+<!-- prettier-ignore -->
+!!! note
+    `replacementName` will take precedence if used within the same package rule.
+
 Use the `replacementNameTemplate` config option to control the replacement name.
 
 Use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
 
-For example to replace the registry for `docker` images:
+For example, the following package rule can be used to replace the registry for `docker` images:
 
 ```json
 {
@@ -2201,7 +2205,7 @@ For example to replace the registry for `docker` images:
 }
 ```
 
-Or, to add a registry to all `docker` images
+Or, to add a registry prefix to any `docker` images that do not contain an explicit registry:
 
 ```json
 {
