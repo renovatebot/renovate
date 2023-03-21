@@ -281,7 +281,7 @@ export async function processBranch(
       config.upgrades.some(
         (upgrade) =>
           (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
-          isActiveConfidenceLevel(upgrade.minimumConfidence!)
+          isActiveConfidenceLevel(upgrade.minimumConfidence)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -306,7 +306,7 @@ export async function processBranch(
         }
         const datasource = upgrade.datasource!;
         const depName = upgrade.depName!;
-        const minimumConfidence = upgrade.minimumConfidence!;
+        const minimumConfidence = upgrade.minimumConfidence;
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
