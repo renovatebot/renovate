@@ -311,13 +311,14 @@ export async function processBranch(
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
         if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence = await getMergeConfidenceLevel(
-            datasource,
-            depName,
-            currentVersion,
-            newVersion,
-            updateType
-          );
+          const confidence =
+            (await getMergeConfidenceLevel(
+              datasource,
+              depName,
+              currentVersion,
+              newVersion,
+              updateType
+            )) ?? 'neutral';
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
             config.confidenceStatus = 'green';
           } else {

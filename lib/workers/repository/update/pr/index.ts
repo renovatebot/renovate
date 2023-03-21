@@ -47,11 +47,11 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: config.azureAutoApprove,
-    azureWorkItemId: config.azureWorkItemId,
-    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
-    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
+    azureAutoApprove: !!config.azureAutoApprove,
+    azureWorkItemId: config.azureWorkItemId ?? 0,
+    bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
+    gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -102,9 +102,15 @@ export async function ensurePr(
   const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const {
+    branchName,
+    ignoreTests,
+    internalChecksAsSuccess,
+    prTitle = '',
+    upgrades,
+  } = config;
   const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
+    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests)
   );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
@@ -385,7 +391,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: config.draftPR,
+          draftPR: !!config.draftPR,
         });
 
         incLimitedValue('PullRequests');

@@ -6,6 +6,7 @@ import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
 import { GlobalConfig } from './global';
+import { DecryptedObject } from './schema';
 import type { RenovateConfig } from './types';
 
 export async function tryDecryptPgp(
@@ -92,8 +93,17 @@ export async function tryDecrypt(
     const decryptedObjStr = await tryDecryptPgp(privateKey, encryptedStr);
     if (decryptedObjStr) {
       try {
-        const decryptedObj = JSON.parse(decryptedObjStr);
-        const { o: org, r: repo, v: value } = decryptedObj;
+        const decryptedObj = DecryptedObject.safeParse(
+          JSON.parse(decryptedObjStr)
+        );
+        // istanbul ignore if
+        if (!decryptedObj.success) {
+          const error = new Error('config-validation');
+          error.validationError = `Could not parse decrypted config.`;
+          throw error;
+        }
+
+        const { o: org, r: repo, v: value } = decryptedObj.data;
         if (is.nonEmptyString(value)) {
           if (is.nonEmptyString(org)) {
             const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash

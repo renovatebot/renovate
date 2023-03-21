@@ -199,8 +199,7 @@ export async function generateLockFile(
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      commands.push(`yarn set version ${yarnUpdate.newValue}`);
+      commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
     // This command updates the lock file based on package.json
@@ -218,6 +217,7 @@ export async function generateLockFile(
             .map((update) => update.depName)
             .filter(is.string)
             .filter(uniqueStrings)
+            .map(quote)
             .join(' ')}${cmdOptions}`
         );
       } else {
@@ -225,9 +225,9 @@ export async function generateLockFile(
         commands.push(
           `yarn up ${lockUpdates
             // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            .map((update) => `${update.depName}@${update.newValue}`)
+            .map((update) => `${update.depName!}@${update.newValue!}`)
             .filter(uniqueStrings)
+            .map(quote)
             .join(' ')}${cmdOptions}`
         );
       }

@@ -193,7 +193,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'docker pull renovate/sidecar',
+        cmd: 'docker pull containerbase/sidecar',
         options: { encoding: 'utf-8' },
       },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
@@ -204,7 +204,7 @@ describe('modules/manager/maven-wrapper/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "../.." ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 17.0.0 ' +
           '&& ' +

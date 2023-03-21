@@ -53,25 +53,10 @@ describe('modules/datasource/go/index', () => {
       delete process.env.GOPROXY;
     });
 
-    it('fetches release info directly from VCS', async () => {
-      const expected = { releases: [{ version: '0.0.1' }] };
-      getReleasesProxyMock.mockResolvedValue(null);
-      getReleasesDirectMock.mockResolvedValue(expected);
-
-      const res = await datasource.getReleases({
-        packageName: 'golang.org/foo/bar',
-      });
-
-      expect(res).toBe(expected);
-      expect(getReleasesProxyMock).not.toHaveBeenCalled();
-      expect(getReleasesDirectMock).toHaveBeenCalled();
-    });
-
-    it('supports GOPROXY', async () => {
+    it('fetches releases', async () => {
       const expected = { releases: [{ version: '0.0.1' }] };
       getReleasesProxyMock.mockResolvedValue(expected);
       getReleasesDirectMock.mockResolvedValue(null);
-      process.env.GOPROXY = 'https://proxy.golang.org,direct';
 
       const res = await datasource.getReleases({
         packageName: 'golang.org/foo/bar',
