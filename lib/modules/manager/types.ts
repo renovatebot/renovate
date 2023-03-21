@@ -95,7 +95,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
-  mergeConfidenceLevel?: MergeConfidence;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;

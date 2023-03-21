@@ -2043,7 +2043,7 @@ describe('workers/repository/process/lookup/index', () => {
         ]);
       });
 
-      it('doesnt get a merge confidence level when no packageRule is set', async () => {
+      it('does not get a merge confidence level when no packageRule is set', async () => {
         config.currentValue = '3.7.0';
         config.packageName = 'webpack';
         config.datasource = NpmDatasource.id;
@@ -2062,7 +2062,7 @@ describe('workers/repository/process/lookup/index', () => {
         ]);
       });
 
-      it('doesnt set merge confidence value when api is not in use', async () => {
+      it('does not set merge confidence value when API is not in use', async () => {
         const datasource = NpmDatasource.id;
         config.packageRules = [{ matchConfidence: ['high'] }];
         config.currentValue = '3.7.0';

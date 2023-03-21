@@ -114,7 +114,7 @@ export async function getMergeConfidenceLevel(
  * @throws {ExternalHostError} if a timeout or connection reset error, authentication failure, or internal server error occurs during the request.
  *
  * @remarks
- * Results are caches for 60 minutes to reduce the number of API calls.
+ * Results are cached for 60 minutes to reduce the number of API calls.
  */
 async function queryApi(
   datasource: string,
@@ -157,20 +157,20 @@ async function queryApi(
 /**
  * Checks the health of the Merge Confidence API by attempting to authenticate with it.
  *
- * @returns Resolves when the API health check is complete successfully.
+ * @returns Resolves when the API health check is completed successfully.
  *
  * @throws {ExternalHostError} if a timeout, connection reset error, authentication failure, or internal server error occurs during the request.
  *
  * @remarks
  * This function first checks that the API base URL and an authentication bearer token are defined before attempting to
- * authenticate with the API. If either the base URL or token is no defined, it will immediately return
+ * authenticate with the API. If either the base URL or token is not defined, it will immediately return
  * without making a request.
  */
 export async function initMergeConfidence(): Promise<void> {
   initConfig();
 
   if (is.nullOrUndefined(apiBaseUrl) || is.nullOrUndefined(token)) {
-    logger.trace('merge confidence api usage is disabled');
+    logger.trace('merge confidence API usage is disabled');
     return;
   }
 
@@ -181,7 +181,7 @@ export async function initMergeConfidence(): Promise<void> {
     apiErrorHandler(err);
   }
 
-  logger.debug('merge confidence api - successfully authenticated');
+  logger.debug('merge confidence API - successfully authenticated');
   return;
 }
 
@@ -190,7 +190,7 @@ function getApiBaseUrl(): string {
   const baseFromEnv = process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
 
   if (is.nullOrUndefined(baseFromEnv)) {
-    logger.trace('using default merge confidence api base url');
+    logger.trace('using default merge confidence API base URL');
     return defaultBaseUrl;
   }
 
@@ -198,13 +198,13 @@ function getApiBaseUrl(): string {
     const parsedBaseUrl = new URL(baseFromEnv).toString();
     logger.trace(
       { baseUrl: parsedBaseUrl },
-      'using merge confidence api base found in environment variables'
+      'using merge confidence API base found in environment variables'
     );
     return parsedBaseUrl;
   } catch (err) {
     logger.warn(
       { err, baseFromEnv },
-      'invalid merge confidence api base url found in environment variables - using default value instead'
+      'invalid merge confidence API base URL found in environment variables - using default value instead'
     );
     return defaultBaseUrl;
   }
@@ -224,17 +224,17 @@ function getApiToken(): string | undefined {
  */
 function apiErrorHandler(err: any): void {
   if (err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET') {
-    logger.error({ err }, 'merge confidence api request failed - aborting run');
+    logger.error({ err }, 'merge confidence API request failed - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 
   if (err.statusCode === 403) {
-    logger.error({ err }, 'merge confidence api token rejected - aborting run');
+    logger.error({ err }, 'merge confidence API token rejected - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 
   if (err.statusCode >= 500 && err.statusCode < 600) {
-    logger.error({ err }, 'merge confidence api failure: 5xx - aborting run');
+    logger.error({ err }, 'merge confidence API failure: 5xx - aborting run');
     throw new ExternalHostError(err, hostType);
   }
 

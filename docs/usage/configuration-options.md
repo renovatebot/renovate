@@ -2139,7 +2139,8 @@ For example to apply a special label for Major updates:
 
 <!-- prettier-ignore -->
 !!! warning
-This configuration option is dependent on a Mend API key, and is in private beta testing only. API keys are not available for free or via this repository.
+    This configuration option needs a Mend API key, and is in private beta testing only.
+    API keys are not available for free or via the `renovatebot/renovate` repository.
 
 For example to group high merge confidence updates:
 
@@ -2154,7 +2155,7 @@ For example to group high merge confidence updates:
 }
 ```
 
-Tokens can be configured via `hostRules` using the `merge-confidence` `hostType`:
+Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
 
 ```json
 {

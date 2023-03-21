@@ -78,7 +78,8 @@ When using `matchPackageNames` and `matchPackagePatterns` matchers:
 
 ## `RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL`
 
-If set, Renovate will query this api for Merge Confidence data.
+If set, Renovate will query this API for Merge Confidence data.
+This feature is in private beta.
 
 ## `RENOVATE_X_AUTODISCOVER_REPO_SORT`
 
