@@ -302,8 +302,8 @@ export async function findPr({
 
     prsFiltered = prs.filter(
       (item) =>
-        item.sourceRefName.toLowerCase() ===
-        getNewBranchName(branchName).toLowerCase()
+        item.sourceRefName?.toLowerCase() ===
+        getNewBranchName(branchName)?.toLowerCase()
     );
 
     if (prTitle) {

@@ -203,7 +203,7 @@ export async function findPr({
     const refsHeadBranchName = getNewBranchName(branchName);
     prsFiltered = prs.filter(
       (item) =>
-        item.sourceBranch.toLowerCase() === refsHeadBranchName.toLowerCase()
+        item.sourceBranch.toLowerCase() === refsHeadBranchName?.toLowerCase()
     );
 
     if (prTitle) {
