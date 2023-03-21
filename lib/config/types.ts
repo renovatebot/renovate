@@ -77,7 +77,7 @@ export interface RenovateSharedConfig {
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
-  commitMessageLowerCase?: boolean;
+  commitMessageLowerCase?: string | null;
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;

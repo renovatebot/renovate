@@ -1517,8 +1517,8 @@ const options: RenovateOptions[] = [
   {
     name: 'commitMessageLowerCase',
     description: 'Lowercase PR- and commit titles.',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    default: 'auto',
   },
   // PR Behaviour
   {
