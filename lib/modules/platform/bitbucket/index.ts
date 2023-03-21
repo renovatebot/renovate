@@ -210,6 +210,7 @@ export async function initRepo({
       hasJiraProjectLinked: false,
     };
 
+    // TODO - Where should this logic now reside, to fetch the jira project linked to a Bitbucket Cloud repository, so that issues/jira can use it
     // Check if there are any linked Jira Projects
     try {
       const jiraProjects =
@@ -492,6 +493,29 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
+async function findOpenIssues(title: string): Promise<BitbucketIssue[]> {
+  try {
+    const filters = [
+      `title=${JSON.stringify(title)}`,
+      '(state = "new" OR state = "open")',
+    ];
+    if (renovateUserUuid) {
+      filters.push(`reporter.uuid="${renovateUserUuid}"`);
+    }
+    const filter = encodeURIComponent(filters.join(' AND '));
+    return (
+      (
+        await bitbucketHttp.getJson<{ values: BitbucketIssue[] }>(
+          `/2.0/repositories/${config.repository}/issues?q=${filter}`
+        )
+      ).body.values || /* istanbul ignore next */ []
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error finding issues');
+    return [];
+  }
+}
+
 export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
 
@@ -512,30 +536,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   };
 }
 
-async function findOpenIssues(title: string): Promise<BitbucketIssue[]> {
-  try {
-    const filters = [
-      `title=${JSON.stringify(title)}`,
-      '(state = "new" OR state = "open")',
-    ];
-    if (renovateUserUuid) {
-      filters.push(`reporter.uuid="${renovateUserUuid}"`);
-    }
-    const filter = encodeURIComponent(filters.join(' AND '));
-    return (
-      (
-        await bitbucketHttp.getJson<{ values: BitbucketIssue[] }>(
-          `/2.0/repositories/${config.repository}/issues?q=${filter}`
-        )
-      ).body.values || /* istanbul ignore next */ []
-    );
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error finding open bitbucket issues');
-    return [];
-  }
-}
-
-async function closeBitbucketIssue(issueNumber: number): Promise<void> {
+async function closeIssue(issueNumber: number): Promise<void> {
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
     {
@@ -582,7 +583,7 @@ export async function ensureIssue({
     if (issues.length) {
       // Close any duplicates
       for (const issue of issues.slice(1)) {
-        await closeBitbucketIssue(issue.id);
+        await closeIssue(issue.id);
       }
       const [issue] = issues;
 
@@ -590,7 +591,7 @@ export async function ensureIssue({
         issue.title !== title ||
         String(issue.content?.raw).trim() !== description.trim()
       ) {
-        logger.debug('Bitbucket issue updated');
+        logger.debug('Issue updated');
         await bitbucketHttp.putJson(
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
@@ -606,7 +607,7 @@ export async function ensureIssue({
         return 'updated';
       }
     } else {
-      logger.info('Bitbucket issue created');
+      logger.info('Issue created');
       await bitbucketHttp.postJson(
         `/2.0/repositories/${config.repository}/issues`,
         {
@@ -625,7 +626,7 @@ export async function ensureIssue({
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(`Issues are disabled, so could not create issue: ${title}`);
     } else {
-      logger.warn({ err }, 'Could not ensure bitbucket issue ');
+      logger.warn({ err }, 'Could not ensure issue ');
     }
   }
   return null;
@@ -654,7 +655,7 @@ export async function getIssueList(): Promise<Issue[]> {
       ).body.values || []
     );
   } catch (err) {
-    logger.warn({ err }, 'Error finding bitbucket issues');
+    logger.warn({ err }, 'Error finding issues');
     return [];
   }
 }
@@ -668,7 +669,7 @@ export async function ensureIssueClosing(title: string): Promise<void> {
 
   const issues = await findOpenIssues(title);
   for (const issue of issues) {
-    await closeBitbucketIssue(issue.id);
+    await closeIssue(issue.id);
   }
 }
 
