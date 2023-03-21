@@ -2,7 +2,7 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -460,7 +460,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
-  mergeConfidenceLevel?: MergeConfidence;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
   language?: string;

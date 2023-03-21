@@ -1,7 +1,7 @@
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
-import type { MergeConfidence } from '../merge-confidence';
+import type { MergeConfidence } from '../merge-confidence/types';
 import { applyPackageRules } from './index';
 
 type TestConfig = PackageRuleInputConfig & {

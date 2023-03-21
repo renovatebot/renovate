@@ -281,7 +281,7 @@ export async function processBranch(
       config.upgrades.some(
         (upgrade) =>
           (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
-          isActiveConfidenceLevel(upgrade.minimumConfidence)
+          isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -310,7 +310,7 @@ export async function processBranch(
         const updateType = upgrade.updateType!;
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
-        if (isActiveConfidenceLevel(minimumConfidence)) {
+        if (isActiveConfidenceLevel(minimumConfidence!)) {
           const confidence =
             (await getMergeConfidenceLevel(
               datasource,
@@ -319,7 +319,7 @@ export async function processBranch(
               newVersion,
               updateType
             )) ?? 'neutral';
-          if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
+          if (satisfiesConfidenceLevel(confidence, minimumConfidence!)) {
             config.confidenceStatus = 'green';
           } else {
             logger.debug(

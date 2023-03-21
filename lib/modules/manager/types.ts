@@ -8,7 +8,7 @@ import type {
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
-import type { MergeConfidence } from '../../util/merge-confidence';
+import type { MergeConfidence } from '../../util/merge-confidence/types';
 
 export type Result<T> = T | Promise<T>;
 
