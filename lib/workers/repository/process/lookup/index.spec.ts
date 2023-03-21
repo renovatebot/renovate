@@ -2004,7 +2004,6 @@ describe('workers/repository/process/lookup/index', () => {
       });
 
       afterEach(() => {
-        hostRules.clear();
         resetConfig();
       });
 
