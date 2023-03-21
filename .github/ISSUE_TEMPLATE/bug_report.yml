@@ -51,7 +51,7 @@ body:
       label: Was this something which used to work for you, and then stopped?
       options:
         - 'Placeholder value, please select the correct response from the dropdown'
-        - 'I\'m trying to get this working for the first time'
+        - 'I am trying to get this working for the first time'
         - 'It used to work, and then stopped'
     validations:
       required: true
