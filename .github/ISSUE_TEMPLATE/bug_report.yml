@@ -92,7 +92,7 @@ body:
       label: Have you created a minimal reproduction repository?
       description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
       options:
-        - '-- Please select from the below --'
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'I have linked to a minimal reproduction in the description above'
         - 'I have explained in the description why a minimal reproduction is impossible'
     validations:
