@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { JiraHttp } from '../../../util/http/jira';
+import { JiraHttp, setBaseUrl } from '../../../util/http/jira';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import type {
@@ -23,7 +23,10 @@ export class JiraIssueCollector extends IssueCollector {
   constructor() {
     super(JiraIssueCollector.id);
     this.http = new JiraHttp();
+    setBaseUrl(getJiraCloudUrl());
   }
+
+  getIssue: undefined;
 
   async getIssueList(): Promise<Issue[]> {
     logger.debug(`getIssueList()`);
@@ -59,13 +62,6 @@ export class JiraIssueCollector extends IssueCollector {
       logger.warn({ err }, 'Error finding jira issues');
       return [];
     }
-  }
-
-  getIssue?(
-    number: number,
-    useCache?: boolean | undefined
-  ): Promise<Issue | null> {
-    throw new Error('Method not implemented.');
   }
 
   async findIssue(title: string): Promise<Issue | null> {
@@ -245,15 +241,19 @@ export class JiraIssueCollector extends IssueCollector {
  * Retrieving this may vary between platforms(ie: Bitbucket repositories can be natively linked)
  */
 function getProjectKey(): string {
-  return 'RENO';
+  return 'somekey';
 }
 
 /**
  * TODO - What is the best way to retrieve these per repository to use in the Jira Issue Collector?
  * Retrieving this may vary between platforms(ie: Bitbucket repositories can be natively linked)
  */
+function getJiraCloudUrl(): string {
+  return 'https://someorg.atlassian.net';
+}
+
 function getRepositoryUrl(): string {
-  return 'https://foo.com/bar';
+  return `${getJiraCloudUrl()}/browse/${getProjectKey()}`;
 }
 
 //  try {
