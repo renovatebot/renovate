@@ -285,7 +285,7 @@ export async function lookupUpdates(
           return res;
         }
         const newVersion = release.version;
-        const update = generateUpdate(
+        const update = await generateUpdate(
           config,
           versioning,
           // TODO #7154

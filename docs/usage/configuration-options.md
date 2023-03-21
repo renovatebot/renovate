@@ -2135,6 +2135,39 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### matchConfidence
+
+<!-- prettier-ignore -->
+!!! warning
+    This configuration option needs a Mend API key, and is in private beta testing only.
+    API keys are not available for free or via the `renovatebot/renovate` repository.
+
+For example to group high merge confidence updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchConfidence": ["high", "very high"],
+      "groupName": "high merge confidence"
+    }
+  ]
+}
+```
+
+Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "merge-confidence",
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
