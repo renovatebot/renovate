@@ -1987,29 +1987,23 @@ describe('workers/repository/process/lookup/index', () => {
     });
 
     describe('handles merge confidence', () => {
+      const defaultApiBaseUrl = 'https://badges.renovateapi.com/';
       const getMergeConfidenceSpy = jest.spyOn(
         McApi,
         'getMergeConfidenceLevel'
       );
-      const apiBaseUrl = 'https://www.baseurl.com/';
-      const envOrg: NodeJS.ProcessEnv = process.env;
       const hostRule: HostRule = {
         hostType: 'merge-confidence',
         token: 'some-token',
       };
 
       beforeEach(() => {
-        process.env = {
-          ...envOrg,
-          RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: apiBaseUrl,
-        };
         hostRules.add(hostRule);
         initConfig();
         memCache.reset();
       });
 
       afterEach(() => {
-        process.env = envOrg;
         hostRules.clear();
         resetConfig();
       });
@@ -2028,7 +2022,7 @@ describe('workers/repository/process/lookup/index', () => {
           .get('/webpack')
           .reply(200, webpackJson);
         httpMock
-          .scope(apiBaseUrl)
+          .scope(defaultApiBaseUrl)
           .get(
             `/api/mc/json/${datasource}/${packageName}/${currentValue}/${newVersion}`
           )
