@@ -5,11 +5,11 @@ import type { Release } from '../../../../modules/datasource';
 import type { VersioningApi } from '../../../../modules/versioning';
 import { getElapsedDays } from '../../../../util/date';
 import {
-  MergeConfidence,
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 import { applyPackageRules } from '../../../../util/package-rules';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import { getUpdateType } from './update-type';

@@ -5,6 +5,8 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../cache/package';
 import * as hostRules from '../host-rules';
 import { Http } from '../http';
+import { MERGE_CONFIDENCE } from './common';
+import type { MergeConfidence } from './types';
 
 const hostType = 'merge-confidence';
 const http = new Http(hostType);
@@ -12,9 +14,6 @@ let token: string | undefined;
 let apiBaseUrl: string | undefined;
 
 const supportedDatasources = ['npm', 'maven', 'pypi'];
-
-const MERGE_CONFIDENCE = ['low', 'neutral', 'high', 'very high'] as const;
-export type MergeConfidence = (typeof MERGE_CONFIDENCE)[number];
 
 export const confidenceLevels: Record<MergeConfidence, number> = {
   low: -1,
