@@ -1630,7 +1630,7 @@ export async function mergePr({
           body?.message &&
           /^Required status check ".+" is expected\.$/.test(body.message)
         ) {
-          logger.warn(
+          logger.debug(
             { response: body },
             `GitHub blocking PR merge -- Missing required status check(s)`
           );
