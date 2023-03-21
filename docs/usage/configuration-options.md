@@ -2101,6 +2101,39 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### matchConfidence
+
+<!-- prettier-ignore -->
+!!! warning
+    This configuration option needs a Mend API key, and is in private beta testing only.
+    API keys are not available for free or via the `renovatebot/renovate` repository.
+
+For example to group high merge confidence updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchConfidence": ["high", "very high"],
+      "groupName": "high merge confidence"
+    }
+  ]
+}
+```
+
+Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "merge-confidence",
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
@@ -2142,8 +2175,48 @@ Managers which do not support replacement:
 - `regex`
 
 Use the `replacementName` config option to set the name of a replacement package.
-Must be used with `replacementVersion` (see example below).
+
+Can be used in combination with `replacementVersion`.
+
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementNameTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementName` will take precedence if used within the same package rule.
+
+Use the `replacementNameTemplate` config option to control the replacement name.
+
+Use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+For example, the following package rule can be used to replace the registry for `docker` images:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefix": ["^docker.io/.*)"],
+      "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
+    }
+  ]
+}
+```
+
+Or, to add a registry prefix to any `docker` images that do not contain an explicit registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
+    }
+  ]
+}
+```
 
 ### replacementVersion
 
