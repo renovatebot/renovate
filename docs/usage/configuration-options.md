@@ -3046,8 +3046,8 @@ Renovate autodetects if your repository is already using semantic commits or not
 
 ## commitMessageLowerCase
 
-With `semanticCommits` pr- and commit-titles will be convert to all-lowercase. Set this to `auto` to keep this behaviour,
-or `never` to leave the titles untouched.
+With `semanticCommits` pr- and commit-titles will be converted to all-lowercase. Set this to `auto` to keep this
+behaviour, or `never` to leave the titles untouched, which allows uppercase characters in semantic commit titles.
 
 ## separateMajorMinor
 
