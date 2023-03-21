@@ -50,7 +50,6 @@ describe('util/merge-confidence/index', () => {
   });
 
   describe('API calling functions', () => {
-    const envOrg: NodeJS.ProcessEnv = process.env;
     const hostRule: HostRule = {
       hostType: 'merge-confidence',
       token: 'some-token',
@@ -276,7 +275,7 @@ describe('util/merge-confidence/index', () => {
     describe('initMergeConfidence()', () => {
       it('using default base url if none is set', async () => {
         resetConfig();
-        process.env = {};
+        delete process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
@@ -293,9 +292,8 @@ describe('util/merge-confidence/index', () => {
 
       it('warns and then resolves if base url is invalid', async () => {
         resetConfig();
-        process.env = {
-          RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: 'invalid-url.com',
-        };
+        process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL =
+          'invalid-url.com';
         httpMock
           .scope(defaultApiBaseUrl)
           .get(`/api/mc/availability`)
