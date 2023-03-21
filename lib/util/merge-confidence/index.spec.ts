@@ -58,10 +58,7 @@ describe('util/merge-confidence/index', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      process.env = {
-        ...envOrg,
-        RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL: apiBaseUrl,
-      };
+      process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL = apiBaseUrl;
       hostRules.add(hostRule);
       initConfig();
       memCache.reset();
