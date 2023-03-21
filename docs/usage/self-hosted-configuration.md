@@ -472,6 +472,12 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 
 ## issueCollector
 
+Used to specify the preferred Issue Tracking System.
+
+If not set, will default to the `platform` issue collector.
+
+Requires repositories to be issue-enabled (varies by platform + issue collector combination)
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
