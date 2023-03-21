@@ -46,6 +46,7 @@ export interface LookupUpdateConfig
   packageName: string;
   minimumConfidence?: MergeConfidence | undefined;
   replacementName?: string;
+  replacementNameTemplate?: string;
   replacementVersion?: string;
 }
 
