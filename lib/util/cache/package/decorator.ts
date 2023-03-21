@@ -76,25 +76,25 @@ export function cache<T>({
       finalKey
     );
 
-    const softTTL = ttlMinutes;
+    const softTtl = ttlMinutes;
+
     const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
-    let hardTTL = softTTL;
-    hardTTL +=
-      methodName === 'getReleases' || methodName === 'getDigest'
-        ? cacheHardTtlMinutes
-        : 0;
+    let hardTtl = softTtl;
+    if (methodName === 'getReleases' || methodName === 'getDigest') {
+      hardTtl = Math.max(softTtl, cacheHardTtlMinutes);
+    }
 
     let oldData: unknown;
     if (oldRecord) {
       const now = DateTime.local();
       const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
 
-      const softDeadline = cachedAt.plus({ minutes: softTTL });
+      const softDeadline = cachedAt.plus({ minutes: softTtl });
       if (now < softDeadline) {
         return oldRecord.value;
       }
 
-      const hardDeadline = cachedAt.plus({ minutes: hardTTL });
+      const hardDeadline = cachedAt.plus({ minutes: hardTtl });
       if (now < hardDeadline) {
         oldData = oldRecord.value;
       }
@@ -120,7 +120,7 @@ export function cache<T>({
         cachedAt: DateTime.local().toISO(),
         value: newData,
       };
-      await packageCache.set(finalNamespace, finalKey, newRecord, hardTTL);
+      await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
     }
 
     return newData;
