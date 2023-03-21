@@ -48,7 +48,7 @@ export async function getMergeConfidenceLevel(
   currentVersion: string,
   newVersion: string,
   updateType: UpdateType
-): Promise<MergeConfidence> {
+): Promise<MergeConfidence | undefined> {
   if (!(currentVersion && newVersion && updateType)) {
     return 'neutral';
   }
@@ -62,11 +62,11 @@ export async function getMergeConfidenceLevel(
   });
   if (!token) {
     logger.warn('No Merge Confidence API token found');
-    return 'neutral';
+    return undefined;
   }
   // istanbul ignore if
   if (memCache.get('merge-confidence-invalid-token')) {
-    return 'neutral';
+    return undefined;
   }
   const url = `https://badges.renovateapi.com/packages/${datasource}/${depName}/${newVersion}/confidence.api/${currentVersion}`;
   const cachedResult = await packageCache.get('merge-confidence', token + url);
@@ -74,7 +74,7 @@ export async function getMergeConfidenceLevel(
   if (cachedResult) {
     return cachedResult;
   }
-  let confidence: MergeConfidence = 'neutral';
+  let confidence: MergeConfidence | undefined;
   try {
     const res = (await http.getJson<{ confidence: MergeConfidence }>(url)).body;
     if (MERGE_CONFIDENCE.includes(res.confidence)) {
