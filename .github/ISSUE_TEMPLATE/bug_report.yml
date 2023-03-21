@@ -14,7 +14,7 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
-        - '-- Please select from the below --'
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted Renovate'
     validations:
