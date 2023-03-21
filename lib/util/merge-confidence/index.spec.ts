@@ -233,7 +233,7 @@ describe('util/merge-confidence/index', () => {
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence api token rejected - aborting run'
+          'merge confidence API token rejected - aborting run'
         );
       });
 
@@ -260,7 +260,7 @@ describe('util/merge-confidence/index', () => {
         ).rejects.toThrow(EXTERNAL_HOST_ERROR);
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence api failure: 5xx - aborting run'
+          'merge confidence API failure: 5xx - aborting run'
         );
       });
 
@@ -288,10 +288,10 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
-          'using default merge confidence api base url'
+          'using default merge confidence API base URL'
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence api - successfully authenticated'
+          'merge confidence API - successfully authenticated'
         );
       });
 
@@ -308,10 +308,10 @@ describe('util/merge-confidence/index', () => {
         await expect(initMergeConfidence()).toResolve();
         expect(logger.warn).toHaveBeenCalledWith(
           expect.anything(),
-          'invalid merge confidence api base url found in environment variables - using default value instead'
+          'invalid merge confidence API base URL found in environment variables - using default value instead'
         );
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence api - successfully authenticated'
+          'merge confidence API - successfully authenticated'
         );
       });
 
@@ -321,7 +321,7 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.trace).toHaveBeenCalledWith(
-          'merge confidence api usage is disabled'
+          'merge confidence API usage is disabled'
         );
       });
 
@@ -330,7 +330,7 @@ describe('util/merge-confidence/index', () => {
 
         await expect(initMergeConfidence()).toResolve();
         expect(logger.debug).toHaveBeenCalledWith(
-          'merge confidence api - successfully authenticated'
+          'merge confidence API - successfully authenticated'
         );
       });
 
@@ -342,7 +342,7 @@ describe('util/merge-confidence/index', () => {
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence api token rejected - aborting run'
+          'merge confidence API token rejected - aborting run'
         );
       });
 
@@ -354,7 +354,7 @@ describe('util/merge-confidence/index', () => {
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence api failure: 5xx - aborting run'
+          'merge confidence API failure: 5xx - aborting run'
         );
       });
 
@@ -369,7 +369,7 @@ describe('util/merge-confidence/index', () => {
         );
         expect(logger.error).toHaveBeenCalledWith(
           expect.anything(),
-          'merge confidence api request failed - aborting run'
+          'merge confidence API request failed - aborting run'
         );
       });
     });
