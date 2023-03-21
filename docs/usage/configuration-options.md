@@ -2244,8 +2244,15 @@ Or, to add a registry prefix to any `docker` images that do not contain an expli
 {
   "packageRules": [
     {
+      "description": "official images",
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^([^.]+)(:|$).*"],
+      "matchPackagePatterns": ["^([^.\\/]+)(:|$).*"],
+      "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
+    },
+    {
+      "description": "non-official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^([^.\\/]+)\\/\\S+(:|$).*"],
       "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
