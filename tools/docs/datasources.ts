@@ -1,6 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { getDatasources } from '../../lib/modules/datasource';
 import { readFile, updateFile } from '../utils';
+import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatDescription,
   formatUrls,
@@ -9,7 +10,10 @@ import {
   replaceContent,
 } from './utils';
 
-export async function generateDatasources(dist: string): Promise<void> {
+export async function generateDatasources(
+  dist: string,
+  datasourceIssuesMap: OpenItems
+): Promise<void> {
   const dsList = getDatasources();
   let datasourceContent = '\nSupported values for `datasource` are:\n\n';
 
@@ -55,6 +59,8 @@ export async function generateDatasources(dist: string): Promise<void> {
         JSON.stringify(defaultConfig, undefined, 2) +
         '\n```\n';
     }
+
+    md += generateFeatureAndBugMarkdown(datasourceIssuesMap, datasource);
 
     await updateFile(`${dist}/modules/datasource/${datasource}/index.md`, md);
   }

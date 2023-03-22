@@ -8,6 +8,7 @@ import type {
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
+import type { MergeConfidence } from '../../util/merge-confidence/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -19,7 +20,7 @@ export interface ExtractConfig extends CustomExtractConfig {
   registryAliases?: Record<string, string>;
   npmrc?: string;
   npmrcMerge?: boolean;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
 }
 
 export interface CustomExtractConfig extends RegexManagerTemplates {
@@ -63,7 +64,7 @@ export interface PackageFileContent<T = Record<string, any>>
   lockFiles?: string[];
   npmrc?: string;
   packageFileVersion?: string;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
   matchStrings?: string[];
   matchStringsStrategy?: MatchStringsStrategy;
 }
@@ -71,32 +72,6 @@ export interface PackageFileContent<T = Record<string, any>>
 export interface PackageFile<T = Record<string, any>>
   extends PackageFileContent<T> {
   packageFile: string;
-}
-
-export interface Package<T> extends ManagerData<T> {
-  currentValue?: string | null;
-  currentDigest?: string;
-  depName?: string;
-  depType?: string;
-  fileReplacePosition?: number;
-  groupName?: string;
-  lineNumber?: number;
-  packageName?: string | null;
-  target?: string;
-  versioning?: string;
-  dataType?: string;
-  enabled?: boolean;
-
-  // npm manager
-  bumpVersion?: ReleaseType | string;
-  npmPackageAlias?: boolean;
-  packageFileVersion?: string;
-  gitRef?: boolean;
-  sourceUrl?: string | null;
-  pinDigests?: boolean;
-  currentRawValue?: string;
-  major?: { enabled?: boolean };
-  prettyDepType?: string;
 }
 
 export interface LookupUpdate {
@@ -120,6 +95,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
@@ -127,7 +103,29 @@ export interface LookupUpdate {
   registryUrl?: string;
 }
 
-export interface PackageDependency<T = Record<string, any>> extends Package<T> {
+export interface PackageDependency<T = Record<string, any>>
+  extends ManagerData<T> {
+  currentValue?: string | null;
+  currentDigest?: string;
+  depName?: string;
+  depType?: string;
+  fileReplacePosition?: number;
+  groupName?: string;
+  lineNumber?: number;
+  packageName?: string;
+  target?: string;
+  versioning?: string;
+  dataType?: string;
+  enabled?: boolean;
+  bumpVersion?: ReleaseType | string;
+  npmPackageAlias?: boolean;
+  packageFileVersion?: string;
+  gitRef?: boolean;
+  sourceUrl?: string | null;
+  pinDigests?: boolean;
+  currentRawValue?: string;
+  major?: { enabled?: boolean };
+  prettyDepType?: string;
   newValue?: string;
   warnings?: ValidationMessage[];
   commitMessageTopic?: string;
@@ -147,7 +145,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   updates?: LookupUpdate[];
   replaceString?: string;
   autoReplaceStringTemplate?: string;
-  depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
   extractVersion?: string;
@@ -155,7 +152,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   variableName?: string;
 }
 
-export interface Upgrade<T = Record<string, any>> extends Package<T> {
+export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;
@@ -274,7 +271,7 @@ export interface PostUpdateConfig<T = Record<string, any>>
     ManagerData<T> {
   updatedPackageFiles?: FileChange[];
   postUpdateOptions?: string[];
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
   ignoreScripts?: boolean;
 
   packageFile?: string;

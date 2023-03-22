@@ -26,7 +26,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items,
       createdAt: isoTs('2022-10-01 15:30'),
-      updatedAt: isoTs('2022-10-30 12:35'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -40,10 +39,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual(Object.values(items));
     expect(isPaginationDone).toBe(true);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
-      ...cacheRecord,
-      updatedAt: isoTs(now),
-    });
+    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
 
     // One second later, the cache is invalid
     now = '2022-10-31 15:30:00';
@@ -58,7 +54,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
       items: {},
       createdAt: isoTs(now),
-      updatedAt: isoTs(now),
     });
   });
 
@@ -71,7 +66,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -96,7 +90,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
         '4': newItem,
       },
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs(now),
     });
   });
 
@@ -109,7 +102,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -125,6 +117,42 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const isPaginationDone = await strategy.reconcile(page);
 
     expect(isPaginationDone).toBe(true);
+  });
+
+  it('reconciles entire page', async () => {
+    const oldItems = {
+      '1': { releaseTimestamp: isoTs('2020-01-01 00:00'), version: '1' },
+      '2': { releaseTimestamp: isoTs('2020-01-01 01:00'), version: '2' },
+      '3': { releaseTimestamp: isoTs('2020-01-01 02:00'), version: '3' },
+    };
+    const cacheRecord: CacheRecord = {
+      items: oldItems,
+      createdAt: isoTs('2022-12-31 12:00'),
+    };
+    memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
+
+    const now = '2022-12-31 23:59';
+    mockTime(now);
+
+    const page = [
+      { version: '1', releaseTimestamp: isoTs('2022-12-31 10:00') },
+      { version: '2', releaseTimestamp: isoTs('2022-12-31 11:00') },
+      { version: '3', releaseTimestamp: isoTs('2022-12-31 12:00') },
+      { version: '4', releaseTimestamp: isoTs('2022-12-31 13:00') },
+    ].reverse();
+
+    const strategy = new GithubGraphqlMemoryCacheStrategy('foo', 'bar');
+    const isPaginationDone = await strategy.reconcile(page);
+
+    expect(isPaginationDone).toBe(true);
+    expect(memCache.get('github-graphql-cache:foo:bar')).toMatchObject({
+      items: {
+        '1': { releaseTimestamp: isoTs('2022-12-31 10:00') },
+        '2': { releaseTimestamp: isoTs('2022-12-31 11:00') },
+        '3': { releaseTimestamp: isoTs('2022-12-31 12:00') },
+        '4': { releaseTimestamp: isoTs('2022-12-31 13:00') },
+      },
+    });
   });
 
   it('detects removed packages', async () => {
@@ -144,7 +172,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -182,7 +209,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
         '8': { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
       },
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-31 15:30'),
     });
   });
 });

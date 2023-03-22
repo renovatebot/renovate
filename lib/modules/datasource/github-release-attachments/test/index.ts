@@ -2,7 +2,7 @@ import * as httpMock from '../../../../../test/http-mock';
 import { partial } from '../../../../../test/util';
 import type { GithubRestRelease } from '../../../../util/github/types';
 
-export class GitHubReleaseMocker {
+export class GitHubReleaseAttachmentMocker {
   constructor(
     private readonly githubApiHost: string,
     private readonly packageName: string

@@ -2,7 +2,7 @@
 import is from '@sindresorhus/is';
 import { WORKER_FILE_UPDATE_FAILED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { get } from '../../../../modules/manager';
+import { extractPackageFile } from '../../../../modules/manager';
 import type { PackageDependency } from '../../../../modules/manager/types';
 import { writeLocalFile } from '../../../../util/fs';
 import { escapeRegExp, regEx } from '../../../../util/regex';
@@ -14,21 +14,13 @@ export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const {
-    manager,
-    packageFile,
-    newValue,
-    newDigest,
-    depIndex,
-    currentDigest,
-    pinDigests,
-  } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
+  const { manager, packageFile, depIndex } = upgrade;
   let newUpgrade: PackageDependency;
   try {
-    const newExtract = await extractPackageFile!(
+    const newExtract = await extractPackageFile(
+      manager,
       newContent,
-      packageFile,
+      packageFile!,
       upgrade
     );
     // istanbul ignore if
@@ -63,12 +55,25 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (newValue && newUpgrade.currentValue !== newValue) {
+  if (upgrade.newName && upgrade.newName !== newUpgrade.depName) {
     logger.debug(
       {
         manager,
         packageFile,
-        expectedValue: newValue,
+        currentDepName: upgrade.depName,
+        newDepName: newUpgrade.depName,
+      },
+      'depName is not updated'
+    );
+    return false;
+  }
+
+  if (upgrade.newValue && upgrade.newValue !== newUpgrade.currentValue) {
+    logger.debug(
+      {
+        manager,
+        packageFile,
+        expectedValue: upgrade.newValue,
         foundValue: newUpgrade.currentValue,
       },
       'Value is not updated'
@@ -76,27 +81,35 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (!newDigest) {
-    return true;
-  }
-  if (newUpgrade.currentDigest === newDigest) {
-    return true;
-  }
-  if (!currentDigest) {
-    if (!pinDigests) {
-      return true;
-    } else if (newDigest) {
-      return true;
-    }
+  if (
+    upgrade.newDigest &&
+    (upgrade.isPinDigest || upgrade.currentDigest) &&
+    upgrade.newDigest !== newUpgrade.currentDigest
+  ) {
+    logger.debug(
+      {
+        manager,
+        packageFile,
+        expectedValue: upgrade.newDigest,
+        foundValue: newUpgrade.currentDigest,
+      },
+      'Digest is not updated'
+    );
+    return false;
   }
 
-  // istanbul ignore next
-  return false;
+  return true;
 }
 
 function getDepsSignature(deps: PackageDependency[]): string {
   // TODO: types (#7154)
-  return deps.map((dep) => `${dep.depName!}${dep.packageName!}`).join(',');
+  return deps
+    .map(
+      (dep) =>
+        `${(dep.depName ?? dep.packageName)!}${(dep.packageName ??
+          dep.depName)!}`
+    )
+    .join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
@@ -104,9 +117,13 @@ export async function checkBranchDepsMatchBaseDeps(
   branchContent: string
 ): Promise<boolean> {
   const { baseDeps, manager, packageFile } = upgrade;
-  const extractPackageFile = get(manager, 'extractPackageFile');
   try {
-    const res = await extractPackageFile!(branchContent, packageFile, upgrade)!;
+    const res = await extractPackageFile(
+      manager,
+      branchContent,
+      packageFile!,
+      upgrade
+    )!;
     const branchDeps = res!.deps;
     return getDepsSignature(baseDeps!) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
@@ -157,6 +174,7 @@ export async function doAutoReplace(
     currentDigest,
     currentDigestShort,
     newDigest,
+    autoReplaceGlobalMatch,
     autoReplaceStringTemplate,
   } = upgrade;
   /*
@@ -195,26 +213,28 @@ export async function doAutoReplace(
       newString = compile(autoReplaceStringTemplate, upgrade, false);
     } else {
       newString = replaceString!;
+
+      const autoReplaceRegExpFlag = autoReplaceGlobalMatch ? 'g' : '';
       if (currentValue && newValue) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentValue), 'g'),
+          regEx(escapeRegExp(currentValue), autoReplaceRegExpFlag),
           newValue
         );
       }
       if (depName && newName) {
         newString = newString.replace(
-          regEx(escapeRegExp(depName), 'g'),
+          regEx(escapeRegExp(depName), autoReplaceRegExpFlag),
           newName
         );
       }
       if (currentDigest && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigest), 'g'),
+          regEx(escapeRegExp(currentDigest), autoReplaceRegExpFlag),
           newDigest
         );
       } else if (currentDigestShort && newDigest) {
         newString = newString.replace(
-          regEx(escapeRegExp(currentDigestShort), 'g'),
+          regEx(escapeRegExp(currentDigestShort), autoReplaceRegExpFlag),
           newDigest
         );
       }

@@ -15,7 +15,7 @@ describe('modules/platform/default-scm', () => {
 
   it('delegate commitAndPush to util/git', async () => {
     git.commitFiles.mockResolvedValueOnce('sha');
-    await defaultGitScm.commitAndPush(partial<CommitFilesConfig>({}));
+    await defaultGitScm.commitAndPush(partial<CommitFilesConfig>());
     expect(git.commitFiles).toHaveBeenCalledTimes(1);
   });
 

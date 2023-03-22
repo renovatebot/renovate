@@ -1,4 +1,4 @@
-# Bitbucket Server Support
+# Bitbucket Data Center and Server
 
 ## Authentication
 

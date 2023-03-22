@@ -397,7 +397,7 @@ export function handleImplicitGradlePlugin(ctx: Ctx): Ctx {
   }
 
   const groupIdArtifactId =
-    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS];
+    GRADLE_PLUGINS[pluginName as keyof typeof GRADLE_PLUGINS][1];
   const dep = parseDependencyString(`${groupIdArtifactId}:${versionValue}`);
   if (!dep) {
     return ctx;

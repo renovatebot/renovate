@@ -1,5 +1,12 @@
 import { DateTime } from 'luxon';
-import { git, logger, mocked, platform, scm } from '../../../../../test/util';
+import {
+  git,
+  logger,
+  mocked,
+  partial,
+  platform,
+  scm,
+} from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -107,7 +114,9 @@ describe('workers/repository/update/pr/index', () => {
         platform.createPr.mockResolvedValueOnce(pr);
         limits.isLimitReached.mockReturnValueOnce(true);
 
-        const res = await ensurePr({ ...config, isVulnerabilityAlert: true });
+        const prConfig = { ...config, isVulnerabilityAlert: true };
+        delete prConfig.prTitle; // for coverage
+        const res = await ensurePr(prConfig);
 
         expect(res).toEqual({ type: 'with-pr', pr });
         expect(platform.createPr).toHaveBeenCalled();
@@ -620,7 +629,7 @@ describe('workers/repository/update/pr/index', () => {
         date: '',
       };
 
-      const dummyUpgrade: BranchUpgradeConfig = {
+      const dummyUpgrade = partial<BranchUpgradeConfig>({
         branchName: sourceBranch,
         depType: 'foo',
         depName: 'bar',
@@ -642,7 +651,7 @@ describe('workers/repository/update/pr/index', () => {
             { ...dummyRelease, version: '4.5.6' },
           ],
         },
-      };
+      });
 
       it('processes changelogs', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
@@ -695,11 +704,11 @@ describe('workers/repository/update/pr/index', () => {
       it('removes duplicate changelogs', async () => {
         platform.createPr.mockResolvedValueOnce(pr);
 
-        const upgrade: BranchUpgradeConfig = {
+        const upgrade = partial<BranchUpgradeConfig>({
           ...dummyUpgrade,
           sourceUrl: 'https://github.com/foo/bar',
           sourceDirectory: '/src',
-        };
+        });
         const res = await ensurePr({
           ...config,
           upgrades: [upgrade, upgrade, { ...upgrade, depType: 'test' }],

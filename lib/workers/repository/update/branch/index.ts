@@ -311,13 +311,14 @@ export async function processBranch(
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
         if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence = await getMergeConfidenceLevel(
-            datasource,
-            depName,
-            currentVersion,
-            newVersion,
-            updateType
-          );
+          const confidence =
+            (await getMergeConfidenceLevel(
+              datasource,
+              depName,
+              currentVersion,
+              newVersion,
+              updateType
+            )) ?? 'neutral';
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
             config.confidenceStatus = 'green';
           } else {
@@ -498,6 +499,9 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+      // baseBranch is not checked out at the start of processBranch() due to pull/16246
+      await checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

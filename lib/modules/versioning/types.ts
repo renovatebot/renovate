@@ -1,4 +1,4 @@
-import type { Range, SemVer } from 'semver';
+import type { SemVer } from 'semver';
 import type { RangeStrategy } from '../../types';
 
 export interface NewValueConfig {
@@ -94,9 +94,18 @@ export interface VersioningApi {
   /**
    * Check whether the `version` satisfies the `range` constraint.
    */
-  matches(version: string, range: string | Range): boolean;
+  matches(version: string, range: string): boolean;
 
   valueToVersion?(version: string): string;
+
+  /**
+   * @returns true if subRange is entirely contained by superRange, false otherwise,
+   * and undefined if it cannot determine it.
+   *
+   * @param subRange - the sub range
+   * @param superRange - the dom range
+   */
+  subset?(subRange: string, superRange: string): boolean | undefined;
 }
 
 export interface VersioningApiConstructor {

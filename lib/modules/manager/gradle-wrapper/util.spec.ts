@@ -39,6 +39,12 @@ describe('modules/manager/gradle-wrapper/util', () => {
       GlobalConfig.set({ binarySource: 'docker' });
       expect(getJavaConstraint('7.0.1')).toBe('^16.0.0');
     });
+
+    it('return ^17.0.0 for docker gradle >= 7.3', () => {
+      GlobalConfig.set({ binarySource: 'docker' });
+      expect(getJavaConstraint('7.3.0')).toBe('^17.0.0');
+      expect(getJavaConstraint('8.0.1')).toBe('^17.0.0');
+    });
   });
 
   describe('extractGradleVersion()', () => {
