@@ -10,7 +10,10 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './types';
-import { areKustomizationsUsed } from './utils';
+import {
+  kustomizationsKeysUsed,
+  localChartHasKustomizationsYaml,
+} from './utils';
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
@@ -22,11 +25,16 @@ function extractYaml(content: string): string {
     .replace(regEx(/{{.+?}}/g), '');
 }
 
-export function extractPackageFile(
+const isLocalPath = (possiblePath: string): boolean =>
+  ['./', '../', '/'].some((localPrefix) =>
+    possiblePath.startsWith(localPrefix)
+  );
+
+export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFileContent | null {
+): Promise<PackageFileContent | null> {
   let deps: PackageDependency[] = [];
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
@@ -48,76 +56,82 @@ export function extractPackageFile(
     }
     logger.debug({ registryAliases }, 'repositories discovered.');
 
-    deps = doc.releases.map((dep) => {
-      let depName = dep.chart;
-      let repoName: string | null = null;
+    deps = await Promise.all(
+      doc.releases.map(async (dep) => {
+        let depName = dep.chart;
+        let repoName: string | null = null;
 
-      if (!is.string(dep.chart)) {
-        return {
-          depName: dep.name,
-          skipReason: 'invalid-name',
-        };
-      }
+        if (!is.string(dep.chart)) {
+          return {
+            depName: dep.name,
+            skipReason: 'invalid-name',
+          };
+        }
 
-      // If it starts with ./ ../ or / then it's a local path
-      if (['./', '../', '/'].some((val) => dep.chart.startsWith(val))) {
-        return {
-          depName: dep.name,
-          skipReason: 'local-chart',
-        };
-      }
+        // If it starts with ./ ../ or / then it's a local path
+        if (isLocalPath(dep.chart)) {
+          const needKustomize =
+            kustomizationsKeysUsed(dep) ||
+            (await localChartHasKustomizationsYaml(dep));
+          return {
+            depName: dep.name,
+            skipReason: 'local-chart',
+            ...(needKustomize && { managerData: { needKustomize: true } }),
+          };
+        }
 
-      if (is.number(dep.version)) {
-        dep.version = String(dep.version);
-      }
+        if (is.number(dep.version)) {
+          dep.version = String(dep.version);
+        }
 
-      if (dep.chart.includes('/')) {
-        const v = dep.chart.split('/');
-        repoName = v.shift()!;
-        depName = v.join('/');
-      } else {
-        repoName = dep.chart;
-      }
+        if (dep.chart.includes('/')) {
+          const v = dep.chart.split('/');
+          repoName = v.shift()!;
+          depName = v.join('/');
+        } else {
+          repoName = dep.chart;
+        }
 
-      if (!is.string(dep.version)) {
-        return {
+        if (!is.string(dep.version)) {
+          return {
+            depName,
+            skipReason: 'invalid-version',
+          };
+        }
+
+        const res: PackageDependency = {
           depName,
-          skipReason: 'invalid-version',
+          currentValue: dep.version,
+          registryUrls: [registryAliases[repoName]]
+            .concat([config.registryAliases?.[repoName]] as string[])
+            .filter(is.string),
         };
-      }
+        if (kustomizationsKeysUsed(dep)) {
+          res.managerData = { needKustomize: true };
+        }
+        // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+        const repository = doc.repositories?.find(
+          (repo) => repo.name === repoName
+        );
+        if (repository?.oci) {
+          res.datasource = DockerDatasource.id;
+          res.packageName = registryAliases[repoName] + '/' + depName;
+        }
 
-      const res: PackageDependency = {
-        depName,
-        currentValue: dep.version,
-        registryUrls: [registryAliases[repoName]]
-          .concat([config.registryAliases?.[repoName]] as string[])
-          .filter(is.string),
-      };
-      if (areKustomizationsUsed(dep)) {
-        res.managerData = { needKustomize: true };
-      }
-      // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-      const repository = doc.repositories?.find(
-        (repo) => repo.name === repoName
-      );
-      if (repository?.oci) {
-        res.datasource = DockerDatasource.id;
-        res.packageName = registryAliases[repoName] + '/' + depName;
-      }
+        // By definition on helm the chart name should be lowercase letter + number + -
+        // However helmfile support templating of that field
+        if (!isValidChartName(res.depName)) {
+          res.skipReason = 'unsupported-chart-type';
+        }
 
-      // By definition on helm the chart name should be lowercase letter + number + -
-      // However helmfile support templating of that field
-      if (!isValidChartName(res.depName)) {
-        res.skipReason = 'unsupported-chart-type';
-      }
+        // Skip in case we cannot locate the registry
+        if (is.emptyArray(res.registryUrls)) {
+          res.skipReason = 'unknown-registry';
+        }
 
-      // Skip in case we cannot locate the registry
-      if (is.emptyArray(res.registryUrls)) {
-        res.skipReason = 'unknown-registry';
-      }
-
-      return res;
-    });
+        return res;
+      })
+    );
   }
 
   return deps.length ? { deps, datasource: HelmDatasource.id } : null;
