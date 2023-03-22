@@ -1833,7 +1833,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyTemplate',
     description:
-      'Pull Request body template. Controls which sections are rendered in the body.',
+      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
     default:
       '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',

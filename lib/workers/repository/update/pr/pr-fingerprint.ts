@@ -6,7 +6,7 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../../../../config/types';
-import { pkg } from '../../../../expose.cjs';
+import type { UpdateType, ValidationMessage } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PrCache } from '../../../../util/cache/repository/types';
 import { getElapsedHours } from '../../../../util/date';
@@ -23,9 +23,6 @@ export interface FilteredBranchUpgradeConfig {
 }
 
 export interface PrFingerprintConfig {
-  // Renovate Version
-  pkgVersion: string;
-
   // BranchConfig - filtered
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -67,7 +64,6 @@ export function generatePrFingerprintConfig(
     filteredUpgrades,
     hasReleaseNotes: config.hasReleaseNotes,
     isPin: config.isPin,
-    pkgVersion: pkg.version,
     prBodyTemplate: config.prBodyTemplate,
     prFooter: config.prFooter,
     prHeader: config.prHeader,
