@@ -110,7 +110,6 @@ describe('modules/platform/index', () => {
         {
           hostType: 'github',
           matchHost: 'ghe.renovatebot.com',
-          resolvedHost: 'ghe.renovatebot.com',
           token: '123',
           username: 'abc',
         },
