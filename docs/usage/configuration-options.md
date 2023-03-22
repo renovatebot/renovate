@@ -2572,9 +2572,9 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 ## recreateClosed
 
-By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
+By default, Renovate detects if it proposed an update to a project before, and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customize this behavior down to a per-package level.
+You can use `recreateClosed` to customize this behavior down to a per-package level.
 For example we override it to `always` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
@@ -2585,7 +2585,7 @@ There are total three possible options:
 
 1. `always`: Recreates all closed/merged PRs
 2. `auto`: The default option. Recreates only immortal PRs
-3. `never`: No PR is recreated, doesn't matter if it is immortal or not.
+3. `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 Typically you shouldn't need to modify this setting.
 
