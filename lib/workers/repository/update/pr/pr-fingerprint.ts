@@ -6,7 +6,6 @@ import type {
   UpdateType,
   ValidationMessage,
 } from '../../../../config/types';
-import type { UpdateType, ValidationMessage } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PrCache } from '../../../../util/cache/repository/types';
 import { getElapsedHours } from '../../../../util/date';
