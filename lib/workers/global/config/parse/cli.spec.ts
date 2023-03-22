@@ -135,6 +135,7 @@ describe('workers/global/config/parse/cli', () => {
       ${'--recreate-closed=never'}     | ${{ recreateClosed: 'never' }}
       ${'--recreate-closed=false'}     | ${{ recreateClosed: 'auto' }}
       ${'--recreate-closed=true'}      | ${{ recreateClosed: 'always' }}
+      ${'--recreate-closed'}           | ${{ recreateClosed: 'always' }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
