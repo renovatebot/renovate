@@ -10,9 +10,6 @@ describe('util/http/jira', () => {
   beforeEach(() => {
     api = new JiraHttp();
 
-    // reset module
-    jest.resetAllMocks();
-
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
