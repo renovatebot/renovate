@@ -14,7 +14,7 @@ describe('modules/datasource/json/index', () => {
     it('return null if registryUrl is missing', async () => {
       expect(
         await getPkgReleases({
-          depName: 'test',
+          packageName: 'test',
           datasource: JsonDatasource.id,
         })
       ).toBeNull();
@@ -23,7 +23,7 @@ describe('modules/datasource/json/index', () => {
     it('return null if registryUrl is not valid', async () => {
       expect(
         await getPkgReleases({
-          depName: 'test',
+          packageName: 'test',
           registryUrls: ['example'],
           datasource: JsonDatasource.id,
         })
@@ -33,7 +33,7 @@ describe('modules/datasource/json/index', () => {
     it('return null if a not supported scheme is used', async () => {
       expect(
         await getPkgReleases({
-          depName: 'test',
+          packageName: 'test',
           registryUrls: ['gcp://test.example.com'],
           datasource: JsonDatasource.id,
         })
@@ -44,7 +44,7 @@ describe('modules/datasource/json/index', () => {
       httpMock.scope('http://test.example.com').get('/').reply(500);
       expect(
         await getPkgReleases({
-          depName: 'test',
+          packageName: 'test',
           registryUrls: ['http://test.example.com'],
           datasource: JsonDatasource.id,
         })
@@ -55,7 +55,7 @@ describe('modules/datasource/json/index', () => {
       httpMock.scope('https://test.example.com').get('/').reply(200, '');
       expect(
         await getPkgReleases({
-          depName: 'test',
+          packageName: 'test',
           registryUrls: ['https://test.example.com'],
           datasource: JsonDatasource.id,
         })
@@ -80,7 +80,7 @@ describe('modules/datasource/json/index', () => {
         );
       expect(
         await getPkgReleases({
-          depName: '*',
+          packageName: '*',
           registryUrls: ['https://test.example.com'],
           datasource: JsonDatasource.id,
         })
@@ -108,7 +108,7 @@ describe('modules/datasource/json/index', () => {
         );
       expect(
         await getPkgReleases({
-          depName: '*',
+          packageName: '*',
           registryUrls: ['https://test.example.com'],
           datasource: JsonDatasource.id,
         })
@@ -145,7 +145,7 @@ describe('modules/datasource/json/index', () => {
       `);
       expect(
         await getPkgReleases({
-          depName: '*',
+          packageName: '*',
           registryUrls: ['file://folder/example.json'],
           datasource: JsonDatasource.id,
         })
@@ -192,7 +192,7 @@ describe('modules/datasource/json/index', () => {
         );
       expect(
         await getPkgReleases({
-          depName: 'package',
+          packageName: 'package',
           registryUrls: ['https://test.example.com'],
           datasource: JsonDatasource.id,
         })
