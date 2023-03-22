@@ -1215,6 +1215,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementNameTemplate',
+    description: 'Controls what the replacement package name.',
+    type: 'string',
+    default: '{{{packageName}}}',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementVersion',
     description:
       'The version of the new dependency that replaces the old deprecated dependency.',
@@ -1223,6 +1233,21 @@ const options: RenovateOptions[] = [
     parent: 'packageRules',
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchConfidence',
+    description:
+      'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'matchUpdateTypes',

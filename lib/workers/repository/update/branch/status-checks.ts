@@ -2,10 +2,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import type { BranchStatus } from '../../../../types';
-import {
-  MergeConfidence,
-  isActiveConfidenceLevel,
-} from '../../../../util/merge-confidence';
+import { isActiveConfidenceLevel } from '../../../../util/merge-confidence';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 
 export async function resolveBranchStatus(
   branchName: string,
@@ -80,7 +78,7 @@ export async function setStability(config: StabilityConfig): Promise<void> {
 
 export interface ConfidenceConfig extends RenovateConfig {
   confidenceStatus?: BranchStatus;
-  minimumConfidence?: MergeConfidence;
+  minimumConfidence?: MergeConfidence | undefined;
 }
 
 export async function setConfidence(config: ConfidenceConfig): Promise<void> {
