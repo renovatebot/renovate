@@ -2231,7 +2231,7 @@ For example, the following package rule can be used to replace the registry for 
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^docker.io/.*)"],
+      "matchPackagePatterns": ["^docker.io/.*)"],
       "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
     }
   ]
@@ -2244,8 +2244,15 @@ Or, to add a registry prefix to any `docker` images that do not contain an expli
 {
   "packageRules": [
     {
+      "description": "official images",
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "matchPackagePatterns": ["^[a-z-]+(:|$).*"],
+      "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
+    },
+    {
+      "description": "non-official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^[a-z-]+\\/[a-z-]+(:|$).*"],
       "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
