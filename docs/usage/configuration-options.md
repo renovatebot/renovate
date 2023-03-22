@@ -2231,7 +2231,7 @@ For example, the following package rule can be used to replace the registry for 
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^docker.io/.*"],
+      "matchPackagePatterns": ["^docker.io/.+"],
       "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
     }
   ]
