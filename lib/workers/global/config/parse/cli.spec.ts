@@ -130,6 +130,11 @@ describe('workers/global/config/parse/cli', () => {
       ${'--git-lab-automerge=false'}   | ${{ platformAutomerge: false }}
       ${'--git-lab-automerge=true'}    | ${{ platformAutomerge: true }}
       ${'--git-lab-automerge'}         | ${{ platformAutomerge: true }}
+      ${'--recreate-closed=auto'}      | ${{ recreateClosed: 'auto' }}
+      ${'--recreate-closed=always'}    | ${{ recreateClosed: 'always' }}
+      ${'--recreate-closed=never'}     | ${{ recreateClosed: 'never' }}
+      ${'--recreate-closed=false'}     | ${{ recreateClosed: 'auto' }}
+      ${'--recreate-closed=true'}      | ${{ recreateClosed: 'always' }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);

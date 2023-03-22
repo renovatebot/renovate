@@ -85,6 +85,17 @@ describe('workers/global/config/parse/env', () => {
       expect(res).toMatchObject({ hostRules: [{ foo: 'bar' }] });
     });
 
+    test.each`
+      envArg                                    | config
+      ${{ RENOVATE_RECREATE_CLOSED: 'auto' }}   | ${{ recreateClosed: 'auto' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'always' }} | ${{ recreateClosed: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'never' }}  | ${{ recreateClosed: 'never' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}   | ${{ recreateClosed: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'false' }}  | ${{ recreateClosed: 'auto' }}
+    `('"$envArg" -> $config', ({ envArg, config }) => {
+      expect(env.getConfig(envArg)).toMatchObject(config);
+    });
+
     it('skips misconfigured arrays', () => {
       const envName = 'RENOVATE_HOST_RULES';
       const val = JSON.stringify('foobar');
