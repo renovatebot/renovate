@@ -1,26 +1,36 @@
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
-import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
-import { parseUrl } from '../../../util/url';
-import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { ReleaseResultZod } from './types';
+import { z } from 'zod';
+import { logger } from '../../logger';
+import { readLocalFile } from '../../util/fs';
+import { parseUrl } from '../../util/url';
+import { Datasource } from './datasource';
+import type { ReleaseResult } from './types';
 
-export class JsonDatasource extends Datasource {
-  static readonly id = 'json';
+export const ReleaseResultZod = z.object({
+  releases: z.array(
+    z.object({
+      version: z.string(),
+      isDeprecated: z.boolean().optional(),
+      releaseTimestamp: z.string().optional(),
+      sourceUrl: z.string().optional(),
+      sourceDirectory: z.string().optional(),
+      changelogUrl: z.string().optional(),
+    })
+  ),
+  sourceUrl: z.string().optional(),
+  sourceDirectory: z.string().optional(),
+  changelogUrl: z.string().optional(),
+  homepage: z.string().optional(),
+});
 
+export abstract class GenericDatasource extends Datasource {
   override caching = true;
   override customRegistrySupport = true;
 
-  constructor() {
-    super(JsonDatasource.id);
-  }
-
-  async getReleases({
-    registryUrl,
-    packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  protected async queryRegistry(
+    registryUrl: string | null | undefined
+  ): Promise<string | null> {
     if (is.nullOrUndefined(registryUrl)) {
       return null;
     }
@@ -52,13 +62,17 @@ export class JsonDatasource extends Datasource {
       return null;
     }
 
+    return response;
+  }
+
+  protected async parseData(
+    packageName: string,
+    data: unknown
+  ): Promise<ReleaseResult | null> {
     const expression = jsonata(packageName);
-
-    const jsonObject = JSON.parse(response);
-
     // wildcard means same object
     const evaluated =
-      packageName === '*' ? jsonObject : await expression.evaluate(jsonObject);
+      packageName === '*' ? data : await expression.evaluate(data);
 
     const parsed = ReleaseResultZod.safeParse(evaluated);
     if (!parsed.success) {

@@ -129,6 +129,7 @@ describe('modules/datasource/index', () => {
         )
         .map((dirent) => dirent.name)
         .sort();
+
       expect(getDatasourceList()).toEqual(managerList);
     });
 

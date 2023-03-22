@@ -1,4 +1,4 @@
-The `json` datasource allows to gather dependency information from generic endpoints or files.
+The `generic-json` datasource allows to gather dependency information from generic endpoints or files.
 These files or endpoints have to contain or return valid json objects in the following format:
 
 Minimal supported returned object:

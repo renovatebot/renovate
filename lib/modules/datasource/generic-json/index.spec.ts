@@ -1,11 +1,11 @@
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
 import { getPkgReleases } from '../index';
-import { JsonDatasource } from './index';
+import { GenericJsonDatasource } from './index';
 
 jest.mock('../../../util/fs');
 
-describe('modules/datasource/json/index', () => {
+describe('modules/datasource/generic-json/index', () => {
   describe('getReleases', () => {
     afterEach(() => {
       jest.resetAllMocks();
@@ -15,7 +15,7 @@ describe('modules/datasource/json/index', () => {
       expect(
         await getPkgReleases({
           packageName: 'test',
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -25,7 +25,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: 'test',
           registryUrls: ['example'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -35,7 +35,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: 'test',
           registryUrls: ['gcp://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -46,7 +46,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: 'test',
           registryUrls: ['http://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -57,7 +57,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: 'test',
           registryUrls: ['https://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -82,7 +82,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: '*',
           registryUrls: ['https://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toBeNull();
     });
@@ -110,7 +110,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: '*',
           registryUrls: ['https://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toMatchObject({
         releases: [
@@ -147,7 +147,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: '*',
           registryUrls: ['file://folder/example.json'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toMatchObject({
         releases: [
@@ -194,7 +194,7 @@ describe('modules/datasource/json/index', () => {
         await getPkgReleases({
           packageName: 'package',
           registryUrls: ['https://test.example.com'],
-          datasource: JsonDatasource.id,
+          datasource: GenericJsonDatasource.id,
         })
       ).toMatchObject({
         releases: [
