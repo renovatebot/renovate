@@ -9,7 +9,8 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-export function add(rule: HostRule): void {
+export function add(params: HostRule): void {
+  const rule = clone(params);
   const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
     const parsedUrl = parseUrl(rule.matchHost);

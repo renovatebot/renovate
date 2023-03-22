@@ -70,7 +70,6 @@ describe('modules/platform/index', () => {
         {
           hostType: 'bitbucket',
           matchHost: 'api.bitbucket.org',
-          resolvedHost: 'api.bitbucket.org',
           password: '123',
           username: 'abc',
         },
