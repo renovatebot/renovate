@@ -1627,8 +1627,8 @@ export async function mergePr({
       if (err.statusCode === 404 || err.statusCode === 405) {
         const body = err.response?.body;
         if (
-          body?.message &&
-          /^Required status check ".+" is expected\.$/.test(body.message)
+          is.nonEmptyString(body?.message) &&
+          regEx(/^Required status check ".+" is expected\.$/).test(body.message)
         ) {
           logger.debug(
             { response: body },
