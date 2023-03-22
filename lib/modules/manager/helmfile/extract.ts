@@ -59,8 +59,8 @@ export function extractPackageFile(
         };
       }
 
-      // If starts with ./ is for sure a local path
-      if (dep.chart.startsWith('./')) {
+      // If it starts with ./ or ../ it's a local path
+      if (dep.chart.startsWith('./') || dep.chart.startsWith('../')) {
         return {
           depName: dep.name,
           skipReason: 'local-chart',
