@@ -99,7 +99,6 @@ api.set(HexDatasource.id, new HexDatasource());
 api.set(HexpmBobDatasource.id, new HexpmBobDatasource());
 api.set(JavaVersionDatasource.id, new JavaVersionDatasource());
 api.set(JenkinsPluginsDatasource.id, new JenkinsPluginsDatasource());
-
 api.set(KubernetesApiDatasource.id, new KubernetesApiDatasource());
 api.set(MavenDatasource.id, new MavenDatasource());
 api.set(NodeDatasource.id, new NodeDatasource());
