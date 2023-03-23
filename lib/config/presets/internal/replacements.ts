@@ -1,5 +1,3 @@
-import { z } from 'zod';
-import dataFiles from '../../../data-files.generated';
 import type { Preset } from '../types';
 import {
   PresetTemplate,
@@ -559,6 +557,18 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  'k8s-registry-move': {
+    description:
+      'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
+    packageRules: [
+      {
+        matchDatasources: ['docker'],
+        matchPackagePatterns: ['^k8s\\.gcr\\.io/.+$'],
+        replacementNameTemplate:
+          "{{{replace 'k8s\\.gcr\\.io/' 'registry\\.k8s\\.io/' packageName}}}",
+      },
+    ],
+  },
   'middie-to-scoped': {
     description: '`middie` became scoped.',
     packageRules: [
@@ -743,26 +753,6 @@ const mui: PresetTemplate = {
   title: 'material-ui-to-mui',
 };
 
-const K8sImagesSchema = z.array(z.string());
-
-const k8sImages = K8sImagesSchema.parse(
-  JSON.parse(dataFiles.get('data/k8s-images.json')!)
-);
-const k8Registry: PresetTemplate = {
-  description:
-    'The Kubernetes container registry has changed from `k8s.gcr.io` to `registry.k8s.io`.',
-  packageRules: [
-    {
-      matchDatasources: ['docker'],
-      replacements: k8sImages.map((k8sImage) => [
-        [`k8s.gcr.io/${k8sImage}`],
-        `registry.k8s.io/${k8sImage}`,
-      ]),
-    },
-  ],
-  title: 'k8s-registry-move',
-};
-
 const messageFormat: PresetTemplate = {
   description:
     'The `messageformat` monorepo package naming scheme changed from `messageFormat-{{package}}`-to-`@messageformat/{{package}}`.',
@@ -795,4 +785,4 @@ const messageFormat: PresetTemplate = {
   title: 'messageFormat-{{package}}-to-@messageformat/{{package}}',
 };
 
-addPresets(presets, messageFormat, mui, k8Registry);
+addPresets(presets, messageFormat, mui);
