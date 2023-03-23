@@ -36,7 +36,7 @@ export function getConfig(input: string[]): AllConfig {
         .replace('--include-forks', '--fork-processing=enabled')
         .replace('--recreate-closed=false', '--recreate-closed=auto')
         .replace('--recreate-closed=true', '--recreate-closed=always')
-        .replace('--recreate-closed', '--recreate-closed=always')
+        .replace(regEx(/--recreate-closed$/), '--recreate-closed=always')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
