@@ -342,13 +342,13 @@ Solutions:
 
 <!-- prettier-ignore -->
 !!! warning
-    We strongly recommended that you do not configure this field directly.
+    We strongly recommended that you avoid configuring this field directly.
     Use at your own risk.
 
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-- You have a use case we didn't expect and we should have a feature request from you to add it to the project
+- You have a use case we didn't expect, please open a discussion to see if we want to get a feature request from you
 
 ## branchNameStrict
 
@@ -2231,8 +2231,8 @@ For example, the following package rule can be used to replace the registry for 
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^docker.io/.*)"],
-      "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
+      "matchPackagePatterns": ["^docker\\.io/.+"],
+      "replacementNameTemplate": "{{{replace 'docker\\.io/' 'ghcr.io/' packageName}}}"
     }
   ]
 }
@@ -2244,8 +2244,15 @@ Or, to add a registry prefix to any `docker` images that do not contain an expli
 {
   "packageRules": [
     {
+      "description": "official images",
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "matchPackagePatterns": ["^[a-z-]+$"],
+      "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
+    },
+    {
+      "description": "non-official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^[a-z-]+/[a-z-]+$"],
       "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
@@ -2463,9 +2470,16 @@ e.g. if you wish to add an extra Warning to major updates:
 
 ## prBodyTemplate
 
-This setting controls which sections are rendered in the body of the pull request.
+The available sections are:
 
-The available sections are header, table, notes, changelogs, configDescription, controls, footer.
+- `header`
+- `table`
+- `warnings`
+- `notes`
+- `changelogs`
+- `configDescription`
+- `controls`
+- `footer`
 
 ## prConcurrentLimit
 
