@@ -1,5 +1,14 @@
 image: node:10.15.1
 
+definitions:
+  services:
+    my-service:
+      image:
+        name: node:14
+        username: $USERNAME
+        password: $PASSWORD
+        email: $EMAIL
+
 pipelines:
   default:
     - step:
@@ -23,3 +32,18 @@ pipelines:
               AWS_DEFAULT_REGION: "us-east-1"
               S3_BUCKET: "my-bucket-name"
               LOCAL_PATH: "dist"
+    - step:
+        name: Private Image Step
+        image:
+          name: node:16
+          username: $USERNAME
+          password: $PASSWORD
+          email: $EMAIL
+        script:
+          - echo "Hello private image step"
+    - step:
+        name: Service Definition Step
+        services:
+          - my-service
+        script:
+          - echo "Hello service definition step"

@@ -6,12 +6,17 @@ import type { PackageDependency, PackageFileContent } from '../types';
 
 const pipeRegex = regEx(`^\\s*-\\s?pipe:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
 const dockerImageRegex = regEx(`^\\s*-?\\s?image:\\s*'?"?([^\\s'"]+)'?"?\\s*$`);
+const dockerPrivateImageRegex = regEx(`^\\s*-?\\s?image:\\s*$`);
+const dockerPrivateImageNameRegex = regEx(
+  `^\\s*-?\\s?name:\\s*'?"?([^\\s'"]+)'?"?\\s*$`
+);
 
 export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   try {
     const lines = content.split(newlineRegex);
+    let prevLine = '';
     for (const line of lines) {
       const pipeMatch = pipeRegex.exec(line);
       if (pipeMatch) {
@@ -30,6 +35,15 @@ export function extractPackageFile(content: string): PackageFileContent | null {
         const currentFrom = dockerImageMatch[1];
         addDepAsDockerImage(deps, currentFrom);
       }
+
+      const dockerPrivateImageNameMatch =
+        dockerPrivateImageNameRegex.exec(line);
+      const dockerPrivateImageMatch = dockerPrivateImageRegex.exec(prevLine);
+      if (dockerPrivateImageNameMatch && dockerPrivateImageMatch) {
+        const currentFrom = dockerPrivateImageNameMatch[1];
+        addDepAsDockerImage(deps, currentFrom);
+      }
+      prevLine = line;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error extracting Bitbucket Pipes dependencies');

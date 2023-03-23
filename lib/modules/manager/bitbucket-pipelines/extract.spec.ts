@@ -23,6 +23,15 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
           {
             "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
             "currentDigest": undefined,
+            "currentValue": "14",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "docker",
+            "replaceString": "node:14",
+          },
+          {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
             "currentValue": "10.15.2",
             "datasource": "docker",
             "depName": "node",
@@ -44,9 +53,18 @@ describe('modules/manager/bitbucket-pipelines/extract', () => {
             "depName": "atlassian/aws-s3-deploy",
             "depType": "bitbucket-tags",
           },
+          {
+            "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+            "currentDigest": undefined,
+            "currentValue": "16",
+            "datasource": "docker",
+            "depName": "node",
+            "depType": "docker",
+            "replaceString": "node:16",
+          },
         ]
       `);
-      expect(res?.deps).toHaveLength(4);
+      expect(res?.deps).toHaveLength(6);
     });
   });
 });
