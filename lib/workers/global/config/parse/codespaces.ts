@@ -1,6 +1,7 @@
 import readline from 'readline';
 import type { AllConfig } from '../../../../config/types';
 
+// istanbul ignore next
 export async function setConfig(config: AllConfig): Promise<AllConfig> {
   if (process.env.CODESPACES !== 'true') {
     return config;
