@@ -108,7 +108,7 @@ Sometimes Renovate detects that an override to these defaults is needed, and wil
 Please check the docs on this website for an exhaustive Configuration Reference.
 To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:base"` preset overrides it to `"auto"`. Some prefer `"bump"`.
+- **rangeStrategy**: By default (with zero config) it's `"replace"` but the `"config:recommended"` preset overrides it to `"auto"`. Some prefer `"bump"`.
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub user(s) to assign the Pull Requests to
 

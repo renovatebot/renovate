@@ -3,7 +3,15 @@ import type { Preset } from '../types';
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 export const presets: Record<string, Preset> = {
-  base: {
+  'js-app': {
+    description: 'Default configuration for webapps.',
+    extends: ['config:recommended', ':pinAllExceptPeerDependencies'],
+  },
+  'js-lib': {
+    description: 'Default configuration for libraries.',
+    extends: ['config:recommended', ':pinOnlyDevDependencies'],
+  },
+  recommended: {
     description: 'Default base configuration for all languages.',
     extends: [
       ':dependencyDashboard',
@@ -14,14 +22,6 @@ export const presets: Record<string, Preset> = {
       'replacements:all',
       'workarounds:all',
     ],
-  },
-  'js-app': {
-    description: 'Default configuration for webapps.',
-    extends: ['config:base', ':pinAllExceptPeerDependencies'],
-  },
-  'js-lib': {
-    description: 'Default configuration for libraries.',
-    extends: ['config:base', ':pinOnlyDevDependencies'],
   },
   semverAllMonthly: {
     description:

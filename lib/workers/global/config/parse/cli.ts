@@ -65,7 +65,7 @@ export function getConfig(input: string[]): AllConfig {
     );
     console.log('    $ renovate singapore/lint-condo singapore/package-test');
     console.log(
-      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:base"]}'`
+      `    $ renovate singapore/lint-condo --onboarding-config='{"extends":["config:recommended"]}'`
     );
     /* eslint-enable no-console */
   }
