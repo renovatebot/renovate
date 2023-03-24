@@ -28,4 +28,4 @@ Remember to:
 ## Unsupported platform features/concepts
 
 - Adding assignees to PRs not supported (does not seem to be a Bitbucket concept)
-- `automergeStrategy=rebase` not supported by BitBucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)
+- `automergeStrategy=rebase` not supported by Bitbucket Cloud, see [Jira issue BCLOUD-16610](https://jira.atlassian.com/browse/BCLOUD-16610)

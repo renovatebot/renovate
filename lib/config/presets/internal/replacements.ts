@@ -110,24 +110,32 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         description:
-          'Replace `containerbase/buildpack` with `containerbase/base`.',
+          'Replace `containerbase/(buildpack|base)` and `renovate/buildpack` with `ghcr.io/containerbase/base`.',
         matchDatasources: ['docker'],
-        matchPackageNames: ['containerbase/buildpack'],
-        replacementName: 'containerbase/base',
-      },
-      {
-        description:
-          'Replace `docker.io/containerbase/buildpack` with `docker.io/containerbase/base`.',
-        matchDatasources: ['docker'],
-        matchPackageNames: ['docker.io/containerbase/buildpack'],
-        replacementName: 'docker.io/containerbase/base',
-      },
-      {
-        description:
-          'Replace `ghcr.io/containerbase/buildpack` with `ghcr.io/containerbase/base`.',
-        matchDatasources: ['docker'],
-        matchPackageNames: ['ghcr.io/containerbase/buildpack'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?containerbase/(?:buildpack|base)$',
+          '^ghcr\\.io/containerbase/buildpack$',
+          '^(?:docker\\.io/)?renovate/buildpack$',
+        ],
         replacementName: 'ghcr.io/containerbase/base',
+      },
+      {
+        description:
+          'Replace `containerbase/node` and `renovate/node` with `ghcr.io/containerbase/node`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        replacementName: 'ghcr.io/containerbase/node',
+      },
+      {
+        description:
+          'Replace `containerbase/sidecar` and `renovate/sidecar` with `ghcr.io/containerbase/sidecar`.',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:docker\\.io/)?(?:containerbase|renovate)/sidecar$',
+        ],
+        replacementName: 'ghcr.io/containerbase/sidecar',
       },
       {
         description:

@@ -752,6 +752,7 @@ const options: RenovateOptions[] = [
     description: 'List of Repositories.',
     stage: 'global',
     type: 'array',
+    subType: 'string',
     cli: false,
     globalOnly: true,
   },
@@ -807,6 +808,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
+    subType: 'string',
     mergeable: false,
     stage: 'repository',
   },
@@ -1215,6 +1217,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementNameTemplate',
+    description: 'Controls what the replacement package name.',
+    type: 'string',
+    default: '{{{packageName}}}',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementVersion',
     description:
       'The version of the new dependency that replaces the old deprecated dependency.',
@@ -1223,6 +1235,21 @@ const options: RenovateOptions[] = [
     parent: 'packageRules',
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchConfidence',
+    description:
+      'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'matchUpdateTypes',
@@ -1807,7 +1834,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyTemplate',
     description:
-      'Pull Request body template. Controls which sections are rendered in the body.',
+      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
     default:
       '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
@@ -2028,6 +2055,7 @@ const options: RenovateOptions[] = [
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
     default: [],
+    subType: 'string',
     allowedValues: [
       'bundlerConservative',
       'helmUpdateSubChartArchives',

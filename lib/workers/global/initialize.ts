@@ -9,6 +9,7 @@ import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import { validateGitVersion } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { initMergeConfidence } from '../../util/merge-confidence';
 import { setMaxLimit } from './limits';
 
 async function setDirectories(input: AllConfig): Promise<AllConfig> {
@@ -74,6 +75,7 @@ export async function globalInitialize(
   limitCommitsPerRun(config);
   setEmojiConfig(config);
   setGlobalHostRules(config);
+  await initMergeConfidence();
   return config;
 }
 

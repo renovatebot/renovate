@@ -322,7 +322,7 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'pulumi/pulumi',
             depName: 'pulumi',
-            versioning: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.11.0',

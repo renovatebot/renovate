@@ -2,7 +2,7 @@ import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
@@ -43,7 +43,7 @@ describe('modules/manager/flux/extract', () => {
           },
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest: undefined,
             currentValue: 'v1.8.2',
             datasource: DockerDatasource.id,
@@ -455,7 +455,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             currentValue: '2020.5.6+staging.ze',
-            datasource: BitBucketTagsDatasource.id,
+            datasource: BitbucketTagsDatasource.id,
             depName: 'renovate-repo',
             packageName: 'renovatebot/renovate',
             sourceUrl: 'https://bitbucket.org/renovatebot/renovate',
@@ -534,7 +534,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentValue: 'v1.8.2',
             currentDigest: undefined,
             depName: 'ghcr.io/kyverno/manifests/kyverno',
@@ -591,7 +591,7 @@ describe('modules/manager/flux/extract', () => {
         deps: [
           {
             autoReplaceStringTemplate:
-              '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+              '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
             currentDigest:
               'sha256:761c3189c482d0f1f0ad3735ca05c4c398cae201d2169f6645280c7b7b2ce6fc',
             currentValue: 'v1.8.2',
@@ -700,7 +700,7 @@ describe('modules/manager/flux/extract', () => {
           deps: [
             {
               autoReplaceStringTemplate:
-                '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+                '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
               currentDigest: undefined,
               currentValue: 'v1.8.2',
               depName: 'ghcr.io/kyverno/manifests/kyverno',
