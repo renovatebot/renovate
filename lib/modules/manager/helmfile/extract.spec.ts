@@ -1,6 +1,9 @@
 import { Fixtures } from '../../../../test/fixtures';
+import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { extractPackageFile } from '.';
+
+jest.mock('../../../util/fs');
 
 describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
@@ -325,6 +328,7 @@ describe('modules/manager/helmfile/extract', () => {
 
     it('parses and replaces templating strings', async () => {
       const filename = 'helmfile.yaml';
+      fs.localPathExists.mockReturnValue(Promise.resolve(true));
       const result = await extractPackageFile(
         Fixtures.get('go-template.yaml'),
         filename,
@@ -340,16 +344,23 @@ describe('modules/manager/helmfile/extract', () => {
           {
             depName: '',
             skipReason: 'local-chart',
+            managerData: { needKustomize: true },
           },
           {
             depName: '',
             skipReason: 'local-chart',
+            managerData: { needKustomize: true },
           },
           {
             depName: '',
             skipReason: 'local-chart',
+            managerData: { needKustomize: true },
           },
-          { depName: null, skipReason: 'local-chart' },
+          {
+            depName: null,
+            skipReason: 'local-chart',
+            managerData: { needKustomize: true },
+          },
           {
             depName: 'ingress-nginx',
             currentValue: '3.37.0',
