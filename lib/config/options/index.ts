@@ -2068,15 +2068,6 @@ const options: RenovateOptions[] = [
     ],
   },
   {
-    name: 'java',
-    description: 'Configuration object for all Java package managers.',
-    stage: 'package',
-    type: 'object',
-    default: {},
-    mergeable: true,
-    cli: false,
-  },
-  {
     name: 'hostRules',
     description: 'Host rules/configuration including credentials.',
     type: 'array',

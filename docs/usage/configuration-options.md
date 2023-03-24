@@ -1470,8 +1470,6 @@ Currently this applies to the `stabilityDays` check only.
 The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
 We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
 
-## java
-
 ## labels
 
 By default, Renovate won't add any labels to PRs.
