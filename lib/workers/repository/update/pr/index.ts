@@ -359,6 +359,7 @@ export async function ensurePr(
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+        return { type: 'with-pr', pr: existingPr };
       } else {
         await platform.updatePr({
           number: existingPr.number,

@@ -349,12 +349,12 @@ describe('workers/repository/update/pr/index', () => {
       });
 
       it('dry-runs PR update', async () => {
-        const changedPr: Pr = { ...pr, title: 'Another title' }; // user changed prTitle
+        const changedPr: Pr = { ...pr, title: 'Another title' };
         platform.getBranchPr.mockResolvedValueOnce(changedPr);
 
         const res = await ensurePr(config);
 
-        expect(res).toEqual({ type: 'with-pr', pr }); // we redo the prTitle as per config
+        expect(res).toEqual({ type: 'with-pr', pr: changedPr });
         expect(platform.updatePr).not.toHaveBeenCalled();
         expect(platform.createPr).not.toHaveBeenCalled();
         expect(logger.logger.info).toHaveBeenCalledWith(
