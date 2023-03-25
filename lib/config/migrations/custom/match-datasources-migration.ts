@@ -12,6 +12,8 @@ export class MatchDatasourcesMigration extends AbstractMigration {
             return 'java-version';
           case 'dotnet':
             return 'dotnet-version';
+          case 'node':
+            return 'node-version';
           default:
             return datasource;
         }

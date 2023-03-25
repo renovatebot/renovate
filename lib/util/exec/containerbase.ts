@@ -97,7 +97,7 @@ const allToolConfig: Record<string, ToolConfig> = {
     versioning: semverVersioningId,
   },
   node: {
-    datasource: 'node',
+    datasource: 'node-version',
     packageName: 'node',
     versioning: nodeVersioningId,
   },

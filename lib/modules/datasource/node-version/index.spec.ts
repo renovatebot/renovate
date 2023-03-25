@@ -4,7 +4,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { datasource, defaultRegistryUrl } from './common';
 
-describe('modules/datasource/node/index', () => {
+describe('modules/datasource/node-version/index', () => {
   describe('getReleases', () => {
     it('throws for 500', async () => {
       httpMock.scope(defaultRegistryUrl).get('/index.json').reply(500);

@@ -6,7 +6,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, defaultRegistryUrl } from './common';
 import type { NodeRelease } from './types';
 
-export class NodeDatasource extends Datasource {
+export class NodeVersionDatasource extends Datasource {
   static readonly id = datasource;
 
   constructor() {

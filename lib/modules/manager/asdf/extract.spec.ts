@@ -9,7 +9,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -34,7 +34,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -287,7 +287,7 @@ dummy 1.2.3
           },
           {
             currentValue: '18.12.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
           {
@@ -489,7 +489,7 @@ dummy 1.2.3
               deps: [
                 {
                   currentValue: data.expect,
-                  datasource: 'node',
+                  datasource: 'node-version',
                   depName: 'node',
                 },
               ],
@@ -518,7 +518,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
             },
           ],
@@ -531,7 +531,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
               skipReason: 'ignored',
             },
