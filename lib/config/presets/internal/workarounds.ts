@@ -18,8 +18,23 @@ export const presets: Record<string, Preset> = {
       'workarounds:supportRedHatImageVersion',
       'workarounds:javaLTSVersions',
       'workarounds:disableMavenParentRoot',
+      'workarounds:containerbase',
     ],
     ignoreDeps: [],
+  },
+  containerbase: {
+    description: 'Add some containerbase overrides',
+    packageRules: [
+      {
+        description:
+          'Use node versioning for `(containerbase|renovate)/node` images',
+        matchDatasources: ['docker'],
+        matchPackagePatterns: [
+          '^(?:(?:docker|ghcr)\\.io/)?(?:containerbase|renovate)/node$',
+        ],
+        versioning: 'node',
+      },
+    ],
   },
   disableMavenParentRoot: {
     description:
