@@ -82,7 +82,7 @@ describe('config/presets/internal/regex-managers', () => {
           pull_request:
 
         env:
-          # renovate: datasource=node depName=node versioning=node
+          # renovate: datasource=node-version depName=node versioning=node
           NODE_VERSION: 18.13.0
           # renovate: datasource=npm depName=pnpm
           PNPM_VERSION: "7.25.1"
@@ -113,7 +113,7 @@ describe('config/presets/internal/regex-managers', () => {
           datasource: 'node-version',
           depName: 'node',
           replaceString:
-            '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
+            '# renovate: datasource=node-version depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
           versioning: 'node',
         },
         {
