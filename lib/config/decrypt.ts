@@ -110,13 +110,13 @@ export async function tryDecrypt(
             const orgPrefixes = org
               .split(',')
               .map((o) => o.trim())
-              .map((o) => o.toLowerCase())
+              .map((o) => o.toUpperCase())
               .map((o) => ensureTrailingSlash(o));
             if (is.nonEmptyString(repo)) {
               const scopedRepos = orgPrefixes.map((orgPrefix) =>
-                `${orgPrefix}${repo}`.toLowerCase()
+                `${orgPrefix}${repo}`.toUpperCase()
               );
-              if (scopedRepos.some((r) => r === repository.toLowerCase())) {
+              if (scopedRepos.some((r) => r === repository.toUpperCase())) {
                 decryptedStr = value;
               } else {
                 logger.debug(
@@ -132,7 +132,7 @@ export async function tryDecrypt(
             } else {
               if (
                 orgPrefixes.some((orgPrefix) =>
-                  repository.toLowerCase().startsWith(orgPrefix)
+                  repository.toUpperCase().startsWith(orgPrefix)
                 )
               ) {
                 decryptedStr = value;
