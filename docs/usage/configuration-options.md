@@ -802,12 +802,16 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
+Use this to encrypt secrets in a way which can be stored in repository configs.
+
 See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
 
 <!-- prettier-ignore -->
 !!! note
     Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
     This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
+
+Encrypted secrets typically have a single org, but you may encrypt a secret with more than one, e.g. specifying `org1,org2` to allow the secret to be used in both `org1` and `org2` organizations.
 
 ## excludeCommitPaths
 
