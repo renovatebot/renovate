@@ -2067,6 +2067,29 @@ describe('workers/repository/process/lookup/index', () => {
       ]);
     });
 
+    it('handles replacements - can perform replacement even for invalid versioning', async () => {
+      config.packageName = 'adoptopenjdk/openjdk11';
+      config.currentValue = 'alpine-jre';
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersion = '17.0.0-jre-alpine';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'alpine-jre',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0-jre-alpine',
+        },
+      ]);
+    });
+
     it('rollback for invalid version to last stable version', async () => {
       config.currentValue = '2.5.17';
       config.packageName = 'vue';

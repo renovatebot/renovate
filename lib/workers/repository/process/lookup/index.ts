@@ -327,6 +327,9 @@ export async function lookupUpdates(
       logger.debug(
         `Dependency ${packageName} has unsupported/unversioned value ${currentValue} (versioning=${config.versioning})`
       );
+      if (isReplacementRulesConfigured(config)) {
+        addReplacementUpdateIfValid(res.updates, config);
+      }
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
       } else {
