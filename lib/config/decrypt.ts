@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { regEx } from '../util/regex';
 import { addSecretForSanitizing } from '../util/sanitize';
+import { ensureTrailingSlash } from '../util/url';
 import { GlobalConfig } from './global';
 import { DecryptedObject } from './schema';
 import type { RenovateConfig } from './types';
@@ -106,33 +107,44 @@ export async function tryDecrypt(
         const { o: org, r: repo, v: value } = decryptedObj.data;
         if (is.nonEmptyString(value)) {
           if (is.nonEmptyString(org)) {
-            const orgName = org.replace(regEx(/\/$/), ''); // Strip trailing slash
+            const orgPrefixes = org
+              .split(',')
+              .map((o) => o.trim())
+              .map((o) => o.toLowerCase())
+              .map((o) => ensureTrailingSlash(o));
             if (is.nonEmptyString(repo)) {
-              const scopedRepository = `${orgName}/${repo}`;
-              if (scopedRepository.toLowerCase() === repository.toLowerCase()) {
+              const scopedRepos = orgPrefixes.map((orgPrefix) =>
+                `${orgPrefix}${repo}`.toLowerCase()
+              );
+              if (scopedRepos.some((r) => r === repository.toLowerCase())) {
                 decryptedStr = value;
               } else {
                 logger.debug(
-                  { scopedRepository },
+                  { scopedRepos },
                   'Secret is scoped to a different repository'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepository}".`;
+                error.validationError = `Encrypted secret is scoped to a different repository: "${scopedRepos.join(
+                  ','
+                )}".`;
                 throw error;
               }
             } else {
-              const scopedOrg = `${orgName}/`;
               if (
-                repository.toLowerCase().startsWith(scopedOrg.toLowerCase())
+                orgPrefixes.some((orgPrefix) =>
+                  repository.toLowerCase().startsWith(orgPrefix)
+                )
               ) {
                 decryptedStr = value;
               } else {
                 logger.debug(
-                  { scopedOrg },
+                  { orgPrefixes },
                   'Secret is scoped to a different org'
                 );
                 const error = new Error('config-validation');
-                error.validationError = `Encrypted secret is scoped to a different org: "${scopedOrg}".`;
+                error.validationError = `Encrypted secret is scoped to a different org: "${orgPrefixes.join(
+                  ','
+                )}".`;
                 throw error;
               }
             }
