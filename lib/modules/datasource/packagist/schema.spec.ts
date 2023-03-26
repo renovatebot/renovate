@@ -1,4 +1,3 @@
-import { partial } from '../../../../test/util';
 import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
@@ -244,59 +243,57 @@ describe('modules/datasource/packagist/schema', () => {
             ],
           },
         })
-      ).toEqual(
-        partial<ComposerRelease>([
-          {
-            version: '3.3.3',
-            require: { php: '^8.0' },
-            homepage: null,
-            source: null,
-            time: null,
-          },
-          {
-            version: '2.2.2',
-            require: { php: '^8.0' },
-            homepage: null,
-            source: null,
-            time: null,
-          },
-          {
-            version: '1.1.1',
-            require: { php: '^8.0' },
-            homepage: null,
-            source: null,
-            time: null,
-          },
-          {
-            version: '0.0.4',
-            require: { php: '^7.0' },
-            homepage: null,
-            source: null,
-            time: null,
-          },
-          {
-            version: '0.0.3',
-            require: { php: '^7.0' },
-            homepage: null,
-            source: null,
-            time: null,
-          },
-          {
-            version: '0.0.2',
-            homepage: null,
-            source: null,
-            time: null,
-            require: null,
-          },
-          {
-            version: '0.0.1',
-            homepage: null,
-            source: null,
-            time: null,
-            require: null,
-          },
-        ])
-      );
+      ).toEqual([
+        {
+          version: '3.3.3',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '2.2.2',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '1.1.1',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.4',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.3',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.2',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+        {
+          version: '0.0.1',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
   });
 
