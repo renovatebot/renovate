@@ -802,9 +802,24 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-Use this to encrypt secrets in a way which can be stored in repository configs.
+Use this to encrypt secrets in a way which can be stored in repository configs. It is possible to encrypt secrets using either a HTML page, or CLI.
 
-See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+To encrypt secrets for the hosted Mend Renovate app for github.com using a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form. Alternatively, this form may be downloaded and edited for self-hosted users to use their own PGP public key.
+
+You can also encrypt secrets using the CLI, using the `gpg` command line tool plus some help from `curl` and `jq`. Here is an example:
+
+```
+curl https://app.renovatebot.com/renovate.pgp --output renovate.pgp
+echo -n '{"o":"your-organization", "r":"your-repository (optional)", "v":"your-secret-value"}' | jq . -c | gpg --encrypt -a --recipient-file renovate.pgp | grep -v '^----' | tr -d '\n'
+```
+
+The above script does this:
+
+- Uses `curl` to download the Mend Renovate hosted app's public key
+- Echos a JSON object into `jq` for validation and compacting
+- Uses `gpg` to encrypt the contents
+
+The `jq` step is optional, you could leave it out if you wish. Its primary value is validating that the string you input to `gpg` is valid JSON, and compact.
 
 <!-- prettier-ignore -->
 !!! note
@@ -812,6 +827,8 @@ See [Private module support](https://docs.renovatebot.com/getting-started/privat
     This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
 
 Encrypted secrets typically have a single org, but you may encrypt a secret with more than one, e.g. specifying `org1,org2` to allow the secret to be used in both `org1` and `org2` organizations.
+
+For additional information about secrets use for private packages you can also read [Private package support](https://docs.renovatebot.com/getting-started/private-packages).
 
 ## excludeCommitPaths
 
