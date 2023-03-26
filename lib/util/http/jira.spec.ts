@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import * as hostRules from '../host-rules';
 import { JiraHttp, setBaseUrl } from './jira';
 
 describe('util/http/jira', () => {
@@ -14,15 +13,10 @@ describe('util/http/jira', () => {
   it('accepts custom baseUrl', async () => {
     const siteUrl = 'https://some-site.atlassian.com';
     httpMock.scope(siteUrl).post('/some-path').reply(200, {});
-    hostRules.add({
-      hostType: 'jira',
-      matchHost: siteUrl,
-      token: 'token',
-    });
     setBaseUrl(siteUrl);
 
     expect(await api.postJson('some-path')).toEqual({
-      authorization: true,
+      authorization: false,
       body: {},
       headers: {
         'content-type': 'application/json',
