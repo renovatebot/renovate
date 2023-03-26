@@ -5,11 +5,7 @@ import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as perlVersioning from '../../versioning/perl';
 import type { PackageDependency, PackageFileContent } from '../types';
-import { extractPerlVersion } from './common';
-
-function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
-}
+import { extractPerlVersion, formatContent } from './common';
 
 export async function extractPackageFile(
   content: string,
