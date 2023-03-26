@@ -8,6 +8,7 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parse Dancer2 cpa
       "datasource": "github-tags",
       "depName": "Perl",
       "packageName": "Perl/perl5",
+      "versioning": "perl",
     },
     {
       "datasource": "cpan",
@@ -876,6 +877,7 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parses Plack cpan
       "datasource": "github-tags",
       "depName": "Perl",
       "packageName": "Perl/perl5",
+      "versioning": "perl",
     },
     {
       "currentValue": "0.07",

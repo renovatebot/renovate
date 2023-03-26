@@ -1,4 +1,5 @@
 import { CpanDatasource } from '../../datasource/cpan';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 
 export { extractPackageFile } from './extract';
 
@@ -10,4 +11,7 @@ export const defaultConfig = {
   fileMatch: ['(^|/)cpanfile$'],
 };
 
-export const supportedDatasources = [CpanDatasource.id];
+export const supportedDatasources = [
+  CpanDatasource.id,
+  GithubTagsDatasource.id,
+];
