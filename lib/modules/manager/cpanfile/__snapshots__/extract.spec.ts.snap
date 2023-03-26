@@ -12,631 +12,376 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parse Dancer2 cpa
     {
       "datasource": "cpan",
       "depName": "Attribute::Handlers",
-      "managerData": {
-        "lineNumber": 1,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Carp",
-      "managerData": {
-        "lineNumber": 2,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Clone",
-      "managerData": {
-        "lineNumber": 3,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Config::Any",
-      "managerData": {
-        "lineNumber": 4,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Digest::SHA",
-      "managerData": {
-        "lineNumber": 5,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Encode",
-      "managerData": {
-        "lineNumber": 6,
-      },
     },
     {
       "currentValue": "5.57",
       "datasource": "cpan",
       "depName": "Exporter",
-      "managerData": {
-        "lineNumber": 7,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Exporter::Tiny",
-      "managerData": {
-        "lineNumber": 8,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Basename",
-      "managerData": {
-        "lineNumber": 9,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Copy",
-      "managerData": {
-        "lineNumber": 10,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Path",
-      "managerData": {
-        "lineNumber": 11,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Share",
-      "managerData": {
-        "lineNumber": 12,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Spec",
-      "managerData": {
-        "lineNumber": 13,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Temp",
-      "managerData": {
-        "lineNumber": 14,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Hash::Merge::Simple",
-      "managerData": {
-        "lineNumber": 15,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Hash::MultiValue",
-      "managerData": {
-        "lineNumber": 16,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Date",
-      "managerData": {
-        "lineNumber": 17,
-      },
     },
     {
       "currentValue": "0.21",
       "datasource": "cpan",
       "depName": "HTTP::Headers::Fast",
-      "managerData": {
-        "lineNumber": 18,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Tiny",
-      "managerData": {
-        "lineNumber": 19,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Import::Into",
-      "managerData": {
-        "lineNumber": 20,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "JSON::MaybeXS",
-      "managerData": {
-        "lineNumber": 21,
-      },
     },
     {
       "currentValue": "1.29",
       "datasource": "cpan",
       "depName": "List::Util",
-      "managerData": {
-        "lineNumber": 22,
-      },
     },
     {
       "currentValue": "3.13",
       "datasource": "cpan",
       "depName": "MIME::Base64",
-      "managerData": {
-        "lineNumber": 23,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Module::Runtime",
-      "managerData": {
-        "lineNumber": 24,
-      },
     },
     {
       "currentValue": "2.000000",
       "datasource": "cpan",
       "depName": "Moo",
-      "managerData": {
-        "lineNumber": 25,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Moo::Role",
-      "managerData": {
-        "lineNumber": 26,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "parent",
-      "managerData": {
-        "lineNumber": 27,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Path::Tiny",
-      "managerData": {
-        "lineNumber": 28,
-      },
     },
     {
       "currentValue": "1.0040",
       "datasource": "cpan",
       "depName": "Plack",
-      "managerData": {
-        "lineNumber": 29,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Plack::Middleware::FixMissingBodyInRedirect",
-      "managerData": {
-        "lineNumber": 30,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Plack::Middleware::RemoveRedundantBody",
-      "managerData": {
-        "lineNumber": 31,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "POSIX",
-      "managerData": {
-        "lineNumber": 32,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Ref::Util",
-      "managerData": {
-        "lineNumber": 33,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Safe::Isa",
-      "managerData": {
-        "lineNumber": 34,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Sub::Quote",
-      "managerData": {
-        "lineNumber": 35,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Template",
-      "managerData": {
-        "lineNumber": 36,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Template::Tiny",
-      "managerData": {
-        "lineNumber": 37,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Builder",
-      "managerData": {
-        "lineNumber": 38,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::More",
-      "managerData": {
-        "lineNumber": 39,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Types::Standard",
-      "managerData": {
-        "lineNumber": 40,
-      },
     },
     {
       "currentValue": "1.000006",
       "datasource": "cpan",
       "depName": "Type::Tiny",
-      "managerData": {
-        "lineNumber": 41,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "URI::Escape",
-      "managerData": {
-        "lineNumber": 42,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CLI::Osprey",
-      "managerData": {
-        "lineNumber": 43,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "File::Which",
-      "managerData": {
-        "lineNumber": 44,
-      },
     },
     {
       "currentValue": "2.000000",
       "datasource": "cpan",
       "depName": "Role::Tiny",
-      "managerData": {
-        "lineNumber": 46,
-      },
     },
     {
       "currentValue": "0.86",
       "datasource": "cpan",
       "depName": "YAML",
-      "managerData": {
-        "lineNumber": 54,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CGI::Deurl::XS",
-      "managerData": {
-        "lineNumber": 57,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Class::XSAccessor",
-      "managerData": {
-        "lineNumber": 58,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Cpanel::JSON::XS",
-      "managerData": {
-        "lineNumber": 59,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Crypt::URandom",
-      "managerData": {
-        "lineNumber": 60,
-      },
     },
     {
       "currentValue": "0.000015",
       "datasource": "cpan",
       "depName": "HTTP::XSCookies",
-      "managerData": {
-        "lineNumber": 61,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::XSHeaders",
-      "managerData": {
-        "lineNumber": 62,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Math::Random::ISAAC::XS",
-      "managerData": {
-        "lineNumber": 63,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "MooX::TypeTiny",
-      "managerData": {
-        "lineNumber": 64,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Pod::Simple::Search",
-      "managerData": {
-        "lineNumber": 65,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Pod::Simple::SimpleTree",
-      "managerData": {
-        "lineNumber": 66,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Scope::Upper",
-      "managerData": {
-        "lineNumber": 67,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Type::Tiny::XS",
-      "managerData": {
-        "lineNumber": 68,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "URL::Encode::XS",
-      "managerData": {
-        "lineNumber": 69,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "YAML::XS",
-      "managerData": {
-        "lineNumber": 70,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Unicode::UTF8",
-      "managerData": {
-        "lineNumber": 71,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Fcntl",
-      "managerData": {
-        "lineNumber": 73,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "MIME::Types",
-      "managerData": {
-        "lineNumber": 74,
-      },
     },
     {
       "currentValue": "0.12",
       "datasource": "cpan",
       "depName": "Capture::Tiny",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 76,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Cookies",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 77,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Headers",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 78,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Pod::Simple::SimpleTree",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 79,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Template",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 80,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Builder",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 81,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::EOL",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 82,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Fatal",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 83,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::More",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 84,
-      },
     },
     {
       "currentValue": "0.92",
       "datasource": "cpan",
       "depName": "Test::More",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 85,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::NoTabs",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 87,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Pod",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 88,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "AnyEvent",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 89,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CBOR::XS",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 90,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Class::Method::Modifiers",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 91,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Dist::Zilla::Plugin::Test::UnusedVars",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 92,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Perl::Tidy",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 93,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Memory::Cycle",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 94,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::MockTime",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 95,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Perl::Critic",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 96,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Whitespaces",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 97,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "YAML::XS",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 98,
-      },
     },
   ],
 }
@@ -649,616 +394,403 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parse DateTime cp
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Carp",
-      "managerData": {
-        "lineNumber": 3,
-      },
     },
     {
       "currentValue": "1.06",
       "datasource": "cpan",
       "depName": "DateTime::Locale",
-      "managerData": {
-        "lineNumber": 4,
-      },
     },
     {
       "currentValue": "2.44",
       "datasource": "cpan",
       "depName": "DateTime::TimeZone",
-      "managerData": {
-        "lineNumber": 5,
-      },
     },
     {
       "currentValue": "0.02",
       "datasource": "cpan",
       "depName": "Dist::CheckConflicts",
-      "managerData": {
-        "lineNumber": 6,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "POSIX",
-      "managerData": {
-        "lineNumber": 7,
-      },
     },
     {
       "currentValue": "0.26",
       "datasource": "cpan",
       "depName": "Params::ValidationCompiler",
-      "managerData": {
-        "lineNumber": 8,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Scalar::Util",
-      "managerData": {
-        "lineNumber": 9,
-      },
     },
     {
       "currentValue": "0.18",
       "datasource": "cpan",
       "depName": "Specio",
-      "managerData": {
-        "lineNumber": 10,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Declare",
-      "managerData": {
-        "lineNumber": 11,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Exporter",
-      "managerData": {
-        "lineNumber": 12,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Library::Builtins",
-      "managerData": {
-        "lineNumber": 13,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Library::Numeric",
-      "managerData": {
-        "lineNumber": 14,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Library::String",
-      "managerData": {
-        "lineNumber": 15,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Specio::Subs",
-      "managerData": {
-        "lineNumber": 16,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Try::Tiny",
-      "managerData": {
-        "lineNumber": 17,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "XSLoader",
-      "managerData": {
-        "lineNumber": 18,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "integer",
-      "managerData": {
-        "lineNumber": 19,
-      },
     },
     {
       "currentValue": "0.19",
       "datasource": "cpan",
       "depName": "namespace::autoclean",
-      "managerData": {
-        "lineNumber": 20,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "overload",
-      "managerData": {
-        "lineNumber": 21,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "parent",
-      "managerData": {
-        "lineNumber": 22,
-      },
     },
     {
       "currentValue": "5.008004",
       "datasource": "cpan",
       "depName": "perl",
-      "managerData": {
-        "lineNumber": 23,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "strict",
-      "managerData": {
-        "lineNumber": 24,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "warnings",
-      "managerData": {
-        "lineNumber": 25,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "warnings::register",
-      "managerData": {
-        "lineNumber": 26,
-      },
     },
     {
       "currentValue": "0.011",
       "datasource": "cpan",
       "depName": "CPAN::Meta::Check",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 29,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "CPAN::Meta::Requirements",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 30,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "ExtUtils::MakeMaker",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 31,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "File::Spec",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 32,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Storable",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 33,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Fatal",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 34,
-      },
     },
     {
       "currentValue": "0.96",
       "datasource": "cpan",
       "depName": "Test::More",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 35,
-      },
     },
     {
       "currentValue": "0.005",
       "datasource": "cpan",
       "depName": "Test::Warnings",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 36,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Without::Module",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 37,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "utf8",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 38,
-      },
     },
     {
       "currentValue": "2.120900",
       "datasource": "cpan",
       "depName": "CPAN::Meta",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 42,
-      },
     },
     {
       "currentValue": "0.02",
       "datasource": "cpan",
       "depName": "Dist::CheckConflicts",
       "depType": "configure",
-      "managerData": {
-        "lineNumber": 46,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "ExtUtils::MakeMaker",
       "depType": "configure",
-      "managerData": {
-        "lineNumber": 47,
-      },
     },
     {
       "currentValue": "2.27300",
       "datasource": "cpan",
       "depName": "JSON::PP",
       "depType": "configure",
-      "managerData": {
-        "lineNumber": 51,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Capture::Tiny",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 55,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Cwd",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 56,
-      },
     },
     {
       "currentValue": "3.23",
       "datasource": "cpan",
       "depName": "Devel::PPPort",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 57,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Encode",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 58,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "File::Basename",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 59,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "File::Spec",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 60,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "FindBin",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 61,
-      },
     },
     {
       "currentValue": "1.138",
       "datasource": "cpan",
       "depName": "Perl::Critic",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 62,
-      },
     },
     {
       "currentValue": "1.05",
       "datasource": "cpan",
       "depName": "Perl::Critic::Moose",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 63,
-      },
     },
     {
       "currentValue": "20210111",
       "datasource": "cpan",
       "depName": "Perl::Tidy",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 64,
-      },
     },
     {
       "currentValue": "1.74",
       "datasource": "cpan",
       "depName": "Pod::Checker",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 65,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Pod::Coverage::TrustPod",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 66,
-      },
     },
     {
       "currentValue": "0.10",
       "datasource": "cpan",
       "depName": "Pod::Tidy",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 67,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Pod::Wordlist",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 68,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Storable",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 69,
-      },
     },
     {
       "currentValue": "0.19",
       "datasource": "cpan",
       "depName": "Test::CPAN::Changes",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 70,
-      },
     },
     {
       "currentValue": "0.16",
       "datasource": "cpan",
       "depName": "Test::CPAN::Meta::JSON",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 71,
-      },
     },
     {
       "currentValue": "0.15",
       "datasource": "cpan",
       "depName": "Test::CleanNamespaces",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 72,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::DependentModules",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 73,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::EOL",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 74,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Fatal",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 75,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Mojibake",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 76,
-      },
     },
     {
       "currentValue": "0.96",
       "datasource": "cpan",
       "depName": "Test::More",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 77,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::NoTabs",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 78,
-      },
     },
     {
       "currentValue": "1.41",
       "datasource": "cpan",
       "depName": "Test::Pod",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 79,
-      },
     },
     {
       "currentValue": "1.08",
       "datasource": "cpan",
       "depName": "Test::Pod::Coverage",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 80,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Portability::Files",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 81,
-      },
     },
     {
       "currentValue": "0.12",
       "datasource": "cpan",
       "depName": "Test::Spelling",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 82,
-      },
     },
     {
       "currentValue": "2.05",
       "datasource": "cpan",
       "depName": "Test::Version",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 83,
-      },
     },
     {
       "currentValue": "0.005",
       "datasource": "cpan",
       "depName": "Test::Warnings",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 84,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Test::Without::Module",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 85,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "autodie",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 86,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "utf8",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 87,
-      },
     },
   ],
 }
@@ -1271,102 +803,66 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parse Test2 cpanf
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "File::Spec",
-      "managerData": {
-        "lineNumber": 3,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "File::Temp",
-      "managerData": {
-        "lineNumber": 4,
-      },
     },
     {
       "currentValue": "1.13",
       "datasource": "cpan",
       "depName": "Scalar::Util",
-      "managerData": {
-        "lineNumber": 5,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Storable",
-      "managerData": {
-        "lineNumber": 6,
-      },
     },
     {
       "currentValue": "5.006002",
       "datasource": "cpan",
       "depName": "perl",
-      "managerData": {
-        "lineNumber": 7,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "utf8",
-      "managerData": {
-        "lineNumber": 8,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "Module::Pluggable",
-      "managerData": {
-        "lineNumber": 9,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "ExtUtils::MakeMaker",
       "depType": "configure",
-      "managerData": {
-        "lineNumber": 12,
-      },
     },
     {
       "currentValue": "0",
       "datasource": "cpan",
       "depName": "IPC::Open3",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 16,
-      },
     },
     {
       "currentValue": "0.013",
       "datasource": "cpan",
       "depName": "Term::Table",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 17,
-      },
     },
     {
       "currentValue": "1.41",
       "datasource": "cpan",
       "depName": "Test::Pod",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 18,
-      },
     },
     {
       "currentValue": "0.12",
       "datasource": "cpan",
       "depName": "Test::Spelling",
       "depType": "develop",
-      "managerData": {
-        "lineNumber": 19,
-      },
     },
   ],
 }
@@ -1385,323 +881,203 @@ exports[`modules/manager/cpanfile/extract extractPackageFile() parses Plack cpan
       "currentValue": "0.07",
       "datasource": "cpan",
       "depName": "Cookie::Baker",
-      "managerData": {
-        "lineNumber": 2,
-      },
     },
     {
       "currentValue": "1.23",
       "datasource": "cpan",
       "depName": "Devel::StackTrace",
-      "managerData": {
-        "lineNumber": 3,
-      },
     },
     {
       "currentValue": "0.11",
       "datasource": "cpan",
       "depName": "Devel::StackTrace::AsHTML",
-      "managerData": {
-        "lineNumber": 4,
-      },
     },
     {
       "currentValue": "1.00",
       "datasource": "cpan",
       "depName": "File::ShareDir",
-      "managerData": {
-        "lineNumber": 5,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Filesys::Notify::Simple",
-      "managerData": {
-        "lineNumber": 6,
-      },
     },
     {
       "currentValue": "5.814",
       "datasource": "cpan",
       "depName": "HTTP::Message",
-      "managerData": {
-        "lineNumber": 7,
-      },
     },
     {
       "currentValue": "0.18",
       "datasource": "cpan",
       "depName": "HTTP::Headers::Fast",
-      "managerData": {
-        "lineNumber": 8,
-      },
     },
     {
       "currentValue": "0.05",
       "datasource": "cpan",
       "depName": "Hash::MultiValue",
-      "managerData": {
-        "lineNumber": 9,
-      },
     },
     {
       "currentValue": "1.36",
       "datasource": "cpan",
       "depName": "Pod::Usage",
-      "managerData": {
-        "lineNumber": 10,
-      },
     },
     {
       "currentValue": "0.02",
       "datasource": "cpan",
       "depName": "Stream::Buffered",
-      "managerData": {
-        "lineNumber": 11,
-      },
     },
     {
       "currentValue": "2.15",
       "datasource": "cpan",
       "depName": "Test::TCP",
-      "managerData": {
-        "lineNumber": 12,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Try::Tiny",
-      "managerData": {
-        "lineNumber": 13,
-      },
     },
     {
       "currentValue": "1.59",
       "datasource": "cpan",
       "depName": "URI",
-      "managerData": {
-        "lineNumber": 14,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "parent",
-      "managerData": {
-        "lineNumber": 15,
-      },
     },
     {
       "currentValue": "0.33",
       "datasource": "cpan",
       "depName": "Apache::LogFormat::Compiler",
-      "managerData": {
-        "lineNumber": 16,
-      },
     },
     {
       "currentValue": "0.034",
       "datasource": "cpan",
       "depName": "HTTP::Tiny",
-      "managerData": {
-        "lineNumber": 17,
-      },
     },
     {
       "currentValue": "0.25",
       "datasource": "cpan",
       "depName": "HTTP::Entity::Parser",
-      "managerData": {
-        "lineNumber": 18,
-      },
     },
     {
       "currentValue": "0.23",
       "datasource": "cpan",
       "depName": "WWW::Form::UrlEncoded",
-      "managerData": {
-        "lineNumber": 19,
-      },
     },
     {
       "currentValue": "0.88",
       "datasource": "cpan",
       "depName": "Test::More",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 22,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Test::Requires",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 23,
-      },
     },
     {
       "currentValue": "0.06",
       "datasource": "cpan",
       "depName": "Test::MockTime::HiRes",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 24,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Authen::Simple::Passwd",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 25,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "MIME::Types",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 26,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CGI::Emulate::PSGI",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 27,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CGI::Compile",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 28,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "IO::Handle::Util",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 29,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "LWP::Protocol::http10",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 30,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Server::Simple::PSGI",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 31,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Request::AsCGI",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 32,
-      },
     },
     {
       "currentValue": "5.814",
       "datasource": "cpan",
       "depName": "LWP::UserAgent",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 33,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "HTTP::Headers",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 34,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Log::Dispatch::Array",
       "depType": "test",
-      "managerData": {
-        "lineNumber": 35,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "FCGI",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 39,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "FCGI::ProcManager",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 40,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CGI::Emulate::PSGI",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 41,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "CGI::Compile",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 42,
-      },
     },
     {
       "currentValue": "5.814",
       "datasource": "cpan",
       "depName": "LWP::UserAgent",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 43,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Log::Log4perl",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 44,
-      },
     },
     {
       "currentValue": "2.25",
       "datasource": "cpan",
       "depName": "Log::Dispatch",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 45,
-      },
     },
     {
       "datasource": "cpan",
       "depName": "Module::Refresh",
       "depType": "runtime",
-      "managerData": {
-        "lineNumber": 46,
-      },
     },
   ],
 }

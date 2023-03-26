@@ -39,7 +39,6 @@ export async function extractPackageFile(
     if (moduleMatch) {
       const dep: PackageDependency = {
         depName: moduleMatch.groups?.depName,
-        managerData: { lineNumber },
       };
       if (moduleMatch.groups?.currentValue) {
         const currentValue = moduleMatch.groups.currentValue;
@@ -57,7 +56,6 @@ export async function extractPackageFile(
     );
     if (phaseMatch) {
       const phase = phaseMatch[1];
-      const phaseLineNumber = lineNumber;
       let phaseContent = '';
       let phaseLine = '';
       while (lineNumber < lines.length && phaseLine !== '};') {
@@ -81,10 +79,6 @@ export async function extractPackageFile(
           phaseRes.deps.map((dep) => ({
             ...dep,
             depType: phase,
-            managerData: {
-              lineNumber:
-                Number(dep.managerData?.lineNumber) + phaseLineNumber + 1,
-            },
           }))
         );
       }
