@@ -2668,7 +2668,7 @@ For example we override it to `always` in the following cases where branch names
 - When pinning versions
 - Lock file maintenance
 
-There are total three possible options:
+You can select which behavior you want from Renovate bot:
 
 1. `always`: Recreates all closed or blocking PRs
 2. `auto`: The default option. Recreates only immortal PRs
