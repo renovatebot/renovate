@@ -102,8 +102,8 @@ describe('modules/manager/cpanfile/extract', () => {
         expect(
           await extractPackageFile(
             `on 'configure' => sub {
-              requires "ExtUtils::MakeMaker" => "0";
-            };
+               requires "ExtUtils::MakeMaker" => "0";
+             };
             `,
             'cpanfile'
           )
