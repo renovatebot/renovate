@@ -42,10 +42,10 @@ export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
 export const ComposerRelease = z.object({
   version: z.string(),
-  homepage: z.optional(looseValue(z.string())),
-  source: z.optional(looseValue(z.object({ url: z.string() }))),
-  time: z.optional(looseValue(z.string())),
-  require: z.optional(looseValue(z.object({ php: z.string() }))),
+  homepage: looseValue(z.string()),
+  source: looseValue(z.object({ url: z.string() })),
+  time: looseValue(z.string()),
+  require: looseValue(z.object({ php: z.string() })),
 });
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
