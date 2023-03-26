@@ -30,7 +30,7 @@ You'll need to change this example config if you're using Amazon ECR or Google G
 
 With the [regex manager](https://docs.renovatebot.com/modules/manager/regex/) you can configure Renovate to assist with migrating your Bitbucket Pipelines from unauthenticated registries to authenticated registries.
 
-An example configuration is shown below
+For example:
 
 ```json
 {
