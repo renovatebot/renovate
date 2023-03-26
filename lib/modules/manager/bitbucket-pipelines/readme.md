@@ -8,7 +8,8 @@ Bitbucket Pipelines supports using an authenticated Docker registry, including s
 
 More details can be found on the Atlassian [Bitbucket Pipeline documentation](https://support.atlassian.com/bitbucket-cloud/docs/use-docker-images-as-build-environments) site
 
-The following `regexManager` configuration can be used for authenticated Docker Hub or private registries. Changes will be required for Amazon ECR or Google GCR use cases.
+The following `regexManager` configuration can be used for authenticated Docker Hub or private registries.
+You'll need to change this example config if you're using Amazon ECR or Google GCR.
 
 ```json
 {
