@@ -1,5 +1,4 @@
 import { CpanDatasource } from '../../datasource/cpan';
-import * as perlVersioning from '../../versioning/perl';
 
 export { extractPackageFile } from './extract';
 
@@ -9,7 +8,6 @@ export const url =
 
 export const defaultConfig = {
   fileMatch: ['(^|/)cpanfile$'],
-  versioning: perlVersioning.id,
 };
 
 export const supportedDatasources = [CpanDatasource.id];

@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
+import * as perlVersioning from '../../versioning/perl';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { extractPerlVersion } from './common';
 
@@ -28,6 +29,7 @@ export async function extractPackageFile(
         packageName: 'Perl/perl5',
         currentValue: perlMatch,
         datasource: GithubTagsDatasource.id,
+        versioning: perlVersioning.id,
       });
       continue;
     }
