@@ -7,7 +7,7 @@ describe('util/http/jira', () => {
 
   it('throws error if setBaseUrl not called', async () => {
     await expect(api.postJson('some-path')).rejects.toThrow(
-      TypeError('Invalid URL')
+      new TypeError('Invalid URL')
     );
   });
 
