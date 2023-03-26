@@ -10,7 +10,7 @@ import {
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {
   all: {
-    description: 'All replacements.',
+    description: 'Apply crowd-sourced package replacement rules.',
     extends: [
       'replacements:apollo-server-to-scoped',
       'replacements:babel-eslint-to-eslint-parser',
@@ -34,6 +34,7 @@ export const presets: Record<string, Preset> = {
       'replacements:vsts-task-lib-to-azure-pipelines-task-lib',
       'replacements:xmldom-to-scoped',
     ],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   'apollo-server-to-scoped': {
     description: '`apollo-server` packages became scoped.',
