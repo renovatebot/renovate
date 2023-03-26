@@ -21,7 +21,8 @@ import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson, ComposerLock } from './types';
+import { ComposerConfig, ComposerLock } from './schema';
+import type { AuthJson } from './types';
 import {
   extractConstraints,
   findGithubToken,
@@ -104,12 +105,32 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
+    const composerLockResult = ComposerLock.safeParse(
+      JSON.parse(existingLockFileContent)
+    );
+    // istanbul ignore if
+    if (!composerLockResult.success) {
+      logger.warn(
+        { error: composerLockResult.error },
+        'Unable to parse composer.lock'
+      );
+      return null;
+    }
+
+    const newPackageFileResult = ComposerConfig.safeParse(
+      JSON.parse(newPackageFileContent)
+    );
+    // istanbul ignore if
+    if (!newPackageFileResult.success) {
+      logger.warn(
+        { error: newPackageFileResult.error },
+        'Unable to parse composer.json'
+      );
+      return null;
+    }
+
     const constraints = {
-      ...extractConstraints(
-        JSON.parse(newPackageFileContent),
-        existingLockFile
-      ),
+      ...extractConstraints(newPackageFileResult.data, composerLockResult.data),
       ...config.constraints,
     };
 
@@ -136,7 +157,7 @@ export async function updateArtifacts({
     const commands: string[] = [];
 
     // Determine whether install is required before update
-    if (requireComposerDependencyInstallation(existingLockFile)) {
+    if (requireComposerDependencyInstallation(composerLockResult.data)) {
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
