@@ -1,13 +1,16 @@
-import { Fixtures } from '../../../../test/fixtures';
 import { extractPerlVersion } from './common';
-
-const cpanfile = Fixtures.get('cpanfile.plack');
 
 describe('modules/manager/cpanfile/common', () => {
   describe('extractPerlVersion', () => {
-    it('extracts minimum required Perl version', () => {
-      const version = extractPerlVersion(cpanfile);
-      expect(version).toBe('5.008001');
+    test.each`
+      version         | expected
+      ${5.012005}     | ${'5.012005'}
+      ${"'5.008001'"} | ${'5.008001'}
+      ${'"5.008001"'} | ${'5.008001'}
+    `('$version', ({ version, expected }) => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      const result = extractPerlVersion(`requires 'perl', ${version};`);
+      expect(result).toBe(expected);
     });
   });
 });
