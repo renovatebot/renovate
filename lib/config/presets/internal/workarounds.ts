@@ -5,7 +5,7 @@ import type { Preset } from '../types';
 export const presets: Record<string, Preset> = {
   all: {
     description: [
-      'A collection of workarounds for known problems with packages.',
+      'Apply crowd-sourced workarounds for known problems with packages.',
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
@@ -20,7 +20,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:disableMavenParentRoot',
       'workarounds:containerbase',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   containerbase: {
     description: 'Add some containerbase overrides',
