@@ -7,7 +7,6 @@ export const programmingLanguages = [
   'js',
   'dotnet',
   'node',
-  'perl',
   'php',
   'python',
   'ruby',
