@@ -10414,10 +10414,10 @@ xml@^1.0.1:
   resolved "https://registry.yarnpkg.com/xml/-/xml-1.0.1.tgz#78ba72020029c5bc87b8a81a3cfcd74b4a2fc1e5"
   integrity sha512-huCv9IH9Tcf95zuYCsQraZtWnJvBtLVE0QHMOs8bWyZAFZNDcYjsPq1nEx8jKA9y+Beo9v+7OBPRisQTjinQMw==
 
-xmldoc@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-1.2.0.tgz#7554371bfd8c138287cff01841ae4566d26e5541"
-  integrity sha512-2eN8QhjBsMW2uVj7JHLHkMytpvGHLHxKXBy4J3fAT/HujsEtM6yU84iGjpESYGHg6XwK0Vu4l+KgqQ2dv2cCqg==
+xmldoc@1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-1.3.0.tgz#7823225b096c74036347c9ec5924d06b6a3cebab"
+  integrity sha512-y7IRWW6PvEnYQZNZFMRLNJw+p3pezM4nKYPfr15g4OOW9i8VpeydycFuipE2297OvZnh3jSb2pxOt9QpkZUVng==
   dependencies:
     sax "^1.2.4"
 
