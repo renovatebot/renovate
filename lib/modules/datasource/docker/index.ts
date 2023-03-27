@@ -234,7 +234,7 @@ export async function getAuthHeaders(
 }
 
 async function getECRAuthToken(
-  region: string | undefined,
+  region: string,
   opts: HostRule
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };

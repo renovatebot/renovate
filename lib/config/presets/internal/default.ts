@@ -10,10 +10,6 @@ export const presets: Record<string, Preset> = {
     assignees: ['{{arg0}}'],
     description: 'Assign PRs to `{{arg0}}`.',
   },
-  autodetectRangeStrategy: {
-    description: 'Automatically detect the best rangeStrategy to use.',
-    rangeStrategy: 'auto',
-  },
   automergeAll: {
     automerge: true,
     description:
@@ -529,7 +525,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],

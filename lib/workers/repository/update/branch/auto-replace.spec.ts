@@ -1105,6 +1105,51 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('autoReplaceGlobalMatch: throws error when globally replacing recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('autoReplaceGlobalMatch: updates when replacing first match only of recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.autoReplaceGlobalMatch = false;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM eclipse-temurin:11@sha256:p0o9i8u7z6t5r4e3w2q1
+        `
+      );
+    });
+
     it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
       const yml = 'image: "some.url.com/my-repository:1.0"';
       upgrade.manager = 'regex';

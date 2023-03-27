@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Don't create a Bug Report like this without a Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
+        Don't create a Bug Report like this without a GitHub Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
         Invalid bug reports waste the time of maintainers and can confuse other users so they will closed, locked and deleted.
         You are always welcome to create Discussions and new users should always do that instead.
 
@@ -14,8 +14,9 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'Mend Renovate hosted app on github.com'
-        - 'Self-hosted'
+        - 'Self-hosted Renovate'
     validations:
       required: true
 
@@ -44,30 +45,14 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: platform-version-if-selfhosting
-    attributes:
-      label: If you're self-hosting Renovate, tell us what version of the platform you run.
-      description: |
-        This field is for the version number of your _platform_, so one of these:
-          - AWS CodeCommit
-          - Azure DevOps
-          - Bitbucket Cloud
-          - Bitbucket Server
-          - Azure DevOps
-          - Gitea or Forgejo
-          - GitHub (.com and Enterprise Server)
-          - GitLab (.com and CE/EE)
-    validations:
-      required: false
-
   - type: dropdown
     id: regression-error
     attributes:
       label: Was this something which used to work for you, and then stopped?
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
+        - 'I am trying to get this working for the first time'
         - 'It used to work, and then stopped'
-        - 'I never saw this working'
     validations:
       required: true
 
@@ -107,7 +92,8 @@ body:
       label: Have you created a minimal reproduction repository?
       description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
       options:
-        - 'I have read the minimal reproductions documentation and linked to such a repository in the bug description'
+        - 'Placeholder value, please select the correct response from the dropdown'
+        - 'I have linked to a minimal reproduction in the description above'
         - 'I have explained in the description why a minimal reproduction is impossible'
     validations:
       required: true

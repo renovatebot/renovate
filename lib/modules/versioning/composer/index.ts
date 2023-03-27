@@ -163,6 +163,10 @@ function minSatisfyingVersion(
   );
 }
 
+function subset(subRange: string, superRange: string): boolean | undefined {
+  return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+}
+
 function getNewValue({
   currentValue,
   rangeStrategy,
@@ -304,5 +308,6 @@ export const api: VersioningApi = {
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
+  subset,
 };
 export default api;
