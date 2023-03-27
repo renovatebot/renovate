@@ -85,7 +85,7 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source);
+    const sourceUrl = getSourceUrl(source) ?? null;
 
     /**
      * github.com/org/mod/submodule should be tagged as submodule/va.b.c
