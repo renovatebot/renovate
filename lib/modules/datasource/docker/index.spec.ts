@@ -1086,6 +1086,79 @@ describe('modules/datasource/docker/index', () => {
       );
       expect(res).toBeNull();
     });
+
+    it('falls back to library/ prefix on non-namespaced images with existing digest', async () => {
+      const currentDigest =
+          'sha256:0000000000000000000000000000000000000000000000000000000000000000',
+        newDigest =
+          'sha256:1111111111111111111111111111111111111111111111111111111111111111';
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(4)
+        .reply(200)
+        .head(`/some-dep/manifests/${currentDigest}`)
+        .reply(500)
+        .head(`/some-dep/manifests/3.17`)
+        .reply(404)
+        .head(`/library/some-dep/manifests/${currentDigest}`)
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': currentDigest,
+        })
+        .head('/library/some-dep/manifests/3.17')
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': newDigest,
+        });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          currentDigest,
+          registryUrls: ['https://registry.company.com'],
+        },
+        '3.17'
+      );
+
+      expect(res).toBe(newDigest);
+    });
+
+    it('falls back to library/ prefix on non-namespaced images without existing digest', async () => {
+      const newDigest =
+        'sha256:1111111111111111111111111111111111111111111111111111111111111111';
+
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(2)
+        .reply(200)
+        .head(`/some-dep/manifests/3.17`)
+        .reply(404)
+        .head('/library/some-dep/manifests/3.17')
+        .reply(200, '', {
+          'content-type':
+            'application/vnd.docker.distribution.manifest.list.v2+json',
+          'docker-content-digest': newDigest,
+        });
+
+      hostRules.find.mockReturnValue({});
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          packageName: 'some-dep',
+          registryUrls: ['https://registry.company.com'],
+        },
+        '3.17'
+      );
+
+      expect(res).toBe(newDigest);
+    });
   });
 
   describe('getReleases', () => {
