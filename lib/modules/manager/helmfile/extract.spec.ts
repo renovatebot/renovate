@@ -339,6 +339,14 @@ describe('modules/manager/helmfile/extract', () => {
             depName: '',
             skipReason: 'local-chart',
           },
+          {
+            depName: '',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: '',
+            skipReason: 'local-chart',
+          },
           { depName: null, skipReason: 'local-chart' },
           {
             depName: 'ingress-nginx',
