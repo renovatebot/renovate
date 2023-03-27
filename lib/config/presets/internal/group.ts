@@ -398,7 +398,7 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
@@ -730,7 +730,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
 config.monorepos = {
   description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [],
+  ignoreDeps: [], // Hack to improve onboarding PR description
 };
 
 export const presets: Record<string, Preset> = config;
