@@ -10,6 +10,7 @@ export interface BaseBranchCache {
   configHash: string; // object hash of config
   extractionFingerprints: Record<string, string | undefined>; // matching manager fingerprints
   packageFiles: Record<string, PackageFile[]>; // extract result
+  onboardingSha: string | null;
 }
 
 export interface BranchUpgradeCache {

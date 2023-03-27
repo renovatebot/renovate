@@ -8,7 +8,7 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch } from '../../../util/git';
+import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -68,9 +68,22 @@ function extractStats(
 export function isCacheExtractValid(
   baseBranchSha: string,
   configHash: string,
-  cachedExtract?: BaseBranchCache
+  cachedExtract?: BaseBranchCache,
+  isOnboarded?: boolean,
+  onboardingBranch?: string
 ): boolean {
+  if (
+    !isOnboarded &&
+    !(
+      cachedExtract?.onboardingSha &&
+      cachedExtract.onboardingSha === getBranchCommit(onboardingBranch!)
+    )
+  ) {
+    logger.debug('ONboarding branch has been modified. Performing extraction');
+    return false;
+  }
   if (!(cachedExtract?.sha && cachedExtract.configHash)) {
+    logger.debug('Cached data incomplete');
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
@@ -122,7 +135,15 @@ export async function extract(
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
+  if (
+    isCacheExtractValid(
+      baseBranchSha!,
+      configHash,
+      cachedExtract,
+      config.repoIsOnboarded,
+      config.onboardingBranch
+    )
+  ) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
@@ -147,6 +168,7 @@ export async function extract(
       configHash,
       extractionFingerprints,
       packageFiles,
+      onboardingSha: getBranchCommit(config.onboardingBranch!),
     };
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
