@@ -10,13 +10,8 @@ import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
-import { id } from './common';
-import type {
-  CachedNpmDependency,
-  NpmDependency,
-  NpmRelease,
-  NpmResponse,
-} from './types';
+import type { Release } from '../types';
+import type { CachedNpmDependency, NpmDependency, NpmResponse } from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -143,10 +138,9 @@ export async function getDependency(
 
     if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map((version) => {
-      const release: NpmRelease = {
+      const release: Release = {
         version,
         gitRef: res.versions?.[version].gitHead,
         dependencies: res.versions?.[version].dependencies,

@@ -188,7 +188,6 @@ exports[`modules/datasource/npm/index should return deprecated 1`] = `
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
-  "deprecationSource": "npm",
   "isPrivate": true,
   "name": "foobar",
   "registryUrl": "https://registry.npmjs.org",

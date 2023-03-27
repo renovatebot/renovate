@@ -1,13 +1,12 @@
 import * as npmVersioning from '../../versioning/npm';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { id } from './common';
 import { getDependency } from './get';
 
 export { setNpmrc } from './npmrc';
 
 export class NpmDatasource extends Datasource {
-  static readonly id = id;
+  static readonly id = 'npm';
 
   override readonly customRegistrySupport = true;
 
