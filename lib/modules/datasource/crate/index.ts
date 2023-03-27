@@ -268,14 +268,16 @@ export class CrateDatasource extends Datasource {
       isSparse: isSparseRegistry,
     };
 
+    if (
+      registry.flavor !== 'crates.io' &&
+      !GlobalConfig.get('allowCustomCrateRegistries')
+    ) {
+      logger.warn(
+        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
+      );
+      return null;
+    }
     if (registry.flavor !== 'crates.io' && !registry.isSparse) {
-      if (!GlobalConfig.get('allowCustomCrateRegistries')) {
-        logger.warn(
-          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
-        );
-        return null;
-      }
-
       const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
       const cacheKeyForError = `crate-datasource/registry-clone-path/${registryFetchUrl}/error`;
 
