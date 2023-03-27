@@ -658,11 +658,11 @@ export async function isBranchModified(
   }
   const { gitAuthorEmail } = config;
   let branchIsModified = false;
-  branchAuthors.forEach(function (author) {
+  for (const author of branchAuthors) {
     if (author !== gitAuthorEmail && !config.ignoredAuthors.includes(author)) {
       branchIsModified = true;
     }
-  });
+  }
   logger.debug(`branch.isModified() = ${branchIsModified}`);
   config.branchIsModified[branchName] = branchIsModified;
   setCachedModifiedResult(branchName, branchIsModified);
