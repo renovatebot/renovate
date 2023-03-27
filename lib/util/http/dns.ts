@@ -1,4 +1,8 @@
-import { LookupAllOptions, LookupOneOptions, lookup as _dnsLookup } from 'dns';
+import {
+  LookupAllOptions,
+  LookupOneOptions,
+  lookup as _dnsLookup,
+} from 'node:dns';
 import type { EntryObject, IPFamily, LookupOptions } from 'cacheable-lookup';
 import QuickLRU from 'quick-lru';
 import { logger } from '../../logger';

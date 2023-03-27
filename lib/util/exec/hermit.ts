@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
