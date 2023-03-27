@@ -354,6 +354,20 @@ describe('modules/datasource/crate/index', () => {
       expect(result).toBeNull();
       expect(result2).toBeNull();
     });
+
+    it('does not clone for sparse registries', async () => {
+      GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
+      const { mockClone } = setupGitMocks();
+
+      const url = 'sparse+https://github.com/mcorbin/othertestregistry';
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'mypkg',
+        registryUrls: [url],
+      });
+      expect(mockClone).toHaveBeenCalledTimes(0);
+      expect(res).toBeNull();
+    });
   });
 
   describe('fetchCrateRecordsPayload', () => {
