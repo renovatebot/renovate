@@ -28,10 +28,6 @@ export class NpmDatasource extends Datasource {
     }
 
     const res = await getDependency(this.http, registryUrl, packageName);
-    if (res) {
-      res.tags ||= res['dist-tags'];
-      delete res['dist-tags'];
-    }
     return res;
   }
 }

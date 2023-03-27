@@ -32,13 +32,7 @@ export interface NpmResponse {
   'dist-tags'?: Record<string, string>;
 }
 
-export interface NpmDependency extends ReleaseResult {
-  name: string;
-  versions: Record<string, any>;
-  'dist-tags'?: Record<string, string>;
-}
-
-export interface CachedNpmDependency extends NpmDependency {
+export interface CachedReleaseResult extends ReleaseResult {
   cacheData?: {
     etag: string | undefined;
     softExpireAt: string;

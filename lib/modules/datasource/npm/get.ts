@@ -10,8 +10,8 @@ import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
-import type { Release } from '../types';
-import type { CachedNpmDependency, NpmDependency, NpmResponse } from './types';
+import type { Release, ReleaseResult } from '../types';
+import type { CachedReleaseResult, NpmResponse } from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -53,14 +53,14 @@ export async function getDependency(
   http: Http,
   registryUrl: string,
   packageName: string
-): Promise<NpmDependency | null> {
+): Promise<ReleaseResult | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   // Now check the persistent cache
-  const cacheNamespace = 'datasource-npm';
-  const cachedResult = await packageCache.get<CachedNpmDependency>(
+  const cacheNamespace = 'datasource-npm:data';
+  const cachedResult = await packageCache.get<CachedReleaseResult>(
     cacheNamespace,
     packageUrl
   );
@@ -125,14 +125,12 @@ export async function getDependency(
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
     // Simplify response before caching and returning
-    const dep: NpmDependency = {
-      name: res.name,
+    const dep: ReleaseResult = {
       homepage: res.homepage,
       sourceUrl,
       sourceDirectory,
-      versions: {},
       releases: [],
-      'dist-tags': res['dist-tags'],
+      tags: res['dist-tags'],
       registryUrl,
     };
 
