@@ -2541,10 +2541,10 @@
   resolved "https://registry.yarnpkg.com/@renovatebot/pep440/-/pep440-2.1.13.tgz#d630989b6abf9dd001edc526cf3e821450e6e45d"
   integrity sha512-PFnG9X7on77Gp9FPdossWfvDL6QTg1MafZP3hdKafo3n6SP89wiyZmjFVaQwlRlE5cEmZQwh11dE8Oos9H2paw==
 
-"@renovatebot/ruby-semver@2.1.9":
-  version "2.1.9"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-2.1.9.tgz#6edb8232a50d833157b17c8914468d3e301163dd"
-  integrity sha512-44udvdctC5SCjlPYIcyf7vDARlXE3tVRTfZ6/OHcSNBt5WCfMljP5T7QLekCslHZjXgPoep33TURuOfeLrV3Ag==
+"@renovatebot/ruby-semver@2.1.10":
+  version "2.1.10"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-2.1.10.tgz#3465e3818239e21a980e9b8acd90ffc323d417a3"
+  integrity sha512-k9GE1cYAYWH5zJpePf4m6GEOZaT/5dh6ETTnV4TQthqufaKpIg9m6ZoxzKhKfuwPo5PlprWh8gyYXjYpN2TkhA==
   dependencies:
     tslib "^2.5.0"
 
