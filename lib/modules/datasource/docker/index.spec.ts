@@ -1119,7 +1119,7 @@ describe('modules/datasource/docker/index', () => {
       const res = await getDigest(
         {
           datasource: 'docker',
-          depName: 'some-dep',
+          packageName: 'some-dep',
           currentDigest,
           registryUrls: ['https://registry.company.com'],
         },
@@ -1151,7 +1151,7 @@ describe('modules/datasource/docker/index', () => {
       const res = await getDigest(
         {
           datasource: 'docker',
-          depName: 'some-dep',
+          packageName: 'some-dep',
           registryUrls: ['https://registry.company.com'],
         },
         '3.17'
