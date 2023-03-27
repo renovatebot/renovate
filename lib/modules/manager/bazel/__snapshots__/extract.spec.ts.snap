@@ -192,7 +192,7 @@ exports[`modules/manager/bazel/extract extractPackageFile() extracts multiple ty
     "depName": "distroless",
     "depType": "http_file",
     "managerData": {
-      "idx": 17,
+      "idx": 18,
     },
     "packageName": "GoogleContainerTools/distroless",
   },
