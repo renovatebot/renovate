@@ -47,7 +47,7 @@ export function addDepFromObject(
   for (let idx = start + 1; idx < len; idx++) {
     const line = lines[idx];
 
-    if (!identRegex.test(line)) {
+    if (!indentRegex.test(line)) {
       // malformed
       return idx;
     }
