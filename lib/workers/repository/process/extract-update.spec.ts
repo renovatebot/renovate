@@ -160,7 +160,7 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('undefined cache', () => {
-      expect(isCacheExtractValid('sha', 'hash')).toBe(false);
+      expect(isCacheExtractValid('sha', 'hash', undefined)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
 
