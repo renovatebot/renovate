@@ -194,7 +194,6 @@ describe('workers/repository/process/extract-update', () => {
         isCacheExtractValid(
           'sha',
           'hash',
-
           restOfCache as never as BaseBranchCache
         )
       ).toBe(false);
