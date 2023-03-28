@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';

@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { migrateDatasource } from '../../../config/migrations/custom/datasource-migration';
 import type { RegexManagerTemplates } from '../../../config/types';

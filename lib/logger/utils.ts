@@ -1,4 +1,4 @@
-import { Stream } from 'stream';
+import { Stream } from 'node:stream';
 import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';

@@ -1,4 +1,4 @@
-import { tmpdir } from 'os';
+import { tmpdir } from 'node:os';
 import { remove } from 'fs-extra';
 import upath from 'upath';
 

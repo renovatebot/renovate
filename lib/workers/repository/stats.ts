@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../logger';
 import { sortNumeric } from '../../util/array';
 import * as memCache from '../../util/cache/memory';
