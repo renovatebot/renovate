@@ -18,6 +18,7 @@ import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import * as memCache from '../../../../util/cache/memory';
 import * as _cache from '../../../../util/cache/repository';
+import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
@@ -247,7 +248,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
 
-    it('updates onboarding branch', async () => {
+    it('processes onboarding branch', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
@@ -256,6 +257,41 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.mergeBranch).toHaveBeenCalledTimes(1);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
+    });
+
+    it('processes modified onboarding branch and invalidates extract cache', async () => {
+      const dummyCache = {
+        scan: {
+          master: {
+            sha: 'base_sha',
+            configHash: 'hash',
+            packageFiles: {},
+            extractionFingerprints: {},
+          },
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValueOnce(dummyCache);
+      git.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(false);
+      config.baseBranch = 'master';
+      await checkOnboardingBranch(config);
+      expect(git.mergeBranch).toHaveBeenCalledTimes(1);
+      expect(dummyCache).toMatchObject({
+        scan: {},
+      });
+    });
+
+    it('skips processing conflicted onboarding branch', async () => {
+      git.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      scm.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      await checkOnboardingBranch(config);
+      expect(git.mergeBranch).toHaveBeenCalledTimes(0);
     });
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
