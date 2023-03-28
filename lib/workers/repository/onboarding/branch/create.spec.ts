@@ -27,6 +27,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             contents: '{"foo":"bar"}',
           },
         ],
+        force: true,
         message: 'Add renovate.json',
         platformCommit: false,
       });
@@ -49,6 +50,7 @@ describe('workers/repository/onboarding/branch/create', () => {
             contents: '{"foo":"bar"}',
           },
         ],
+        force: true,
         message,
         platformCommit: false,
       });
@@ -72,6 +74,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -99,6 +102,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -123,6 +127,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -150,6 +155,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -175,6 +181,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -198,6 +205,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -222,6 +230,7 @@ describe('workers/repository/onboarding/branch/create', () => {
               contents: '{"foo":"bar"}',
             },
           ],
+          force: true,
           message,
           platformCommit: false,
         });
@@ -241,6 +250,7 @@ describe('workers/repository/onboarding/branch/create', () => {
           branchName: 'renovate/configure',
           files: [{ type: 'addition', path, contents: '{"foo":"bar"}' }],
           message,
+          force: true,
           platformCommit: false,
         });
       });
