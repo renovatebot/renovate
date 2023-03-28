@@ -8,7 +8,7 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch, getBranchCommit } from '../../../util/git';
+import { checkoutBranch } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -68,22 +68,23 @@ function extractStats(
 export function isCacheExtractValid(
   baseBranchSha: string,
   configHash: string,
+  isOnboarded: boolean,
   cachedExtract?: BaseBranchCache,
-  isOnboarded?: boolean,
-  onboardingBranch?: string
+  onboardingBranchSha?: string | null,
 ): boolean {
   if (
     !isOnboarded &&
     !(
-      cachedExtract?.onboardingSha &&
-      cachedExtract.onboardingSha === getBranchCommit(onboardingBranch!)
+      cachedExtract?.onboardingBranchSha &&
+      cachedExtract.onboardingBranchSha === onboardingBranchSha
     )
   ) {
-    logger.debug('ONboarding branch has been modified. Performing extraction');
+    logger.debug(
+      `Cached extract result cannot be used due to onboarding branch SHA change (old=${cachedExtract?.onboardingBranchSha}, new=${onboardingBranchSha})`
+    );
     return false;
   }
   if (!(cachedExtract?.sha && cachedExtract.configHash)) {
-    logger.debug('Cached data incomplete');
     return false;
   }
   if (cachedExtract.sha !== baseBranchSha) {
@@ -127,8 +128,9 @@ export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
-  const { baseBranch } = config;
+  const { baseBranch, onboardingBranch } = config;
   const baseBranchSha = await scm.getBranchCommit(baseBranch!);
+  const onboardingBranchSha = await scm.getBranchCommit(onboardingBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
@@ -139,9 +141,9 @@ export async function extract(
     isCacheExtractValid(
       baseBranchSha!,
       configHash,
+      !!config.repoIsOnboarded,
       cachedExtract,
-      config.repoIsOnboarded,
-      config.onboardingBranch
+      onboardingBranchSha,
     )
   ) {
     packageFiles = cachedExtract.packageFiles;
@@ -168,7 +170,7 @@ export async function extract(
       configHash,
       extractionFingerprints,
       packageFiles,
-      onboardingSha: getBranchCommit(config.onboardingBranch!),
+      onboardingBranchSha,
     };
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)
