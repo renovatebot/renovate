@@ -42,7 +42,7 @@ export function addDepFromObject(
   const nameRegex = regEx(
     `^${spaces}\\s+name:\\s*['"]?(?<image>[^\\s'"]+)['"]?\\s*$`
   );
-  const identRegex = regEx(`^${spaces}\\s+`);
+  const indentRegex = regEx(`^${spaces}\\s+`);
 
   for (let idx = start + 1; idx < len; idx++) {
     const line = lines[idx];
