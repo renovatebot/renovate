@@ -68,22 +68,8 @@ function extractStats(
 export function isCacheExtractValid(
   baseBranchSha: string,
   configHash: string,
-  isOnboarded: boolean,
-  cachedExtract?: BaseBranchCache,
-  onboardingBranchSha?: string | null,
+  cachedExtract?: BaseBranchCache
 ): boolean {
-  if (
-    !isOnboarded &&
-    !(
-      cachedExtract?.onboardingBranchSha &&
-      cachedExtract.onboardingBranchSha === onboardingBranchSha
-    )
-  ) {
-    logger.debug(
-      `Cached extract result cannot be used due to onboarding branch SHA change (old=${cachedExtract?.onboardingBranchSha}, new=${onboardingBranchSha})`
-    );
-    return false;
-  }
   if (!(cachedExtract?.sha && cachedExtract.configHash)) {
     return false;
   }
@@ -128,24 +114,15 @@ export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
-  const { baseBranch, onboardingBranch } = config;
+  const { baseBranch } = config;
   const baseBranchSha = await scm.getBranchCommit(baseBranch!);
-  const onboardingBranchSha = await scm.getBranchCommit(onboardingBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
   const cachedExtract = cache.scan[baseBranch!];
   const configHash = fingerprint(generateFingerprintConfig(config));
   // istanbul ignore if
-  if (
-    isCacheExtractValid(
-      baseBranchSha!,
-      configHash,
-      !!config.repoIsOnboarded,
-      cachedExtract,
-      onboardingBranchSha,
-    )
-  ) {
+  if (isCacheExtractValid(baseBranchSha!, configHash, cachedExtract)) {
     packageFiles = cachedExtract.packageFiles;
     try {
       for (const files of Object.values(packageFiles)) {
@@ -170,7 +147,6 @@ export async function extract(
       configHash,
       extractionFingerprints,
       packageFiles,
-      onboardingBranchSha,
     };
     // Clean up cached branch extracts
     const baseBranches = is.nonEmptyArray(config.baseBranches)

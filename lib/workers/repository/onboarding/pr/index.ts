@@ -43,10 +43,11 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // skip pr-update if branch is conflicted
     if (
-      await scm.isBranchConflicted(
+      (await scm.isBranchModified(config.onboardingBranch!)) &&
+      (await scm.isBranchConflicted(
         config.defaultBranch!,
         config.onboardingBranch!
-      )
+      ))
     ) {
       await ensureComment({
         number: existingPr.number,

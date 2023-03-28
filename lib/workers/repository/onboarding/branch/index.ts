@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
+import { getCache } from '../../../../util/cache/repository';
 import { mergeBranch, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
@@ -41,11 +42,13 @@ export async function checkOnboardingBranch(
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-
-    isConflicted = await scm.isBranchConflicted(
-      config.baseBranch!,
-      config.onboardingBranch!
-    );
+    if (await scm.isBranchModified(config.onboardingBranch!)) {
+      invalidateExtractCache(config.baseBranch!);
+      isConflicted = await scm.isBranchConflicted(
+        config.baseBranch!,
+        config.onboardingBranch!
+      );
+    }
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
@@ -99,4 +102,13 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
     logger.debug('Manual onboarding PR update requested');
     OnboardingState.prUpdateRequested = true;
   }
+}
+
+function invalidateExtractCache(baseBranch: string): void {
+  const cache = getCache();
+  cache.scan ||= {};
+  logger.debug(
+    `Onboarding branch modified. Removing outdated extract cache for branch=${baseBranch}`
+  );
+  delete cache.scan[baseBranch];
 }

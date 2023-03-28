@@ -160,24 +160,18 @@ describe('workers/repository/process/extract-update', () => {
     });
 
     it('undefined cache', () => {
-      expect(isCacheExtractValid('sha', 'hash', true, undefined, null)).toBe(
-        false
-      );
+      expect(isCacheExtractValid('sha', 'hash')).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
 
     it('partial cache', () => {
-      expect(
-        isCacheExtractValid('sha', 'hash', true, cachedExtract, null)
-      ).toBe(false);
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(0);
     });
 
     it('sha mismatch', () => {
       cachedExtract.configHash = 'hash';
-      expect(
-        isCacheExtractValid('new_sha', 'hash', true, cachedExtract, null)
-      ).toBe(false);
+      expect(isCacheExtractValid('new_sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         `Cached extract result cannot be used due to base branch SHA change (old=sha, new=new_sha)`
       );
@@ -186,9 +180,7 @@ describe('workers/repository/process/extract-update', () => {
 
     it('config change', () => {
       cachedExtract.configHash = 'hash';
-      expect(
-        isCacheExtractValid('sha', 'new_hash', true, cachedExtract, null)
-      ).toBe(false);
+      expect(isCacheExtractValid('sha', 'new_hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract result cannot be used due to config change'
       );
@@ -202,9 +194,8 @@ describe('workers/repository/process/extract-update', () => {
         isCacheExtractValid(
           'sha',
           'hash',
-          true,
-          restOfCache as never as BaseBranchCache,
-          null
+
+          restOfCache as never as BaseBranchCache
         )
       ).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledWith(
@@ -216,31 +207,15 @@ describe('workers/repository/process/extract-update', () => {
     it('invalid if changed fingerprints', () => {
       cachedExtract.configHash = 'hash';
       cachedExtract.extractionFingerprints = { npm: 'old-fingerprint' };
-      expect(
-        isCacheExtractValid('sha', 'hash', true, cachedExtract, null)
-      ).toBe(false);
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(false);
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
 
     it('valid cache and config', () => {
       cachedExtract.configHash = 'hash';
-      expect(
-        isCacheExtractValid('sha', 'hash', true, cachedExtract, null)
-      ).toBe(true);
+      expect(isCacheExtractValid('sha', 'hash', cachedExtract)).toBe(true);
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Cached extract for sha=sha is valid and can be used'
-      );
-      expect(logger.logger.debug).toHaveBeenCalledTimes(1);
-    });
-
-    it('returns false when onboarding branch is modified', () => {
-      cachedExtract.configHash = 'hash';
-      cachedExtract.onboardingBranchSha = 'old_onb_sha';
-      expect(
-        isCacheExtractValid('sha', 'hash', false, cachedExtract, 'new_onb_sha')
-      ).toBe(false);
-      expect(logger.logger.debug).toHaveBeenCalledWith(
-        `Cached extract result cannot be used due to onboarding branch SHA change (old=old_onb_sha, new=new_onb_sha)`
       );
       expect(logger.logger.debug).toHaveBeenCalledTimes(1);
     });
