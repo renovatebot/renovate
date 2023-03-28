@@ -26,6 +26,10 @@ import { filterInternalChecks } from './filter-checks';
 import { generateUpdate } from './generate';
 import { getRollbackUpdate } from './rollback';
 import type { LookupUpdateConfig, UpdateResult } from './types';
+import {
+  addReplacementUpdateIfValid,
+  isReplacementRulesConfigured,
+} from './utils';
 
 export async function lookupUpdates(
   inconfig: LookupUpdateConfig
@@ -66,6 +70,7 @@ export async function lookupUpdates(
       return res;
     }
     const isValid = is.string(currentValue) && versioning.isValid(currentValue);
+
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
@@ -157,27 +162,6 @@ export async function lookupUpdates(
       }
       let rangeStrategy = getRangeStrategy(config);
 
-      if (config.replacementName && !config.replacementVersion) {
-        res.updates.push({
-          updateType: 'replacement',
-          newName: config.replacementName,
-          newValue: currentValue!,
-        });
-      }
-
-      if (config.replacementName && config.replacementVersion) {
-        res.updates.push({
-          updateType: 'replacement',
-          newName: config.replacementName,
-          newValue: versioning.getNewValue({
-            // TODO #7154
-            currentValue: currentValue!,
-            newVersion: config.replacementVersion,
-            rangeStrategy: rangeStrategy!,
-            isReplacement: true,
-          })!,
-        });
-      }
       // istanbul ignore next
       if (
         isVulnerabilityAlert &&
@@ -297,7 +281,7 @@ export async function lookupUpdates(
           return res;
         }
         const newVersion = release.version;
-        const update = generateUpdate(
+        const update = await generateUpdate(
           config,
           versioning,
           // TODO #7154
@@ -339,26 +323,18 @@ export async function lookupUpdates(
       logger.debug(
         `Dependency ${packageName} has unsupported/unversioned value ${currentValue} (versioning=${config.versioning})`
       );
+
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
       }
-    } else if (
-      !currentValue &&
-      config.replacementName &&
-      !config.replacementVersion
-    ) {
-      logger.debug(
-        `Handle name-only replacement for ${packageName} without current version`
-      );
-      res.updates.push({
-        updateType: 'replacement',
-        newName: config.replacementName,
-        newValue: currentValue!,
-      });
     } else {
       res.skipReason = 'invalid-value';
+    }
+
+    if (isReplacementRulesConfigured(config)) {
+      addReplacementUpdateIfValid(res.updates, config);
     }
 
     // Record if the dep is fixed to a version

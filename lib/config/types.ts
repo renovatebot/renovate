@@ -2,6 +2,7 @@ import type { LogLevel } from 'bunyan';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -25,6 +26,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
@@ -33,6 +35,9 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -252,7 +257,7 @@ export interface RenovateConfig
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
 }
@@ -324,6 +329,7 @@ export interface PackageRule
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
 }
 
@@ -454,6 +460,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
   language?: string;

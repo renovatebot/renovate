@@ -119,50 +119,52 @@ The steps to enable GitHub's Merge Queue differ based on whether you use GitHub 
 
 <!-- prettier-ignore -->
 !!! warning "GitHub Merge Queue is in beta"
-    GitHub's Merge Queue feature is labeled as a beta feature by GitHub themselves.
-    The Merge Queue may stop working, have bugs, or maybe you need to update your configuration when GitHub changes things.
+    GitHub's Merge Queue feature is labeled as a beta feature by GitHub.
+    The Merge Queue may stop working, have bugs, or you may need to update your configuration when GitHub changes things.
 
 #### If you use GitHub Actions
 
 If you use GitHub Actions as your CI provider, follow these steps:
 
-1. Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
+Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
 
-   ```yaml
-   on:
-     pull_request:
-     merge_group:
-   ```
+```yaml
+on:
+  pull_request:
+  merge_group:
+```
 
-1. On `github.com`:
-   1. Go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section, [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge)
-   1. Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
-   1. Confirm you've set the correct "required checks" for your base branch
-1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
 
-   ```json
-   {
-     "platformAutomerge": true,
-     "packageRules": [
-       {
-         "description": "Automerge non-major updates",
-         "matchUpdateTypes": ["minor", "patch"],
-         "automerge": true
-       }
-     ]
-   }
-   ```
+Then go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+```json
+{
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
+}
+```
 
 #### If you don't use GitHub Actions
 
 If you _don't_ use GitHub Actions as your CI provider, follow these steps:
 
-1. Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this
-1. On `github.com`:
-   1. Go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section, [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge)
-   1. Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting
-   1. Confirm you've set the correct "required checks" for your base branch
-1. Allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example)
+Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this.
+
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
+Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example).
 
 ## Automerging and scheduling
 

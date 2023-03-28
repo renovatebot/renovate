@@ -15,6 +15,7 @@ MultiSpanProcessor {
         "_isCalled": false,
         "_that": [Circular],
       },
+      "_unresolvedExports": Set {},
     },
   ],
 }
@@ -35,8 +36,10 @@ MultiSpanProcessor {
         "_isCalled": false,
         "_that": [Circular],
       },
+      "_unresolvedExports": Set {},
     },
     BatchSpanProcessor {
+      "_droppedSpansCount": 0,
       "_exportTimeoutMillis": 30000,
       "_exporter": OTLPTraceExporter {
         "DEFAULT_HEADERS": {},
@@ -82,6 +85,7 @@ exports[`instrumentation/index activate remote logger 1`] = `
 MultiSpanProcessor {
   "_spanProcessors": [
     BatchSpanProcessor {
+      "_droppedSpansCount": 0,
       "_exportTimeoutMillis": 30000,
       "_exporter": OTLPTraceExporter {
         "DEFAULT_HEADERS": {},
