@@ -210,6 +210,7 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
+      scm.isBranchModified.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
