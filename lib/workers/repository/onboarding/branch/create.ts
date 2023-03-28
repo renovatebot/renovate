@@ -46,6 +46,6 @@ export async function createOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
-    force: true, // so we do not check diff with remote
+    force: true,
   });
 }
