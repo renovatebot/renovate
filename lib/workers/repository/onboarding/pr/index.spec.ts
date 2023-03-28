@@ -202,7 +202,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       }
     );
 
-    it('skips updates PR when conflicted', async () => {
+    it('ensures comment, when PR is conflicted', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -210,15 +210,15 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      scm.isBranchModified.mockResolvedValueOnce(true);
       scm.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);    
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
 
-    it('updates PR-body when package-files are not found', async () => {
+    it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
