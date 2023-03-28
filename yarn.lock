@@ -3884,14 +3884,14 @@ bunyan@1.8.15:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@17.0.4:
-  version "17.0.4"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.0.4.tgz#5023ed892ba8843e3b7361c26d0ada37e146290c"
-  integrity sha512-Z/nL3gU+zTUjz5pCA5vVjYM8pmaw2kxM7JEiE0fv3w77Wj+sFbi70CrBruUWH0uNcEdvLDixFpgA2JM4F4DBjA==
+cacache@17.0.5:
+  version "17.0.5"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.0.5.tgz#6dbec26c11f1f6a2b558bc11ed3316577c339ebc"
+  integrity sha512-Y/PRQevNSsjAPWykl9aeGz8Pr+OI6BYM9fYDNMvOkuUiG9IhG4LEmaYrZZZvioMUEQ+cBCxT0v8wrnCURccyKA==
   dependencies:
     "@npmcli/fs" "^3.1.0"
     fs-minipass "^3.0.0"
-    glob "^8.0.1"
+    glob "^9.3.1"
     lru-cache "^7.7.1"
     minipass "^4.0.0"
     minipass-collect "^1.0.2"
@@ -5580,7 +5580,7 @@ glob@^7.0.0, glob@^7.1.3, glob@^7.1.4:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-glob@^9.2.0:
+glob@^9.2.0, glob@^9.3.1:
   version "9.3.2"
   resolved "https://registry.yarnpkg.com/glob/-/glob-9.3.2.tgz#8528522e003819e63d11c979b30896e0eaf52eda"
   integrity sha512-BTv/JhKXFEHsErMte/AnfiSv8yYOLLiyH2lTg8vn02O21zWFgHPTfxtgn1QRe7NRgggUhC8hacR2Re94svHqeA==
