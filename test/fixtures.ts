@@ -1,5 +1,5 @@
-import type fs from 'fs';
-import type { PathLike, Stats } from 'fs';
+import type fs from 'node:fs';
+import type { PathLike, Stats } from 'node:fs';
 import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';

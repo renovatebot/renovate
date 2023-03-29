@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
@@ -628,12 +628,30 @@ export class DockerDatasource extends Datasource {
     currentDigest: string
   ): Promise<string | null | undefined> {
     try {
-      const manifestResponse = await this.getManifestResponse(
-        registryHost,
-        dockerRepository,
-        currentDigest,
-        'head'
-      );
+      let manifestResponse: HttpResponse<string> | null;
+
+      try {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+          'head'
+        );
+      } catch (_err) {
+        const err = _err instanceof ExternalHostError ? _err.err : _err;
+
+        if (
+          typeof err.statusCode === 'number' &&
+          err.statusCode >= 500 &&
+          err.statusCode < 600
+        ) {
+          // querying the digest manifest for a non existent image leads to a 500 statusCode
+          return null;
+        }
+
+        /* istanbul ignore next */
+        throw _err;
+      }
 
       if (
         manifestResponse?.headers['content-type'] !==
@@ -1094,6 +1112,24 @@ export class DockerDatasource extends Datasource {
         if (!digest) {
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
+      }
+
+      if (
+        !manifestResponse &&
+        !dockerRepository.includes('/') &&
+        !packageName.includes('/')
+      ) {
+        logger.debug(
+          `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`
+        );
+        return this.getDigest(
+          {
+            registryUrl,
+            packageName: 'library/' + packageName,
+            currentDigest,
+          },
+          newValue
+        );
       }
 
       if (manifestResponse) {
