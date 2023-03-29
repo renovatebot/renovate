@@ -632,7 +632,7 @@ export async function isBranchModified(
   try {
     if (baseBranch) {
       logger.debug(
-        `branch.isModified(): using git to calculate with baseBranch`
+        `branch.isModified(): using git to calculate with ${baseBranch}`
       );
       branchAuthors = [
         ...new Set(
