@@ -288,17 +288,16 @@ describe('util/git/index', () => {
     });
 
     it('should return false when branch is not found', async () => {
+      expect(await git.isBranchModified('renovate/not_found')).toBeFalse();
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/not_found')
+        await git.isBranchModified('renovate/not_found', defaultBranch)
       ).toBeFalse();
     });
 
     it('should return false when author matches', async () => {
+      expect(await git.isBranchModified('renovate/future_branch')).toBeFalse();
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
-      ).toBeFalse();
-      expect(
-        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
+        await git.isBranchModified('renovate/future_branch', defaultBranch)
       ).toBeFalse();
     });
 
@@ -306,8 +305,9 @@ describe('util/git/index', () => {
       git.setUserRepoConfig({
         gitIgnoredAuthors: ['custom@example.com'],
       });
+      expect(await git.isBranchModified('renovate/custom_author')).toBeFalse();
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/custom_author')
+        await git.isBranchModified('renovate/custom_author', defaultBranch)
       ).toBeFalse();
     });
 
@@ -316,13 +316,14 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com', 'author2@example.com'],
       });
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/multiple_commits')
+        await git.isBranchModified('renovate/multiple_commits', defaultBranch)
       ).toBeFalse();
     });
 
     it('should return true when custom author is unknown', async () => {
+      expect(await git.isBranchModified('renovate/custom_author')).toBeTrue();
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/custom_author')
+        await git.isBranchModified('renovate/custom_author', defaultBranch)
       ).toBeTrue();
     });
 
@@ -331,14 +332,15 @@ describe('util/git/index', () => {
         gitIgnoredAuthors: ['author1@example.com'],
       });
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/multiple_commits')
+        await git.isBranchModified('renovate/multiple_commits', defaultBranch)
       ).toBeTrue();
     });
 
     it('should return value stored in modifiedCacheResult', async () => {
       modifiedCache.getCachedModifiedResult.mockReturnValue(true);
+      expect(await git.isBranchModified('renovate/future_branch')).toBeTrue();
       expect(
-        await git.isBranchModified(defaultBranch, 'renovate/future_branch')
+        await git.isBranchModified('renovate/future_branch', defaultBranch)
       ).toBeTrue();
     });
   });

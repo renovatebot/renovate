@@ -22,8 +22,8 @@ async function cleanUpBranches(
         state: 'open',
       });
       const branchIsModified = await scm.isBranchModified(
-        baseBranch!,
-        branchName
+        branchName,
+        baseBranch
       );
       if (pr) {
         if (branchIsModified) {

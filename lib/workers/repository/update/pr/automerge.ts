@@ -82,7 +82,7 @@ export async function checkAutoMerge(
     };
   }
   // Check if it's been touched
-  if (await scm.isBranchModified(config.baseBranch, branchName)) {
+  if (await scm.isBranchModified(branchName, config.baseBranch)) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,

@@ -190,8 +190,8 @@ export async function processBranch(
 
       logger.debug('Checking if PR has been edited');
       const branchIsModified = await scm.isBranchModified(
-        config.baseBranch,
-        config.branchName
+        config.branchName,
+        config.baseBranch
       );
       if (branchPr) {
         logger.debug('Found existing branch PR');

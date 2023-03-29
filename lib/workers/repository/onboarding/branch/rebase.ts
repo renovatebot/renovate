@@ -25,9 +25,7 @@ export async function rebaseOnboardingBranch(
   }
 
   // TODO #7154
-  if (
-    await scm.isBranchModified(config.baseBranch!, config.onboardingBranch!)
-  ) {
+  if (await scm.isBranchModified(config.onboardingBranch!, config.baseBranch)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }

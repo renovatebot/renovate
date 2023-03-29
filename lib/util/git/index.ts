@@ -604,8 +604,8 @@ export async function isBranchBehindBase(
 }
 
 export async function isBranchModified(
-  baseBranch: string,
-  branchName: string
+  branchName: string,
+  baseBranch?: string
 ): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
@@ -626,26 +626,46 @@ export async function isBranchModified(
     return isModified;
   }
 
-  logger.debug('branch.isModified(): using git to calculate');
-
   await syncGit();
   // Retrieve the commit authors
   let branchAuthors: string[] = [];
   try {
-    branchAuthors = [
-      ...new Set(
-        (
-          await git.raw([
-            'log',
-            '--pretty=format:%ae',
-            `origin/${branchName}...origin/${baseBranch}`,
-            '--',
-          ])
-        )
-          .trim()
-          .split('\n')
-      ),
-    ];
+    if (baseBranch) {
+      logger.debug(
+        `branch.isModified(): using git to calculate with baseBranch`
+      );
+      branchAuthors = [
+        ...new Set(
+          (
+            await git.raw([
+              'log',
+              '--pretty=format:%ae',
+              `origin/${branchName}...origin/${baseBranch}`,
+              '--',
+            ])
+          )
+            .trim()
+            .split('\n')
+        ),
+      ];
+    } else {
+      logger.debug(`branch.isModified(): using git to calculate`);
+      branchAuthors = [
+        ...new Set(
+          (
+            await git.raw([
+              'log',
+              '-1',
+              '--pretty=format:%ae',
+              `origin/${branchName}`,
+              '--',
+            ])
+          )
+            .trim()
+            .split('\n')
+        ),
+      ];
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
