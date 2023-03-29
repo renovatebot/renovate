@@ -35,7 +35,7 @@ export async function extractPackageFile(
   fileName: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  let deps: PackageDependency[] = [];
+  const deps: PackageDependency[] = [];
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
   try {
@@ -56,82 +56,83 @@ export async function extractPackageFile(
     }
     logger.debug({ registryAliases }, 'repositories discovered.');
 
-    deps = await Promise.all(
-      doc.releases.map(async (dep) => {
-        let depName = dep.chart;
-        let repoName: string | null = null;
+    for (const dep of doc.releases) {
+      let depName = dep.chart;
+      let repoName: string | null = null;
 
-        if (!is.string(dep.chart)) {
-          return {
-            depName: dep.name,
-            skipReason: 'invalid-name',
-          };
-        }
+      if (!is.string(dep.chart)) {
+        deps.push({
+          depName: dep.name,
+          skipReason: 'invalid-name',
+        });
+        continue;
+      }
 
-        // If it starts with ./ ../ or / then it's a local path
-        if (isLocalPath(dep.chart)) {
-          const needKustomize =
-            kustomizationsKeysUsed(dep) ||
-            (await localChartHasKustomizationsYaml(dep));
-          return {
-            depName: dep.name,
-            skipReason: 'local-chart',
-            ...(needKustomize && { managerData: { needKustomize: true } }),
-          };
-        }
+      // If it starts with ./ ../ or / then it's a local path
+      if (isLocalPath(dep.chart)) {
+        const needKustomize =
+          kustomizationsKeysUsed(dep) ||
+          (await localChartHasKustomizationsYaml(dep));
+        deps.push({
+          depName: dep.name,
+          skipReason: 'local-chart',
+          ...(needKustomize && { managerData: { needKustomize: true } }),
+        });
+        continue;
+      }
 
-        if (is.number(dep.version)) {
-          dep.version = String(dep.version);
-        }
+      if (is.number(dep.version)) {
+        dep.version = String(dep.version);
+      }
 
-        if (dep.chart.includes('/')) {
-          const v = dep.chart.split('/');
-          repoName = v.shift()!;
-          depName = v.join('/');
-        } else {
-          repoName = dep.chart;
-        }
+      if (dep.chart.includes('/')) {
+        const v = dep.chart.split('/');
+        repoName = v.shift()!;
+        depName = v.join('/');
+      } else {
+        repoName = dep.chart;
+      }
 
-        if (!is.string(dep.version)) {
-          return {
-            depName,
-            skipReason: 'invalid-version',
-          };
-        }
-
-        const res: PackageDependency = {
+      if (!is.string(dep.version)) {
+        deps.push({
           depName,
-          currentValue: dep.version,
-          registryUrls: [registryAliases[repoName]]
-            .concat([config.registryAliases?.[repoName]] as string[])
-            .filter(is.string),
-        };
-        if (kustomizationsKeysUsed(dep)) {
-          res.managerData = { needKustomize: true };
-        }
-        // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
-        const repository = doc.repositories?.find(
-          (repo) => repo.name === repoName
-        );
-        if (repository?.oci) {
-          res.datasource = DockerDatasource.id;
-          res.packageName = registryAliases[repoName] + '/' + depName;
-        }
+          skipReason: 'invalid-version',
+        });
+        continue;
+      }
 
-        // By definition on helm the chart name should be lowercase letter + number + -
-        // However helmfile support templating of that field
-        if (!isValidChartName(res.depName)) {
-          res.skipReason = 'unsupported-chart-type';
-        }
+      const res: PackageDependency = {
+        depName,
+        currentValue: dep.version,
+        registryUrls: [registryAliases[repoName]]
+          .concat([config.registryAliases?.[repoName]] as string[])
+          .filter(is.string),
+      };
+      if (kustomizationsKeysUsed(dep)) {
+        res.managerData = { needKustomize: true };
+      }
+      // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
+      const repository = doc.repositories?.find(
+        (repo) => repo.name === repoName
+      );
+      if (repository?.oci) {
+        res.datasource = DockerDatasource.id;
+        res.packageName = registryAliases[repoName] + '/' + depName;
+      }
 
-        // Skip in case we cannot locate the registry
-        if (is.emptyArray(res.registryUrls)) {
-          res.skipReason = 'unknown-registry';
-        }
+      // By definition on helm the chart name should be lowercase letter + number + -
+      // However helmfile support templating of that field
+      if (!isValidChartName(res.depName)) {
+        res.skipReason = 'unsupported-chart-type';
+      }
 
-        return res;
-      })
-    );
+      // Skip in case we cannot locate the registry
+      if (is.emptyArray(res.registryUrls)) {
+        res.skipReason = 'unknown-registry';
+      }
+
+      deps.push(res);
+    }
   }
 
   return deps.length ? { deps, datasource: HelmDatasource.id } : null;
