@@ -41,7 +41,7 @@ describe('modules/datasource/generic-json/index', () => {
       ).toBeNull();
     });
 
-    it('return null if http request fails', async () => {
+    it('throw error if http request fails', async () => {
       httpMock.scope('http://test.example.com').get('/').reply(500);
       await expect(
         getPkgReleases({
@@ -50,6 +50,17 @@ describe('modules/datasource/generic-json/index', () => {
           datasource: GenericJsonDatasource.id,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('return null if http request fails with 404', async () => {
+      httpMock.scope('http://test.example.com').get('/').reply(404);
+      expect(
+        await getPkgReleases({
+          packageName: 'test',
+          registryUrls: ['http://test.example.com'],
+          datasource: GenericJsonDatasource.id,
+        })
+      ).toBeNull();
     });
 
     it('return null if response is empty', async () => {
