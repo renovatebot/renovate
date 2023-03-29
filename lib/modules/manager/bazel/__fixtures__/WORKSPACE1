@@ -150,13 +150,6 @@ container_pull(
     tag = "latest",
 )
 
-oci_pull(
-    name = "py3_image_base",
-    digest = "sha256:d5a717649fd93ea5b9c430d7f84e4c37ba219eb53bd73ed1d4a5a98e9edd84a7",
-    repository = "gcr.io/distroless/python3-debian10",
-    tag = "latest",
-)
-
 http_file(
     name="distroless",
     sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",
