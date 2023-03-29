@@ -103,7 +103,4 @@ export interface DatasourceApi extends ModuleApi {
    * false: caching is not performed, or performed within the datasource implementation
    */
   caching?: boolean | undefined;
-
-  /** optional URLs to add to docs as references */
-  urls?: string[];
 }
