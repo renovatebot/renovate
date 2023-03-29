@@ -376,6 +376,7 @@ describe('modules/datasource/crate/index', () => {
         rawUrl: 'https://example.com',
         url: new URL('https://example.com'),
         flavor: 'cloudsmith',
+        isSparse: false,
       };
       const crateDatasource = new CrateDatasource();
       await expect(
