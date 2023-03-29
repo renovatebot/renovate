@@ -40,22 +40,22 @@ These Docker images work on all the platforms that Renovate supports.
 
 There are two flavors:
 
-- The `full` image (the `latest` tag defaults to the `full` image)
-- The `slim` image
+- The "full" image (the `latest` tag defaults to the full image)
+- The `-slim` image
 
-##### The `full` image
+##### The full image
 
-The `full` image comes with every package manager that Renovate supports.
-This makes the `full` image the best choice for most users.
+The "full" image comes with every package manager that Renovate supports.
+This makes the "full" image the best choice for most users.
 
-The `full` image has some downsides, because it:
+The "full" image has some downsides, because it:
 
 - Only comes with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
 
-##### The `slim` image
+##### The slim image
 
-The `slim` image only comes with the Node.js environment, so it works when:
+The `-slim` image only comes with the Node.js environment, so it works when:
 
 - you don't need any additional package managers, or
 - you map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed
