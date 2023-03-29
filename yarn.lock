@@ -3309,19 +3309,19 @@
     "@typescript-eslint/types" "5.56.0"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.4.0.tgz#1684dfcbd4e68ff28a11a25154d415f7de2c8224"
-  integrity sha512-EwkRU7TjZrpAPA2cqVBtMD95unti9uSXefGJbhCVANOfuY6tjBoqSt8uSf6BSXUUoJkxBWwewjTn0v0tgoLBkQ==
+"@yarnpkg/core@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.5.0.tgz#5ad86cb48b1c32b7fa8cd092cc7cf171682ac534"
+  integrity sha512-pWU+SToQ0eO6mDS2DdX4AcM/IIO0Zgx3pYQAz41E1cEXmvfm3K1U5WBG418g41TszHCSA9dGqzyshBlD1mEIYw==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.10.1"
+    "@yarnpkg/fslib" "^2.10.2"
     "@yarnpkg/json-proxy" "^2.1.1"
-    "@yarnpkg/libzip" "^2.2.4"
+    "@yarnpkg/libzip" "^2.3.0"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.3.0"
+    "@yarnpkg/pnp" "^3.3.1"
     "@yarnpkg/shell" "^3.2.5"
     camelcase "^5.3.1"
     chalk "^3.0.0"
@@ -3347,7 +3347,7 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.10.1", "@yarnpkg/fslib@^2.10.2", "@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
+"@yarnpkg/fslib@^2.10.2", "@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
   version "2.10.2"
   resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.10.2.tgz#16e419a1412084f152e8eec16183a7f80bc73684"
   integrity sha512-6WfQrPEV8QVpDPw5kd5s5jsb3QLqwVFSGZy3rEjl3p2FZ3OtIfYcLbFirOxXj2jXiKQDe7XbYsw1WjSf8K94gw==
@@ -3363,7 +3363,7 @@
     "@yarnpkg/fslib" "^2.5.0"
     tslib "^1.13.0"
 
-"@yarnpkg/libzip@^2.2.4", "@yarnpkg/libzip@^2.3.0":
+"@yarnpkg/libzip@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/libzip/-/libzip-2.3.0.tgz#fe1e762e47669f6e2c960fc118436608d834e3be"
   integrity sha512-6xm38yGVIa6mKm/DUCF2zFFJhERh/QWp1ufm4cNUvxsONBmfPg8uZ9pZBdOmF6qFGr/HlT6ABBkCSx/dlEtvWg==
@@ -3379,7 +3379,7 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.3.0":
+"@yarnpkg/pnp@^3.3.1":
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.1.tgz#8ce0777f2950cbadc9978ba3bd3407b4b9c2a640"
   integrity sha512-iA2IKk2hOQqEBBHBZ3j004mCfzsPGx5PNjgGn8kb6/VMXokX4mhZzPNI/q7ipI0+UaIMeDXvIzwdGL2GSmgsTA==
