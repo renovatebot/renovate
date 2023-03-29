@@ -3,6 +3,7 @@ import jsonata from 'jsonata';
 import { z } from 'zod';
 import { logger } from '../../logger';
 import { readLocalFile } from '../../util/fs';
+import { HttpError } from '../../util/http';
 import { parseUrl } from '../../util/url';
 import { Datasource } from './datasource';
 import type { ReleaseResult } from './types';
@@ -42,24 +43,35 @@ export abstract class GenericDatasource extends Datasource {
     }
 
     let response: string | null = null;
-    switch (url.protocol) {
-      case 'http:':
-      case 'https:':
-        response = (await this.http.get(registryUrl)).body;
-        break;
-      case 'file:':
-        response = await readLocalFile(
-          registryUrl.replace('file://', ''),
-          'utf8'
-        );
-        break;
-      default:
-        logger.debug(`Scheme ${url.protocol} is not supported`);
-        return null;
-    }
+    try {
+      switch (url.protocol) {
+        case 'http:':
+        case 'https:':
+          response = (await this.http.get(registryUrl)).body;
+          break;
+        case 'file:':
+          response = await readLocalFile(
+            registryUrl.replace('file://', ''),
+            'utf8'
+          );
+          break;
+        default:
+          logger.debug(`Scheme ${url.protocol} is not supported`);
+          return null;
+      }
 
-    if (!is.nonEmptyString(response)) {
-      return null;
+      if (!is.nonEmptyString(response)) {
+        return null;
+      }
+    } catch (err) {
+      // istanbul ignore else: not testable with nock
+      if (err instanceof HttpError) {
+        if (err.response?.statusCode === 404) {
+          logger.warn({ registryUrl }, `${this.id}: Not Found error`);
+          return null;
+        }
+      }
+      this.handleGenericErrors(err);
     }
 
     return response;

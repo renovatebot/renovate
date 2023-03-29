@@ -1,5 +1,6 @@
 import * as httpMock from '../../../../test/http-mock';
 import { fs } from '../../../../test/util';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { getPkgReleases } from '../index';
 import { GenericJsonDatasource } from './index';
 
@@ -42,13 +43,13 @@ describe('modules/datasource/generic-json/index', () => {
 
     it('return null if http request fails', async () => {
       httpMock.scope('http://test.example.com').get('/').reply(500);
-      expect(
-        await getPkgReleases({
+      await expect(
+        getPkgReleases({
           packageName: 'test',
           registryUrls: ['http://test.example.com'],
           datasource: GenericJsonDatasource.id,
         })
-      ).toBeNull();
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('return null if response is empty', async () => {
