@@ -1,4 +1,4 @@
-import readline from 'readline';
+import readline from 'node:readline';
 import type { AllConfig } from '../../../../config/types';
 
 // istanbul ignore next

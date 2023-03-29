@@ -155,6 +155,30 @@ describe('util/merge-confidence/index', () => {
         ).toBe('high');
       });
 
+      it('escapes a package name containing a forward slash', async () => {
+        const datasource = 'npm';
+        const packageName = '@jest/global';
+        const escapedPackageName = '@jest%2fglobal';
+        const currentVersion = '24.3.0';
+        const newVersion = '25.0.0';
+        httpMock
+          .scope(apiBaseUrl)
+          .get(
+            `/api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`
+          )
+          .reply(200, { confidence: 'high' });
+
+        expect(
+          await getMergeConfidenceLevel(
+            datasource,
+            packageName,
+            currentVersion,
+            newVersion,
+            'major'
+          )
+        ).toBe('high');
+      });
+
       it('returns neutral on invalid merge confidence response from api', async () => {
         const datasource = 'npm';
         const depName = 'renovate';

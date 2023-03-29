@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';

@@ -172,29 +172,4 @@ describe('util/schema', () => {
       expect(called).toBeTrue();
     });
   });
-
-  describe('looseObject', () => {
-    it('parses object', () => {
-      const s = schema.looseObject({
-        foo: z.string(),
-        bar: z.number(),
-      });
-      expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({
-        foo: 'foo',
-        bar: 123,
-      });
-    });
-
-    it('drops wrong items', () => {
-      const s = schema.looseObject({
-        foo: z.string(),
-        bar: z.number(),
-        baz: z.string(),
-      });
-      expect(s.parse({ foo: 'foo', bar: 'bar' })).toEqual({
-        foo: 'foo',
-        bar: null,
-      });
-    });
-  });
 });

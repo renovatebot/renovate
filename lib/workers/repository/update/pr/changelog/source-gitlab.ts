@@ -1,5 +1,5 @@
 // TODO #7154
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';

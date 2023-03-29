@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
