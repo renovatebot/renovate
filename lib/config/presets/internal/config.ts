@@ -15,6 +15,20 @@ export const presets: Record<string, Preset> = {
       'workarounds:all',
     ],
   },
+  'best-practice': {
+    description: 'Preset with what renovate considers best practice.',
+    extends: [
+      'config:base',
+      'docker:pinDigests',
+      'helpers:pinGitHubActionDigests',
+    ],
+    packageRules: [
+      {
+        matchDepTypes: ['devDependencies'],
+        rangeStrategy: 'pin',
+      },
+    ],
+  },
   'js-app': {
     description: 'Default configuration for webapps.',
     extends: ['config:base', ':pinAllExceptPeerDependencies'],
