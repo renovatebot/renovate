@@ -98,6 +98,7 @@ async function fetchManagerPackagerFileUpdates(
   if (pFile.extractedConstraints) {
     pFile.constraints = {
       ...pFile.extractedConstraints,
+      ...config.constraints,
       ...pFile.constraints,
     };
     delete pFile.extractedConstraints;
