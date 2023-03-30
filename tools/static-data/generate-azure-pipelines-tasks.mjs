@@ -1,5 +1,5 @@
-import os from 'os';
-import { promisify } from 'util';
+import os from 'node:os';
+import { promisify } from 'node:util';
 import fs from 'fs-extra';
 import g from 'glob';
 import JSON5 from 'json5';

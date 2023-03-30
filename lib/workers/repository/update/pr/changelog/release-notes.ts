@@ -1,5 +1,5 @@
 // TODO #7154
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';

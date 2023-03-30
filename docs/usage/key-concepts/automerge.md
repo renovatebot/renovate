@@ -82,6 +82,22 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 
 The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
 
+### Automerge monorepo PRs
+
+Say you want to automerge `patch` and `minor` updates for packages in the `group:ionic-nativeMonorepo` preset:
+
+```json
+{
+  "packageRules": [
+    {
+      "extends": ["monorepo:ionic-native"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### Faster merges with platform-native automerge
 
 You can speed up merges by letting Renovate use your platform's native automerge.
