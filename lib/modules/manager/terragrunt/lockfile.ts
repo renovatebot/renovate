@@ -5,6 +5,7 @@ export async function updateArtifacts(
   artifact: UpdateArtifact
 ): Promise<UpdateArtifactsResult[] | null> {
   if (artifact.config.updateType !== 'lockFileMaintenance') {
+    logger.debug(`UpdateType ${artifact.config.updateType} is not supported for terragrunt`)
     return null;
   }
 
