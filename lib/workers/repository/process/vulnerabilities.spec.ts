@@ -80,7 +80,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         ],
       };
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Cannot map datasource docker to OSV ecosystem'
       );
@@ -97,7 +100,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'No vulnerabilities found in OSV database for lodash'
       );
@@ -121,7 +127,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(0);
     });
 
@@ -167,7 +176,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Skipping vulnerability lookup for package lodash due to unsupported version #4.17.11'
       );
@@ -191,7 +203,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockRejectedValueOnce(err);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.warn).toHaveBeenCalledWith(
         { err },
         'Error fetching vulnerability information for lodash'
@@ -236,7 +251,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         { event },
         'Skipping OSV event with invalid version'
@@ -266,7 +284,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(0);
     });
 
@@ -294,7 +315,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.info).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 4.17.11'
       );
@@ -333,7 +357,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.info).toHaveBeenCalledWith(
         'No fixed version available for vulnerability GHSA-xxxx-yyyy-zzzz in fake 1.5.1'
       );
@@ -379,7 +406,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Vulnerability GO-2022-0187 affects stdlib 1.7.5'
       );
@@ -454,7 +484,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
         {
@@ -480,7 +513,10 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(0);
     });
 
@@ -541,7 +577,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
 
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
@@ -620,7 +659,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
 
       expect(config.packageRules).toHaveLength(2);
       expect(config.packageRules).toMatchObject([
@@ -674,7 +716,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.debug).not.toHaveBeenCalledWith(
         'OSV advisory GHSA-xxxx-yyyy-zzzz lists quokka 1.2.3 as vulnerable'
       );
@@ -718,7 +763,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
         {
@@ -793,7 +841,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
 
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Error processing CVSS vector some-invalid-score'
@@ -855,7 +906,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
 
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([
@@ -937,7 +991,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.applyVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
 
       expect(config.packageRules).toHaveLength(1);
       expect(config.packageRules).toMatchObject([

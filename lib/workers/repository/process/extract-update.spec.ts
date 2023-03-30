@@ -118,7 +118,7 @@ describe('workers/repository/process/extract-update', () => {
       };
       const fetchVulnerabilitiesMock = jest.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
-        fetchVulnerabilities: fetchVulnerabilitiesMock,
+        applyVulnerabilityPackageRules: fetchVulnerabilitiesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       git.checkoutBranch.mockResolvedValueOnce('123test');
