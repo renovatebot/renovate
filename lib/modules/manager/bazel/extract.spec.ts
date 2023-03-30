@@ -87,6 +87,29 @@ describe('modules/manager/bazel/extract', () => {
       ]);
     });
 
+    it('extracts dependencies for oci_pull deptype', () => {
+      const res = extractPackageFile(
+        codeBlock`
+          oci_pull(
+            name="hasura",
+            image="index.docker.io/hasura/graphql-engine",
+            # v1.0.0-alpha31.cli-migrations 11/28
+            digest="sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548",
+            tag="v1.0.0-alpha31.cli-migrations"
+          )
+        `
+      );
+      expect(res?.deps).toMatchObject([
+        {
+          currentDigest:
+            'sha256:a4e8d8c444ca04fe706649e82263c9f4c2a4229bc30d2a64561b5e1d20cc8548',
+          currentValue: 'v1.0.0-alpha31.cli-migrations',
+          depType: 'oci_pull',
+          packageName: 'index.docker.io/hasura/graphql-engine',
+        },
+      ]);
+    });
+
     it('check remote option in go_repository', () => {
       const successStory = extractPackageFile(
         codeBlock`
