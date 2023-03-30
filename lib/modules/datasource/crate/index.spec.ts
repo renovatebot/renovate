@@ -359,11 +359,14 @@ describe('modules/datasource/crate/index', () => {
       GlobalConfig.set({ ...adminConfig, allowCustomCrateRegistries: true });
       const { mockClone } = setupGitMocks();
 
-      const url = 'sparse+https://github.com/mcorbin/othertestregistry';
+      const url = 'https://github.com/mcorbin/othertestregistry';
+      const sparseUrl = `sparse+${url}`;
+      httpMock.scope(url).get('/my/pk/mypkg').reply(200, {});
+
       const res = await getPkgReleases({
         datasource,
         packageName: 'mypkg',
-        registryUrls: [url],
+        registryUrls: [sparseUrl],
       });
       expect(mockClone).toHaveBeenCalledTimes(0);
       expect(res).toBeNull();
