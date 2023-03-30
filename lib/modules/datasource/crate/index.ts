@@ -222,7 +222,10 @@ export class CrateDatasource extends Datasource {
   }
 
   private static isSparseRegistry(url: string): boolean {
-    const parsed = new URL(url);
+    const parsed = parseUrl(url);
+    if (!parsed) {
+      return false;
+    }
     return parsed.protocol.startsWith('sparse+');
   }
 
