@@ -2,7 +2,12 @@ import type { RenovateConfig } from '../../lib/config/types';
 import { getManagers } from '../../lib/modules/manager';
 import { readFile, updateFile } from '../utils';
 import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
-import { getDisplayName, getNameWithUrl, replaceContent } from './utils';
+import {
+  formatUrls,
+  getDisplayName,
+  getNameWithUrl,
+  replaceContent,
+} from './utils';
 
 const noCategoryDisplayName = 'no-category';
 
@@ -26,7 +31,7 @@ export async function generateManagers(
   const allCategories: Record<string, string[]> = {};
 
   for (const [manager, definition] of managers) {
-    const { defaultConfig, supportedDatasources } = definition;
+    const { defaultConfig, supportedDatasources, urls } = definition;
     const { fileMatch } = defaultConfig as RenovateConfig;
     const displayName = getDisplayName(manager, definition);
 
@@ -89,6 +94,9 @@ sidebar_label: ${displayName}
         )
         .join(', ');
       md += `This manager supports extracting the following datasources: ${escapedDatasources}.\n\n`;
+
+      md += '## References';
+      md += formatUrls(urls).replace('**References**:', '');
 
       md += '## Default config\n\n';
       md += '```json\n';

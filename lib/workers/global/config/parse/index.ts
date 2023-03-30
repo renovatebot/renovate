@@ -6,6 +6,7 @@ import { detectAllGlobalConfig } from '../../../../modules/manager';
 import { ensureDir, getParentDir, readSystemFile } from '../../../../util/fs';
 import { ensureTrailingSlash } from '../../../../util/url';
 import * as cliParser from './cli';
+import * as codespaces from './codespaces';
 import * as envParser from './env';
 import * as fileParser from './file';
 import { hostRulesFromEnv } from './host-rules-from-env';
@@ -24,6 +25,8 @@ export async function parseConfigs(
 
   let config: AllConfig = mergeChildConfig(fileConfig, envConfig);
   config = mergeChildConfig(config, cliConfig);
+
+  config = await codespaces.setConfig(config);
 
   const combinedConfig = config;
 
