@@ -521,7 +521,13 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
-    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+    .replace(
+      regEx(
+        / - \[ \] <!-- create-all-rate-limited-prs -->🔐 \*\*Create all rate-limited PRs at once\*\* 🔐/g
+      ),
+      ''
+    );
 }
 
 export async function ensureIssue({
