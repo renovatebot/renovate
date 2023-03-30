@@ -99,6 +99,35 @@ describe('modules/datasource/generic-json/index', () => {
       ).toBeNull();
     });
 
+    it('return null if there are unexpected keys', async () => {
+      httpMock
+        .scope('https://test.example.com')
+        .get('/')
+        .reply(
+          200,
+          `
+      {
+        "releases": [
+          {
+            "test": "test",
+            "version": "v1.1.0"
+          },
+          {
+            "version": "v1.2.0"
+          }
+        ]
+      }
+      `
+        );
+      expect(
+        await getPkgReleases({
+          packageName: '*',
+          registryUrls: ['https://test.example.com'],
+          datasource: GenericJsonDatasource.id,
+        })
+      ).toBeNull();
+    });
+
     it('return version for minimal', async () => {
       httpMock
         .scope('https://test.example.com')

@@ -8,22 +8,26 @@ import { parseUrl } from '../../util/url';
 import { Datasource } from './datasource';
 import type { ReleaseResult } from './types';
 
-export const ReleaseResultZod = z.object({
-  releases: z.array(
-    z.object({
-      version: z.string(),
-      isDeprecated: z.boolean().optional(),
-      releaseTimestamp: z.string().optional(),
-      sourceUrl: z.string().optional(),
-      sourceDirectory: z.string().optional(),
-      changelogUrl: z.string().optional(),
-    })
-  ),
-  sourceUrl: z.string().optional(),
-  sourceDirectory: z.string().optional(),
-  changelogUrl: z.string().optional(),
-  homepage: z.string().optional(),
-});
+export const ReleaseResultZod = z
+  .object({
+    releases: z.array(
+      z
+        .object({
+          version: z.string(),
+          isDeprecated: z.boolean().optional(),
+          releaseTimestamp: z.string().optional(),
+          sourceUrl: z.string().optional(),
+          sourceDirectory: z.string().optional(),
+          changelogUrl: z.string().optional(),
+        })
+        .strict()
+    ),
+    sourceUrl: z.string().optional(),
+    sourceDirectory: z.string().optional(),
+    changelogUrl: z.string().optional(),
+    homepage: z.string().optional(),
+  })
+  .strict();
 
 export abstract class GenericDatasource extends Datasource {
   override caching = true;
@@ -92,23 +96,6 @@ export abstract class GenericDatasource extends Datasource {
       return null;
     }
 
-    const cleanedResponse = parsed.data;
-    // manually copy to prevent leaking data into other systems
-    const releases = cleanedResponse.releases.map((value) => ({
-      version: value.version,
-      isDeprecated: value.isDeprecated,
-      releaseTimestamp: value.releaseTimestamp,
-      changelogUrl: value.changelogUrl,
-      sourceUrl: value.sourceUrl,
-      sourceDirectory: value.sourceDirectory,
-    }));
-
-    return {
-      sourceUrl: cleanedResponse.sourceUrl,
-      sourceDirectory: cleanedResponse.sourceDirectory,
-      changelogUrl: cleanedResponse.changelogUrl,
-      homepage: cleanedResponse.homepage,
-      releases,
-    };
+    return structuredClone(parsed.data);
   }
 }
