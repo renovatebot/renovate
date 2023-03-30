@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {

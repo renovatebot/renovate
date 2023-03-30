@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
