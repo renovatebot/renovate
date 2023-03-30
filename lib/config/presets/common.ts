@@ -24,6 +24,7 @@ export const removedPresets: Record<string, string | null> = {
   'default:unpublishSafe': 'npm:unpublishSafe',
   'helpers:oddIsUnstable': null,
   'helpers:oddIsUnstablePackages': null,
+  'group:jsTestMonMajor': 'group:jsTestNonMajor',
 };
 
 const renamedMonorepos: Record<string, string> = {

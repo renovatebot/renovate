@@ -1,5 +1,6 @@
 import { GlobalConfig } from '../config/global';
 import { logger } from '../logger';
+import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github-release-attachments';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
 import type { PackageFileContent } from '../modules/manager/types';
@@ -31,7 +32,8 @@ export function checkGithubToken(
         if (
           !dep.skipReason &&
           (dep.datasource === GithubTagsDatasource.id ||
-            dep.datasource === GithubReleasesDatasource.id)
+            dep.datasource === GithubReleasesDatasource.id ||
+            dep.datasource === GithubReleaseAttachmentsDatasource.id)
         ) {
           dep.skipReason = 'github-token-required';
           if (dep.depName) {
