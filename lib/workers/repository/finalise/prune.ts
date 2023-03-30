@@ -8,7 +8,7 @@ import { scm } from '../../../modules/platform/scm';
 import { getBranchList } from '../../../util/git';
 
 async function cleanUpBranches(
-  { baseBranch, pruneStaleBranches: enabled }: RenovateConfig,
+  { pruneStaleBranches: enabled }: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
   if (enabled === false) {
@@ -21,10 +21,7 @@ async function cleanUpBranches(
         branchName,
         state: 'open',
       });
-      const branchIsModified = await scm.isBranchModified(
-        branchName,
-        baseBranch
-      );
+      const branchIsModified = await scm.isBranchModified(branchName);
       if (pr) {
         if (branchIsModified) {
           logger.debug(
