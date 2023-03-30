@@ -8,7 +8,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -173,8 +173,8 @@ export class CrateDatasource extends Datasource {
     if (info.flavor === 'crates.io' || info.isSparse) {
       const packageSuffix = CrateDatasource.getIndexSuffix(
         packageName.toLowerCase()
-      ).join('/');
-      const crateUrl = `${baseUrl}/${packageSuffix}`;
+      );
+      const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
