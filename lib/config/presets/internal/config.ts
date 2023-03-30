@@ -16,7 +16,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'best-practice': {
-    description: 'Preset with what renovate considers best practice.',
+    description: 'Preset with best practices from the Renovate maintainers.',
     extends: [
       'config:base',
       'docker:pinDigests',
