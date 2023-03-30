@@ -207,17 +207,6 @@ const staticGroups = {
       },
     ],
   },
-  jsTestMonMajor: {
-    description:
-      'Group non-major JS test package updates together. Note: This option will be removed, use `group:jsTestNonMajor` instead.',
-    packageRules: [
-      {
-        extends: 'packages:jsTest',
-        groupName: 'JS test packages',
-        matchUpdateTypes: ['minor', 'patch'],
-      },
-    ],
-  },
   jsTestNonMajor: {
     description: 'Group non-major JS test package updates together.',
     packageRules: [
