@@ -214,6 +214,58 @@ describe('modules/manager/regex/index', () => {
     expect(res?.deps).toHaveLength(1);
   });
 
+  it('extracts indentation: maintains indentation value if whitespace or empty', async () => {
+    const config = {
+      matchStrings: [
+        '(?<indentation>\\s*)image:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      '     image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          currentValue: '17.0.0-alpine',
+          datasource: 'docker',
+          indentation: '     ',
+        },
+      ],
+    });
+  });
+
+  it('extracts indentation: discards non-whitespace content', async () => {
+    const config = {
+      matchStrings: [
+        '(?<indentation>.*)image:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'name: image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          currentValue: '17.0.0-alpine',
+          datasource: 'docker',
+          indentation: '',
+        },
+      ],
+    });
+  });
+
   it('extracts with combination strategy', async () => {
     const config: CustomExtractConfig = {
       matchStrings: [
