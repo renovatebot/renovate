@@ -33,22 +33,22 @@ The `renovate` npm package is compatible with all of Renovate's supported platfo
 
 Renovate requires Node.js `>=18.12.0` and Git `>=2.33.0`.
 
-#### Docker image
+#### Docker images
 
 The `renovate` npm package is also distributed via Node.js images on Docker Hub (`renovate/renovate`).
 These Docker images work on all the platforms that Renovate supports.
 
 There are two flavors:
 
-- The "full" image (the `latest` tag defaults to the full image)
+- The default "full" image, this is the image you'll get if you use the `latest` tag
 - The `-slim` image
 
-##### The full image
+##### The default image
 
-The "full" image comes with every package manager that Renovate supports.
-This makes the "full" image the best choice for most users.
+The default image comes with every package manager that Renovate supports.
+This makes the default image the best choice for most users.
 
-The "full" image has some downsides, because it:
+The default image has some downsides, because it:
 
 - Only comes with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
@@ -74,7 +74,7 @@ Details for how it works can be found in the project.
 #### Mend Renovate On-Premises
 
 Mend Renovate On-Premises (WSOP) started out as a commercial product "Renovate Pro", but was renamed and made free to use when Renovate became a part of Mend (formerly WhiteSource) in 2019.
-It is built similarly to the "full" Renovate image described above, but with these differences:
+It is built similarly to the default "full" Renovate image described above, but with these differences:
 
 - It is a stateful app and does not exit after processing all repositories
 - It is installed as an App on GitHub, and behaves similarly on GitLab - for example responding to webhooks
