@@ -2,6 +2,11 @@ import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
+import {
+  REPOSITORY_DISABLED_BY_CONFIG,
+  REPOSITORY_FORKED,
+  REPOSITORY_NO_CONFIG,
+} from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
@@ -18,6 +23,7 @@ import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
+import { pruneStaleBranches } from './finalise/prune';
 import { initRepo } from './init';
 import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
@@ -92,6 +98,14 @@ export async function renovateRepository(
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
+    const pruneWhenErrors = [
+      REPOSITORY_DISABLED_BY_CONFIG,
+      REPOSITORY_FORKED,
+      REPOSITORY_NO_CONFIG,
+    ];
+    if (pruneWhenErrors.includes(errorRes)) {
+      await pruneStaleBranches(config, []);
+    }
     repoResult = processResult(config, errorRes);
   }
   if (localDir && !repoConfig.persistRepoData) {
