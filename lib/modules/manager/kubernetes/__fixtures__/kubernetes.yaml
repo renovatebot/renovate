@@ -19,6 +19,10 @@ spec:
         image: nginx:1.7.9
         ports:
         - containerPort: 80
+      - name: nginx2
+        image: nginx:1.22.1 # trailing comment
+        ports:
+          - containerPort: 8081
 
 ---
 
