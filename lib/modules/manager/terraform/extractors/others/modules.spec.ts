@@ -47,6 +47,12 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const ssh = gitTagsRefMatchRegex.exec(
         'ssh://github.com/hashicorp/example?ref=v1.0.0'
       )?.groups;
+      const depth = gitTagsRefMatchRegex.exec(
+        'ssh://github.com/hashicorp/example?depth=1&ref=v1.0.0'
+      )?.groups;
+      const folder = gitTagsRefMatchRegex.exec(
+        'git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.0.0'
+      )?.groups;
 
       expect(http).toMatchObject({
         project: 'hashicorp/example',
@@ -58,6 +64,14 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       });
       expect(ssh).toMatchObject({
         project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(depth).toMatchObject({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(folder).toMatchObject({
+        project: '/bar',
         tag: 'v1.0.0',
       });
     });
