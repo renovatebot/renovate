@@ -87,19 +87,16 @@ export async function generateLockFile(
     const lockRootUpdates: Upgrade<Record<string, any>>[] = []; // stores all upgrades which are present in root package.json
     const lockWorkspaceUpdates: Upgrade<Record<string, any>>[] = []; // stores all upgrades which are present in workspaces package.json
     const workspaces: Set<string> = new Set(); // name of all workspaces
-    const rootDeps: Set<string> = new Set(); // depName of all upgrades in root package.json (makes it easy to verify deps presence in root)
+    const rootDeps: Set<string> = new Set(); // depName of all upgrades in root package.json (makes it check duplicate deps in root)
 
     // divide the deps in two categories: workspace and root
     for (const upgrade of lockUpdates) {
       if (upgrade.isLockfileUpdate && upgrade.managerData?.hasWorkspaces) {
         const workspacePatterns = upgrade.managerData?.workspacesPackages; // glob pattern or directory name/path
-        const packageFileDir = upgrade.packageFile
-          ?.split('/')
-          .slice(0, -1)
-          .join('/'); // remove package.json from packageFile
+        const packageFileDir = upgrade.packageFile?.replace('package.json', '');
 
-        // subPackageFileDir is generally the workspace directory name
-        const subPackageFileDir = trimLeadingSlash(
+        // workspaceDir = packageFileDir - lockFileDir (root/workspace - root = workspace)
+        const workspaceDir = trimLeadingSlash(
           packageFileDir?.replace(lockFileDir, '') ?? ''
         );
 
@@ -108,24 +105,21 @@ export async function generateLockFile(
           lockRootUpdates.push(upgrade);
           rootDeps.add(`${upgrade.depName!}@${upgrade.newVersion!}`);
         }
-        // else it is only present in workspace package.json
+        // else it is present in workspace package.json
         else {
           let workspaceName: string | undefined;
-          // compare subPackageFileDir to workspace patterns
-          // stop when first match it found and add it to workspace names
-          // add workspace field to upgrade object to be used laters
+          // compare workspaceDir to workspace patterns
+          // stop when the first match is found
+          // add workspaceDir to workspaces set and upgrade object
           for (const workspacePattern of workspacePatterns ?? []) {
-            if (
-              subPackageFileDir &&
-              minimatch(subPackageFileDir, workspacePattern)
-            ) {
-              workspaceName = subPackageFileDir;
+            if (workspaceDir && minimatch(workspaceDir, workspacePattern)) {
+              workspaceName = workspaceDir;
               continue;
             }
           }
           if (
             workspaceName &&
-            !rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`) // prevent installing within workspace if dep is also present in root
+            !rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`) // prevent same dep from existing in root and workspace
           ) {
             workspaces.add(workspaceName);
             upgrade.workspace = workspaceName;
@@ -145,7 +139,7 @@ export async function generateLockFile(
           .filter((update) => update.workspace === workspace)
           .filter(
             (update) =>
-              !rootDeps.has(`${update.depName!}@${update.newVersion!}`) // filter out deps present in root again - precautionary
+              !rootDeps.has(`${update.depName!}@${update.newVersion!}`) // filter out deps present in root again to be sure
           );
         const updateCmd =
           `npm install ${cmdOptions} --workspace=${workspace}` +
