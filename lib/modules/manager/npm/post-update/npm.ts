@@ -1,3 +1,4 @@
+import minimatch from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {
@@ -17,6 +18,7 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
+import { trimLeadingSlash } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
@@ -81,11 +83,90 @@ export async function generateLockFile(
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
-    if (lockUpdates.length) {
+
+    const lockRootUpdates: Upgrade<Record<string, any>>[] = [];
+    const lockWorkspaceUpdates: Upgrade<Record<string, any>>[] = [];
+    const workspaces: Set<string> = new Set();
+    const rootDeps: Set<string> = new Set();
+
+    // divide the deps in two categories: workspace and root
+    for (const upgrade of lockUpdates) {
+      if (upgrade.isLockfileUpdate && upgrade.managerData?.hasWorkspaces) {
+        logger.debug('has workspaces');
+        const workspacePatterns = upgrade.managerData?.workspacesPackages; // glob patter or literal path
+        // remove package.json from fileName
+        const packageFileDir = upgrade.packageFile
+          ?.split('/')
+          .slice(0, -1)
+          .join('/'); // remove package.json from packageFile
+        const subPackageFileDir = trimLeadingSlash(
+          packageFileDir?.replace(lockFileDir, '') ?? ''
+        );
+
+        // if packageFileDir === lockFileDir then dep is present in root package.json
+        if (
+          packageFileDir === lockFileDir &&
+          !rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`) // prevents duplicate deps
+        ) {
+          lockRootUpdates.push(upgrade);
+          rootDeps.add(`${upgrade.depName!}@${upgrade.newVersion!}`);
+        }
+        // else it is only present in workspace package.json
+        else {
+          // parse the packageFileDir and compare it to workspaces to figure out workspace name
+          let workspaceName: string | undefined;
+          // it is a workspace if any workspacc pattern matches with fileName
+          for (const workspacePattern of workspacePatterns ?? []) {
+            if (
+              subPackageFileDir &&
+              minimatch(subPackageFileDir, workspacePattern)
+            ) {
+              workspaceName = subPackageFileDir;
+              continue; // one dep should only match one workspace as we divide the deps per packageFile
+            }
+          }
+          if (
+            workspaceName &&
+            !rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`)
+          ) {
+            workspaces.add(workspaceName);
+            upgrade.workspace = workspaceName;
+            lockWorkspaceUpdates.push(upgrade);
+          }
+        }
+      } else {
+        if (!rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`)) {
+          lockRootUpdates.push(upgrade);
+          rootDeps.add(`${upgrade.depName!}@${upgrade.newVersion!}`);
+        }
+      }
+    }
+
+    if (workspaces.size) {
+      logger.debug('Performing lockfileUpdate (npm-worspaces)');
+      for (const workspace of workspaces) {
+        const currentUpdates = lockWorkspaceUpdates
+          .filter((update) => update.workspace === workspace)
+          .filter(
+            (update) =>
+              !rootDeps.has(`${update.depName!}@${update.newVersion!}`) // make sure there are no deps present in root already
+          );
+        const updateCmd =
+          `npm install ${cmdOptions} --workspace=${workspace}` +
+          currentUpdates
+            // TODO: types (#7154)
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            .map((update) => ` ${update.depName}@${update.newVersion}`)
+            .join('');
+        commands.push(updateCmd);
+      }
+    }
+
+    if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
         `npm install ${cmdOptions}` +
-        lockUpdates
+        lockRootUpdates
           // TODO: types (#7154)
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           .map((update) => ` ${update.depName}@${update.newVersion}`)
