@@ -8,5 +8,5 @@ export function extractPerlVersion(txt: string): string | null {
 }
 
 export function formatContent(input: string): string {
-  return input.replace(regEx(/^ {2}/), '') + '\n'; //remove leading witespace and add a new line at the end
+  return `${input.trimStart()}\n`; //remove leading witespace and add a new line at the end
 }
