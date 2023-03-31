@@ -262,7 +262,7 @@
     "@types/clean-git-ref": "2.0.0",
     "@types/common-tags": "1.8.1",
     "@types/conventional-commits-detector": "1.0.0",
-    "@types/diff": "5.0.2",
+    "@types/diff": "5.0.3",
     "@types/eslint": "8.21.3",
     "@types/fs-extra": "11.0.1",
     "@types/git-url-parse": "9.0.1",
@@ -329,7 +329,7 @@
     "tmp-promise": "3.0.3",
     "ts-jest": "29.0.5",
     "ts-node": "10.9.1",
-    "type-fest": "3.6.1",
+    "type-fest": "3.7.0",
     "typescript": "4.9.5",
     "unified": "9.2.2"
   },
