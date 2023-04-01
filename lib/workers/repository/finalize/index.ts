@@ -12,7 +12,7 @@ import {
 } from './repository-statistics';
 
 // istanbul ignore next
-export async function finaliseRepo(
+export async function finalizeRepo(
   config: RenovateConfig,
   branchList: string[]
 ): Promise<void> {
