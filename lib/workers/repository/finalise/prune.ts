@@ -5,16 +5,18 @@ import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import { ensureComment } from '../../../modules/platform/comment';
 import { scm } from '../../../modules/platform/scm';
-import { getBranchList } from '../../../util/git';
+import { getBranchList, setUserRepoConfig } from '../../../util/git';
 
 async function cleanUpBranches(
-  { pruneStaleBranches: enabled }: RenovateConfig,
+  config: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
-  if (enabled === false) {
+  if (!config.pruneStaleBranches) {
     logger.debug('Branch/PR pruning is disabled - skipping');
     return;
   }
+  // set Git author in case the repository is not initialized yet
+  setUserRepoConfig(config);
   for (const branchName of remainingBranches) {
     try {
       const pr = await platform.findPr({
