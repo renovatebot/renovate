@@ -1872,15 +1872,15 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'eclipse-temurin',
-          newValue: '17.0.0',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
         },
       ]);
     });
@@ -1909,16 +1909,16 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'eclipse-temurin',
-          newValue: '17.0.0',
-          newDigest: 'sha256:abcdef1234567890',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+          newDigest: 'sha256:abcdef1234567890',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
           newDigest: 'sha256:0123456789abcdef',
         },
         {
@@ -1990,15 +1990,15 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'new.registry.io/library/openjdk',
-          newValue: '17.0.0',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '17.0.0',
         },
       ]);
     });
@@ -2022,15 +2022,15 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'new.registry.io/library/openjdk',
-          newValue: '18.0.0',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'new.registry.io/library/openjdk',
+          newValue: '18.0.0',
         },
       ]);
     });
@@ -2054,15 +2054,38 @@ describe('workers/repository/process/lookup/index', () => {
 
       expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
         {
-          updateType: 'replacement',
-          newName: 'eclipse-temurin',
-          newValue: '17.0.0',
-        },
-        {
           updateType: 'major',
           newMajor: 18,
           newValue: '18.0.0',
           newVersion: '18.0.0',
+        },
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0',
+        },
+      ]);
+    });
+
+    it('handles replacements - can perform replacement even for invalid versioning', async () => {
+      config.packageName = 'adoptopenjdk/openjdk11';
+      config.currentValue = 'alpine-jre';
+      config.replacementName = 'eclipse-temurin';
+      config.replacementVersion = '17.0.0-jre-alpine';
+      config.datasource = DockerDatasource.id;
+      getDockerReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: 'alpine-jre',
+          },
+        ],
+      });
+
+      expect((await lookup.lookupUpdates(config)).updates).toMatchObject([
+        {
+          updateType: 'replacement',
+          newName: 'eclipse-temurin',
+          newValue: '17.0.0-jre-alpine',
         },
       ]);
     });

@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
 
 export interface ToolConstraint {
   toolName: string;
