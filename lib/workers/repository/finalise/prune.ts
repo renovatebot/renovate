@@ -15,7 +15,7 @@ async function cleanUpBranches(
     logger.debug('Branch/PR pruning is disabled - skipping');
     return;
   }
-  // set git author in case repo is not initialised yet
+  // set Git author in case the repository is not initialized yet
   setUserRepoConfig(config);
   for (const branchName of remainingBranches) {
     try {
