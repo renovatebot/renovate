@@ -35,7 +35,7 @@ Renovate requires Node.js `>=18.12.0` and Git `>=2.33.0`.
 
 #### Docker images
 
-The `renovate` npm package is also distributed via Node.js images on Docker Hub (`renovate/renovate`).
+Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`) and GitHub container registry (`ghcr.io/renovatebot/renovate`).
 These Docker images work on all the platforms that Renovate supports.
 
 There are two flavors:
@@ -50,7 +50,7 @@ This makes the default image the best choice for most users.
 
 The default image has some downsides, because it:
 
-- Only comes with _one_ version of each language/manager - usually the latest
+- Comes pre-installed _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
 
 ##### The slim image
@@ -192,7 +192,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 
 ### GitHub.com token for release notes
 
-If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it. QUESTION: this should probably be encrypted somehow???
+If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
 This account can actually be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
