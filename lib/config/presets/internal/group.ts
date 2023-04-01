@@ -207,7 +207,7 @@ const staticGroups = {
       },
     ],
   },
-  jsTestMonMajor: {
+  jsTestNonMajor: {
     description: 'Group non-major JS test package updates together.',
     packageRules: [
       {

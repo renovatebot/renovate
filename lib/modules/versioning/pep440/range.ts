@@ -5,19 +5,22 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig } from '../types';
 
-const UserPolicy = {
+const UserPolicyPrecisionMap = {
   Major: 0,
   Minor: 1,
   Micro: 2,
   Bug: 3,
+  None: Infinity,
+} as const;
+const PrecisionUserPolicyMap = {
   0: 'Major',
   1: 'Minor',
   2: 'Micro',
   3: 'Bug',
-  None: Infinity,
 } as const;
 
-type UserPolicy = (typeof UserPolicy)[keyof typeof UserPolicy];
+type UserPolicy =
+  (typeof UserPolicyPrecisionMap)[keyof typeof UserPolicyPrecisionMap];
 
 /**
  * Calculate current update range precision.
@@ -41,7 +44,7 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
   }
   // Tune down Major precision if followed by a zero
   if (
-    rangePrecision === UserPolicy.Major &&
+    rangePrecision === UserPolicyPrecisionMap.Major &&
     rangePrecision + 1 < bound.length &&
     bound[rangePrecision + 1] === 0
   ) {
@@ -53,8 +56,11 @@ function getRangePrecision(ranges: Range[]): UserPolicy {
   if (rangePrecision === -1) {
     rangePrecision = bound.length - 1;
   }
-  const key = UserPolicy[rangePrecision as keyof typeof UserPolicy];
-  return UserPolicy[key as keyof typeof UserPolicy];
+  const key =
+    PrecisionUserPolicyMap[
+      rangePrecision as keyof typeof PrecisionUserPolicyMap
+    ];
+  return UserPolicyPrecisionMap[key as keyof typeof UserPolicyPrecisionMap];
 }
 
 /**
@@ -290,7 +296,7 @@ function updateRangeValue(
   // keep the .* suffix
   if (range.prefix) {
     const futureVersion = getFutureVersion(
-      UserPolicy.None,
+      UserPolicyPrecisionMap.None,
       newVersion,
       range.version
     ).join('.');
@@ -408,8 +414,12 @@ function handleWidenStrategy(
       const len = upperBound.length;
       // Match the precision of the smallest specifier if other than 0
       if (upperBound[len - 1] !== 0) {
-        const key = UserPolicy[(len - 1) as keyof typeof UserPolicy];
-        rangePrecision = UserPolicy[key as keyof typeof UserPolicy];
+        const key =
+          PrecisionUserPolicyMap[
+            (len - 1) as keyof typeof PrecisionUserPolicyMap
+          ];
+        rangePrecision =
+          UserPolicyPrecisionMap[key as keyof typeof UserPolicyPrecisionMap];
       }
       let futureVersion = getFutureVersion(
         rangePrecision,
