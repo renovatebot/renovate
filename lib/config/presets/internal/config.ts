@@ -15,7 +15,7 @@ export const presets: Record<string, Preset> = {
       'workarounds:all',
     ],
   },
-  'best-practice': {
+  'best-practices': {
     description: 'Preset with best practices from the Renovate maintainers.',
     extends: [
       'config:base',
