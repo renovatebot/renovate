@@ -212,7 +212,7 @@
     "minimatch": "5.1.6",
     "moo": "0.5.2",
     "ms": "2.1.3",
-    "nanoid": "3.3.4",
+    "nanoid": "3.3.6",
     "node-html-parser": "6.1.5",
     "openpgp": "5.7.0",
     "p-all": "3.0.0",
