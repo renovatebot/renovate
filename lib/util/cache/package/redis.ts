@@ -76,7 +76,7 @@ export async function set(
       { EX: redisTTL }
     );
   } catch (err) {
-    logger.debug({ err, namespace, key }, 'Error setting cache value');
+    logger.once.debug({ err }, 'Error while setting cache value');
   }
 }
 
