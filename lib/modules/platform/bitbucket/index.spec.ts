@@ -1153,9 +1153,9 @@ describe('modules/platform/bitbucket/index', () => {
       const issueBody =
         '## Rate-Limited\n' +
         'These updates are currently rate-limited. Click on a checkbox below to force their creation now\n' +
-        ' - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6\n' +
-        ' - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10\n' +
-        ' - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4\n' +
+        ' - Update dependency ansi-regex to v6\n' +
+        ' - Update dependency commander to v10\n' +
+        ' - Update dependency graceful-fs to v4\n' +
         ' - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐';
       expect(bitbucket.massageMarkdown(issueBody)).toMatchSnapshot();
     });

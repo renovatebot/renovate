@@ -143,9 +143,9 @@ exports[`modules/platform/bitbucket/index initRepo() works with username and pas
 exports[`modules/platform/bitbucket/index massageMarkdown() removes create all rate-limited PRs at once text 1`] = `
 "## Rate-Limited
 These updates are currently rate-limited. Click on a checkbox below to force their creation now
- - [ ] <!-- unlimit-branch=renovate/ansi-regex-6.x -->Update dependency ansi-regex to v6
- - [ ] <!-- unlimit-branch=renovate/commander-10.x -->Update dependency commander to v10
- - [ ] <!-- unlimit-branch=renovate/graceful-fs-4.x -->Update dependency graceful-fs to v4
+ - Update dependency ansi-regex to v6
+ - Update dependency commander to v10
+ - Update dependency graceful-fs to v4
 "
 `;
 
