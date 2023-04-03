@@ -125,6 +125,31 @@ describe('workers/repository/process/vulnerabilities', () => {
       expect(config.packageRules).toHaveLength(0);
     });
 
+    it('withdrawn vulnerability', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              { depName: 'lodash', currentValue: '4.17.10', datasource: 'npm' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          withdrawn: '2021-11-29T18:17:00Z',
+        },
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      expect(logger.logger.trace).toHaveBeenCalledWith(
+        'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm'
+      );
+      expect(config.packageRules).toHaveLength(0);
+    });
+
     it('invalid dep version', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
