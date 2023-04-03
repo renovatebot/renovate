@@ -632,7 +632,7 @@ export async function isBranchModified(
   try {
     if (baseBranch) {
       logger.debug(
-        `branch.isModified(): using git to calculate with ${baseBranch}`
+        `branch.isModified(): using git to calculate authors between ${branchName} and ${baseBranch}`
       );
       branchAuthors = [
         ...new Set(
@@ -649,7 +649,9 @@ export async function isBranchModified(
         ),
       ];
     } else {
-      logger.debug(`branch.isModified(): using git to calculate`);
+      logger.debug(
+        `branch.isModified(): checking last author of ${branchName}`
+      );
       branchAuthors = [
         ...new Set(
           (
