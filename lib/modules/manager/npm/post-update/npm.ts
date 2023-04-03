@@ -91,7 +91,10 @@ export async function generateLockFile(
 
     // divide the deps in two categories: workspace and root
     for (const upgrade of lockUpdates) {
-      if (upgrade.isLockfileUpdate && upgrade.managerData?.hasWorkspaces) {
+      if (
+        upgrade.isLockfileUpdate &&
+        upgrade.managerData?.workspacesPackages.length
+      ) {
         const workspacePatterns = upgrade.managerData?.workspacesPackages; // glob pattern or directory name/path
         const packageFileDir = upgrade.packageFile?.replace('package.json', '');
 

@@ -42,7 +42,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
     ],
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -57,7 +56,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -114,7 +112,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
     ],
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -129,7 +126,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -162,7 +158,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
@@ -177,7 +172,6 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
