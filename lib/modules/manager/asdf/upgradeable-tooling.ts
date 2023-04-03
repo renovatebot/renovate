@@ -372,7 +372,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mozilla/sops',
-      extractVersion: '^v(?<version>\\S+)'
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   terraform: {
