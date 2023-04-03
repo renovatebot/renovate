@@ -46,5 +46,6 @@ export async function createOnboardingBranch(
     ],
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
+    force: true,
   });
 }

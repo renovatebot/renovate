@@ -26,7 +26,7 @@ const result = Object.keys(prJson).map((key) => {
   return prJson[key];
 });
 
-describe('workers/repository/finalise/repository-statistics', () => {
+describe('workers/repository/finalize/repository-statistics', () => {
   let config: RenovateConfig;
 
   describe('runRenovateRepoStats', () => {

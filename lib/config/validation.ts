@@ -333,6 +333,7 @@ export async function validateConfig(
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
+              'matchConfidence',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {

@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 import _glob from 'glob';
 
 const glob = util.promisify(_glob);
