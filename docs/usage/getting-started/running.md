@@ -58,7 +58,7 @@ If you want, you can map the Docker socket into the container so that Renovate c
 
 ##### The default image
 
-The default image comes with every package manager that Renovate supports.
+The default image comes with most package manager that Renovate supports.
 This makes the default image the best choice for most users.
 
 You'll need to change to global mode, or Renovate still installs the latest version of the tools or the requested version from the repository.
