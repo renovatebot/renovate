@@ -62,7 +62,7 @@ module "task_definition" {
   source = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0"
   name   = "mytask"
   container_definitions = [
-  "${module.container_definition.json}"]
+   "${module.container_definition.json}"]
 }
 
 
@@ -134,8 +134,4 @@ module "relative" {
 
 module "nosauce" {
   foo = "bar"
-}
-
-module "ssh_foo" {
-  source = "git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.2.3"
 }

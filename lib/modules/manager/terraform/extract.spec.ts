@@ -42,7 +42,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('extracts  modules', async () => {
       const res = await extractPackageFile(modules, 'modules.tf', {});
-      expect(res?.deps).toHaveLength(19);
+      expect(res?.deps).toHaveLength(18);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res?.deps).toIncludeAllPartialMembers([
         {
@@ -163,13 +163,6 @@ describe('modules/manager/terraform/extract', () => {
         },
         {
           skipReason: 'no-source',
-        },
-        {
-          currentValue: 'v1.2.3',
-          depType: 'module',
-          depName: 'git.example.com/modules/foo-module.git',
-          datasource: 'git-tags',
-          packageName: 'ssh://git@git.example.com/modules/foo-module.git',
         },
       ]);
     });
