@@ -50,7 +50,7 @@ This makes the default image the best choice for most users.
 
 The default image has some downsides, because it:
 
-- Comes pre-installed _one_ version of each language/manager - usually the latest
+- Comes pre-installed with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
 
 ##### The slim image
