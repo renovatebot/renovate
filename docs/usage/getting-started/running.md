@@ -36,7 +36,13 @@ Renovate requires Node.js `>=18.12.0` and Git `>=2.33.0`.
 #### Docker images
 
 Renovate is also distributed as Docker images on Docker Hub (`renovate/renovate`) and GitHub container registry (`ghcr.io/renovatebot/renovate`).
-These Docker images work on all the platforms that Renovate supports.
+These Docker images work on all the hosting platforms that Renovate supports.
+
+You must run the Docker images in a `linux/amd64` container.
+We're working on `linux/arm64` container support.
+You can't run the Docker images on a Windows or macOS container.
+
+In general, you can run Renovate on Windows with global mode.
 
 There are two flavors:
 
