@@ -15,17 +15,19 @@ export class GithubGraphqlPackageCacheStrategy<
   async persist(
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>
   ): Promise<void> {
-    const expiry = this.createdAt.plus({
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
-    });
-    const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
-    if (ttlMinutes && ttlMinutes > 0) {
-      await packageCache.set(
-        this.cacheNs,
-        this.cacheKey,
-        cacheRecord,
-        ttlMinutes
-      );
+    if (this.hasUpdatedItems) {
+      const expiry = this.createdAt.plus({
+        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+      });
+      const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
+      if (ttlMinutes && ttlMinutes > 0) {
+        await packageCache.set(
+          this.cacheNs,
+          this.cacheKey,
+          cacheRecord,
+          ttlMinutes
+        );
+      }
     }
   }
 }

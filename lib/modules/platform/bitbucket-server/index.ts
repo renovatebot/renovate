@@ -148,7 +148,7 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,

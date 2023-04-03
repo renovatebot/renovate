@@ -15,7 +15,10 @@ import {
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import {
+  getPrBodyStruct,
+  hashBody,
+} from '../../../../modules/platform/pr-body';
 import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
@@ -47,12 +50,12 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: config.azureAutoApprove,
-    azureWorkItemId: config.azureWorkItemId,
-    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gerritAutoApprove: config.gerritAutoApprove,
-    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
-    forkModeDisallowMaintainerEdits: config.forkModeDisallowMaintainerEdits,
+    azureAutoApprove: !!config.azureAutoApprove,
+    azureWorkItemId: config.azureWorkItemId ?? 0,
+    bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
+    gerritAutoApprove: !!config.gerritAutoApprove,
+    gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -120,7 +123,9 @@ export async function ensurePr(
   const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
-    if (prCache) {
+    if (existingPr.bodyStruct?.rebaseRequested) {
+      logger.debug('PR rebase requested, so skipping cache check');
+    } else if (prCache) {
       logger.trace({ prCache }, 'Found existing PR cache');
       // return if pr cache is valid and pr was not changed in the past 24hrs
       if (validatePrCache(prCache, prFingerprint)) {
@@ -355,6 +360,7 @@ export async function ensurePr(
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+        return { type: 'with-pr', pr: existingPr };
       } else {
         await platform.updatePr({
           number: existingPr.number,
@@ -365,7 +371,14 @@ export async function ensurePr(
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
         setPrCache(branchName, prFingerprint, true);
       }
-      return { type: 'with-pr', pr: existingPr };
+      return {
+        type: 'with-pr',
+        pr: {
+          ...existingPr,
+          bodyStruct: getPrBodyStruct(prBody),
+          title: prTitle,
+        },
+      };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     if (config.updateType === 'rollback') {
@@ -392,7 +405,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: config.draftPR,
+          draftPR: !!config.draftPR,
         });
 
         incLimitedValue('PullRequests');

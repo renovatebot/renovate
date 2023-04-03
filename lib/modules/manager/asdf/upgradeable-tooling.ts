@@ -305,7 +305,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'pulumi/pulumi',
-      versioning: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   python: {

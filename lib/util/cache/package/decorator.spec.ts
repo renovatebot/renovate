@@ -1,4 +1,5 @@
-import os from 'os';
+import os from 'node:os';
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';
 import * as packageCache from '.';
@@ -37,8 +38,8 @@ describe('util/cache/package/decorator', () => {
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledOnceWith(
       'some-namespace',
-      'some-key',
-      '111',
+      'cache-decorator:some-key',
+      { cachedAt: expect.any(String), value: '111' },
       30
     );
   });
@@ -75,7 +76,12 @@ describe('util/cache/package/decorator', () => {
     expect(await obj.fn(null)).toBeNull();
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith('namespace', 'key', null, 30);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), value: null },
+      30
+    );
   });
 
   it('does not cache undefined', async () => {
@@ -120,8 +126,8 @@ describe('util/cache/package/decorator', () => {
     expect(getValue).toHaveBeenCalledTimes(1);
     expect(setCache).toHaveBeenCalledOnceWith(
       'some-namespace',
-      'some-key',
-      '111',
+      'cache-decorator:some-key',
+      { cachedAt: expect.any(String), value: '111' },
       30
     );
   });
@@ -140,6 +146,103 @@ describe('util/cache/package/decorator', () => {
     expect(await fn.value?.()).toBe('111');
 
     expect(getValue).toHaveBeenCalledTimes(1);
-    expect(setCache).toHaveBeenCalledOnceWith('namespace', 'key', '111', 30);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), value: '111' },
+      30
+    );
+  });
+
+  describe('Fallbacks with hard TTL', () => {
+    class Class {
+      @cache({
+        namespace: 'namespace',
+        key: 'key',
+        ttlMinutes: 1,
+      })
+
+      // Hard TTL is enabled only for `getReleases` and `getDigest` methods
+      public getReleases(): Promise<string> {
+        return getValue();
+      }
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false });
+      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      GlobalConfig.reset();
+    });
+
+    it('updates cached result', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(60 * 1000 - 1);
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(1);
+      expect(await obj.getReleases()).toBe('222');
+      expect(getValue).toHaveBeenCalledTimes(2);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '222' },
+        2
+      );
+    });
+
+    it('returns obsolete result on error', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(60 * 1000);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(2);
+      expect(setCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops obsolete value after hard TTL is out', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(2 * 60 * 1000 - 1);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      expect(await obj.getReleases()).toBe('111');
+
+      jest.advanceTimersByTime(1);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      await expect(obj.getReleases()).rejects.toThrow('test');
+    });
   });
 });

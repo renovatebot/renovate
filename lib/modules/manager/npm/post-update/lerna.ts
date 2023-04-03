@@ -40,7 +40,7 @@ export async function generateLockFiles(
   lockFileDir: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
-  skipInstalls?: boolean
+  skipInstalls?: boolean | null
 ): Promise<GenerateLockFileResult> {
   const lernaClient = lernaPackageFile.managerData?.lernaClient;
   if (!is.nonEmptyString(lernaClient)) {

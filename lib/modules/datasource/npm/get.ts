@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
@@ -99,12 +99,12 @@ export async function getDependency(
   try {
     const options: HttpOptions = {};
     if (cachedResult?.cacheData?.etag) {
-      logger.debug('Using cached etag');
+      logger.trace({ packageName }, 'Using cached etag');
       options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.debug({ packageName }, 'Cached npm result is revalidated');
+      logger.trace(`Cached npm result for ${packageName} is revalidated`);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,

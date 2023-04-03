@@ -3,7 +3,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -76,7 +76,7 @@ export class GoDatasource extends Datasource {
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
-      case BitBucketTagsDatasource.id: {
+      case BitbucketTagsDatasource.id: {
         return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
       }
       case GitlabTagsDatasource.id: {

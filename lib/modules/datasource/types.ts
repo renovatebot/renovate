@@ -48,12 +48,12 @@ export interface Release {
   isStable?: boolean;
   releaseTimestamp?: any;
   version: string;
-  newDigest?: string;
+  newDigest?: string | undefined;
   constraints?: Record<string, string[]>;
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   registryUrl?: string;
-  sourceUrl?: string;
+  sourceUrl?: string | undefined;
   sourceDirectory?: string;
 }
 
@@ -61,11 +61,11 @@ export interface ReleaseResult {
   deprecationMessage?: string;
   isPrivate?: boolean;
   releases: Release[];
-  tags?: Record<string, string>;
+  tags?: Record<string, string> | undefined;
   // URL metadata
   changelogUrl?: string;
   dependencyUrl?: string;
-  homepage?: string;
+  homepage?: string | undefined;
   gitRef?: string;
   sourceUrl?: string | null;
   sourceDirectory?: string;
@@ -81,8 +81,8 @@ export interface DatasourceApi extends ModuleApi {
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[] | (() => string[]);
-  defaultVersioning?: string;
-  defaultConfig?: Record<string, unknown>;
+  defaultVersioning?: string | undefined;
+  defaultConfig?: Record<string, unknown> | undefined;
 
   /**
    * Strategy to use when multiple registryUrls are available to the datasource.
@@ -90,7 +90,7 @@ export interface DatasourceApi extends ModuleApi {
    * hunt: registryUrls will be tried in order until one returns a result
    * merge: all registryUrls will be tried and the results merged if more than one returns a result
    */
-  registryStrategy?: RegistryStrategy;
+  registryStrategy?: RegistryStrategy | undefined;
 
   /**
    * Whether custom registryUrls are allowed.
@@ -102,8 +102,5 @@ export interface DatasourceApi extends ModuleApi {
    * true: datasoure index wrapper should cache all results (based on registryUrl/packageName)
    * false: caching is not performed, or performed within the datasource implementation
    */
-  caching?: boolean;
-
-  /** optional URLs to add to docs as references */
-  urls?: string[];
+  caching?: boolean | undefined;
 }

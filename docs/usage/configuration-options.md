@@ -342,13 +342,13 @@ Solutions:
 
 <!-- prettier-ignore -->
 !!! warning
-    We strongly recommended that you do not configure this field directly.
+    We strongly recommended that you avoid configuring this field directly.
     Use at your own risk.
 
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-- You have a use case we didn't expect and we should have a feature request from you to add it to the project
+- You have a use case we didn't expect, please open a discussion to see if we want to get a feature request from you
 
 ## branchNameStrict
 
@@ -802,12 +802,41 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+Before you put any secrets in your repository configuration, encrypt the secrets.
+You can encrypt secrets using either a HTML page, or the CLI.
+
+To encrypt secrets for the hosted Mend Renovate app for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
+If you're self-hosting Renovate, you may download and edit the form, to use your own PGP public key.
+
+You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`, `grep` and `tr` CLI programs.
+Here is an example:
+
+```
+curl https://app.renovatebot.com/renovate.pgp --output renovate.pgp
+echo -n '{"o":"your-organization", "r":"your-repository (optional)", "v":"your-secret-value"}' | jq . -c | gpg --encrypt -a --recipient-file renovate.pgp | grep -v '^----' | tr -d '\n'
+```
+
+The above script uses:
+
+- `curl` to download the Mend Renovate hosted app's public key
+- `echo` to echo a JSON object into `jq`
+- `jq` to validate the JSON and then compact it
+- `gpg` to encrypt the contents
+- `grep` and `tr` to extract the encrypted payload which we will use
+
+The `jq` step is optional, you can leave it out if you wish.
+Its primary value is validating that the string you echo to `gpg` is valid JSON, and compact.
 
 <!-- prettier-ignore -->
 !!! note
     Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
     This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
+
+Encrypted secrets usually have a single organization.
+But you may encrypt a secret with more than one organization, for example: `org1,org2`.
+This way the secret can be used in both the `org1` and `org2` organizations.
+
+For more information on how to use secrets for private packages, read [Private package support](https://docs.renovatebot.com/getting-started/private-packages).
 
 ## excludeCommitPaths
 
@@ -964,8 +993,12 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 ## forkProcessing
 
 By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file, because Renovate can't tell if that file was added by the original repository or not.
+This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
 If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+
+<!-- prettier-ignore -->
+!!! note
+    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
 
 If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
 
@@ -2151,6 +2184,39 @@ For example to apply a special label for Major updates:
 }
 ```
 
+### matchConfidence
+
+<!-- prettier-ignore -->
+!!! warning
+    This configuration option needs a Mend API key, and is in private beta testing only.
+    API keys are not available for free or via the `renovatebot/renovate` repository.
+
+For example to group high merge confidence updates:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchConfidence": ["high", "very high"],
+      "groupName": "high merge confidence"
+    }
+  ]
+}
+```
+
+Tokens can be configured via `hostRules` using the `"merge-confidence"` `hostType`:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "merge-confidence",
+      "token": "********"
+    }
+  ]
+}
+```
+
 ### customChangelogUrl
 
 Use this field to set the source URL for a package, including overriding an existing one.
@@ -2192,8 +2258,55 @@ Managers which do not support replacement:
 - `regex`
 
 Use the `replacementName` config option to set the name of a replacement package.
-Must be used with `replacementVersion` (see example below).
+
+Can be used in combination with `replacementVersion`.
+
 You can suggest a new community package rule by editing [the `replacements.ts` file on the Renovate repository](https://github.com/renovatebot/renovate/blob/main/lib/config/presets/internal/replacements.ts) and opening a pull request.
+
+### replacementNameTemplate
+
+<!-- prettier-ignore -->
+!!! note
+    `replacementName` will take precedence if used within the same package rule.
+
+Use the `replacementNameTemplate` config option to control the replacement name.
+
+Use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+For example, the following package rule can be used to replace the registry for `docker` images:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^docker\\.io/.+"],
+      "replacementNameTemplate": "{{{replace 'docker\\.io/' 'ghcr.io/' packageName}}}"
+    }
+  ]
+}
+```
+
+Or, to add a registry prefix to any `docker` images that do not contain an explicit registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^[a-z-]+$"],
+      "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
+    },
+    {
+      "description": "non-official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^[a-z-]+/[a-z-]+$"],
+      "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
+    }
+  ]
+}
+```
 
 ### replacementVersion
 
@@ -2406,9 +2519,16 @@ e.g. if you wish to add an extra Warning to major updates:
 
 ## prBodyTemplate
 
-This setting controls which sections are rendered in the body of the pull request.
+The available sections are:
 
-The available sections are header, table, notes, changelogs, configDescription, controls, footer.
+- `header`
+- `table`
+- `warnings`
+- `notes`
+- `changelogs`
+- `configDescription`
+- `controls`
+- `footer`
 
 ## prConcurrentLimit
 

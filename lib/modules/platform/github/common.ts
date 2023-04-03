@@ -50,6 +50,10 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.closedAt = pr.closed_at;
   }
 
+  if (pr.base?.ref) {
+    result.targetBranch = pr.base.ref;
+  }
+
   schema.match(platformSchemas.Pr, result, 'warn');
   return result;
 }

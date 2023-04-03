@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';

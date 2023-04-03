@@ -8,6 +8,7 @@ import type {
   RangeConfig,
 } from '../../../../modules/manager/types';
 import type { SkipReason } from '../../../../types';
+import type { MergeConfidence } from '../../../../util/merge-confidence/types';
 
 export interface FilterConfig {
   allowedVersions?: string;
@@ -43,8 +44,9 @@ export interface LookupUpdateConfig
   separateMultipleMajor?: boolean;
   datasource: string;
   packageName: string;
-  minimumConfidence?: string;
+  minimumConfidence?: MergeConfidence | undefined;
   replacementName?: string;
+  replacementNameTemplate?: string;
   replacementVersion?: string;
 }
 

@@ -62,7 +62,7 @@ export async function filterInternalChecks(
       if (is.integer(stabilityDays) && releaseTimestamp) {
         if (getElapsedDays(releaseTimestamp) < stabilityDays) {
           // Skip it if it doesn't pass checks
-          logger.debug(
+          logger.trace(
             { depName, check: 'stabilityDays' },
             `Release ${candidateRelease.version} is pending status checks`
           );
@@ -73,16 +73,17 @@ export async function filterInternalChecks(
 
       // TODO #7154
       if (isActiveConfidenceLevel(minimumConfidence!)) {
-        const confidenceLevel = await getMergeConfidenceLevel(
-          datasource!,
-          depName!,
-          currentVersion!,
-          newVersion,
-          updateType!
-        );
+        const confidenceLevel =
+          (await getMergeConfidenceLevel(
+            datasource!,
+            depName!,
+            currentVersion!,
+            newVersion,
+            updateType!
+          )) ?? 'neutral';
         // TODO #7154
         if (!satisfiesConfidenceLevel(confidenceLevel, minimumConfidence!)) {
-          logger.debug(
+          logger.trace(
             { depName, check: 'minimumConfidence' },
             `Release ${candidateRelease.version} is pending status checks`
           );
@@ -97,7 +98,7 @@ export async function filterInternalChecks(
     if (!release) {
       if (pendingReleases.length) {
         // If all releases were pending then just take the highest
-        logger.debug(
+        logger.trace(
           { depName, bucket },
           'All releases are pending - using latest'
         );
