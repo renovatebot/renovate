@@ -46,25 +46,31 @@ In general, you can run Renovate on Windows with global mode.
 
 There are two flavors:
 
-- The default "full" image, this is the image you'll get if you use the `latest` tag
 - The `-slim` image
+- The default "full" image, this is the image you'll get if you use the `latest` tag
+
+##### The slim image
+
+The `-slim` image only comes with the Node.js environment.
+By default, the image installs the required tools when needed.
+
+If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 
 ##### The default image
 
 The default image comes with every package manager that Renovate supports.
 This makes the default image the best choice for most users.
 
+You'll need to change to global mode, or Renovate still installs the latest version of the tools or the requested version from the repository.
+The pre-installed tool are sometimes outdated if the user doesn't update the Docker image regularly.
+
+We also support a persistent cache for downloaded tools, so that we only need to unpack on second+ run.
+
+The default image is for user who don't want to download or install things at runtime.
 The default image has some downsides, because it:
 
 - Comes pre-installed with _one_ version of each language/manager - usually the latest
 - Weighs several gigabytes
-
-##### The slim image
-
-The `-slim` image only comes with the Node.js environment, so it works when:
-
-- you don't need any additional package managers, or
-- you map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed
 
 #### GitHub Action
 
