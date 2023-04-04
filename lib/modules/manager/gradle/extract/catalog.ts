@@ -179,7 +179,6 @@ function extractDependency({
     }
     return {
       depName: `${groupName}:${name}`,
-      groupName,
       currentValue,
       managerData: {
         fileReplacePosition:
@@ -209,7 +208,7 @@ function extractDependency({
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
-    const groupName = is.nullOrUndefined(versionRef) ? group : versionRef; // usage of common variable should have higher priority than other values
+    const groupName = is.nullOrUndefined(versionRef) ? undefined : versionRef; // usage of common variable should have higher priority than other values
     return {
       depName: `${group}:${name}`,
       groupName,
@@ -218,7 +217,7 @@ function extractDependency({
     };
   }
   const [depGroupName, name] = descriptor.module.split(':');
-  const groupName = is.nullOrUndefined(versionRef) ? depGroupName : versionRef;
+  const groupName = is.nullOrUndefined(versionRef) ? undefined : versionRef;
   const dependency = {
     depName: `${depGroupName}:${name}`,
     groupName,

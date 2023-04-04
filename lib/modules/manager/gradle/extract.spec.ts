@@ -416,7 +416,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'org.mockito:mockito-core',
-              groupName: 'org.mockito',
               currentValue: '3.10.0',
               managerData: {
                 fileReplacePosition: 474,
@@ -425,7 +424,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.github.siom79.japicmp:japicmp',
-              groupName: 'com.github.siom79.japicmp',
               currentValue: '0.15.+',
               managerData: {
                 fileReplacePosition: 561,
@@ -504,7 +502,6 @@ describe('modules/manager/gradle/extract', () => {
           deps: [
             {
               depName: 'com.squareup.okhttp3:okhttp',
-              groupName: 'com.squareup.okhttp3',
               currentValue: '4.9.0',
               managerData: {
                 fileReplacePosition: 99,
@@ -513,7 +510,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.squareup.okio:okio',
-              groupName: 'com.squareup.okio',
               currentValue: '2.8.0',
               managerData: {
                 fileReplacePosition: 161,
@@ -522,7 +518,6 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'com.squareup.picasso:picasso',
-              groupName: 'com.squareup.picasso',
               currentValue: '2.5.1',
               managerData: {
                 fileReplacePosition: 243,
