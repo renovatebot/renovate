@@ -68,12 +68,12 @@ export class DenoDatasource extends Datasource {
     key: (moduleAPIURL) => moduleAPIURL,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
-    const cache: Record<string, Release> =
+    const releasesCache: Record<string, Release> =
       (await packageCache.get(
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL
       )) ?? {};
-    let isModified = false;
+    let cacheModified = false;
 
     const { body } = await this.http.getJson(moduleAPIURL);
     const { versions, tags } = DenoAPIModuleResponse.parse(body);
@@ -82,7 +82,7 @@ export class DenoDatasource extends Datasource {
     const releases = await pMap(
       versions,
       async (version) => {
-        const cacheRelease = cache[version];
+        const cacheRelease = releasesCache[version];
         // istanbul ignore if
         if (cacheRelease) {
           return cacheRelease;
@@ -93,20 +93,20 @@ export class DenoDatasource extends Datasource {
         const releaseDetails = await this.getReleaseDetails(url);
         const release: Release = releaseDetails ?? { version };
 
-        cache[release.version] = release;
-        isModified = true;
+        releasesCache[release.version] = release;
+        cacheModified = true;
 
         return release;
       },
       { concurrency: 5 }
     );
 
-    if (isModified) {
+    if (cacheModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL,
-        cache,
+        releasesCache,
         10080
       );
     }
