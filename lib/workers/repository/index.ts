@@ -22,8 +22,8 @@ import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
-import { finaliseRepo } from './finalise';
-import { pruneStaleBranches } from './finalise/prune';
+import { finalizeRepo } from './finalize';
+import { pruneStaleBranches } from './finalize/prune';
 import { initRepo } from './init';
 import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
@@ -91,7 +91,7 @@ export async function renovateRepository(
       } else {
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
-      await finaliseRepo(config, branchList);
+      await finalizeRepo(config, branchList);
       // TODO #7154
       repoResult = processResult(config, res!);
     }
