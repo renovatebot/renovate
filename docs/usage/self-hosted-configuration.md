@@ -19,15 +19,10 @@ Please also see [Self-Hosted Experimental Options](./self-hosted-experimental.md
 
 ## allowPostUpgradeCommandTemplating
 
-Set to `true` to allow templating of dependency level post-upgrade commands.
-
 Let's look at an example of configuring packages with existing Angular migrations.
-
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.exports = {
-  allowPostUpgradeCommandTemplating: true,
   allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
 };
 ```
@@ -59,6 +54,8 @@ With this configuration, the executable command for `@angular/core` looks like t
 npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
+
+This option can be set to `false` if you wish to disable templating for any security or performance concerns, but usually it's sufficient to configure just `allowedPostUpgradeCommands` patterns.
 
 ## allowScripts
 
