@@ -55,7 +55,8 @@ npm ci --ignore-scripts
 npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dirty --force
 ```
 
-This option can be set to `false` if you wish to disable templating for any security or performance concerns, but usually it's sufficient to configure just `allowedPostUpgradeCommands` patterns.
+If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option, to limit what commmands are allowed to run.
 
 ## allowScripts
 
