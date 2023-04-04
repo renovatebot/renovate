@@ -10,16 +10,16 @@ import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
 
 export const githubRefMatchRegex = regEx(
-  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?ref=(?<tag>.*)$/i
+  /github\.com([/:])(?<project>[^/]+\/[a-z0-9-_.]+).*\?.*ref=(?<tag>.*)$/i
 );
 export const bitbucketRefMatchRegex = regEx(
-  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?ref=(?<tag>.*)$/
+  /(?:git::)?(?<url>(?:http|https|ssh)?(?::\/\/)?(?:.*@)?(?<path>bitbucket\.org\/(?<workspace>.*)\/(?<project>.*).git\/?(?<subfolder>.*)))\?.*ref=(?<tag>.*)$/
 );
 export const gitTagsRefMatchRegex = regEx(
   /(?:git::)?(?<url>(?:(?:http|https|ssh):\/\/)?(?:.*@)?(?<path>.*\/(?<project>.*\/.*)))\?.*ref=(?<tag>.*)$/
 );
 export const azureDevOpsSshRefMatchRegex = regEx(
-  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?ref=(?<tag>.*)$/
+  /(?:git::)?(?<url>git@ssh\.dev\.azure\.com:v3\/(?<organization>[^/]*)\/(?<project>[^/]*)\/(?<repository>[^/]*))(?<modulepath>.*)?\?.*ref=(?<tag>.*)$/
 );
 const hostnameMatchRegex = regEx(/^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/);
 
