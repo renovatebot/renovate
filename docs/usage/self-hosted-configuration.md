@@ -56,7 +56,7 @@ npx ng update @angular/core --from=10.0.0 --to=11.0.0 --migrate-only --allow-dir
 ```
 
 If you wish to disable templating because of any security or performance concern, you may set `allowPostUpgradeCommandTemplating` to `false`.
-But before you disable templating completely, try the `allowedPostUpgradeCommands` config option, to limit what commmands are allowed to run.
+But before you disable templating completely, try the `allowedPostUpgradeCommands` config option to limit what commands are allowed to run.
 
 ## allowScripts
 
