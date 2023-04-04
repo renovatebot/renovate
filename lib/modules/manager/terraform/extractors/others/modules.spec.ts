@@ -135,7 +135,7 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         'bitbucket.org/hashicorp/example.git//terraform?ref=v1.0.0'
       )?.groups;
       const depth = bitbucketRefMatchRegex.exec(
-        'git::https://git@bitbucket.org/hashicorp/example.git?dref=v1.0.0'
+        'git::https://git@bitbucket.org/hashicorp/example.git?depth=1&ref=v1.0.0'
       )?.groups;
 
       expect(ssh).toMatchObject({
