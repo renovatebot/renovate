@@ -90,8 +90,9 @@ export class DenoDatasource extends Datasource {
 
         // https://apiland.deno.dev/v2/modules/postgres/v0.17.0
         const url = joinUrlParts(moduleAPIURL, version);
-        const releaseDetails = await this.getReleaseDetails(url);
-        const release: Release = releaseDetails ?? { version };
+        const { body } = await this.http.getJson(url);
+        const res = DenoAPIModuleVersionResponse.safeParse(body);
+        const release: Release = res.success ? res.data : { version };
 
         releasesCache[release.version] = release;
         cacheModified = true;
@@ -112,13 +113,5 @@ export class DenoDatasource extends Datasource {
     }
 
     return { releases, tags };
-  }
-
-  async getReleaseDetails(
-    moduleAPIVersionURL: string
-  ): Promise<Release | null> {
-    const { body } = await this.http.getJson(moduleAPIVersionURL);
-    const res = DenoAPIModuleVersionResponse.safeParse(body);
-    return res.success ? res.data : null;
   }
 }
