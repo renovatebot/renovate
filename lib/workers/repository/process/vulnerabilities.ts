@@ -54,11 +54,16 @@ export class Vulnerabilities {
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<void> {
-    const vuls = await this.fetchVulnerabilities(config, packageFiles);
+    const vulnerabilities = await this.fetchVulnerabilities(
+      config,
+      packageFiles
+    );
 
     config.packageRules ??= [];
-    for (const vul of vuls) {
-      config.packageRules.push(...this.vulnerabilityToPackageRules(vul));
+    for (const vulnerability of vulnerabilities) {
+      config.packageRules.push(
+        ...this.vulnerabilityToPackageRules(vulnerability)
+      );
     }
   }
 
