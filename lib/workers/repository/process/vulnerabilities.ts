@@ -58,9 +58,7 @@ export class Vulnerabilities {
 
     config.packageRules ??= [];
     for (const vul of vuls) {
-      config.packageRules.push(
-        ...Vulnerabilities.vulnerabilityToPackageRules(vul)
-      );
+      config.packageRules.push(...this.vulnerabilityToPackageRules(vul));
     }
   }
 
@@ -171,7 +169,7 @@ export class Vulnerabilities {
         }
 
         for (const affected of osvVulnerability.affected ?? []) {
-          const isVulnerable = Vulnerabilities.isPackageVulnerable(
+          const isVulnerable = this.isPackageVulnerable(
             ecosystem,
             packageName,
             depVersion,
@@ -185,7 +183,7 @@ export class Vulnerabilities {
           logger.debug(
             `Vulnerability ${osvVulnerability.id} affects ${packageName} ${depVersion}`
           );
-          const fixedVersion = Vulnerabilities.getFixedVersion(
+          const fixedVersion = this.getFixedVersion(
             ecosystem,
             depVersion,
             affected,
@@ -214,9 +212,7 @@ export class Vulnerabilities {
     }
   }
 
-  private static vulnerabilityToPackageRules(
-    vul: Vulnerability
-  ): PackageRule[] {
+  private vulnerabilityToPackageRules(vul: Vulnerability): PackageRule[] {
     const {
       vulnerability,
       affected,
@@ -253,7 +249,7 @@ export class Vulnerabilities {
   }
 
   // https://ossf.github.io/osv-schema/#affectedrangesevents-fields
-  private static sortEvents(
+  private sortEvents(
     events: Osv.Event[],
     versioningApi: VersioningApi
   ): Osv.Event[] {
@@ -282,7 +278,7 @@ export class Vulnerabilities {
     return sortedCopy;
   }
 
-  private static isPackageAffected(
+  private isPackageAffected(
     ecosystem: Ecosystem,
     packageName: string,
     affected: Osv.Affected
@@ -293,14 +289,14 @@ export class Vulnerabilities {
     );
   }
 
-  private static includedInVersions(
+  private includedInVersions(
     depVersion: string,
     affected: Osv.Affected
   ): boolean {
     return !!affected.versions?.includes(depVersion);
   }
 
-  private static includedInRanges(
+  private includedInRanges(
     depVersion: string,
     affected: Osv.Affected,
     versioningApi: VersioningApi
@@ -340,7 +336,7 @@ export class Vulnerabilities {
   }
 
   // https://ossf.github.io/osv-schema/#evaluation
-  private static isPackageVulnerable(
+  private isPackageVulnerable(
     ecosystem: Ecosystem,
     packageName: string,
     depVersion: string,
@@ -354,7 +350,7 @@ export class Vulnerabilities {
     );
   }
 
-  private static getFixedVersion(
+  private getFixedVersion(
     ecosystem: Ecosystem,
     depVersion: string,
     affected: Osv.Affected,
@@ -402,7 +398,7 @@ export class Vulnerabilities {
     return null;
   }
 
-  private static isVersionGt(
+  private isVersionGt(
     version: string,
     other: string,
     versioningApi: VersioningApi
@@ -414,7 +410,7 @@ export class Vulnerabilities {
     );
   }
 
-  private static isVersionGtOrEq(
+  private isVersionGtOrEq(
     version: string,
     other: string,
     versioningApi: VersioningApi
@@ -427,7 +423,7 @@ export class Vulnerabilities {
     );
   }
 
-  private static evaluateCvssVector(vector: string): [string, string] {
+  private evaluateCvssVector(vector: string): [string, string] {
     try {
       const parsedCvss: CvssScore = parseCvssVector(vector);
       const severityLevel =
@@ -442,7 +438,7 @@ export class Vulnerabilities {
     return ['', ''];
   }
 
-  private static generatePrBodyNotes(
+  private generatePrBodyNotes(
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected
   ): string[] {
