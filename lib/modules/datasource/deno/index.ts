@@ -117,9 +117,7 @@ export class DenoDatasource extends Datasource {
   async getReleaseDetails(
     moduleAPIVersionURL: string
   ): Promise<Release | null> {
-    const { body } = await this.http.getJson<DenoAPIModuleVersionResponse>(
-      moduleAPIVersionURL
-    );
+    const { body } = await this.http.getJson(moduleAPIVersionURL);
     const res = DenoAPIModuleVersionResponse.safeParse(body);
     return res.success ? res.data : null;
   }

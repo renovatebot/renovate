@@ -6,7 +6,6 @@ export const DenoApiTag = z.object({
   kind: z.string(),
   value: z.string(),
 });
-export type DenoAPITag = z.infer<typeof DenoApiTag>;
 
 export const DenoAPIModuleResponse = z.object({
   tags: looseArray(DenoApiTag).transform((tags) => {
@@ -18,7 +17,6 @@ export const DenoAPIModuleResponse = z.object({
   }),
   versions: z.array(z.string()),
 });
-export type DenoAPIModuleResponse = z.infer<typeof DenoAPIModuleResponse>;
 
 export const DenoAPIUploadOptions = z.object({
   ref: z.string(),
@@ -26,7 +24,6 @@ export const DenoAPIUploadOptions = z.object({
   repository: z.string(),
   subdir: z.string().optional(),
 });
-export type DenoAPIUploadOptions = z.infer<typeof DenoAPIUploadOptions>;
 
 export const DenoAPIModuleVersionResponse = z
   .object({
@@ -42,6 +39,3 @@ export const DenoAPIModuleVersionResponse = z
     }
     return { version, gitRef, releaseTimestamp, sourceUrl };
   });
-export type DenoAPIModuleVersionResponse = z.infer<
-  typeof DenoAPIModuleVersionResponse
->;
