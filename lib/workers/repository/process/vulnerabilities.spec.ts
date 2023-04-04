@@ -36,6 +36,89 @@ describe('workers/repository/process/vulnerabilities', () => {
   describe('fetchVulnerabilities()', () => {
     let config: RenovateConfig;
     let vulnerabilities: Vulnerabilities;
+
+    beforeAll(async () => {
+      createMock.mockResolvedValue({
+        getVulnerabilities: getVulnerabilitiesMock,
+      });
+      vulnerabilities = await Vulnerabilities.create();
+    });
+
+    beforeEach(() => {
+      config = getConfig();
+      config.packageRules = [];
+    });
+
+    it('return list of Vulnerabilities', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.0' }, { fixed: '3.3.8' }],
+                },
+              ],
+            },
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      const vulnerabilityList = await vulnerabilities.fetchVulnerabilities(
+        config,
+        packageFiles
+      );
+      expect(vulnerabilityList).toMatchObject([
+        {
+          packageName: 'django',
+          depVersion: '3.2',
+          fixedVersion: '==3.3.8',
+          datasource: 'pypi',
+        },
+        {
+          packageName: 'django',
+          depVersion: '3.2',
+          fixedVersion: '==3.2.16',
+          datasource: 'pypi',
+        },
+      ]);
+    });
+  });
+
+  describe('appendVulnerabilityPackageRules()', () => {
+    let config: RenovateConfig;
+    let vulnerabilities: Vulnerabilities;
     const lodashVulnerability: Osv.Vulnerability = {
       id: 'GHSA-x5rq-j2xg-h7qm',
       modified: '',
@@ -152,7 +235,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(logger.logger.trace).toHaveBeenCalledWith(
         'Skipping withdrawn vulnerability GHSA-x5rq-j2xg-h7qm'
       );
@@ -546,7 +632,10 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
       expect(config.packageRules).toHaveLength(2);
       expect(config.packageRules).toMatchObject([
         {
