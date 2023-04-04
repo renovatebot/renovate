@@ -100,9 +100,8 @@ Say you want to automerge `patch` and `minor` updates for packages in the `group
 
 ### Faster merges with platform-native automerge
 
-You can speed up merges by letting Renovate use your platform's native automerge.
-The config option is called `platformAutomerge`.
-If `automerge=true` and `automergeType=pr` then you can set `platformAutomerge=true`.
+Renovate by default uses platform-native automerge to speed up automerging.
+The config option is called `platformAutomerge` and can be disabled if it's not desired.
 
 For example:
 
@@ -112,7 +111,7 @@ For example:
     "enabled": true,
     "automerge": true,
     "automergeType": "pr",
-    "platformAutomerge": true
+    "platformAutomerge": false
   }
 }
 ```
@@ -155,11 +154,10 @@ On `github.com`, go to your repository's "homepage", click on Settings, scroll d
 Then go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
 Confirm you've set the correct "required checks" for your base branch.
 
-Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+Finally, allow Renovate to automerge by setting `automerge=true` in your Renovate config file, for example:
 
 ```json
 {
-  "platformAutomerge": true,
   "packageRules": [
     {
       "description": "Automerge non-major updates",
@@ -180,7 +178,7 @@ On `github.com`, go to your repository's "homepage", click on Settings, scroll d
 Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
 Confirm you've set the correct "required checks" for your base branch.
 
-Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example).
+Finally, allow Renovate to automerge by setting `automerge=true` in your Renovate config file (see earlier example).
 
 ## Automerging and scheduling
 
