@@ -1,14 +1,13 @@
 import merge from 'deepmerge';
 import got, { Options, RequestError } from 'got';
 import hasha from 'hasha';
-import { infer as Infer, ZodSchema } from 'zod';
+import { infer as Infer, ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
-import { match } from '../schema';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { hooks } from './hooks';
@@ -28,10 +27,10 @@ import './legacy';
 
 export { RequestError as HttpError };
 
-type JsonArgs<T extends HttpOptions> = {
+type JsonArgs<T extends HttpOptions, Output = any> = {
   url: string;
   httpOptions?: T;
-  schema?: ZodSchema | undefined;
+  schema?: ZodType<Output> | undefined;
 };
 
 type Task<T> = () => Promise<HttpResponse<T>>;
@@ -239,7 +238,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     method: InternalHttpOptions['method'],
     { url, httpOptions: requestOptions, schema }: JsonArgs<Opts>
   ): Promise<HttpResponse<T>> {
-    const { body, onSchemaError, ...httpOptions } = { ...requestOptions };
+    const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
       ...httpOptions,
       method,
@@ -255,21 +254,27 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     const res = await this.request<T>(url, opts);
 
-    if (schema) {
-      match(schema, res.body, onSchemaError);
+    if (!schema) {
+      return { ...res, body: res.body };
     }
 
-    return { ...res, body: res.body };
+    const parsed = await schema.safeParseAsync(res.body);
+    if (!parsed.success) {
+      logger.once.info({ err: parsed.error }, `Response does not match schema`);
+      return { ...res, body: res.body };
+    }
+
+    return { ...res, body: parsed.data };
   }
 
-  private resolveArgs(
+  private resolveArgs<Output = any>(
     arg1: string,
-    arg2: Opts | ZodSchema | undefined,
-    arg3: ZodSchema | undefined
+    arg2: Opts | ZodType<Output> | undefined,
+    arg3: ZodType<Output> | undefined
   ): JsonArgs<Opts> {
     const res: JsonArgs<Opts> = { url: arg1 };
 
-    if (arg2 instanceof ZodSchema) {
+    if (arg2 instanceof ZodType<Output>) {
       res.schema = arg2;
     } else if (arg2) {
       res.httpOptions = arg2;
@@ -283,114 +288,99 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   }
 
   getJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  getJson<T>(
+  getJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  getJson<T>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  getJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  getJson<T = unknown>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  getJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
+    arg2?: Opts | Schema,
+    arg3?: Schema
   ): Promise<HttpResponse<T>> {
     const args = this.resolveArgs(arg1, arg2, arg3);
     return this.requestJson<T>('get', args);
   }
 
-  headJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  headJson<T>(
-    url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  headJson<T>(
-    url: string,
-    options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  headJson<T = unknown>(
-    arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
-  ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
-    return this.requestJson<T>('head', args);
+  headJson(url: string, httpOptions?: Opts): Promise<HttpResponse<undefined>> {
+    return this.requestJson<undefined>('head', { url, httpOptions });
   }
 
   postJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  postJson<T>(
+  postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  postJson<T>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  postJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  postJson<T = unknown>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  postJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
+    arg2?: Opts | Schema,
+    arg3?: Schema
   ): Promise<HttpResponse<T>> {
     const args = this.resolveArgs(arg1, arg2, arg3);
     return this.requestJson<T>('post', args);
   }
 
   putJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  putJson<T>(
+  putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  putJson<T>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  putJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  putJson<T = unknown>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  putJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
+    arg2?: Opts | Schema,
+    arg3?: ZodType
   ): Promise<HttpResponse<T>> {
     const args = this.resolveArgs(arg1, arg2, arg3);
     return this.requestJson<T>('put', args);
   }
 
   patchJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  patchJson<T>(
+  patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  patchJson<T>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  patchJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  patchJson<T = unknown>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  patchJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
+    arg2?: Opts | Schema,
+    arg3?: Schema
   ): Promise<HttpResponse<T>> {
     const args = this.resolveArgs(arg1, arg2, arg3);
     return this.requestJson<T>('patch', args);
   }
 
   deleteJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  deleteJson<T>(
+  deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  deleteJson<T>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  deleteJson<T, Schema extends ZodType<T> = ZodType<T>>(
     url: string,
     options: Opts,
-    schema: ZodSchema<T>
-  ): Promise<HttpResponse<Infer<typeof schema>>>;
-  deleteJson<T = unknown>(
+    schema: Schema
+  ): Promise<HttpResponse<Infer<Schema>>>;
+  deleteJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
     arg1: string,
-    arg2?: Opts | ZodSchema,
-    arg3?: ZodSchema
+    arg2?: Opts | Schema,
+    arg3?: Schema
   ): Promise<HttpResponse<T>> {
     const args = this.resolveArgs(arg1, arg2, arg3);
     return this.requestJson<T>('delete', args);
