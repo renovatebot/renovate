@@ -80,7 +80,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         ],
       };
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -100,7 +100,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -127,7 +127,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -176,7 +176,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -203,7 +203,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockRejectedValueOnce(err);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -251,7 +251,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -284,7 +284,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -315,7 +315,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -357,7 +357,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -406,7 +406,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -484,7 +484,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -513,7 +513,7 @@ describe('workers/repository/process/vulnerabilities', () => {
       };
       getVulnerabilitiesMock.mockResolvedValueOnce([lodashVulnerability]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -577,7 +577,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -659,7 +659,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -716,7 +716,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -763,7 +763,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -841,7 +841,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -906,7 +906,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
@@ -991,7 +991,7 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
 
-      await vulnerabilities.applyVulnerabilityPackageRules(
+      await vulnerabilities.appendVulnerabilityPackageRules(
         config,
         packageFiles
       );
