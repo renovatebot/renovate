@@ -9,12 +9,7 @@ import * as semanticVersioning from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { Release } from '../index';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type {
-  DenoAPIModuleResponse,
-  DenoAPIModuleVersionResponse,
-  ReleaseMap,
-} from './types';
-import { createSourceURL, tagsToRecord } from './utils';
+import { DenoAPIModuleResponse, DenoAPIModuleVersionResponse } from './schema';
 
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
@@ -45,7 +40,7 @@ export class DenoDatasource extends Datasource {
     const massagedRegistryUrl = registryUrl!;
 
     const extractResult = regEx(
-      '^(https://deno.land/)(?<rawPackageName>[^@\\s]+)'
+      /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
     if (is.nullOrUndefined(rawPackageName)) {
@@ -73,65 +68,59 @@ export class DenoDatasource extends Datasource {
     key: (moduleAPIURL) => moduleAPIURL,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
-    const { versions, tags } = (
-      await this.http.getJson<DenoAPIModuleResponse>(moduleAPIURL)
-    ).body;
-
-    const releasesCache =
-      (await packageCache.get<ReleaseMap>(
+    const cache: Record<string, Release> =
+      (await packageCache.get(
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL
       )) ?? {};
-    let cacheModified = false;
+    let isModified = false;
+
+    const { body } = await this.http.getJson(moduleAPIURL);
+    const { versions, tags } = DenoAPIModuleResponse.parse(body);
 
     // get details for the versions
     const releases = await pMap(
       versions,
       async (version) => {
-        const cacheRelease = releasesCache[version];
+        const cacheRelease = cache[version];
         // istanbul ignore if
         if (cacheRelease) {
           return cacheRelease;
         }
 
         // https://apiland.deno.dev/v2/modules/postgres/v0.17.0
-        const release = await this.getReleaseDetails(
-          joinUrlParts(moduleAPIURL, version)
-        );
+        const url = joinUrlParts(moduleAPIURL, version);
+        const releaseDetails = await this.getReleaseDetails(url);
+        const release: Release = releaseDetails ?? { version };
 
-        releasesCache[release.version] = release;
-        cacheModified = true;
+        cache[release.version] = release;
+        isModified = true;
 
         return release;
       },
       { concurrency: 5 }
     );
 
-    if (cacheModified) {
+    if (isModified) {
       // 1 week. Releases at Deno are immutable, therefore we can use a long term cache here.
       await packageCache.set(
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL,
-        releasesCache,
+        cache,
         10080
       );
     }
 
-    return {
-      releases,
-      tags: tagsToRecord(tags),
-    };
+    return { releases, tags };
   }
 
-  async getReleaseDetails(moduleAPIVersionURL: string): Promise<Release> {
-    const { version, uploaded_at, upload_options } = (
-      await this.http.getJson<DenoAPIModuleVersionResponse>(moduleAPIVersionURL)
-    ).body;
-    return {
-      version,
-      gitRef: upload_options.ref,
-      releaseTimestamp: uploaded_at,
-      sourceUrl: createSourceURL(upload_options),
-    };
+  async getReleaseDetails(
+    moduleAPIVersionURL: string
+  ): Promise<Release | null> {
+    const { body } = await this.http.getJson<DenoAPIModuleVersionResponse>(
+      moduleAPIVersionURL
+    );
+    const res = DenoAPIModuleVersionResponse.safeParse(body);
+    return res.success ? res.data : null;
   }
 }
