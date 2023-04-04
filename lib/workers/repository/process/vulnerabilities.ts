@@ -16,6 +16,7 @@ import {
   get as getVersioning,
 } from '../../../modules/versioning';
 import { sanitizeMarkdown } from '../../../util/markdown';
+import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
 import type { Vulnerability, VulnerabilityGroup } from './types';
 
@@ -100,14 +101,15 @@ export class Vulnerabilities {
     manager: string
   ): Promise<VulnerabilityGroup[]> {
     const managerConfig = getManagerConfig(config, manager);
-    const queue = packageFiles[manager].flatMap((pFile) =>
-      this.fetchManagerPackageFileVulnerabilities(managerConfig, pFile)
+    const queue = packageFiles[manager].map(
+      (pFile) => (): Promise<VulnerabilityGroup[]> =>
+        this.fetchManagerPackageFileVulnerabilities(managerConfig, pFile)
     );
     logger.trace(
       { manager, queueLength: queue.length },
       'fetchManagerUpdates starting'
     );
-    const result = (await Promise.all(queue)).flat();
+    const result = (await p.all(queue)).flat();
     logger.trace({ manager }, 'fetchManagerUpdates finished');
     return result;
   }
@@ -119,15 +121,16 @@ export class Vulnerabilities {
     const { packageFile } = pFile;
     const packageFileConfig = mergeChildConfig(managerConfig, pFile);
     const { manager } = packageFileConfig;
-    const queue = pFile.deps.map((dep) =>
-      this.fetchDependencyVulnerabilities(packageFileConfig, dep)
+    const queue = pFile.deps.map(
+      (dep) => (): Promise<VulnerabilityGroup | null> =>
+        this.fetchDependencyVulnerabilities(packageFileConfig, dep)
     );
     logger.trace(
       { manager, packageFile, queueLength: queue.length },
       'fetchManagerPackageFileVulnerabilities starting with concurrency'
     );
 
-    const result = await Promise.all(queue);
+    const result = await p.all(queue);
     logger.trace(
       { packageFile },
       'fetchManagerPackageFileVulnerabilities finished'
@@ -248,39 +251,6 @@ export class Vulnerabilities {
         versionsCleaned[b.allowedVersions as string]
       )
     );
-  }
-
-  private vulnerabilityToPackageRules(vul: Vulnerability): PackageRule | null {
-    const {
-      vulnerability,
-      affected,
-      packageName,
-      depVersion,
-      fixedVersion,
-      datasource,
-      packageFileConfig,
-    } = vul;
-    if (is.nullOrUndefined(fixedVersion)) {
-      logger.info(
-        `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
-      );
-      return null;
-    }
-
-    logger.debug(
-      `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
-    );
-    return {
-      matchDatasources: [datasource],
-      matchPackageNames: [packageName],
-      matchCurrentVersion: depVersion,
-      allowedVersions: fixedVersion,
-      isVulnerabilityAlert: true,
-      prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
-      force: {
-        ...packageFileConfig.vulnerabilityAlerts,
-      },
-    };
   }
 
   // https://ossf.github.io/osv-schema/#affectedrangesevents-fields
@@ -456,6 +426,39 @@ export class Vulnerabilities {
       (versioningApi.equals(version, other) ||
         versioningApi.isGreaterThan(version, other))
     );
+  }
+
+  private vulnerabilityToPackageRules(vul: Vulnerability): PackageRule | null {
+    const {
+      vulnerability,
+      affected,
+      packageName,
+      depVersion,
+      fixedVersion,
+      datasource,
+      packageFileConfig,
+    } = vul;
+    if (is.nullOrUndefined(fixedVersion)) {
+      logger.info(
+        `No fixed version available for vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+      );
+      return null;
+    }
+
+    logger.debug(
+      `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
+    );
+    return {
+      matchDatasources: [datasource],
+      matchPackageNames: [packageName],
+      matchCurrentVersion: depVersion,
+      allowedVersions: fixedVersion,
+      isVulnerabilityAlert: true,
+      prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
+      force: {
+        ...packageFileConfig.vulnerabilityAlerts,
+      },
+    };
   }
 
   private evaluateCvssVector(vector: string): [string, string] {
