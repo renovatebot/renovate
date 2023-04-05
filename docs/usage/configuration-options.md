@@ -2469,28 +2469,28 @@ If enabled Renovate will pin Docker images or GitHub Actions by means of their S
 ## platformAutomerge
 
 <!-- prettier-ignore -->
-!!! warning
-    Before you enable `platformAutomerge` you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
+!!! note
+    If you use the default `platformAutomerge=true` then you should enable your Git hosting platform's capabilities to enforce test passing before PR merge.
     If you don't do this, the platform might merge Renovate PRs even if the repository's tests haven't started, are in still in progress, or possibly even when they have failed.
     On GitHub this is called "Require status checks before merging", which you can find in the "Branch protection rules" section of the settings for your repository.
     [GitHub docs, about protected branches](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
     [GitHub docs, require status checks before merging](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches#require-status-checks-before-merging)
     If you're using another platform, search their documentation for a similar feature.
 
-If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then you can also set `platformAutomerge` to `true` to speed up merging via the platform's native automerge functionality.
+If you have enabled `automerge` and set `automergeType=pr` in the Renovate config, then leaving `platformAutomerge` as `true` speeds up merging via the platform's native automerge functionality.
 
 Renovate tries platform-native automerge only when it initially creates the PR.
 Any PR that is being updated will be automerged with the Renovate-based automerge.
 
 `platformAutomerge` will configure PRs to be merged after all (if any) branch policies have been met.
-This option is available for Azure, GitHub and GitLab.
+This option is available for Azure, Gitea, GitHub and GitLab.
 It falls back to Renovate-based automerge if the platform-native automerge is not available.
 
 You can also fine-tune the behavior by setting `packageRules` if you want to use it selectively (e.g. per-package).
 
 Note that the outcome of `rebaseWhen=auto` can differ when `platformAutomerge=true`.
 Normally when you set `rebaseWhen=auto` Renovate rebases any branch that's behind the base branch automatically, and some people rely on that.
-This behavior is no longer guaranteed when you enable `platformAutomerge` because the platform might automerge a branch which is not up-to-date.
+This behavior is no longer guaranteed when `platformAutomerge` is `true` because the platform might automerge a branch which is not up-to-date.
 For example, GitHub might automerge a Renovate branch even if it's behind the base branch at the time.
 
 Please check platform specific docs for version requirements.
