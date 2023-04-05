@@ -549,6 +549,7 @@ describe('modules/manager/gradle/parser', () => {
         ${''}               | ${'id(["foo.bar"]) version "1.2.3"'}       | ${null}
         ${''}               | ${'id("foo", "bar") version "1.2.3"'}      | ${null}
         ${''}               | ${'id "foo".version("1.2.3")'}             | ${null}
+        ${''}               | ${'id("foo.bar") version("1.2.3")'}        | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id("foo.bar") version "1.2.3"'}         | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3' }}
         ${''}               | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', skipReason: 'unknown-version', currentValue: 'baz' }}
         ${'baz = "1.2.3"'}  | ${'id "foo.bar" version "$baz"'}           | ${{ depName: 'foo.bar', packageName: 'foo.bar:foo.bar.gradle.plugin', currentValue: '1.2.3', groupName: 'baz' }}
