@@ -14,7 +14,8 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "orta.vscode-jest",
-    "EditorConfig.editorconfig"
+    "EditorConfig.editorconfig",
+    "GitHub.vscode-github-actions"
   ],
   "runArgs": [
     "--cap-add=SYS_PTRACE",
