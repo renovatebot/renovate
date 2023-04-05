@@ -1,3 +1,5 @@
+Extracts dependencies from `terragrunt.hcl` files, and the associated `.terraform.lock.hcl` files too.
+
 Currently by default, Terragrunt support is limited to Terraform registry sources and GitHub sources that include SemVer refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
 
 You can create a custom [versioning config](/configuration-options/#versioning) to support non-SemVer references.

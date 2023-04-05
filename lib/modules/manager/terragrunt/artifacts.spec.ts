@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../config/global';
 import type { UpdateType } from '../../../config/types';
 import * as TerraformLockfile from '../terraform/lockfile';
 import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './lockfile';
+import { updateArtifacts } from './artifacts';
 
 jest.mock('../terraform/lockfile');
 const mockTFUpdateArtifacts = mocked(TerraformLockfile).updateArtifacts;
@@ -20,7 +20,7 @@ const adminConfig = {
   containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 
-describe('modules/manager/terragrunt/lockfile', () => {
+describe('modules/manager/terragrunt/artifacts', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
