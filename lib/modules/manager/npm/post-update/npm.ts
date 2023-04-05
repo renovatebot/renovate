@@ -106,7 +106,7 @@ export async function generateLockFile(
         // if packageFileDir === lockFileDir, dep is present in root package.json
         if (packageFileDir === lockFileDir) {
           lockRootUpdates.push(upgrade);
-          rootDeps.add(`${upgrade.depName!}@${upgrade.newVersion!}`);
+          rootDeps.add(`${upgrade.packageName}@${upgrade.newVersion!}`);
         }
         // else it is present in workspace package.json
         else {
