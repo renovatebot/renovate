@@ -22,11 +22,18 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const depth = githubRefMatchRegex.exec(
         'github.com/hashicorp/example?depth=1&ref=v1.0.0'
       )?.groups;
+      const depth2 = githubRefMatchRegex.exec(
+        'github.com/hashicorp/example?ref=v1.0.0&depth=1'
+      )?.groups;
       expect(groups).toEqual({
         project: 'hashicorp/example',
         tag: 'v1.0.0',
       });
       expect(depth).toEqual({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(depth2).toEqual({
         project: 'hashicorp/example',
         tag: 'v1.0.0',
       });
@@ -57,6 +64,9 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const depth = gitTagsRefMatchRegex.exec(
         'ssh://github.com/hashicorp/example?depth=1&ref=v1.0.0'
       )?.groups;
+      const depth2 = gitTagsRefMatchRegex.exec(
+        'ssh://github.com/hashicorp/example?ref=v1.0.0&depth=1'
+      )?.groups;
       const folder = gitTagsRefMatchRegex.exec(
         'git::ssh://git@git.example.com/modules/foo-module.git//bar?depth=1&ref=v1.0.0'
       )?.groups;
@@ -74,6 +84,10 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         tag: 'v1.0.0',
       });
       expect(depth).toMatchObject({
+        project: 'hashicorp/example',
+        tag: 'v1.0.0',
+      });
+      expect(depth2).toMatchObject({
         project: 'hashicorp/example',
         tag: 'v1.0.0',
       });
@@ -137,6 +151,9 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const depth = bitbucketRefMatchRegex.exec(
         'git::https://git@bitbucket.org/hashicorp/example.git?depth=1&ref=v1.0.0'
       )?.groups;
+      const depth2 = bitbucketRefMatchRegex.exec(
+        'git::https://git@bitbucket.org/hashicorp/example.git?ref=v1.0.0&depth=1'
+      )?.groups;
 
       expect(ssh).toMatchObject({
         workspace: 'hashicorp',
@@ -164,6 +181,11 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
         tag: 'v1.0.0',
       });
       expect(depth).toMatchObject({
+        workspace: 'hashicorp',
+        project: 'example',
+        tag: 'v1.0.0',
+      });
+      expect(depth2).toMatchObject({
         workspace: 'hashicorp',
         project: 'example',
         tag: 'v1.0.0',
@@ -233,8 +255,19 @@ describe('modules/manager/terraform/extractors/others/modules', () => {
       const depth = azureDevOpsSshRefMatchRegex.exec(
         'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?depth=1&ref=1.0.0'
       )?.groups;
+      const depth2 = azureDevOpsSshRefMatchRegex.exec(
+        'git::git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository//some-module/path?ref=1.0.0&depth=1'
+      )?.groups;
 
       expect(depth).toEqual({
+        modulepath: '//some-module/path',
+        organization: 'MyOrg',
+        project: 'MyProject',
+        repository: 'MyRepository',
+        tag: '1.0.0',
+        url: 'git@ssh.dev.azure.com:v3/MyOrg/MyProject/MyRepository',
+      });
+      expect(depth2).toEqual({
         modulepath: '//some-module/path',
         organization: 'MyOrg',
         project: 'MyProject',
