@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -93,20 +94,21 @@ export async function generateLockFile(
     for (const upgrade of lockUpdates) {
       if (
         upgrade.isLockfileUpdate &&
-        upgrade.managerData?.workspacesPackages.length
+        upgrade.managerData?.workspacesPackages.length &&
+        is.string(upgrade.packageFile)
       ) {
-        const workspacePatterns = upgrade.managerData?.workspacesPackages; // glob pattern or directory name/path
-        const packageFileDir = upgrade.packageFile?.replace('package.json', '');
+        const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
+        const packageFileDir = upgrade.packageFile.replace('package.json', '');
 
         // workspaceDir = packageFileDir - lockFileDir (root/workspace - root = workspace)
         const workspaceDir = trimLeadingSlash(
-          packageFileDir?.replace(lockFileDir, '') ?? ''
+          packageFileDir.replace(lockFileDir, '') ?? ''
         );
 
         // if packageFileDir === lockFileDir, dep is present in root package.json
         if (packageFileDir === lockFileDir) {
           lockRootUpdates.push(upgrade);
-          rootDeps.add(`${upgrade.packageName}@${upgrade.newVersion!}`);
+          rootDeps.add(`${upgrade.packageName!}@${upgrade.newVersion!}`);
         }
         // else it is present in workspace package.json
         else {
@@ -115,14 +117,14 @@ export async function generateLockFile(
           // stop when the first match is found
           // add workspaceDir to workspaces set and upgrade object
           for (const workspacePattern of workspacePatterns ?? []) {
-            if (workspaceDir && minimatch(workspaceDir, workspacePattern)) {
+            if (minimatch(workspaceDir, workspacePattern)) {
               workspaceName = workspaceDir;
               continue;
             }
           }
           if (
             workspaceName &&
-            !rootDeps.has(`${upgrade.depName!}@${upgrade.newVersion!}`) // prevent same dep from existing in root and workspace
+            !rootDeps.has(`${upgrade.packageName!}@${upgrade.newVersion!}`) // prevent same dep from existing in root and workspace
           ) {
             workspaces.add(workspaceName);
             upgrade.workspace = workspaceName;
@@ -131,7 +133,7 @@ export async function generateLockFile(
         }
       } else {
         lockRootUpdates.push(upgrade);
-        rootDeps.add(`${upgrade.depName!}@${upgrade.newVersion!}`);
+        rootDeps.add(`${upgrade.packageName!}@${upgrade.newVersion!}`);
       }
     }
 
@@ -142,14 +144,14 @@ export async function generateLockFile(
           .filter((update) => update.workspace === workspace)
           .filter(
             (update) =>
-              !rootDeps.has(`${update.depName!}@${update.newVersion!}`) // filter out deps present in root again to be sure
+              !rootDeps.has(`${update.packageName!}@${update.newVersion!}`) // filter out deps present in root again to be sure
           );
         const updateCmd =
           `npm install ${cmdOptions} --workspace=${workspace}` +
           currentUpdates
             // TODO: types (#7154)
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            .map((update) => ` ${update.depName}@${update.newVersion}`)
+            .map((update) => ` ${update.packageName}@${update.newVersion}`)
             .join('');
         commands.push(updateCmd);
       }
@@ -162,7 +164,7 @@ export async function generateLockFile(
         lockRootUpdates
           // TODO: types (#7154)
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          .map((update) => ` ${update.depName}@${update.newVersion}`)
+          .map((update) => ` ${update.packageName}@${update.newVersion}`)
           .join('');
       commands.push(updateCmd);
     }
