@@ -36,6 +36,7 @@ describe('modules/versioning/hashicorp/index', () => {
     ${'>=4.1'}              | ${true}
     ${'<=4.1.2'}            | ${true}
     ${''}                   | ${false}
+    ${'0.1.0-beta.0'}       | ${true}
   `('isValid("$input") === $expected', ({ input, expected }) => {
     const res = !!semver.isValid(input);
     expect(res).toBe(expected);

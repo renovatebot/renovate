@@ -467,6 +467,72 @@ describe('workers/repository/process/vulnerabilities', () => {
       ]);
     });
 
+    it('package rules are sorted by fixed version even if affected is unsorted', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        poetry: [
+          {
+            deps: [
+              { depName: 'django', currentValue: '3.2', datasource: 'pypi' },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          id: 'GHSA-qrw5-5h28-modded',
+          modified: '',
+          affected: [
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.0' }, { fixed: '3.3.8' }],
+                },
+              ],
+            },
+            {
+              package: {
+                name: 'django',
+                ecosystem: 'PyPI',
+                purl: 'pkg:pypi/django',
+              },
+              ranges: [
+                {
+                  type: 'ECOSYSTEM',
+                  events: [{ introduced: '3.2' }, { fixed: '3.2.16' }],
+                },
+              ],
+            },
+          ],
+        },
+      ]);
+
+      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      expect(config.packageRules).toHaveLength(2);
+      expect(config.packageRules).toMatchObject([
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '==3.2.16',
+          isVulnerabilityAlert: true,
+        },
+        {
+          matchDatasources: ['pypi'],
+          matchPackageNames: ['django'],
+          matchCurrentVersion: '3.2',
+          allowedVersions: '==3.3.8',
+          isVulnerabilityAlert: true,
+        },
+      ]);
+    });
+
     it('filters not applicable vulnerability', async () => {
       const packageFiles: Record<string, PackageFile[]> = {
         npm: [
