@@ -5,10 +5,6 @@ import { extractPackageFile } from './';
 
 const yamlFile1 = Fixtures.get('requirements01.yml');
 const yamlFile2 = Fixtures.get('requirements02.yml');
-const yamlFile3 = codeBlock`collections:
-- name: https://github.com/lowlydba/lowlydba.sqlserver.git
-  type: git 
-  version: 1.1.3`;
 const helmRequirements = Fixtures.get('helmRequirements.yml');
 const collections1 = Fixtures.get('collections1.yml');
 const collections2 = Fixtures.get('collections2.yml');
@@ -33,7 +29,11 @@ describe('modules/manager/ansible-galaxy/extract', () => {
     });
 
     it('extracts dependencies from requirements.yml with a space at the end of line', () => {
-      const res = extractPackageFile(yamlFile3, 'requirements.yml');
+      const yamlFile = codeBlock`collections:
+      - name: https://github.com/lowlydba/lowlydba.sqlserver.git
+      type: git 
+      version: 1.1.3`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
       expect(res?.deps).toHaveLength(1);
       expect(res?.deps[0].currentValue).toBe('1.1.3');
     });
