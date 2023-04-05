@@ -100,8 +100,8 @@ Say you want to automerge `patch` and `minor` updates for packages in the `group
 
 ### Faster merges with platform-native automerge
 
-Renovate by default uses platform-native automerge to speed up automerging.
-The config option is called `platformAutomerge` and can be disabled if it's not desired.
+By default, Renovate uses platform-native automerge to speed up automerging.
+If you don't want Renovate to use the platform-native automerge, then set `platformAutomerge` to `false`.
 
 For example:
 
