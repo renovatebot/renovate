@@ -341,6 +341,7 @@ describe('util/http/index', () => {
 
         const { body }: HttpResponse<string> = await http.getJson(
           'http://renovate.com',
+          { headers: { accept: 'application/json' } },
           SomeSchema
         );
 
