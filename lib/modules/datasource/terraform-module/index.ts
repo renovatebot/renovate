@@ -19,12 +19,14 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = [
+  override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
+
+  override readonly defaultVersioning = hashicorpVersioning.id;
+
+  readonly extendedApiRegistryUrls = [
     'https://registry.terraform.io',
     'https://app.terraform.io',
   ];
-
-  override readonly defaultVersioning = hashicorpVersioning.id;
 
   /**
    * This function will fetch a package from the specified Terraform registry and return all semver versions.
@@ -55,7 +57,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryUrlNormalized
     );
-    if (this.defaultRegistryUrls.includes(registryUrlNormalized)) {
+    if (this.extendedApiRegistryUrls.includes(registryUrlNormalized)) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrlNormalized,
