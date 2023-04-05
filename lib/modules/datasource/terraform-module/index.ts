@@ -19,7 +19,10 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     super(TerraformModuleDatasource.id);
   }
 
-  override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
+  override readonly defaultRegistryUrls = [
+    'https://registry.terraform.io',
+    'https://app.terraform.io',
+  ];
 
   override readonly defaultVersioning = hashicorpVersioning.id;
 
@@ -52,7 +55,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryUrlNormalized
     );
-    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
+    if (this.defaultRegistryUrls.includes(registryUrlNormalized)) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrlNormalized,
