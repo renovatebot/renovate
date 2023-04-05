@@ -84,10 +84,10 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
 
-    const lockRootUpdates: Upgrade<Record<string, any>>[] = []; // stores all upgrades which are present in root package.json
-    const lockWorkspaceUpdates: Upgrade<Record<string, any>>[] = []; // stores all upgrades which are present in workspaces package.json
-    const workspaces: Set<string> = new Set(); // name of all workspaces
-    const rootDeps: Set<string> = new Set(); // depName of all upgrades in root package.json (makes it check duplicate deps in root)
+    const lockRootUpdates: Upgrade[] = []; // stores all upgrades which are present in root package.json
+    const lockWorkspaceUpdates: Upgrade[] = []; // stores all upgrades which are present in workspaces package.json
+    const workspaces = new Set<string>(); // name of all workspaces
+    const rootDeps = new Set<string>(); // depName of all upgrades in root package.json (makes it check duplicate deps in root)
 
     // divide the deps in two categories: workspace and root
     for (const upgrade of lockUpdates) {
