@@ -27,10 +27,14 @@ import './legacy';
 
 export { RequestError as HttpError };
 
-type JsonArgs<T extends HttpOptions, Output = any> = {
+type JsonArgs<
+  Opts extends HttpOptions,
+  ResT = unknown,
+  Schema extends ZodType<ResT> = ZodType<ResT>
+> = {
   url: string;
-  httpOptions?: T;
-  schema?: ZodType<Output> | undefined;
+  httpOptions?: Opts;
+  schema?: Schema;
 };
 
 type Task<T> = () => Promise<HttpResponse<T>>;
@@ -234,10 +238,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return this.requestBuffer(url, options);
   }
 
-  private async requestJson<T = unknown>(
+  private async requestJson<ResT = unknown>(
     method: InternalHttpOptions['method'],
-    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts>
-  ): Promise<HttpResponse<T>> {
+    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts, ResT>
+  ): Promise<HttpResponse<ResT>> {
     const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
       ...httpOptions,
@@ -252,7 +256,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     if (body) {
       opts.json = body;
     }
-    const res = await this.request<T>(url, opts);
+    const res = await this.request<ResT>(url, opts);
 
     if (!schema) {
       return { ...res, body: res.body };
@@ -267,14 +271,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return { ...res, body: parsed.data };
   }
 
-  private resolveArgs<Output = any>(
+  private resolveArgs<ResT = unknown>(
     arg1: string,
-    arg2: Opts | ZodType<Output> | undefined,
-    arg3: ZodType<Output> | undefined
-  ): JsonArgs<Opts> {
-    const res: JsonArgs<Opts> = { url: arg1 };
+    arg2: Opts | ZodType<ResT> | undefined,
+    arg3: ZodType<ResT> | undefined
+  ): JsonArgs<Opts, ResT> {
+    const res: JsonArgs<Opts, ResT> = { url: arg1 };
 
-    if (arg2 instanceof ZodType<Output>) {
+    if (arg2 instanceof ZodType<ResT>) {
       res.schema = arg2;
     } else if (arg2) {
       res.httpOptions = arg2;
@@ -287,27 +291,27 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return res;
   }
 
-  getJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
-  getJson<T, Schema extends ZodType<T> = ZodType<T>>(
+  getJson<ResT>(url: string, options?: Opts): Promise<HttpResponse<ResT>>;
+  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
     schema: Schema
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<T, Schema extends ZodType<T> = ZodType<T>>(
+  getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
     options: Opts,
     schema: Schema
   ): Promise<HttpResponse<Infer<Schema>>>;
-  getJson<T = unknown, Schema extends ZodType<T> = ZodType<T>>(
+  getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(
     arg1: string,
     arg2?: Opts | Schema,
     arg3?: Schema
-  ): Promise<HttpResponse<T>> {
-    const args = this.resolveArgs(arg1, arg2, arg3);
-    return this.requestJson<T>('get', args);
+  ): Promise<HttpResponse<ResT>> {
+    const args = this.resolveArgs<ResT>(arg1, arg2, arg3);
+    return this.requestJson<ResT>('get', args);
   }
 
-  headJson(url: string, httpOptions?: Opts): Promise<HttpResponse<undefined>> {
-    return this.requestJson<undefined>('head', { url, httpOptions });
+  headJson(url: string, httpOptions?: Opts): Promise<HttpResponse<never>> {
+    return this.requestJson<never>('head', { url, httpOptions });
   }
 
   postJson<T>(url: string, options?: Opts): Promise<HttpResponse<T>>;
