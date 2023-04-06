@@ -4,6 +4,7 @@ import * as allVersioning from '../../../../modules/versioning';
 import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
+import { toMs } from '../../../../util/pretty-time';
 import { filterInternalChecks } from './filter-checks';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 
@@ -44,10 +45,10 @@ describe('workers/repository/process/lookup/filter-checks', () => {
     config.currentVersion = '1.0.0';
     sortedReleases = clone(releases);
     jest.resetAllMocks();
-    dateUtil.getElapsedDays.mockReturnValueOnce(3);
-    dateUtil.getElapsedDays.mockReturnValueOnce(5);
-    dateUtil.getElapsedDays.mockReturnValueOnce(7);
-    dateUtil.getElapsedDays.mockReturnValueOnce(9);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('7 days') ?? 0);
+    dateUtil.getElapsedMs.mockReturnValueOnce(toMs('9 days') ?? 0);
   });
 
   describe('.filterInternalChecks()', () => {
