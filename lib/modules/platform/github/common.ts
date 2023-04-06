@@ -1,7 +1,5 @@
 import is from '@sindresorhus/is';
-import * as schema from '../../../util/schema';
 import { getPrBodyStruct } from '../pr-body';
-import * as platformSchemas from '../schemas';
 import type { GhPr, GhRestPr } from './types';
 
 /**
@@ -54,6 +52,5 @@ export function coerceRestPr(pr: GhRestPr): GhPr {
     result.targetBranch = pr.base.ref;
   }
 
-  schema.match(platformSchemas.Pr, result, 'warn');
   return result;
 }

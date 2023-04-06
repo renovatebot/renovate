@@ -17,7 +17,6 @@ import { detectSemanticCommits } from '../../util/git/semantic';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
-import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
@@ -126,7 +125,6 @@ export async function renovateRepository(
   printLookupStats();
   printDnsStats();
   clearDnsCache();
-  schemaUtil.reportErrors();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;
