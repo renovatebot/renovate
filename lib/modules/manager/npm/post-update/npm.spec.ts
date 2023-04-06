@@ -307,4 +307,88 @@ describe('modules/manager/npm/post-update/npm', () => {
       },
     ]);
   });
+
+  it('installs workspace only packages separately', async () => {
+    const execSnapshots = mockExecAll();
+    fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+    const skipInstalls = true;
+    const updates = [
+      {
+        packageFile: 'some-dir/a/package.json',
+        packageName: 'abbrev',
+        depType: 'dependencies',
+        newVersion: '1.1.0',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+      {
+        packageFile: 'some-dir/b/package.json',
+        packageName: 'xmldoc',
+        depType: 'dependencies',
+        newVersion: '2.2.0',
+        newValue: '^2.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+      {
+        packageFile: 'some-dir/a/package.json',
+        packageName: 'postcss',
+        depType: 'dependencies',
+        newVersion: '8.4.8',
+        newValue: '^8.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+      {
+        packageFile: 'some-dir/package.json',
+        packageName: 'chalk',
+        depType: 'dependencies',
+        newVersion: '9.4.8',
+        newValue: '^9.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+      {
+        packageFile: 'some-dir/b/package.json',
+        packageName: 'postcss',
+        depType: 'dependencies',
+        newVersion: '8.4.8',
+        newValue: '^8.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+      {
+        packageFile: 'some-dir/package.json',
+        packageName: 'postcss',
+        depType: 'dependencies',
+        newVersion: '8.4.8',
+        newValue: '^8.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['a', 'b'],
+        },
+      },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      { skipInstalls },
+      updates
+    );
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });
