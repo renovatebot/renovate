@@ -214,6 +214,7 @@ const repoGroups = {
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
+  'storybook-react-native': 'https://github.com/storybookjs/react-native',
   strapi: 'https://github.com/strapi/strapi',
   'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',

@@ -12,13 +12,13 @@ const SupportPhase = z.union([
 const ReleaseIndex = z.object({
   'channel-version': z.string(),
   'latest-release': z.string(),
-  'latest-release-date': z.date(),
+  'latest-release-date': z.string(),
   security: z.boolean(),
   'latest-runtime': z.string(),
   'latest-sdk': z.string(),
   product: Product,
   'support-phase': SupportPhase,
-  'eol-date': z.date().nullable(),
+  'eol-date': z.string().nullable(),
   'releases.json': z.string(),
 });
 export const DotnetReleasesIndexSchema = z.object({
@@ -30,7 +30,7 @@ const ReleaseDetails = z.object({
   'version-display': z.string(),
 });
 const ReleaseSchema = z.object({
-  'release-date': z.date(),
+  'release-date': z.string(),
   'release-version': z.string(),
   security: z.boolean(),
   'release-notes': z.string(),
@@ -40,7 +40,7 @@ const ReleaseSchema = z.object({
 export const DotnetReleasesSchema = z.object({
   'channel-version': z.string(),
   'latest-release': z.string(),
-  'latest-release-date': z.date(),
+  'latest-release-date': z.string(),
   'latest-runtime': z.string(),
   'latest-sdk': z.string(),
   'support-phase': SupportPhase,
