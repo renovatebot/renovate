@@ -175,8 +175,10 @@ export async function generateLockFile(
             | 'optionalDependencies';
 
           // TODO #7154
-          if (lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.depName!]) {
-            lockFileParsed.packages[''][depType]![lockUpdate.depName!] =
+          if (
+            lockFileParsed.packages?.['']?.[depType]?.[lockUpdate.packageName!]
+          ) {
+            lockFileParsed.packages[''][depType]![lockUpdate.packageName!] =
               lockUpdate.newValue!;
           }
         });
@@ -214,7 +216,7 @@ export function divideWorkspaceAndRootDeps(
   const lockRootUpdates: Upgrade[] = []; // stores all upgrades which are present in root package.json
   const lockWorkspacesUpdates: Upgrade[] = []; // stores all upgrades which are present in workspaces package.json
   const workspaces = new Set<string>(); // name of all workspaces
-  const rootDeps = new Set<string>(); // depName of all upgrades in root package.json (makes it check duplicate deps in root)
+  const rootDeps = new Set<string>(); // packageName of all upgrades in root package.json (makes it check duplicate deps in root)
 
   // divide the deps in two categories: workspace and root
   for (const upgrade of lockUpdates) {

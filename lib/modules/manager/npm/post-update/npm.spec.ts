@@ -30,7 +30,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const skipInstalls = true;
     const postUpdateOptions = ['npmDedupe'];
     const updates = [
-      { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: false },
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -50,7 +50,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     fs.readLocalFile.mockResolvedValueOnce('package-lock-contents');
     const skipInstalls = true;
     const updates = [
-      { depName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
+      { packageName: 'some-dep', newVersion: '1.0.1', isLockfileUpdate: true },
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -73,7 +73,7 @@ describe('modules/manager/npm/post-update/npm', () => {
     const skipInstalls = true;
     const updates = [
       {
-        depName: 'postcss',
+        packageName: 'postcss',
         depType: 'dependencies',
         newVersion: '8.4.8',
         newValue: '^8.0.0',
