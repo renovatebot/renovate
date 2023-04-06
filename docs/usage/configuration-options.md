@@ -2648,7 +2648,8 @@ Renovate's `"auto"` strategy works like this for npm:
 
 1. Widen `peerDependencies`
 1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Otherwise, if the update is outside the existing range, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Finally, if the update is in-range, Renovate will update the lockfile with the new exact version.
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
