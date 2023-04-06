@@ -264,7 +264,10 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
     const parsed = await schema.safeParseAsync(res.body);
     if (!parsed.success) {
-      logger.once.info({ err: parsed.error }, `Response does not match schema`);
+      logger.once.info(
+        { err: parsed.error },
+        `Response does not match schema: please report this to https://github.com/renovatebot/renovate/pull/21338`
+      );
       return { ...res, body: res.body };
     }
 
