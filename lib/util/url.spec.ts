@@ -8,6 +8,7 @@ import {
   parseUrl,
   replaceUrlPath,
   resolveBaseUrl,
+  trimSlashes,
   trimTrailingSlash,
   validateUrl,
 } from './url';
@@ -120,6 +121,17 @@ describe('util/url', () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('trimSlashes', () => {
+    expect(trimSlashes('foo')).toBe('foo');
+    expect(trimSlashes('/foo')).toBe('foo');
+    expect(trimSlashes('foo/')).toBe('foo');
+    expect(trimSlashes('//////foo//////')).toBe('foo');
+    expect(trimSlashes('foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('foo/bar/')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar/')).toBe('foo/bar');
   });
 
   it('ensureTrailingSlash', () => {

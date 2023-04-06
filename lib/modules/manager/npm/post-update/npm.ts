@@ -20,7 +20,7 @@ import {
   readLocalFile,
   renameLocalFile,
 } from '../../../../util/fs';
-import { trimLeadingSlash } from '../../../../util/url';
+import { trimSlashes } from '../../../../util/url';
 import type { PostUpdateConfig, Upgrade } from '../../types';
 import { composeLockFile, parseLockFile } from '../utils';
 import { getNodeToolConstraint } from './node-version';
@@ -224,10 +224,12 @@ export function divideWorkspaceAndRootDeps(
       is.string(upgrade.packageFile)
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
-      const packageFileDir = upgrade.packageFile.replace('package.json', '');
+      const packageFileDir = trimSlashes(
+        upgrade.packageFile.replace('package.json', '')
+      );
 
       // workspaceDir = packageFileDir - lockFileDir
-      const workspaceDir = trimLeadingSlash(
+      const workspaceDir = trimSlashes(
         packageFileDir.replace(lockFileDir, '') ?? ''
       );
 
