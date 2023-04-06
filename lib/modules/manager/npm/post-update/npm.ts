@@ -233,7 +233,7 @@ export function divideWorkspaceAndRootDeps(
       // workspaceDir = packageFileDir - lockFileDir
       const workspaceDir = trimSlashes(packageFileDir.replace(lockFileDir, ''));
 
-      if (!is.nonEmptyString(workspaceDir)) {
+      if (is.emptyString(workspaceDir)) {
         lockRootUpdates.push(upgrade);
         rootDeps.add(`${upgrade.packageName!}@${upgrade.newVersion!}`);
       }
