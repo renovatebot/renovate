@@ -162,17 +162,17 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('skips branch for fresh release with stabilityDays', async () => {
+    it('skips branch for fresh release with minimumReleaseAge', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
       (config.upgrades as Partial<BranchUpgradeConfig>[]) = [
         {
           releaseTimestamp: new Date('2019-01-01').getTime().toString(),
-          stabilityDays: 1,
+          minimumReleaseAge: '1 day',
         },
         {
           releaseTimestamp: new Date().toString(),
-          stabilityDays: 1,
+          minimumReleaseAge: '1 day',
         },
       ];
 
@@ -185,13 +185,13 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('skips branch if not stabilityDays not met', async () => {
+    it('skips branch if not minimumReleaseAge not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
       config.upgrades = partial<BranchUpgradeConfig>([
         {
           releaseTimestamp: '2099-12-31',
-          stabilityDays: 1,
+          minimumReleaseAge: '1 day',
         },
       ]);
       const res = await branchWorker.processBranch(config);

@@ -1576,16 +1576,15 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
-    name: 'stabilityDays',
-    description:
-      'Number of days required before a new release is considered stable.',
-    type: 'integer',
-    default: 0,
+    name: 'minimumReleaseAge',
+    description: 'Time required before a new release is considered stable.',
+    type: 'string',
+    default: '0',
   },
   {
     name: 'internalChecksAsSuccess',
     description:
-      'Whether to consider passing internal checks such as stabilityDays when determining branch status.',
+      'Whether to consider passing internal checks such as minimumReleaseAge when determining branch status.',
     type: 'boolean',
     default: false,
   },
@@ -1719,7 +1718,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      stabilityDays: 0,
+      minimumReleaseAge: '0',
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
