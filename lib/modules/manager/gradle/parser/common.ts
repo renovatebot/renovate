@@ -13,6 +13,10 @@ export const REGISTRY_URLS = {
 export const GRADLE_PLUGINS = {
   checkstyle: ['toolVersion', 'com.puppycrawl.tools:checkstyle'],
   codenarc: ['toolVersion', 'org.codenarc:CodeNarc'],
+  composeOptions: [
+    'kotlinCompilerExtensionVersion',
+    'androidx.compose.compiler:compiler',
+  ],
   detekt: ['toolVersion', 'io.gitlab.arturbosch.detekt:detekt-core'],
   findbugs: ['toolVersion', 'com.google.code.findbugs:findbugs'],
   googleJavaFormat: [

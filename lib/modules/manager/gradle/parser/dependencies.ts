@@ -79,7 +79,7 @@ const qDependencySet = q
   .handler(cleanupTempVars);
 
 // group: "foo", name: "bar", version: "1.2.3"
-const qGroovyMapNotationDependencies = q
+export const qGroovyMapNotationDependencies = q
   .sym<Ctx>('group')
   .op(':')
   .join(qGroupId)
@@ -179,7 +179,7 @@ const qImplicitGradlePlugin = q
             )
             .alt(
               // toolVersion = "1.2.3"
-              q.op<Ctx>('=').join(qVersion),
+              q.opt<Ctx>(q.op('=')).join(qVersion),
               // toolVersion.set("1.2.3"), toolVersion.value("1.2.3")
               q
                 .op<Ctx>('.')

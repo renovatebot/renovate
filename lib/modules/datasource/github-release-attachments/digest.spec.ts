@@ -1,17 +1,17 @@
 import hasha from 'hasha';
 import * as httpMock from '../../../../test/http-mock';
 import type { GithubDigestFile } from '../../../util/github/types';
-import { GitHubReleaseMocker } from './test';
+import { GitHubReleaseAttachmentMocker } from './test';
 
-import { GithubReleasesDatasource } from '.';
+import { GithubReleaseAttachmentsDatasource } from '.';
 
-describe('modules/datasource/github-releases/digest', () => {
+describe('modules/datasource/github-release-attachments/digest', () => {
   const packageName = 'some/dep';
-  const releaseMock = new GitHubReleaseMocker(
+  const releaseMock = new GitHubReleaseAttachmentMocker(
     'https://api.github.com',
     packageName
   );
-  const githubReleases = new GithubReleasesDatasource();
+  const githubReleaseAttachments = new GithubReleaseAttachmentsDatasource();
 
   describe('findDigestAsset', () => {
     it('finds SHASUMS.txt file containing digest', async () => {
@@ -21,7 +21,7 @@ describe('modules/datasource/github-releases/digest', () => {
         'another-digest linux-arm64.tar.gz'
       );
 
-      const digestAsset = await githubReleases.findDigestAsset(
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
         release,
         'test-digest'
       );
@@ -40,7 +40,7 @@ describe('modules/datasource/github-releases/digest', () => {
         .get(`/repos/${packageName}/releases/download/v1.0.0/SHASUMS.txt`)
         .reply(200, '');
 
-      const digestAsset = await githubReleases.findDigestAsset(
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
         release,
         'test-digest'
       );
@@ -57,7 +57,7 @@ describe('modules/datasource/github-releases/digest', () => {
       });
       const contentDigest = await hasha.async(content, { algorithm: 'sha256' });
 
-      const digestAsset = await githubReleases.findDigestAsset(
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
         release,
         contentDigest
       );
@@ -67,7 +67,7 @@ describe('modules/datasource/github-releases/digest', () => {
 
     it('returns null when no assets available', async () => {
       const release = releaseMock.release('v1.0.0');
-      const digestAsset = await githubReleases.findDigestAsset(
+      const digestAsset = await githubReleaseAttachments.findDigestAsset(
         release,
         'test-digest'
       );
@@ -89,7 +89,7 @@ describe('modules/datasource/github-releases/digest', () => {
           'v1.0.1',
           'updated-digest  asset.zip'
         );
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,
           release
         );
@@ -106,7 +106,7 @@ describe('modules/datasource/github-releases/digest', () => {
           'v1.0.1',
           'updated-digest  asset-1.0.1.zip'
         );
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAssetWithVersion,
           release
         );
@@ -118,7 +118,7 @@ describe('modules/datasource/github-releases/digest', () => {
           'v1.0.1',
           'moot-digest asset.tar.gz'
         );
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,
           release
         );
@@ -127,7 +127,7 @@ describe('modules/datasource/github-releases/digest', () => {
 
       it('returns null when digest file not found', async () => {
         const release = releaseMock.release('v1.0.1');
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,
           release
         );
@@ -151,7 +151,7 @@ describe('modules/datasource/github-releases/digest', () => {
           algorithm: 'sha256',
         });
 
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,
           release
         );
@@ -160,7 +160,7 @@ describe('modules/datasource/github-releases/digest', () => {
 
       it('returns null when not found', async () => {
         const release = releaseMock.release('v1.0.1');
-        const digest = await githubReleases.mapDigestAssetToRelease(
+        const digest = await githubReleaseAttachments.mapDigestAssetToRelease(
           digestAsset,
           release
         );

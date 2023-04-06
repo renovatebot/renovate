@@ -77,6 +77,7 @@ ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
+pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
@@ -315,6 +316,13 @@ dummy 1.2.3
             packageName: 'pnpm',
             depName: 'pnpm',
             versioning: 'semver',
+          },
+          {
+            currentValue: '3.57.1',
+            datasource: 'github-releases',
+            packageName: 'pulumi/pulumi',
+            depName: 'pulumi',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.11.0',

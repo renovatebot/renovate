@@ -41,7 +41,6 @@ export function extractPackageFile(content: string): PackageFileContent | null {
               packageName: orbName,
               commitMessageTopic: '{{{depName}}} orb',
               versioning: npmVersioning.id,
-              rangeStrategy: 'pin',
             };
             deps.push(dep);
           }

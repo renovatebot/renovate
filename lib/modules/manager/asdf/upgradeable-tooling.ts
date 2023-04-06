@@ -300,6 +300,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       versioning: semverVersioning.id,
     },
   },
+  pulumi: {
+    asdfPluginUrl: 'https://github.com/canha/asdf-pulumi.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pulumi/pulumi',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   python: {
     asdfPluginUrl: 'https://github.com/danhper/asdf-python',
     config: {
@@ -356,6 +364,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mvdan/sh',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  sops: {
+    asdfPluginUrl: 'https://github.com/feniix/asdf-sops',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mozilla/sops',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

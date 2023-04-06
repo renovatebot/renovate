@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
@@ -99,12 +99,12 @@ export async function getDependency(
   try {
     const options: HttpOptions = {};
     if (cachedResult?.cacheData?.etag) {
-      logger.debug('Using cached etag');
+      logger.trace({ packageName }, 'Using cached etag');
       options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.debug({ packageName }, 'Cached npm result is revalidated');
+      logger.trace(`Cached npm result for ${packageName} is revalidated`);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
@@ -171,19 +171,12 @@ export async function getDependency(
       return release;
     });
     logger.trace({ dep }, 'dep');
-    // serialize first before saving
-    // TODO: use dynamic detection of public repos instead of a static list (#9587)
-    const whitelistedPublicScopes = [
-      '@graphql-codegen',
-      '@storybook',
-      '@types',
-      '@typescript-eslint',
-    ];
+    const cacheControl = raw.headers?.['cache-control'];
     if (
-      !raw.authorization &&
-      (whitelistedPublicScopes.includes(packageName.split('/')[0]) ||
-        !packageName.startsWith('@'))
+      is.nonEmptyString(cacheControl) &&
+      regEx(/(^|,)\s*public\s*(,|$)/).test(cacheControl)
     ) {
+      dep.isPrivate = false;
       const cacheData = { softExpireAt, etag };
       await packageCache.set(
         cacheNamespace,
@@ -191,6 +184,8 @@ export async function getDependency(
         { ...dep, cacheData },
         etag ? cacheHardTtlMinutes : cacheMinutes
       );
+    } else {
+      dep.isPrivate = true;
     }
     return dep;
   } catch (err) {

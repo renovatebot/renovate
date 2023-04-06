@@ -1749,7 +1749,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('green');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'green'
+          );
         });
 
         it('should be pending', async () => {
@@ -1764,7 +1766,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
 
           scope
             .get(
@@ -1776,7 +1780,9 @@ Followed by some information.
               failed: 0,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('yellow');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'yellow'
+          );
         });
 
         it('should be failed', async () => {
@@ -1791,7 +1797,9 @@ Followed by some information.
               failed: 1,
             });
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
 
           scope
             .get(
@@ -1799,15 +1807,17 @@ Followed by some information.
             )
             .replyWithError('requst-failed');
 
-          expect(await bitbucket.getBranchStatus('somebranch')).toBe('red');
+          expect(await bitbucket.getBranchStatus('somebranch', true)).toBe(
+            'red'
+          );
         });
 
         it('throws repository-changed', async () => {
           git.branchExists.mockReturnValue(false);
           await initRepo();
-          await expect(bitbucket.getBranchStatus('somebranch')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.getBranchStatus('somebranch', true)
+          ).rejects.toThrow(REPOSITORY_CHANGED);
         });
       });
 

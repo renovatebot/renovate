@@ -81,7 +81,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
 }
 
 export async function getDockerTag(
-  depName: string,
+  packageName: string,
   constraint: string,
   scheme: string
 ): Promise<string> {
@@ -96,12 +96,12 @@ export async function getDockerTag(
   }
 
   logger.debug(
-    { depName, scheme, constraint },
+    { packageName, scheme, constraint },
     `Found version constraint - checking for a compatible image to use`
   );
   const imageReleases = await getPkgReleases({
     datasource: 'docker',
-    depName,
+    packageName,
     versioning: scheme,
   });
   if (imageReleases?.releases) {
@@ -117,17 +117,17 @@ export async function getDockerTag(
     const version = versions.sort(ver.sortVersions.bind(ver)).pop();
     if (version) {
       logger.debug(
-        { depName, scheme, constraint, version },
+        { packageName, scheme, constraint, version },
         `Found compatible image version`
       );
       return version;
     }
   } else {
-    logger.error(`No ${depName} releases found`);
+    logger.error(`No ${packageName} releases found`);
     return 'latest';
   }
   logger.warn(
-    { depName, constraint, scheme },
+    { packageName, constraint, scheme },
     'Failed to find a tag satisfying constraint, using "latest" tag instead'
   );
   return 'latest';
@@ -259,7 +259,9 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  image = `${ensureTrailingSlash(dockerImagePrefix ?? 'renovate')}${image}`;
+  image = `${ensureTrailingSlash(
+    dockerImagePrefix ?? 'containerbase'
+  )}${image}`;
 
   // TODO: add constraint: const tag = getDockerTag(image, sideCarImageVersion, 'semver');
   logger.debug(

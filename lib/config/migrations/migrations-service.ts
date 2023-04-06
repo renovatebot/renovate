@@ -24,6 +24,7 @@ import { GoModTidyMigration } from './custom/go-mod-tidy-migration';
 import { HostRulesMigration } from './custom/host-rules-migration';
 import { IgnoreNodeModulesMigration } from './custom/ignore-node-modules-migration';
 import { IgnoreNpmrcFileMigration } from './custom/ignore-npmrc-file-migration';
+import { IncludeForksMigration } from './custom/include-forks-migration';
 import { MatchDatasourcesMigration } from './custom/match-datasources-migration';
 import { MatchStringsMigration } from './custom/match-strings-migration';
 import { NodeMigration } from './custom/node-migration';
@@ -111,6 +112,7 @@ export class MigrationsService {
     HostRulesMigration,
     IgnoreNodeModulesMigration,
     IgnoreNpmrcFileMigration,
+    IncludeForksMigration,
     MatchStringsMigration,
     PackageNameMigration,
     PackagePatternMigration,

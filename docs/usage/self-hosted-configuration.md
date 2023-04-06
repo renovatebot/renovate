@@ -139,6 +139,14 @@ For example:
 }
 ```
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
+
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch". This fall back behavior matches that of the Bitbucket Cloud web interface.
+
 ## binarySource
 
 Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
@@ -302,9 +310,9 @@ You can skip the host part, and use just the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `renovate/node` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_node` instead of `renovate_node`
+- called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
@@ -313,19 +321,19 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 ## dockerImagePrefix
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
+By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
 You can use the `dockerImagePrefix` option to override this default.
 
-Say you want to pull your images from `ghcr.io/renovatebot`.
+Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/renovatebot"
+  "dockerImagePrefix": "ghcr.io/containerbase"
 }
 ```
 
-If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 
@@ -708,6 +716,10 @@ Set this to an S3 URI to enable S3 backed repository cache.
 !!! tip
     If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
     For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+
+<!-- prettier-ignore -->
+!!! note
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 

@@ -276,7 +276,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mockEmpty);
       const res = await getDigest({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, without returned images to be null"]}]',
       });
       expect(res).toBeNull();
@@ -286,7 +286,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mock1Image);
       const res = await getDigest({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, with one matching image to return that image"]}]',
       });
       expect(res).toStrictEqual(image3.Name);
@@ -296,7 +296,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getDigest({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without newValue, with 3 matching image to return the newest image"]}]',
       });
       expect(res).toStrictEqual(image3.Name);
@@ -307,7 +307,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       const res = await getDigest(
         {
           datasource,
-          depName:
+          packageName:
             '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with matching newValue, with 3 matching image to return the matching image"]}]',
         },
         image1.ImageId
@@ -320,7 +320,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       const res = await getDigest(
         {
           datasource,
-          depName:
+          packageName:
             '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with not matching newValue, with 3 matching images to return the matching image"]}]',
         },
         'will never match'
@@ -334,7 +334,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mockEmpty);
       const res = await getPkgReleases({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["without returned images to be null"]}]',
       });
       expect(res).toBeNull();
@@ -344,7 +344,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mock1Image);
       const res = await getPkgReleases({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one matching image to return that image"]}]',
       });
       expect(res).toStrictEqual({
@@ -363,7 +363,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand({ Images: [image2] });
       const res = await getPkgReleases({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one deprecated matching image to return that image"]}]',
       });
       expect(res).toStrictEqual({
@@ -382,7 +382,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
       mockDescribeImagesCommand(mock3Images);
       const res = await getPkgReleases({
         datasource,
-        depName:
+        packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
       });
       expect(res).toStrictEqual({

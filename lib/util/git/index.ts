@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
@@ -31,7 +31,10 @@ import { incLimitedValue } from '../../workers/global/limits';
 import { getCache } from '../cache/repository';
 import { newlineRegex, regEx } from '../regex';
 import { parseGitAuthor } from './author';
-import { getCachedBehindBaseResult } from './behind-base-branch-cache';
+import {
+  getCachedBehindBaseResult,
+  setCachedBehindBaseResult,
+} from './behind-base-branch-cache';
 import { getNoVerify, simpleGitConfig } from './config';
 import {
   getCachedConflictResult,
@@ -106,10 +109,6 @@ export async function gitRetry<T>(gitFunc: () => Promise<T>): Promise<T> {
   }
 
   throw lastError;
-}
-
-function localName(branchName: string): string {
-  return branchName.replace(regEx(/^origin\//), '');
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -568,11 +567,13 @@ export async function isBranchBehindBase(
   branchName: string,
   baseBranch: string
 ): Promise<boolean> {
+  const baseBranchSha = getBranchCommit(baseBranch);
+  const branchSha = getBranchCommit(branchName);
   let isBehind = getCachedBehindBaseResult(
     branchName,
-    getBranchCommit(branchName), // branch sha
+    branchSha,
     baseBranch,
-    getBranchCommit(baseBranch) // base branch sha
+    baseBranchSha
   );
   if (isBehind !== null) {
     logger.debug(`branch.isBehindBase(): using cached result "${isBehind}"`);
@@ -583,18 +584,15 @@ export async function isBranchBehindBase(
 
   await syncGit();
   try {
-    const { currentBranchSha, currentBranch } = config;
-    const branches = await git.branch([
-      '--remotes',
-      '--verbose',
-      '--contains',
-      config.currentBranchSha,
-    ]);
-    isBehind = !branches.all.map(localName).includes(branchName);
+    const behindCount = (
+      await git.raw(['rev-list', '--count', `${branchSha!}..${baseBranchSha!}`])
+    ).trim();
+    isBehind = behindCount !== '0';
     logger.debug(
-      { currentBranch, currentBranchSha },
+      { baseBranch, branchName },
       `branch.isBehindBase(): ${isBehind}`
     );
+    setCachedBehindBaseResult(branchName, isBehind);
     return isBehind;
   } catch (err) /* istanbul ignore next */ {
     const errChecked = checkForPlatformFailure(err);

@@ -15,11 +15,12 @@ import type {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../types';
+import { PipfileLockSchema } from './schema';
 
 function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
-): string | undefined | null {
+): string | undefined {
   const { constraints = {} } = config;
   const { python } = constraints;
 
@@ -28,14 +29,20 @@ function getPythonConstraint(
     return python;
   }
   try {
-    const pipfileLock = JSON.parse(existingLockFileContent);
-    if (pipfileLock?._meta?.requires?.python_version) {
-      const pythonVersion: string = pipfileLock._meta.requires.python_version;
+    const result = PipfileLockSchema.safeParse(
+      JSON.parse(existingLockFileContent)
+    );
+    // istanbul ignore if: not easily testable
+    if (!result.success) {
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
+      return undefined;
+    }
+    if (result.data._meta?.requires?.python_version) {
+      const pythonVersion = result.data._meta.requires.python_version;
       return `== ${pythonVersion}.*`;
     }
-    if (pipfileLock?._meta?.requires?.python_full_version) {
-      const pythonFullVersion: string =
-        pipfileLock._meta.requires.python_full_version;
+    if (result.data._meta?.requires?.python_full_version) {
+      const pythonFullVersion = result.data._meta.requires.python_full_version;
       return `== ${pythonFullVersion}`;
     }
   } catch (err) {
@@ -56,14 +63,19 @@ function getPipenvConstraint(
     return pipenv;
   }
   try {
-    const pipfileLock = JSON.parse(existingLockFileContent);
-    if (pipfileLock?.default?.pipenv?.version) {
-      const pipenvVersion: string = pipfileLock.default.pipenv.version;
-      return pipenvVersion;
+    const result = PipfileLockSchema.safeParse(
+      JSON.parse(existingLockFileContent)
+    );
+    // istanbul ignore if: not easily testable
+    if (!result.success) {
+      logger.warn({ error: result.error }, 'Invalid Pipfile.lock');
+      return '';
     }
-    if (pipfileLock?.develop?.pipenv?.version) {
-      const pipenvVersion: string = pipfileLock.develop.pipenv.version;
-      return pipenvVersion;
+    if (result.data.default?.pipenv?.version) {
+      return result.data.default.pipenv.version;
+    }
+    if (result.data.develop?.pipenv?.version) {
+      return result.data.develop.pipenv.version;
     }
   } catch (err) {
     // Do nothing

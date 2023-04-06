@@ -71,7 +71,7 @@ describe('modules/datasource/repology/index', () => {
         await getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).toBeNull();
     });
@@ -88,7 +88,7 @@ describe('modules/datasource/repology/index', () => {
         await getPkgReleases({
           datasource,
           versioning,
-          depName: 'this_should/never-exist',
+          packageName: 'this_should/never-exist',
         })
       ).toBeNull();
     });
@@ -107,7 +107,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -121,7 +121,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -139,7 +139,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -158,7 +158,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -172,7 +172,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'debian_stable/nginx',
+          packageName: 'debian_stable/nginx',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -187,7 +187,7 @@ describe('modules/datasource/repology/index', () => {
         await getPkgReleases({
           datasource,
           versioning,
-          depName: 'ubuntu_20_04/git',
+          packageName: 'ubuntu_20_04/git',
         })
       ).toBeNull();
     });
@@ -197,7 +197,7 @@ describe('modules/datasource/repology/index', () => {
         getPkgReleases({
           datasource,
           versioning,
-          depName: 'invalid-lookup-name',
+          packageName: 'invalid-lookup-name',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -211,7 +211,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'debian_stable/nginx',
+        packageName: 'debian_stable/nginx',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(1);
@@ -230,7 +230,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'debian_stable/gcc-defaults',
+        packageName: 'debian_stable/gcc-defaults',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(1);
@@ -246,7 +246,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'debian_stable/gcc-defaults',
+        packageName: 'debian_stable/gcc-defaults',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(1);
@@ -262,7 +262,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'alpine_3_12/gcc',
+        packageName: 'alpine_3_12/gcc',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(1);
@@ -278,7 +278,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'debian_stable/pulseaudio-utils',
+        packageName: 'debian_stable/pulseaudio-utils',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(1);
@@ -297,7 +297,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'centos_8/java-11-openjdk',
+        packageName: 'centos_8/java-11-openjdk',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(6);
@@ -325,7 +325,7 @@ describe('modules/datasource/repology/index', () => {
       const release = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'dummy/example',
+        packageName: 'dummy/example',
       });
 
       expect(release).toBeNull();
@@ -407,7 +407,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'some_repo/some-package',
+        packageName: 'some_repo/some-package',
       });
       expect(res).toEqual({
         registryUrl: 'https://repology.org',
@@ -434,7 +434,7 @@ describe('modules/datasource/repology/index', () => {
       const res = await getPkgReleases({
         datasource,
         versioning,
-        depName: 'ubuntu_20_04/python3.8',
+        packageName: 'ubuntu_20_04/python3.8',
       });
       expect(res).toEqual({
         registryUrl: 'https://repology.org',

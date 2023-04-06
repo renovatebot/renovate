@@ -252,7 +252,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
       config,
     });
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       {
         cmd:
           'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
@@ -261,7 +261,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool ruby 3.1.0' +
           ' && ' +

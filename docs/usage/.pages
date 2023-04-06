@@ -10,6 +10,7 @@ nav:
   - ... | modules
   - Language Support:
       - 'Bazel': 'bazel.md'
+      - 'Bicep': 'bicep.md'
       - 'Docker': 'docker.md'
       - 'Golang': 'golang.md'
       - 'Java': 'java.md'

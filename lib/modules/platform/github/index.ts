@@ -1,6 +1,6 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
@@ -32,6 +32,8 @@ import type {
 } from '../../../util/git/types';
 import * as hostRules from '../../../util/host-rules';
 import * as githubHttp from '../../../util/http/github';
+import type { GithubHttpOptions } from '../../../util/http/github';
+import type { HttpResponse } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
 import { fromBase64, looseEquals } from '../../../util/string';
@@ -821,7 +823,8 @@ async function getStatus(
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   let commitStatus: CombinedBranchStatus;
@@ -841,6 +844,18 @@ export async function getBranchStatus(
     { state: commitStatus.state, statuses: commitStatus.statuses },
     'branch status check result'
   );
+  if (commitStatus.statuses && !internalChecksAsSuccess) {
+    commitStatus.statuses = commitStatus.statuses.filter(
+      (status) =>
+        status.state !== 'success' || !status.context?.startsWith('renovate/')
+    );
+    if (!commitStatus.statuses.length) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      commitStatus.state = 'pending';
+    }
+  }
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
   // API is supported in oldest available GHE version 2.19
   try {
@@ -1592,15 +1607,15 @@ export async function mergePr({
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
-  const options: any = {
-    body: {} as { merge_method?: string },
+  const options: GithubHttpOptions = {
+    body: {},
   };
   // istanbul ignore if
   if (config.forkToken) {
     options.token = config.forkToken;
   }
   let automerged = false;
-  let automergeResult: any;
+  let automergeResult: HttpResponse<unknown>;
   if (config.mergeMethod) {
     // This path is taken if we have auto-detected the allowed merge types from the repo
     options.body.merge_method = config.mergeMethod;
@@ -1610,9 +1625,19 @@ export async function mergePr({
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
-        // istanbul ignore next
+        const body = err.response?.body;
+        if (
+          is.nonEmptyString(body?.message) &&
+          regEx(/^Required status check ".+" is expected\.$/).test(body.message)
+        ) {
+          logger.debug(
+            { response: body },
+            `GitHub blocking PR merge -- Missing required status check(s)`
+          );
+          return false;
+        }
         logger.debug(
-          { response: err.response ? err.response.body : undefined },
+          { response: body },
           'GitHub blocking PR merge -- will keep trying'
         );
       } else {
@@ -1648,7 +1673,7 @@ export async function mergePr({
     }
   }
   logger.debug(
-    { automergeResult: automergeResult.body, pr: prNo },
+    { automergeResult: automergeResult!.body, pr: prNo },
     'PR merged'
   );
   const cachedPr = config.prList?.find(({ number }) => number === prNo);

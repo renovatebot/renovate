@@ -285,6 +285,30 @@ describe('modules/datasource/go/releases-goproxy', () => {
       delete process.env.GOINSECURE;
     });
 
+    it('handles direct', async () => {
+      process.env.GOPROXY = 'direct';
+
+      githubGetTags.mockResolvedValueOnce({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v1.0.1', version: 'v1.0.1' },
+        ],
+      });
+      githubGetReleases.mockResolvedValueOnce({ releases: [] });
+
+      const res = await datasource.getReleases({
+        packageName: 'github.com/google/btree',
+      });
+
+      expect(res).toEqual({
+        releases: [
+          { gitRef: 'v1.0.0', version: 'v1.0.0' },
+          { gitRef: 'v1.0.1', version: 'v1.0.1' },
+        ],
+        sourceUrl: 'https://github.com/google/btree',
+      });
+    });
+
     it('skips GONOPROXY and GOPRIVATE packages', async () => {
       process.env.GOPROXY = baseUrl;
       process.env.GOPRIVATE = 'github.com/google/*';
@@ -311,8 +335,6 @@ describe('modules/datasource/go/releases-goproxy', () => {
     });
 
     it('fetches release data from goproxy', async () => {
-      process.env.GOPROXY = baseUrl;
-
       httpMock
         .scope(`${baseUrl}/github.com/google/btree`)
         .get('/@v/list')

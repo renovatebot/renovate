@@ -1,8 +1,9 @@
 import { ArtifactoryDatasource } from './artifactory';
 import { AwsMachineImageDataSource } from './aws-machine-image';
 import { AwsRdsDataSource } from './aws-rds';
+import { AzureBicepResourceDatasource } from './azure-bicep-resource';
 import { AzurePipelinesTasksDatasource } from './azure-pipelines-tasks';
-import { BitBucketTagsDatasource } from './bitbucket-tags';
+import { BitbucketTagsDatasource } from './bitbucket-tags';
 import { CdnJsDatasource } from './cdnjs';
 import { ClojureDatasource } from './clojure';
 import { ConanDatasource } from './conan';
@@ -19,6 +20,7 @@ import { GalaxyDatasource } from './galaxy';
 import { GalaxyCollectionDatasource } from './galaxy-collection';
 import { GitRefsDatasource } from './git-refs';
 import { GitTagsDatasource } from './git-tags';
+import { GithubReleaseAttachmentsDatasource } from './github-release-attachments';
 import { GithubReleasesDatasource } from './github-releases';
 import { GithubTagsDatasource } from './github-tags';
 import { GitlabPackagesDatasource } from './gitlab-packages';
@@ -58,8 +60,9 @@ export default api;
 api.set(ArtifactoryDatasource.id, new ArtifactoryDatasource());
 api.set(AwsMachineImageDataSource.id, new AwsMachineImageDataSource());
 api.set(AwsRdsDataSource.id, new AwsRdsDataSource());
+api.set(AzureBicepResourceDatasource.id, new AzureBicepResourceDatasource());
 api.set(AzurePipelinesTasksDatasource.id, new AzurePipelinesTasksDatasource());
-api.set(BitBucketTagsDatasource.id, new BitBucketTagsDatasource());
+api.set(BitbucketTagsDatasource.id, new BitbucketTagsDatasource());
 api.set(CdnJsDatasource.id, new CdnJsDatasource());
 api.set(ClojureDatasource.id, new ClojureDatasource());
 api.set(ConanDatasource.id, new ConanDatasource());
@@ -76,6 +79,10 @@ api.set(GalaxyDatasource.id, new GalaxyDatasource());
 api.set(GalaxyCollectionDatasource.id, new GalaxyCollectionDatasource());
 api.set(GitRefsDatasource.id, new GitRefsDatasource());
 api.set(GitTagsDatasource.id, new GitTagsDatasource());
+api.set(
+  GithubReleaseAttachmentsDatasource.id,
+  new GithubReleaseAttachmentsDatasource()
+);
 api.set(GithubReleasesDatasource.id, new GithubReleasesDatasource());
 api.set(GithubTagsDatasource.id, new GithubTagsDatasource());
 api.set(GitlabPackagesDatasource.id, new GitlabPackagesDatasource());

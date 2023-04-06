@@ -381,7 +381,8 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatusCheck(branchName);
@@ -404,6 +405,19 @@ export async function getBranchStatus(
       status.state === GitStatusState.Pending
   ).length;
   if (noOfPending) {
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === GitStatusState.Succeeded &&
+        status.context?.genre === 'renovate'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   return 'green';

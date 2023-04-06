@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { regEx } from '../../../../../util/regex';
-import { BitBucketTagsDatasource } from '../../../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../../../datasource/bitbucket-tags';
 import { GitTagsDatasource } from '../../../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../../../datasource/terraform-module';
@@ -78,7 +78,7 @@ export class ModuleExtractor extends DependencyExtractor {
         bitbucketRefMatch.groups.project;
       dep.packageName = dep.depName;
       dep.currentValue = bitbucketRefMatch.groups.tag;
-      dep.datasource = BitBucketTagsDatasource.id;
+      dep.datasource = BitbucketTagsDatasource.id;
     } else if (azureDevOpsSshRefMatch?.groups) {
       dep.depType = 'module';
       dep.depName = `${azureDevOpsSshRefMatch.groups.organization}/${azureDevOpsSshRefMatch.groups.project}/${azureDevOpsSshRefMatch.groups.repository}${azureDevOpsSshRefMatch.groups.modulepath}`;

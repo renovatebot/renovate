@@ -46,6 +46,7 @@ function parseRepositories(
         switch (repo.type) {
           case 'vcs':
           case 'git':
+          case 'path':
             repositories[name!] = repo;
             break;
           case 'composer':
@@ -144,6 +145,14 @@ export async function extractPackageFile(
                   datasource = GitTagsDatasource.id;
                   packageName = repositories[depName].url;
                   break;
+                case 'path':
+                  deps.push({
+                    depType,
+                    depName,
+                    currentValue,
+                    skipReason: 'path-dependency',
+                  });
+                  continue;
               }
             }
             const dep: PackageDependency = {

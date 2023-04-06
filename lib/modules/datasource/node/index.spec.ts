@@ -11,7 +11,7 @@ describe('modules/datasource/node/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'node',
+          packageName: 'node',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -24,7 +24,7 @@ describe('modules/datasource/node/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'node',
+          packageName: 'node',
         })
       ).toBeNull();
     });
@@ -34,7 +34,7 @@ describe('modules/datasource/node/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'node',
+          packageName: 'node',
         })
       ).toBeNull();
     });
@@ -46,7 +46,7 @@ describe('modules/datasource/node/index', () => {
         .reply(200, Fixtures.get('index.json'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'node',
+        packageName: 'node',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(64);
