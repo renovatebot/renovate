@@ -1579,7 +1579,7 @@ const options: RenovateOptions[] = [
     name: 'minimumReleaseAge',
     description: 'Time required before a new release is considered stable.',
     type: 'string',
-    default: '0',
+    default: null,
   },
   {
     name: 'internalChecksAsSuccess',
@@ -1718,7 +1718,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      minimumReleaseAge: '0',
+      minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,

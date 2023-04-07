@@ -60,7 +60,7 @@ export async function filterInternalChecks(
         version: newVersion,
         updateType,
       } = releaseConfig;
-      if (is.string(minimumReleaseAge) && releaseTimestamp) {
+      if (is.nonEmptyString(minimumReleaseAge) && releaseTimestamp) {
         if (getElapsedMs(releaseTimestamp) < (toMs(minimumReleaseAge) ?? 0)) {
           // Skip it if it doesn't pass checks
           logger.trace(

@@ -281,7 +281,8 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (upgrade.minimumReleaseAge && upgrade.releaseTimestamp) ||
+          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
+            upgrade.releaseTimestamp) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {
@@ -290,7 +291,10 @@ export async function processBranch(
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (is.string(upgrade.minimumReleaseAge) && upgrade.releaseTimestamp) {
+        if (
+          is.nonEmptyString(upgrade.minimumReleaseAge) &&
+          upgrade.releaseTimestamp
+        ) {
           const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
           if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
             logger.debug(

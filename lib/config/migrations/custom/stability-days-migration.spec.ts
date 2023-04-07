@@ -4,6 +4,14 @@ describe('config/migrations/custom/stability-days-migration', () => {
   it('migrates', () => {
     expect(StabilityDaysMigration).toMigrate(
       {
+        stabilityDays: 0,
+      },
+      {
+        minimumReleaseAge: null,
+      }
+    );
+    expect(StabilityDaysMigration).toMigrate(
+      {
         stabilityDays: 2,
       },
       {
