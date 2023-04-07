@@ -66,7 +66,8 @@ The default image comes with most package managers that Renovate supports, but n
 You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
 The pre-installed tool are sometimes outdated if the user doesn't update the Docker image regularly.
 
-We also support a persistent cache for downloaded tools, so that we only need to unpack on second+ run.
+Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
+Use the [`containerbaseDir` config option](../self-hosted-configuration.md/#containerbasedir) to control where Renovate stores its containerbase cache.
 
 The default image is for user who don't want to download or install things at runtime.
 The default image has some downsides, because it:
