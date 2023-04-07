@@ -90,7 +90,7 @@ export async function generateLockFile(
     const { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps } =
       divideWorkspaceAndRootDeps(lockFileDir, lockUpdates);
 
-    if (workspaces.size) {
+    if (workspaces.size && lockWorkspacesUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm-workspaces)');
       for (const workspace of workspaces) {
         const currentWorkspaceUpdates = lockWorkspacesUpdates
@@ -99,12 +99,14 @@ export async function generateLockFile(
             (update) =>
               !rootDeps.has(`${update.packageName!}@${update.newVersion!}`) // filter out deps present in root again to be sure
           );
-        const updateCmd =
-          `npm install ${cmdOptions} --workspace=${workspace}` +
-          currentWorkspaceUpdates
-            .map((update) => ` ${update.packageName!}@${update.newVersion!}`)
-            .join('');
-        commands.push(updateCmd);
+        if (currentWorkspaceUpdates.length) {
+          const updateCmd =
+            `npm install ${cmdOptions} --workspace=${workspace}` +
+            currentWorkspaceUpdates
+              .map((update) => ` ${update.packageName!}@${update.newVersion!}`)
+              .join('');
+          commands.push(updateCmd);
+        }
       }
     }
 
