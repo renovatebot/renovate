@@ -343,6 +343,58 @@ describe('modules/manager/regex/index', () => {
     expect(res?.deps).toHaveLength(1);
   });
 
+  it('extracts with combination strategy: sets replaceString when current version group present', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          datasource: 'docker',
+          currentValue: '17.0.0-alpine',
+          replaceString: 'image: eclipse-temurin:17.0.0-alpine',
+        },
+      ],
+    });
+  });
+
+  it('extracts with combination strategy: sets replaceString when current digest group present', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'image: eclipse-temurin@sha256:1234567890abcdef',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          datasource: 'docker',
+          currentDigest: 'sha256:1234567890abcdef',
+          replaceString: 'image: eclipse-temurin@sha256:1234567890abcdef',
+        },
+      ],
+    });
+  });
+
   it('extracts with combination strategy and templates', async () => {
     const config: CustomExtractConfig = {
       matchStringsStrategy: 'combination',
