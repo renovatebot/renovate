@@ -184,7 +184,7 @@ An example of a `config.js` that exports an `async` function (which is a functio
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
 We recommend you use `@renovate-bot` as username if you're on a self-hosted server where you can set all usernames.
-We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
+We also recommend you configure `config.gitAuthor` with the same identity as your Renovate user, for example: `"gitAuthor": "Renovate Bot <renovate@some.domain.test>"`.
 
 <!-- prettier-ignore -->
 !!! warning
