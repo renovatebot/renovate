@@ -61,7 +61,7 @@ If you want, you can map the Docker socket into the container so that Renovate c
 The default image comes with most package managers that Renovate supports, but not _all_ package managers.
 This makes the default image the best choice for most users.
 
-You'll need to change to global mode, or Renovate still installs the latest version of the tools or the requested version from the repository.
+You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
 The pre-installed tool are sometimes outdated if the user doesn't update the Docker image regularly.
 
 We also support a persistent cache for downloaded tools, so that we only need to unpack on second+ run.
