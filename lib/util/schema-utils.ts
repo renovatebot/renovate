@@ -90,3 +90,27 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
     : nullableSchema.catch(null);
   return schemaWithFallback;
 }
+
+export function parseJson<
+  T = unknown,
+  Schema extends z.ZodType<T> = z.ZodType<T>
+>(input: string, schema: Schema): z.infer<Schema> {
+  const parsed = JSON.parse(input);
+  return schema.parse(parsed);
+}
+
+export function safeParseJson<
+  T = unknown,
+  Schema extends z.ZodType<T> = z.ZodType<T>
+>(
+  input: string,
+  schema: Schema,
+  catchCallback?: (e: SyntaxError | z.ZodError) => void
+): z.infer<Schema> | null {
+  try {
+    return parseJson(input, schema);
+  } catch (err) {
+    catchCallback?.(err);
+    return null;
+  }
+}
