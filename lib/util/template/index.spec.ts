@@ -205,4 +205,28 @@ describe('util/template/index', () => {
       expect(output).toBe('@fsouza/prettierd');
     });
   });
+
+  describe('ifEquals', () => {
+    it('should render block if equals', () => {
+      const output = template.compile(
+        '{{#ifEquals datasource "git-refs"}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/ifEquals}}',
+        {
+          datasource: 'git-refs',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('https://github.com/renovatebot/renovate');
+    });
+
+    it('should render else block if not equals', () => {
+      const output = template.compile(
+        '{{#ifEquals datasource "git-refs"}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/ifEquals}}',
+        {
+          datasource: 'github-releases',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('renovatebot/renovate');
+    });
+  });
 });
