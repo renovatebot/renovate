@@ -82,11 +82,11 @@ Returns `true` if a given string is a substring.
 
 `{{#if (containsString depName 'python')}}Python{{else}}Other{{/if}}`
 
-### ifEquals
+### equals
 
 Returns `true` if two values equals (`==`).
 
-`{{#ifEquals depName 'python'}}Python{{else}}Other{{/ifEquals}}`
+`{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
 
 ### and
 

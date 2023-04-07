@@ -206,10 +206,10 @@ describe('util/template/index', () => {
     });
   });
 
-  describe('ifEquals', () => {
+  describe('equals', () => {
     it('should render block if equals', () => {
       const output = template.compile(
-        '{{#ifEquals datasource "git-refs"}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/ifEquals}}',
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
         {
           datasource: 'git-refs',
           packageName: 'renovatebot/renovate',
@@ -220,7 +220,7 @@ describe('util/template/index', () => {
 
     it('should render else block if not equals', () => {
       const output = template.compile(
-        '{{#ifEquals datasource "git-refs"}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/ifEquals}}',
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
         {
           datasource: 'github-releases',
           packageName: 'renovatebot/renovate',

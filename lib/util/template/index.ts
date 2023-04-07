@@ -24,11 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
-handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
-  // @ts-expect-error `this` refers to a Handlebars context object.
-  // eslint-disable-next-line eqeqeq
-  return arg1 == arg2 ? options.fn(this) : options.inverse(this);
-});
+// eslint-disable-next-line eqeqeq
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 == arg2);
 
 handlebars.registerHelper({
   and(...args) {
@@ -207,7 +204,7 @@ export function proxyCompileInput(input: CompileInput): CompileInput {
 }
 
 const templateRegex =
-  /{{(?:#(?:if|unless|with|each|ifEquals) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
+  /{{(?:#(?:if|unless|with|each) )?([a-zA-Z.]+)(?: as \| [a-zA-Z.]+ \|)?}}/g; // TODO #12873
 
 export function compile(
   template: string,
