@@ -53,6 +53,7 @@ There are two flavors:
 
 The `-slim` image only comes with the Node.js environment.
 By default, the image installs the required tools when needed.
+We recommend the `-slim` image for most users.
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
@@ -61,7 +62,6 @@ Read the [`binarySource` config option docs](../self-hosted-configuration.md/#bi
 ##### The default image
 
 The default image comes with most package managers that Renovate supports, but not _all_ package managers.
-This makes the default image the best choice for most users.
 
 You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
 The pre-installed tool are sometimes outdated if the user doesn't update the Docker image regularly.
