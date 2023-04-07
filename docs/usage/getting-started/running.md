@@ -213,7 +213,7 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 
 <!-- prettier-ignore -->
 !!! note
-    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT.
+    If you're using Renovate in a project where dependencies are loaded from github.com (such as Go modules hosted on GitHub), we highly recommend that you add a `github.com` PAT (classic).
     Otherwise you will exceed the rate limit for the github.com API, which will lead to Renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ### Self-hosting examples
