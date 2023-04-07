@@ -56,7 +56,7 @@ By default, the image installs the required tools when needed.
 
 If you want, you can map the Docker socket into the container so that Renovate can dynamically invoke "sidecar" images when needed.
 You'll need to set `binarySource=docker` for this to work.
-Read the [`binarySource` config option docs](https://docs.renovatebot.com/self-hosted-configuration/#binarysource) for more information.
+Read the [`binarySource` config option docs](../self-hosted-configuration.md/#binarysource) for more information.
 
 ##### The default image
 
