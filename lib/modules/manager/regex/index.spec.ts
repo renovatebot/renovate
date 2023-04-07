@@ -163,6 +163,8 @@ describe('modules/manager/regex/index', () => {
           datasource: 'gradle-version',
           depName: 'gradle',
           versioning: 'maven',
+          replaceString:
+            'ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven\n',
         },
       ],
     });
@@ -235,6 +237,7 @@ describe('modules/manager/regex/index', () => {
           currentValue: '17.0.0-alpine',
           datasource: 'docker',
           indentation: '     ',
+          replaceString: '     image: eclipse-temurin:17.0.0-alpine',
         },
       ],
     });
@@ -261,6 +264,7 @@ describe('modules/manager/regex/index', () => {
           currentValue: '17.0.0-alpine',
           datasource: 'docker',
           indentation: '',
+          replaceString: 'name: image: eclipse-temurin:17.0.0-alpine',
         },
       ],
     });
@@ -578,6 +582,8 @@ describe('modules/manager/regex/index', () => {
           packageName: 'dotnet-runtime',
           currentValue: '6.0.13',
           datasource: 'dotnet-version',
+          replaceString:
+            '# renovate: datasource=dotnet packageName=dotnet-runtime\nRUN install-tool dotnet 6.0.13',
         },
       ],
     });
