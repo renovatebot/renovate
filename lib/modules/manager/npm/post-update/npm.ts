@@ -224,7 +224,7 @@ export function divideWorkspaceAndRootDeps(
   for (const upgrade of lockUpdates) {
     if (
       upgrade.isLockfileUpdate &&
-      upgrade.managerData?.workspacesPackages.length &&
+      upgrade.managerData?.workspacesPackages?.length &&
       is.string(upgrade.packageFile)
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
