@@ -39,13 +39,6 @@ const onboardingCache = mocked(_onboardingCache);
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
-    const dummyCache = {
-      onboardingBranchCache: {
-        onboardingBranch: 'configure/renovate',
-        defaultBranchSha: 'default-sha',
-        onboardingBranchSha: 'onboarding-sha',
-      },
-    };
 
     beforeEach(() => {
       memCache.init();
@@ -176,7 +169,6 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via file', async () => {
-      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -261,7 +253,6 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('processes onboarding branch', async () => {
-      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
@@ -283,15 +274,22 @@ describe('workers/repository/onboarding/branch/index', () => {
           },
         },
       } satisfies RepoCacheData;
-      cache.getCache.mockReturnValueOnce(dummyCache);
-      git.getFileList.mockResolvedValue(['package.json']);
+      cache.getCache.mockReturnValue(dummyCache);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      scm.isBranchConflicted.mockResolvedValueOnce(false);
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('new-onboarding-sha');
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(1);
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'new-onboarding-sha',
+        false
+      );
       expect(dummyCache).toMatchObject({
         scan: {},
       });
@@ -301,10 +299,37 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('onboarding-sha');
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(0);
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'onboarding-sha',
+        true
+      );
+    });
+
+    it('sets onboarding cache for existing onboarding branch', async () => {
+      git.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('onboarding-sha');
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
+      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
+      await checkOnboardingBranch(config);
+      expect(git.mergeBranch).toHaveBeenCalledTimes(1);
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
+        'default-sha',
+        'onboarding-sha',
+        false
+      );
     });
 
     describe('tests onboarding rebase/retry checkbox handling', () => {

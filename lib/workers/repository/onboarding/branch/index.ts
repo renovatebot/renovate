@@ -97,7 +97,6 @@ export async function checkOnboardingBranch(
     }
   }
   setOnboardingCache(
-    config.onboardingBranch!,
     getBranchCommit(config.defaultBranch!)!,
     getBranchCommit(onboardingBranch!)!,
     isConflicted
