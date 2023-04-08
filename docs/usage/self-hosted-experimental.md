@@ -44,6 +44,10 @@ See [issue 8660](https://github.com/renovatebot/renovate/issues/8660) for backgr
 
 Suppress the default warning when a deprecated version of Node.js is used to run Renovate.
 
+## `RENOVATE_X_IGNORE_RE2`
+
+Skip initializing `RE2` for regular expressions and instead use Node-native `RegExp` instead.
+
 ## `RENOVATE_X_PLATFORM_VERSION`
 
 If set, Renovate will use this string as GitLab server version instead of checking via the GitLab API.
