@@ -32,7 +32,7 @@ export async function extractPackageFile(
     }
 
     const moduleMatchRegex = regEx(
-      `^\\s*(((?<phase>configure|build|test|author)_)?requires|recommends|suggests)\\s+['"](?<depName>[^'"]+)['"](\\s*(,|=>)\\s*['"]?(==|>=|>)?\\s*v?(?<currentValue>[^'"]+)['"]?)?;`
+      /^\s*(?:(?:(?<phase>configure|build|test|author)_)?requires|recommends|suggests)\s+['"](?<depName>[^'"]+)['"](?:\s*(?:,|=>)\s*['"]?(?:\s*(?:==|>=|>))?\s*v?(?<currentValue>[^'"]+)['"]?)?;/
     );
     const moduleMatch = moduleMatchRegex.exec(line);
     if (moduleMatch) {
