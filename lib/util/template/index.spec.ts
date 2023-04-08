@@ -207,7 +207,7 @@ describe('util/template/index', () => {
   });
 
   describe('equals', () => {
-    it('should render block if equals', () => {
+    it('equals', () => {
       const output = template.compile(
         '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
         {
@@ -218,7 +218,7 @@ describe('util/template/index', () => {
       expect(output).toBe('https://github.com/renovatebot/renovate');
     });
 
-    it('should render else block if not equals', () => {
+    it('not equals', () => {
       const output = template.compile(
         '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
         {
@@ -227,6 +227,16 @@ describe('util/template/index', () => {
         }
       );
       expect(output).toBe('renovatebot/renovate');
+    });
+
+    it('not strict equals', () => {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
+          newMajor: 3,
+        }
+      );
+      expect(output).toBe('not equals');
     });
   });
 });

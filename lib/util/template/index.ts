@@ -24,8 +24,7 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
-// eslint-disable-next-line eqeqeq
-handlebars.registerHelper('equals', (arg1, arg2) => arg1 == arg2);
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 
 handlebars.registerHelper({
   and(...args) {

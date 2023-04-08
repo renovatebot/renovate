@@ -84,7 +84,7 @@ Returns `true` if a given string is a substring.
 
 ### equals
 
-Returns `true` if two values equals (`==`).
+Returns `true` if two values equals (checks strict equality, i.e. `===`).
 
 `{{#if (equals datasource 'git-refs')}}git-refs{{else}}Other{{/if}}`
 
