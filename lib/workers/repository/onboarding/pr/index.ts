@@ -20,6 +20,10 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import {
+  isOnboardingBranchConflicted,
+  isOnboardingBranchModified,
+} from '../branch/onboarding-branch-cache';
 import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -43,8 +47,8 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // skip pr-update if branch is conflicted
     if (
-      (await scm.isBranchModified(config.onboardingBranch!)) &&
-      (await scm.isBranchConflicted(
+      (await isOnboardingBranchModified(config.onboardingBranch!)) &&
+      (await isOnboardingBranchConflicted(
         config.defaultBranch!,
         config.onboardingBranch!
       ))

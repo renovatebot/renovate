@@ -68,9 +68,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===
-      getBranchCommit(config.defaultBranch!) &&
-    onboardingBranchCache.onboardingBranchSha ===
-      getBranchCommit(config.onboardingBranch!)
+      getBranchCommit(config.defaultBranch!)
   ) {
     logger.debug('Onboarding cache is valid. Repo is not onboarded');
     return false;

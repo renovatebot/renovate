@@ -7,12 +7,11 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
-import { scm } from '../../../../modules/platform/scm';
+import type { Pr } from '../../../../modules/platform';
 import { getCache } from '../../../../util/cache/repository';
 import {
-  mergeBranch,
   getBranchCommit,
+  mergeBranch,
   setGitAuthor,
 } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
@@ -23,6 +22,8 @@ import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
 import {
   deleteOnboardingCache,
+  isOnboardingBranchConflicted,
+  isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
 
@@ -53,18 +54,11 @@ export async function checkOnboardingBranch(
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    if (await scm.isBranchModified(config.onboardingBranch!)) {
+    if (await isOnboardingBranchModified(config.onboardingBranch!)) {
       invalidateExtractCache(config.baseBranch!);
-      isConflicted = await scm.isBranchConflicted(
+      isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,
         config.onboardingBranch!
-      );
-
-      // update onboarding cache
-      setOnboardingCache(
-        config.onboardingBranch!,
-        getBranchCommit(config.defaultBranch!)!,
-        commit
       );
     }
   } else {
@@ -93,13 +87,6 @@ export async function checkOnboardingBranch(
         { branch: onboardingBranch, commit, onboarding: true },
         'Branch created'
       );
-
-      // set onboarding branch cache
-      setOnboardingCache(
-        config.onboardingBranch!,
-        getBranchCommit(config.defaultBranch!)!,
-        commit
-      );
     }
   }
   if (!GlobalConfig.get('dryRun')) {
@@ -109,6 +96,13 @@ export async function checkOnboardingBranch(
       await mergeBranch(onboardingBranch!, true);
     }
   }
+  setOnboardingCache(
+    config.onboardingBranch!,
+    getBranchCommit(config.defaultBranch!)!,
+    getBranchCommit(onboardingBranch!)!,
+    isConflicted
+  );
+
   // TODO #7154
   const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
@@ -135,5 +129,8 @@ function invalidateExtractCache(baseBranch: string): void {
   logger.debug(
     `Onboarding branch modified. Removing outdated extract cache for branch=${baseBranch}`
   );
-  delete cache.scan[baseBranch];
+
+  if (cache.scan[baseBranch]) {
+    delete cache.scan[baseBranch];
+  }
 }

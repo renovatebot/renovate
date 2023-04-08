@@ -30,6 +30,7 @@ export interface OnboardingBranchCache {
   onboardingBranch: string;
   defaultBranchSha: string;
   onboardingBranchSha: string;
+  isConflicted: boolean;
 }
 
 export interface PrCache {
