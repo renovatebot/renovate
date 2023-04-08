@@ -1625,6 +1625,10 @@ Some datasources do not provide a release timestamp (in which case this feature 
 
 Maven users: you cannot use `minimumReleaseAge` if a Maven source returns unreliable `last-modified` headers.
 
+<!-- prettier-ignore -->
+!!! note
+    Configuring this option will add `renovate/stability-days` option to the status checks.
+
 There are a couple of uses for `minimumReleaseAge`:
 
 <!-- markdownlint-disable MD001 -->
