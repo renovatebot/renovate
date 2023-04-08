@@ -21,11 +21,12 @@ export async function extractPackageFile(
     const perlMatch = extractPerlVersion(line);
     if (perlMatch) {
       res.deps.push({
-        depName: 'Perl',
+        depName: 'perl',
         packageName: 'Perl/perl5',
         currentValue: perlMatch,
         datasource: GithubTagsDatasource.id,
         versioning: perlVersioning.id,
+        extractVersion: '^v(?<version>\\S+)',
       });
       continue;
     }

@@ -13,10 +13,11 @@ describe('modules/manager/cpanfile/extract', () => {
         deps: [
           {
             versioning: 'perl',
-            depName: 'Perl',
+            depName: 'perl',
             packageName: 'Perl/perl5',
             currentValue: '5.008001',
             datasource: 'github-tags',
+            extractVersion: '^v(?<version>\\S+)',
           },
         ],
       });
