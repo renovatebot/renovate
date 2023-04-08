@@ -221,11 +221,11 @@ export async function generateLockFile(
             .join(' ')}${cmdOptions}`
         );
       } else {
-        // `yarn up` updates to the latest release, so the range should be specified
+        // `yarn up -R` updates to the latest release in each range
         commands.push(
-          `yarn up ${lockUpdates
+          `yarn up -R ${lockUpdates
             // TODO: types (#7154)
-            .map((update) => `${update.depName!}@${update.newValue!}`)
+            .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
             .map(quote)
             .join(' ')}${cmdOptions}`

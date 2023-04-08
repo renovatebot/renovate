@@ -8,13 +8,21 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
-import { checkoutBranch, setGitAuthor } from '../../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  setGitAuthor,
+} from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
+import {
+  deleteOnboardingCache,
+  setOnboardingCache,
+} from './onboarding-branch-cache';
 import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
@@ -26,6 +34,9 @@ export async function checkOnboardingBranch(
   const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
+
+    // delete onboarding cache
+    deleteOnboardingCache();
     return { ...config, repoIsOnboarded };
   }
   if (config.isFork && config.forkProcessing !== 'enabled') {
@@ -46,6 +57,13 @@ export async function checkOnboardingBranch(
       logger.info(
         { branch: config.onboardingBranch, commit, onboarding: true },
         'Branch updated'
+      );
+
+      // update onboarding cache
+      setOnboardingCache(
+        config.onboardingBranch!,
+        getBranchCommit(config.defaultBranch!)!,
+        commit
       );
     }
     // istanbul ignore if
@@ -77,6 +95,13 @@ export async function checkOnboardingBranch(
       logger.info(
         { branch: onboardingBranch, commit, onboarding: true },
         'Branch created'
+      );
+
+      // set onboarding branch cache
+      setOnboardingCache(
+        config.onboardingBranch!,
+        getBranchCommit(config.defaultBranch!)!,
+        commit
       );
     }
   }
