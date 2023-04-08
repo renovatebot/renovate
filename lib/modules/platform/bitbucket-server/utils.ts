@@ -1,5 +1,5 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
-import url from 'url';
+import url, { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -61,7 +61,9 @@ function callApi<T>(
     case 'patch':
       return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketServerHttp.headJson<T>(apiUrl, options);
+      return bitbucketServerHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':

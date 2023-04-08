@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';

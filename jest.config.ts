@@ -1,5 +1,5 @@
-import os from 'os';
-import v8 from 'v8';
+import os from 'node:os';
+import v8 from 'node:v8';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;

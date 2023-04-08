@@ -22,6 +22,7 @@ import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
+import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
 
 const configModule: any = _config;
@@ -30,12 +31,21 @@ jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+jest.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
+const onboardingCache = mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
+    const dummyCache = {
+      onboardingBranchCache: {
+        onboardingBranch: 'configure/renovate',
+        defaultBranchSha: 'default-sha',
+        onboardingBranchSha: 'onboarding-sha',
+      },
+    };
 
     beforeEach(() => {
       memCache.init();
@@ -166,9 +176,11 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via file', async () => {
+      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
+      expect(onboardingCache.deleteOnboardingCache).toHaveBeenCalledTimes(1); // removes onboarding cache when repo is onboarded
     });
 
     it('handles removed cached file name', async () => {
@@ -249,6 +261,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('processes onboarding branch', async () => {
+      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());

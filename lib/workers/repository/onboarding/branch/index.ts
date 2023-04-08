@@ -7,16 +7,24 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { Pr, platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
-import { mergeBranch, setGitAuthor } from '../../../../util/git';
+import {
+  mergeBranch,
+  getBranchCommit,
+  setGitAuthor,
+} from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
 import { getOnboardingPr, isOnboarded } from './check';
 import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
+import {
+  deleteOnboardingCache,
+  setOnboardingCache,
+} from './onboarding-branch-cache';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -28,6 +36,9 @@ export async function checkOnboardingBranch(
   const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
+
+    // delete onboarding cache
+    deleteOnboardingCache();
     return { ...config, repoIsOnboarded };
   }
   if (config.isFork && config.forkProcessing !== 'enabled') {
@@ -47,6 +58,13 @@ export async function checkOnboardingBranch(
       isConflicted = await scm.isBranchConflicted(
         config.baseBranch!,
         config.onboardingBranch!
+      );
+
+      // update onboarding cache
+      setOnboardingCache(
+        config.onboardingBranch!,
+        getBranchCommit(config.defaultBranch!)!,
+        commit
       );
     }
   } else {
@@ -74,6 +92,13 @@ export async function checkOnboardingBranch(
       logger.info(
         { branch: onboardingBranch, commit, onboarding: true },
         'Branch created'
+      );
+
+      // set onboarding branch cache
+      setOnboardingCache(
+        config.onboardingBranch!,
+        getBranchCommit(config.defaultBranch!)!,
+        commit
       );
     }
   }
