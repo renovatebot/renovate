@@ -4,7 +4,7 @@ describe('modules/manager/cpanfile/common', () => {
   describe('extractPerlVersion', () => {
     test.each`
       version         | expected
-      ${5.012005}     | ${'5.012005'}
+      ${'5.012005'}   | ${'5.012005'}
       ${`'5.008001'`} | ${'5.008001'}
       ${`"5.008001"`} | ${'5.008001'}
     `('$version', ({ version, expected }) => {
