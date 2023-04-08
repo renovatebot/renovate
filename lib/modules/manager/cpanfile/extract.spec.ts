@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/cpanfile/extract', () => {
@@ -26,9 +27,10 @@ describe('modules/manager/cpanfile/extract', () => {
     it('parse modules with requires', async () => {
       expect(
         await extractPackageFile(
-          `requires 'Try::Tiny';
-           requires 'URI', '1.59';
-           requires "Capture::Tiny" => "0";
+          codeBlock`
+            requires 'Try::Tiny';
+            requires 'URI', '1.59';
+            requires "Capture::Tiny" => "0";
           `,
           'cpanfile'
         )
@@ -55,8 +57,9 @@ describe('modules/manager/cpanfile/extract', () => {
     it('parse modules with recommends', async () => {
       expect(
         await extractPackageFile(
-          `recommends 'Crypt::URandom';
-           recommends 'HTTP::XSCookies', '0.000015';
+          codeBlock`
+            recommends 'Crypt::URandom';
+            recommends 'HTTP::XSCookies', '0.000015';
           `,
           'cpanfile'
         )
@@ -78,8 +81,9 @@ describe('modules/manager/cpanfile/extract', () => {
     it('parse modules with suggests', async () => {
       expect(
         await extractPackageFile(
-          `suggests 'Test::MockTime::HiRes', '0.06';
-           suggests 'Authen::Simple::Passwd';
+          codeBlock`
+            suggests 'Test::MockTime::HiRes', '0.06';
+            suggests 'Authen::Simple::Passwd';
           `,
           'cpanfile'
         )
@@ -102,9 +106,10 @@ describe('modules/manager/cpanfile/extract', () => {
       test('configure phase', async () => {
         expect(
           await extractPackageFile(
-            `on 'configure' => sub {
-               requires "ExtUtils::MakeMaker" => "0";
-             };
+            codeBlock`
+              on 'configure' => sub {
+                requires "ExtUtils::MakeMaker" => "0";
+              };
             `,
             'cpanfile'
           )
@@ -123,9 +128,10 @@ describe('modules/manager/cpanfile/extract', () => {
       test('build phase', async () => {
         expect(
           await extractPackageFile(
-            `on build => sub {
-               requires 'Test::More', '0.98';
-             };
+            codeBlock`
+              on build => sub {
+                requires 'Test::More', '0.98';
+              };
             `,
             'cpanfile'
           )
@@ -144,10 +150,11 @@ describe('modules/manager/cpanfile/extract', () => {
       test('test phase', async () => {
         expect(
           await extractPackageFile(
-            `on test => sub {
-               requires 'Test::More', '0.88';
-               requires 'Test::Requires';
-             };
+            codeBlock`
+              on test => sub {
+                requires 'Test::More', '0.88';
+                requires 'Test::Requires';
+              };
             `,
             'cpanfile'
           )
@@ -171,10 +178,11 @@ describe('modules/manager/cpanfile/extract', () => {
       test('runtime phase', async () => {
         expect(
           await extractPackageFile(
-            `on runtime => sub {
-               suggests 'FCGI';
-               suggests 'FCGI::ProcManager';
-             };
+            codeBlock`
+              on runtime => sub {
+                suggests 'FCGI';
+                suggests 'FCGI::ProcManager';
+              };
             `,
             'cpanfile'
           )
@@ -197,10 +205,11 @@ describe('modules/manager/cpanfile/extract', () => {
       test('develop phase', async () => {
         expect(
           await extractPackageFile(
-            `on 'develop' => sub {
-               requires "IPC::Open3" => "0";
-               requires "Term::Table" => "0.013";
-             };
+            codeBlock`
+              on 'develop' => sub {
+                requires "IPC::Open3" => "0";
+                requires "Term::Table" => "0.013";
+              };
             `,
             'cpanfile'
           )
