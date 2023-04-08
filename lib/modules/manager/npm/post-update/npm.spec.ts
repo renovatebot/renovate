@@ -78,6 +78,7 @@ describe('modules/manager/npm/post-update/npm', () => {
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
+        managerData: {}, // intentional: edge-case test for workspaces
       },
     ];
     const res = await npmHelper.generateLockFile(
@@ -308,42 +309,39 @@ describe('modules/manager/npm/post-update/npm', () => {
     ]);
   });
 
-  it('installs workspace only packages separately', async () => {
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('package-lock content');
-    const skipInstalls = true;
+  describe('installs workspace only packages separately', () => {
     const updates = [
       {
-        packageFile: 'some-dir/a/package.json',
+        packageFile: 'some-dir/docs/a/package.json',
         packageName: 'abbrev',
         depType: 'dependencies',
         newVersion: '1.1.0',
         newValue: '^1.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
       {
-        packageFile: 'some-dir/b/package.json',
+        packageFile: 'some-dir/web/b/package.json',
         packageName: 'xmldoc',
         depType: 'dependencies',
         newVersion: '2.2.0',
         newValue: '^2.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
       {
-        packageFile: 'some-dir/a/package.json',
+        packageFile: 'some-dir/docs/a/package.json',
         packageName: 'postcss',
         depType: 'dependencies',
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
       {
@@ -354,18 +352,18 @@ describe('modules/manager/npm/post-update/npm', () => {
         newValue: '^9.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
       {
-        packageFile: 'some-dir/b/package.json',
+        packageFile: 'some-dir/web/b/package.json',
         packageName: 'postcss',
         depType: 'dependencies',
         newVersion: '8.4.8',
         newValue: '^8.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
       {
@@ -376,19 +374,127 @@ describe('modules/manager/npm/post-update/npm', () => {
         newValue: '^8.0.0',
         isLockfileUpdate: true,
         managerData: {
-          workspacesPackages: ['a', 'b'],
+          workspacesPackages: ['docs/*', 'web/*'],
         },
       },
     ];
-    const res = await npmHelper.generateLockFile(
-      'some-dir',
-      {},
-      'package-lock.json',
-      { skipInstalls },
-      updates
-    );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-    expect(res.error).toBeUndefined();
-    expect(execSnapshots).toMatchSnapshot();
+
+    it('workspace in sub-folder', async () => {
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      const skipInstalls = true;
+      const res = await npmHelper.generateLockFile(
+        'some-dir',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        updates
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.error).toBeUndefined();
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('workspace in root folder', async () => {
+      const modifiedUpdates = updates.map((update) => {
+        return {
+          ...update,
+          packageFile: update.packageFile.replace('some-dir/', ''),
+        };
+      });
+      const execSnapshots = mockExecAll();
+      fs.readLocalFile.mockResolvedValueOnce('package-lock content');
+      const skipInstalls = true;
+      expect(
+        npmHelper.divideWorkspaceAndRootDeps('.', modifiedUpdates)
+      ).toMatchObject({
+        lockRootUpdates: [
+          {
+            packageFile: 'package.json',
+            packageName: 'chalk',
+            depType: 'dependencies',
+            newVersion: '9.4.8',
+            newValue: '^9.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+          {
+            packageFile: 'package.json',
+            packageName: 'postcss',
+            depType: 'dependencies',
+            newVersion: '8.4.8',
+            newValue: '^8.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+          },
+        ],
+        lockWorkspacesUpdates: [
+          {
+            packageFile: 'docs/a/package.json',
+            packageName: 'abbrev',
+            depType: 'dependencies',
+            newVersion: '1.1.0',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'docs/a',
+          },
+          {
+            packageFile: 'web/b/package.json',
+            packageName: 'xmldoc',
+            depType: 'dependencies',
+            newVersion: '2.2.0',
+            newValue: '^2.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'web/b',
+          },
+          {
+            packageFile: 'docs/a/package.json',
+            packageName: 'postcss',
+            depType: 'dependencies',
+            newVersion: '8.4.8',
+            newValue: '^8.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'docs/a',
+          },
+          {
+            packageFile: 'web/b/package.json',
+            packageName: 'postcss',
+            depType: 'dependencies',
+            newVersion: '8.4.8',
+            newValue: '^8.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'web/b',
+          },
+        ],
+        workspaces: new Set(['docs/a', 'web/b']),
+        rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
+      });
+      const res = await npmHelper.generateLockFile(
+        '.',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        modifiedUpdates
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.error).toBeUndefined();
+      expect(execSnapshots).toMatchSnapshot();
+    });
   });
 });
