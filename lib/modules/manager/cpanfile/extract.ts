@@ -74,8 +74,8 @@ export async function extractPackageFile(
       }
       const phaseRes = await extractPackageFile(phaseContent);
       if (phaseRes) {
-        res.deps = res.deps.concat(
-          phaseRes.deps.map((dep) => ({
+        res.deps.push(
+          ...phaseRes.deps.map((dep) => ({
             ...dep,
             depType: phase,
           }))
