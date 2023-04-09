@@ -22,17 +22,17 @@ export const BicepResourceVersionIndex = z
       )
     ),
   })
-  .transform((res) => {
+  .transform(({ Resources, Functions }) => {
     const releaseMap = new Map<string, string[]>();
 
-    for (const resourceReference of Object.keys(res.Resources)) {
+    for (const resourceReference of Object.keys(Resources)) {
       const [type, version] = resourceReference.toLowerCase().split('@', 2);
       const versions = releaseMap.get(type) ?? [];
       versions.push(version);
       releaseMap.set(type, versions);
     }
 
-    for (const functionResource of Object.entries(res.Functions)) {
+    for (const functionResource of Object.entries(Functions)) {
       const [type, versionMap] = functionResource;
       const versions = Object.keys(versionMap);
       releaseMap.set(type, versions);
