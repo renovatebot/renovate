@@ -1,25 +1,46 @@
 import { z } from 'zod';
 
-export const BicepTypeIndex = z.object({
-  Resources: z.record(
-    z.string(),
-    z.object({
-      RelativePath: z.string(),
-      Index: z.number(),
-    })
-  ),
-  Functions: z.record(
-    z.string(),
-    z.record(
+export const BicepResourceVersionIndex = z
+  .object({
+    Resources: z.record(
       z.string(),
-      z.array(
-        z.object({
-          RelativePath: z.string(),
-          Index: z.number(),
-        })
+      z.object({
+        RelativePath: z.string(),
+        Index: z.number(),
+      })
+    ),
+    Functions: z.record(
+      z.string(),
+      z.record(
+        z.string(),
+        z.array(
+          z.object({
+            RelativePath: z.string(),
+            Index: z.number(),
+          })
+        )
       )
-    )
-  ),
-});
+    ),
+  })
+  .transform((res) => {
+    const releaseMap = new Map<string, string[]>();
 
-export type BicepTypeIndex = z.infer<typeof BicepTypeIndex>;
+    for (const resourceReference of Object.keys(res.Resources)) {
+      const [type, version] = resourceReference.toLowerCase().split('@', 2);
+      const versions = releaseMap.get(type) ?? [];
+      versions.push(version);
+      releaseMap.set(type, versions);
+    }
+
+    for (const functionResource of Object.entries(res.Functions)) {
+      const [type, versionMap] = functionResource;
+      const versions = Object.keys(versionMap);
+      releaseMap.set(type, versions);
+    }
+
+    return Object.fromEntries(releaseMap);
+  });
+
+export type BicepResourceVersionIndex = z.infer<
+  typeof BicepResourceVersionIndex
+>;
