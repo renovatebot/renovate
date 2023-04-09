@@ -392,7 +392,18 @@ describe('modules/manager/npm/post-update/npm', () => {
       );
       expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
       expect(res.error).toBeUndefined();
-      expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0',
+        },
+
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
+        },
+      ]);
     });
 
     it('workspace in root folder', async () => {
@@ -405,6 +416,27 @@ describe('modules/manager/npm/post-update/npm', () => {
       const execSnapshots = mockExecAll();
       fs.readLocalFile.mockResolvedValueOnce('package-lock content');
       const skipInstalls = true;
+      const res = await npmHelper.generateLockFile(
+        '.',
+        {},
+        'package-lock.json',
+        { skipInstalls },
+        modifiedUpdates
+      );
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
+      expect(res.error).toBeUndefined();
+      expect(execSnapshots).toMatchObject([
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0',
+        },
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0',
+        },
+
+        {
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts chalk@9.4.8 postcss@8.4.8',
+        },
+      ]);
       expect(
         npmHelper.divideWorkspaceAndRootDeps('.', modifiedUpdates)
       ).toMatchObject({
@@ -485,16 +517,6 @@ describe('modules/manager/npm/post-update/npm', () => {
         workspaces: new Set(['docs/a', 'web/b']),
         rootDeps: new Set(['chalk@9.4.8', 'postcss@8.4.8']),
       });
-      const res = await npmHelper.generateLockFile(
-        '.',
-        {},
-        'package-lock.json',
-        { skipInstalls },
-        modifiedUpdates
-      );
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
-      expect(res.error).toBeUndefined();
-      expect(execSnapshots).toMatchSnapshot();
     });
   });
 });
