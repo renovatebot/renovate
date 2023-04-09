@@ -268,10 +268,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
         { err: parsed.error },
         `Response does not match schema: please report this to https://github.com/renovatebot/renovate/pull/21338`
       );
-      return { ...res, body: res.body };
+      return res;
     }
 
-    return { ...res, body: parsed.data };
+    res.body = parsed.data;
+    return res;
   }
 
   private resolveArgs<ResT = unknown>(
