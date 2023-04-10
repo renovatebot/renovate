@@ -29,7 +29,6 @@ import type {
 } from '../types';
 import { repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import type {
   Account,
@@ -522,6 +521,12 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/\]\(\.\.\/pull\//g), '](../../pull-requests/')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '')
+    .replace(' only once you click their checkbox below', '')
+    .replace(' unless you click a checkbox below', '')
+    .replace(' To discard all commits and start over, click on a checkbox.', '')
+    .replace(regEx(/ Click (?:on |)a checkbox.*\./g), '')
+    .replace(regEx(/\[ ] <!-- \w*-branch.*-->/g), '')
+    .replace(regEx(/- \[ ] <!-- rebase-all-open-prs -->.*/g), '')
     .replace(
       regEx(
         / - \[ \] <!-- create-all-rate-limited-prs -->🔐 \*\*Create all rate-limited PRs at once\*\* 🔐/g
@@ -566,7 +571,7 @@ export async function ensureIssue({
           {
             body: {
               content: {
-                raw: readOnlyIssueBody(description),
+                raw: description,
                 markup: 'markdown',
               },
             },
@@ -582,7 +587,7 @@ export async function ensureIssue({
           body: {
             title,
             content: {
-              raw: readOnlyIssueBody(description),
+              raw: description,
               markup: 'markdown',
             },
           },

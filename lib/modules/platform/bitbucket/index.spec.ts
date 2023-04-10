@@ -1,3 +1,4 @@
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
 import type * as _git from '../../../util/git';
@@ -5,6 +6,8 @@ import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
 
 const baseUrl = 'https://api.bitbucket.org';
+
+const issueBody = Fixtures.get('issue-body.txt');
 
 const pr = {
   id: 5,
@@ -1150,14 +1153,28 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('removes create all rate-limited PRs at once text', () => {
-      const issueBody =
+      const issue =
         '## Rate-Limited\n' +
         'These updates are currently rate-limited. Click on a checkbox below to force their creation now\n' +
         ' - Update dependency ansi-regex to v6\n' +
         ' - Update dependency commander to v10\n' +
         ' - Update dependency graceful-fs to v4\n' +
         ' - [ ] <!-- create-all-rate-limited-prs -->🔐 **Create all rate-limited PRs at once** 🔐';
-      expect(bitbucket.massageMarkdown(issueBody)).toMatchSnapshot();
+      expect(bitbucket.massageMarkdown(issue)).toMatchSnapshot();
+    });
+
+    it('removes all checkbox formatting', () => {
+      expect(bitbucket.massageMarkdown(issueBody)).toEqual(
+        expect.not.stringContaining('[ ] <!--')
+      );
+    });
+
+    it('removes all checkbox-related instructions', () => {
+      expect(bitbucket.massageMarkdown(issueBody)).toEqual(
+        expect.not.stringMatching(
+          /click (?:(?:on |)a|their|this) checkbox|check the box below/gi
+        )
+      );
     });
   });
 
