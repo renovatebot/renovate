@@ -50,6 +50,10 @@ describe('modules/manager/gradle/extract', () => {
   it('logs a warning in case parseGradle throws an exception', async () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
+    const fsMock = {
+      'build.gradle': '',
+    };
+    mockFs(fsMock);
 
     jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
       throw err;
