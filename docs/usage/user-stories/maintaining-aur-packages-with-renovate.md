@@ -1,8 +1,18 @@
----
-title: Maintaining AUR packages with Renovate
-date: '2023-03-16'
-comments: true
----
+<!-- hide table of contents in navigation sidebar -->
+<style>
+.md-nav--primary .md-nav__link[for=__toc] ~ .md-nav {
+    display: none;
+}
+</style>
+
+# Maintaining AUR packages with Renovate
+
+> This article was written by [Jamie Magee](https://github.com/JamieMagee) and originally published on [Jamie Magee's blog](https://jamiemagee.co.uk/blog/maintaining-aur-packages-with-renovate/).
+
+<!-- prettier-ignore -->
+!!! note
+    Jamie Magee helps to maintain Renovate.
+    They obviously like Renovate, and want you to use it.
 
 One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use arch”, is the Arch User Repository (AUR).
 It’s a community-driven repository with over 80,000 packages.
