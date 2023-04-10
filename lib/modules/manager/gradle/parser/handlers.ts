@@ -30,6 +30,12 @@ export function handleAssignment(ctx: Ctx): Ctx {
     ctx.tokenMap.templateStringTokens = valTokens;
     handleDepString(ctx);
     delete ctx.tokenMap.templateStringTokens;
+  } else if (valTokens[0].type === 'symbol') {
+    // foo = bar || foo = "${bar}"
+    const varData = ctx.globalVars[valTokens[0].value];
+    if (varData) {
+      ctx.globalVars[key] = { ...varData };
+    }
   } else {
     // = string value
     const dep = parseDependencyString(valTokens[0].value);
