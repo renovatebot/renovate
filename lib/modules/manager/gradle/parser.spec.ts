@@ -76,6 +76,7 @@ describe('modules/manager/gradle/parser', () => {
           libraries += [
             guava: "com.google.guava:guava:31.1-jre",
             detekt: '1.18.1',
+            core2: versions.core
           ]
         }
         `;
@@ -97,6 +98,10 @@ describe('modules/manager/gradle/parser', () => {
           'libraries.detekt': {
             key: 'libraries.detekt',
             value: '1.18.1',
+          },
+          'libraries.core2': {
+            key: 'versions.core',
+            value: '1.7.0',
           },
         });
       });
@@ -246,6 +251,7 @@ describe('modules/manager/gradle/parser', () => {
 
       it('nested map', () => {
         const input = codeBlock`
+          val junitPlatformVersion: String by extra { "1.0.1" }
           ext["deps"] = mapOf(
             "support" to mapOf(
               "appCompat" to "com.android.support:appcompat-v7:26.0.2",
@@ -259,7 +265,8 @@ describe('modules/manager/gradle/parser', () => {
             "support2" to mapOfInvalid(
               "design2" to "com.android.support:design:26.0.2"
             ),
-            "picasso" to "com.squareup.picasso:picasso:2.5.2"
+            "picasso" to "com.squareup.picasso:picasso:2.5.2",
+            "junit-platform-runner" to junitPlatformVersion
           )
         `;
 
@@ -284,6 +291,10 @@ describe('modules/manager/gradle/parser', () => {
           'deps.picasso': {
             key: 'deps.picasso',
             value: 'com.squareup.picasso:picasso:2.5.2',
+          },
+          'deps.junit-platform-runner': {
+            key: 'junitPlatformVersion',
+            value: '1.0.1',
           },
         });
       });
