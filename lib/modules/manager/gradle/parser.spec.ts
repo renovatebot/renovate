@@ -833,7 +833,6 @@ describe('modules/manager/gradle/parser', () => {
     const fileContents = {
       'foo/bar.gradle': key + ' = "' + value + '"',
     };
-    mockFs(fileContents);
 
     test.each`
       def                        | input                                                     | output
@@ -871,6 +870,7 @@ describe('modules/manager/gradle/parser', () => {
       ${'base="foo"'}            | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput}
       ${'base="foo"'}            | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput}
     `('$def | $input', ({ def, input, output }) => {
+      mockFs(fileContents);
       const { vars } = parseGradle(
         [def, input].join('\n'),
         {},
