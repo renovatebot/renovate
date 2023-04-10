@@ -31,7 +31,7 @@ You might have seen it opening pull requests on GitHub and making updates for np
 
 Renovate has a couple of concepts that I need to explain first: [datasources](../modules/datasource/index.md) and [managers](../modules/manager/index.md).
 Datasources define where to look for new versions of a dependency.
-Renovate comes with over 40 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](https://docs.renovatebot.com/modules/datasource/#git-tags-datasource).
+Renovate comes with over 50 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](https://docs.renovatebot.com/modules/datasource/#git-tags-datasource).
 Managers are the Renovate concept for package managers.
 There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https://docs.renovatebot.com/modules/manager/regex/) that I can use.
 
