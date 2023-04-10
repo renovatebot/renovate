@@ -4,15 +4,26 @@ date: '2023-03-16'
 comments: true
 ---
 
-One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use arch”, is the Arch User Repository (AUR). It’s a community-driven repository with over 80,000 packages. If you’re looking for a package, chances are you'll find it in the AUR.
+One big advantage that Arch Linux has over other distributions, apart from being able to say “BTW I use arch”, is the Arch User Repository (AUR).
+It’s a community-driven repository with over 80,000 packages.
+If you’re looking for a package, chances are you'll find it in the AUR.
 
-Keeping all those packages up to date, takes a lot of manual effort by a lot of volunteers. People have created and used tools, like [`urlwatch`](https://github.com/thp/urlwatch) and [`aurpublish`](https://github.com/eli-schwartz/aurpublish), to let them know when upstream releases are cut and automate some parts of the process. I know I do. But I wanted to automate the entire process. I think [Renovate](https://github.com/renovatebot/renovate/) can help here.
+Keeping all those packages up to date, takes a lot of manual effort by a lot of volunteers.
+People have created and used tools, like [`urlwatch`](https://github.com/thp/urlwatch) and [`aurpublish`](https://github.com/eli-schwartz/aurpublish), to let them know when upstream releases are cut and automate some parts of the process.
+I know I do.
+But I wanted to automate the entire process.
+I think [Renovate](https://github.com/renovatebot/renovate/) can help here.
 
 ## Updating versions with Renovate
 
-Renovate is an automated dependency update tool. You might have seen it opening pull requests on GitHub and making updates for npm or other package managers, but it’s a lot more powerful than just that.
+Renovate is an automated dependency update tool.
+You might have seen it opening pull requests on GitHub and making updates for npm or other package managers, but it’s a lot more powerful than just that.
 
-Renovate has a couple of concepts that I need to explain first: [datasources](https://docs.renovatebot.com/modules/datasource) and [managers](https://docs.renovatebot.com/modules/manager/). Datasources define where to look for new versions of a dependency. Renovate comes with over 40 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](https://docs.renovatebot.com/modules/datasource/#git-tags-datasource). Managers are the Renovate concept for package managers. There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https://docs.renovatebot.com/modules/manager/regex/) that I can use.
+Renovate has a couple of concepts that I need to explain first: [datasources](https://docs.renovatebot.com/modules/datasource) and [managers](https://docs.renovatebot.com/modules/manager/).
+Datasources define where to look for new versions of a dependency.
+Renovate comes with over 40 different datasources, but the one that is important for AUR packages is the [`git-tags` datasource](https://docs.renovatebot.com/modules/datasource/#git-tags-datasource).
+Managers are the Renovate concept for package managers.
+There isn’t an AUR or `PKGBUILD` manager, but there is a [regex manager](https://docs.renovatebot.com/modules/manager/regex/) that I can use.
 
 I can create a `renovate.json` configuration with the following regex manager configuration:
 
@@ -42,13 +53,19 @@ And here’s an extract from the PKGBUILD for the [bicep-bin](https://aur.archli
 pkgver=0.15.31 # renovate: datasource=github-tags depName=Azure/bicep
 ```
 
-Here I’m configuring Renovate to use the [`github-tags`](https://docs.renovatebot.com/modules/datasource/github-tags/) datasource and to look in the [Azure/bicep GitHub repository](https://github.com/Azure/bicep) for new versions. That means it’ll look in the [list of tags in that repository](https://github.com/Azure/bicep/tags) for any new versions. If Renovate finds any new versions, it’ll automatically update the `PKGBUILD` and open a pull request with the updated version.
+Here I’m configuring Renovate to use the [`github-tags`](https://docs.renovatebot.com/modules/datasource/github-tags/) datasource and to look in the [Azure/bicep GitHub repository](https://github.com/Azure/bicep) for new versions.
+That means it’ll look in the [list of tags in that repository](https://github.com/Azure/bicep/tags) for any new versions.
+If Renovate finds any new versions, it’ll automatically update the `PKGBUILD` and open a pull request with the updated version.
 
-So I’ve automated the `PKGBUILD` update, but that’s only half of the work. The checksums and `.SRCINFO` must be updated before pushing to the AUR. Unfortunately, Renovate can’t do that ([yet](https://github.com/renovatebot/renovate/tree/feat/arch-linux-manager)), but GitHub Actions can!
+So I’ve automated the `PKGBUILD` update, but that’s only half of the work.
+The checksums and `.SRCINFO` must be updated before pushing to the AUR.
+Unfortunately, Renovate can’t do that ([yet](https://github.com/renovatebot/renovate/tree/feat/arch-linux-manager)), but GitHub Actions can!
 
 ## Updating checksums and `.SRCINFO` with GitHub Actions
 
-Updating the checksums with `updpkgsums` is easy, and generating an updated `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO` is straightforward too. But doing that for a whole repository of AUR packages is going to be a little trickier. So let me build up the GitHub actions workflow step-by-step.
+Updating the checksums with `updpkgsums` is easy, and generating an updated `.SRCINFO` with `makepkg --printsrcinfo > .SRCINFO` is straightforward too.
+But doing that for a whole repository of AUR packages is going to be a little trickier.
+So let me build up the GitHub actions workflow step-by-step.
 
 First, I only want to run this workflow on pull requests targeting the `main` branch.
 
@@ -89,7 +106,9 @@ Getting the package that changed in a pull request requires a little bit of shel
 
 Now I’ve found the package that changed in the Renovate pull request, I can update the files.
 
-This step in the workflow uses a private GitHub Action that I have in my `aur-packages` repository. I’m not going to break it down here, but at its core it runs `updpkgsums` and `makepkg --printsrcinfo > .SRCINFO` with a little extra configuration required to run Arch Linux on GitHub Actions runners. You can [check out the full code on GitHub](https://github.com/JamieMagee/aur-packages/tree/main/.github/actions/aur).
+This step in the workflow uses a private GitHub Action that I have in my `aur-packages` repository.
+I’m not going to break it down here, but at its core it runs `updpkgsums` and `makepkg --printsrcinfo > .SRCINFO` with a little extra configuration required to run Arch Linux on GitHub Actions runners.
+You can [check out the full code on GitHub](https://github.com/JamieMagee/aur-packages/tree/main/.github/actions/aur).
 
 ```yaml
 - name: Validate package
@@ -112,13 +131,17 @@ Finally, once the `PKGBUILD` and `.SRCINFO` are updated I need to commit that ch
 
 Check out [this pull request for `bicep-bin`](https://github.com/JamieMagee/aur-packages/pull/62) where Renovate opened a pull request, and my GitHub Actions workflow updated the `b2sums` in the `PKGBUILD` and updated the `.SRCINFO`.
 
-But why stop there? Let’s talk about publishing.
+But why stop there?
+Let’s talk about publishing.
 
 ## Publishing to the AUR
 
-Each AUR package is its own Git repository. So to update a package in the AUR, I only need to push a new commit with the updated `PKGBUILD` and `.SRCINFO`. Thankfully, [KSXGitHub](https://github.com/KSXGitHub) created the [github-actions-deploy-aur](https://github.com/KSXGitHub/github-actions-deploy-aur) GitHub Action to streamline the whole process.
+Each AUR package is its own Git repository.
+So to update a package in the AUR, I only need to push a new commit with the updated `PKGBUILD` and `.SRCINFO`.
+Thankfully, [KSXGitHub](https://github.com/KSXGitHub) created the [github-actions-deploy-aur](https://github.com/KSXGitHub/github-actions-deploy-aur) GitHub Action to streamline the whole process.
 
-If I create a new GitHub Actions workflow to publish to the AUR, I can reuse the first two steps from my previous workflow to check out the repository and find the updated package. Then all I need to do is to use the [github-actions-deploy-aur](https://github.com/KSXGitHub/github-actions-deploy-aur) GitHub Action:
+If I create a new GitHub Actions workflow to publish to the AUR, I can reuse the first two steps from my previous workflow to check out the repository and find the updated package.
+Then all I need to do is to use the [github-actions-deploy-aur](https://github.com/KSXGitHub/github-actions-deploy-aur) GitHub Action:
 
 ```yaml
 - name: Publish package
@@ -134,4 +157,6 @@ If I create a new GitHub Actions workflow to publish to the AUR, I can reuse the
 
 ### All together now
 
-If you own any AUR packages and want to automate some of the maintenance burden, check out my [AUR packages template GitHub repository](https://github.com/JamieMagee/aur-packages-template/). It contains all of the steps I showed in this blog post. And if you want to see how it works in practice, check out my [AUR packages GitHub repository](https://github.com/JamieMagee/aur-packages).
+If you own any AUR packages and want to automate some of the maintenance burden, check out my [AUR packages template GitHub repository](https://github.com/JamieMagee/aur-packages-template/).
+It contains all of the steps I showed in this blog post.
+And if you want to see how it works in practice, check out my [AUR packages GitHub repository](https://github.com/JamieMagee/aur-packages).
