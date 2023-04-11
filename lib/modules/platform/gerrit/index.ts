@@ -44,6 +44,8 @@ import {
   mapPrStateToGerritFilter,
 } from './utils';
 
+export const id = 'gerrit';
+
 const defaults: {
   endpoint?: string;
   hostType: string;
