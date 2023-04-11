@@ -22,8 +22,8 @@ import { getOnboardingConfig } from './config';
 import { createOnboardingBranch } from './create';
 import {
   deleteOnboardingCache,
+  hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
-  isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
 
@@ -54,7 +54,7 @@ export async function checkOnboardingBranch(
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    if (await isOnboardingBranchModified(config.onboardingBranch!)) {
+    if (await hasOnboardingBranchChanged(config.onboardingBranch!)) {
       invalidateExtractCache(config.baseBranch!);
       isConflicted = await isOnboardingBranchConflicted(
         config.baseBranch!,

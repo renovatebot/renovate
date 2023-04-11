@@ -53,6 +53,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const title = `Action required: Add a Renovate config`;
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
+  // Repo is not onboarded if the onboarding cache is present and
+  // the base branch has not been updated since last run
   if (config.requireConfig === 'optional' && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
@@ -64,7 +66,6 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
 
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
-  // if onboarding cache is present and base branch has not been updated branch is not onboarded
   if (
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===

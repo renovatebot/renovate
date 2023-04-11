@@ -280,7 +280,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('new-onboarding-sha');
-      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       await checkOnboardingBranch(config);
@@ -303,7 +303,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('onboarding-sha');
-      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(0);
@@ -321,7 +321,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('onboarding-sha');
-      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
+      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(false);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(1);

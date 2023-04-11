@@ -3,8 +3,8 @@ import * as _cache from '../../../../util/cache/repository';
 import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import {
   deleteOnboardingCache,
+  hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
-  isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
 
@@ -69,12 +69,12 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
     });
   });
 
-  describe('isOnboardingBranchModified()', () => {
+  describe('hasOnboardingBranchChanged()', () => {
     it('falls back to git if cache is absent', async () => {
       cache.getCache.mockReturnValueOnce({});
       git.getBranchCommit.mockReturnValueOnce('onboarding-sha');
       scm.isBranchModified.mockResolvedValueOnce(false);
-      expect(await isOnboardingBranchModified('configure/renovate')).toBe(
+      expect(await hasOnboardingBranchChanged('configure/renovate')).toBe(
         false
       );
     });
@@ -89,7 +89,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValueOnce(dummyCache);
       git.getBranchCommit.mockReturnValueOnce('new-onboarding-sha');
-      expect(await isOnboardingBranchModified('configure/renovate')).toBe(true);
+      expect(await hasOnboardingBranchChanged('configure/renovate')).toBe(true);
     });
 
     it('returns false', async () => {
@@ -102,7 +102,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValueOnce(dummyCache);
       git.getBranchCommit.mockReturnValueOnce('onboarding-sha');
-      expect(await isOnboardingBranchModified('configure/renovate')).toBe(
+      expect(await hasOnboardingBranchChanged('configure/renovate')).toBe(
         false
       );
     });

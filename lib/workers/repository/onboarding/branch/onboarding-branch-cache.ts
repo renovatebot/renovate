@@ -43,7 +43,8 @@ export function deleteOnboardingCache(): void {
   }
 }
 
-export async function isOnboardingBranchModified(
+// checks of onboarding branch has been modified since last run
+export async function hasOnboardingBranchChanged(
   onboardingBranch: string
 ): Promise<boolean> {
   const cache = getCache();
