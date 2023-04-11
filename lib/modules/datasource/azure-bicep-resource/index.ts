@@ -25,7 +25,7 @@ export class AzureBicepResourceDatasource extends Datasource {
     super(AzureBicepResourceDatasource.id);
   }
 
-  getChangelogUrl(packageName: string): string {
+  private getChangelogUrl(packageName: string): string {
     const firstSlashIndex = packageName.indexOf('/');
     const namespaceProvider = packageName
       .slice(0, firstSlashIndex)
@@ -64,10 +64,10 @@ export class AzureBicepResourceDatasource extends Datasource {
     ttlMinutes: 24 * 60,
   })
   async getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
-    const { body: resourceVersionIndex } = await this.http.getJson(
+    const { body } = await this.http.getJson(
       BICEP_TYPES_INDEX_URL,
       BicepResourceVersionIndex
     );
-    return resourceVersionIndex;
+    return body;
   }
 }
