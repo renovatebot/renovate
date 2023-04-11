@@ -276,6 +276,7 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  rjsf: '^@rjsf/',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
   'syncfusion-dotnet': '^Syncfusion\\.',
