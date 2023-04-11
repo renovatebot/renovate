@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { regEx } from '../regex';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
@@ -25,27 +24,15 @@ export class GerritHttp extends Http {
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
     const url = baseUrl + path;
-    const opts = {
+    const opts: InternalHttpOptions = {
       baseUrl,
+      parseJson: (text: string) =>
+        JSON5.parse(text.replace(GerritHttp.magicPrefix, '')),
       ...options,
-      responseType: undefined, //IMPORTANT: we need to remove "json" or it tries to parse the result immediately, which don't work cause the of the magicPrefix
     };
     opts.headers = {
       ...opts.headers,
     };
-    const response = await super.request<T>(url, opts);
-    if (
-      response.headers['content-type']?.includes('application/json') &&
-      is.string(response.body)
-    ) {
-      const newBody = JSON5.parse(
-        response.body.replace(GerritHttp.magicPrefix, '')
-      );
-      return {
-        ...response,
-        body: newBody,
-      };
-    }
-    return response;
+    return await super.request<T>(url, opts);
   }
 }
