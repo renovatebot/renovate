@@ -27,10 +27,8 @@ export class AzureBicepResourceDatasource extends Datasource {
 
   private getChangelogUrl(packageName: string): string {
     const firstSlashIndex = packageName.indexOf('/');
-    const namespaceProvider = packageName
-      .slice(0, firstSlashIndex)
-      .toLowerCase();
-    const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
+    const namespaceProvider = packageName.slice(0, firstSlashIndex);
+    const type = packageName.slice(firstSlashIndex + 1);
     return `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
   }
 
@@ -41,11 +39,9 @@ export class AzureBicepResourceDatasource extends Datasource {
   async getReleases(
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
-    const { packageName } = getReleasesConfig;
-
     const resourceVersionIndex = await this.getResourceVersionIndex();
-
-    const versions = resourceVersionIndex[packageName.toLowerCase()];
+    const packageName = getReleasesConfig.packageName.toLowerCase();
+    const versions = resourceVersionIndex[packageName];
     if (!versions?.length) {
       return null;
     }
