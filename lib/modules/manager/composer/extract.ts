@@ -10,10 +10,10 @@ import type { PackageDependency, PackageFileContent } from '../types';
 import type {
   ComposerConfig,
   ComposerLock,
-  ComposerManagerData,
   ComposerRepositories,
-  Repo,
-} from './types';
+  ComposerRepository,
+} from './schema';
+import type { ComposerManagerData } from './types';
 
 /**
  * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
@@ -34,7 +34,7 @@ function transformRegUrl(url: string): string {
  */
 function parseRepositories(
   repoJson: ComposerRepositories,
-  repositories: Record<string, Repo>,
+  repositories: Record<string, ComposerRepository>,
   registryUrls: string[]
 ): void {
   try {
@@ -91,7 +91,7 @@ export async function extractPackageFile(
     logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
-  const repositories: Record<string, Repo> = {};
+  const repositories: Record<string, ComposerRepository> = {};
   const registryUrls: string[] = [];
   const res: PackageFileContent = { deps: [] };
 
