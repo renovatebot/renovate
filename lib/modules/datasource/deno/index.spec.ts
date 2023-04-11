@@ -62,8 +62,11 @@ describe('modules/datasource/deno/index', () => {
           popularity: 'top_5_percent',
         },
       });
+
       expect(logger.logger.warn).toHaveBeenCalledWith(
-        expect.any(ZodError),
+        expect.objectContaining({
+          err: expect.any(ZodError),
+        }),
         `Deno: failed to get version details for 0.161.0`
       );
     });

@@ -93,7 +93,7 @@ export class DenoDatasource extends Datasource {
         const url = joinUrlParts(moduleAPIURL, version);
         const { body: release } = await this.http.getJson(
           url,
-          DenoAPIModuleVersionResponse.catch((err) => {
+          DenoAPIModuleVersionResponse.catch(({ error: err }) => {
             logger.warn(
               { err },
               `Deno: failed to get version details for ${version}`
