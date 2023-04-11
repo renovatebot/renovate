@@ -280,7 +280,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('new-onboarding-sha');
-      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(true);
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       await checkOnboardingBranch(config);
@@ -288,7 +289,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'new-onboarding-sha',
-        false
+        false,
+        true
       );
       expect(dummyCache).toMatchObject({
         scan: {},
@@ -303,13 +305,15 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('onboarding-sha');
-      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(true);
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
+      onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(true);
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(0);
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'onboarding-sha',
+        true,
         true
       );
     });
@@ -321,13 +325,13 @@ describe('workers/repository/onboarding/branch/index', () => {
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('onboarding-sha');
-      onboardingCache.hasOnboardingBranchChanged.mockResolvedValueOnce(false);
-      onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
+      onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(false);
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledTimes(1);
       expect(onboardingCache.setOnboardingCache).toHaveBeenCalledWith(
         'default-sha',
         'onboarding-sha',
+        false,
         false
       );
     });

@@ -17,6 +17,7 @@ describe('workers/repository/onboarding/branch/check', () => {
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
         isConflicted: false,
+        isModified: false,
       },
     });
     git.getBranchCommit
@@ -35,6 +36,7 @@ describe('workers/repository/onboarding/branch/check', () => {
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
         isConflicted: false,
+        isModified: false,
       },
     });
     git.getBranchCommit
