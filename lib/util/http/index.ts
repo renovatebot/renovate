@@ -259,19 +259,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     const res = await this.request<ResT>(url, opts);
 
     if (!schema) {
-      return { ...res, body: res.body };
+      return res;
     }
 
-    const parsed = await schema.safeParseAsync(res.body);
-    if (!parsed.success) {
-      logger.once.info(
-        { err: parsed.error },
-        `Response does not match schema: please report this to https://github.com/renovatebot/renovate/pull/21338`
-      );
-      return { ...res, body: res.body };
-    }
-
-    return { ...res, body: parsed.data };
+    res.body = await schema.parseAsync(res.body);
+    return res;
   }
 
   private resolveArgs<ResT = unknown>(
