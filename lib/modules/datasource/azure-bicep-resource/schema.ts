@@ -32,8 +32,7 @@ export const BicepResourceVersionIndex = z
       releaseMap.set(type, versions);
     }
 
-    for (const functionResource of Object.entries(Functions)) {
-      const [type, versionMap] = functionResource;
+    for (const [type, versionMap] of Object.entries(Functions)) {
       const versions = Object.keys(versionMap);
       releaseMap.set(type, versions);
     }
