@@ -7,7 +7,8 @@ import { getBranchCommit } from '../../../../util/git';
 export function setOnboardingCache(
   defaultBranchSha: string,
   onboardingBranchSha: string,
-  isConflicted: boolean
+  isConflicted: boolean,
+  isModified: boolean
 ): void {
   // do not update cache if commit is null/undefined
   if (
@@ -25,6 +26,7 @@ export function setOnboardingCache(
     defaultBranchSha,
     onboardingBranchSha,
     isConflicted,
+    isModified,
   };
   if (cache.onboardingBranchCache) {
     logger.debug({ onboardingCache }, 'Update Onboarding Cache');
@@ -43,17 +45,32 @@ export function deleteOnboardingCache(): void {
   }
 }
 
-// checks of onboarding branch has been modified since last run
-export async function hasOnboardingBranchChanged(
+// checks if onboarding branch has been modified since last run
+// return true if cache isn't present
+export function hasOnboardingBranchChanged(onboardingBranch: string): boolean {
+  const cache = getCache();
+  const onboardingSha = getBranchCommit(onboardingBranch);
+
+  if (cache.onboardingBranchCache) {
+    return onboardingSha !== cache.onboardingBranchCache.onboardingBranchSha;
+  }
+  return true;
+}
+
+// checks if onboarding branch has been modified by user
+// once set to true it stays true as we do not rebase onboarding branches anymore (this feature will be added in future though)
+export async function isOnboardingBranchModified(
   onboardingBranch: string
 ): Promise<boolean> {
   const cache = getCache();
   const onboardingSha = getBranchCommit(onboardingBranch);
   let isModified = false;
 
-  if (cache.onboardingBranchCache) {
-    isModified =
-      onboardingSha !== cache.onboardingBranchCache.onboardingBranchSha;
+  if (
+    cache.onboardingBranchCache &&
+    onboardingSha === cache.onboardingBranchCache.onboardingBranchSha
+  ) {
+    return cache.onboardingBranchCache.isModified;
   } else {
     isModified = await scm.isBranchModified(onboardingBranch);
   }
@@ -76,7 +93,7 @@ export async function isOnboardingBranchConflicted(
     defaultBranchSha === onboardingCache.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha
   ) {
-    isConflicted = onboardingCache.isConflicted;
+    return onboardingCache.isConflicted;
   } else {
     isConflicted = await scm.isBranchConflicted(
       defaultBranch,

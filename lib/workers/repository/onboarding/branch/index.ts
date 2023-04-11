@@ -24,6 +24,7 @@ import {
   deleteOnboardingCache,
   hasOnboardingBranchChanged,
   isOnboardingBranchConflicted,
+  isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
 
@@ -34,6 +35,7 @@ export async function checkOnboardingBranch(
   logger.trace({ config });
   let onboardingBranch = config.onboardingBranch;
   let isConflicted = false;
+  let isModified = false;
   const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
@@ -54,13 +56,16 @@ export async function checkOnboardingBranch(
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
-    if (await hasOnboardingBranchChanged(config.onboardingBranch!)) {
-      invalidateExtractCache(config.baseBranch!);
+    isModified = await isOnboardingBranchModified(config.onboardingBranch!);
+    if (isModified) {
+      if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
+        invalidateExtractCache(config.baseBranch!);
+      }
+      isConflicted = await isOnboardingBranchConflicted(
+        config.baseBranch!,
+        config.onboardingBranch!
+      );
     }
-    isConflicted = await isOnboardingBranchConflicted(
-      config.baseBranch!,
-      config.onboardingBranch!
-    );
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);
@@ -99,7 +104,8 @@ export async function checkOnboardingBranch(
   setOnboardingCache(
     getBranchCommit(config.defaultBranch!)!,
     getBranchCommit(onboardingBranch!)!,
-    isConflicted
+    isConflicted,
+    isModified
   );
 
   // TODO #7154
