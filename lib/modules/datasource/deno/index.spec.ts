@@ -1,4 +1,6 @@
+import { ZodError } from 'zod';
 import * as httpMock from '../../../../test/http-mock';
+import { logger } from '../../../../test/util';
 import { DenoDatasource } from '.';
 
 describe('modules/datasource/deno/index', () => {
@@ -60,6 +62,10 @@ describe('modules/datasource/deno/index', () => {
           popularity: 'top_5_percent',
         },
       });
+      expect(logger.logger.warn).toHaveBeenCalledWith(
+        expect.any(ZodError),
+        `Deno: failed to get version details for 0.161.0`
+      );
     });
 
     it('throws error if module endpoint fails', async () => {

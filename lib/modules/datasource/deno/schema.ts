@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { getSourceUrl as getGithubSourceUrl } from '../../../util/github/url';
-import { looseArray } from '../../../util/schema';
+import { looseArray } from '../../../util/schema-utils';
+import type { Release } from '../types';
 
 export const DenoApiTag = z.object({
   kind: z.string(),
@@ -31,11 +32,13 @@ export const DenoAPIModuleVersionResponse = z
     uploaded_at: z.string(),
     version: z.string(),
   })
-  .transform(({ version, uploaded_at: releaseTimestamp, upload_options }) => {
-    let sourceUrl: string | undefined = undefined;
-    const { type, repository, ref: gitRef } = upload_options;
-    if (type === 'github') {
-      sourceUrl = getGithubSourceUrl(repository);
+  .transform(
+    ({ version, uploaded_at: releaseTimestamp, upload_options }): Release => {
+      let sourceUrl: string | undefined = undefined;
+      const { type, repository, ref: gitRef } = upload_options;
+      if (type === 'github') {
+        sourceUrl = getGithubSourceUrl(repository);
+      }
+      return { version, gitRef, releaseTimestamp, sourceUrl };
     }
-    return { version, gitRef, releaseTimestamp, sourceUrl };
-  });
+  );

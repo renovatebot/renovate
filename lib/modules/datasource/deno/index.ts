@@ -75,8 +75,9 @@ export class DenoDatasource extends Datasource {
       )) ?? {};
     let cacheModified = false;
 
-    const { body } = await this.http.getJson(moduleAPIURL);
-    const { versions, tags } = DenoAPIModuleResponse.parse(body);
+    const {
+      body: { versions, tags },
+    } = await this.http.getJson(moduleAPIURL, DenoAPIModuleResponse);
 
     // get details for the versions
     const releases = await pMap(
@@ -90,9 +91,16 @@ export class DenoDatasource extends Datasource {
 
         // https://apiland.deno.dev/v2/modules/postgres/v0.17.0
         const url = joinUrlParts(moduleAPIURL, version);
-        const { body } = await this.http.getJson(url);
-        const res = DenoAPIModuleVersionResponse.safeParse(body);
-        const release: Release = res.success ? res.data : { version };
+        const { body: release } = await this.http.getJson(
+          url,
+          DenoAPIModuleVersionResponse.catch((err) => {
+            logger.warn(
+              { err },
+              `Deno: failed to get version details for ${version}`
+            );
+            return { version };
+          })
+        );
 
         releasesCache[release.version] = release;
         cacheModified = true;
