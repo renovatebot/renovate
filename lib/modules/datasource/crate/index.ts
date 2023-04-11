@@ -8,7 +8,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import { privateCacheDir, readCacheFile } from '../../../util/fs';
 import { simpleGitConfig } from '../../../util/git/config';
 import { newlineRegex, regEx } from '../../../util/regex';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import * as cargoVersioning from '../../versioning/cargo';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
@@ -165,10 +165,16 @@ export class CrateDatasource extends Datasource {
       return readCacheFile(path, 'utf8');
     }
 
-    if (info.flavor === 'crates.io') {
-      const crateUrl =
-        CrateDatasource.CRATES_IO_BASE_URL +
-        CrateDatasource.getIndexSuffix(packageName.toLowerCase()).join('/');
+    const baseUrl =
+      info.flavor === 'crates.io'
+        ? CrateDatasource.CRATES_IO_BASE_URL
+        : info.rawUrl;
+
+    if (info.flavor === 'crates.io' || info.isSparse) {
+      const packageSuffix = CrateDatasource.getIndexSuffix(
+        packageName.toLowerCase()
+      );
+      const crateUrl = joinUrlParts(baseUrl, ...packageSuffix);
       try {
         return (await this.http.get(crateUrl)).body;
       } catch (err) {
@@ -215,6 +221,14 @@ export class CrateDatasource extends Datasource {
     return `crate-registry-${proto}-${host}-${hash}`;
   }
 
+  private static isSparseRegistry(url: string): boolean {
+    const parsed = parseUrl(url);
+    if (!parsed) {
+      return false;
+    }
+    return parsed.protocol.startsWith('sparse+');
+  }
+
   /**
    * Fetches information about a registry, by url.
    * If no url is given, assumes crates.io.
@@ -230,9 +244,14 @@ export class CrateDatasource extends Datasource {
       return null;
     }
 
-    const url = parseUrl(registryUrl);
+    const isSparseRegistry = CrateDatasource.isSparseRegistry(registryUrl);
+    const registryFetchUrl = isSparseRegistry
+      ? registryUrl.replace(/^sparse\+/, '')
+      : registryUrl;
+
+    const url = parseUrl(registryFetchUrl);
     if (!url) {
-      logger.debug(`Could not parse registry URL ${registryUrl}`);
+      logger.debug(`Could not parse registry URL ${registryFetchUrl}`);
       return null;
     }
 
@@ -247,20 +266,23 @@ export class CrateDatasource extends Datasource {
 
     const registry: RegistryInfo = {
       flavor,
-      rawUrl: registryUrl,
+      rawUrl: registryFetchUrl,
       url,
+      isSparse: isSparseRegistry,
     };
 
-    if (flavor !== 'crates.io') {
-      if (!GlobalConfig.get('allowCustomCrateRegistries')) {
-        logger.warn(
-          'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
-        );
-        return null;
-      }
-
-      const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
-      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryUrl}/error`;
+    if (
+      registry.flavor !== 'crates.io' &&
+      !GlobalConfig.get('allowCustomCrateRegistries')
+    ) {
+      logger.warn(
+        'crate datasource: allowCustomCrateRegistries=true is required for registries other than crates.io, bailing out'
+      );
+      return null;
+    }
+    if (registry.flavor !== 'crates.io' && !registry.isSparse) {
+      const cacheKey = `crate-datasource/registry-clone-path/${registryFetchUrl}`;
+      const cacheKeyForError = `crate-datasource/registry-clone-path/${registryFetchUrl}/error`;
 
       // We need to ensure we don't run `git clone` in parallel. Therefore we store
       // a promise of the running operation in the mem cache, which in the end resolves
@@ -277,12 +299,12 @@ export class CrateDatasource extends Datasource {
           CrateDatasource.cacheDirFromUrl(url)
         );
         logger.info(
-          { clonePath, registryUrl },
+          { clonePath, registryFetchUrl },
           `Cloning private cargo registry`
         );
 
         const git = Git({ ...simpleGitConfig(), maxConcurrentProcesses: 1 });
-        const clonePromise = git.clone(registryUrl, clonePath, {
+        const clonePromise = git.clone(registryFetchUrl, clonePath, {
           '--depth': 1,
         });
 
@@ -295,7 +317,7 @@ export class CrateDatasource extends Datasource {
           await clonePromise;
         } catch (err) {
           logger.warn(
-            { err, packageName, registryUrl },
+            { err, packageName, registryFetchUrl },
             'failed cloning git registry'
           );
           memCache.set(cacheKeyForError, err);
@@ -307,7 +329,7 @@ export class CrateDatasource extends Datasource {
       if (!clonePath) {
         const err = memCache.get(cacheKeyForError);
         logger.warn(
-          { err, packageName, registryUrl },
+          { err, packageName, registryFetchUrl },
           'Previous git clone failed, bailing out.'
         );
 
