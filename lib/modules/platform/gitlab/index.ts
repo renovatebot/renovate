@@ -79,6 +79,8 @@ const defaults = {
   version: '0.0.0',
 };
 
+export const id = 'gitlab';
+
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 

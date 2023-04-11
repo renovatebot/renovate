@@ -46,6 +46,8 @@ import type {
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
 
+export const id = 'bitbucket';
+
 const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
