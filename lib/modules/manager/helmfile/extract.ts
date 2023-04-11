@@ -73,9 +73,12 @@ export async function extractPackageFile(
 
       // If it starts with ./ ../ or / then it's a local path
       if (isLocalPath(dep.chart)) {
-        needKustomize =
+        if (
           kustomizationsKeysUsed(dep) ||
-          (await localChartHasKustomizationsYaml(dep));
+          (await localChartHasKustomizationsYaml(dep))
+        ) {
+          needKustomize = true;
+        }
         deps.push({
           depName: dep.name,
           skipReason: 'local-chart',
