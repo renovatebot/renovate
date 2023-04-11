@@ -396,6 +396,7 @@ const staticGroups = {
       'group:springStatemachine',
       'group:springWebflow',
       'group:springWs',
+      'group:swc',
       'group:symfony',
     ],
     ignoreDeps: [], // Hack to improve onboarding PR description
@@ -657,6 +658,15 @@ const staticGroups = {
       {
         groupName: 'spring ws',
         matchPackagePrefixes: ['org.springframework.ws:'],
+      },
+    ],
+  },
+  swc: {
+    description: 'Group SWC packages together.',
+    packageRules: [
+      {
+        groupName: 'swc packages',
+        matchPackagePrefixes: ['@swc/'],
       },
     ],
   },
