@@ -25,10 +25,11 @@ function extractYaml(content: string): string {
     .replace(regEx(/{{.+?}}/g), '');
 }
 
-const isLocalPath = (possiblePath: string): boolean =>
-  ['./', '../', '/'].some((localPrefix) =>
+function isLocalPath(possiblePath: string): boolean {
+  return ['./', '../', '/'].some((localPrefix) =>
     possiblePath.startsWith(localPrefix)
   );
+}
 
 export async function extractPackageFile(
   content: string,
