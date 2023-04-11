@@ -27,9 +27,9 @@ export function setOnboardingCache(
     isConflicted,
   };
   if (cache.onboardingBranchCache) {
-    logger.debug('Onboarding cache updated');
+    logger.debug({ onboardingCache }, 'Update Onboarding Cache');
   } else {
-    logger.debug('Onboarding cache created');
+    logger.debug({ onboardingCache }, 'Create Onboarding Cache');
   }
   cache.onboardingBranchCache = onboardingCache;
 }

@@ -20,10 +20,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
-import {
-  hasOnboardingBranchChanged,
-  isOnboardingBranchConflicted,
-} from '../branch/onboarding-branch-cache';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
 import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -47,11 +44,10 @@ export async function ensureOnboardingPr(
   if (existingPr) {
     // skip pr-update if branch is conflicted
     if (
-      (await hasOnboardingBranchChanged(config.onboardingBranch!)) &&
-      (await isOnboardingBranchConflicted(
+      await isOnboardingBranchConflicted(
         config.defaultBranch!,
         config.onboardingBranch!
-      ))
+      )
     ) {
       await ensureComment({
         number: existingPr.number,

@@ -56,11 +56,11 @@ export async function checkOnboardingBranch(
     }
     if (await hasOnboardingBranchChanged(config.onboardingBranch!)) {
       invalidateExtractCache(config.baseBranch!);
-      isConflicted = await isOnboardingBranchConflicted(
-        config.baseBranch!,
-        config.onboardingBranch!
-      );
     }
+    isConflicted = await isOnboardingBranchConflicted(
+      config.baseBranch!,
+      config.onboardingBranch!
+    );
   } else {
     logger.debug('Onboarding PR does not exist');
     const onboardingConfig = await getOnboardingConfig(config);

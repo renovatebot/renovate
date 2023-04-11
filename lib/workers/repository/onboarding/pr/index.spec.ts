@@ -211,7 +211,6 @@ describe('workers/repository/onboarding/pr/index', () => {
         })
       );
       scm.isBranchConflicted.mockResolvedValueOnce(true);
-      scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
@@ -226,7 +225,6 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
