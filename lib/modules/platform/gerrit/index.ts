@@ -145,7 +145,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
-    repoFingerprint: repoFingerprint('', url), //TODO: understand the semantic? what cache could be stale/wrong?
+    repoFingerprint: repoFingerprint(repository, baseUrl), //TODO: understand the semantic? what cache could be stale/wrong?
   };
   return repoConfig;
 }
@@ -174,9 +174,7 @@ export async function findPr(
   findPRConfig: FindPRConfig,
   refreshCache?: boolean
 ): Promise<Pr | null> {
-  const change = await findOwnPr(findPRConfig, refreshCache).then((res) =>
-    res.pop()
-  );
+  const change = (await findOwnPr(findPRConfig, refreshCache)).pop();
   return change ? mapGerritChangeToPr(change) : null;
 }
 
@@ -219,14 +217,16 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       prConfig.labels?.toString() ?? ''
     })`
   );
-  const pr = await findOwnPr(
-    {
-      branchName: prConfig.sourceBranch,
-      targetBranch: prConfig.targetBranch,
-      state: 'open',
-    },
-    true
-  ).then((res) => res.pop());
+  const pr = (
+    await findOwnPr(
+      {
+        branchName: prConfig.sourceBranch,
+        targetBranch: prConfig.targetBranch,
+        state: 'open',
+      },
+      true
+    )
+  ).pop();
   if (pr) {
     //Workaround for "Known Problems.1"
     if (pr.subject !== prConfig.prTitle) {

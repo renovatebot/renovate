@@ -9,7 +9,7 @@ import type {
   GerritProjectInfo,
 } from './types';
 
-export class GerritClient {
+class GerritClient {
   requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
     'CHECK', // include potential problems with the change.
@@ -20,7 +20,7 @@ export class GerritClient {
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
   ];
 
-  gerritHttp = new GerritHttp();
+  private gerritHttp = new GerritHttp();
 
   async getRepos(): Promise<string[]> {
     const res = await this.gerritHttp.getJson<string[]>(

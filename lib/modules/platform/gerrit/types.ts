@@ -8,7 +8,7 @@ export interface GerritProjectInfo {
   state?: 'ACTIVE' | 'READ_ONLY' | 'HIDDEN';
   branches?: Record<string, string>; //TODO: always empty???
   labels?: Record<string, GerritLabelTypeInfo>;
-  web_links?: any;
+  web_links?: unknown[];
 }
 
 export interface GerritLabelTypeInfo {
@@ -66,22 +66,22 @@ export interface GerritChange {
   _number: number;
   owner: GerritAccountInfo;
   actions?: Record<string, GerritActionInfo>;
-  submit_records: any[]; // SubmitRecordInfo[]
-  requirements?: any[]; //List of the requirements
-  submit_requirements?: any[]; //List of the SubmitRequirementResultInfo
+  submit_records: unknown[]; // SubmitRecordInfo[]
+  requirements?: unknown[]; //List of the requirements
+  submit_requirements?: unknown[]; //List of the SubmitRequirementResultInfo
   labels?: Record<string, GerritLabelInfo>;
-  permitted_labels?: any[];
-  removable_reviewers?: any[];
+  permitted_labels?: unknown[];
+  removable_reviewers?: unknown[];
   reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>; //key = ReviewerState
-  pending_reviewers?: any;
-  reviewer_updates?: any;
+  pending_reviewers?: unknown;
+  reviewer_updates?: unknown;
   messages?: GerritChangeMessageInfo[];
   current_revision?: string;
   revisions?: Record<string, GerritRevisionInfo>; //All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
   meta_rev_id?: string;
-  tracking_ids?: any;
-  _more_changes?: any;
-  problems: any[];
+  tracking_ids?: unknown;
+  _more_changes?: unknown;
+  problems: unknown[];
   is_private?: boolean;
   work_in_progress?: boolean;
   has_review_started?: boolean;
@@ -125,8 +125,8 @@ export interface GerritLabelInfo {
   value?: string; //The voting value of the user who recommended/disliked this label on the change if it is not “+1”/“-1”.
   default_value?: string;
   votes?: number[]; //A list of integers containing the vote values applied to this label at the latest patchset.
-  all?: any[];
-  values?: any; //A map of all values that are allowed for this label. The map maps the values (“-2”, “-1”, " `0`", “+1”, “+2”) to the value descriptions.
+  all?: unknown[];
+  values?: unknown; //A map of all values that are allowed for this label. The map maps the values (“-2”, “-1”, " `0`", “+1”, “+2”) to the value descriptions.
 }
 
 export interface GerritActionInfo {
@@ -143,7 +143,7 @@ export interface GerritAccountInfo {
   email?: string;
   secondary_emails?: string[];
   username?: string;
-  avatars?: any;
+  avatars?: unknown;
   _more_accounts?: boolean;
   status?: string;
   inactive?: boolean;
@@ -158,6 +158,12 @@ export interface GerritAttentionSetInfo {
 }
 
 export interface GerritMergeableInfo {
-  submit_type: string; //MERGE_IF_NECESSARY, FAST_FORWARD_ONLY, REBASE_IF_NECESSARY, REBASE_ALWAYS, MERGE_ALWAYS or CHERRY_PICK
+  submit_type:
+    | 'MERGE_IF_NECESSARY'
+    | 'FAST_FORWARD_ONLY'
+    | 'REBASE_IF_NECESSARY'
+    | 'REBASE_ALWAYS'
+    | 'MERGE_ALWAYS'
+    | 'CHERRY_PICK';
   mergeable: boolean;
 }

@@ -24,8 +24,13 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   if (!url) {
     throw new Error(CONFIG_GIT_URL_UNAVAILABLE);
   }
-  url.username = opts.username ?? '';
-  url.password = opts.password ?? '';
+  if (!(opts.username && opts.password)) {
+    throw new Error(
+      'Init: You must configure a Gerrit Server username/password'
+    );
+  }
+  url.username = opts.username;
+  url.password = opts.password;
   url.pathname = `${url.pathname}a/${encodeURIComponent(repository)}`;
   logger.trace(
     { url: url.toString() },

@@ -1,6 +1,7 @@
 import { git, mocked, partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
+import * as _hostRules from '../../../util/host-rules';
 import { repoFingerprint } from '../util';
 import { client as _client } from './client';
 import type {
@@ -28,12 +29,18 @@ const codeReviewLabel: GerritLabelTypeInfo = {
   default_value: 0,
 };
 
+jest.mock('../../../util/host-rules');
 jest.mock('../../../util/git');
 jest.mock('./client');
 const clientMock = mocked(_client);
+const hostRules = mocked(_hostRules);
 
 describe('modules/platform/gerrit/index', () => {
   beforeEach(async () => {
+    hostRules.find.mockReturnValue({
+      username: 'user',
+      password: 'pass',
+    });
     mergeToConfig({
       repository: 'test/repo',
       labels: {},
@@ -102,13 +109,10 @@ describe('modules/platform/gerrit/index', () => {
       expect(await gerrit.initRepo({ repository: 'test/repo' })).toEqual({
         defaultBranch: 'main',
         isFork: false,
-        repoFingerprint: repoFingerprint(
-          '',
-          `${gerritEndpointUrl}/a/${encodeURIComponent('test/repo')}`
-        ),
+        repoFingerprint: repoFingerprint('test/repo', `${gerritEndpointUrl}/`),
       });
       expect(git.initRepo).toHaveBeenCalledWith({
-        url: 'https://dev.gerrit.com/renovate/a/test%2Frepo',
+        url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
       });
       expect(git.syncGit).toHaveBeenCalled();
     });

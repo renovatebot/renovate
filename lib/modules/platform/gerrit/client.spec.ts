@@ -2,7 +2,7 @@ import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
-import { GerritClient } from './client';
+import { client } from './client';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
@@ -13,8 +13,6 @@ const gerritEndpointUrl = 'https://dev.gerrit.com/renovate/';
 const jsonResultHeader = { 'content-type': 'application/json;charset=utf-8' };
 
 describe('modules/platform/gerrit/client', () => {
-  const client = new GerritClient();
-
   beforeAll(() => {
     setBaseUrl(gerritEndpointUrl);
   });
