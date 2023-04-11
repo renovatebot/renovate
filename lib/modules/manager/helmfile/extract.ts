@@ -39,6 +39,8 @@ export async function extractPackageFile(
   const deps: PackageDependency[] = [];
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
+  // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
+  let needKustomize = false;
   try {
     docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
@@ -71,13 +73,12 @@ export async function extractPackageFile(
 
       // If it starts with ./ ../ or / then it's a local path
       if (isLocalPath(dep.chart)) {
-        const needKustomize =
+        needKustomize =
           kustomizationsKeysUsed(dep) ||
           (await localChartHasKustomizationsYaml(dep));
         deps.push({
           depName: dep.name,
           skipReason: 'local-chart',
-          ...(needKustomize && { managerData: { needKustomize: true } }),
         });
         continue;
       }
@@ -110,7 +111,7 @@ export async function extractPackageFile(
           .filter(is.string),
       };
       if (kustomizationsKeysUsed(dep)) {
-        res.managerData = { needKustomize: true };
+        needKustomize = true;
       }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
@@ -136,5 +137,11 @@ export async function extractPackageFile(
     }
   }
 
-  return deps.length ? { deps, datasource: HelmDatasource.id } : null;
+  return deps.length
+    ? {
+        deps,
+        datasource: HelmDatasource.id,
+        ...(needKustomize && { managerData: { needKustomize: true } }),
+      }
+    : null;
 }

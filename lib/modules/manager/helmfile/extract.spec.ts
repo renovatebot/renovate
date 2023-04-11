@@ -204,8 +204,9 @@ describe('modules/manager/helmfile/extract', () => {
           { depName: 'kube-prometheus-stack', currentValue: '13.7' },
           { depName: 'invalid', skipReason: 'invalid-name' },
           { depName: 'external-dns', skipReason: 'invalid-version' },
-          { depName: 'raw', managerData: { needKustomize: true } },
+          { depName: 'raw' },
         ],
+        managerData: { needKustomize: true },
       });
     });
 
@@ -344,22 +345,18 @@ describe('modules/manager/helmfile/extract', () => {
           {
             depName: '',
             skipReason: 'local-chart',
-            managerData: { needKustomize: true },
           },
           {
             depName: '',
             skipReason: 'local-chart',
-            managerData: { needKustomize: true },
           },
           {
             depName: '',
             skipReason: 'local-chart',
-            managerData: { needKustomize: true },
           },
           {
             depName: null,
             skipReason: 'local-chart',
-            managerData: { needKustomize: true },
           },
           {
             depName: 'ingress-nginx',
@@ -385,6 +382,7 @@ describe('modules/manager/helmfile/extract', () => {
             registryUrls: ['https://charts.helm.sh/stable'],
           },
         ],
+        managerData: { needKustomize: true },
       });
     });
   });
