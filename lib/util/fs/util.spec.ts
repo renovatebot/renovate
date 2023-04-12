@@ -1,7 +1,7 @@
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
-import { ensureCachePath, ensureLocalPath } from './util';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
 
 describe('util/fs/util', () => {
   const localDir = upath.resolve('/foo');
@@ -45,7 +45,35 @@ describe('util/fs/util', () => {
     ${'/bar/../foo'}
     ${'/bar/../../etc/passwd'}
     ${'/baz'}
+    ${'/baz"'}
   `(`ensureCachePath('$path', '${cacheDir}') - throws`, ({ path }) => {
     expect(() => ensureCachePath(path)).toThrow(FILE_ACCESS_VIOLATION_ERROR);
+  });
+
+  it.each`
+    value               | expected
+    ${'.'}              | ${true}
+    ${'./...'}          | ${true}
+    ${'foo'}            | ${true}
+    ${'foo/bar'}        | ${true}
+    ${'./foo/bar'}      | ${true}
+    ${'./foo/bar/...'}  | ${true}
+    ${'..'}             | ${false}
+    ${'....'}           | ${true}
+    ${'./foo/..'}       | ${true}
+    ${'./foo/..../bar'} | ${true}
+    ${'./..'}           | ${false}
+    ${'\\foo'}          | ${false}
+    ${"foo'"}           | ${false}
+    ${'fo"o'}           | ${false}
+    ${'fo&o'}           | ${false}
+    ${'f;oo'}           | ${true}
+    ${'f o o'}          | ${true}
+    ${'/'}              | ${false}
+    ${'/foo'}           | ${false}
+    ${'&&'}             | ${false}
+    ${';'}              | ${true}
+  `('isValidPath($value) == $expected', ({ value, expected }) => {
+    expect(isValidPath(value, 'cacheDir')).toBe(expected);
   });
 });
