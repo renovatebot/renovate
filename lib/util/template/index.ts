@@ -91,6 +91,7 @@ export const allowedFields = {
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
   isLockfileUpdate: 'true if the branch is a lock file update',
+  isGroup: 'true if the upgrade is part of a group',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
   isPin: 'true if the upgrade is pinning dependencies',
