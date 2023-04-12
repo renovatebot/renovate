@@ -1,52 +1,59 @@
 import { z } from 'zod';
+import { looseArray } from '../../../util/schema-utils';
+import type { Release } from '../types';
 
-const Product = z.union([z.literal('.NET Core'), z.literal('.NET')]);
-const SupportPhase = z.union([
-  z.literal('current'),
-  z.literal('eol'),
-  z.literal('lts'),
-  z.literal('maintenance'),
-  z.literal('preview'),
-  z.literal('rc'),
-]);
-const ReleaseIndex = z.object({
-  'channel-version': z.string(),
-  'latest-release': z.string(),
-  'latest-release-date': z.string(),
-  security: z.boolean(),
-  'latest-runtime': z.string(),
-  'latest-sdk': z.string(),
-  product: Product,
-  'support-phase': SupportPhase,
-  'eol-date': z.string().nullable(),
-  'releases.json': z.string(),
-});
-export const DotnetReleasesIndexSchema = z.object({
-  'releases-index': z.array(ReleaseIndex),
-});
+export const ReleasesIndex = z
+  .object({
+    'releases-index': looseArray(
+      z
+        .object({
+          'releases.json': z.string(),
+        })
+        .transform(({ 'releases.json': releasesUrl }) => releasesUrl)
+    ),
+  })
+  .transform(({ 'releases-index': releasesIndex }) => releasesIndex);
 
+const ReleaseBase = z.object({
+  'release-date': z.string(),
+  'release-notes': z.string(),
+});
 const ReleaseDetails = z.object({
   version: z.string(),
-  'version-display': z.string(),
-});
-const ReleaseSchema = z.object({
-  'release-date': z.string(),
-  'release-version': z.string(),
-  security: z.boolean(),
-  'release-notes': z.string(),
-  runtime: z.nullable(ReleaseDetails),
-  sdk: z.nullable(ReleaseDetails),
-});
-export const DotnetReleasesSchema = z.object({
-  'channel-version': z.string(),
-  'latest-release': z.string(),
-  'latest-release-date': z.string(),
-  'latest-runtime': z.string(),
-  'latest-sdk': z.string(),
-  'support-phase': SupportPhase,
-  releases: z.array(ReleaseSchema),
 });
 
-export type DotnetReleasesIndex = z.infer<typeof DotnetReleasesIndexSchema>;
-export type DotnetReleases = z.infer<typeof DotnetReleasesSchema>;
-export type DotnetRelease = z.infer<typeof ReleaseSchema>;
+export const DotnetSdkReleases = z
+  .object({
+    releases: looseArray(
+      ReleaseBase.extend({
+        sdk: ReleaseDetails,
+      })
+    ),
+  })
+  .transform(({ releases }): Release[] =>
+    releases.map(
+      ({
+        sdk: { version },
+        'release-date': releaseTimestamp,
+        'release-notes': changelogUrl,
+      }) => ({ version, releaseTimestamp, changelogUrl })
+    )
+  );
+
+export const DotnetRuntimeReleases = z
+  .object({
+    releases: looseArray(
+      ReleaseBase.extend({
+        runtime: ReleaseDetails,
+      })
+    ),
+  })
+  .transform(({ releases }): Release[] =>
+    releases.map(
+      ({
+        runtime: { version },
+        'release-date': releaseTimestamp,
+        'release-notes': changelogUrl,
+      }) => ({ version, releaseTimestamp, changelogUrl })
+    )
+  );
