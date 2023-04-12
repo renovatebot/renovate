@@ -114,7 +114,6 @@ describe('modules/platform/gerrit/index', () => {
       expect(git.initRepo).toHaveBeenCalledWith({
         url: 'https://user:pass@dev.gerrit.com/renovate/a/test%2Frepo',
       });
-      expect(git.syncGit).toHaveBeenCalled();
     });
 
     it('initRepo() - abandon rejected changes', async () => {

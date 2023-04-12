@@ -97,7 +97,7 @@ export class GerritScm extends DefaultGitScm {
   override async commitAndPush(
     commit: CommitFilesConfig
   ): Promise<CommitSha | null> {
-    logger.info(`commitAndPush(${commit.branchName})`);
+    logger.debug(`commitAndPush(${commit.branchName})`);
     const filter = this.createFilter(
       'open',
       commit.branchName,

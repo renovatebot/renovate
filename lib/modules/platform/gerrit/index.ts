@@ -6,7 +6,6 @@ import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
 import { ensureTrailingSlash } from '../../../util/url';
-import { smartLinks } from '../gitea/utils';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -28,6 +27,7 @@ import type {
 import { repoFingerprint } from '../util';
 
 import { smartTruncate } from '../utils/pr-body';
+import readOnlyIssueBody from '../utils/read-only-issue-body';
 import { client } from './client';
 import { configureScm } from './scm';
 import type {
@@ -48,16 +48,13 @@ export const id = 'gerrit';
 
 const defaults: {
   endpoint?: string;
-  hostType: string;
-} = {
-  hostType: 'gerrit',
-};
+} = {};
 
 let config: {
   repository?: string;
   head?: string;
   config?: GerritProjectInfo;
-  labels: { [key: string]: GerritLabelTypeInfo };
+  labels: Record<string, GerritLabelTypeInfo>;
   labelMappings?: {
     stabilityDaysLabel?: string;
     mergeConfidenceLabel?: string;
@@ -80,7 +77,7 @@ export function initPlatform({
   password,
   gerritLabelMapping,
 }: PlatformParams & RepoGlobalConfig): Promise<PlatformResult> {
-  logger.info(`initPlatform(${endpoint!}, ${username!})`);
+  logger.debug(`initPlatform(${endpoint!}, ${username!})`);
   if (!endpoint) {
     throw new Error('Init: You must configure a Gerrit Server endpoint');
   }
@@ -116,7 +113,7 @@ export async function initRepo({
   endpoint,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.info(`initRepo(${repository}, ${endpoint!}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${endpoint!}, ${gitUrl!})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -130,10 +127,7 @@ export async function initRepo({
   const baseUrl = endpoint ?? defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
   configureScm(repository, config.gerritUsername!);
-
-  // Initialize Git storage
   await git.initRepo({ url });
-  await git.syncGit(); //if not called the hook can be removed later...
 
   //abandon "open" and "rejected" changes at startup
   const rejectedChanges = await findOwnPr({
@@ -147,7 +141,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.head!,
     isFork: false,
-    repoFingerprint: repoFingerprint(repository, baseUrl), //TODO: understand the semantic? what cache could be stale/wrong?
+    repoFingerprint: repoFingerprint(repository, baseUrl),
   };
   return repoConfig;
 }
@@ -193,7 +187,7 @@ export async function getPr(number: number): Promise<Pr | null> {
 }
 
 export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
-  logger.info(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
+  logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
   const change = await client.getChange(prConfig.number);
   if (change.subject !== prConfig.prTitle) {
     await updatePullRequestTitle(
@@ -214,7 +208,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
 }
 
 export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
-  logger.info(
+  logger.debug(
     `createPr(${prConfig.sourceBranch}, ${prConfig.prTitle}, ${
       prConfig.labels?.toString() ?? ''
     })`
@@ -309,7 +303,7 @@ export function getPrList(): Promise<Pr[]> {
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
-  logger.info(
+  logger.debug(
     `mergePr(${config.id}, ${config.branchName!}, ${config.strategy!})`
   );
   try {
@@ -431,7 +425,8 @@ export function getRawFile(
   branchOrTag?: string
 ): Promise<string | null> {
   const repo = repoName ?? config.repository ?? 'All-Projects';
-  const branch = branchOrTag ?? config.head ?? 'HEAD';
+  const branch =
+    branchOrTag ?? (repo === config.repository ? config.head! : 'HEAD');
   return client.getFile(repo, branch, fileName);
 }
 
@@ -440,8 +435,8 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = (await getRawFile(fileName, repoName, branchOrTag)) as string;
-  return JSON5.parse(raw);
+  const raw = await getRawFile(fileName, repoName, branchOrTag);
+  return raw ? JSON5.parse(raw) : null;
 }
 
 export function getRepoForceRebase(): Promise<boolean> {
@@ -495,7 +490,7 @@ export async function ensureComment(
 
 export function massageMarkdown(prBody: string): string {
   //TODO: do more Gerrit specific replacements?
-  return smartTruncate(smartLinks(prBody), 16384) //TODO: check the real gerrit limit (max. chars)
+  return smartTruncate(readOnlyIssueBody(prBody), 16384) //TODO: check the real gerrit limit (max. chars)
     .replace(regEx(/Pull Request(s)?/g), 'Change-Request$1')
     .replace(regEx(/\bPR(s)?\b/g), 'Change-Request$1')
     .replace(regEx(/<\/?summary>/g), '**')
