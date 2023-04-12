@@ -1584,7 +1584,7 @@ const options: RenovateOptions[] = [
   {
     name: 'internalChecksAsSuccess',
     description:
-      'Whether to consider passing internal checks such as minimumReleaseAge when determining branch status.',
+      'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
     type: 'boolean',
     default: false,
   },

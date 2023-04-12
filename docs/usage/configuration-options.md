@@ -1524,8 +1524,8 @@ Currently this applies to the `minimumReleaseAge` check only.
 - `strict`: All pending releases will be filtered. PRs will be skipped unless a non-pending version is available
 - `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version
 
-The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
-We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
+The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
+We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
 
 ## java
 
@@ -1621,13 +1621,14 @@ Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reductio
 If the time since the release is less than the set `minimumReleaseAge` a "pending" status check is added to the branch.
 If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
 
-Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
+Some datasources don't have a release timestamp, in which case this feature is not compatible.
+Other datasources may have a release timestamp, but Renovate does not support it yet, in which case a feature request needs to be implemented.
 
 Maven users: you cannot use `minimumReleaseAge` if a Maven source returns unreliable `last-modified` headers.
 
 <!-- prettier-ignore -->
 !!! note
-    Configuring this option will add `renovate/stability-days` option to the status checks.
+    Configuring this option will add a `renovate/stability-days` option to the status checks.
 
 There are a couple of uses for `minimumReleaseAge`:
 
@@ -1636,7 +1637,7 @@ There are a couple of uses for `minimumReleaseAge`:
 #### Suppress branch/PR creation for X days
 
 If you combine `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
-It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
+We recommend that you set `dependencyDashboard=true` so you can see these pending PRs.
 
 #### Prevent holding broken npm packages
 
@@ -1656,7 +1657,7 @@ Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a pac
 
 #### Await X time duration before Automerging
 
-If you have both `automerge` as well as `minimumReleaseAge` enabled, it means that PRs will be created immediately but automerging will be delayed until the time-duration has passed.
+If you enabled `automerge` _and_ `minimumReleaseAge`, it means that PRs will be created immediately but automerging will be delayed until the time-duration has passed.
 This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
 
 <!-- markdownlint-enable MD001 -->
