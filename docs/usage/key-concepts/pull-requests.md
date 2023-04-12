@@ -7,7 +7,7 @@ This page describes how Renovate pull requests work.
 
 ## How Renovate finds existing PRs
 
-Renovate does not keep any database/state about open or closed Pull Requests.
+Renovate does not need to maintain any database/state about open or closed Pull Requests.
 Instead, it uses the code platform's APIs to search and find such PRs.
 
 Renovate finds existing PRs (open or closed) by matching both:
