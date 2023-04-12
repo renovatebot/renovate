@@ -752,6 +752,7 @@ const options: RenovateOptions[] = [
     description: 'List of Repositories.',
     stage: 'global',
     type: 'array',
+    subType: 'string',
     cli: false,
     globalOnly: true,
   },
@@ -807,6 +808,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
+    subType: 'string',
     mergeable: false,
     stage: 'repository',
   },
@@ -1832,7 +1834,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyTemplate',
     description:
-      'Pull Request body template. Controls which sections are rendered in the body.',
+      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
     default:
       '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
@@ -2053,6 +2055,7 @@ const options: RenovateOptions[] = [
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
     default: [],
+    subType: 'string',
     allowedValues: [
       'bundlerConservative',
       'helmUpdateSubChartArchives',

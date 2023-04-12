@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';

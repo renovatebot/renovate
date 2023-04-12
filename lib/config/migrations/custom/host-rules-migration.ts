@@ -3,6 +3,7 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import type { HostRule } from '../../../types';
 import { clone } from '../../../util/clone';
 import { AbstractMigration } from '../base/abstract-migration';
+import { migrateDatasource } from './datasource-migration';
 
 interface LegacyHostRule {
   hostName?: string;
@@ -31,6 +32,26 @@ export class HostRulesMigration extends AbstractMigration {
         }
 
         if (key === 'matchHost') {
+          if (is.string(value)) {
+            newRule.matchHost ??= massageUrl(value);
+          }
+          continue;
+        }
+
+        if (key === 'hostType') {
+          if (is.string(value)) {
+            newRule.hostType ??= migrateDatasource(value);
+          }
+          continue;
+        }
+
+        if (
+          key === 'endpoint' ||
+          key === 'host' ||
+          key === 'baseUrl' ||
+          key === 'hostName' ||
+          key === 'domainName'
+        ) {
           if (is.string(value)) {
             newRule.matchHost ??= massageUrl(value);
           }

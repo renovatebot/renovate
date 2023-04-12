@@ -1,4 +1,4 @@
-import url from 'url';
+import URL from 'node:url';
 import type { MergeStrategy } from '../../../config/types';
 import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
@@ -64,8 +64,8 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true);
-  const maxedUrl = url.format({
+  const { search, ...parsedUrl } = URL.parse(inputUrl, true);
+  const maxedUrl = URL.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, pagelen },
   });
@@ -86,7 +86,9 @@ function callApi<T>(
     case 'patch':
       return bitbucketHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketHttp.headJson<T>(apiUrl, options);
+      return bitbucketHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
       return bitbucketHttp.deleteJson<T>(apiUrl, options);
     case 'get':

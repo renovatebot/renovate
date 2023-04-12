@@ -224,7 +224,7 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
           dep.autoReplaceStringTemplate =
-            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';

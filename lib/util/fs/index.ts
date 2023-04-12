@@ -1,5 +1,5 @@
-import stream from 'stream';
-import util from 'util';
+import stream from 'node:stream';
+import util from 'node:util';
 import is from '@sindresorhus/is';
 import findUp from 'find-up';
 import fs from 'fs-extra';

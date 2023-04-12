@@ -1,4 +1,4 @@
-import url from 'url';
+import URL from 'node:url';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
@@ -30,6 +30,12 @@ export function handleAssignment(ctx: Ctx): Ctx {
     ctx.tokenMap.templateStringTokens = valTokens;
     handleDepString(ctx);
     delete ctx.tokenMap.templateStringTokens;
+  } else if (valTokens[0].type === 'symbol') {
+    // foo = bar || foo = "${bar}"
+    const varData = ctx.globalVars[valTokens[0].value];
+    if (varData) {
+      ctx.globalVars[key] = { ...varData };
+    }
   } else {
     // = string value
     const dep = parseDependencyString(valTokens[0].value);
@@ -289,7 +295,7 @@ export function handleCustomRegistryUrl(ctx: Ctx): Ctx {
   if (registryUrl) {
     registryUrl = registryUrl.replace(regEx(/\\/g), '');
     try {
-      const { host, protocol } = url.parse(registryUrl);
+      const { host, protocol } = URL.parse(registryUrl);
       if (host && protocol) {
         ctx.registryUrls.push({
           registryUrl,

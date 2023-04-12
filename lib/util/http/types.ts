@@ -1,4 +1,4 @@
-import type { IncomingHttpHeaders } from 'http';
+import type { IncomingHttpHeaders } from 'node:http';
 import type {
   OptionsOfBufferResponseBody,
   OptionsOfJSONResponseBody,
@@ -63,8 +63,6 @@ export interface HttpOptions {
 
   token?: string;
   useCache?: boolean;
-
-  onSchemaError?: 'warn' | 'throw';
 }
 
 export interface InternalHttpOptions extends HttpOptions {

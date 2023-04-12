@@ -28,7 +28,6 @@ import { getRollbackUpdate } from './rollback';
 import type { LookupUpdateConfig, UpdateResult } from './types';
 import {
   addReplacementUpdateIfValid,
-  isReplacementNameRulesConfigured,
   isReplacementRulesConfigured,
 } from './utils';
 
@@ -71,6 +70,7 @@ export async function lookupUpdates(
       return res;
     }
     const isValid = is.string(currentValue) && versioning.isValid(currentValue);
+
     if (unconstrainedValue || isValid) {
       if (
         !updatePinnedDependencies &&
@@ -161,10 +161,6 @@ export async function lookupUpdates(
         res.updates.push(rollback);
       }
       let rangeStrategy = getRangeStrategy(config);
-
-      if (isReplacementRulesConfigured(config)) {
-        addReplacementUpdateIfValid(res.updates, config);
-      }
 
       // istanbul ignore next
       if (
@@ -327,19 +323,18 @@ export async function lookupUpdates(
       logger.debug(
         `Dependency ${packageName} has unsupported/unversioned value ${currentValue} (versioning=${config.versioning})`
       );
+
       if (!pinDigests && !currentDigest) {
         res.skipReason = 'invalid-value';
       } else {
         delete res.skipReason;
       }
-    } else if (!currentValue && isReplacementNameRulesConfigured(config)) {
-      logger.debug(
-        `Handle name-only replacement for ${packageName} without current version`
-      );
-
-      addReplacementUpdateIfValid(res.updates, config);
     } else {
       res.skipReason = 'invalid-value';
+    }
+
+    if (isReplacementRulesConfigured(config)) {
+      addReplacementUpdateIfValid(res.updates, config);
     }
 
     // Record if the dep is fixed to a version

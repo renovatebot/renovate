@@ -342,13 +342,13 @@ Solutions:
 
 <!-- prettier-ignore -->
 !!! warning
-    We strongly recommended that you do not configure this field directly.
+    We strongly recommended that you avoid configuring this field directly.
     Use at your own risk.
 
 If you truly need to configure this then it probably means either:
 
 - You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
-- You have a use case we didn't expect and we should have a feature request from you to add it to the project
+- You have a use case we didn't expect, please open a discussion to see if we want to get a feature request from you
 
 ## branchNameStrict
 
@@ -802,12 +802,41 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+Before you put any secrets in your repository configuration, encrypt the secrets.
+You can encrypt secrets using either a HTML page, or the CLI.
+
+To encrypt secrets for the hosted Mend Renovate app for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
+If you're self-hosting Renovate, you may download and edit the form, to use your own PGP public key.
+
+You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`, `grep` and `tr` CLI programs.
+Here is an example:
+
+```
+curl https://app.renovatebot.com/renovate.pgp --output renovate.pgp
+echo -n '{"o":"your-organization", "r":"your-repository (optional)", "v":"your-secret-value"}' | jq . -c | gpg --encrypt -a --recipient-file renovate.pgp | grep -v '^----' | tr -d '\n'
+```
+
+The above script uses:
+
+- `curl` to download the Mend Renovate hosted app's public key
+- `echo` to echo a JSON object into `jq`
+- `jq` to validate the JSON and then compact it
+- `gpg` to encrypt the contents
+- `grep` and `tr` to extract the encrypted payload which we will use
+
+The `jq` step is optional, you can leave it out if you wish.
+Its primary value is validating that the string you echo to `gpg` is valid JSON, and compact.
 
 <!-- prettier-ignore -->
 !!! note
     Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
     This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
+
+Encrypted secrets usually have a single organization.
+But you may encrypt a secret with more than one organization, for example: `org1,org2`.
+This way the secret can be used in both the `org1` and `org2` organizations.
+
+For more information on how to use secrets for private packages, read [Private package support](https://docs.renovatebot.com/getting-started/private-packages).
 
 ## excludeCommitPaths
 
@@ -2231,8 +2260,8 @@ For example, the following package rule can be used to replace the registry for 
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^docker.io/.*)"],
-      "replacementNameTemplate": "{{{replace 'docker.io/' 'ghcr.io/' packageName}}}"
+      "matchPackagePatterns": ["^docker\\.io/.+"],
+      "replacementNameTemplate": "{{{replace 'docker\\.io/' 'ghcr.io/' packageName}}}"
     }
   ]
 }
@@ -2244,8 +2273,15 @@ Or, to add a registry prefix to any `docker` images that do not contain an expli
 {
   "packageRules": [
     {
+      "description": "official images",
       "matchDatasources": ["docker"],
-      "matchPackagePrefix": ["^([^.]+)(\\/\\:)?$"],
+      "matchPackagePatterns": ["^[a-z-]+$"],
+      "replacementNameTemplate": "some.registry.org/library/{{{packageName}}}"
+    },
+    {
+      "description": "non-official images",
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["^[a-z-]+/[a-z-]+$"],
       "replacementNameTemplate": "some.registry.org/{{{packageName}}}"
     }
   ]
@@ -2463,9 +2499,16 @@ e.g. if you wish to add an extra Warning to major updates:
 
 ## prBodyTemplate
 
-This setting controls which sections are rendered in the body of the pull request.
+The available sections are:
 
-The available sections are header, table, notes, changelogs, configDescription, controls, footer.
+- `header`
+- `table`
+- `warnings`
+- `notes`
+- `changelogs`
+- `configDescription`
+- `controls`
+- `footer`
 
 ## prConcurrentLimit
 
@@ -2605,7 +2648,8 @@ Renovate's `"auto"` strategy works like this for npm:
 
 1. Widen `peerDependencies`
 1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Otherwise, if the update is outside the existing range, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Finally, if the update is in-range, Renovate will update the lockfile with the new exact version.
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
