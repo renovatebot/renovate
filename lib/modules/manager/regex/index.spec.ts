@@ -623,17 +623,4 @@ describe('modules/manager/regex/index', () => {
       });
     }
   );
-    expect(res).toMatchObject({
-      deps: [
-        {
-          depName: 'dotnet',
-          packageName: 'dotnet-runtime',
-          currentValue: '6.0.13',
-          datasource: 'dotnet-version',
-          replaceString:
-            '# renovate: datasource=dotnet packageName=dotnet-runtime\nRUN install-tool dotnet 6.0.13',
-        },
-      ],
-    });
-  });
 });
