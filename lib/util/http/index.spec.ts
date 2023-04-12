@@ -349,7 +349,7 @@ describe('util/http/index', () => {
         expect(logger.logger.once.info).not.toHaveBeenCalled();
       });
 
-      it('returns original body if schema does not match', async () => {
+      it('throws on schema mismatch', async () => {
         httpMock
           .scope(baseUrl, {
             reqheaders: {
@@ -359,10 +359,9 @@ describe('util/http/index', () => {
           .get('/')
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
-        const { body } = await http.getJson('http://renovate.com', SomeSchema);
-
-        expect(body).toEqual({ foo: 'bar' });
-        expect(logger.logger.once.info).toHaveBeenCalled();
+        await expect(
+          http.getJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
       });
     });
 
@@ -382,16 +381,15 @@ describe('util/http/index', () => {
         expect(logger.logger.once.info).not.toHaveBeenCalled();
       });
 
-      it('returns original body if schema does not match', async () => {
+      it('throws on schema mismatch', async () => {
         httpMock
           .scope(baseUrl)
           .post('/')
           .reply(200, JSON.stringify({ foo: 'bar' }));
 
-        const { body } = await http.postJson('http://renovate.com', SomeSchema);
-
-        expect(body).toEqual({ foo: 'bar' });
-        expect(logger.logger.once.info).toHaveBeenCalled();
+        await expect(
+          http.postJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
       });
     });
   });
