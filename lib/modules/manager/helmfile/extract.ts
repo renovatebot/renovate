@@ -144,7 +144,7 @@ export async function extractPackageFile(
     ? {
         deps,
         datasource: HelmDatasource.id,
-        ...(needKustomize && { managerData: { needKustomize: true } }),
+        ...(needKustomize && { managerData: { needKustomize } }),
       }
     : null;
 }
