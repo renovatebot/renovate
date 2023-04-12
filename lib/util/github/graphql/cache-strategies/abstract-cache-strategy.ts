@@ -67,7 +67,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
 
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
-      createdAt: this.createdAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
 
     const storedData = await this.load();
@@ -150,7 +150,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
     const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
       items: cachedItems,
-      createdAt: this.createdAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
     await this.persist(cacheRecord);
   }
