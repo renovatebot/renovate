@@ -14,7 +14,6 @@ import { REGISTRY_URLS } from './parser/common';
 import type {
   GradleManagerData,
   PackageRegistry,
-  PackageVariables,
   VariableRegistry,
 } from './types';
 import {
@@ -24,9 +23,24 @@ import {
   isTOMLFile,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
 } from './utils';
 
 const mavenDatasource = MavenDatasource.id;
+
+function updatePackageRegistries(
+  packageRegistries: PackageRegistry[],
+  urls: PackageRegistry[]
+): void {
+  for (const url of urls) {
+    const registryAlreadyKnown = packageRegistries.some(
+      (item) => item.registryUrl === url.registryUrl && item.scope === url.scope
+    );
+    if (!registryAlreadyKnown) {
+      packageRegistries.push(url);
+    }
+  }
+}
 
 function getRegistryUrlsForDep(
   packageRegistries: PackageRegistry[],
@@ -45,18 +59,17 @@ function getRegistryUrlsForDep(
   return [...new Set(registryUrls)];
 }
 
-export async function extractAllPackageFiles(
+async function parsePackageFiles(
   config: ExtractConfig,
-  packageFiles: string[]
-): Promise<PackageFile[] | null> {
-  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  packageFiles: string[],
+  extractedDeps: PackageDependency<GradleManagerData>[],
+  packageFilesByName: Record<string, PackageFile>,
+  packageRegistries: PackageRegistry[]
+): Promise<PackageDependency<GradleManagerData>[]> {
   const varRegistry: VariableRegistry = {};
-  const packageFilesByName: Record<string, PackageFile> = {};
-  const packageRegistries: PackageRegistry[] = [];
-  const reorderedFiles = reorderFiles(packageFiles);
   const fileContents = await getLocalFiles(packageFiles);
 
-  for (const packageFile of reorderedFiles) {
+  for (const packageFile of packageFiles) {
     packageFilesByName[packageFile] = {
       packageFile,
       datasource: mavenDatasource,
@@ -68,24 +81,19 @@ export async function extractAllPackageFiles(
       const content = fileContents[packageFile]!;
       const packageFileDir = upath.dirname(toAbsolutePath(packageFile));
 
-      const updateVars = (newVars: PackageVariables): void => {
-        const oldVars = varRegistry[packageFileDir] || {};
-        varRegistry[packageFileDir] = { ...oldVars, ...newVars };
-      };
-
       if (isPropsFile(packageFile)) {
         const { vars, deps } = parseProps(content, packageFile);
-        updateVars(vars);
+        updateVars(varRegistry, packageFileDir, vars);
         extractedDeps.push(...deps);
       } else if (isTOMLFile(packageFile)) {
-        const updatesFromCatalog = parseCatalog(packageFile, content);
-        extractedDeps.push(...updatesFromCatalog);
+        const deps = parseCatalog(packageFile, content);
+        extractedDeps.push(...deps);
       } else if (
         isGcvPropsFile(packageFile) &&
         usesGcv(packageFile, fileContents)
       ) {
-        const updatesFromGcv = parseGcv(packageFile, fileContents);
-        extractedDeps.push(...updatesFromGcv);
+        const deps = parseGcv(packageFile, fileContents);
+        extractedDeps.push(...deps);
       } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(varRegistry, packageFileDir);
         const {
@@ -93,20 +101,8 @@ export async function extractAllPackageFiles(
           urls,
           vars: gradleVars,
         } = parseGradle(content, vars, packageFile, fileContents);
-        for (const url of urls) {
-          const registryAlreadyKnown = packageRegistries.some(
-            (item) =>
-              item.registryUrl === url.registryUrl && item.scope === url.scope
-          );
-          if (!registryAlreadyKnown) {
-            packageRegistries.push(url);
-          }
-        }
-        varRegistry[packageFileDir] = {
-          ...varRegistry[packageFileDir],
-          ...gradleVars,
-        };
-        updateVars(gradleVars);
+        updatePackageRegistries(packageRegistries, urls);
+        updateVars(varRegistry, packageFileDir, gradleVars);
         extractedDeps.push(...deps);
       }
     } catch (err) {
@@ -116,6 +112,26 @@ export async function extractAllPackageFiles(
       );
     }
   }
+
+  return extractedDeps;
+}
+
+export async function extractAllPackageFiles(
+  config: ExtractConfig,
+  packageFiles: string[]
+): Promise<PackageFile[] | null> {
+  const packageFilesByName: Record<string, PackageFile> = {};
+  const packageRegistries: PackageRegistry[] = [];
+  const extractedDeps: PackageDependency<GradleManagerData>[] = [];
+  const gradleFiles = reorderFiles(packageFiles);
+
+  await parsePackageFiles(
+    config,
+    gradleFiles,
+    extractedDeps,
+    packageFilesByName,
+    packageRegistries
+  );
 
   if (!extractedDeps.length) {
     return null;

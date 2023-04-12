@@ -172,3 +172,12 @@ export function getVars(
   const parentVars = registry[parentDir] || {};
   return getVars(registry, parentDir, { ...parentVars, ...vars });
 }
+
+export function updateVars(
+  registry: VariableRegistry,
+  dir: string,
+  newVars: PackageVariables
+): void {
+  const oldVars = registry[dir] ?? {};
+  registry[dir] = { ...oldVars, ...newVars };
+}
