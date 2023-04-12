@@ -142,7 +142,7 @@ export function isScheduledNow(
     return true;
   }
   let now = DateTime.local();
-  logger.trace(`now=${now.toISO()}`);
+  logger.trace(`now=${now.toISO()!}`);
   // Adjust the time if repo is in a different timezone to renovate
   if (config.timezone) {
     logger.debug(`Found timezone: ${config.timezone}`);
@@ -153,7 +153,7 @@ export function isScheduledNow(
     }
     logger.debug('Adjusting now for timezone');
     now = now.setZone(config.timezone);
-    logger.trace(`now=${now.toISO()}`);
+    logger.trace(`now=${now.toISO()!}`);
   }
   const currentDay = now.weekday;
   logger.trace(`currentDay=${currentDay}`);
