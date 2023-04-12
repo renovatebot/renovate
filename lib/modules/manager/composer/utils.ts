@@ -7,7 +7,7 @@ import type { ToolConstraint } from '../../../util/exec/types';
 import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
-import type { ComposerConfig, ComposerLock } from './schema';
+import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
