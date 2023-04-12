@@ -18,6 +18,20 @@ import type {
 import { isDependencyString, parseDependencyString } from './utils';
 
 const groovy = lang.createLang('groovy');
+const ctx: Ctx = {
+  packageFile: '',
+  fileContents: {},
+  recursionDepth: 0,
+
+  globalVars: {},
+  deps: [],
+  registryUrls: [],
+
+  varTokens: [],
+  tmpNestingDepth: [],
+  tmpTokenStore: {},
+  tokenMap: {},
+};
 
 setParseGradleFunc(parseGradle);
 
@@ -47,18 +61,11 @@ export function parseGradle(
   });
 
   const parsedResult = groovy.query(input, query, {
+    ...ctx,
     packageFile,
     fileContents,
     recursionDepth,
-
-    globalVars: initVars,
-    deps: [],
-    registryUrls: [],
-
-    varTokens: [],
-    tmpNestingDepth: [],
-    tmpTokenStore: {},
-    tokenMap: {},
+    globalVars: vars,
   });
 
   if (parsedResult) {
