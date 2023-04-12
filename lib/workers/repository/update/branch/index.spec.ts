@@ -185,7 +185,7 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
-    it('skips branch if not minimumReleaseAge not met', async () => {
+    it('skips branch if minimumReleaseAge not met', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
       config.prCreation = 'not-pending';
       config.upgrades = partial<BranchUpgradeConfig>([
