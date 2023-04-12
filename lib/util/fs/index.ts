@@ -6,7 +6,7 @@ import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { ensureCachePath, ensureLocalPath } from './util';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
 
 export const pipeline = util.promisify(stream.pipeline);
 
@@ -118,6 +118,15 @@ export async function localPathExists(pathName: string): Promise<boolean> {
   } catch (_) {
     return false;
   }
+}
+
+/**
+ * Validate local path without throwing.
+ * @param path Path to check
+ * @returns `true` if given `path` is a valid local path, otherwise `false`.
+ */
+export function isValidLocalPath(path: string): boolean {
+  return isValidPath(path, 'localDir');
 }
 
 /**
