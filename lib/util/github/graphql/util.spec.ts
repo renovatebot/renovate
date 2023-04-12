@@ -3,7 +3,7 @@ import { parse as graphqlParse } from 'graphql';
 import { DateTime } from 'luxon';
 import { isDateExpired, prepareQuery } from './util';
 
-const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
+const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
 
 describe('util/github/graphql/util', () => {
   describe('prepareQuery', () => {
