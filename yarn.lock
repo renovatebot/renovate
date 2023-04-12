@@ -3026,10 +3026,10 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.192.tgz#5790406361a2852d332d41635d927f1600811285"
   integrity sha512-km+Vyn3BYm5ytMO13k9KTp27O75rbQ0NFw+U//g+PX7VZyjCioXaRFisqSIJRECljcTv73G3i6BpglNGHgUQ5A==
 
-"@types/luxon@3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.2.0.tgz#99901b4ab29a5fdffc88fff59b3b47fbfbe0557b"
-  integrity sha512-lGmaGFoaXHuOLXFvuju2bfvZRqxAqkHPx9Y9IQdQABrinJJshJwfNCKV+u7rR3kJbiqfTF/NhOkcxxAFrObyaA==
+"@types/luxon@3.2.2":
+  version "3.2.2"
+  resolved "https://registry.yarnpkg.com/@types/luxon/-/luxon-3.2.2.tgz#c30b369d4cbacbf4617c6c2d8bb1532c83cc3df7"
+  integrity sha512-CuF9hIlsxGpJO4EztrW23/q1L9ctQfb5JM9mnLCJhhA8z81K2b4LTVjQYySXWhFV5SMyUsPYH/IcvvXDCKwa2g==
 
 "@types/markdown-it@12.2.3":
   version "12.2.3"
@@ -5701,10 +5701,10 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.10,
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
 
-graph-data-structure@3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.2.0.tgz#db7886a69a2073c76291eef75c973d532eea3b48"
-  integrity sha512-GtMD5xvFX947d04IzH0dIPnncglFVQKZpLqLb0jy7OM+dMcm4gY9QNAUfHJryNc0Gd0cSvlMfwulUQ/CPyGczg==
+graph-data-structure@3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/graph-data-structure/-/graph-data-structure-3.3.0.tgz#93465f9f0aedcbcf357b187aa005214f30a8ca3b"
+  integrity sha512-p5z0GZ3tm85kuB0iXFjLpbL9gNSFeDPPOyINhLQm6mVfHbLaj62LF9uB1tymcsxkHqLWLQSqGA0f/4/OepCdxA==
 
 grapheme-splitter@^1.0.4:
   version "1.0.4"
