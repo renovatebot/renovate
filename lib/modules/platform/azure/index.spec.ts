@@ -1349,13 +1349,6 @@ describe('modules/platform/azure/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
-    });
-  });
-
   describe('deleteLabel()', () => {
     it('Should delete a label', async () => {
       await initRepo({ repository: 'some/repo' });

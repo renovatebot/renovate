@@ -912,6 +912,8 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
 
+If you are running on any platform except github.com, you need to [configure a Personal Access Token](https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
+
 <!-- prettier-ignore -->
 !!! note
     Renovate can only show release notes from some platforms and some package managers.
