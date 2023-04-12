@@ -98,7 +98,7 @@ describe('config/presets/internal/regex-managers', () => {
                   version: \${{ env.PNPM_VERSION }}
               - uses: actions/setup-node@v3
                 with:
-                  node: \${{ env.NODE_VERSION }}
+                  node-version: \${{ env.NODE_VERSION }}
       `;
 
       const res = await extractPackageFile(
