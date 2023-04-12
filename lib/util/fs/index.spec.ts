@@ -17,6 +17,7 @@ import {
   getLocalFiles,
   getParentDir,
   getSiblingFileName,
+  isValidLocalPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -205,7 +206,17 @@ describe('util/fs/index', () => {
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBe(false);
+      expect(await localPathExists('file.txt')).toBeFalse();
+    });
+  });
+
+  describe('isLocalPath', () => {
+    it('returns true for valid local path', () => {
+      expect(isValidLocalPath('./foo/...')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(isValidLocalPath('/file.txt')).toBeFalse();
     });
   });
 

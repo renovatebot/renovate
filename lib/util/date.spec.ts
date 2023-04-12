@@ -1,4 +1,9 @@
-import { getElapsedDays, getElapsedHours, getElapsedMinutes } from './date';
+import {
+  getElapsedDays,
+  getElapsedHours,
+  getElapsedMinutes,
+  getElapsedMs,
+} from './date';
 
 const ONE_MINUTE_MS = 60 * 1000;
 const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
@@ -32,6 +37,13 @@ describe('util/date', () => {
 
     it('returns zero when date passed is invalid', () => {
       expect(getElapsedHours(new Date('invalid_date_string'))).toBe(0);
+    });
+  });
+
+  describe('getElapsedMilliseconds', () => {
+    it('returns elapsed time in milliseconds', () => {
+      const elapsedMs = new Date().getTime() - new Date(Jan1).getTime();
+      expect(getElapsedMs(Jan1.toISOString())).toBe(elapsedMs);
     });
   });
 });

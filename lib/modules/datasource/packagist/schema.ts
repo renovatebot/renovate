@@ -1,7 +1,11 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import { looseArray, looseRecord, looseValue } from '../../../util/schema';
+import {
+  looseArray,
+  looseRecord,
+  looseValue,
+} from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
