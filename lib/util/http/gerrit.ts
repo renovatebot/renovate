@@ -1,4 +1,3 @@
-import JSON5 from 'json5';
 import { regEx } from '../regex';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
@@ -27,7 +26,7 @@ export class GerritHttp extends Http {
     const opts: InternalHttpOptions = {
       baseUrl,
       parseJson: (text: string) =>
-        JSON5.parse(text.replace(GerritHttp.magicPrefix, '')),
+        JSON.parse(text.replace(GerritHttp.magicPrefix, '')),
       ...options,
     };
     opts.headers = {

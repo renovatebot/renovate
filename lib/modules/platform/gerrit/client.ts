@@ -147,9 +147,7 @@ class GerritClient {
         repo
       )}/branches/${branch}/files/${encodeURIComponent(fileName)}/content`
     );
-    return Promise.resolve(
-      Buffer.from(base64Content.body, 'base64').toString()
-    );
+    return Buffer.from(base64Content.body, 'base64').toString();
   }
 
   async approveChange(changeId: number): Promise<void> {

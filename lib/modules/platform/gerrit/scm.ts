@@ -10,10 +10,10 @@ import { mapPrStateToGerritFilter } from './utils';
 
 let repository: string;
 let username: string;
-export const configureScm = (repo: string, login: string): void => {
+export function configureScm(repo: string, login: string): void {
   repository = repo;
   username = login;
-};
+}
 
 export class GerritScm extends DefaultGitScm {
   private createFilter(
@@ -69,16 +69,16 @@ export class GerritScm extends DefaultGitScm {
     baseBranch: string,
     branch: string
   ): Promise<boolean> {
-    const filter = this.createFilter('all', branch, baseBranch);
-    const change = await client.findChanges(filter).then((res) => res.pop());
+    const filter = this.createFilter('open', branch, baseBranch);
+    const change = (await client.findChanges(filter)).pop();
     if (change) {
       const mergeInfo = await client.getMergeableInfo(change);
       return !mergeInfo.mergeable;
     } else {
-      //TODO: is this correct? what about closed changes? (HTTP-Status=409 from getMergeableInfo)
-      throw new Error(
-        `There is no change with branch=${branch} and baseBranch=${baseBranch}`
+      logger.warn(
+        `There is no open change with branch=${branch} and baseBranch=${baseBranch}`
       );
+      return true;
     }
   }
 

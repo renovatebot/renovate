@@ -122,17 +122,15 @@ describe('modules/platform/gerrit/scm', () => {
   });
 
   describe('isBranchConflicted()', () => {
-    it('no open change for with branch name found -> throws an error', async () => {
+    it('no open change with branch name found -> return true', async () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       await expect(
         gerritScm.isBranchConflicted('target', 'myBranchName')
-      ).rejects.toThrow(
-        `There is no change with branch=myBranchName and baseBranch=target`
-      );
+      ).resolves.toBe(true);
       expect(clientMock.findChanges).toHaveBeenCalledWith([
         'owner:self',
         'project:test/repo',
-        '-is:wip',
+        'status:open',
         'hashtag:sourceBranch-myBranchName',
         'branch:target',
       ]);

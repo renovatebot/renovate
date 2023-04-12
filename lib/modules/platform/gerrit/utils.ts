@@ -2,7 +2,7 @@ import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
 import * as hostRules from '../../../util/host-rules';
-import { parseUrl } from '../../../util/url';
+import { joinUrlParts, parseUrl } from '../../../util/url';
 import { hashBody } from '../pr-body';
 import type { Pr } from '../types';
 import type {
@@ -31,7 +31,11 @@ export function getGerritRepoUrl(repository: string, endpoint: string): string {
   }
   url.username = opts.username;
   url.password = opts.password;
-  url.pathname = `${url.pathname}a/${encodeURIComponent(repository)}`;
+  url.pathname = joinUrlParts(
+    url.pathname,
+    'a',
+    encodeURIComponent(repository)
+  );
   logger.trace(
     { url: url.toString() },
     'using URL based on configured endpoint'
@@ -90,9 +94,9 @@ export function extractSourceBranch(change: GerritChange): string | undefined {
 }
 
 export function findPullRequestBody(change: GerritChange): string | undefined {
-  const msg = change.messages
-    ?.filter((msg) => msg.tag === TAG_PULL_REQUEST_BODY)
-    .pop();
+  const msg = change.messages?.findLast(
+    (msg) => msg.tag === TAG_PULL_REQUEST_BODY
+  );
   if (msg) {
     return msg.message.replace(/^Patch Set \d+:\n\n/, ''); //TODO: check how to get rid of the auto-added prefix?
   }
