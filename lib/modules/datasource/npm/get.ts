@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import { GlobalConfig } from '../../../config/global';
@@ -10,13 +10,8 @@ import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
 import { joinUrlParts } from '../../../util/url';
-import { id } from './common';
-import type {
-  CachedNpmDependency,
-  NpmDependency,
-  NpmRelease,
-  NpmResponse,
-} from './types';
+import type { Release, ReleaseResult } from '../types';
+import type { CachedReleaseResult, NpmResponse } from './types';
 
 interface PackageSource {
   sourceUrl?: string;
@@ -58,14 +53,14 @@ export async function getDependency(
   http: Http,
   registryUrl: string,
   packageName: string
-): Promise<NpmDependency | null> {
+): Promise<ReleaseResult | null> {
   logger.trace(`npm.getDependency(${packageName})`);
 
   const packageUrl = joinUrlParts(registryUrl, packageName.replace('/', '%2F'));
 
   // Now check the persistent cache
-  const cacheNamespace = 'datasource-npm';
-  const cachedResult = await packageCache.get<CachedNpmDependency>(
+  const cacheNamespace = 'datasource-npm:data';
+  const cachedResult = await packageCache.get<CachedReleaseResult>(
     cacheNamespace,
     packageUrl
   );
@@ -88,7 +83,9 @@ export async function getDependency(
   const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
     ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
     : 15;
-  const softExpireAt = DateTime.local().plus({ minutes: cacheMinutes }).toISO();
+  const softExpireAt = DateTime.local()
+    .plus({ minutes: cacheMinutes })
+    .toISO()!;
   let { cacheHardTtlMinutes } = GlobalConfig.get();
   if (!(is.number(cacheHardTtlMinutes) && cacheHardTtlMinutes > cacheMinutes)) {
     cacheHardTtlMinutes = cacheMinutes;
@@ -99,12 +96,12 @@ export async function getDependency(
   try {
     const options: HttpOptions = {};
     if (cachedResult?.cacheData?.etag) {
-      logger.debug('Using cached etag');
+      logger.trace({ packageName }, 'Using cached etag');
       options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
     }
     const raw = await http.getJson<NpmResponse>(packageUrl, options);
     if (cachedResult?.cacheData && raw.statusCode === 304) {
-      logger.debug({ packageName }, 'Cached npm result is revalidated');
+      logger.trace(`Cached npm result for ${packageName} is revalidated`);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
         cacheNamespace,
@@ -130,23 +127,20 @@ export async function getDependency(
     const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
 
     // Simplify response before caching and returning
-    const dep: NpmDependency = {
-      name: res.name,
+    const dep: ReleaseResult = {
       homepage: res.homepage,
       sourceUrl,
       sourceDirectory,
-      versions: {},
       releases: [],
-      'dist-tags': res['dist-tags'],
+      tags: res['dist-tags'],
       registryUrl,
     };
 
     if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-      dep.deprecationSource = id;
     }
     dep.releases = Object.keys(res.versions).map((version) => {
-      const release: NpmRelease = {
+      const release: Release = {
         version,
         gitRef: res.versions?.[version].gitHead,
         dependencies: res.versions?.[version].dependencies,

@@ -1,5 +1,5 @@
-import type { Stats } from 'fs';
-import os from 'os';
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { Fixtures } from '../../../../test/fixtures';

@@ -8,16 +8,18 @@ let RegEx: RegExpConstructor;
 
 const cache = new Map<string, RegExp>();
 
-try {
-  const RE2 = re2();
-  // Test if native is working
-  new RE2('.*').exec('test');
-  logger.debug('Using RE2 as regex engine');
-  RegEx = RE2;
-} catch (err) {
-  logger.warn({ err }, 'RE2 not usable, falling back to RegExp');
-  RegEx = RegExp;
+if (!process.env.RENOVATE_X_IGNORE_RE2) {
+  try {
+    const RE2 = re2();
+    // Test if native is working
+    new RE2('.*').exec('test');
+    logger.debug('Using RE2 as regex engine');
+    RegEx = RE2;
+  } catch (err) {
+    logger.warn({ err }, 'RE2 not usable, falling back to RegExp');
+  }
 }
+RegEx ??= RegExp;
 
 export function regEx(
   pattern: string | RegExp,

@@ -92,7 +92,7 @@ export class GoProxyDatasource extends Datasource {
             const datasource = await BaseGoDatasource.getDatasource(
               packageName
             );
-            const sourceUrl = getSourceUrl(datasource);
+            const sourceUrl = getSourceUrl(datasource) ?? null;
             result = { releases, sourceUrl };
           } catch (err) {
             logger.trace({ err }, `Can't get datasource for ${packageName}`);

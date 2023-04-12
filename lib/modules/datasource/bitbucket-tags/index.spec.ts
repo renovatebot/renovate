@@ -1,8 +1,8 @@
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../../test/http-mock';
-import { BitBucketTagsDatasource } from '.';
+import { BitbucketTagsDatasource } from '.';
 
-const datasource = BitBucketTagsDatasource.id;
+const datasource = BitbucketTagsDatasource.id;
 
 describe('modules/datasource/bitbucket-tags/index', () => {
   describe('getReleases', () => {

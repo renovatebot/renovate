@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';

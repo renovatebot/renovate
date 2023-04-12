@@ -59,6 +59,8 @@ import * as utils from './utils';
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
 
+export const id = 'bitbucket-server';
+
 let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -148,7 +150,7 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,

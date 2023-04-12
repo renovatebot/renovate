@@ -8,3 +8,7 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [DockerDatasource.id];
+
+export const urls = [
+  'https://support.atlassian.com/bitbucket-cloud/docs/bitbucket-pipelines-configuration-reference/',
+];

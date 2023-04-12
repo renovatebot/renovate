@@ -37,7 +37,7 @@ describe('config/migrate-validate', () => {
     it('isOnboarded', async () => {
       const input: RenovateConfig = {};
       const res = await migrateAndValidate(
-        { ...config, repoIsOnboarded: true, warnings: undefined },
+        { ...config, repoIsOnboarded: true },
         input
       );
       expect(res.warnings).toBeUndefined();

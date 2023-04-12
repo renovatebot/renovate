@@ -373,6 +373,35 @@ describe('workers/repository/update/branch/index', () => {
       );
     });
 
+    it('skips branch if tagretBranch of update PR is changed by user', async () => {
+      const pr = partial<Pr>({
+        state: 'open',
+        targetBranch: 'old_base',
+      });
+      const ensureCommentConfig = partial<EnsureCommentConfig>({
+        number: pr.number,
+        topic: 'Edited/Blocked Notification',
+      });
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      scm.branchExists.mockResolvedValue(true);
+      scm.isBranchModified.mockResolvedValueOnce(false);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      config.baseBranch = 'new_base';
+      const res = await branchWorker.processBranch(config);
+      expect(res).toEqual({
+        branchExists: true,
+        prNo: undefined,
+        result: 'pr-edited',
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        `PR has been edited, PrNo:${pr.number}`
+      );
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+      expect(platform.ensureComment).toHaveBeenCalledWith(
+        expect.objectContaining({ ...ensureCommentConfig })
+      );
+    });
+
     it('skips branch if edited PR found without commenting', async () => {
       const pr = partial<Pr>({
         state: 'open',

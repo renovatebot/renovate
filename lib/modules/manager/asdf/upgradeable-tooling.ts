@@ -305,7 +305,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'pulumi/pulumi',
-      versioning: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   python: {
@@ -364,6 +364,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'mvdan/sh',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  sops: {
+    asdfPluginUrl: 'https://github.com/feniix/asdf-sops',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mozilla/sops',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

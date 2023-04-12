@@ -13,7 +13,7 @@ interface Comment {
 
 export type CommentsConfig = Pick<Config, 'repository'>;
 
-interface EnsureBitBucketCommentConfig extends EnsureCommentConfig {
+interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
 }
 
@@ -71,7 +71,7 @@ export async function ensureComment({
   number: prNo,
   topic,
   content,
-}: EnsureBitBucketCommentConfig): Promise<boolean> {
+}: EnsureBitbucketCommentConfig): Promise<boolean> {
   try {
     const comments = await getComments(config, prNo);
     let body: string;

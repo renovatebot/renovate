@@ -95,6 +95,7 @@ export type PlatformPrOptions = {
   usePlatformAutomerge?: boolean;
   forkModeDisallowMaintainerEdits?: boolean;
 };
+
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;
