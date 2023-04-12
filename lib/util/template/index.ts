@@ -24,6 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter

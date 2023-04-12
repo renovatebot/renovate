@@ -83,6 +83,8 @@ const defaults: {
   hostType: 'azure',
 };
 
+export const id = 'azure';
+
 export function initPlatform({
   endpoint,
   token,
