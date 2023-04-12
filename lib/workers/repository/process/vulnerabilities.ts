@@ -50,7 +50,7 @@ export class Vulnerabilities {
     return instance;
   }
 
-  async fetchVulnerabilities(
+  async appendVulnerabilityPackageRules(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<void> {
