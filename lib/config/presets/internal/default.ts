@@ -525,7 +525,7 @@ export const presets: Record<string, Preset> = {
   },
   semanticPrefixFixDepsChoreOthers: {
     description:
-      'If Renovate detects semantic commits, it will use semantic commit type `fix` for dependencies and `chore` for all others.',
+      'Use semantic commit type `fix` for dependencies and `chore` for all others if semantic commits are in use.',
     packageRules: [
       {
         matchPackagePatterns: ['*'],

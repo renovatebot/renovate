@@ -1,6 +1,6 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
@@ -81,6 +81,8 @@ import type {
   PlatformConfig,
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
+
+export const id = 'github';
 
 const githubApi = new githubHttp.GithubHttp();
 

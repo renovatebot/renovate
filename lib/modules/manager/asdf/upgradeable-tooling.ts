@@ -367,6 +367,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  sops: {
+    asdfPluginUrl: 'https://github.com/feniix/asdf-sops',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mozilla/sops',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   terraform: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
     config: {

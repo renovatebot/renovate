@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
@@ -78,6 +78,8 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
+
+export const id = 'gitlab';
 
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';

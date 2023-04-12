@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';
 import {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
@@ -49,6 +49,8 @@ interface Config {
   region?: string;
   prList?: CodeCommitPr[];
 }
+
+export const id = 'codecommit';
 
 export const config: Config = {};
 

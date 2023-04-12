@@ -1,4 +1,4 @@
-FROM containerbase/node:18.15.0@sha256:d0a18560ea8e3b33389eb645282a47eebfde09ae9a345e4cbeb332a1b1e624da
+FROM ghcr.io/containerbase/node:18.15.0@sha256:d7bd3e320e60dfd51a5b4ddbb01929f18d8c54b00c6f9d706e6dcfbc17dfee1e
 
 USER root
 

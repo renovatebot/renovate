@@ -153,6 +153,11 @@ export class Vulnerabilities {
       }
 
       for (const vulnerability of vulnerabilities) {
+        if (vulnerability.withdrawn) {
+          logger.trace(`Skipping withdrawn vulnerability ${vulnerability.id}`);
+          continue;
+        }
+
         for (const affected of vulnerability.affected ?? []) {
           const isVulnerable = this.isPackageVulnerable(
             ecosystem,

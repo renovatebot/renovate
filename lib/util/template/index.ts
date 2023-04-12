@@ -24,6 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -87,6 +89,7 @@ export const allowedFields = {
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
+  indentation: 'The indentation of the dependency being updated',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',

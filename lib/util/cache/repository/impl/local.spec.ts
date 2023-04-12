@@ -4,7 +4,7 @@ import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compress } from '../../../compress';
 import { CACHE_REVISION } from '../common';
-import type { RepoCacheRecord } from '../schemas';
+import type { RepoCacheRecord } from '../schema';
 import type { RepoCacheData } from '../types';
 import { CacheFactory } from './cache-factory';
 import { RepoCacheLocal } from './local';

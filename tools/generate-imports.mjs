@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 import fs from 'fs-extra';
 import _glob from 'glob';
 import hasha from 'hasha';
