@@ -10,6 +10,7 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit, getFileList } from '../../../../util/git';
+import { deleteOnboardingCache } from './onboarding-branch-cache';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -51,6 +52,13 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
+  const pr = await closedPrExists(config);
+  // if closed pr found delete onboarding cache to prevent re-opening onboarding pr
+  if (pr) {
+    logger.debug('Found closed onboarding PR');
+    deleteOnboardingCache();
+  }
+
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   // Repo is not onboarded if the onboarding cache is present and
@@ -117,12 +125,10 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
-  const pr = await closedPrExists(config);
   if (!pr) {
     logger.debug('Found no closed onboarding PR');
     return false;
   }
-  logger.debug('Found closed onboarding PR');
   if (config.requireConfig === 'optional') {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;
