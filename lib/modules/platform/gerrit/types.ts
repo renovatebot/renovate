@@ -44,7 +44,7 @@ export interface GerritChange {
   status: GerritChangeStatus;
   created: string;
   updated: string;
-  submitted?: Date; //TODO: convert
+  submitted?: string;
   submitter?: GerritAccountInfo;
   starred?: boolean;
   stars?: string[];
@@ -66,18 +66,21 @@ export interface GerritChange {
   _number: number;
   owner: GerritAccountInfo;
   actions?: Record<string, GerritActionInfo>;
-  submit_records: unknown[]; // SubmitRecordInfo[]
-  requirements?: unknown[]; //List of the requirements
-  submit_requirements?: unknown[]; //List of the SubmitRequirementResultInfo
+  submit_records: unknown[];
+  requirements?: unknown[];
+  submit_requirements?: unknown[];
   labels?: Record<string, GerritLabelInfo>;
   permitted_labels?: unknown[];
   removable_reviewers?: unknown[];
-  reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>; //key = ReviewerState
+  reviewers?: Record<GerritReviewersType, GerritAccountInfo[]>;
   pending_reviewers?: unknown;
   reviewer_updates?: unknown;
   messages?: GerritChangeMessageInfo[];
   current_revision?: string;
-  revisions?: Record<string, GerritRevisionInfo>; //All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
+  /**
+   * All patch sets of this change as a map that maps the commit ID of the patch set to a RevisionInfo entity.
+   */
+  revisions?: Record<string, GerritRevisionInfo>;
   meta_rev_id?: string;
   tracking_ids?: unknown;
   _more_changes?: unknown;
@@ -92,22 +95,29 @@ export interface GerritChange {
   contains_git_conflicts?: string;
 }
 
-//type ReviewerState = "REVIEWER"|"CC"|"REMOVED";
 export interface GerritRevisionInfo {
-  kind: string; //The change kind. Valid values are REWORK, TRIVIAL_REBASE, MERGE_FIRST_PARENT_UPDATE, NO_CODE_CHANGE, and NO_CHANGE.
-  _number: string; //The patch set number, or edit if the patch set is an edit.
-  created: Date; //TODO: map
+  /**
+   * The change kind.
+   * Valid values are: REWORK, TRIVIAL_REBASE, MERGE_FIRST_PARENT_UPDATE, NO_CODE_CHANGE, and NO_CHANGE. */
+  kind: string;
+  /**
+   * The patch set number, or edit if the patch set is an edit.
+   */
+  _number: string;
+  created: string;
   uploader: GerritAccountInfo;
-  ref: string; //The Git reference for the patch set.
+  /**
+   * The Git reference for the patch set.
+   */
+  ref: string;
   actions?: Record<string, GerritActionInfo>;
-  //... many more...still not necessary
 }
 
 export interface GerritChangeMessageInfo {
   id: string;
   author?: GerritAccountInfo;
   real_author?: GerritAccountInfo;
-  date: Date; //TODO: convert
+  date: string;
   message: string;
   accountsInMessage: GerritAccountInfo[];
   tag?: string;
@@ -122,11 +132,20 @@ export interface GerritLabelInfo {
   recommended?: GerritAccountInfo;
   disliked?: GerritAccountInfo;
   blocking?: boolean;
-  value?: string; //The voting value of the user who recommended/disliked this label on the change if it is not “+1”/“-1”.
+  /**
+   * The voting value of the user who recommended/disliked this label on the change if it is not “+1”/“-1”.
+   */
+  value?: string;
   default_value?: string;
-  votes?: number[]; //A list of integers containing the vote values applied to this label at the latest patchset.
+  /**
+   * A list of integers containing the vote values applied to this label at the latest patchset.
+   */
+  votes?: number[];
   all?: unknown[];
-  values?: unknown; //A map of all values that are allowed for this label. The map maps the values (“-2”, “-1”, " `0`", “+1”, “+2”) to the value descriptions.
+  /**
+   * A map of all values that are allowed for this label. The map maps the values (“-2”, “-1”, " `0`", “+1”, “+2”) to the value descriptions.
+   */
+  values?: unknown;
 }
 
 export interface GerritActionInfo {
@@ -152,7 +171,7 @@ export interface GerritAccountInfo {
 
 export interface GerritAttentionSetInfo {
   account: GerritAccountInfo;
-  last_update: Date;
+  last_update: string;
   reason: string;
   reason_account: GerritAccountInfo;
 }
