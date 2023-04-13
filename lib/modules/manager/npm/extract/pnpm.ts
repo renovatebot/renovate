@@ -138,15 +138,20 @@ export async function detectPnpmWorkspaces(
   }
 }
 
-export async function getPnpmShrinkwrap(filePath: string): Promise<LockFile> {
+export async function getPnpmLock(filePath: string): Promise<LockFile> {
   // TODO #7154
-  const pmpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
+  const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
-    const lockParsed = yaml.load(pmpmLockRaw) as Record<string, any>;
+    const lockParsed = yaml.load(pnpmLockRaw) as Record<string, any>;
+    if (!lockParsed) {
+      logger.debug('pnpm lockfile is empty or invalid');
+      return { lockedVersions: {} };
+    }
+
     logger.debug({ lockParsed }, 'pnpm lockfile parsed');
     const lockedVersions: Record<string, string> = {};
     const packagePathRegex = regEx(
-      /\/(?<packageName>.*)(?<version>\d\.\d\.\d.*)/
+      /^\/(?<packageName>.*)(?@|\/)(?<version>\d\.\d\.\d.*)$/
     ); // eg. "/<packageName>(@|/)<version>"
 
     for (const packagePath of Object.keys(
@@ -175,10 +180,7 @@ export async function getPnpmShrinkwrap(filePath: string): Promise<LockFile> {
       lockfileVersion: parseFloat(lockParsed.lockfileVersion),
     };
   } catch (err) {
-    logger.debug(
-      { filePath, err },
-      'Warning: Exception parsing pnpm shrinkwrap'
-    );
+    logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
     return { lockedVersions: {} };
   }
 }
