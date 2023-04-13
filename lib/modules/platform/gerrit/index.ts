@@ -1,7 +1,7 @@
 import JSON5 from 'json5';
 import type { RepoGlobalConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { regEx } from '../../../util/regex';
@@ -540,9 +540,5 @@ export function findIssue(title: string): Promise<Issue | null> {
 }
 
 export function getIssueList(): Promise<Issue[]> {
-  return Promise.resolve([]);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }

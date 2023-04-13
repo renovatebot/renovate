@@ -834,9 +834,5 @@ describe('modules/platform/gerrit/index', () => {
     it('getIssueList()', async () => {
       await expect(gerrit.getIssueList()).resolves.toStrictEqual([]);
     });
-
-    it('getVulnerabilityAlerts()', async () => {
-      await expect(gerrit.getVulnerabilityAlerts()).resolves.toStrictEqual([]);
-    });
   });
 });
