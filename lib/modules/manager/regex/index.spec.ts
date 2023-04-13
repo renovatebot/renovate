@@ -559,33 +559,68 @@ describe('modules/manager/regex/index', () => {
     });
   });
 
-  it('migrates', async () => {
-    const config: CustomExtractConfig = {
-      matchStrings: [
-        '# renovate: datasource=(?<datasource>[a-z-]+?)(?: (?:packageName|lookupName)=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\sRUN install-[a-z]+? (?<depName>[a-z-]+?) (?<currentValue>.+?)(?:\\s|$)',
-      ],
-      versioningTemplate:
-        '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
-    };
-    const res = await extractPackageFile(
+  it.each([
+    [
+      'dotnet',
       codeBlock`
-        # renovate: datasource=dotnet packageName=dotnet-runtime
-        RUN install-tool dotnet 6.0.13
-      `,
+    # renovate: datasource=dotnet packageName=dotnet-runtime
+    RUN install-tool dotnet 6.0.13
+  `,
       'Dockerfile',
-      config
-    );
-    expect(res).toMatchObject({
-      deps: [
-        {
-          depName: 'dotnet',
-          packageName: 'dotnet-runtime',
-          currentValue: '6.0.13',
-          datasource: 'dotnet-version',
-          replaceString:
-            '# renovate: datasource=dotnet packageName=dotnet-runtime\nRUN install-tool dotnet 6.0.13',
-        },
-      ],
-    });
-  });
+      'dotnet-version',
+      'dotnet-runtime',
+      'dotnet',
+    ],
+    [
+      'adoptium-java',
+      codeBlock`
+    # renovate: datasource=adoptium-java packageName=java
+    RUN install-tool java 6.0.13
+  `,
+      'Dockerfile',
+      'java-version',
+      'java',
+      'java',
+    ],
+    [
+      'node',
+      codeBlock`
+    # renovate: datasource=node packageName=node
+    RUN install-tool node 6.0.13
+  `,
+      'Dockerfile',
+      'node-version',
+      'node',
+      'node',
+    ],
+  ])(
+    'migrates %s',
+    async (
+      _oldDatasource,
+      content,
+      packageFile,
+      newDatasource,
+      packageName,
+      depName
+    ) => {
+      const config: CustomExtractConfig = {
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-]+?)(?: (?:packageName|lookupName)=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\sRUN install-[a-z]+? (?<depName>[a-z-]+?) (?<currentValue>.+?)(?:\\s|$)',
+        ],
+        versioningTemplate:
+          '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+      };
+      const res = await extractPackageFile(content, packageFile, config);
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName,
+            packageName,
+            currentValue: '6.0.13',
+            datasource: newDatasource,
+          },
+        ],
+      });
+    }
+  );
 });
