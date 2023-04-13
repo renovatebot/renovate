@@ -2031,7 +2031,7 @@ The `currentVersion` field will be one of the following (in order of preference)
 
 Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
-`matchCurrentVersion` can be an exact SemVer version or a SemVer range:
+`matchCurrentVersion` can be an exact version or a version range:
 
 ```json
 {
@@ -2044,8 +2044,8 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
 }
 ```
 
-The syntax of the SemVer range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
-used by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered the configured package.
+The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning)
+used by the matched packages. This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them.
 
 This field also supports Regular Expressions which must begin and end with `/`.
 For example, the following enforces that only `1.*` versions will be used:
