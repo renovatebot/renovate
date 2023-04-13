@@ -23,7 +23,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   /**
    * The time which is used during single cache access cycle.
    */
-  protected readonly now = DateTime.now();
+  protected readonly now = DateTime.now().toUTC();
 
   /**
    * Set of all versions which were reconciled
@@ -80,7 +80,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       }
     }
 
-    this.createdAt = DateTime.fromISO(result.createdAt);
+    this.createdAt = DateTime.fromISO(result.createdAt).toUTC();
     this.items = result.items;
     return this.items;
   }
@@ -91,7 +91,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+      hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
