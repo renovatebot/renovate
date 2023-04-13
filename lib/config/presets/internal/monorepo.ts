@@ -275,6 +275,10 @@ const patternGroups = {
   babel6: '^babel6$',
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
+  'fabric8-kubernetes-client': [
+    'io.fabric8:kubernetes-',
+    'io.fabric8:openshift-',
+  ],
   fullcalendar: '^@fullcalendar/',
   spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
   spock: '^org\\.spockframework:spock-',
