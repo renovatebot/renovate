@@ -73,7 +73,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     const storedData = await this.load();
     if (storedData) {
       const cacheTTLDuration = {
-        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+        hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
       };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
