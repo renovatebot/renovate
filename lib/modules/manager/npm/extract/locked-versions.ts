@@ -3,6 +3,7 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
+import { getPnpmShrinkwrap } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
@@ -87,8 +88,41 @@ export async function getLockedVersions(
         )!;
       }
     } else if (pnpmShrinkwrap) {
-      logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      logger.debug('Found pnpm lock-file');
       lockFiles.push(pnpmShrinkwrap);
+      if (!lockFileCache[pnpmShrinkwrap]) {
+        logger.trace('Retrieving/parsing ' + pnpmShrinkwrap);
+        lockFileCache[pnpmShrinkwrap] = await getPnpmShrinkwrap(pnpmShrinkwrap);
+      }
+      const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];
+
+      // pnpm-version to pnpm lock-file version relation: https://github.com/pnpm/spec/tree/master/lockfile
+      if (lockfileVersion === 6) {
+        if (packageFile.extractedConstraints?.pnpm) {
+          //  if the latest 7.x release is compatible we need to increase the constraint
+          if (
+            semver.satisfies('7.32.0', packageFile.extractedConstraints.pnpm)
+          ) {
+            packageFile.extractedConstraints.pnpm += ' >=8';
+          }
+        } else {
+          packageFile.extractedConstraints!.pnpm = '>=8';
+        }
+      } else {
+        if (packageFile.extractedConstraints?.pnpm) {
+          // TODO: implement constraints for pnpm 5 🙂
+          // wondering if that will need to be done separately for 5.0, 5.1, 5.2, 5.3, 5.4
+        } else {
+          packageFile.extractedConstraints!.pnpm = '>=3.0.0, <8.0.0'; // HELP NEEDED: is this correct way to add range constraints
+        }
+      }
+
+      for (const dep of packageFile.deps) {
+        // TODO: types (#7154)
+        dep.lockedVersion = semver.valid(
+          lockFileCache[pnpmShrinkwrap].lockedVersions[dep.depName!]
+        )!;
+      }
     }
     if (lockFiles.length) {
       packageFile.lockFiles = lockFiles;

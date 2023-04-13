@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
-import { load } from 'js-yaml';
+import yaml, { load } from 'js-yaml';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -10,9 +10,11 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
+import { regEx } from '../../../../util/regex';
+import { trimTrailingSlash } from '../../../../util/url';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
-import type { PnpmWorkspaceFile } from './types';
+import type { LockFile, LockFileEntry, PnpmWorkspaceFile } from './types';
 
 export async function extractPnpmFilters(
   fileName: string
@@ -133,5 +135,50 @@ export async function detectPnpmWorkspaces(
         `Didn't find the package in the pnpm workspace`
       );
     }
+  }
+}
+
+export async function getPnpmShrinkwrap(filePath: string): Promise<LockFile> {
+  // TODO #7154
+  const pmpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
+  try {
+    const lockParsed = yaml.load(pmpmLockRaw) as Record<string, any>;
+    logger.debug({ lockParsed }, 'pnpm lockfile parsed');
+    const lockedVersions: Record<string, string> = {};
+    const packagePathRegex = regEx(
+      /\/(?<packageName>.*)(?<version>\d\.\d\.\d.*)/
+    ); // eg. "/<packageName>(@|/)<version>"
+
+    for (const packagePath of Object.keys(
+      (lockParsed.packages || {}) as LockFileEntry
+    )) {
+      const result = packagePath.match(packagePathRegex);
+      if (result?.groups) {
+        const packageName = trimTrailingSlash(
+          result.groups.packageName ?? ''
+        ).replace(regEx(/@$/), '');
+        const version = result.groups.version;
+        logger.debug({
+          packagePath,
+          packageName,
+          version,
+        });
+        lockedVersions[packageName] = version;
+      }
+    }
+    logger.debug(
+      { lockedVersions, lockfileVersion: lockParsed.lockfileVersion },
+      'pnpm lockfile parsed'
+    );
+    return {
+      lockedVersions,
+      lockfileVersion: parseFloat(lockParsed.lockfileVersion),
+    };
+  } catch (err) {
+    logger.debug(
+      { filePath, err },
+      'Warning: Exception parsing pnpm shrinkwrap'
+    );
+    return { lockedVersions: {} };
   }
 }
