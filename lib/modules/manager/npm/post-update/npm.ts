@@ -252,7 +252,6 @@ export function divideWorkspaceAndRootDeps(
             break;
           }
         }
-        ``;
         if (
           workspaceName &&
           !rootDeps.has(packageKey) // prevent same dep from existing in root and workspace
