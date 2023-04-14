@@ -1,0 +1,17 @@
+name: 'devcontainer'
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.5.2
+
+      - name: Build and run dev container task
+        uses: devcontainers/ci@v0.3.1900000328
+        with:
+          runCmd: cd /workspace; yarn build

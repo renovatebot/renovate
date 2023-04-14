@@ -245,6 +245,11 @@
   "optionalDependencies": {
     "re2": "1.18.0"
   },
+  "DependenciesMeta": {
+    "re2": {
+      "built": false
+    }
+  },
   "devDependencies": {
     "@jest/globals": "29.5.0",
     "@jest/reporters": "29.5.0",
