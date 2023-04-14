@@ -315,7 +315,7 @@
     "jest-extended": "3.2.4",
     "jest-junit": "15.0.0",
     "jest-mock-extended": "3.0.4",
-    "lint-staged": "13.2.0",
+    "lint-staged": "13.2.1",
     "markdownlint-cli2": "0.6.0",
     "memfs": "3.5.0",
     "mock-fs": "5.2.0",
