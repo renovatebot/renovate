@@ -96,9 +96,7 @@ If you need any further assistance then you can also [request help here](${
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#7154)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
-  } else if (
-    await scm.isBranchModified(config.onboardingBranch!, config.defaultBranch)
-  ) {
+  } else if (await scm.isBranchModified(config.onboardingBranch!)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
         config.productLinks!.help
