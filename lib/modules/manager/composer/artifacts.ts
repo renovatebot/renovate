@@ -18,10 +18,12 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { safeParseJson } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson, ComposerLock } from './types';
+import { Lockfile, PackageFile } from './schema';
+import type { AuthJson } from './types';
 import {
   extractConstraints,
   findGithubToken,
@@ -91,10 +93,17 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
+  const file = safeParseJson(newPackageFileContent, PackageFile);
+  if (!file) {
+    logger.debug('Composer: unable to parse package file');
+    return null;
+  }
+
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
-    logger.debug('No composer.lock found');
+  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
+  const lockfile = safeParseJson(lockFileContent, Lockfile);
+  if (!lockfile) {
+    logger.debug('Composer: unable to read lockfile');
     return null;
   }
 
@@ -104,12 +113,8 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractConstraints(
-        JSON.parse(newPackageFileContent),
-        existingLockFile
-      ),
+      ...extractConstraints(file, lockfile),
       ...config.constraints,
     };
 
@@ -136,7 +141,7 @@ export async function updateArtifacts({
     const commands: string[] = [];
 
     // Determine whether install is required before update
-    if (requireComposerDependencyInstallation(existingLockFile)) {
+    if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);
