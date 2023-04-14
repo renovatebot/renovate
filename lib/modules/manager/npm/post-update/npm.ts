@@ -95,16 +95,16 @@ export async function generateLockFile(
       for (const workspace of workspaces) {
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
-          .map((update) => `${generatePackageKey(
-              update.packageName!,
-              update.newVersion!
-            )}`)
+          .map(
+            (update) =>
+              `${generatePackageKey(update.packageName!, update.newVersion!)}`
+          )
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         if (currentWorkspaceUpdates.length) {
-          const updateCmd =
-            `npm install ${cmdOptions} --workspace=${workspace} ` +
-            currentWorkspaceUpdates.join(' ');
+          const updateCmd = `npm install ${cmdOptions} --workspace=${workspace} ${currentWorkspaceUpdates.join(
+            ' '
+          )}`;
           commands.push(updateCmd);
         }
       }
@@ -113,13 +113,13 @@ export async function generateLockFile(
     if (lockRootUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
-        `npm install ${cmdOptions}` +
+        `npm install ${cmdOptions} ` +
         lockRootUpdates
           .map(
             (update) =>
-              ` ${generatePackageKey(update.packageName!, update.newVersion!)}`
+              `${generatePackageKey(update.packageName!, update.newVersion!)}`
           )
-          .join('');
+          .join(' ');
       commands.push(updateCmd);
     }
 
