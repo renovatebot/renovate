@@ -95,24 +95,20 @@ export async function generateLockFile(
       for (const workspace of workspaces) {
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
-          .filter(
-            (update) =>
-              !rootDeps.has(
-                `${generatePackageKey(update.packageName!, update.newVersion!)}`
-              ) // filter out deps present in root again to be sure
-          );
+          .map((update) => {
+            const packageKey = `${generatePackageKey(
+              update.packageName!,
+              update.newVersion!
+            )}`;
+            // filter out packagesthat are present in root package-file (doing again to be sure)
+            if (!rootDeps.has(packageKey)) {return packageKey;}
+          })
+          .filter(Boolean);
+
         if (currentWorkspaceUpdates.length) {
           const updateCmd =
-            `npm install ${cmdOptions} --workspace=${workspace}` +
-            currentWorkspaceUpdates
-              .map(
-                (update) =>
-                  ` ${generatePackageKey(
-                    update.packageName!,
-                    update.newVersion!
-                  )}`
-              )
-              .join('');
+            `npm install ${cmdOptions} --workspace=${workspace} ` +
+            currentWorkspaceUpdates.join(' ');
           commands.push(updateCmd);
         }
       }
