@@ -5,6 +5,8 @@ import { logger } from '../../logger';
 import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as gradleVersioningId } from '../../modules/versioning/gradle';
+import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
@@ -60,6 +62,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'golang',
     versioning: npmVersioningId,
   },
+  gradle: {
+    datasource: 'gradle-version',
+    packageName: 'gradle',
+    versioning: gradleVersioningId,
+  },
+  hashin: {
+    datasource: 'pypi',
+    packageName: 'hashin',
+    versioning: pep440VersioningId,
+  },
   helm: {
     datasource: 'github-releases',
     packageName: 'helm/helm',
@@ -91,6 +103,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'lerna',
     versioning: npmVersioningId,
   },
+  maven: {
+    datasource: 'maven',
+    packageName: 'org.apache.maven:maven',
+    versioning: mavenVersioningId,
+  },
   nix: {
     datasource: 'github-tags',
     packageName: 'NixOS/nix',
@@ -111,6 +128,16 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'github-releases',
     packageName: 'containerbase/php-prebuild',
     versioning: composerVersioningId,
+  },
+  'pip-tools': {
+    datasource: 'pypi',
+    packageName: 'pip-tools',
+    versioning: pep440VersioningId,
+  },
+  pipenv: {
+    datasource: 'pypi',
+    packageName: 'pipenv',
+    versioning: pep440VersioningId,
   },
   pnpm: {
     datasource: 'npm',
@@ -219,7 +246,10 @@ export async function resolveConstraint(
         return constraint;
       }
     } else {
-      logger.warn({ toolName, constraint }, 'Invalid tool constraint');
+      logger.warn(
+        { toolName, constraint, versioning: toolConfig.versioning },
+        'Invalid tool constraint'
+      );
       constraint = undefined;
     }
   }
