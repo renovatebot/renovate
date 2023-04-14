@@ -116,6 +116,17 @@ describe('util/schema-utils', () => {
         parseJson('{"foo": "bar"}', z.object({ foo: z.number() }))
       ).toThrow(z.ZodError);
     });
+
+    it('parses ready data', () => {
+      const res = parseJson({ foo: 'bar' }, z.object({ foo: z.string() }));
+      expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('throws on invalid data', () => {
+      expect(() => parseJson(null, z.object({ foo: z.string() }))).toThrow(
+        z.ZodError
+      );
+    });
   });
 
   describe('safeParseJson', () => {
@@ -150,6 +161,15 @@ describe('util/schema-utils', () => {
       const callback = jest.fn();
       safeParseJson('{"foo": "bar"}', z.object({ foo: z.number() }), callback);
       expect(callback).toHaveBeenCalledWith(expect.any(z.ZodError));
+    });
+
+    it('parses ready data', () => {
+      const res = safeParseJson({ foo: 'bar' }, z.object({ foo: z.string() }));
+      expect(res).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null for invalid data', () => {
+      expect(safeParseJson(42, z.object({ foo: z.string() }))).toBeNull();
     });
   });
 });
