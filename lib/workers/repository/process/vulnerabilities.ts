@@ -18,7 +18,7 @@ import {
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { Vulnerability, VulnerabilityGroup } from './types';
+import type { DependencyVulnerabilities, Vulnerability } from './types';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -87,7 +87,7 @@ export class Vulnerabilities {
   async fetchVulnerabilityGroups(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
-  ): Promise<VulnerabilityGroup[]> {
+  ): Promise<DependencyVulnerabilities[]> {
     const managers = Object.keys(packageFiles);
     const allManagerJobs = managers.map((manager) =>
       this.fetchManagerVulnerabilities(config, packageFiles, manager)
@@ -99,10 +99,10 @@ export class Vulnerabilities {
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>,
     manager: string
-  ): Promise<VulnerabilityGroup[]> {
+  ): Promise<DependencyVulnerabilities[]> {
     const managerConfig = getManagerConfig(config, manager);
     const queue = packageFiles[manager].map(
-      (pFile) => (): Promise<VulnerabilityGroup[]> =>
+      (pFile) => (): Promise<DependencyVulnerabilities[]> =>
         this.fetchManagerPackageFileVulnerabilities(managerConfig, pFile)
     );
     logger.trace(
@@ -117,12 +117,12 @@ export class Vulnerabilities {
   private async fetchManagerPackageFileVulnerabilities(
     managerConfig: RenovateConfig,
     pFile: PackageFile
-  ): Promise<VulnerabilityGroup[]> {
+  ): Promise<DependencyVulnerabilities[]> {
     const { packageFile } = pFile;
     const packageFileConfig = mergeChildConfig(managerConfig, pFile);
     const { manager } = packageFileConfig;
     const queue = pFile.deps.map(
-      (dep) => (): Promise<VulnerabilityGroup | null> =>
+      (dep) => (): Promise<DependencyVulnerabilities | null> =>
         this.fetchDependencyVulnerabilities(packageFileConfig, dep)
     );
     logger.trace(
@@ -142,7 +142,7 @@ export class Vulnerabilities {
   private async fetchDependencyVulnerabilities(
     packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency
-  ): Promise<VulnerabilityGroup | null> {
+  ): Promise<DependencyVulnerabilities | null> {
     const ecosystem = Vulnerabilities.datasourceEcosystemMap[dep.datasource!];
     if (!ecosystem) {
       logger.trace(`Cannot map datasource ${dep.datasource!} to OSV ecosystem`);

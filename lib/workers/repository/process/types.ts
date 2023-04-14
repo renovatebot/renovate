@@ -13,7 +13,7 @@ export interface Vulnerability {
   affected: Osv.Affected;
 }
 
-export interface VulnerabilityGroup {
+export interface DependencyVulnerabilities {
   versioningApi: VersioningApi;
   vulnerabilities: Vulnerability[];
 }
