@@ -95,10 +95,7 @@ export async function generateLockFile(
       for (const workspace of workspaces) {
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
-          .map(
-            (update) =>
-              `${generatePackageKey(update.packageName!, update.newVersion!)}`
-          )
+          .map((update) => update.managerData?.packageKey)
           .filter((packageKey) => !rootDeps.has(packageKey));
 
         if (currentWorkspaceUpdates.length) {
@@ -115,10 +112,7 @@ export async function generateLockFile(
       const updateCmd =
         `npm install ${cmdOptions} ` +
         lockRootUpdates
-          .map(
-            (update) =>
-              `${generatePackageKey(update.packageName!, update.newVersion!)}`
-          )
+          .map((update) => update.managerData?.packageKey)
           .join(' ');
       commands.push(updateCmd);
     }
@@ -225,7 +219,7 @@ export function divideWorkspaceAndRootDeps(
 
   // divide the deps in two categories: workspace and root
   for (const upgrade of lockUpdates) {
-    const packageKey = generatePackageKey(
+    upgrade.managerData!.packageKey = generatePackageKey(
       upgrade.packageName!,
       upgrade.newVersion!
     );
@@ -254,7 +248,7 @@ export function divideWorkspaceAndRootDeps(
         }
         if (
           workspaceName &&
-          !rootDeps.has(packageKey) // prevent same dep from existing in root and workspace
+          !rootDeps.has(upgrade.managerData.packageKey) // prevent same dep from existing in root and workspace
         ) {
           workspaces.add(workspaceName);
           upgrade.workspace = workspaceName;
@@ -263,9 +257,8 @@ export function divideWorkspaceAndRootDeps(
         continue;
       }
     }
-
     lockRootUpdates.push(upgrade);
-    rootDeps.add(packageKey);
+    rootDeps.add(upgrade.managerData?.packageKey);
   }
 
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
