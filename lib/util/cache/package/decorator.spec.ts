@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';
@@ -10,16 +10,17 @@ describe('util/cache/package/decorator', () => {
   const setCache = jest.spyOn(packageCache, 'set');
 
   let count = 1;
-  const getValue = jest.fn(() => {
-    const res = String(100 * count + 10 * count + count);
-    count += 1;
-    return Promise.resolve(res);
-  });
+  const getValue = jest.fn();
 
   beforeEach(async () => {
     memCache.init();
     await packageCache.init({ cacheDir: os.tmpdir() });
     count = 1;
+    getValue.mockImplementation(() => {
+      const res = String(100 * count + 10 * count + count);
+      count += 1;
+      return Promise.resolve(res);
+    });
   });
 
   it('should cache string', async () => {

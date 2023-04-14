@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import _findUp from 'find-up';
 import upath from 'upath';
 import { mockExecAll } from '../../../test/exec-util';

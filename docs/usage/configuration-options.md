@@ -802,12 +802,41 @@ For the full list of available managers, see the [Supported Managers](https://do
 
 ## encrypted
 
-See [Private module support](https://docs.renovatebot.com/getting-started/private-packages) for details on how this is used to encrypt npm tokens.
+Before you put any secrets in your repository configuration, encrypt the secrets.
+You can encrypt secrets using either a HTML page, or the CLI.
+
+To encrypt secrets for the hosted Mend Renovate app for github.com with a HTML page, go to [app.renovatebot.com/encrypt](https://app.renovatebot.com/encrypt) and complete the form.
+If you're self-hosting Renovate, you may download and edit the form, to use your own PGP public key.
+
+You can also encrypt secrets from the CLI, using the `curl`, `echo`, `jq`, `gpg`, `grep` and `tr` CLI programs.
+Here is an example:
+
+```
+curl https://app.renovatebot.com/renovate.pgp --output renovate.pgp
+echo -n '{"o":"your-organization", "r":"your-repository (optional)", "v":"your-secret-value"}' | jq . -c | gpg --encrypt -a --recipient-file renovate.pgp | grep -v '^----' | tr -d '\n'
+```
+
+The above script uses:
+
+- `curl` to download the Mend Renovate hosted app's public key
+- `echo` to echo a JSON object into `jq`
+- `jq` to validate the JSON and then compact it
+- `gpg` to encrypt the contents
+- `grep` and `tr` to extract the encrypted payload which we will use
+
+The `jq` step is optional, you can leave it out if you wish.
+Its primary value is validating that the string you echo to `gpg` is valid JSON, and compact.
 
 <!-- prettier-ignore -->
 !!! note
     Encrypted secrets must have at least an org/group scope, and optionally a repository scope.
     This means that Renovate will check if a secret's scope matches the current repository before applying it, and warn/discard if there is a mismatch.
+
+Encrypted secrets usually have a single organization.
+But you may encrypt a secret with more than one organization, for example: `org1,org2`.
+This way the secret can be used in both the `org1` and `org2` organizations.
+
+For more information on how to use secrets for private packages, read [Private package support](https://docs.renovatebot.com/getting-started/private-packages).
 
 ## excludeCommitPaths
 
@@ -882,6 +911,8 @@ Renovate can fetch release notes when they are hosted on one of these platforms:
 
 - GitHub (.com and Enterprise Server)
 - GitLab (.com and CE/EE)
+
+If you are running on any platform except github.com, you need to [configure a Personal Access Token](https://docs.renovatebot.com/getting-started/running/#githubcom-token-for-release-notes) to allow Renovate to fetch release notes from github.com.
 
 <!-- prettier-ignore -->
 !!! note
@@ -1514,14 +1545,14 @@ Change this setting to `true` if you want to use internal Renovate checks toward
 ## internalChecksFilter
 
 This setting determines whether Renovate controls when and how filtering of internal checks are performed, particularly when multiple versions of the same update type are available.
-Currently this applies to the `stabilityDays` check only.
+Currently this applies to the `minimumReleaseAge` check only.
 
 - `none`: No filtering will be performed, and the highest release will be used regardless of whether it's pending or not
 - `strict`: All pending releases will be filtered. PRs will be skipped unless a non-pending version is available
 - `flexible`: Similar to strict, but in the case where all versions are pending then a PR will be created with the highest pending version
 
-The `flexible` mode can result in "flapping" of Pull Requests, where e.g. a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `stabilityDays`.
-We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you have visibility into suppressed PRs.
+The `flexible` mode can result in "flapping" of Pull Requests, for example: a pending PR with version `1.0.3` is first released but then downgraded to `1.0.2` once it passes `minimumReleaseAge`.
+We recommend that you use the `strict` mode, and enable the `dependencyDashboard` so that you can see suppressed PRs.
 
 ## java
 
@@ -1603,6 +1634,60 @@ Depending on its running schedule, Renovate may run a few times within that time
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
+
+## minimumReleaseAge
+
+If this is set _and_ an update has a release timestamp header, then Renovate will check if the set duration has passed.
+
+Note: Renovate will wait for the set duration to pass for each **separate** version.
+Renovate does not wait until the package has seen no releases for x time-duration(`minimumReleaseAge`).
+`minimumReleaseAge` is not intended to help with slowing down fast releasing project updates.
+If you want to slow down PRs for a specific package, setup a custom schedule for that package.
+Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
+
+If the time since the release is less than the set `minimumReleaseAge` a "pending" status check is added to the branch.
+If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
+
+Some datasources don't have a release timestamp, in which case this feature is not compatible.
+Other datasources may have a release timestamp, but Renovate does not support it yet, in which case a feature request needs to be implemented.
+
+Maven users: you cannot use `minimumReleaseAge` if a Maven source returns unreliable `last-modified` headers.
+
+<!-- prettier-ignore -->
+!!! note
+    Configuring this option will add a `renovate/stability-days` option to the status checks.
+
+There are a couple of uses for `minimumReleaseAge`:
+
+<!-- markdownlint-disable MD001 -->
+
+#### Suppress branch/PR creation for X days
+
+If you combine `minimumReleaseAge=3 days` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
+We recommend that you set `dependencyDashboard=true` so you can see these pending PRs.
+
+#### Prevent holding broken npm packages
+
+npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
+Set `minimumReleaseAge` to `3 days` for npm packages to prevent relying on a package that can be removed from the registry:
+
+```json
+{
+  "packageRules": [
+    {
+      "matchDatasources": ["npm"],
+      "minimumReleaseAge": "3 days"
+    }
+  ]
+}
+```
+
+#### Await X time duration before Automerging
+
+If you enabled `automerge` _and_ `minimumReleaseAge`, it means that PRs will be created immediately but automerging will be delayed until the time-duration has passed.
+This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
+
+<!-- markdownlint-enable MD001 -->
 
 ## minor
 
@@ -1971,7 +2056,7 @@ The `currentVersion` field will be one of the following (in order of preference)
 
 Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
-`matchCurrentVersion` can be an exact SemVer version or a SemVer range:
+`matchCurrentVersion` can be an exact version or a version range:
 
 ```json
 {
@@ -1983,6 +2068,10 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
   ]
 }
 ```
+
+The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
 For example, the following enforces that only `1.*` versions will be used:
@@ -2579,7 +2668,7 @@ This is why we configured an upper limit for how long we wait until creating a P
 
 <!-- prettier-ignore -->
 !!! note
-    If the option `stabilityDays` is non-zero then Renovate disables the `prNotPendingHours` functionality.
+    If the option `minimumReleaseAge` is non-zero then Renovate disables the `prNotPendingHours` functionality.
 
 ## prPriority
 
@@ -2644,7 +2733,8 @@ Renovate's `"auto"` strategy works like this for npm:
 
 1. Widen `peerDependencies`
 1. If an existing range already ends with an "or" operator like `"^1.0.0 || ^2.0.0"`, then Renovate widens it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
-1. Otherwise, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Otherwise, if the update is outside the existing range, Renovate replaces the range. So `"^2.0.0"` is replaced by `"^3.0.0"`
+1. Finally, if the update is in-range, Renovate will update the lockfile with the new exact version.
 
 By default, Renovate assumes that if you are using ranges then it's because you want them to be wide/open.
 Renovate won't deliberately "narrow" any range by increasing the semver value inside.
@@ -3186,55 +3276,6 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 Configure this to `true` if you wish to get one PR for every separate major version upgrade of a dependency.
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
-
-## stabilityDays
-
-If this is set to a non-zero value, _and_ an update has a release timestamp header, then Renovate will check if the "stability days" have passed.
-
-Note: Renovate will wait for the set number of `stabilityDays` to pass for each **separate** version.
-Renovate does not wait until the package has seen no releases for x `stabilityDays`.
-`stabilityDays` is not intended to help with slowing down fast releasing project updates.
-If you want to slow down PRs for a specific package, setup a custom schedule for that package.
-Read [our selective-scheduling help](https://docs.renovatebot.com/noise-reduction/#selective-scheduling) to learn how to set the schedule.
-
-If the number of days since the release is less than the set `stabilityDays` a "pending" status check is added to the branch.
-If enough days have passed then the "pending" status is removed, and a "passing" status check is added.
-
-Some datasources do not provide a release timestamp (in which case this feature is not compatible), and other datasources may provide a release timestamp but it's not supported by Renovate (in which case a feature request needs to be implemented).
-
-Maven users: you cannot use `stabilityDays` if a Maven source returns unreliable `last-modified` headers.
-
-There are a couple of uses for `stabilityDays`:
-
-<!-- markdownlint-disable MD001 -->
-
-#### Suppress branch/PR creation for X days
-
-If you combine `stabilityDays=3` and `internalChecksFilter="strict"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released.
-It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
-
-#### Prevent holding broken npm packages
-
-npm packages less than 72 hours (3 days) old can be unpublished, which could result in a service impact if you have already updated to it.
-Set `stabilityDays` to 3 for npm packages to prevent relying on a package that can be removed from the registry:
-
-```json
-{
-  "packageRules": [
-    {
-      "matchDatasources": ["npm"],
-      "stabilityDays": 3
-    }
-  ]
-}
-```
-
-#### Await X days before Automerging
-
-If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed.
-This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
-
-<!-- markdownlint-enable MD001 -->
 
 ## stopUpdatingLabel
 

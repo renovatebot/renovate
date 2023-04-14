@@ -80,34 +80,78 @@ describe('modules/datasource/packagist/schema', () => {
     });
 
     it('parses ComposerRelease', () => {
-      expect(ComposerRelease.parse({ version: '' })).toEqual({ version: '' });
+      expect(ComposerRelease.parse({ version: '' })).toEqual({
+        version: '',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
       expect(ComposerRelease.parse({ version: 'dev-main' })).toEqual({
         version: 'dev-main',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
       });
 
       expect(ComposerRelease.parse({ version: '1.2.3' })).toEqual({
         version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
       });
 
       expect(ComposerRelease.parse({ version: '1.2.3', homepage: 42 })).toEqual(
-        { version: '1.2.3', homepage: null }
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        }
       );
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' })
-      ).toEqual({ version: '1.2.3', homepage: 'example.com' });
+      ).toEqual({
+        version: '1.2.3',
+        homepage: 'example.com',
+        source: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' })
-      ).toEqual({ version: '1.2.3', source: null });
+      ).toEqual({
+        version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: { url: 'foobar' } })
-      ).toEqual({ version: '1.2.3', source: { url: 'foobar' } });
+      ).toEqual({
+        version: '1.2.3',
+        source: { url: 'foobar' },
+        homepage: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', time: '12345' })
-      ).toEqual({ version: '1.2.3', time: '12345' });
+      ).toEqual({
+        version: '1.2.3',
+        time: '12345',
+        homepage: null,
+        source: null,
+        require: null,
+      });
     });
   });
 
@@ -123,7 +167,22 @@ describe('modules/datasource/packagist/schema', () => {
       expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
       expect(
         ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
-      ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+        {
+          version: 'dev-main',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
   });
 
@@ -133,6 +192,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(parsePackagesResponse('foo/bar', {})).toEqual([]);
       expect(parsePackagesResponse('foo/bar', { packages: '123' })).toEqual([]);
       expect(parsePackagesResponse('foo/bar', { packages: {} })).toEqual([]);
+
       expect(
         parsePackagesResponse('foo/bar', {
           packages: {
@@ -140,7 +200,16 @@ describe('modules/datasource/packagist/schema', () => {
             'baz/qux': [{ version: '4.5.6' }],
           },
         })
-      ).toEqual([{ version: '1.2.3' }]);
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
+
       expect(
         parsePackagesResponse('foo/bar', {
           packages: {
@@ -148,7 +217,15 @@ describe('modules/datasource/packagist/schema', () => {
             'baz/qux': { '4.5.6': { version: '4.5.6' } },
           },
         })
-      ).toEqual([{ version: '1.2.3' }]);
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
 
     it('expands minified fields', () => {
@@ -167,14 +244,56 @@ describe('modules/datasource/packagist/schema', () => {
           },
         })
       ).toEqual([
-        { version: '3.3.3', require: { php: '^8.0' } },
-        { version: '2.2.2', require: { php: '^8.0' } },
-        { version: '1.1.1', require: { php: '^8.0' } },
-        { version: '0.0.4', require: { php: '^7.0' } },
-        { version: '0.0.3', require: { php: '^7.0' } },
-        { version: '0.0.2' },
-        { version: '0.0.1' },
-      ] satisfies ComposerRelease[]);
+        {
+          version: '3.3.3',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '2.2.2',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '1.1.1',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.4',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.3',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.2',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+        {
+          version: '0.0.1',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
   });
 
@@ -205,6 +324,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '222',
                   homepage: 'https://example.com/2',
                   source: { url: 'git@example.com:baz/qux-2' },
+                  require: null,
                 },
               ],
             },
@@ -226,6 +346,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '444',
                   homepage: 'https://example.com/4',
                   source: { url: 'git@example.com:baz/qux-3' },
+                  require: null,
                 },
               ],
             },

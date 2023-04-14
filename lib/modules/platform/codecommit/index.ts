@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer';
+import { Buffer } from 'node:buffer';
 import {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
@@ -12,7 +12,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
@@ -49,6 +49,8 @@ interface Config {
   region?: string;
   prList?: CodeCommitPr[];
 }
+
+export const id = 'codecommit';
 
 export const config: Config = {};
 
@@ -559,11 +561,6 @@ export function ensureIssueClosing(title: string): Promise<void> {
 /* istanbul ignore next */
 export function deleteLabel(prNumber: number, label: string): Promise<void> {
   return Promise.resolve();
-}
-
-/* istanbul ignore next */
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }
 
 // Returns the combined status for a branch.

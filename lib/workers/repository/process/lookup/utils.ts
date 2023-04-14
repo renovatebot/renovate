@@ -25,20 +25,12 @@ export function addReplacementUpdateIfValid(
   }
 }
 
-export function isReplacementNameRulesConfigured(
-  config: LookupUpdateConfig
-): boolean {
-  return (
-    is.nonEmptyString(config.replacementName) ||
-    is.nonEmptyString(config.replacementNameTemplate)
-  );
-}
-
 export function isReplacementRulesConfigured(
   config: LookupUpdateConfig
 ): boolean {
   return (
-    isReplacementNameRulesConfigured(config) ||
+    is.nonEmptyString(config.replacementName) ||
+    is.nonEmptyString(config.replacementNameTemplate) ||
     is.nonEmptyString(config.replacementVersion)
   );
 }
