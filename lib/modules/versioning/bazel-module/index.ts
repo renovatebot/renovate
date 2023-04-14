@@ -1,0 +1,159 @@
+import type { SemVer } from 'semver';
+import type { NewValueConfig, VersioningApi } from '../types';
+
+function getMajor(version: string | SemVer): null | number {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+function getMinor(version: string | SemVer): null | number {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+function getPatch(version: string | SemVer): null | number {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+/**
+ * Check whether `version` and `other` are logically equivalent, even if
+ * they're not the exact same string.
+ *
+ * For example, with Semver the build metadata should be ignored when comparing.
+ */
+function equals(version: string, other: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether `version` is "greater" than the `other` version.
+ */
+function isGreaterThan(version: string, other: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `version` is "less" than all the versions possible in
+ * the `range`.
+ */
+function isLessThanRange(version: string, range: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Select the highest version from `versions` that is within the given
+ * `range` constraint, or return `null` if there is no matching version.
+ */
+function getSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+/**
+ * Select the lowest version from `versions` that is within the given
+ * `range` constraint, or return `null` if there is no matching version.
+ */
+function minSatisfyingVersion(
+  versions: string[],
+  range: string
+): string | null {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+/**
+ * Calculate a new version constraint based on the current constraint, the
+ * `rangeStrategy` option, and the current and new version.
+ */
+function getNewValue(newValueConfig: NewValueConfig): string | null {
+  // TODO(grindel): IMPLEMENT ME!
+  return null;
+}
+
+/**
+ * Compare two versions. Return `0` if `v1 == v2`, or `1` if `v1` is
+ * greater, or `-1` if `v2` is greater.
+ */
+function sortVersions(version: string, other: string): number {
+  // TODO(grindel): IMPLEMENT ME!
+  return 0;
+}
+
+/**
+ * Check whether the `version` satisfies the `range` constraint.
+ */
+function matches(version: string, range: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `version` is compatible with the `current` value
+ * constraint.
+ */
+function isCompatible(version: string, current?: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `version` constraint is not a range, i.e. it only allows a
+ * single specific version.
+ */
+function isSingleVersion(version: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `version` is considered to be "stable".
+ *
+ * Example: in SemVer the version must not have a pre-release marker.
+ */
+function isStable(version: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `input` is a valid version or a valid version range constraint.
+ */
+function isValid(input: string): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+/**
+ * Check whether the `input` is a valid version string.
+ */
+function isVersion(input: string | undefined | null): boolean {
+  // TODO(grindel): IMPLEMENT ME!
+  return false;
+}
+
+export const api: VersioningApi = {
+  equals,
+  getMajor,
+  getMinor,
+  getPatch,
+  isCompatible,
+  isGreaterThan,
+  isLessThanRange,
+  isSingleVersion,
+  isStable,
+  isValid,
+  isVersion,
+  matches,
+  getSatisfyingVersion,
+  minSatisfyingVersion,
+  getNewValue,
+  sortVersions,
+};
+export default api;
