@@ -101,7 +101,9 @@ export async function generateLockFile(
               update.newVersion!
             )}`;
             // filter out packagesthat are present in root package-file (doing again to be sure)
-            if (!rootDeps.has(packageKey)) {return packageKey;}
+            if (!rootDeps.has(packageKey)) {
+              return packageKey;
+            }
           })
           .filter(Boolean);
 
