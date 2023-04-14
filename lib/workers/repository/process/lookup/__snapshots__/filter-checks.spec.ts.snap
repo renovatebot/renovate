@@ -24,7 +24,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from hostRules 1`] = `
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumReleaseAge settings from hostRules 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [],
@@ -35,7 +35,7 @@ exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks()
 }
 `;
 
-exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up stabilityDays settings from updateType 1`] = `
+exports[`workers/repository/process/lookup/filter-checks .filterInternalChecks() picks up minimumReleaseAge settings from updateType 1`] = `
 {
   "pendingChecks": false,
   "pendingReleases": [
