@@ -223,12 +223,6 @@ const repoGroups = {
   surveyjs: 'https://github.com/surveyjs/surveyjs',
   'swashbuckle-aspnetcore':
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
-  swc: [
-    'https://github.com/swc-project/swc',
-    'https://github.com/swc-project/plugins',
-    'https://github.com/swc-project/jest',
-    'https://github.com/swc-project/cli',
-  ],
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
   'tanstack-query': 'https://github.com/TanStack/query',
@@ -269,6 +263,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
+  swc: 'https://github.com/swc-project',
 };
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
