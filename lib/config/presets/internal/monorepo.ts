@@ -263,7 +263,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
-  swc: 'https://github.com/swc-project',
+  swc: 'https://github.com/swc-project/',
 };
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
