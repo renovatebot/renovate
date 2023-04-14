@@ -95,17 +95,11 @@ export async function generateLockFile(
       for (const workspace of workspaces) {
         const currentWorkspaceUpdates = lockWorkspacesUpdates
           .filter((update) => update.workspace === workspace)
-          .map((update) => {
-            const packageKey = `${generatePackageKey(
+          .map((update) => `${generatePackageKey(
               update.packageName!,
               update.newVersion!
-            )}`;
-            // filter out packagesthat are present in root package-file (doing again to be sure)
-            if (!rootDeps.has(packageKey)) {
-              return packageKey;
-            }
-          })
-          .filter(Boolean);
+            )}`)
+          .filter((packageKey) => !rootDeps.has(packageKey));
 
         if (currentWorkspaceUpdates.length) {
           const updateCmd =
