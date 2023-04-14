@@ -377,6 +377,28 @@ describe('modules/manager/npm/post-update/npm', () => {
           workspacesPackages: ['docs/*', 'web/*'],
         },
       },
+      {
+        packageFile: 'some-dir/web/b/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
+      {
+        packageFile: 'some-dir/docs/a/package.json',
+        packageName: 'hello',
+        depType: 'dependencies',
+        newVersion: '1.1.1',
+        newValue: '^1.0.0',
+        isLockfileUpdate: true,
+        managerData: {
+          workspacesPackages: ['docs/*', 'web/*'],
+        },
+      },
     ];
 
     it('workspace in sub-folder', async () => {
@@ -394,10 +416,10 @@ describe('modules/manager/npm/post-update/npm', () => {
       expect(res.error).toBeUndefined();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0',
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
         },
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0',
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
         },
 
         {
@@ -427,10 +449,10 @@ describe('modules/manager/npm/post-update/npm', () => {
       expect(res.error).toBeUndefined();
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0',
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=docs/a abbrev@1.1.0 hello@1.1.1',
         },
         {
-          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0',
+          cmd: 'npm install --package-lock-only --no-audit --ignore-scripts --workspace=web/b xmldoc@2.2.0 hello@1.1.1',
         },
 
         {
@@ -512,6 +534,30 @@ describe('modules/manager/npm/post-update/npm', () => {
               workspacesPackages: ['docs/*', 'web/*'],
             },
             workspace: 'web/b',
+          },
+          {
+            packageFile: 'web/b/package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'web/b',
+          },
+          {
+            packageFile: 'docs/a/package.json',
+            packageName: 'hello',
+            depType: 'dependencies',
+            newVersion: '1.1.1',
+            newValue: '^1.0.0',
+            isLockfileUpdate: true,
+            managerData: {
+              workspacesPackages: ['docs/*', 'web/*'],
+            },
+            workspace: 'docs/a',
           },
         ],
         workspaces: new Set(['docs/a', 'web/b']),

@@ -97,13 +97,21 @@ export async function generateLockFile(
           .filter((update) => update.workspace === workspace)
           .filter(
             (update) =>
-              !rootDeps.has(`${update.packageName!}@${update.newVersion!}`) // filter out deps present in root again to be sure
+              !rootDeps.has(
+                `${generatePackageKey(update.packageName!, update.newVersion!)}`
+              ) // filter out deps present in root again to be sure
           );
         if (currentWorkspaceUpdates.length) {
           const updateCmd =
             `npm install ${cmdOptions} --workspace=${workspace}` +
             currentWorkspaceUpdates
-              .map((update) => ` ${update.packageName!}@${update.newVersion!}`)
+              .map(
+                (update) =>
+                  ` ${generatePackageKey(
+                    update.packageName!,
+                    update.newVersion!
+                  )}`
+              )
               .join('');
           commands.push(updateCmd);
         }
@@ -115,7 +123,10 @@ export async function generateLockFile(
       const updateCmd =
         `npm install ${cmdOptions}` +
         lockRootUpdates
-          .map((update) => ` ${update.packageName!}@${update.newVersion!}`)
+          .map(
+            (update) =>
+              ` ${generatePackageKey(update.packageName!, update.newVersion!)}`
+          )
           .join('');
       commands.push(updateCmd);
     }
@@ -222,8 +233,11 @@ export function divideWorkspaceAndRootDeps(
 
   // divide the deps in two categories: workspace and root
   for (const upgrade of lockUpdates) {
+    const packageKey = generatePackageKey(
+      upgrade.packageName!,
+      upgrade.newVersion!
+    );
     if (
-      upgrade.isLockfileUpdate &&
       upgrade.managerData?.workspacesPackages?.length &&
       is.string(upgrade.packageFile)
     ) {
@@ -235,12 +249,7 @@ export function divideWorkspaceAndRootDeps(
       // workspaceDir = packageFileDir - lockFileDir
       const workspaceDir = trimSlashes(packageFileDir.replace(lockFileDir, ''));
 
-      if (is.emptyString(workspaceDir)) {
-        lockRootUpdates.push(upgrade);
-        rootDeps.add(`${upgrade.packageName!}@${upgrade.newVersion!}`);
-      }
-      // else it is present in workspace package.json
-      else {
+      if (is.nonEmptyString(workspaceDir)) {
         let workspaceName: string | undefined;
         // compare workspaceDir to workspace patterns
         // stop when the first match is found and
@@ -248,23 +257,29 @@ export function divideWorkspaceAndRootDeps(
         for (const workspacePattern of workspacePatterns ?? []) {
           if (minimatch(workspaceDir, workspacePattern)) {
             workspaceName = workspaceDir;
-            continue;
+            break;
           }
         }
+        ``;
         if (
           workspaceName &&
-          !rootDeps.has(`${upgrade.packageName!}@${upgrade.newVersion!}`) // prevent same dep from existing in root and workspace
+          !rootDeps.has(packageKey) // prevent same dep from existing in root and workspace
         ) {
           workspaces.add(workspaceName);
           upgrade.workspace = workspaceName;
           lockWorkspacesUpdates.push(upgrade);
         }
+        continue;
       }
-    } else {
-      lockRootUpdates.push(upgrade);
-      rootDeps.add(`${upgrade.packageName!}@${upgrade.newVersion!}`);
     }
+
+    lockRootUpdates.push(upgrade);
+    rootDeps.add(packageKey);
   }
 
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
+}
+
+function generatePackageKey(packageName: string, version: string): string {
+  return `${packageName}@${version}`;
 }
