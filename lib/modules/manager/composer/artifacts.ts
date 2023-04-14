@@ -60,9 +60,9 @@ function getAuthJson(): string | null {
     };
   }
 
-  hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
+  for (const gitlabHostRule of hostRules.findAll({ hostType: 'gitlab' })) {
     if (!isArtifactAuthEnabled(gitlabHostRule)) {
-      return;
+      continue;
     }
 
     if (gitlabHostRule?.token) {
@@ -75,24 +75,24 @@ function getAuthJson(): string | null {
         ...(authJson['gitlab-domains'] ?? []),
       ];
     }
-  });
+  }
 
-  hostRules
-    .findAll({ hostType: PackagistDatasource.id })
-    ?.forEach((hostRule) => {
-      if (!isArtifactAuthEnabled(hostRule)) {
-        return;
-      }
+  for (const packagistHostRule of hostRules.findAll({
+    hostType: PackagistDatasource.id,
+  })) {
+    if (!isArtifactAuthEnabled(packagistHostRule)) {
+      continue;
+    }
 
-      const { resolvedHost, username, password, token } = hostRule;
-      if (resolvedHost && username && password) {
-        authJson['http-basic'] = authJson['http-basic'] ?? {};
-        authJson['http-basic'][resolvedHost] = { username, password };
-      } else if (resolvedHost && token) {
-        authJson.bearer = authJson.bearer ?? {};
-        authJson.bearer[resolvedHost] = token;
-      }
-    });
+    const { resolvedHost, username, password, token } = packagistHostRule;
+    if (resolvedHost && username && password) {
+      authJson['http-basic'] = authJson['http-basic'] ?? {};
+      authJson['http-basic'][resolvedHost] = { username, password };
+    } else if (resolvedHost && token) {
+      authJson.bearer = authJson.bearer ?? {};
+      authJson.bearer[resolvedHost] = token;
+    }
+  }
 
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
