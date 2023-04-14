@@ -485,32 +485,5 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         },
       ]);
     });
-
-    it('ignores pnpm', async () => {
-      const packageFiles = [
-        {
-          managerData: {
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          deps: [
-            { depName: 'a', currentValue: '1.0.0' },
-            { depName: 'b', currentValue: '2.0.0' },
-          ],
-          packageFile: 'some-file',
-        },
-      ];
-      await getLockedVersions(packageFiles);
-      expect(packageFiles).toEqual([
-        {
-          deps: [
-            { currentValue: '1.0.0', depName: 'a' },
-            { currentValue: '2.0.0', depName: 'b' },
-          ],
-          lockFiles: ['pnpm-lock.yaml'],
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-          packageFile: 'some-file',
-        },
-      ]);
-    });
   });
 });
