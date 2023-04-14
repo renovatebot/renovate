@@ -219,12 +219,13 @@ export function divideWorkspaceAndRootDeps(
 
   // divide the deps in two categories: workspace and root
   for (const upgrade of lockUpdates) {
-    upgrade.managerData!.packageKey = generatePackageKey(
+    upgrade.managerData ??= {};
+    upgrade.managerData.packageKey = generatePackageKey(
       upgrade.packageName!,
       upgrade.newVersion!
     );
     if (
-      upgrade.managerData?.workspacesPackages?.length &&
+      upgrade.managerData.workspacesPackages?.length &&
       is.string(upgrade.packageFile)
     ) {
       const workspacePatterns = upgrade.managerData.workspacesPackages; // glob pattern or directory name/path
@@ -258,7 +259,7 @@ export function divideWorkspaceAndRootDeps(
       }
     }
     lockRootUpdates.push(upgrade);
-    rootDeps.add(upgrade.managerData?.packageKey);
+    rootDeps.add(upgrade.managerData.packageKey);
   }
 
   return { lockRootUpdates, lockWorkspacesUpdates, workspaces, rootDeps };
