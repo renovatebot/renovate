@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { findPackages } from 'find-packages';
-import yaml, { load } from 'js-yaml';
+import { load } from 'js-yaml';
 import semver from 'semver';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
@@ -143,7 +143,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   // TODO #7154
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
-    const lockParsed = yaml.load(pnpmLockRaw) as Record<string, any>;
+    const lockParsed = load(pnpmLockRaw) as Record<string, any>;
     if (!lockParsed) {
       logger.debug('pnpm lockfile is empty or invalid');
       return { lockedVersions: {} };
@@ -160,9 +160,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     )) {
       const result = packagePath.match(packagePathRegex);
       if (result?.groups) {
-        const packageName = trimTrailingSlash(
-          result.groups.packageName ?? ''
-        ).replace(regEx(/@$/), '');
+        const packageName = result.groups.packageName;
         const version = result.groups.version;
         logger.debug({
           packagePath,
