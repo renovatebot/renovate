@@ -18,7 +18,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { safeParseJson } from '../../../util/schema-utils';
+import { parseJson, safeParseJson } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -93,11 +93,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const file = safeParseJson(newPackageFileContent, PackageFile);
-  if (!file) {
-    logger.debug('Composer: unable to parse package file');
-    return null;
-  }
+  const file = parseJson(newPackageFileContent, PackageFile);
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
