@@ -12,7 +12,6 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
-import { trimTrailingSlash } from '../../../../util/url';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import type { LockFile, LockFileEntry, PnpmWorkspaceFile } from './types';
