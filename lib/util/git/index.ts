@@ -603,7 +603,10 @@ export async function isBranchBehindBase(
   }
 }
 
-export async function isBranchModified(branchName: string): Promise<boolean> {
+export async function isBranchModified(
+  branchName: string,
+  baseBranch?: string
+): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
     return false;
@@ -623,21 +626,48 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
     return isModified;
   }
 
-  logger.debug('branch.isModified(): using git to calculate');
-
   await syncGit();
-  // Retrieve the author of the most recent commit
-  let lastAuthor: string | undefined;
+  // Retrieve the commit authors
+  let branchAuthors: string[] = [];
   try {
-    lastAuthor = (
-      await git.raw([
-        'log',
-        '-1',
-        '--pretty=format:%ae',
-        `origin/${branchName}`,
-        '--',
-      ])
-    ).trim();
+    if (baseBranch) {
+      logger.debug(
+        `branch.isModified(): using git to calculate authors between ${branchName} and ${baseBranch}`
+      );
+      branchAuthors = [
+        ...new Set(
+          (
+            await git.raw([
+              'log',
+              '--pretty=format:%ae',
+              `origin/${branchName}...origin/${baseBranch}`,
+              '--',
+            ])
+          )
+            .trim()
+            .split('\n')
+        ),
+      ];
+    } else {
+      logger.debug(
+        `branch.isModified(): checking last author of ${branchName}`
+      );
+      branchAuthors = [
+        ...new Set(
+          (
+            await git.raw([
+              'log',
+              '-1',
+              '--pretty=format:%ae',
+              `origin/${branchName}`,
+              '--',
+            ])
+          )
+            .trim()
+            .split('\n')
+        ),
+      ];
+    }
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
@@ -646,26 +676,19 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       );
       throw new Error(REPOSITORY_CHANGED);
     }
-    logger.warn({ err }, 'Error checking last author for isBranchModified');
+    logger.warn({ err }, 'Error retrieving git authors for isBranchModified');
   }
   const { gitAuthorEmail } = config;
-  if (
-    lastAuthor === gitAuthorEmail ||
-    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
-  ) {
-    // author matches - branch has not been modified
-    logger.debug('branch.isModified() = false');
-    config.branchIsModified[branchName] = false;
-    setCachedModifiedResult(branchName, false);
-    return false;
+  let branchIsModified = false;
+  for (const author of branchAuthors) {
+    if (author !== gitAuthorEmail && !config.ignoredAuthors.includes(author)) {
+      branchIsModified = true;
+    }
   }
-  logger.debug(
-    { branchName, lastAuthor, gitAuthorEmail },
-    'branch.isModified() = true'
-  );
-  config.branchIsModified[branchName] = true;
-  setCachedModifiedResult(branchName, true);
-  return true;
+  logger.debug(`branch.isModified() = ${branchIsModified}`);
+  config.branchIsModified[branchName] = branchIsModified;
+  setCachedModifiedResult(branchName, branchIsModified);
+  return branchIsModified;
 }
 
 export async function isBranchConflicted(

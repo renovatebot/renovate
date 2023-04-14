@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 
 // http://www.mtu.edu/umc/services/digital/writing/characters-avoid/
 // We allow spaces, but not newlines
-const restricted = /[[\]#%&{}<>*?\b\n\r\0$!'"@|‘“+^`]/;
+const restricted = /[[\]#%&{}<>*?\b\n\r\0!'"|‘“^`]/;
 
 function assertBaseDir(path: string, baseDir: string): void {
   if (!path.startsWith(baseDir)) {
