@@ -68,7 +68,8 @@ export async function isOnboardingBranchModified(
 
   if (
     cache.onboardingBranchCache &&
-    onboardingSha === cache.onboardingBranchCache.onboardingBranchSha
+    onboardingSha === cache.onboardingBranchCache.onboardingBranchSha &&
+    cache.onboardingBranchCache.isModified
   ) {
     return cache.onboardingBranchCache.isModified;
   } else {

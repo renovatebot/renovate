@@ -10,7 +10,6 @@ import { ensureComment } from '../../../../modules/platform/comment';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchCommit, getFileList } from '../../../../util/git';
-import { deleteOnboardingCache } from './onboarding-branch-cache';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
@@ -52,17 +51,13 @@ function closedPrExists(config: RenovateConfig): Promise<Pr | null> {
 export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   logger.debug('isOnboarded()');
   const title = `Action required: Add a Renovate config`;
-  const pr = await closedPrExists(config);
-  // if closed pr found delete onboarding cache to prevent re-opening onboarding pr
-  if (pr) {
-    logger.debug('Found closed onboarding PR');
-    deleteOnboardingCache();
-  }
+  const closedPr = await closedPrExists(config);
 
   // Repo is onboarded if global config is bypassing onboarding and does not require a
   // configuration file.
   // Repo is not onboarded if the onboarding cache is present and
   // the base branch has not been updated since last run
+  // Also if there is a closed pr skip using cache as it is outdated
   if (config.requireConfig === 'optional' && config.onboarding === false) {
     // Return early and avoid checking for config files
     return true;
@@ -75,6 +70,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
   if (
+    !closedPr &&
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===
       getBranchCommit(config.defaultBranch!)
@@ -125,7 +121,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
-  if (!pr) {
+  if (!closedPr) {
     logger.debug('Found no closed onboarding PR');
     return false;
   }
@@ -137,7 +133,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     // ensure PR comment
     await ensureComment({
-      number: pr.number,
+      number: closedPr.number,
       topic: `Renovate is disabled`,
       content: `Renovate is disabled due to lack of config. If you wish to re-enable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
     });

@@ -131,9 +131,6 @@ function handleOnboardingManualRebase(onboardingPr: Pr): void {
 function invalidateExtractCache(baseBranch: string): void {
   const cache = getCache();
   cache.scan ||= {};
-  logger.debug(
-    `Onboarding branch modified. Removing outdated extract cache for branch=${baseBranch}`
-  );
 
   if (cache.scan[baseBranch]) {
     delete cache.scan[baseBranch];
