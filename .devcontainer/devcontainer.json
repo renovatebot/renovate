@@ -28,5 +28,6 @@
     "--security-opt",
     "seccomp=unconfined",
     "--privileged"
-  ]
+  ],
+  "postCreateCommand": "yarn install"
 }

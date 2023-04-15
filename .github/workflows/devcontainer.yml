@@ -14,4 +14,4 @@ jobs:
       - name: Build and run dev container task
         uses: devcontainers/ci@v0.3.1900000328
         with:
-          runCmd: cd /workspace; yarn build
+          runCmd: yarn build
