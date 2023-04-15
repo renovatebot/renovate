@@ -6,6 +6,7 @@ import {
   detectPnpmWorkspaces,
   extractPnpmFilters,
   findPnpmWorkspace,
+  getConstraints,
 } from './pnpm';
 
 describe('modules/manager/npm/extract/pnpm', () => {
@@ -225,6 +226,53 @@ describe('modules/manager/npm/extract/pnpm', () => {
             packageFile.packageFile === 'not-matching/b/package.json'
         )?.managerData.pnpmShrinkwrap
       ).toBeUndefined();
+    });
+  });
+
+  describe('getConstraints()', () => {
+    // no constraints
+    it.each([
+      [6.0, undefined, '>=8'],
+      [5.4, undefined, '>=7 <8'],
+      [5.3, undefined, '>=6 <7'],
+      [5.2, undefined, '>=5.10.0 <6'],
+      [5.1, undefined, '>=3.5.0 <5.9.3'],
+      [5.0, undefined, '>=3 <3.5.0'],
+    ])('adds constraints for %f', (lockfileVersion, constraints, expected) => {
+      expect(getConstraints(lockfileVersion, constraints)).toBe(expected);
+    });
+
+    // constraints present
+    it.each([
+      [6.0, '>=8.2.0', '>=8.2.0'],
+      [6.0, '>=7', '>=7 >=8'],
+
+      [5.4, '^7.2.0', '^7.2.0'],
+      [5.4, '<7.2.0', '<7.2.0 >=7'],
+      [5.4, '>7.2.0', '>7.2.0 <8'],
+      [5.4, '>=6', '>=6 >=7 <8'],
+
+      [5.3, '^6.0.0', '^6.0.0'],
+      [5.3, '<6.2.0', '<6.2.0 >=6'],
+      [5.3, '>6.2.0', '>6.2.0 <7'],
+      [5.3, '>=5', '>=5 >=6 <7'],
+
+      [5.2, '5.10.0', '5.10.0'],
+      [5.2, '>5.0.0 <5.18.0', '>5.0.0 <5.18.0 >=5.10.0'],
+      [5.2, '>5.10.0', '>5.10.0 <6'],
+      [5.2, '>=5', '>=5 >=5.10.0 <6'],
+
+      [5.1, '^4.0.0', '^4.0.0'],
+      [5.1, '<4', '<4 >=3.5.0'],
+      [5.1, '>=4', '>=4 <5.9.3'],
+      [5.1, '>=3', '>=3 >=3.5.0 <5.9.3'],
+
+      [5.0, '3.1.0', '3.1.0'],
+      [5.0, '^3.0.0', '^3.0.0 <3.5.0'],
+      [5.0, '>=3', '>=3 <3.5.0'],
+      [5.0, '>=2', '>=2 >=3 <3.5.0'],
+    ])('adds constraints for %f', (lockfileVersion, constraints, expected) => {
+      expect(getConstraints(lockfileVersion, constraints)).toBe(expected);
     });
   });
 });

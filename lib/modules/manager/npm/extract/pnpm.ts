@@ -190,33 +190,70 @@ export function getConstraints(
   let newConstraints = constraints;
 
   // find matching lockfileVersion
-  // fallback to version:5 if no match is found   -- this is safe as only lockfileVersion >= 5 can use the name `pnpm-lock.yaml`
-  const { maxNAVersion, constraint: versionConstraint } =
+  // fallback to version:5 if no match is found   -- this should be because only lockfileVersions which are >= 5 can use the name `pnpm-lock.yaml`
+  const { lowerBound, upperBound, lowerConstraint, upperConstraint } =
     lockToPnpmVersionMapping.find(
       (m) => m.lockfileVersion === lockfileVersion
     ) ?? {
       lockfileVersion: 5.0,
-      maxNAVersion: '2.24.0',
-      constraint: '>=3.0.0',
+      lowerBound: '2.24.0',
+      upperBound: '3.5.0',
+      lowerConstraint: '>=3',
+      upperConstraint: '<3.5.0',
     };
 
-  if (newConstraints && semver.satisfies(maxNAVersion, newConstraints)) {
-    newConstraints += ' ' + versionConstraint;
+  if (newConstraints) {
+    // if constraint satisfies versions lower than min allowed version
+    if (semver.satisfies(lowerBound, newConstraints)) {
+      newConstraints += ` ${lowerConstraint}`;
+    }
+
+    // if constraint satisfies versions higher than max allowed version
+    if (
+      upperBound &&
+      upperConstraint &&
+      semver.satisfies(upperBound, newConstraints)
+    ) {
+      newConstraints += ` ${upperConstraint}`;
+    }
   } else {
-    newConstraints = versionConstraint;
+    newConstraints = `${lowerConstraint}${
+      upperConstraint ? ` ${upperConstraint}` : ''
+    }`;
   }
 
-  if (lockfileVersion !== 6.0 && semver.satisfies('8.0.0', newConstraints)) {
-    newConstraints += '<8';
-  }
   return newConstraints;
 }
 
 // lockfileVersion, maxNotAllowedVersion, minAllowedVersion
 const lockToPnpmVersionMapping = [
-  { lockfileVersion: 6.0, maxNAVersion: '7.32.0', constraint: '>=8' },
-  { lockfileVersion: 5.4, maxNAVersion: '6.35.1', constraint: '>=7' },
-  { lockfileVersion: 5.3, maxNAVersion: '5.18.0', constraint: '>=6' },
-  { lockfileVersion: 5.2, maxNAVersion: '5.9.3', constraint: '>=5.10.0' },
-  { lockfileVersion: 5.1, maxNAVersion: '3.4.1', constraint: '>=3.5.0' },
+  { lockfileVersion: 6.0, lowerBound: '7.32.0', lowerConstraint: '>=8' },
+  {
+    lockfileVersion: 5.4,
+    lowerBound: '6.35.1',
+    upperBound: '8.0.0',
+    lowerConstraint: '>=7',
+    upperConstraint: '<8',
+  },
+  {
+    lockfileVersion: 5.3,
+    lowerBound: '5.18.10',
+    upperBound: '7.0.0',
+    lowerConstraint: '>=6',
+    upperConstraint: '<7',
+  },
+  {
+    lockfileVersion: 5.2,
+    lowerBound: '5.9.3',
+    upperBound: '5.18.10',
+    lowerConstraint: '>=5.10.0',
+    upperConstraint: '<6',
+  },
+  {
+    lockfileVersion: 5.1,
+    lowerBound: '3.4.1',
+    upperBound: '5.9.3',
+    lowerConstraint: '>=3.5.0',
+    upperConstraint: '<5.9.3',
+  },
 ];

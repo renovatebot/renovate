@@ -97,7 +97,7 @@ export async function getLockedVersions(
       const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];
 
       // pnpm-version to pnpm lock-file version relation: https://github.com/pnpm/spec/tree/master/lockfile
-      packageFile.extractedConstraints!.npm = getConstraints(
+      packageFile.extractedConstraints!.pnpm = getConstraints(
         lockfileVersion!,
         packageFile.extractedConstraints!.pnpm
       );
