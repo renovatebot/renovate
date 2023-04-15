@@ -363,6 +363,7 @@ describe('modules/manager/gradle/parser', () => {
         ${'baz = "1.2.3"'}                   | ${'"foo:bar:${ext.baz}"'}              | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'baz = "1.2.3"'}                   | ${'"foo:bar:${project.ext[\'baz\']}"'} | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' }}
         ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${property("c")}"'}      | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
+        ${'a = "foo"; b = "bar"; c="1.2.3"'} | ${'"${a}:${b}:${properties["c"]}"'}    | ${{ depName: 'foo:bar', currentValue: '1.2.3', groupName: 'c' }}
       `('$def | $str', ({ def, str, output }) => {
         const { deps } = parseGradle([def, str].join('\n'));
         expect(deps).toMatchObject([output].filter(is.truthy));
@@ -410,6 +411,24 @@ describe('modules/manager/gradle/parser', () => {
         const input = `
           baz = "1.2.3"
           api("foo:bar:$\{${String(accessor)}("baz") as String}")
+        `;
+        const { deps } = parseGradle(input);
+        expect(deps).toMatchObject([
+          { depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' },
+        ]);
+      });
+    });
+
+    describe('properties map accessors', () => {
+      test.each`
+        accessor
+        ${'properties'}
+        ${'project.properties'}
+        ${'rootProject.properties'}
+      `('$accessor', ({ accessor }) => {
+        const input = `
+          baz = "1.2.3"
+          api("foo:bar:$\{${String(accessor)}["baz"]}")
         `;
         const { deps } = parseGradle(input);
         expect(deps).toMatchObject([
