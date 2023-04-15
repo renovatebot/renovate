@@ -55,13 +55,16 @@ export class Vulnerabilities {
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<void> {
-    const vulnerabilityGroups = await this.fetchVulnerabilityGroups(
+    const dependencyVulnerabilities = await this.fetchDependencyVulnerabilities(
       config,
       packageFiles
     );
 
     config.packageRules ??= [];
-    for (const { vulnerabilities, versioningApi } of vulnerabilityGroups) {
+    for (const {
+      vulnerabilities,
+      versioningApi,
+    } of dependencyVulnerabilities) {
       const groupPackageRules: PackageRule[] = [];
       for (const vulnerability of vulnerabilities) {
         const rule = this.vulnerabilityToPackageRules(vulnerability);
@@ -80,11 +83,14 @@ export class Vulnerabilities {
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<Vulnerability[]> {
-    const groups = await this.fetchVulnerabilityGroups(config, packageFiles);
+    const groups = await this.fetchDependencyVulnerabilities(
+      config,
+      packageFiles
+    );
     return groups.flatMap((group) => group.vulnerabilities);
   }
 
-  async fetchVulnerabilityGroups(
+  async fetchDependencyVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<DependencyVulnerabilities[]> {
@@ -123,7 +129,7 @@ export class Vulnerabilities {
     const { manager } = packageFileConfig;
     const queue = pFile.deps.map(
       (dep) => (): Promise<DependencyVulnerabilities | null> =>
-        this.fetchDependencyVulnerabilities(packageFileConfig, dep)
+        this.fetchDependencyVulnerability(packageFileConfig, dep)
     );
     logger.trace(
       { manager, packageFile, queueLength: queue.length },
@@ -139,7 +145,7 @@ export class Vulnerabilities {
     return result.filter(is.truthy);
   }
 
-  private async fetchDependencyVulnerabilities(
+  private async fetchDependencyVulnerability(
     packageFileConfig: RenovateConfig & PackageFile,
     dep: PackageDependency
   ): Promise<DependencyVulnerabilities | null> {
