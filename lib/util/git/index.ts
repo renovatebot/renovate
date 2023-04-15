@@ -1058,7 +1058,7 @@ export async function pushCommit({
   return result;
 }
 
-export async function fetchCommit(
+export async function fetchBranch(
   branchName: string
 ): Promise<CommitSha | null> {
   await syncGit();
