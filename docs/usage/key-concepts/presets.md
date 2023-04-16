@@ -16,6 +16,20 @@ Use presets to:
 - Share your configuration with others
 - Use somebody else's configuration and extend it with your own rules
 
+## How to use presets
+
+Let's say you're using the `config:base` preset, and want to pin GitHub Action digests.
+Instead of writing your own Renovate config, you search through Renovate's build-in presets.
+You find the the `helpers:pinGitHubActionDigests` preset and add it to the `extends` array, like this:
+
+```json
+{
+  "extends": ["config:base", "helpers:pinGitHubActionDigests"],
+}
+```
+
+Renovate now follows the rules for `config:base` plus the rules for `helpers:pinGitHubActionDigests`.
+
 ## Managing config for many repositories
 
 If you manage Renovate for many repositories, then you should create a global preset configuration.
