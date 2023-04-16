@@ -91,21 +91,20 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
   return schemaWithFallback;
 }
 
-const JsonLiteral = z.union([z.string(), z.number(), z.boolean(), z.null()]);
-type JsonLiteral = z.infer<typeof JsonLiteral>;
-type JsonData = JsonLiteral | JsonData[] | { [key: string]: JsonData };
-const JsonData: z.ZodType<JsonData> = z.lazy(() =>
-  z.union([JsonLiteral, z.array(JsonData), z.record(JsonData)])
-);
+type JsonData =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonData[]
+  | { [key: string]: JsonData };
 
-export const Json = z
-  .string()
-  .transform((str, ctx): z.infer<typeof JsonData> => {
-    try {
-      return JSON.parse(str);
-    } catch (e) {
-      ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
-      return z.NEVER;
-    }
-  });
+export const Json = z.string().transform((str, ctx): JsonData => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+    return z.NEVER;
+  }
+});
 type Json = z.infer<typeof Json>;
