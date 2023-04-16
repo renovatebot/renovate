@@ -24,7 +24,7 @@ You find the the `helpers:pinGitHubActionDigests` preset and add it to the `exte
 
 ```json
 {
-  "extends": ["config:base", "helpers:pinGitHubActionDigests"],
+  "extends": ["config:base", "helpers:pinGitHubActionDigests"]
 }
 ```
 
