@@ -87,6 +87,12 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'java',
     versioning: npmVersioningId,
   },
+  /* not used in Renovate */
+  'java-maven': {
+    datasource: 'java-version',
+    packageName: 'java',
+    versioning: mavenVersioningId,
+  },
   jb: {
     datasource: 'github-releases',
     packageName: 'jsonnet-bundler/jsonnet-bundler',
