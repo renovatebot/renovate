@@ -14,11 +14,21 @@ Common application logic for Renovate, not specific to particular managers, usua
 
 The manager's `index.ts` file supports the following values/functions:
 
+- bumpPackageVersion (optional)
 - extractPackageFile
 - extractAllPackageFiles
 - getRangeStrategy (optional)
 - language (optional)
 - supportsLockFileMaintenance (optional)
+- updateArtifacts (optional)
+- updateDependency (optional)
+- updateLockedDependency (optional)
+
+### `bumpPackageVersion` (optional)
+
+Use this function if you want to allow the version bumping of updated packages.
+E.g. increase the version of a Maven module if a package has been updated.
+Another example would be to bump the Helm chart version, if a sub chart version has been updated.
 
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
@@ -67,3 +77,16 @@ This is used when more than one package manager shares settings from a common la
 ### `supportsLockFileMaintenance` (optional)
 
 Set to true if this package manager needs to update lock files in addition to package files.
+
+### `updateArtifacts` (async, optional)
+
+This function is triggered if a dependency has been updated for a package file or `lockfileMaintenance` has been triggered.
+Mostly this function is used to directly or indirectly ( e.g. by executing external binaries ) update lock files.
+
+### `updateDependency` (optional)
+
+`updateDependency` is used if the manager can not be updated with the standard replacing mechanisms and a custom replacement has to be provided.
+
+### `updateLockedDependency` (optional)
+
+???
