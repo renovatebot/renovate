@@ -7,7 +7,9 @@ interface ErrorContext<T> {
 
 /**
  * Works like `z.array()`, but drops wrong elements instead of invalidating the whole array.
- * **Important**: non-array inputs are still invalid, use `LooseArray(...).catch([])` to handle it.
+ *
+ * **Important**: non-array inputs are still invalid.
+ * Use `LooseArray(...).catch([])` to handle it.
  *
  * @param Elem Schema for array elements
  * @param onError Callback for errors
@@ -61,7 +63,9 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
 
 /**
  * Works like `z.record()`, but drops wrong elements instead of invalidating the whole record.
- * **Important**: non-record inputs other are still invalid, use `LooseRecord(...).catch({})` to handle it.
+ *
+ * **Important**: non-record inputs other are still invalid.
+ * Use `LooseRecord(...).catch({})` to handle it.
  *
  * @param Elem Schema for record values
  * @param onError Callback for errors
