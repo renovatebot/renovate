@@ -91,26 +91,21 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
   return schemaWithFallback;
 }
 
-export function parseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(input: string, schema: Schema): z.infer<Schema> {
-  const parsed = JSON.parse(input);
-  return schema.parse(parsed);
-}
+const JsonLiteral = z.union([z.string(), z.number(), z.boolean(), z.null()]);
+type JsonLiteral = z.infer<typeof JsonLiteral>;
+type JsonData = JsonLiteral | JsonData[] | { [key: string]: JsonData };
+const JsonData: z.ZodType<JsonData> = z.lazy(() =>
+  z.union([JsonLiteral, z.array(JsonData), z.record(JsonData)])
+);
 
-export function safeParseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(
-  input: string,
-  schema: Schema,
-  catchCallback?: (e: SyntaxError | z.ZodError) => void
-): z.infer<Schema> | null {
-  try {
-    return parseJson(input, schema);
-  } catch (err) {
-    catchCallback?.(err);
-    return null;
-  }
-}
+export const Json = z
+  .string()
+  .transform((str, ctx): z.infer<typeof JsonData> => {
+    try {
+      return JSON.parse(str);
+    } catch (e) {
+      ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+      return z.NEVER;
+    }
+  });
+type Json = z.infer<typeof Json>;
