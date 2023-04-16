@@ -6,7 +6,6 @@
   },
   "name": "Renovate",
   "dockerFile": "Dockerfile",
-  "context": "..",
   "customizations": {
     "vscode": {
       "settings": {
