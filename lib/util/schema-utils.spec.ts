@@ -1,11 +1,5 @@
 import { z } from 'zod';
-import {
-  looseArray,
-  looseRecord,
-  looseValue,
-  parseJson,
-  safeParseJson,
-} from './schema-utils';
+import { Json, looseArray, looseRecord, looseValue } from './schema-utils';
 
 describe('util/schema-utils', () => {
   describe('looseArray', () => {
@@ -99,57 +93,69 @@ describe('util/schema-utils', () => {
     });
   });
 
-  describe('parseJson', () => {
+  describe('Json', () => {
     it('parses json', () => {
-      const res = parseJson('{"foo": "bar"}', z.object({ foo: z.string() }));
-      expect(res).toEqual({ foo: 'bar' });
-    });
+      const Schema = Json.pipe(z.object({ foo: z.literal('bar') }));
 
-    it('throws on invalid json', () => {
-      expect(() =>
-        parseJson('{"foo": "bar"', z.object({ foo: z.string() }))
-      ).toThrow(SyntaxError);
-    });
+      expect(Schema.parse('{"foo": "bar"}')).toEqual({ foo: 'bar' });
 
-    it('throws on invalid schema', () => {
-      expect(() =>
-        parseJson('{"foo": "bar"}', z.object({ foo: z.number() }))
-      ).toThrow(z.ZodError);
-    });
-  });
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
 
-  describe('safeParseJson', () => {
-    it('parses json', () => {
-      const res = safeParseJson(
-        '{"foo": "bar"}',
-        z.object({ foo: z.string() })
-      );
-      expect(res).toEqual({ foo: 'bar' });
-    });
+      expect(Schema.safeParse('{"foo": "foo"}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid literal value, expected "bar"',
+              code: 'invalid_literal',
+              expected: 'bar',
+              received: 'foo',
+              path: ['foo'],
+            },
+          ],
+        },
+        success: false,
+      });
 
-    it('returns null on invalid json', () => {
-      const res = safeParseJson('{"foo": "bar"', z.object({ foo: z.string() }));
-      expect(res).toBeNull();
-    });
+      expect(Schema.safeParse('["foo", "bar"]')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected object, received array',
+              code: 'invalid_type',
+              expected: 'object',
+              received: 'array',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
 
-    it('returns null on invalid schema', () => {
-      const res = safeParseJson(
-        '{"foo": "bar"}',
-        z.object({ foo: z.number() })
-      );
-      expect(res).toBeNull();
-    });
-
-    it('runs callback on invalid json', () => {
-      const callback = jest.fn();
-      safeParseJson('{"foo": "bar"', z.object({ foo: z.string() }), callback);
-      expect(callback).toHaveBeenCalledWith(expect.any(SyntaxError));
-    });
-
-    it('runs callback on invalid schema', () => {
-      const callback = jest.fn();
-      safeParseJson('{"foo": "bar"}', z.object({ foo: z.number() }), callback);
-      expect(callback).toHaveBeenCalledWith(expect.any(z.ZodError));
+      expect(Schema.safeParse('{{{}}}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid JSON',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
     });
   });
 });

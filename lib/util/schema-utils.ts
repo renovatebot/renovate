@@ -91,26 +91,20 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
   return schemaWithFallback;
 }
 
-export function parseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(input: string, schema: Schema): z.infer<Schema> {
-  const parsed = JSON.parse(input);
-  return schema.parse(parsed);
-}
+type JsonData =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonData[]
+  | { [key: string]: JsonData };
 
-export function safeParseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(
-  input: string,
-  schema: Schema,
-  catchCallback?: (e: SyntaxError | z.ZodError) => void
-): z.infer<Schema> | null {
+export const Json = z.string().transform((str, ctx): JsonData => {
   try {
-    return parseJson(input, schema);
-  } catch (err) {
-    catchCallback?.(err);
-    return null;
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+    return z.NEVER;
   }
-}
+});
+type Json = z.infer<typeof Json>;
