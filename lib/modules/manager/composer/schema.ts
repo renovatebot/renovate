@@ -211,7 +211,9 @@ export const ComposerExtract = z
 
     const lockfileName = fileName.replace(/\.json$/, '.lock');
     const lockfileContent = await readLocalFile(lockfileName, 'utf8');
-    const lockfile = safeParseJson(lockfileContent, Lockfile);
+    const lockfile = lockfileContent
+      ? safeParseJson(lockfileContent, Lockfile)
+      : null;
     return {
       file,
       lockfile: lockfile ? lockfile : { packages: [], packagesDev: [] },
