@@ -1,4 +1,4 @@
-name: 'devcontainer'
+name: devcontainer
 on:
   pull_request:
     branches:
