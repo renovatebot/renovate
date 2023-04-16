@@ -5,7 +5,7 @@ on:
       - main
 
 jobs:
-  build:
+  devcontainer-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
