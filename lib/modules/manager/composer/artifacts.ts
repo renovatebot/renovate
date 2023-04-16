@@ -97,7 +97,9 @@ export async function updateArtifacts({
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
   const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-  const lockfile = safeParseJson(lockFileContent, Lockfile);
+  const lockfile = lockFileContent
+    ? safeParseJson(lockFileContent, Lockfile)
+    : null;
   if (!lockfile) {
     logger.debug('Composer: unable to read lockfile');
     return null;

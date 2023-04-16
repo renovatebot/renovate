@@ -13,7 +13,9 @@ export function updateLockedDependency(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const lockfile = safeParseJson(lockFileContent, Lockfile);
+    const lockfile = lockFileContent
+      ? safeParseJson(lockFileContent, Lockfile)
+      : /*istanbul ignore next*/ null;
     if (
       lockfile?.packages.find(
         ({ name, version }) =>
