@@ -143,6 +143,19 @@ describe('util/schema-utils', () => {
         },
         success: false,
       });
+
+      expect(Schema.safeParse('{{{}}}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid JSON',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
     });
   });
 });
