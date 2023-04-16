@@ -20,7 +20,7 @@ beforeEach(() => {
   config.warnings = [];
 });
 
-describe('workers/repository/finalise/prune', () => {
+describe('workers/repository/finalize/prune', () => {
   describe('pruneStaleBranches()', () => {
     beforeEach(() => {
       GlobalConfig.reset();

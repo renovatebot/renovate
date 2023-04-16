@@ -110,7 +110,7 @@ describe('config/presets/internal/regex-managers', () => {
       expect(res?.deps).toMatchObject([
         {
           currentValue: '18.13.0',
-          datasource: 'node',
+          datasource: 'node-version',
           depName: 'node',
           replaceString:
             '# renovate: datasource=node depName=node versioning=node\n  NODE_VERSION: 18.13.0\n',
