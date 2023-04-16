@@ -11,6 +11,7 @@ describe('modules/versioning/maven/index', () => {
   test.each`
     version              | expected
     ${'1.0.0'}           | ${true}
+    ${'17.0.5+8'}        | ${true}
     ${'[1.12.6,1.18.6]'} | ${true}
     ${undefined}         | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
