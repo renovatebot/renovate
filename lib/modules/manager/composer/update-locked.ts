@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { safeParseJson } from '../../../util/schema-utils';
+import { Json } from '../../../util/schema-utils';
 import { api as composer } from '../../versioning/composer';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { Lockfile } from './schema';
@@ -13,9 +13,7 @@ export function updateLockedDependency(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const lockfile = lockFileContent
-      ? safeParseJson(lockFileContent, Lockfile)
-      : /*istanbul ignore next*/ null;
+    const lockfile = Json.pipe(Lockfile).parse(lockFileContent);
     if (
       lockfile?.packages.find(
         ({ name, version }) =>

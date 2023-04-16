@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { z } from 'zod';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -18,7 +19,7 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
-import { parseJson, safeParseJson } from '../../../util/schema-utils';
+import { Json } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -93,13 +94,17 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
-  const file = parseJson(newPackageFileContent, PackageFile);
+  const file = Json.pipe(PackageFile).parse(newPackageFileContent);
 
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
-  const lockFileContent = await readLocalFile(lockFileName, 'utf8');
-  const lockfile = lockFileContent
-    ? safeParseJson(lockFileContent, Lockfile)
-    : null;
+  const lockfile = await z
+    .string()
+    .transform((f) => readLocalFile(f, 'utf8'))
+    .pipe(Json)
+    .pipe(Lockfile)
+    .nullable()
+    .catch(null)
+    .parseAsync(lockFileName);
   if (!lockfile) {
     logger.debug('Composer: unable to read lockfile');
     return null;

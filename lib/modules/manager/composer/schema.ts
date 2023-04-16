@@ -3,10 +3,10 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import {
+  Json,
   looseArray,
   looseRecord,
   looseValue,
-  safeParseJson,
 } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -199,36 +199,47 @@ export const ComposerExtract = z
     content: z.string(),
     fileName: z.string(),
   })
-  .transform(async ({ content, fileName }, ctx) => {
-    const file = safeParseJson(content, PackageFile);
-    if (!file) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Composer: invalid package file',
-      });
-      return z.NEVER;
-    }
-
+  .transform(({ content, fileName }) => {
     const lockfileName = fileName.replace(/\.json$/, '.lock');
-    const lockfileContent = await readLocalFile(lockfileName, 'utf8');
-    const lockfile = lockfileContent
-      ? safeParseJson(lockfileContent, Lockfile)
-      : null;
     return {
-      file,
-      lockfile: lockfile ? lockfile : { packages: [], packagesDev: [] },
-      lockfileName: lockfile ? lockfileName : null,
+      file: content,
+      lockfileName,
+      lockfile: lockfileName,
     };
   })
-  .transform(({ file, lockfile: { packages, packagesDev }, lockfileName }) => {
+  .pipe(
+    z.object({
+      file: Json.pipe(PackageFile),
+      lockfileName: z.string(),
+      lockfile: z
+        .string()
+        .transform((lockfileName) => readLocalFile(lockfileName, 'utf8'))
+        .pipe(Json)
+        .pipe(Lockfile)
+        .nullable()
+        .catch(({ error: err }) => {
+          logger.warn({ err }, 'Composer: lockfile parsing error');
+          return null;
+        }),
+    })
+  )
+  .transform(({ file, lockfile, lockfileName }) => {
     const { composerJsonType, require, requireDev } = file;
     const { registryUrls, gitRepos, pathRepos } = file.repositories;
 
     const deps: PackageDependency[] = [];
 
     const profiles = [
-      { depType: 'require', req: require, locked: packages },
-      { depType: 'require-dev', req: requireDev, locked: packagesDev },
+      {
+        depType: 'require',
+        req: require,
+        locked: lockfile?.packages ?? [],
+      },
+      {
+        depType: 'require-dev',
+        req: requireDev,
+        locked: lockfile?.packagesDev ?? [],
+      },
     ];
 
     for (const { depType, req, locked } of profiles) {
@@ -298,7 +309,7 @@ export const ComposerExtract = z
       res.extractedConstraints = { php: require.php };
     }
 
-    if (lockfileName) {
+    if (lockfile) {
       res.lockFiles = [lockfileName];
     }
 
