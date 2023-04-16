@@ -26,8 +26,8 @@ The manager's `index.ts` file supports the following values/functions:
 
 ### `bumpPackageVersion` (optional)
 
-Use this function if you want to allow the version bumping of updated packages.
-E.g. increase the version of a Maven module if a package has been updated.
+Use this function to allow version bumps of updated packages.
+For example, increase the version of a Maven module if a package has been updated.
 Another example would be to bump the Helm chart version, if a sub chart version has been updated.
 
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
@@ -81,7 +81,8 @@ Set to true if this package manager needs to update lock files in addition to pa
 ### `updateArtifacts` (async, optional)
 
 This function is triggered if a dependency has been updated for a package file or `lockfileMaintenance` has been triggered.
-Mostly this function is used to directly or indirectly ( e.g. by executing external binaries ) update lock files.
+Mostly this function is used to directly (or indirectly) update lock files.
+An example of indirectly updating the lock file: running external binaries.
 
 ### `updateDependency` (optional)
 
