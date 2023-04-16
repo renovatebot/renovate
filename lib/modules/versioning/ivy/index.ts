@@ -42,13 +42,27 @@ function isValid(str: string): boolean {
   if (!str) {
     return false;
   }
-  return maven.isVersion(str) || !!parseDynamicRevision(str);
+
+  if (LATEST_REGEX.test(str)) {
+    return true;
+  }
+
+  return isVersion(str) || !!parseDynamicRevision(str);
 }
 
 function isVersion(str: string): boolean {
-  if (!str || LATEST_REGEX.test(str)) {
+  if (!str) {
     return false;
   }
+
+  if (LATEST_REGEX.test(str)) {
+    return false;
+  }
+
+  if (str.includes('+')) {
+    return false;
+  }
+
   return maven.isVersion(str);
 }
 

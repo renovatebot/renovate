@@ -44,7 +44,7 @@ function isDigit(char: string): boolean {
 }
 
 function isLetter(char: string): boolean {
-  return regEx(/^[a-z_]$/i).test(char);
+  return regEx(/^[a-z_+]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -281,7 +281,7 @@ function isVersion(version: unknown): version is string {
   if (!version || typeof version !== 'string') {
     return false;
   }
-  if (!regEx(/^[a-z_0-9.-]+$/i).test(version)) {
+  if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
     return false;
   }
   if (regEx(/^[.-]/).test(version)) {
