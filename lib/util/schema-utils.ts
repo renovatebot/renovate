@@ -1,3 +1,4 @@
+import JSON5 from 'json5';
 import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
 
@@ -101,3 +102,12 @@ export const Json = z.string().transform((str, ctx): JsonValue => {
   }
 });
 type Json = z.infer<typeof Json>;
+
+export const Json5 = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON5.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
+    return z.NEVER;
+  }
+});
