@@ -29,6 +29,7 @@ You find the the `helpers:pinGitHubActionDigests` preset and add it to the `exte
 ```
 
 Renovate now follows the rules for `config:base` plus the rules for `helpers:pinGitHubActionDigests`.
+If there is a logical conflict between presets, then the last preset in the array wins.
 
 ## Managing config for many repositories
 
