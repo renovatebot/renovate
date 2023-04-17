@@ -509,7 +509,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchPackagePatterns: ['*'],
-        semanticCommitType: '{{arg0}}',
+        semanticCommitTypeAll: '{{arg0}}',
       },
     ],
   },
