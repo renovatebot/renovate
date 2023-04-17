@@ -1,10 +1,5 @@
 import { z } from 'zod';
-import {
-  Json,
-  Json5,
-  LooseArray,
-  LooseRecord,
-} from './schema-utils';
+import { Json, Json5, LooseArray, LooseRecord } from './schema-utils';
 
 describe('util/schema-utils', () => {
   describe('LooseArray', () => {
