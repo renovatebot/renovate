@@ -14,7 +14,11 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 
 ## Bug Reports and Feature Requests
 
-If you've found a **bug** or have a **feature request** then please create an issue in this repository (but search first in case a similar issue already exists).
+If you've found a **bug**, first search the issues and discussions.
+If there's no issue/discussion for your bug, then please create a minimal reproduction, and open a new _discussion_.
+
+If you have a **feature request**, first search the issues/discussions.
+If there's no issue/discussion for your feature request, create a _discussion_.
 
 ## Code
 
