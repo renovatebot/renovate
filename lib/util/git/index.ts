@@ -640,7 +640,7 @@ export async function isBranchModified(
             await git.raw([
               'log',
               '--pretty=format:%ae',
-              `origin/${branchName}...origin/${baseBranch}`,
+              `origin/${branchName}..origin/${baseBranch}`,
               '--',
             ])
           )
