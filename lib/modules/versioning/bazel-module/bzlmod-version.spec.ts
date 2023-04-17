@@ -15,6 +15,16 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       expect(ident.asNumber).toBe(0);
       expect(ident.isDigitsOnly).toBe(false);
     });
+
+    it.each([
+      { a: '1', b: '1', exp: true },
+      { a: '1', b: '2', exp: false },
+      { a: 'foo1', b: '1', exp: false },
+    ])('$a.equals($b)', ({ a, b, exp }) => {
+      const aIdent = new Identifier(a);
+      const bIdent = new Identifier(b);
+      expect(aIdent.equals(bIdent)).toBe(exp);
+    });
   });
 
   describe('VersionPart', () => {

@@ -18,6 +18,10 @@ export class Identifier {
       this.asNumber = 0;
     }
   }
+
+  equals(other: Identifier): boolean {
+    return this.asString === other.asString;
+  }
 }
 
 /**
@@ -39,6 +43,20 @@ export class VersionPart extends Array<Identifier> {
   get asString(): string {
     return this.map((ident) => ident.asString).join('.');
   }
+
+  // equals(other: VersionPart): boolean {
+  //   if (this.length !== other.length) {
+  //     return false;
+  //   }
+  //   for (let i = 0; i < this.length; i++) {
+  //     const a = this[i];
+  //     const b = other[i];
+  //     if (!a.equals(b)) {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // }
 }
 
 interface VersionRegexResult {
@@ -51,6 +69,7 @@ interface VersionRegexResult {
  * Represents a Bazel module version.
  */
 export class BzlmodVersion {
+  original: string;
   release: VersionPart;
   prerelease: VersionPart;
   build: VersionPart;
@@ -60,10 +79,7 @@ export class BzlmodVersion {
     /(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?/;
 
   constructor(version: string) {
-    this.release = new VersionPart();
-    this.prerelease = new VersionPart();
-    this.build = new VersionPart();
-
+    this.original = version;
     const vparts: Partial<VersionRegexResult> | undefined =
       BzlmodVersion.versionMatcher.exec(version)?.groups;
     if (!vparts) {
@@ -80,4 +96,29 @@ export class BzlmodVersion {
     const bparts = vparts.build ? [vparts.build] : [];
     this.build = VersionPart.create(...bparts);
   }
+
+  // Comparison
+
+  // static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
+  //   if (a.equals(b)) {
+  //     return 0;
+  //   }
+  //   if (a.lessThan(b)) {
+  //     return -1;
+  //   }
+  //   return 1;
+  // }
+
+  // equals(other: BzlmodVersion): boolean {
+  //   if (!this.release.equals(other.release)) {
+  //     return false;
+  //   }
+  //   if (!this.prerelease.equals(other.prerelease)) {
+  //     return false;
+  //   }
+  //   if (!this.build.equals(other.build)) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
 }
