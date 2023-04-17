@@ -72,7 +72,7 @@ MAINTAINERS: INSERT EXAMPLE CONFIG HERE
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md/#containerbasedir) to control where Renovate stores its containerbase cache.
 
-The default image is for user who don't want to download or install things at runtime.
+The default image is for users who don't want to download or install things at runtime.
 The default image has some downsides, because it:
 
 - Comes pre-installed with _one_ version of each language/manager - usually the latest
