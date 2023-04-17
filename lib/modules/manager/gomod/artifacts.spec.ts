@@ -1973,7 +1973,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t /tmp/github/some/repo /tmp/github/some/repo/foo /tmp/github/some/repo/.bar/... /tmp/github/some/repo/cat',
+        cmd: 'go get -d -t . foo .bar/... cat',
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -2013,7 +2013,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t /tmp/github/some/repo',
+        cmd: 'go get -d -t .',
         options: {
           cwd: '/tmp/github/some/repo',
         },
