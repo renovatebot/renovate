@@ -1,3 +1,5 @@
+import JSON5 from 'json5';
+import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
 
 interface ErrorContext<T> {
@@ -124,26 +126,21 @@ export function LooseRecord<Schema extends z.ZodTypeAny>(
   });
 }
 
-export function parseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(input: string, schema: Schema): z.infer<Schema> {
-  const parsed = JSON.parse(input);
-  return schema.parse(parsed);
-}
-
-export function safeParseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(
-  input: string,
-  schema: Schema,
-  catchCallback?: (e: SyntaxError | z.ZodError) => void
-): z.infer<Schema> | null {
+export const Json = z.string().transform((str, ctx): JsonValue => {
   try {
-    return parseJson(input, schema);
-  } catch (err) {
-    catchCallback?.(err);
-    return null;
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+    return z.NEVER;
   }
-}
+});
+type Json = z.infer<typeof Json>;
+
+export const Json5 = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON5.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
+    return z.NEVER;
+  }
+});
