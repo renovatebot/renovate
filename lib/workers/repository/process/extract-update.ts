@@ -175,7 +175,10 @@ async function fetchVulnerabilities(
   if (config.osvVulnerabilityAlerts) {
     try {
       const vulnerabilities = await Vulnerabilities.create();
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
     } catch (err) {
       logger.warn({ err }, 'Unable to read vulnerability information');
     }

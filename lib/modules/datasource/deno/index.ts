@@ -9,12 +9,7 @@ import * as semanticVersioning from '../../versioning/semver';
 import { Datasource } from '../datasource';
 import type { Release } from '../index';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type {
-  DenoAPIModuleResponse,
-  DenoAPIModuleVersionResponse,
-  ReleaseMap,
-} from './types';
-import { createSourceURL, tagsToRecord } from './utils';
+import { DenoAPIModuleResponse, DenoAPIModuleVersionResponse } from './schema';
 
 export class DenoDatasource extends Datasource {
   static readonly id = 'deno';
@@ -45,7 +40,7 @@ export class DenoDatasource extends Datasource {
     const massagedRegistryUrl = registryUrl!;
 
     const extractResult = regEx(
-      '^(https://deno.land/)(?<rawPackageName>[^@\\s]+)'
+      /^(https:\/\/deno.land\/)(?<rawPackageName>[^@\s]+)/
     ).exec(packageName);
     const rawPackageName = extractResult?.groups?.rawPackageName;
     if (is.nullOrUndefined(rawPackageName)) {
@@ -73,16 +68,16 @@ export class DenoDatasource extends Datasource {
     key: (moduleAPIURL) => moduleAPIURL,
   })
   async getReleaseResult(moduleAPIURL: string): Promise<ReleaseResult> {
-    const { versions, tags } = (
-      await this.http.getJson<DenoAPIModuleResponse>(moduleAPIURL)
-    ).body;
-
-    const releasesCache =
-      (await packageCache.get<ReleaseMap>(
+    const releasesCache: Record<string, Release> =
+      (await packageCache.get(
         `datasource-${DenoDatasource.id}-details`,
         moduleAPIURL
       )) ?? {};
     let cacheModified = false;
+
+    const {
+      body: { versions, tags },
+    } = await this.http.getJson(moduleAPIURL, DenoAPIModuleResponse);
 
     // get details for the versions
     const releases = await pMap(
@@ -95,8 +90,16 @@ export class DenoDatasource extends Datasource {
         }
 
         // https://apiland.deno.dev/v2/modules/postgres/v0.17.0
-        const release = await this.getReleaseDetails(
-          joinUrlParts(moduleAPIURL, version)
+        const url = joinUrlParts(moduleAPIURL, version);
+        const { body: release } = await this.http.getJson(
+          url,
+          DenoAPIModuleVersionResponse.catch(({ error: err }) => {
+            logger.warn(
+              { err },
+              `Deno: failed to get version details for ${version}`
+            );
+            return { version };
+          })
         );
 
         releasesCache[release.version] = release;
@@ -117,21 +120,6 @@ export class DenoDatasource extends Datasource {
       );
     }
 
-    return {
-      releases,
-      tags: tagsToRecord(tags),
-    };
-  }
-
-  async getReleaseDetails(moduleAPIVersionURL: string): Promise<Release> {
-    const { version, uploaded_at, upload_options } = (
-      await this.http.getJson<DenoAPIModuleVersionResponse>(moduleAPIVersionURL)
-    ).body;
-    return {
-      version,
-      gitRef: upload_options.ref,
-      releaseTimestamp: uploaded_at,
-      sourceUrl: createSourceURL(upload_options),
-    };
+    return { releases, tags };
   }
 }

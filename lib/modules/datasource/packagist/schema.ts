@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import {
   looseArray,
-  looseObject,
   looseRecord,
   looseValue,
-} from '../../../util/schema';
+} from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -45,18 +44,13 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
 });
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
-export const ComposerRelease = z
-  .object({
-    version: z.string(),
-  })
-  .merge(
-    looseObject({
-      homepage: z.string(),
-      source: z.object({ url: z.string() }),
-      time: z.string(),
-      require: z.object({ php: z.string() }),
-    })
-  );
+export const ComposerRelease = z.object({
+  version: z.string(),
+  homepage: looseValue(z.string()),
+  source: looseValue(z.object({ url: z.string() })),
+  time: looseValue(z.string()),
+  require: looseValue(z.object({ php: z.string() })),
+});
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
 const ComposerReleasesLooseArray = looseArray(ComposerRelease);

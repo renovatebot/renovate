@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import is from '@sindresorhus/is';
 import * as openpgp from 'openpgp';
 import { logger } from '../logger';

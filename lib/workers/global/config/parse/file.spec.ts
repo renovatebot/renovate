@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import fsExtra from 'fs-extra';
 import { DirectoryResult, dir } from 'tmp-promise';
 import upath from 'upath';
