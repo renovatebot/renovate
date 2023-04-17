@@ -310,6 +310,10 @@ export async function updateArtifacts({
         })
         .map(quote)
         .join(' ');
+
+      if (goGetDirs === '') {
+        throw new Error('Invalid goGetDirs');
+      }
     }
 
     let args = `get -d -t ${goGetDirs ?? './...'}`;

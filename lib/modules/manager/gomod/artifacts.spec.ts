@@ -2020,4 +2020,31 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ]);
   });
+
+  it('errors when goGetDirs is specified with all invalid paths', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['&&', '||'],
+        },
+      })
+    ).toEqual([
+      { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
+    ]);
+    expect(execSnapshots).toMatchObject([]);
+  });
 });
