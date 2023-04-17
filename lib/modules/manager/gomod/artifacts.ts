@@ -15,7 +15,6 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { ensureLocalPath } from '../../../util/fs/util';
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
 import { find, getAll } from '../../../util/host-rules';
@@ -309,7 +308,6 @@ export async function updateArtifacts({
           }
           return isValid;
         })
-        .map(ensureLocalPath)
         .map(quote)
         .join(' ');
     }
