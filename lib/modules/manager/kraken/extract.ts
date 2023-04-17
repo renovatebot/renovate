@@ -1,15 +1,65 @@
-import { parse } from '@iarna/toml';
+import { lang, lexer, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
+import { dependencyPattern, packagePattern } from '../pip_requirements/extract';
 import type {
   ExtractConfig,
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import type { KrakenLockFile } from './types';
 
-const packageNamePattern = '^([a-zA-Z0-9\\-_]+)';
+const pkgRegex = regEx(`^(${packagePattern})$`);
+const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+function addDependency(ctx: Context, { value }: lexer.Token): Context {
+  let dep: PackageDependency = {};
+  const packageMatches = pkgValRegex.exec(value) ?? pkgRegex.exec(value);
+  if (!packageMatches) {
+    logger.debug(`Cannot extract package name from ${value} dependency`);
+    return ctx;
+  }
+
+  const [, depName, , currVal] = packageMatches;
+  const currentValue = currVal ? currVal.trim() : '';
+
+  dep = {
+    depName,
+    currentValue,
+    datasource: PypiDatasource.id,
+  };
+  ctx.deps.push(dep);
+  return ctx;
+}
+
+const python = lang.createLang('python');
+
+const qIndexUrl = q
+  .sym<Context>('index_url')
+  .op('=')
+  .str((ctx: Context, { value: varName }) => {
+    ctx.registryUrls = [varName];
+    return ctx;
+  });
+
+const qRequirements = q
+  .sym<Context>('requirements')
+  .op('=')
+  .tree({
+    type: 'wrapped-tree',
+    startsWith: '[',
+    endsWith: ']',
+    search: q.str(addDependency),
+  });
+
+const qBuildscript = q.sym<Context>('buildscript').tree({
+  type: 'wrapped-tree',
+  startsWith: '(',
+  endsWith: ')',
+  search: q.alt(qIndexUrl, qRequirements),
+});
+
+type Context = PackageFileContent;
 
 export function extractPackageFile(
   content: string,
@@ -17,61 +67,6 @@ export function extractPackageFile(
   _config?: ExtractConfig
 ): PackageFileContent | null {
   logger.info(`kraken.extractPackageFile(${fileName})`);
-
-  let krakenLockFile: KrakenLockFile;
-  try {
-    krakenLockFile = parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing .kraken.lock file');
-    return null;
-  }
-
-  const requirements = krakenLockFile.requirements;
-  const pinned = krakenLockFile.pinned;
-  if (!requirements || !pinned) {
-    logger.debug('Empty .kraken.lock file');
-    return null;
-  }
-
-  const packageRequirements = requirements.requirements;
-  if (!packageRequirements) {
-    logger.debug('No Kraken requirements');
-    return null;
-  }
-
-  const pkgRegex = regEx(packageNamePattern);
-  const deps: PackageDependency[] = [];
-  packageRequirements.forEach((packageRequirement) => {
-    let dep: PackageDependency = {};
-    const packageMatch = pkgRegex.exec(packageRequirement);
-    if (!packageMatch) {
-      logger.debug(
-        `Cannot extract package name from ${packageRequirement} dependency`
-      );
-      return;
-    }
-
-    const [, depName] = packageMatch;
-    const currentValue = pinned[depName.toLowerCase()];
-    if (!currentValue) {
-      logger.debug(`Skipping ${depName} as there is no pinned version`);
-      return;
-    }
-
-    dep = {
-      depName,
-      currentValue,
-      datasource: PypiDatasource.id,
-    };
-    deps.push(dep);
-  });
-  const res: PackageFileContent = { deps };
-
-  if (requirements.index_url) {
-    res.registryUrls = [requirements.index_url];
-  }
-  if (requirements.interpreter_constraint) {
-    res.extractedConstraints = { python: requirements.interpreter_constraint };
-  }
-  return res;
+  const res = python.query(content, qBuildscript, { deps: [] });
+  return res?.deps?.length ? res : null;
 }

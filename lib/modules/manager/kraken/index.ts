@@ -5,8 +5,9 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
-  fileMatch: ['^.kraken.lock$'],
+  fileMatch: ['^.kraken.py$'],
   versioning: pep440.id,
 };
 
 export const supportedDatasources = [PypiDatasource.id];
+export const supportsLockFileMaintenance = true;

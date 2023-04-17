@@ -17,7 +17,13 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.info(`kraken.updateArtifacts(${packageFileName})`);
 
-  if (updatedDeps === undefined || updatedDeps.length < 1) {
+  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+
+  if (
+    !isLockFileMaintenance &&
+    (updatedDeps === undefined || updatedDeps.length < 1)
+  ) {
+    logger.debug('No updated kraken deps - returning null');
     return null;
   }
 
