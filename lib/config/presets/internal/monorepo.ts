@@ -175,7 +175,10 @@ const repoGroups = {
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
-  pixijs: 'https://github.com/pixijs/pixi.js',
+  pixijs: [
+    'https://github.com/pixijs/pixi.js', // old repo
+    'https://github.com/pixijs/pixijs',
+  ],
   playwright: 'https://github.com/Microsoft/playwright',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
@@ -260,6 +263,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
+  swc: 'https://github.com/swc-project/',
 };
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */

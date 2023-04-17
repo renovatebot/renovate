@@ -82,6 +82,8 @@ import type {
 } from './types';
 import { getUserDetails, getUserEmail } from './user';
 
+export const id = 'github';
+
 const githubApi = new githubHttp.GithubHttp();
 
 let config: LocalRepoConfig;

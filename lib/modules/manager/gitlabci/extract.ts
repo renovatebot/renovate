@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
 import type {
   ExtractConfig,
@@ -132,6 +132,11 @@ export async function extractAllPackageFiles(
   // extract all includes from the files
   while (filesToExamine.length > 0) {
     const file = filesToExamine.pop()!;
+
+    if (!isValidLocalPath(file)) {
+      logger.debug(`Invalid gitlabci file path ${file}`);
+      continue;
+    }
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
