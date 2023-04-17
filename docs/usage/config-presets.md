@@ -213,7 +213,8 @@ Renovate will determine the current platform and look up the preset from there.
 Have you configured a rule that you think others might benefit from?
 Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
 
-If you need help with putting your preset into the Renovate code, open a [discussion](https://github.com/renovatebot/renovate/discussions).
+Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
+The maintainers can also help improve the preset, and let you know where to put it in the code.
 
 ## Organization level presets
 
