@@ -22,6 +22,17 @@ export class Identifier {
   equals(other: Identifier): boolean {
     return this.asString === other.asString;
   }
+
+  lessThan(other: Identifier): boolean {
+    // isDigitsOnly: true first
+    if (this.isDigitsOnly !== other.isDigitsOnly) {
+      return this.isDigitsOnly;
+    }
+    if (this.asNumber !== other.asNumber) {
+      return this.asNumber < other.asNumber;
+    }
+    return this.asString < other.asString;
+  }
 }
 
 /**

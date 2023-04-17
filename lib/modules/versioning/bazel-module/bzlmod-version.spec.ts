@@ -20,10 +20,25 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: '1', b: '1', exp: true },
       { a: '1', b: '2', exp: false },
       { a: 'foo1', b: '1', exp: false },
-    ])('$a.equals($b)', ({ a, b, exp }) => {
+      { a: 'a', b: 'a', exp: true },
+      { a: 'a', b: 'b', exp: false },
+    ])('$a equals $b', ({ a, b, exp }) => {
       const aIdent = new Identifier(a);
       const bIdent = new Identifier(b);
       expect(aIdent.equals(bIdent)).toBe(exp);
+    });
+
+    it.each([
+      { a: '1', b: '1', exp: false },
+      { a: '1', b: '2', exp: true },
+      { a: 'foo1', b: '1', exp: false },
+      { a: '1', b: 'foo1', exp: true },
+      { a: 'a', b: 'b', exp: true },
+      { a: 'b', b: 'a', exp: false },
+    ])('$a is lessThan $b', ({ a, b, exp }) => {
+      const aIdent = new Identifier(a);
+      const bIdent = new Identifier(b);
+      expect(aIdent.lessThan(bIdent)).toBe(exp);
     });
   });
 
