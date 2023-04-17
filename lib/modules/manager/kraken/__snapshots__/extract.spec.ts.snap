@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/manager/kraken/extract extractPackageFile() extracts dependencies and versions 1`] = `
+{
+  "deps": [
+    {
+      "currentValue": "1.0.0",
+      "datasource": "pypi",
+      "depName": "package-one",
+    },
+    {
+      "currentValue": "2.0.8",
+      "datasource": "pypi",
+      "depName": "package-two",
+    },
+    {
+      "currentValue": "1.2",
+      "datasource": "pypi",
+      "depName": "Package-three",
+    },
+    {
+      "currentValue": "4.9.2",
+      "datasource": "pypi",
+      "depName": "package-four",
+    },
+    {
+      "currentValue": "4.8.post3",
+      "datasource": "pypi",
+      "depName": "package-five",
+    },
+    {
+      "currentValue": "9.1.1",
+      "datasource": "pypi",
+      "depName": "package-six",
+    },
+  ],
+}
+`;
