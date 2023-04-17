@@ -309,15 +309,3 @@ export async function getLocalFiles(
 
   return fileContentMap;
 }
-
-// validFilePathRegex breakdown:
-// ^               // string start
-// (?!\/)          // does not have a leading slash '/'
-// (\.)?           // may or may not have a leading dot '.'
-// ([a-z0-9/]+)?   // an arbitrary amount of alphanumeric chars, or slash `/`
-// (\/\.{3})?      // may or may not finish with triple dot '...'
-// $               // string end
-const validFilePathRegex = new RegExp(/^(?!\/)(\.)?([a-z0-9/]+)?(\/\.{3})?$/);
-export function isValidLocalPath(s: string): boolean {
-  return validFilePathRegex.test(s);
-}

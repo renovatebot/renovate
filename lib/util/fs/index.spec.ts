@@ -495,34 +495,4 @@ describe('util/fs/index', () => {
       });
     });
   });
-
-  describe('isValidLocalPath', () => {
-    it.each`
-      value               | expected
-      ${undefined}        | ${true}
-      ${'.'}              | ${true}
-      ${'./...'}          | ${true}
-      ${'foo'}            | ${true}
-      ${'foo/bar'}        | ${true}
-      ${'./foo/bar'}      | ${true}
-      ${'./foo/bar/...'}  | ${true}
-      ${'..'}             | ${false}
-      ${'....'}           | ${false}
-      ${'./foo/..'}       | ${false}
-      ${'./foo/..../bar'} | ${false}
-      ${'./..'}           | ${false}
-      ${'\\foo'}          | ${false}
-      ${"foo'"}           | ${false}
-      ${'fo"o'}           | ${false}
-      ${'fo&o'}           | ${false}
-      ${'f;oo'}           | ${false}
-      ${'f o o'}          | ${false}
-      ${'/'}              | ${false}
-      ${'/foo'}           | ${false}
-      ${'&&'}             | ${false}
-      ${';'}              | ${false}
-    `('isValidLocalPath($value) == $expected', ({ value, expected }) => {
-      expect(isValidLocalPath(value)).toBe(expected);
-    });
-  });
 });
