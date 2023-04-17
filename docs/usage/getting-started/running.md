@@ -64,7 +64,10 @@ Read the [`binarySource` config option docs](../self-hosted-configuration.md/#bi
 The default image comes with most package managers that Renovate supports, but not _all_ package managers.
 
 You must set `binarySource=global`, if you don't then Renovate still installs the latest version of the tools or the requested version from the repository.
-The pre-installed tool are sometimes outdated if the user doesn't update the Docker image regularly.
+Update your Docker images regularly to keep the pre-installed tools up-to-date.
+You can use Renovate to update the Renovate Docker images:
+
+MAINTAINERS: INSERT EXAMPLE CONFIG HERE
 
 Renovate supports a persistent cache for downloaded tools, so that it only needs to unpack the tools on later runs.
 Use the [`containerbaseDir` config option](../self-hosted-configuration.md/#containerbasedir) to control where Renovate stores its containerbase cache.
