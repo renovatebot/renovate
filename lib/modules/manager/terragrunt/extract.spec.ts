@@ -32,9 +32,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'github',
             packageName: 'hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
+          {},
           {},
           {
             datasource: 'terraform-module',
@@ -171,7 +169,7 @@ describe('modules/manager/terragrunt/extract', () => {
         ],
       });
       expect(res?.deps).toHaveLength(30);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
     it('extracts terragrunt sources with depth specified after the branch', () => {
@@ -199,9 +197,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'github',
             packageName: 'hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
+          {},
           {},
           {
             datasource: 'terraform-module',
@@ -338,7 +334,7 @@ describe('modules/manager/terragrunt/extract', () => {
         ],
       });
       expect(res?.deps).toHaveLength(30);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
     it('extracts terragrunt sources with depth specified before the branch', () => {
@@ -366,9 +362,7 @@ describe('modules/manager/terragrunt/extract', () => {
             depType: 'github',
             packageName: 'hashicorp/example',
           },
-          {
-            skipReason: 'no-source',
-          },
+          {},
           {},
           {
             datasource: 'terraform-module',
@@ -505,7 +499,7 @@ describe('modules/manager/terragrunt/extract', () => {
         ],
       });
       expect(res?.deps).toHaveLength(30);
-      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
+      expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(4);
     });
 
     it('returns null if only local terragrunt deps', () => {

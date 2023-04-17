@@ -63,7 +63,7 @@ terraform {
   source = "my.host.local/sources/example?depth=1&ref=v1.2.1"
 }
 
-#ip
+#hostname
 terraform {
   source = "my.host/example?depth=1&ref=next"
 }
