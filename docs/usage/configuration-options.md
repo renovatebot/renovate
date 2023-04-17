@@ -854,7 +854,8 @@ The above would mean Renovate would not include files matching the above glob pa
 
 ## extends
 
-See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
+See [shareable config presets](./config-presets.md) for details.
+Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md/#how-to-use-presets) page.
 
 ## extractVersion
 
