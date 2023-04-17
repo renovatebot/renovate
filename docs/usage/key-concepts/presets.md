@@ -46,6 +46,12 @@ Renovate comes with a lot of built-in presets that you can use.
 Browse [Renovate's default presets](https://docs.renovatebot.com/presets-default/) to find any that are useful to you.
 Once you find a preset you like, put it in an `extends` array in your config file.
 
+### Contributing a new built-in preset
+
+If you have a Renovate config that may help others, you can put it into Renovate's built-in presets.
+
+Read [Contributing to presets](https://docs.renovatebot.com/config-presets/#contributing-to-presets) to learn how.
+
 ## Summary
 
 In short:
