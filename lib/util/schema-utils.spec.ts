@@ -20,8 +20,10 @@ describe('util/schema-utils', () => {
 
     it('runs callback for wrong elements', () => {
       let err: z.ZodError | undefined = undefined;
-      const Schema = LooseArray(z.string(), ({ error }) => {
-        err = error;
+      const Schema = LooseArray(z.string(), {
+        onError: ({ error }) => {
+          err = error;
+        },
       });
 
       const res = Schema.parse(['foo', 123, 'bar']);
@@ -56,8 +58,10 @@ describe('util/schema-utils', () => {
       let err: z.ZodError | undefined = undefined;
       const Schema = LooseRecord(
         z.object({ foo: z.object({ bar: z.string() }) }),
-        ({ error }) => {
-          err = error;
+        {
+          onError: ({ error }) => {
+            err = error;
+          },
         }
       );
 

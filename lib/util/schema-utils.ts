@@ -5,6 +5,10 @@ interface ErrorContext<T> {
   input: T;
 }
 
+interface LooseOpts<T> {
+  onError?: (err: ErrorContext<T>) => void;
+}
+
 /**
  * Works like `z.array()`, but drops wrong elements instead of invalidating the whole array.
  *
@@ -17,7 +21,7 @@ interface ErrorContext<T> {
  */
 export function LooseArray<Schema extends z.ZodTypeAny>(
   Elem: Schema,
-  onError?: (err: ErrorContext<unknown[]>) => void
+  { onError }: LooseOpts<unknown[]> = {}
 ): z.ZodEffects<z.ZodArray<z.ZodAny, 'many'>, z.TypeOf<Schema>[], any[]> {
   if (!onError) {
     // Avoid error-related computations inside the loop
@@ -73,7 +77,7 @@ export function LooseArray<Schema extends z.ZodTypeAny>(
  */
 export function LooseRecord<Schema extends z.ZodTypeAny>(
   Elem: Schema,
-  onError?: (ctx: ErrorContext<Record<string, unknown>>) => void
+  { onError }: LooseOpts<Record<string, unknown>> = {}
 ): z.ZodEffects<
   z.ZodRecord<z.ZodString, z.ZodAny>,
   Record<string, z.TypeOf<Schema>>,
