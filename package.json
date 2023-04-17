@@ -136,12 +136,12 @@
     "node": ">=18.12.0"
   },
   "dependencies": {
-    "@aws-sdk/client-codecommit": "3.290.0",
-    "@aws-sdk/client-ec2": "3.291.0",
-    "@aws-sdk/client-ecr": "3.290.0",
-    "@aws-sdk/client-iam": "3.291.0",
-    "@aws-sdk/client-rds": "3.290.0",
-    "@aws-sdk/client-s3": "3.290.0",
+    "@aws-sdk/client-codecommit": "3.312.0",
+    "@aws-sdk/client-ec2": "3.312.0",
+    "@aws-sdk/client-ecr": "3.312.0",
+    "@aws-sdk/client-iam": "3.312.0",
+    "@aws-sdk/client-rds": "3.314.0",
+    "@aws-sdk/client-s3": "3.312.0",
     "@breejs/later": "4.1.0",
     "@cheap-glitch/mi-cron": "1.0.1",
     "@iarna/toml": "3.0.0",
