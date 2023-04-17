@@ -33,9 +33,9 @@ terraform {
   source = "github.com/hashicorp/example?depth=1&ref=next"
 }
 
-#hostname
+#IP
 terraform {
-  source = "https://104.196.242.174"example?depth=1&ref=next"
+  source = "https://104.196.242.174/example?depth=1&ref=next"
 }
 
 #local hostname
