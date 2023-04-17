@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/devcontainers/spec/main/schemas/devContainer.schema.json",
   "hostRequirements": {
     "cpus": 4,
     "memory": "7gb",
