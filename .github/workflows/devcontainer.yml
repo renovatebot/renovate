@@ -12,6 +12,6 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
 
       - name: Build and run dev container task
-        uses: devcontainers/ci@72700878095f87b851a6c4405a16056caffdc577 # v0.3.1900000328
+        uses: devcontainers/ci@57eaf0c9b518a76872bc429cdceefd65a912309b # v0.3.1900000329
         with:
           runCmd: yarn build
