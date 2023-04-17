@@ -2303,6 +2303,20 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'artifactAuth',
+    description:
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    allowedValues: ['composer'],
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'cacheHardTtlMinutes',
     description:
       'Maximum duration in minutes to keep datasource cache entries.',
