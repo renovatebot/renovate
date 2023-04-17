@@ -1,3 +1,4 @@
+import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
 
 export function looseArray<T extends z.ZodTypeAny>(
@@ -91,15 +92,7 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
   return schemaWithFallback;
 }
 
-type JsonData =
-  | string
-  | number
-  | boolean
-  | null
-  | JsonData[]
-  | { [key: string]: JsonData };
-
-export const Json = z.string().transform((str, ctx): JsonData => {
+export const Json = z.string().transform((str, ctx): JsonValue => {
   try {
     return JSON.parse(str);
   } catch (e) {
