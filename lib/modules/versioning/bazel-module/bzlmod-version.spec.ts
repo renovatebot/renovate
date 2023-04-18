@@ -31,6 +31,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
     it.each([
       { a: '1', b: '1', exp: false },
       { a: '1', b: '2', exp: true },
+      { a: '2', b: '1', exp: false },
       { a: 'foo1', b: '1', exp: false },
       { a: '1', b: 'foo1', exp: true },
       { a: 'a', b: 'b', exp: true },
@@ -67,6 +68,10 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: ['a'], b: ['b'], exp: true },
       { a: [], b: ['1'], exp: false },
       { a: ['1'], b: [], exp: true },
+      { a: ['1', '0'], b: ['2'], exp: true },
+      { a: ['2'], b: ['1', '0'], exp: false },
+      { a: ['1', '9'], b: ['2', '0'], exp: true },
+      { a: ['2', '0'], b: ['1', '9'], exp: false },
     ])('$a is lessThan $b', ({ a, b, exp }) => {
       const avp = VersionPart.create(...a);
       const bvp = VersionPart.create(...b);
@@ -139,6 +144,22 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
       expect(abv.lessThan(bbv)).toBe(exp);
+    });
+
+    it.each([
+      { a: '1.2.3', b: '1.2.3', exp: 0 },
+      { a: '1.2.3-pre.20230417.1', b: '1.2.3', exp: -1 },
+      { a: '1.2.3', b: '1.2.3-pre.20230417.1', exp: 1 },
+      { a: '', b: '1.2.3', exp: 1 },
+      { a: '', b: '1.2.3-pre.20230417.1', exp: 1 },
+      { a: '', b: '1.2.3+build5', exp: 1 },
+      { a: '2.0', b: '1.0', exp: 1 },
+      { a: '2', b: '1.0', exp: 1 },
+      { a: '2.0', b: '1.9', exp: 1 },
+    ])('defaultCompare($a, $b)', ({ a, b, exp }) => {
+      const abv = new BzlmodVersion(a);
+      const bbv = new BzlmodVersion(b);
+      expect(BzlmodVersion.defaultCompare(abv, bbv)).toBe(exp);
     });
   });
 });

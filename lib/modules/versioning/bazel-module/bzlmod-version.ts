@@ -92,11 +92,11 @@ export class VersionPart extends Array<Identifier> {
     for (let i = 0; i < shortestLen; i++) {
       const a = this[i];
       const b = other[i];
-      if (a.lessThan(b)) {
-        return true;
+      if (!a.equals(b)) {
+        return a.lessThan(b);
       }
     }
-    return this.length < other.length;
+    return false;
   }
 }
 
@@ -156,6 +156,8 @@ export class BzlmodVersion {
     );
   }
 
+  // This logic mirrors the comparison logic in
+  // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
   lessThan(other: BzlmodVersion): boolean {
     if (this.release.lessThan(other.release)) {
       return true;
@@ -173,16 +175,13 @@ export class BzlmodVersion {
     return false;
   }
 
-  // This logic mirrors the comparison logic in
-  // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
-
-  // static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
-  //   if (a.equals(b)) {
-  //     return 0;
-  //   }
-  //   if (a.lessThan(b)) {
-  //     return -1;
-  //   }
-  //   return 1;
-  // }
+  static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
+    if (a.equals(b)) {
+      return 0;
+    }
+    if (a.lessThan(b)) {
+      return -1;
+    }
+    return 1;
+  }
 }
