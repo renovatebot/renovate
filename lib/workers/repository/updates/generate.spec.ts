@@ -357,6 +357,61 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
+    it('skips appending updateType to prTitle when prTitleAppendUpdateTypeWhenSeparatedGroup is false', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '5.1.2',
+          newVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleAppendUpdateTypeWhenSeparatedGroup: false,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleAppendUpdateTypeWhenSeparatedGroup: false,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        foo: 2,
+        isGroup: true,
+        recreateClosed: true,
+        prTitle: 'some-group',
+        commitMessage: 'some-group',
+        groupName: 'some-group',
+        releaseTimestamp: '2017-02-08T20:01:41+00:00',
+      });
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch = [
         {
@@ -368,7 +423,6 @@ describe('workers/repository/updates/generate', () => {
             '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
             'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
-          commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
           foo: 1,
           newValue: '5.1.2',
           newVersion: '5.1.2',
@@ -388,7 +442,6 @@ describe('workers/repository/updates/generate', () => {
             '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
           commitMessageExtra:
             'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
-          commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
           foo: 1,
           newValue: '1.1.0',
           newVersion: '1.1.0',
@@ -406,7 +459,7 @@ describe('workers/repository/updates/generate', () => {
         isGroup: true,
         recreateClosed: true,
         prTitle: 'some-group (minor)',
-        commitMessage: 'some-group (minor)',
+        commitMessage: 'some-group',
         groupName: 'some-group',
         releaseTimestamp: '2017-02-08T20:01:41+00:00',
       });
@@ -994,8 +1047,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
-          commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
-          prTitle: 'some-title (minor)',
+          prTitle: 'some-title',
           newValue: '0.6.0',
           isGroup: true,
           separateMinorPatch: true,
@@ -1007,8 +1059,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
-          commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
-          prTitle: 'some-title (major)',
+          prTitle: 'some-title',
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
@@ -1020,8 +1071,7 @@ describe('workers/repository/updates/generate', () => {
           manager: 'some-manager',
           depName: 'some-dep',
           branchName: 'some-branch',
-          commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
-          prTitle: 'some-title (patch)',
+          prTitle: 'some-title',
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,

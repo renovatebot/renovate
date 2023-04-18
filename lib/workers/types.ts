@@ -57,6 +57,7 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleAppendUpdateTypeWhenSeparatedGroup?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];

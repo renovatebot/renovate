@@ -61,7 +61,6 @@ export const presets: Record<string, Preset> = {
     },
   },
   automergePatch: {
-    commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
     description: 'Automerge `patch` upgrades if they pass tests.',
     lockFileMaintenance: {
       automerge: true,
@@ -551,20 +550,17 @@ export const presets: Record<string, Preset> = {
     ],
   },
   separateMajorReleases: {
-    commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
     description:
       'Separate `major` versions of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
   },
   separateMultipleMajorReleases: {
-    commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
     description:
       'Separate each `major` version of dependencies into individual branches/PRs.',
     separateMajorMinor: true,
     separateMultipleMajor: true,
   },
   separatePatchReleases: {
-    commitMessageSuffix: '{{#if isGroup}}({{updateType}}){{/if}}',
     description:
       'Separate `patch` and `minor` releases of dependencies into separate PRs.',
     separateMinorPatch: true,

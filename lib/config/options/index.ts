@@ -1849,6 +1849,14 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prTitleAppendUpdateTypeWhenSeparatedGroup',
+    description:
+      'Append the `updateType` to the Pull Request title if update is part of a group and either `separateMajorMinor` or `separateMinorPatch` is true.',
+    type: 'boolean',
+    default: false,
+    cli: false,
+  },
+  {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
