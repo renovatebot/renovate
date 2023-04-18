@@ -13,8 +13,9 @@ import {
 } from '../../../../util/fs';
 import { regEx } from '../../../../util/regex';
 import type { PackageFile } from '../../types';
+import type { PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
-import type { LockFile, LockFileEntry, PnpmWorkspaceFile } from './types';
+import type { LockFile, PnpmWorkspaceFile } from './types';
 
 export async function extractPnpmFilters(
   fileName: string
@@ -142,8 +143,8 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   // TODO #7154
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
-    const lockParsed = load(pnpmLockRaw) as Record<string, any>;
-    if (!is.plainObject(lockParsed)) {
+    const lockParsed = load(pnpmLockRaw) as PnpmLockFile;
+    if (!lockParsed) {
       logger.debug('pnpm lockfile is empty or invalid');
       return { lockedVersions: {} };
     }
@@ -154,9 +155,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/
     ); // eg. "/<packageName>(@|/)<version>"
 
-    for (const packagePath of Object.keys(
-      (lockParsed.packages || {}) as LockFileEntry
-    )) {
+    for (const packagePath of Object.keys(lockParsed.packages ?? {})) {
       const result = packagePath.match(packagePathRegex);
       if (!result?.groups) {
         logger.debug(`Invalid package path ${packagePath}`);
@@ -178,7 +177,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     );
     return {
       lockedVersions,
-      lockfileVersion: parseFloat(lockParsed.lockfileVersion as string),
+      lockfileVersion: lockParsed.lockfileVersion,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');

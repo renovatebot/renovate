@@ -32,6 +32,7 @@ export interface GenerateLockFileResult {
 
 export interface PnpmLockFile {
   lockfileVersion?: number;
+  packages?: Record<string, any>;
 }
 
 export interface YarnRcYmlFile {
