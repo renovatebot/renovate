@@ -11,6 +11,7 @@ const {
   commitMessageAction,
   commitMessageTopic,
   commitMessageExtra,
+  prTitleAppendUpdateTypeWhenSeparatedGroup,
 } = getConfig();
 let requiredDefaultOptions = {};
 
@@ -22,6 +23,7 @@ beforeEach(() => {
     commitMessageAction,
     commitMessageTopic,
     commitMessageExtra,
+    prTitleAppendUpdateTypeWhenSeparatedGroup,
   };
 });
 
@@ -458,7 +460,7 @@ describe('workers/repository/updates/generate', () => {
         foo: 2,
         isGroup: true,
         recreateClosed: true,
-        prTitle: 'some-group (minor)',
+        prTitle: 'some-group',
         commitMessage: 'some-group',
         groupName: 'some-group',
         releaseTimestamp: '2017-02-08T20:01:41+00:00',

@@ -64,6 +64,7 @@ export interface RenovateSharedConfig {
   prBodyColumns?: string[];
   prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
+  prTitleAppendUpdateTypeWhenSeparatedGroup?: boolean;
   productLinks?: Record<string, string>;
   prPriority?: number;
   rebaseLabel?: string;
