@@ -35,7 +35,6 @@ export interface BranchUpgradeConfig
   commitBody?: string;
   commitMessage?: string;
   commitMessageExtra?: string;
-  commitMessageSuffix?: string;
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
