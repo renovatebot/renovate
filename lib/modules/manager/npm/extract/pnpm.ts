@@ -143,7 +143,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const lockParsed = load(pnpmLockRaw) as Record<string, any>;
-    if (!lockParsed) {
+    if (!is.plainObject(lockParsed)) {
       logger.debug('pnpm lockfile is empty or invalid');
       return { lockedVersions: {} };
     }
