@@ -33,14 +33,14 @@ exports[`modules/manager/helmfile/extract extractPackageFile() parses multidoc y
     {
       "currentValue": "0.1.0",
       "depName": "raw",
-      "managerData": {
-        "needKustomize": true,
-      },
       "registryUrls": [
         "https://charts.helm.sh/incubator/",
       ],
     },
   ],
+  "managerData": {
+    "needKustomize": true,
+  },
 }
 `;
 
