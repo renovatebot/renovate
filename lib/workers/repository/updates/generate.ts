@@ -270,7 +270,6 @@ export function generateBranchConfig(
           ? ' (patch)'
           : '';
     }
-
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
     logger.trace(`prTitle: ` + JSON.stringify(upgrade.prTitle));
