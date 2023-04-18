@@ -119,6 +119,12 @@ See [GitHub](https://docs.github.com/en/repositories/managing-your-repositorys-s
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
 
+## autoApprove
+
+Setting this to `true` will automatically approve the PRs.
+
+You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
+
 ## autoReplaceGlobalMatch
 
 Setting this to `false` will replace only the first match during replacements updates.
@@ -257,12 +263,6 @@ If you prefer that Renovate more silently automerge _without_ Pull Requests at a
 
 The final value for `automergeType` is `"pr-comment"`, intended only for users who already have a "merge bot" such as [bors-ng](https://github.com/bors-ng/bors-ng) and want Renovate to _not_ actually automerge by itself and instead tell `bors-ng` to merge for it, by using a comment in the PR.
 If you're not already using `bors-ng` or similar, don't worry about this option.
-
-## azureAutoApprove
-
-Setting this to `true` will automatically approve the PRs in Azure DevOps.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
 
 ## azureWorkItemId
 

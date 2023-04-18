@@ -925,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
