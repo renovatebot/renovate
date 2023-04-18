@@ -1814,7 +1814,7 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles).
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
@@ -1828,8 +1828,11 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 }
 ```
 
-Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
+<!-- prettier-ignore -->
+!!! tip
+    Renovate evaluates all `packageRules` and does not stop after the first match.
+    Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
+    This way important rules override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -2119,11 +2122,17 @@ Renovate will compare `matchFiles` for an exact match against the dependency's p
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 
-```
-  "matchFiles": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "matchFiles": ["package.json"],
+    }
+  ]
+}
 ```
 
-Use `matchPaths` instead if you need more flexible matching.
+Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
 
 ### matchDepNames
 
@@ -2185,9 +2194,9 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
+Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
 
-For example the following would match any `package.json`, including files like `backend/package.json`:
+For example the following matches any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
@@ -2201,7 +2210,7 @@ For example the following would match any `package.json`, including files like `
 }
 ```
 
-The following would match any file in directories starting with `app/`:
+The following matches any file in directories starting with `app/`:
 
 ```json
 {
@@ -2214,6 +2223,11 @@ The following would match any file in directories starting with `app/`:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! caution
+    Partial matches for `matchPaths` are deprecated.
+    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
