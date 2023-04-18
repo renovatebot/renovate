@@ -1,19 +1,25 @@
 import type { SemVer } from 'semver';
 import type { NewValueConfig, VersioningApi } from '../types';
+import { BzlmodVersion } from './bzlmod-version';
+
+function getBzlmodVersion(version: string | SemVer): BzlmodVersion {
+  if (typeof version === 'string') {
+    return new BzlmodVersion(version);
+  } else {
+    return new BzlmodVersion(version.raw);
+  }
+}
 
 function getMajor(version: string | SemVer): null | number {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+  return getBzlmodVersion(version).release.major;
 }
 
 function getMinor(version: string | SemVer): null | number {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+  return getBzlmodVersion(version).release.minor;
 }
 
 function getPatch(version: string | SemVer): null | number {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+  return getBzlmodVersion(version).release.patch;
 }
 
 /**
@@ -23,16 +29,18 @@ function getPatch(version: string | SemVer): null | number {
  * For example, with Semver the build metadata should be ignored when comparing.
  */
 function equals(version: string, other: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  const abv = new BzlmodVersion(version);
+  const bbv = new BzlmodVersion(other);
+  return abv.equals(bbv);
 }
 
 /**
  * Check whether `version` is "greater" than the `other` version.
  */
 function isGreaterThan(version: string, other: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  const abv = new BzlmodVersion(version);
+  const bbv = new BzlmodVersion(other);
+  return abv.isGreaterThan(bbv);
 }
 
 /**
@@ -82,8 +90,9 @@ function getNewValue(newValueConfig: NewValueConfig): string | null {
  * greater, or `-1` if `v2` is greater.
  */
 function sortVersions(version: string, other: string): number {
-  // TODO(grindel): IMPLEMENT ME!
-  return 0;
+  const abv = new BzlmodVersion(version);
+  const bbv = new BzlmodVersion(other);
+  return BzlmodVersion.defaultCompare(abv, bbv);
 }
 
 /**
@@ -118,24 +127,30 @@ function isSingleVersion(version: string): boolean {
  * Example: in SemVer the version must not have a pre-release marker.
  */
 function isStable(version: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  const abv = new BzlmodVersion(version);
+  return !abv.isPrerelease;
 }
 
 /**
  * Check whether the `input` is a valid version or a valid version range constraint.
  */
 function isValid(input: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  try {
+    new BzlmodVersion(input);
+  } catch (e) {
+    return false;
+  }
+  return true;
 }
 
 /**
  * Check whether the `input` is a valid version string.
  */
 function isVersion(input: string | undefined | null): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  if (input === undefined || input === null) {
+    return false;
+  }
+  return isValid(input);
 }
 
 export const api: VersioningApi = {
