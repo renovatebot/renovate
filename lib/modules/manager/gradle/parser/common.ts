@@ -1,7 +1,12 @@
 import { lexer, parser, query as q } from 'good-enough-parser';
 import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
-import type { Ctx, NonEmptyArray, PackageVariables } from '../types';
+import type {
+  Ctx,
+  NonEmptyArray,
+  PackageVariables,
+  VariableData,
+} from '../types';
 
 export const REGISTRY_URLS = {
   google: 'https://dl.google.com/android/maven2/',
@@ -114,9 +119,18 @@ export function coalesceVariable(ctx: Ctx): Ctx {
   return ctx;
 }
 
+export function findVariable(
+  name: string,
+  ctx: Ctx,
+  variables: PackageVariables = ctx.globalVars
+): VariableData | undefined {
+  return variables[name];
+}
+
 export function interpolateString(
   childTokens: lexer.Token[],
-  variables: PackageVariables
+  ctx: Ctx,
+  variables: PackageVariables = ctx.globalVars
 ): string | null {
   const resolvedSubstrings: string[] = [];
   for (const childToken of childTokens) {
@@ -124,7 +138,7 @@ export function interpolateString(
     if (type === 'string-value') {
       resolvedSubstrings.push(childToken.value);
     } else if (type === 'symbol') {
-      const varData = variables[childToken.value];
+      const varData = findVariable(childToken.value, ctx, variables);
       if (varData) {
         resolvedSubstrings.push(varData.value);
       } else {

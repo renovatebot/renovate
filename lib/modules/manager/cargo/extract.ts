@@ -15,6 +15,11 @@ import type {
   CargoSection,
 } from './types';
 
+function getCargoIndexEnv(registryName: string): string | null {
+  const registry = registryName.toUpperCase().replaceAll('-', '_');
+  return process.env[`CARGO_REGISTRIES_${registry}_INDEX`] ?? null;
+}
+
 function extractFromSection(
   parsedContent: CargoSection,
   section: keyof CargoSection,
@@ -47,7 +52,9 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          const registryUrl = cargoRegistries[registryName];
+          const registryUrl =
+            cargoRegistries[registryName] ?? getCargoIndexEnv(registryName);
+
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {
