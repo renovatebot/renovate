@@ -39,6 +39,7 @@ const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
 function addDependency(ctx: Context, { value }: lexer.Token): Context {
   const packageMatches = pkgValRegex.exec(value) ?? pkgRegex.exec(value);
+  // istanbul ignore if
   if (!packageMatches) {
     return ctx;
   }

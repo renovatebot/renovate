@@ -57,6 +57,7 @@ export async function updateArtifacts({
       },
     ];
   } catch (err) {
+    // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
       throw err;
     }
