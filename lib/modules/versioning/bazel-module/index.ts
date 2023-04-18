@@ -66,8 +66,8 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+  // TODO: Rework this to be more efficient.
+  return versions.find((version) => equals(version, range)) ? range : null;
 }
 
 /**
@@ -78,8 +78,7 @@ function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+  return getSatisfyingVersion(versions, range);
 }
 
 /**

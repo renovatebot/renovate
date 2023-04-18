@@ -37,6 +37,14 @@ describe('modules/versioning/bazel-module/index', () => {
   });
 
   it.each([
+    { vers: [], rng: '1.2.3', exp: null },
+    { vers: ['1.1.0', '1.2.0', '2.0.0'], rng: '1.2.0', exp: '1.2.0' },
+    { vers: ['1.1.0', '1.2.0', '2.0.0'], rng: '1.2.3', exp: null },
+  ])('getSatisfyingVersion(vers, rng)', ({ vers, rng, exp }) => {
+    expect(bzlmod.getSatisfyingVersion(vers, rng)).toBe(exp);
+  });
+
+  it.each([
     { a: '1.2.3', b: '1.2.3', exp: 0 },
     { a: '1.2.3', b: '1.2.4', exp: -1 },
     { a: '1.2.4', b: '1.2.3', exp: 1 },
