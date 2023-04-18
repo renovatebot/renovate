@@ -20,7 +20,7 @@ export async function getLockedVersions(
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
       if (!lockFileCache[yarnLock]) {
-        logger.trace('Retrieving/parsing ' + yarnLock);
+        logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];

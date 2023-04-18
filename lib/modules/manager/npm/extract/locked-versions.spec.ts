@@ -2,12 +2,9 @@ import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 
-/** @type any */
 const npm = require('./npm');
-/** @type any */
 const pnpm = require('./pnpm');
 const yarn = require('./yarn');
-/** @type any */
 
 jest.mock('./npm');
 jest.mock('./yarn');

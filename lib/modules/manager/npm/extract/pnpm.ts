@@ -158,16 +158,19 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       (lockParsed.packages || {}) as LockFileEntry
     )) {
       const result = packagePath.match(packagePathRegex);
-      if (result?.groups) {
-        const packageName = result.groups.packageName;
-        const version = result.groups.version;
-        logger.debug({
-          packagePath,
-          packageName,
-          version,
-        });
-        lockedVersions[packageName] = version;
+      if (!result?.groups) {
+        logger.debug(`Invalid package path ${packagePath}`);
+        continue;
       }
+
+      const packageName = result.groups.packageName;
+      const version = result.groups.version;
+      logger.debug({
+        packagePath,
+        packageName,
+        version,
+      });
+      lockedVersions[packageName] = version;
     }
     logger.debug(
       { lockedVersions, lockfileVersion: lockParsed.lockfileVersion },
@@ -175,7 +178,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     );
     return {
       lockedVersions,
-      lockfileVersion: parseFloat(lockParsed.lockfileVersion),
+      lockfileVersion: parseFloat(lockParsed.lockfileVersion as string),
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
