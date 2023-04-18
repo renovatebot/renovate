@@ -1860,7 +1860,7 @@ const options: RenovateOptions[] = [
     description:
       'Append the `updateType` to the Pull Request title if update is part of a group and either `separateMajorMinor` or `separateMinorPatch` is true.',
     type: 'boolean',
-    default: false,
+    default: true,
     cli: false,
   },
   {
