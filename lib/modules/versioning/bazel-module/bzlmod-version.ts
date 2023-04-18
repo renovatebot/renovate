@@ -136,6 +136,14 @@ export class BzlmodVersion {
 
   // Comparison
 
+  equals(other: BzlmodVersion): boolean {
+    return (
+      this.release.equals(other.release) &&
+      this.prerelease.equals(other.prerelease) &&
+      this.build.equals(other.build)
+    );
+  }
+
   // This logic mirrors the comparison logic in
   // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
 

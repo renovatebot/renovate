@@ -101,5 +101,18 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       expect(bv.prerelease.asString).toBe(pexp);
       expect(bv.build.asString).toBe(bexp);
     });
+
+    it.each([
+      { a: '1.2.3', b: '1.2.3', exp: true },
+      { a: '1.2.3', b: '1.2.4', exp: false },
+      { a: '1.2.3', b: '1.2.3-pre.20230417.1', exp: false },
+      { a: '1.2.3', b: '1.2.3+build5', exp: false },
+      { a: '1.2.3', b: '1.2.3-pre.20230417.1+build5', exp: false },
+      { a: '1.2.3', b: 'foo1.2.3', exp: false },
+    ])('$a equals $b', ({ a, b, exp }) => {
+      const abv = new BzlmodVersion(a);
+      const bbv = new BzlmodVersion(b);
+      expect(abv.equals(bbv)).toBe(exp);
+    });
   });
 });
