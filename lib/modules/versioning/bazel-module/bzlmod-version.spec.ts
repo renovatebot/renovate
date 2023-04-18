@@ -123,6 +123,16 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: '1.2.3', b: '1.2.3-pre.20230417.1', exp: false },
       { a: '1.2.3', b: '1.2.3+build5', exp: false },
       { a: '1.2.3', b: '1.2.3-pre.20230417.1+build5', exp: false },
+      {
+        a: '1.2.3-pre.20230417.1+build5',
+        b: '1.2.3-pre.20230417.1+build5',
+        exp: true,
+      },
+      {
+        a: '1.2.3-pre.20230417.1+build4',
+        b: '1.2.3-pre.20230417.1+build5',
+        exp: false,
+      },
       { a: '1.2.3', b: 'foo1.2.3', exp: false },
       { a: '1.2.3', b: '', exp: false },
       { a: '', b: '', exp: true },
@@ -140,6 +150,18 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: '', b: '1.2.3', exp: false },
       { a: '1.2.3', b: '', exp: true },
       { a: '', b: '', exp: false },
+      {
+        a: '1.2.3-pre.20230417.1+build5',
+        b: '1.2.3-pre.20230417.1+build5',
+        exp: false,
+      },
+      // NOTE: We ignore the build value for precedence comparison per the Semver spec.
+      // https://semver.org/#spec-item-10
+      {
+        a: '1.2.3-pre.20230417.1+build4',
+        b: '1.2.3-pre.20230417.1+build5',
+        exp: false,
+      },
     ])('$a is lessThan $b', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
