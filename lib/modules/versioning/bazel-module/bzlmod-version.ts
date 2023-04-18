@@ -148,7 +148,14 @@ export class BzlmodVersion {
 
   // Comparison
 
-  equals(other: BzlmodVersion): boolean {
+  equals(other: BzlmodVersion, ignoreBuild?: boolean): boolean {
+    // ignoreBuild = ignoreBuild === undefined ? false : ignoreBuild;
+    if (ignoreBuild) {
+      return (
+        this.release.equals(other.release) &&
+        this.prerelease.equals(other.prerelease)
+      );
+    }
     return (
       this.release.equals(other.release) &&
       this.prerelease.equals(other.prerelease) &&
@@ -175,7 +182,7 @@ export class BzlmodVersion {
   }
 
   static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
-    if (a.equals(b)) {
+    if (a.equals(b, true)) {
       return 0;
     }
     if (a.lessThan(b)) {
