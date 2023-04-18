@@ -57,6 +57,10 @@ export class VersionPart extends Array<Identifier> {
     return this.map((ident) => ident.asString).join('.');
   }
 
+  get isEmpty(): boolean {
+    return this.length === 0;
+  }
+
   equals(other: VersionPart): boolean {
     if (this.length !== other.length) {
       return false;
@@ -106,7 +110,6 @@ interface VersionRegexResult {
  * Represents a Bazel module version.
  */
 export class BzlmodVersion {
-  original: string;
   release: VersionPart;
   prerelease: VersionPart;
   build: VersionPart;
@@ -116,7 +119,12 @@ export class BzlmodVersion {
     /(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?/;
 
   constructor(version: string) {
-    this.original = version;
+    if (version === '') {
+      this.release = VersionPart.create();
+      this.prerelease = VersionPart.create();
+      this.build = VersionPart.create();
+      return;
+    }
     const vparts: Partial<VersionRegexResult> | undefined =
       BzlmodVersion.versionMatcher.exec(version)?.groups;
     if (!vparts) {
@@ -134,6 +142,10 @@ export class BzlmodVersion {
     this.build = VersionPart.create(...bparts);
   }
 
+  get isPrerelease(): boolean {
+    return !this.prerelease.isEmpty;
+  }
+
   // Comparison
 
   equals(other: BzlmodVersion): boolean {
@@ -142,6 +154,23 @@ export class BzlmodVersion {
       this.prerelease.equals(other.prerelease) &&
       this.build.equals(other.build)
     );
+  }
+
+  lessThan(other: BzlmodVersion): boolean {
+    if (this.release.lessThan(other.release)) {
+      return true;
+    }
+    // Ensure that prerelease is listed before regular releases
+    if (this.isPrerelease && !other.isPrerelease) {
+      return true;
+    }
+    if (this.prerelease.lessThan(other.prerelease)) {
+      return true;
+    }
+    if (this.build.lessThan(other.build)) {
+      return true;
+    }
+    return false;
   }
 
   // This logic mirrors the comparison logic in
@@ -155,18 +184,5 @@ export class BzlmodVersion {
   //     return -1;
   //   }
   //   return 1;
-  // }
-
-  // equals(other: BzlmodVersion): boolean {
-  //   if (!this.release.equals(other.release)) {
-  //     return false;
-  //   }
-  //   if (!this.prerelease.equals(other.prerelease)) {
-  //     return false;
-  //   }
-  //   if (!this.build.equals(other.build)) {
-  //     return false;
-  //   }
-  //   return true;
   // }
 }
