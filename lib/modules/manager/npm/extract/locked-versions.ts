@@ -69,7 +69,7 @@ export async function getLockedVersions(
         } else {
           packageFile.extractedConstraints!.npm = '<7';
         }
-      } else if (lockfileVersion === 2) {
+      } else if (lockfileVersion === 2 || lockfileVersion === 3) {
         if (packageFile.extractedConstraints?.npm) {
           // Add a <9 constraint if the latest 8.x is compatible
           if (
@@ -84,7 +84,10 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         // TODO: types (#7154)
         dep.lockedVersion = semver.valid(
-          lockFileCache[npmLock].lockedVersions[dep.depName!]
+          lockFileCache[npmLock].lockedVersions[dep.depName!] ||
+            lockFileCache[npmLock].lockedVersions[
+              `node_modules/${dep.depName!}`
+            ]
         )!;
       }
     } else if (pnpmShrinkwrap) {

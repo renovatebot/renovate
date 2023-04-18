@@ -9,7 +9,7 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
     const lockParsed = JSON.parse(lockRaw);
     const lockedVersions: Record<string, string> = {};
     for (const [entry, val] of Object.entries(
-      (lockParsed.dependencies || {}) as LockFileEntry
+      (lockParsed.dependencies || lockParsed.packages || {}) as LockFileEntry
     )) {
       logger.trace({ entry, version: val.version });
       lockedVersions[entry] = val.version;
