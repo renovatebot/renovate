@@ -46,7 +46,7 @@ Here is another example, this time for handling Bitnami Docker images, which use
     {
       "matchDatasources": ["docker"],
       "matchPackagePrefixes": ["bitnami/"],
-      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$"
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$"
     }
   ]
 }
