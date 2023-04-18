@@ -196,21 +196,12 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: '', b: '1.0+build', exp: 1 },
       { a: '', b: '1.0-pre', exp: 1 },
       { a: '', b: '1.0-pre+build-kek.lol', exp: 1 },
-      // assertThat(Version.parse("2.0")).isGreaterThan(Version.parse("1.0"));
-      // assertThat(Version.parse("2.0")).isGreaterThan(Version.parse("1.9"));
-      // assertThat(Version.parse("11.0")).isGreaterThan(Version.parse("3.0"));
-      // assertThat(Version.parse("1.0.1")).isGreaterThan(Version.parse("1.0"));
-      // assertThat(Version.parse("1.0.0")).isGreaterThan(Version.parse("1.0"));
-      // assertThat(Version.parse("1.0+build2"))
-      //     .isEquivalentAccordingToCompareTo(Version.parse("1.0+build3"));
-      // assertThat(Version.parse("1.0")).isGreaterThan(Version.parse("1.0-pre"));
-      // assertThat(Version.parse("1.0"))
-      //        .isEquivalentAccordingToCompareTo(Version.parse("1.0+build-notpre"));
       // Release Version
       { a: '2.0', b: '1.0', exp: 1 },
       { a: '2.0', b: '1.9', exp: 1 },
       { a: '11.0', b: '3.0', exp: 1 },
-      { a: '1.0.1', b: '1.0', exp: 1 }, // Question out to Xudong and Yun
+      { a: '1.0.1', b: '1.0', exp: 1 },
+      { a: '1.0.0', b: '1.0', exp: 1 },
       { a: '1.0+build2', b: '1.0+build3', exp: 0 },
       { a: '1.0', b: '1.0-pre', exp: 1 },
       { a: '1.0', b: '1.0+build-notpre', exp: 0 },
