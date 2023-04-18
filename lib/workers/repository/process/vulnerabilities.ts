@@ -90,7 +90,7 @@ export class Vulnerabilities {
     return groups.flatMap((group) => group.vulnerabilities);
   }
 
-  async fetchDependencyVulnerabilities(
+  private async fetchDependencyVulnerabilities(
     config: RenovateConfig,
     packageFiles: Record<string, PackageFile[]>
   ): Promise<DependencyVulnerabilities[]> {
@@ -113,10 +113,10 @@ export class Vulnerabilities {
     );
     logger.trace(
       { manager, queueLength: queue.length },
-      'fetchManagerUpdates starting'
+      'fetchManagerVulnerabilities starting'
     );
     const result = (await p.all(queue)).flat();
-    logger.trace({ manager }, 'fetchManagerUpdates finished');
+    logger.trace({ manager }, 'fetchManagerVulnerabilities finished');
     return result;
   }
 
