@@ -192,7 +192,7 @@ export function getConstraints(
   let newConstraints = constraints;
 
   // find matching lockfileVersion
-  // fallback to version:5 if no match is found   -- this should be because only lockfileVersions which are >= 5 can use the name `pnpm-lock.yaml`
+  // fallback to version:5 if no match is found because `pnpm-lock.yaml` can only be generated using pnpm >= 5
   const { lowerBound, upperBound, lowerConstraint, upperConstraint } =
     lockToPnpmVersionMapping.find(
       (m) => m.lockfileVersion === lockfileVersion
