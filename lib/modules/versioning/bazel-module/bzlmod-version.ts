@@ -9,6 +9,9 @@ export class Identifier {
   static digitsOnlyMatcher = /^[0-9]+$/;
 
   constructor(value: string) {
+    if (value === '') {
+      throw new Error('Identifier value cannot be empty.');
+    }
     this.asString = value;
     if (Identifier.digitsOnlyMatcher.test(value)) {
       this.isDigitsOnly = true;
@@ -25,7 +28,7 @@ export class Identifier {
 
   // This logic mirrors the comparison logic in
   // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
-  lessThan(other: Identifier): boolean {
+  isLessThan(other: Identifier): boolean {
     // isDigitsOnly: true first
     if (this.isDigitsOnly !== other.isDigitsOnly) {
       return this.isDigitsOnly;
@@ -61,6 +64,18 @@ export class VersionPart extends Array<Identifier> {
     return this.length === 0;
   }
 
+  get major(): number {
+    return this.length > 0 ? this[0].asNumber : 0;
+  }
+
+  get minor(): number {
+    return this.length > 1 ? this[1].asNumber : 0;
+  }
+
+  get patch(): number {
+    return this.length > 2 ? this[2].asNumber : 0;
+  }
+
   equals(other: VersionPart): boolean {
     if (this.length !== other.length) {
       return false;
@@ -77,7 +92,7 @@ export class VersionPart extends Array<Identifier> {
 
   // This logic mirrors the comparison logic in
   // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
-  lessThan(other: VersionPart): boolean {
+  isLessThan(other: VersionPart): boolean {
     if (this.equals(other)) {
       return false;
     }
@@ -93,7 +108,7 @@ export class VersionPart extends Array<Identifier> {
       const a = this[i];
       const b = other[i];
       if (!a.equals(b)) {
-        return a.lessThan(b);
+        return a.isLessThan(b);
       }
     }
     return this.length < other.length;
@@ -116,7 +131,7 @@ export class BzlmodVersion {
 
   // Supported version pattern
   static versionMatcher =
-    /(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?/;
+    /^(?<release>[a-zA-Z0-9.]+)(?:-(?<prerelease>[a-zA-Z0-9.-]+))?(?:\+(?<build>[a-zA-Z0-9.-]+))?$/;
 
   constructor(version: string) {
     if (version === '') {
@@ -149,7 +164,6 @@ export class BzlmodVersion {
   // Comparison
 
   equals(other: BzlmodVersion, ignoreBuild?: boolean): boolean {
-    // ignoreBuild = ignoreBuild === undefined ? false : ignoreBuild;
     if (ignoreBuild) {
       return (
         this.release.equals(other.release) &&
@@ -165,15 +179,15 @@ export class BzlmodVersion {
 
   // This logic mirrors the comparison logic in
   // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
-  lessThan(other: BzlmodVersion): boolean {
-    if (this.release.lessThan(other.release)) {
+  isLessThan(other: BzlmodVersion): boolean {
+    if (this.release.isLessThan(other.release)) {
       return true;
     }
     // Ensure that prerelease is listed before regular releases
     if (this.isPrerelease && !other.isPrerelease) {
       return true;
     }
-    if (this.prerelease.lessThan(other.prerelease)) {
+    if (this.prerelease.isLessThan(other.prerelease)) {
       return true;
     }
     // NOTE: We ignore the build value for precedence comparison per the Semver spec.
@@ -181,11 +195,15 @@ export class BzlmodVersion {
     return false;
   }
 
+  isGreaterThan(other: BzlmodVersion): boolean {
+    return BzlmodVersion.defaultCompare(this, other) === 1;
+  }
+
   static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
     if (a.equals(b, true)) {
       return 0;
     }
-    if (a.lessThan(b)) {
+    if (a.isLessThan(b)) {
       return -1;
     }
     return 1;
