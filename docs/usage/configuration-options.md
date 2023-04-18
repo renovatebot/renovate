@@ -854,7 +854,8 @@ The above would mean Renovate would not include files matching the above glob pa
 
 ## extends
 
-See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
+See [shareable config presets](./config-presets.md) for details.
+Learn how to use presets by reading the [Key concepts, Presets](./key-concepts/presets.md/#how-to-use-presets) page.
 
 ## extractVersion
 
@@ -1038,6 +1039,17 @@ Ignore the default project level approval(s), so that Renovate bot can automerge
 Under the hood, it creates a MR-level approval rule where `approvals_required` is set to `0`.
 This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
+
+## goGetDirs
+
+By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
+If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option:
+
+```json
+{
+  "goGetDirs": ["./some-project/", "./tools/..."]
+}
+```
 
 ## golang
 
@@ -1347,6 +1359,31 @@ Example:
 ### keepalive
 
 If enabled, this allows a single TCP connection to remain open for multiple HTTP(S) requests/responses.
+
+### artifactAuth
+
+You may use this field whenever it is needed to only enable authentication for a specific set of managers.
+
+For example, using this option could be used whenever authentication using Git for private composer packages is already being handled through the use of SSH keys, which results in no need for also setting up authentication using tokens.
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "gitlab",
+      "matchHost": "gitlab.myorg.com",
+      "token": "abc123",
+      "artifactAuth": ["composer"]
+    }
+  ]
+}
+```
+
+Supported artifactAuth and hostType combinations:
+
+| artifactAuth | hostTypes                                   |
+| ------------ | ------------------------------------------- |
+| `composer`   | `gitlab`, `packagist`, `github`, `git-tags` |
 
 ### matchHost
 
@@ -2031,7 +2068,7 @@ The `currentVersion` field will be one of the following (in order of preference)
 
 Consider using instead `matchCurrentValue` if you wish to match against the raw string value of a dependency.
 
-`matchCurrentVersion` can be an exact SemVer version or a SemVer range:
+`matchCurrentVersion` can be an exact version or a version range:
 
 ```json
 {
@@ -2043,6 +2080,10 @@ Consider using instead `matchCurrentValue` if you wish to match against the raw 
   ]
 }
 ```
+
+The syntax of the version range must follow the [versioning scheme](https://docs.renovatebot.com/modules/versioning/#supported-versioning) used by the matched package(s).
+This is usually defined by the [manager](https://docs.renovatebot.com/modules/manager/#supported-managers) which discovered them or by the default versioning for the package's [datasource](https://docs.renovatebot.com/modules/datasource/).
+For example, a Gradle package would typically need Gradle constraint syntax (e.g. `[,7.0)`) and not SemVer syntax (e.g. `<7.0`).
 
 This field also supports Regular Expressions which must begin and end with `/`.
 For example, the following enforces that only `1.*` versions will be used:
