@@ -53,8 +53,9 @@ function isGreaterThan(version: string, other: string): boolean {
  * the `range`.
  */
 function isLessThanRange(version: string, range: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  const abv = new BzlmodVersion(version);
+  const bbv = new BzlmodVersion(range);
+  return abv.isLessThan(bbv);
 }
 
 /**

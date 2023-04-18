@@ -21,6 +21,22 @@ describe('modules/versioning/bazel-module/index', () => {
   });
 
   it.each([
+    { a: '1.2.4', b: '1.2.3', exp: true },
+    { a: '1.2.3', b: '1.2.3', exp: false },
+    { a: '1.2.2', b: '1.2.3', exp: false },
+  ])('isGreaterThan($a, $b)', ({ a, b, exp }) => {
+    expect(bzlmod.isGreaterThan(a, b)).toBe(exp);
+  });
+
+  it.each([
+    { a: '1.2.4', b: '1.2.3', exp: false },
+    { a: '1.2.3', b: '1.2.3', exp: false },
+    { a: '1.2.2', b: '1.2.3', exp: true },
+  ])('isLessThanRange($a, $b)', ({ a, b, exp }) => {
+    expect(bzlmod.isLessThanRange(a, b)).toBe(exp);
+  });
+
+  it.each([
     { a: '1.2.3', b: '1.2.3', exp: 0 },
     { a: '1.2.3', b: '1.2.4', exp: -1 },
     { a: '1.2.4', b: '1.2.3', exp: 1 },
