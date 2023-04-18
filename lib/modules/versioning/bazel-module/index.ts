@@ -2,6 +2,8 @@ import type { SemVer } from 'semver';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { BzlmodVersion } from './bzlmod-version';
 
+export const id = 'bazel-module';
+
 function getBzlmodVersion(version: string | SemVer): BzlmodVersion {
   if (typeof version === 'string') {
     return new BzlmodVersion(version);
