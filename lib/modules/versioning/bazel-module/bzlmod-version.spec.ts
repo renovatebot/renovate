@@ -59,6 +59,19 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       const bvp = VersionPart.create(...b);
       expect(avp.equals(bvp)).toBe(exp);
     });
+
+    it.each([
+      { a: ['1', '0'], b: ['1', '0'], exp: false },
+      { a: ['1', '0'], b: ['1', '1'], exp: true },
+      { a: ['1', '1'], b: ['1', '0'], exp: false },
+      { a: ['a'], b: ['b'], exp: true },
+      { a: [], b: ['1'], exp: false },
+      { a: ['1'], b: [], exp: true },
+    ])('$a is lessThan $b', ({ a, b, exp }) => {
+      const avp = VersionPart.create(...a);
+      const bvp = VersionPart.create(...b);
+      expect(avp.lessThan(bvp)).toBe(exp);
+    });
   });
 
   describe('BzlmodVersion', () => {

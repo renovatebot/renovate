@@ -23,6 +23,8 @@ export class Identifier {
     return this.asString === other.asString;
   }
 
+  // This logic mirrors the comparison logic in
+  // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
   lessThan(other: Identifier): boolean {
     // isDigitsOnly: true first
     if (this.isDigitsOnly !== other.isDigitsOnly) {
@@ -68,6 +70,30 @@ export class VersionPart extends Array<Identifier> {
     }
     return true;
   }
+
+  // This logic mirrors the comparison logic in
+  // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
+  lessThan(other: VersionPart): boolean {
+    if (this.equals(other)) {
+      return false;
+    }
+    // Non-empty are first
+    if (this.length === 0 && other.length !== 0) {
+      return false;
+    }
+    if (other.length === 0 && this.length !== 0) {
+      return true;
+    }
+    const shortestLen = this.length < other.length ? this.length : other.length;
+    for (let i = 0; i < shortestLen; i++) {
+      const a = this[i];
+      const b = other[i];
+      if (a.lessThan(b)) {
+        return true;
+      }
+    }
+    return this.length < other.length;
+  }
 }
 
 interface VersionRegexResult {
@@ -109,6 +135,9 @@ export class BzlmodVersion {
   }
 
   // Comparison
+
+  // This logic mirrors the comparison logic in
+  // https://cs.opensource.google/bazel/bazel/+/refs/heads/master:src/main/java/com/google/devtools/build/lib/bazel/bzlmod/Version.java
 
   // static defaultCompare(a: BzlmodVersion, b: BzlmodVersion): number {
   //   if (a.equals(b)) {
