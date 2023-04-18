@@ -1040,6 +1040,17 @@ Under the hood, it creates a MR-level approval rule where `approvals_required` i
 This option works only when `automerge=true`, `automergeType=pr` or `automergeType=branch`, and `platformAutomerge=true`.
 Also, approval rules overriding should not be [prevented in GitLab settings](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/settings.html#prevent-editing-approval-rules-in-merge-requests).
 
+## goGetDirs
+
+By default, Renovate will run `go get -d -t ./...` to update the `go.sum`.
+If you need to modify this path, for example in order to ignore directories, you can override the default `./...` value using this option:
+
+```json
+{
+  "goGetDirs": ["./some-project/", "./tools/..."]
+}
+```
+
 ## golang
 
 Configuration added here applies for all Go-related updates.

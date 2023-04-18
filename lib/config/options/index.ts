@@ -366,6 +366,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
+  },
   // Log options
   {
     name: 'logFile',
