@@ -5,7 +5,7 @@ export { extractPackageFile } from './extract';
 export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
-  fileMatch: ['^.kraken.py$'],
+  fileMatch: ['(^|/)\\.kraken\\.py$'],
   versioning: pep440.id,
 };
 

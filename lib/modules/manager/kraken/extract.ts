@@ -3,42 +3,17 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import { dependencyPattern, packagePattern } from '../pip_requirements/extract';
-import type {
-  ExtractConfig,
-  PackageDependency,
-  PackageFileContent,
-} from '../types';
-
-const pkgRegex = regEx(`^(${packagePattern})$`);
-const pkgValRegex = regEx(`^${dependencyPattern}$`);
-
-function addDependency(ctx: Context, { value }: lexer.Token): Context {
-  let dep: PackageDependency = {};
-  const packageMatches = pkgValRegex.exec(value) ?? pkgRegex.exec(value);
-  if (!packageMatches) {
-    logger.debug(`Cannot extract package name from ${value} dependency`);
-    return ctx;
-  }
-
-  const [, depName, , currVal] = packageMatches;
-  const currentValue = currVal ? currVal.trim() : '';
-
-  dep = {
-    depName,
-    currentValue,
-    datasource: PypiDatasource.id,
-  };
-  ctx.deps.push(dep);
-  return ctx;
-}
+import type { ExtractConfig, PackageFileContent } from '../types';
 
 const python = lang.createLang('python');
+
+type Context = PackageFileContent;
 
 const qIndexUrl = q
   .sym<Context>('index_url')
   .op('=')
-  .str((ctx: Context, { value: varName }) => {
-    ctx.registryUrls = [varName];
+  .str((ctx: Context, { value }: lexer.Token) => {
+    ctx.registryUrls = [value];
     return ctx;
   });
 
@@ -59,7 +34,25 @@ const qBuildscript = q.sym<Context>('buildscript').tree({
   search: q.alt(qIndexUrl, qRequirements),
 });
 
-type Context = PackageFileContent;
+const pkgRegex = regEx(`^(${packagePattern})$`);
+const pkgValRegex = regEx(`^${dependencyPattern}$`);
+
+function addDependency(ctx: Context, { value }: lexer.Token): Context {
+  const packageMatches = pkgValRegex.exec(value) ?? pkgRegex.exec(value);
+  if (!packageMatches) {
+    return ctx;
+  }
+
+  const [, depName, , currVal] = packageMatches;
+  const currentValue = currVal?.trim() ?? '';
+
+  ctx.deps.push({
+    depName,
+    currentValue,
+    datasource: PypiDatasource.id,
+  });
+  return ctx;
+}
 
 export function extractPackageFile(
   content: string,

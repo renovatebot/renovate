@@ -20,7 +20,7 @@ describe('modules/manager/kraken/artifacts', () => {
     const updatedDeps = [{ depName: 'dep' }];
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
@@ -38,7 +38,7 @@ describe('modules/manager/kraken/artifacts', () => {
     const updatedDeps = [{ depName: 'dep' }];
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
@@ -58,7 +58,7 @@ describe('modules/manager/kraken/artifacts', () => {
     const updatedDeps = [{ depName: 'dep' }];
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
@@ -71,7 +71,7 @@ describe('modules/manager/kraken/artifacts', () => {
     const execSnapshots = mockExecAll();
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps: [],
         newPackageFileContent: '',
         config,
@@ -91,7 +91,7 @@ describe('modules/manager/kraken/artifacts', () => {
     const updatedDeps = [{ depName: 'dep' }];
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps,
         newPackageFileContent: '',
         config,
@@ -117,9 +117,9 @@ describe('modules/manager/kraken/artifacts', () => {
     const updatedDeps = [{ depName: 'dep' }];
     expect(
       await updateArtifacts({
-        packageFileName: '.kraken.lock',
+        packageFileName: '.kraken.py',
         updatedDeps,
-        newPackageFileContent: '{}',
+        newPackageFileContent: '',
         config,
       })
     ).toEqual([
