@@ -49,6 +49,16 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
     ])('.asString', ({ vp, exp }) => {
       expect(vp.asString).toBe(exp);
     });
+
+    it.each([
+      { a: ['1', '0'], b: ['1', '0'], exp: true },
+      { a: ['1', '0'], b: ['1', '1'], exp: false },
+      { a: ['foo1', '0'], b: ['foo1', '0'], exp: true },
+    ])('$a equals $b', ({ a, b, exp }) => {
+      const avp = VersionPart.create(...a);
+      const bvp = VersionPart.create(...b);
+      expect(avp.equals(bvp)).toBe(exp);
+    });
   });
 
   describe('BzlmodVersion', () => {

@@ -55,19 +55,19 @@ export class VersionPart extends Array<Identifier> {
     return this.map((ident) => ident.asString).join('.');
   }
 
-  // equals(other: VersionPart): boolean {
-  //   if (this.length !== other.length) {
-  //     return false;
-  //   }
-  //   for (let i = 0; i < this.length; i++) {
-  //     const a = this[i];
-  //     const b = other[i];
-  //     if (!a.equals(b)) {
-  //       return false;
-  //     }
-  //   }
-  //   return true;
-  // }
+  equals(other: VersionPart): boolean {
+    if (this.length !== other.length) {
+      return false;
+    }
+    for (let i = 0; i < this.length; i++) {
+      const a = this[i];
+      const b = other[i];
+      if (!a.equals(b)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
 
 interface VersionRegexResult {
