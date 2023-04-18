@@ -1858,7 +1858,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prTitleAppendUpdateTypeWhenSeparatedGroup',
     description:
-      'Append the `updateType` to the Pull Request title if update is part of a group and either `separateMajorMinor` or `separateMinorPatch` is true.',
+      'Whether to append the `updateType` to the Pull Request title if update is part of a group and either `separateMajorMinor` or `separateMinorPatch` is true.',
     type: 'boolean',
     default: true,
     cli: false,
