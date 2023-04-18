@@ -14,7 +14,12 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 
 ## Bug Reports and Feature Requests
 
-If you've found a **bug** or have a **feature request** then please create an issue in this repository (but search first in case a similar issue already exists).
+**Bugs**: First search for related bugs in the issues and discussions, if you don't find anything then:
+
+1. Create a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md)
+1. Open a new _discussion_ and link to the minimal reproduction
+
+For **feature requests**: first search for related requests in the issues and discussions, if you don't find anything: create a _discussion_.
 
 ## Code
 

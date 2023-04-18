@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -64,6 +64,8 @@ interface GiteaRepoConfig {
   defaultBranch: string;
   cloneSubmodules: boolean;
 }
+
+export const id = 'gitea';
 
 const DRAFT_PREFIX = 'WIP: ';
 
@@ -947,10 +949,6 @@ const platform: Platform = {
   massageMarkdown(prBody: string): string {
     return smartTruncate(smartLinks(prBody), 1000000);
   },
-
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-    return Promise.resolve([]);
-  },
 };
 
 /* eslint-disable @typescript-eslint/unbound-method */
@@ -977,7 +975,6 @@ export const {
   getPrList,
   getRepoForceRebase,
   getRepos,
-  getVulnerabilityAlerts,
   initPlatform,
   initRepo,
   mergePr,

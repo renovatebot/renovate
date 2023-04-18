@@ -5,6 +5,7 @@ import {
   parseDependencyString,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
   versionLikeSubstring,
 } from './utils';
 
@@ -174,6 +175,23 @@ describe('modules/manager/gradle/utils', () => {
       bar: { key: 'bar', value: 'bar' },
       baz: { key: 'baz', value: 'baz' },
       qux: { key: 'qux', value: 'QUX' },
+    });
+  });
+
+  it('updateVars', () => {
+    const registry: VariableRegistry = {
+      [toAbsolutePath('/foo/bar/baz')]: {
+        bar: { key: 'bar', value: 'bar' } as never,
+        baz: { key: 'baz', value: 'baz' } as never,
+      },
+    };
+
+    updateVars(registry, '/foo/bar/baz', { qux: { key: 'qux', value: 'qux' } });
+    const res = getVars(registry, '/foo/bar/baz/build.gradle');
+    expect(res).toStrictEqual({
+      bar: { key: 'bar', value: 'bar' },
+      baz: { key: 'baz', value: 'baz' },
+      qux: { key: 'qux', value: 'qux' },
     });
   });
 });

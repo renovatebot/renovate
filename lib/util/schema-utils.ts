@@ -1,71 +1,6 @@
-import is from '@sindresorhus/is';
-import hasha from 'hasha';
+import JSON5 from 'json5';
+import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
-import { logger } from '../logger';
-import * as memCache from './cache/memory';
-import { safeStringify } from './stringify';
-
-type SchemaErrorsMap = Record<string, Record<string, z.ZodError>>;
-
-function getCacheKey(error: z.ZodError): string {
-  const content = safeStringify(error);
-  const key = hasha(content).slice(0, 32);
-  return `err_${key}`;
-}
-
-function collectError<T extends z.ZodSchema>(
-  schema: T,
-  error: z.ZodError
-): void {
-  const { description = 'Unspecified schema' } = schema;
-  const schemaErrorsMap = memCache.get<SchemaErrorsMap>('schema-errors') ?? {};
-  const schemaErrors = schemaErrorsMap[description] ?? {};
-  const key = getCacheKey(error);
-  const schemaError = schemaErrors[key];
-  if (!schemaError) {
-    schemaErrors[key] = error;
-    schemaErrorsMap[description] = schemaErrors;
-  }
-  memCache.set('schema-errors', schemaErrorsMap);
-}
-
-export function reportErrors(): void {
-  const schemaErrorsMap = memCache.get<SchemaErrorsMap>('schema-errors');
-  if (!schemaErrorsMap) {
-    return;
-  }
-
-  for (const [description, schemaErrors] of Object.entries(schemaErrorsMap)) {
-    const errors = Object.values(schemaErrors);
-    for (const err of errors) {
-      logger.warn({ description, err }, `Schema validation error`);
-    }
-  }
-
-  memCache.set('schema-errors', null);
-}
-
-export function match<T extends z.ZodSchema>(
-  schema: T,
-  input: unknown,
-  onError?: 'warn' | 'throw'
-): input is z.infer<T> {
-  const res = schema.safeParse(input);
-  const { success } = res;
-  if (!success) {
-    if (onError === 'warn') {
-      collectError(schema, res.error);
-    }
-
-    if (onError === 'throw') {
-      throw res.error;
-    }
-
-    return false;
-  }
-
-  return true;
-}
 
 export function looseArray<T extends z.ZodTypeAny>(
   schema: T,
@@ -96,7 +31,7 @@ export function looseArray<T extends z.ZodTypeAny>(
     : arrayOfNullables.catch([]);
 
   const filteredArray = arrayWithFallback.transform((xs) =>
-    xs.filter((x): x is Elem => !is.null_(x))
+    xs.filter((x): x is Elem => x !== null)
   );
 
   return filteredArray;
@@ -133,7 +68,7 @@ export function looseRecord<T extends z.ZodTypeAny>(
   const filteredRecord = recordWithFallback.transform(
     (rec): Record<string, Elem> => {
       for (const key of Object.keys(rec)) {
-        if (is.null_(rec[key])) {
+        if (rec[key] === null) {
           delete rec[key];
         }
       }
@@ -157,3 +92,22 @@ export function looseValue<T, U extends z.ZodTypeDef, V>(
     : nullableSchema.catch(null);
   return schemaWithFallback;
 }
+
+export const Json = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+    return z.NEVER;
+  }
+});
+type Json = z.infer<typeof Json>;
+
+export const Json5 = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON5.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
+    return z.NEVER;
+  }
+});

@@ -61,7 +61,9 @@ function callApi<T>(
     case 'patch':
       return bitbucketServerHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketServerHttp.headJson<T>(apiUrl, options);
+      return bitbucketServerHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
     case 'get':
