@@ -85,9 +85,8 @@ function minSatisfyingVersion(
  * Calculate a new version constraint based on the current constraint, the
  * `rangeStrategy` option, and the current and new version.
  */
-function getNewValue(newValueConfig: NewValueConfig): string | null {
-  // TODO(grindel): IMPLEMENT ME!
-  return null;
+function getNewValue({ newVersion }: NewValueConfig): string {
+  return newVersion;
 }
 
 /**
@@ -104,8 +103,7 @@ function sortVersions(version: string, other: string): number {
  * Check whether the `version` satisfies the `range` constraint.
  */
 function matches(version: string, range: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  return equals(version, range);
 }
 
 /**
@@ -113,8 +111,7 @@ function matches(version: string, range: string): boolean {
  * constraint.
  */
 function isCompatible(version: string, current?: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  return isValid(version);
 }
 
 /**
@@ -122,8 +119,7 @@ function isCompatible(version: string, current?: string): boolean {
  * single specific version.
  */
 function isSingleVersion(version: string): boolean {
-  // TODO(grindel): IMPLEMENT ME!
-  return false;
+  return isValid(version);
 }
 
 /**
