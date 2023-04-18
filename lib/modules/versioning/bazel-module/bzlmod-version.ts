@@ -96,7 +96,7 @@ export class VersionPart extends Array<Identifier> {
         return a.lessThan(b);
       }
     }
-    return false;
+    return this.length < other.length;
   }
 }
 

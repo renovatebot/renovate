@@ -178,6 +178,7 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       },
       { a: '4', b: 'a', exp: true },
       { a: 'abc', b: 'abd', exp: true },
+      { a: 'pre', b: 'pre.foo', exp: true },
     ])('$a is lessThan $b', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
@@ -205,6 +206,23 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       { a: '1.0+build2', b: '1.0+build3', exp: 0 },
       { a: '1.0', b: '1.0-pre', exp: 1 },
       { a: '1.0', b: '1.0+build-notpre', exp: 0 },
+      // Release Version with Letters
+      { a: '1.0.patch.3', b: '1.0', exp: 1 },
+      { a: '1.0.patch.3', b: '1.0.patch.2', exp: 1 },
+      { a: '1.0.patch.3', b: '1.0.patch.10', exp: -1 },
+      { a: '1.0.patch3', b: '1.0.patch10', exp: 1 },
+      { a: '4', b: 'a', exp: -1 },
+      { a: 'abc', b: 'abd', exp: -1 },
+      // Prerelease Version
+      { a: '1.0-pre', b: '1.0-are', exp: 1 },
+      { a: '1.0-3', b: '1.0-2', exp: 1 },
+      { a: '1.0-pre', b: '1.0-pre.foo', exp: -1 },
+      { a: '1.0-pre.3', b: '1.0-pre.2', exp: 1 },
+      { a: '1.0-pre.10', b: '1.0-pre.2', exp: 1 },
+      { a: '1.0-pre.10a', b: '1.0-pre.2a', exp: -1 },
+      { a: '1.0-pre.99', b: '1.0-pre.2a', exp: -1 },
+      { a: '1.0-pre.patch.3', b: '1.0-pre.patch.4', exp: -1 },
+      { a: '1.0--', b: '1.0----', exp: -1 },
     ])('defaultCompare($a, $b)', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
