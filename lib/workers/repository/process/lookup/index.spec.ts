@@ -1002,7 +1002,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
       config.datasource = GithubReleasesDatasource.id;
-      config.stabilityDays = 14;
+      config.minimumReleaseAge = '14 days';
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
@@ -1025,7 +1025,7 @@ describe('workers/repository/process/lookup/index', () => {
       config.currentValue = '1.4.4';
       config.packageName = 'some/action';
       config.datasource = GithubReleasesDatasource.id;
-      config.stabilityDays = 3;
+      config.minimumReleaseAge = '3 days';
       config.internalChecksFilter = 'strict';
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);

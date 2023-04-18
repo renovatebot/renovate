@@ -22,4 +22,15 @@ describe('config/migrations/custom/datasource-migration', () => {
       }
     );
   });
+
+  it('should migrate node', () => {
+    expect(DatasourceMigration).toMigrate(
+      {
+        datasource: 'node',
+      },
+      {
+        datasource: 'node-version',
+      }
+    );
+  });
 });

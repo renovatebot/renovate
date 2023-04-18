@@ -116,9 +116,9 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
-      const fetchVulnerabilitiesMock = jest.fn();
+      const appendVulnerabilityPackageRulesMock = jest.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
-        fetchVulnerabilities: fetchVulnerabilitiesMock,
+        appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       git.checkoutBranch.mockResolvedValueOnce('123test');
@@ -127,7 +127,7 @@ describe('workers/repository/process/extract-update', () => {
       await lookup(config, packageFiles);
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
-      expect(fetchVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledOnce();
     });
 
     it('handles exception when fetching vulnerabilities', async () => {

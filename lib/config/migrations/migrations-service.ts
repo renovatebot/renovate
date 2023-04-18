@@ -47,6 +47,7 @@ import { SemanticCommitsMigration } from './custom/semantic-commits-migration';
 import { SemanticPrefixMigration } from './custom/semantic-prefix-migration';
 import { SeparateMajorReleasesMigration } from './custom/separate-major-release-migration';
 import { SeparateMultipleMajorMigration } from './custom/separate-multiple-major-migration';
+import { StabilityDaysMigration } from './custom/stability-days-migration';
 import { SuppressNotificationsMigration } from './custom/suppress-notifications-migration';
 import { TrustLevelMigration } from './custom/trust-level-migration';
 import { UnpublishSafeMigration } from './custom/unpublish-safe-migration';
@@ -75,6 +76,7 @@ export class MigrationsService {
 
   static readonly renamedProperties: ReadonlyMap<string, string> = new Map([
     ['adoptium-java', 'java-version'],
+    ['azureAutoApprove', 'autoApprove'],
     ['endpoints', 'hostRules'],
     ['excludedPackageNames', 'excludePackageNames'],
     ['exposeEnv', 'exposeAllEnv'],
@@ -143,6 +145,7 @@ export class MigrationsService {
     SemanticPrefixMigration,
     MatchDatasourcesMigration,
     DatasourceMigration,
+    StabilityDaysMigration,
   ];
 
   static run(originalConfig: RenovateConfig): RenovateConfig {
