@@ -1,4 +1,5 @@
 import yaml from 'js-yaml';
+import { Fixtures } from '../../../../../test/fixtures';
 import { getFixturePath, logger } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as fs from '../../../../util/fs';
@@ -7,6 +8,7 @@ import {
   extractPnpmFilters,
   findPnpmWorkspace,
   getConstraints,
+  getPnpmLock,
 } from './pnpm';
 
 describe('modules/manager/npm/extract/pnpm', () => {
@@ -273,6 +275,37 @@ describe('modules/manager/npm/extract/pnpm', () => {
       [5.0, '>=2', '>=2 >=3 <3.5.0'],
     ])('adds constraints for %f', (lockfileVersion, constraints, expected) => {
       expect(getConstraints(lockfileVersion, constraints)).toBe(expected);
+    });
+  });
+
+  describe('.getPnpmLock()', () => {
+    it('returns empty if failed to parse', async () => {
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('abcd');
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+    });
+
+    it('extracts pnpm-lock file with lockfileVersion<6', async () => {
+      const plocktest1Lock = Fixtures.get('pnpm-monorepo/pnpm-lock.yaml', '..');
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+    });
+
+    it('extracts pnpm-lock file with lockfileVersion=6', async () => {
+      const plocktest1Lock = Fixtures.get(
+        'lockfile-parsing/pnpm-lock.yaml',
+        '..'
+      );
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersions)).toHaveLength(2);
+    });
+
+    it('returns empty if no deps', async () => {
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('{}');
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
     });
   });
 });

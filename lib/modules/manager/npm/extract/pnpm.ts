@@ -144,12 +144,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const lockParsed = load(pnpmLockRaw) as PnpmLockFile;
-    if (!lockParsed) {
-      logger.debug('pnpm lockfile is empty or invalid');
-      return { lockedVersions: {} };
-    }
-
     logger.debug({ lockParsed }, 'pnpm lockfile parsed');
+
+    let { lockfileVersion } = lockParsed;
+    // field lockfileVersion is type string in lockfileVersion 6 and type number in <6
+    if (lockfileVersion && !is.number(lockfileVersion)) {
+      lockfileVersion = parseFloat(lockfileVersion);
+    }
     const lockedVersions: Record<string, string> = {};
     const packagePathRegex = regEx(
       /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/
@@ -171,13 +172,10 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       });
       lockedVersions[packageName] = version;
     }
-    logger.debug(
-      { lockedVersions, lockfileVersion: lockParsed.lockfileVersion },
-      'pnpm lockfile parsed'
-    );
+    logger.debug({ lockedVersions, lockfileVersion }, 'pnpm lockfile parsed');
     return {
       lockedVersions,
-      lockfileVersion: lockParsed.lockfileVersion,
+      lockfileVersion,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
