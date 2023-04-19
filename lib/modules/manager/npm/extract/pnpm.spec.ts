@@ -280,7 +280,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
 
   describe('.getPnpmLock()', () => {
     it('returns empty if failed to parse', async () => {
-      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('abcd');
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(undefined as never);
       const res = await getPnpmLock('package.json');
       expect(Object.keys(res.lockedVersions)).toHaveLength(0);
     });
@@ -300,6 +300,33 @@ describe('modules/manager/npm/extract/pnpm', () => {
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
       expect(Object.keys(res.lockedVersions)).toHaveLength(2);
+    });
+
+    it('logs when packagePath is invalid', async () => {
+      jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce(
+        `
+        packages:
+        
+          /sax@1.2.4:
+            resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
+            dev: false
+        
+          /xmldoc@1.1.0:
+            resolution: {integrity: sha512-5CEmEtW6IeVMEHSIxchhwpwJKnpFFsCOl9J3R2trVPcMsT7loE7jwT/q1Zwzlk3MetuiyCAdpA699gq0E4fgdw==}
+            dependencies:
+              sax: 1.2.4
+            dev: false
+        
+          /sup-1.2.4: #invalid
+            resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
+            dev: false
+        `
+      );
+      const res = await getPnpmLock('package.json');
+      expect(Object.keys(res.lockedVersions)).toHaveLength(2);
+      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+        'Invalid package path /sup-1.2.4'
+      );
     });
 
     it('returns empty if no deps', async () => {

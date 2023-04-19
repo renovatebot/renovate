@@ -17,6 +17,10 @@ import type { PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
 import type { LockFile, PnpmWorkspaceFile } from './types';
 
+function isPnpmLockfile(obj: any): obj is PnpmLockFile {
+  return is.plainObject(obj);
+}
+
 export async function extractPnpmFilters(
   fileName: string
 ): Promise<string[] | undefined> {
@@ -143,10 +147,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   // TODO #7154
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
-    const lockParsed = load(pnpmLockRaw) as PnpmLockFile;
+    const lockParsed = load(pnpmLockRaw);
+    if (!isPnpmLockfile(lockParsed)) {
+      throw new Error('Invalid or empty lockfile');
+    }
     logger.trace({ lockParsed }, 'pnpm lockfile parsed');
 
-    let { lockfileVersion } = lockParsed;
+    let lockfileVersion = lockParsed.lockfileVersion;
     // field lockfileVersion is type string in lockfileVersion 6 and type number in <6
     if (lockfileVersion && !is.number(lockfileVersion)) {
       lockfileVersion = parseFloat(lockfileVersion);
