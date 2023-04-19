@@ -1,3 +1,4 @@
+import type { NewValueConfig } from '../types';
 import { api as bzlmod } from '.';
 
 describe('modules/versioning/bazel-module/index', () => {
@@ -18,6 +19,8 @@ describe('modules/versioning/bazel-module/index', () => {
     { a: '1.2.3', b: '1.2.4', exp: false },
   ])('equals($a, $b)', ({ a, b, exp }) => {
     expect(bzlmod.equals(a, b)).toBe(exp);
+    // The following are currently aliases for equals.
+    expect(bzlmod.matches(a, b)).toBe(exp);
   });
 
   it.each([
@@ -33,7 +36,7 @@ describe('modules/versioning/bazel-module/index', () => {
     { a: '1.2.3', b: '1.2.3', exp: false },
     { a: '1.2.2', b: '1.2.3', exp: true },
   ])('isLessThanRange($a, $b)', ({ a, b, exp }) => {
-    expect(bzlmod.isLessThanRange(a, b)).toBe(exp);
+    expect(bzlmod.isLessThanRange!(a, b)).toBe(exp);
   });
 
   it.each([
@@ -70,6 +73,9 @@ describe('modules/versioning/bazel-module/index', () => {
     { a: '1_2', exp: false },
   ])('isValid($a)', ({ a, exp }) => {
     expect(bzlmod.isValid(a)).toBe(exp);
+    // The following are currently aliases for isValid.
+    expect(bzlmod.isCompatible(a)).toBe(exp);
+    expect(bzlmod.isSingleVersion(a)).toBe(exp);
   });
 
   it.each([
@@ -79,5 +85,14 @@ describe('modules/versioning/bazel-module/index', () => {
     { a: undefined, exp: false },
   ])('isVersion($a)', ({ a, exp }) => {
     expect(bzlmod.isVersion(a)).toBe(exp);
+  });
+
+  it('getNewValue()', () => {
+    const config: NewValueConfig = {
+      currentValue: '1.0.0',
+      rangeStrategy: 'auto',
+      newVersion: '1.0.1',
+    };
+    expect(bzlmod.getNewValue(config)).toBe('1.0.1');
   });
 });
