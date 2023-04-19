@@ -118,17 +118,15 @@ const variableNameMatch = q
   }))
   .opt(q.op<Ctx>(':').sym('String'));
 
-const variableValueMatch = q
-  .str<Ctx>((ctx, { value, line }) => {
-    ctx.localVars[ctx.currentVarName!] = {
-      val: value,
-      sourceFile: ctx.packageFile,
-      lineIndex: line - 1,
-    };
-    delete ctx.currentVarName;
-    return ctx;
-  })
-  .sym(regEx(/ *$/));
+const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
+  ctx.localVars[ctx.currentVarName!] = {
+    val: value,
+    sourceFile: ctx.packageFile,
+    lineIndex: line - 1,
+  };
+  delete ctx.currentVarName;
+  return ctx;
+});
 
 const assignmentMatch = q.sym<Ctx>('val').join(variableNameMatch).op('=');
 
