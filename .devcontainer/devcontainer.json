@@ -19,7 +19,7 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "orta.vscode-jest",
-        "editorConfig.editorconfig",
+        "editorconfig.editorconfig",
         "github.vscode-github-actions"
       ]
     }
