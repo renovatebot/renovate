@@ -2126,7 +2126,7 @@ For example the following would match `package.json` but not `package/frontend/p
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"],
+      "matchFiles": ["package.json"]
     }
   ]
 }
