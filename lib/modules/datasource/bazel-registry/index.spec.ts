@@ -1,4 +1,5 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { BazelRegistryDatasource } from '.';
@@ -58,6 +59,19 @@ describe('modules/datasource/bazel-registry/index', () => {
           packageName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+    });
+
+    it('metadata without yanked versions', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-no-yanked-versions.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(4);
     });
   });
 });

@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/bazel-registry/index getReleases metadata without yanked versions 1`] = `
+{
+  "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/rules_foo/metadata.json",
+  "releases": [
+    {
+      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
+      "version": "0.14.8",
+    },
+    {
+      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
+      "version": "0.14.9",
+    },
+    {
+      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
+      "version": "0.15.0",
+    },
+    {
+      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
+      "version": "0.16.0",
+    },
+  ],
+}
+`;
