@@ -470,6 +470,11 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+<!-- prettier-ignore -->
+!!! warning
+    `globalExtends` presets can't be private.
+    TODO FOR MAINTAINERS: please explain _why_ it can't be private, or what resources must be public.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
