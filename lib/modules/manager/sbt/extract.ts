@@ -56,7 +56,7 @@ const sbtVersionRegex = regEx(
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const nestedVariableLiteral = (handler: q.SymMatcherHandler<Ctx>) =>
-  q.sym<Ctx>(handler).alt(q.many(q.op<Ctx>('.').sym(handler)));
+  q.sym<Ctx>(handler).opt(q.many(q.op<Ctx>('.').sym(handler)));
 
 const scalaVersionMatch = q
   .sym<Ctx>('scalaVersion')
@@ -118,15 +118,17 @@ const variableNameMatch = q
   }))
   .opt(q.op<Ctx>(':').sym('String'));
 
-const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
-  ctx.localVars[ctx.currentVarName!] = {
-    val: value,
-    sourceFile: ctx.packageFile,
-    lineIndex: line - 1,
-  };
-  delete ctx.currentVarName;
-  return ctx;
-});
+const variableValueMatch = q
+  .str<Ctx>((ctx, { value, line }) => {
+    ctx.localVars[ctx.currentVarName!] = {
+      val: value,
+      sourceFile: ctx.packageFile,
+      lineIndex: line - 1,
+    };
+    delete ctx.currentVarName;
+    return ctx;
+  })
+  .sym(regEx(/ *$/));
 
 const assignmentMatch = q.sym<Ctx>('val').join(variableNameMatch).op('=');
 
@@ -288,7 +290,7 @@ const resolverMatch = q
 
 const addResolverMatch = q.sym<Ctx>('resolvers').alt(
   q.op<Ctx>('+=').join(resolverMatch),
-  q.op<Ctx>('++=').sym('Seq').tree({
+  q.alt<Ctx>(q.op<Ctx>('++='), q.op<Ctx>('=')).sym('Seq').tree({
     type: 'wrapped-tree',
     maxDepth: 1,
     search: resolverMatch,
@@ -369,7 +371,9 @@ export function extractPackageFile(
       globalVars,
       localVars,
       deps: [],
-      registryUrls: [REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])],
+      registryUrls: [
+        ...new Set([REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])]),
+      ],
       packageFile,
       scalaVersion,
     });
@@ -393,7 +397,7 @@ function prepareLoadPackageFiles(
 } {
   // Return variable
   let globalVars: Variables = {};
-  const registryUrls: string[] = [REGISTRY_URLS.mavenCentral];
+  let registryUrls: string[] = [REGISTRY_URLS.mavenCentral];
   let scalaVersion: string | undefined = undefined;
 
   for (const { packageFile, content } of packageFilesContent) {
@@ -409,7 +413,7 @@ function prepareLoadPackageFiles(
     if (res) {
       globalVars = { ...globalVars, ...res.localVars };
       if (res.registryUrls) {
-        registryUrls.push(...res.registryUrls);
+        registryUrls = [...registryUrls, ...new Set(res.registryUrls)];
       }
       if (res.scalaVersion) {
         scalaVersion = res.scalaVersion;
