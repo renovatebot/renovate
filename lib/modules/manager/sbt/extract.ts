@@ -1,520 +1,413 @@
+import { lang, query as q } from 'good-enough-parser';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { newlineRegex, regEx } from '../../../util/regex';
+import { regEx } from '../../../util/regex';
+import { parseUrl } from '../../../util/url';
+import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { MavenDatasource } from '../../datasource/maven';
-import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SbtPackageDatasource } from '../../datasource/sbt-package';
 import {
+  SBT_PLUGINS_REPO,
   SbtPluginDatasource,
-  defaultRegistryUrls as sbtPluginDefaultRegistries,
 } from '../../datasource/sbt-plugin';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
+import * as semverVersioning from '../../versioning/semver';
+import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
   GroupFilenameContent,
-  ParseContext,
   ParseOptions,
   VariableContext,
+  Variables,
 } from './types';
+import { normalizeScalaVersion } from './util';
 
-const stripComment = (str: string): string =>
-  str.replace(regEx(/(^|\s+)\/\/.*$/), '').replace(regEx(/\/\*\*.*\*\*\//), '');
+// type Vars = Record<string, string>;
 
-const isSingleLineDep = (str: string): boolean =>
-  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/).test(str);
+interface Ctx {
+  globalVars: Variables;
+  localVars: Variables;
+  deps: PackageDependency[];
+  registryUrls: string[];
 
-const isDepsBegin = (str: string): boolean =>
-  regEx(/^\s*(libraryDependencies|dependencyOverrides)\s*\+\+=\s*/).test(str) ||
-  regEx(/\s*Seq\(\s*$/).test(str);
+  scalaVersion?: string;
+  packageFileVersion?: string;
 
-const isPluginDep = (str: string): boolean =>
-  regEx(/^\s*(addSbtPlugin|addCompilerPlugin)\s*\(.*\)\s*$/).test(str);
+  groupId?: string;
+  artifactId?: string;
+  currentValue?: string;
+  currentValueInfo?: VariableContext;
 
-const isStringLiteral = (str: string): boolean => regEx(/^"[^"]*"$/).test(str);
+  currentVarName?: string;
+  depType?: string;
+  useScalaVersion?: boolean;
+  variableName?: string;
 
-const isScalaVersion = (str: string): boolean =>
-  regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*"[^"]*"[\s,]*$/).test(
-    str
-  );
-
-const getScalaVersion = (str: string): string =>
-  str
-    .replace(regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*"/), '')
-    .replace(regEx(/"[\s,]*$/), '');
-
-const isPackageFileVersion = (str: string): boolean =>
-  regEx(/^(version\s*:=\s*).*$/).test(str);
-
-const getPackageFileVersion = (str: string): string =>
-  str
-    .replace(regEx(/^\s*version\s*:=\s*/), '')
-    .replace(regEx(/[\s,]*$/), '')
-    .replace(regEx(/"/g), '');
-
-/*
-  https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
- */
-const normalizeScalaVersion = (str: string): string => {
-  // istanbul ignore if
-  if (!str) {
-    return str;
-  }
-  const versioning = get(mavenVersioning.id);
-  if (versioning.isVersion(str)) {
-    // Do not normalize unstable versions
-    if (!versioning.isStable(str)) {
-      return str;
-    }
-    // Do not normalize versions prior to 2.10
-    if (!versioning.isGreaterThan(str, '2.10.0')) {
-      return str;
-    }
-  }
-  if (regEx(/^\d+\.\d+\.\d+$/).test(str)) {
-    return str.replace(regEx(/^(\d+)\.(\d+)\.\d+$/), '$1.$2');
-  }
-  // istanbul ignore next
-  return str;
-};
-
-const isScalaVersionVariable = (str: string): boolean =>
-  regEx(
-    /^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/
-  ).test(str);
-
-const getScalaVersionVariable = (str: string): string =>
-  str
-    .replace(regEx(/^\s*(?:ThisBuild\s*\/\s*)?scalaVersion\s*:=\s*/), '')
-    .replace(regEx(/[\s,]*$/), '');
-
-const isResolver = (str: string): boolean =>
-  regEx(
-    /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/
-  ).test(str);
-const getResolverUrl = (str: string): string =>
-  str
-    .replace(
-      regEx(
-        /^\s*(resolvers\s*\+\+?=\s*((Seq|List|Stream)\()?)?"[^"]*"\s*at\s*"/
-      ),
-      ''
-    )
-    .replace(regEx(/"[\s,)]*$/), '');
-
-const isVarDependency = (str: string): boolean =>
-  regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/
-  ).test(str);
-
-const isVarDef = (str: string): boolean =>
-  regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/
-  ).test(str);
-
-/**
- *
- * Check if variable definition is referencing another variable
- * @param str line
- * @returns {boolean}
- */
-const isVarDefRefVar = (str: string): boolean =>
-  regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*[_a-zA-Z][_a-zA-Z0-9]*(\.[_a-zA-Z][_a-zA-Z0-9]*)*\s*$/
-  ).test(str);
-
-const isVarSeqSingleLine = (str: string): boolean =>
-  regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*\).*\s*$/
-  ).test(str);
-
-const isVarSeqMultipleLine = (str: string): boolean =>
-  regEx(
-    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(Seq|List|Stream)\(.*[^)]*.*$/
-  ).test(str);
-
-const isObjectLine = (str: string): boolean =>
-  regEx(/object\s+(\w+)\s+{/).test(str);
-
-const isObjectEndedLine = (str: string): boolean =>
-  regEx(/^\s*}\s*$/).test(str);
-
-const getVarName = (str: string): string =>
-  str.replace(
-    regEx(/^\s*(private\s*)?(lazy\s*)?val\s+([_a-zA-Z][_a-zA-Z0-9]*)\s*=.*$/),
-    '$3'
-  );
-
-const isVarName = (str: string): boolean =>
-  // allow dot annotation
-  regEx(/^[_a-zA-Z][_a-zA-Z0-9]*(\.[_a-zA-Z][_a-zA-Z0-9]*)*$/).test(str);
-
-const getVarInfo = (
-  str: string,
-  { lookupVariableFile, lineIndex }: ParseContext
-): VariableContext => {
-  const rightPart = str.replace(
-    regEx(/^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/),
-    ''
-  );
-  const val = rightPart.replace(regEx(/"\s*$/), '');
-  return { val, sourceFile: lookupVariableFile!, lineIndex };
-};
-
-function parseDepExpr(
-  expr: string,
-  ctx: ParseContext
-): PackageDependency | null {
-  const {
-    scalaVersion,
-    variables,
-    lineIndex,
-    globalVariables,
-    localVariables,
-  } = ctx;
-  let { depType } = ctx;
-
-  const isValidToken = (str: string): boolean =>
-    isStringLiteral(str) ||
-    (isVarName(str) &&
-      (Boolean(localVariables[str]) ||
-        Boolean(variables[str]) ||
-        Boolean(globalVariables[str])));
-
-  const resolveToken = (str: string): string => {
-    if (isStringLiteral(str)) {
-      return str.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
-    }
-    if (localVariables[str]) {
-      ctx.lookupVariableFile = variables[str]?.sourceFile || '';
-      return localVariables[str].val;
-    }
-    if (variables[str]) {
-      ctx.lookupVariableFile = variables[str]?.sourceFile || '';
-      return variables[str].val;
-    }
-    if (globalVariables[str]) {
-      ctx.lookupVariableFile = globalVariables[str]?.sourceFile || '';
-      return globalVariables[str].val;
-    }
-    return str;
-  };
-
-  const tokens = expr
-    .trim()
-    .split(regEx(/("[^"]*")/g))
-    .map((x) => (regEx(/"[^"]*"/).test(x) ? x : x.replace(regEx(/[()]+/g), '')))
-    .join('')
-    .split(regEx(/\s*(%%?)\s*|\s*classifier\s*/));
-
-  const [
-    rawGroupId,
-    groupOp,
-    rawArtifactId,
-    artifactOp,
-    rawVersion,
-    scopeOp,
-    rawScope,
-  ] = tokens;
-
-  if (!rawGroupId) {
-    return null;
-  }
-  if (!isValidToken(rawGroupId)) {
-    return null;
-  }
-
-  if (!rawArtifactId) {
-    return null;
-  }
-  if (!isValidToken(rawArtifactId)) {
-    return null;
-  }
-  if (artifactOp !== '%') {
-    return null;
-  }
-
-  if (!rawVersion) {
-    return null;
-  }
-  if (!isValidToken(rawVersion)) {
-    return null;
-  }
-
-  if (scopeOp && scopeOp !== '%') {
-    return null;
-  }
-  const groupId = resolveToken(rawGroupId);
-  const depName = `${groupId}:${resolveToken(rawArtifactId)}`;
-  const artifactId =
-    groupOp === '%%' && scalaVersion
-      ? `${resolveToken(rawArtifactId)}_${scalaVersion}`
-      : resolveToken(rawArtifactId);
-  const packageName = `${groupId}:${artifactId}`;
-  const currentValue = resolveToken(rawVersion);
-
-  if (!depType && rawScope) {
-    depType = rawScope.replace(regEx(/^"/), '').replace(regEx(/"$/), '');
-  }
-
-  const result: PackageDependency = {
-    depName,
-    packageName,
-    currentValue,
-    fileReplacePosition: lineIndex,
-  };
-
-  const varDep =
-    localVariables[rawVersion] ||
-    variables[rawVersion] ||
-    globalVariables[rawVersion];
-  if (varDep) {
-    result.groupName = `${rawVersion}`;
-    result.fileReplacePosition = varDep.lineIndex;
-    result.editFile = varDep.sourceFile;
-  }
-
-  if (depType) {
-    result.depType = depType;
-  }
-
-  return result;
+  packageFile: string;
 }
 
-function parseSbtLine(
-  acc: PackageFile & ParseOptions,
-  line: string,
-  lineIndex: number,
-  lines: string[]
-): PackageFile & ParseOptions {
-  const { deps, registryUrls = [], variables = {}, globalVariables = {} } = acc;
+const scala = lang.createLang('scala');
 
-  let {
-    isMultiDeps,
-    scalaVersion,
-    packageFileVersion,
-    variableParentKey = '',
-    localVariables = {},
-  } = acc;
+const sbtVersionRegex = regEx(
+  'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
+);
 
-  const ctx: ParseContext = {
-    scalaVersion,
-    variables,
-    lookupVariableFile: acc.packageFile!,
-    lineIndex,
-    globalVariables,
-    localVariables,
-  };
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const nestedVariableLiteral = (handler: q.SymMatcherHandler<Ctx>) =>
+  q.sym<Ctx>(handler).alt(q.many(q.op<Ctx>('.').sym(handler)));
 
-  let dep: PackageDependency | null = null;
-  let scalaVersionVariable: string | null = null;
-  if (line !== '') {
-    if (isScalaVersion(line)) {
-      isMultiDeps = false;
-      const rawScalaVersion = getScalaVersion(line);
-      scalaVersion = normalizeScalaVersion(rawScalaVersion);
-      dep = {
+const scalaVersionMatch = q
+  .sym<Ctx>('scalaVersion')
+  .op(':=')
+  .alt(
+    q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
+    nestedVariableLiteral((ctx, { value: varName }) => {
+      const scalaVersion = ctx.localVars[varName] ?? ctx.globalVars[varName];
+      if (scalaVersion) {
+        ctx.scalaVersion = scalaVersion.val;
+      }
+      return ctx;
+    })
+  )
+  .handler((ctx) => {
+    if (ctx.scalaVersion) {
+      const version = get(mavenVersioning.id);
+
+      let packageName = 'org.scala-lang:scala-library';
+      if (version.getMajor(ctx.scalaVersion) === 3) {
+        packageName = 'org.scala-lang:scala3-library_3';
+      }
+
+      const dep: PackageDependency = {
         datasource: MavenDatasource.id,
         depName: 'scala',
-        packageName: 'org.scala-lang:scala-library',
-        currentValue: rawScalaVersion,
+        packageName,
+        currentValue: ctx.scalaVersion,
         separateMinorPatch: true,
       };
-    } else if (isScalaVersionVariable(line)) {
-      isMultiDeps = false;
-      scalaVersionVariable = getScalaVersionVariable(line);
-      const scalaVar =
-        localVariables[scalaVersionVariable] ??
-        variables[scalaVersionVariable] ??
-        globalVariables[scalaVersionVariable];
-      if (scalaVar) {
-        scalaVersion = normalizeScalaVersion(scalaVar.val);
-        dep = {
-          datasource: MavenDatasource.id,
-          depName: 'scala',
-          packageName: 'org.scala-lang:scala-library',
-          currentValue: scalaVar.val,
-          separateMinorPatch: true,
-        };
-      }
-    } else if (isPackageFileVersion(line)) {
-      packageFileVersion = getPackageFileVersion(line);
-    } else if (isResolver(line)) {
-      isMultiDeps = false;
-      const url = getResolverUrl(line);
-      registryUrls.push(url);
-    } else if (isVarSeqSingleLine(line)) {
-      isMultiDeps = false;
-      const depExpr = line
-        .replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '')
-        .replace(regEx(/\).*$/), '');
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-      });
-    } else if (isVarSeqMultipleLine(line)) {
-      isMultiDeps = true;
-      const depExpr = line.replace(regEx(/^.*(Seq|List|Stream)\(\s*/), '');
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-      });
-    } else if (isObjectLine(line)) {
-      const objectName = line.replace(regEx(/object\s+(\w+)\s+{/), '$1');
-      variableParentKey =
-        variableParentKey === ''
-          ? objectName
-          : `${variableParentKey}.${objectName.trim()}`;
-    } else if (isObjectEndedLine(line)) {
-      variableParentKey = variableParentKey.split('.').slice(0, -1).join('.');
-      localVariables = {};
-    } else if (isVarDef(line)) {
-      const key = variableParentKey === '' ? '' : `${variableParentKey}.`;
-      localVariables[getVarName(line)] = getVarInfo(line, ctx);
-      variables[key + getVarName(line)] = getVarInfo(line, ctx);
-    } else if (isVarDefRefVar(line)) {
-      const rightPart = line
-        .replace(
-          regEx(
-            /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*(.*)\s*$/
-          ),
-          '$3'
-        )
-        .trim();
-      const isVarExist = variables[rightPart] || globalVariables[rightPart];
-      if (isVarExist) {
-        const key =
-          (variableParentKey === '' ? '' : `${variableParentKey}.`) +
-          getVarName(line);
-        variables[key] = isVarExist;
-      }
-    } else if (isVarDependency(line)) {
-      isMultiDeps = false;
-      const depExpr = line
-        .replace(
-          regEx(
-            /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/
-          ),
-          ''
-        )
-        .replace(/\s*(force|withSources|exclude(All)?).*$/, '');
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-      });
-    } else if (isSingleLineDep(line)) {
-      isMultiDeps = false;
-      const depExpr = line.replace(regEx(/^.*\+=\s*/), '');
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-      });
-    } else if (isPluginDep(line)) {
-      isMultiDeps = false;
-      const depExpr = line.replace(
-        regEx(
-          /^\s*(addSbtPlugin|addCompilerPlugin)\s*\(+(.*(%%?).*(%)\s*(\w+|".*")\s*)\)+.*/
-        ),
-        '$2'
-      );
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-        depType: 'plugin',
-      });
-    } else if (isDepsBegin(line)) {
-      isMultiDeps = true;
-    } else if (isMultiDeps) {
-      const rightPart = line.replace(regEx(/^[\s,]*/), '');
-      const depExpr = rightPart
-        .replace(regEx(/[\s,]*$/), '')
-        .replace(/\s*(force|withSources|exclude(All)?).*$/, '');
-      dep = parseDepExpr(depExpr, {
-        ...ctx,
-      });
+      ctx.scalaVersion = normalizeScalaVersion(ctx.scalaVersion);
+      ctx.deps.push(dep);
     }
-  }
+    return ctx;
+  });
 
-  if (dep) {
-    if (!dep.datasource) {
-      if (dep.depType === 'plugin') {
-        dep.datasource = SbtPluginDatasource.id;
-        dep.registryUrls = [...registryUrls, ...sbtPluginDefaultRegistries];
-      } else {
-        dep.datasource = SbtPackageDatasource.id;
-      }
-    }
-    deps.push({
-      registryUrls,
-      ...dep,
-    });
-  }
-
-  if (lineIndex + 1 < lines.length) {
-    return {
-      ...acc,
-      isMultiDeps,
-      variableParentKey,
-      scalaVersion:
-        scalaVersion ||
-        (scalaVersionVariable &&
-          variables[scalaVersionVariable] &&
-          normalizeScalaVersion(variables[scalaVersionVariable].val)),
+const packageFileVersionMatch = q
+  .sym<Ctx>('version')
+  .op(':=')
+  .alt(
+    q.str<Ctx>((ctx, { value: packageFileVersion }) => ({
+      ...ctx,
       packageFileVersion,
-    };
-  }
-  return {
-    deps,
-    packageFileVersion,
-    scalaVersion,
+    })),
+    nestedVariableLiteral((ctx, { value: varName }) => {
+      const packageFileVersion =
+        ctx.localVars[varName] ?? ctx.globalVars[varName];
+      if (packageFileVersion) {
+        ctx.packageFileVersion = packageFileVersion.val;
+      }
+      return ctx;
+    }) // support var1, var1.var2.var3
+  );
+
+const variableNameMatch = q
+  .sym<Ctx>((ctx, { value: varName }) => ({
+    ...ctx,
+    currentVarName: varName,
+  }))
+  .opt(q.op<Ctx>(':').sym('String'));
+
+const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
+  ctx.localVars[ctx.currentVarName!] = {
+    val: value,
+    sourceFile: ctx.packageFile,
+    lineIndex: line - 1,
   };
+  delete ctx.currentVarName;
+  return ctx;
+});
+
+const assignmentMatch = q.sym<Ctx>('val').join(variableNameMatch).op('=');
+
+const variableDefinitionMatch = q
+  .alt(
+    q.sym<Ctx>('lazy').join(assignmentMatch),
+    assignmentMatch,
+    variableNameMatch.op(':=')
+  )
+  .join(variableValueMatch);
+
+const groupIdMatch = q.alt<Ctx>(
+  nestedVariableLiteral((ctx, { value: varName }) => {
+    const currentGroupId = ctx.localVars[varName] ?? ctx.globalVars[varName];
+    if (currentGroupId) {
+      ctx.groupId = currentGroupId.val;
+    }
+    return ctx;
+  }),
+  q.str<Ctx>((ctx, { value: groupId }) => ({ ...ctx, groupId }))
+);
+
+const artifactIdMatch = q.alt<Ctx>(
+  nestedVariableLiteral((ctx, { value: varName }) => {
+    const artifactId = ctx.localVars[varName] ?? ctx.globalVars[varName];
+    if (artifactId) {
+      ctx.artifactId = artifactId.val;
+    }
+    return ctx;
+  }),
+  q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId }))
+);
+
+const resolveVariable: q.SymMatcherHandler<Ctx> = (ctx, { value: varName }) => {
+  const currentValue = ctx.localVars[varName] ?? ctx.globalVars[varName];
+  if (currentValue) {
+    ctx.currentValue = currentValue.val;
+    ctx.currentValueInfo = currentValue;
+    ctx.variableName = varName;
+  }
+  return ctx;
+};
+
+const versionMatch = q.alt<Ctx>(
+  nestedVariableLiteral(resolveVariable), // support var1, var1.var2.var3
+  q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })) // String literal "1.23.4"
+);
+
+const simpleDependencyMatch = groupIdMatch
+  .op('%')
+  .join(artifactIdMatch)
+  .op('%')
+  .join(versionMatch);
+
+const versionedDependencyMatch = groupIdMatch
+  .op('%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
+const crossDependencyMatch = groupIdMatch
+  .op('%%%')
+  .join(artifactIdMatch)
+  .handler((ctx) => ({ ...ctx, useScalaVersion: true }))
+  .op('%')
+  .join(versionMatch);
+
+function depHandler(ctx: Ctx): Ctx {
+  const {
+    scalaVersion,
+    groupId,
+    artifactId,
+    currentValue,
+    useScalaVersion,
+    depType,
+    variableName,
+    currentValueInfo,
+  } = ctx;
+
+  delete ctx.groupId;
+  delete ctx.artifactId;
+  delete ctx.currentValue;
+  delete ctx.useScalaVersion;
+  delete ctx.depType;
+  delete ctx.variableName;
+  delete ctx.currentValueInfo;
+
+  const depName = `${groupId!}:${artifactId!}`;
+
+  const dep: PackageDependency = {
+    datasource: SbtPackageDatasource.id,
+    depName,
+    packageName:
+      scalaVersion && useScalaVersion ? `${depName}_${scalaVersion}` : depName,
+    currentValue,
+  };
+
+  if (depType) {
+    dep.depType = depType;
+  }
+
+  if (depType === 'plugin') {
+    dep.datasource = SbtPluginDatasource.id;
+  }
+
+  if (variableName) {
+    dep.groupName = variableName;
+    dep.variableName = variableName;
+    if (currentValueInfo) {
+      dep.fileReplacePosition = currentValueInfo.lineIndex;
+      dep.editFile = currentValueInfo.sourceFile;
+    }
+  }
+
+  ctx.deps.push(dep);
+
+  return ctx;
 }
 
-export function extractFile(
+function depTypeHandler(ctx: Ctx, { value: depType }: { value: string }): Ctx {
+  return { ...ctx, depType };
+}
+
+const sbtPackageMatch = q
+  .opt<Ctx>(q.opt(q.sym<Ctx>('lazy')).sym('val').sym().op('='))
+  .alt(crossDependencyMatch, simpleDependencyMatch, versionedDependencyMatch)
+  .opt(
+    q.alt<Ctx>(
+      q.sym<Ctx>('classifier').str(depTypeHandler),
+      q.op<Ctx>('%').sym(depTypeHandler),
+      q.op<Ctx>('%').str(depTypeHandler)
+    )
+  )
+  .handler(depHandler);
+
+const sbtPluginMatch = q
+  .sym<Ctx>(regEx(/^(?:addSbtPlugin|addCompilerPlugin)$/))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    search: q
+      .begin<Ctx>()
+      .alt(simpleDependencyMatch, versionedDependencyMatch)
+      .end(),
+  })
+  .handler((ctx) => ({ ...ctx, depType: 'plugin' }))
+  .handler(depHandler);
+
+const resolverMatch = q
+  .str<Ctx>()
+  .sym('at')
+  .str((ctx, { value }) => {
+    if (parseUrl(value)) {
+      ctx.registryUrls.push(value);
+    }
+    return ctx;
+  });
+
+const addResolverMatch = q.sym<Ctx>('resolvers').alt(
+  q.op<Ctx>('+=').join(resolverMatch),
+  q.op<Ctx>('++=').sym('Seq').tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    search: resolverMatch,
+  })
+);
+
+function registryUrlHandler(ctx: Ctx): Ctx {
+  for (const dep of ctx.deps) {
+    dep.registryUrls = [...ctx.registryUrls];
+    if (dep.depType === 'plugin') {
+      dep.registryUrls.push(SBT_PLUGINS_REPO);
+    }
+  }
+  return ctx;
+}
+
+const query = q.tree<Ctx>({
+  type: 'root-tree',
+  maxDepth: 32,
+  search: q.alt<Ctx>(
+    scalaVersionMatch,
+    packageFileVersionMatch,
+    sbtPackageMatch,
+    sbtPluginMatch,
+    addResolverMatch,
+    variableDefinitionMatch
+  ),
+  postHandler: registryUrlHandler,
+});
+
+// Extract 1 file
+export function extractPackageFile(
   content: string,
-  defaultAcc?: PackageFile & ParseOptions
-): (PackageFile & ParseOptions) | null {
-  if (!content) {
+  {
+    packageFile,
+    registryUrls,
+    localVars,
+    globalVars,
+    scalaVersion,
+  }: PackageFile & ParseOptions
+): Ctx | null {
+  if (
+    packageFile &&
+    (packageFile === 'project/build.properties' ||
+      packageFile.endsWith('/project/build.properties'))
+  ) {
+    const regexResult = sbtVersionRegex.exec(content);
+    const sbtVersion = regexResult?.groups?.version;
+    const matchString = regexResult?.[0];
+    if (sbtVersion) {
+      const sbtDependency: PackageDependency = {
+        datasource: GithubReleasesDatasource.id,
+        depName: 'sbt/sbt',
+        packageName: 'sbt/sbt',
+        versioning: semverVersioning.id,
+        currentValue: sbtVersion,
+        replaceString: matchString,
+        extractVersion: '^v(?<version>\\S+)',
+        editFile: packageFile,
+      };
+
+      return {
+        deps: [sbtDependency],
+        globalVars: {},
+        localVars: {},
+        packageFile,
+        registryUrls: [REGISTRY_URLS.mavenCentral],
+      };
+    } else {
+      return null;
+    }
+  }
+
+  let parsedResult: Ctx | null = null;
+
+  try {
+    parsedResult = scala.query(content, query, {
+      globalVars,
+      localVars,
+      deps: [],
+      registryUrls: [REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])],
+      packageFile,
+      scalaVersion,
+    });
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err, packageFile }, 'Sbt parsing error');
+  }
+
+  if (!parsedResult) {
     return null;
   }
-  const equalsToNewLineRe = regEx(/=\s*\n/, 'gm');
-  const goodContentForParsing = content.replace(equalsToNewLineRe, '=');
-  const lines = goodContentForParsing.split(newlineRegex).map(stripComment);
 
-  const acc: PackageFile & ParseOptions = {
-    registryUrls: [MAVEN_REPO],
-    deps: [],
-    isMultiDeps: false,
-    scalaVersion: null,
-    variables: {},
-    globalVariables: {},
-    localVariables: {},
-    ...defaultAcc,
-  };
-
-  // TODO: needs major refactoring?
-  const res = lines.reduce(parseSbtLine, acc);
-  return res.deps.length ? res : null;
+  return parsedResult;
 }
 
 function prepareLoadPackageFiles(
   packageFilesContent: { packageFile: string; content: string }[]
 ): {
-  globalVariables: ParseOptions['variables'];
+  globalVars: ParseOptions['globalVars'];
   registryUrls: string[];
   scalaVersion: ParseOptions['scalaVersion'];
 } {
   // Return variable
-  let globalVariables: ParseOptions['variables'] = {};
-  const registryUrls: string[] = [MAVEN_REPO];
-  let scalaVersion: string | null = null;
+  let globalVars: Variables = {};
+  const registryUrls: string[] = [REGISTRY_URLS.mavenCentral];
+  let scalaVersion: string | undefined = undefined;
 
   for (const { packageFile, content } of packageFilesContent) {
     const acc: PackageFile & ParseOptions = {
-      registryUrls,
       deps: [],
-      variables: globalVariables,
+      registryUrls,
+      localVars: globalVars,
+      globalVars: {},
       packageFile,
     };
-    const res = extractFile(content, acc);
+    const res = extractPackageFile(content, acc);
+
     if (res) {
-      globalVariables = { ...globalVariables, ...res.variables };
+      globalVars = { ...globalVars, ...res.localVars };
       if (res.registryUrls) {
         registryUrls.push(...res.registryUrls);
       }
@@ -525,7 +418,7 @@ function prepareLoadPackageFiles(
   }
 
   return {
-    globalVariables,
+    globalVars,
     registryUrls,
     scalaVersion,
   };
@@ -540,22 +433,22 @@ export async function extractAllPackageFiles(
   const groupPackageFileContent: GroupFilenameContent = {};
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
-    if (content) {
-      const group = upath.dirname(packageFile);
-      groupPackageFileContent[group] ??= [];
-      groupPackageFileContent[group].push({ packageFile, content });
+    if (!content) {
+      logger.trace({ packageFile }, 'packageFile has no content');
+      continue;
     }
-    logger.trace({ packageFile }, 'packageFile has no content');
+    const group = upath.dirname(packageFile);
+    groupPackageFileContent[group] ??= [];
+    groupPackageFileContent[group].push({ packageFile, content });
   }
 
   // 1. globalVariables from project/ and root package file
   // 2. registry from all package file
   // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
-  const { globalVariables, registryUrls, scalaVersion } =
-    prepareLoadPackageFiles([
-      ...(groupPackageFileContent['project'] ?? []), // in project/ folder
-      ...(groupPackageFileContent['.'] ?? []), // root
-    ]);
+  const { globalVars, registryUrls, scalaVersion } = prepareLoadPackageFiles([
+    ...(groupPackageFileContent['project'] ?? []), // in project/ folder
+    ...(groupPackageFileContent['.'] ?? []), // root
+  ]);
 
   const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};
   // Start extract all package files
@@ -563,29 +456,20 @@ export async function extractAllPackageFiles(
     // Extract package file by its group
     // local variable is share within its group
     for (const { packageFile, content } of packageFileContents) {
-      const res = extractFile(content, {
+      const res = extractPackageFile(content, {
         registryUrls,
         deps: [],
         packageFile,
         scalaVersion,
-        globalVariables,
+        localVars: {},
+        globalVars,
       });
-
-      if (res?.deps) {
-        for (const dep of res.deps) {
-          // "dep?.editFile" is the source of variable that package version is referecing with
-          // "packageFile" is where package usage was found
-          const variableSourceFile = dep?.editFile ?? packageFile;
-          dep.registryUrls = [...new Set(dep.registryUrls)];
-          if (!mapDepsToPackageFile[variableSourceFile]) {
-            mapDepsToPackageFile[variableSourceFile] = [];
-          }
-          const isExist = mapDepsToPackageFile[variableSourceFile].find(
-            (val) =>
-              val.packageName === dep.packageName &&
-              val.currentValue === dep.currentValue
-          );
-          if (!isExist) {
+      if (res) {
+        if (res?.deps) {
+          for (const dep of res.deps) {
+            const variableSourceFile = dep?.editFile ?? packageFile;
+            dep.registryUrls = [...new Set(dep.registryUrls)];
+            mapDepsToPackageFile[variableSourceFile] ??= [];
             mapDepsToPackageFile[variableSourceFile].push(dep);
           }
         }
@@ -593,14 +477,25 @@ export async function extractAllPackageFiles(
     }
   }
 
-  // Format from Record<packageFile, Dependency[]>
-  // to {packageFile:string, deps: Dependency[]}[]
-  const formatedDeps = Object.entries(mapDepsToPackageFile).map(
+  // Filter unique package
+  // As we merge all package to single package file
+  // Packages are counted in submodule but it's the same one
+  // by packageName and currentValue
+  const finalPackages = Object.entries(mapDepsToPackageFile).map(
     ([packageFile, deps]) => ({
       packageFile,
-      deps,
+      deps: deps.filter(
+        (val, idx, self) =>
+          idx ===
+          self.findIndex(
+            (dep) =>
+              dep.packageName === val.packageName &&
+              dep.currentValue === val.currentValue
+          )
+      ),
     })
   );
+  logger.debug('finalPackages ' + JSON.stringify(finalPackages));
 
-  return formatedDeps.length ? formatedDeps : null;
+  return finalPackages.length > 0 ? finalPackages : null;
 }
