@@ -125,6 +125,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     logger.debug('Found no closed onboarding PR');
     return false;
   }
+  logger.debug('Found closed onboarding PR');
   if (config.requireConfig === 'optional') {
     logger.debug('Config not mandatory so repo is considered onboarded');
     return true;

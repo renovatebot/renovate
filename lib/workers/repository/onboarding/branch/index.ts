@@ -52,10 +52,11 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
-    logger.debug('Onboarding PR already exists');
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
+    logger.debug('Onboarding PR already exists');
+
     isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
       if (hasOnboardingBranchChanged(config.onboardingBranch!)) {

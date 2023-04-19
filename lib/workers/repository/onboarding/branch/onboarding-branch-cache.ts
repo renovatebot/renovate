@@ -17,7 +17,7 @@ export function setOnboardingCache(
       is.nonEmptyString(onboardingBranchSha)
     )
   ) {
-    logger.debug('Onboarding cache not updated');
+    logger.trace('Onboarding cache not updated');
     return;
   }
 
@@ -29,9 +29,9 @@ export function setOnboardingCache(
     isModified,
   };
   if (cache.onboardingBranchCache) {
-    logger.debug({ onboardingCache }, 'Update Onboarding Cache');
+    logger.trace({ onboardingCache }, 'Update Onboarding Cache');
   } else {
-    logger.debug({ onboardingCache }, 'Create Onboarding Cache');
+    logger.trace({ onboardingCache }, 'Create Onboarding Cache');
   }
   cache.onboardingBranchCache = onboardingCache;
 }
@@ -92,7 +92,8 @@ export async function isOnboardingBranchConflicted(
   if (
     onboardingCache &&
     defaultBranchSha === onboardingCache.defaultBranchSha &&
-    onboardingSha === onboardingCache.onboardingBranchSha
+    onboardingSha === onboardingCache.onboardingBranchSha &&
+    onboardingCache.isConflicted
   ) {
     return onboardingCache.isConflicted;
   } else {
