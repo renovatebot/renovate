@@ -1,3 +1,4 @@
+import semver from 'semver';
 import type { NewValueConfig } from '../types';
 import { api as bzlmod } from '.';
 
@@ -13,6 +14,18 @@ describe('modules/versioning/bazel-module/index', () => {
   it('getPatch()', () => {
     expect(bzlmod.getPatch('1.2.3')).toBe(3);
   });
+
+  it.each([
+    { a: '1.2.3', expMajor: 1, expMinor: 2, expPatch: 3 },
+    { a: semver.coerce('1.2.3')!, expMajor: 1, expMinor: 2, expPatch: 3 },
+  ])(
+    'getMajor(), getMinor(), getPatch() with $a',
+    ({ a, expMajor, expMinor, expPatch }) => {
+      expect(bzlmod.getMajor(a)).toBe(expMajor);
+      expect(bzlmod.getMinor(a)).toBe(expMinor);
+      expect(bzlmod.getPatch(a)).toBe(expPatch);
+    }
+  );
 
   it.each([
     { a: '1.2.3', b: '1.2.3', exp: true },
@@ -45,6 +58,8 @@ describe('modules/versioning/bazel-module/index', () => {
     { vers: ['1.1.0', '1.2.0', '2.0.0'], rng: '1.2.3', exp: null },
   ])('getSatisfyingVersion(vers, rng)', ({ vers, rng, exp }) => {
     expect(bzlmod.getSatisfyingVersion(vers, rng)).toBe(exp);
+    // The following are currently aliases for getSatisfyingVersion.
+    expect(bzlmod.minSatisfyingVersion(vers, rng)).toBe(exp);
   });
 
   it.each([
