@@ -18,7 +18,7 @@ import type { NpmManagerData } from '../types';
 import type { LockFile, PnpmWorkspaceFile } from './types';
 
 function isPnpmLockfile(obj: any): obj is PnpmLockFile {
-  return is.plainObject(obj);
+  return is.plainObject(obj) && 'lockfileVersion' in obj;
 }
 
 export async function extractPnpmFilters(
@@ -153,11 +153,11 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     }
     logger.trace({ lockParsed }, 'pnpm lockfile parsed');
 
-    let lockfileVersion = lockParsed.lockfileVersion;
-    // field lockfileVersion is type string in lockfileVersion 6 and type number in <6
-    if (lockfileVersion && !is.number(lockfileVersion)) {
-      lockfileVersion = parseFloat(lockfileVersion);
-    }
+    // field lockfileVersion is type string in lockfileVersion = 6 and type number in < 6
+    const lockfileVersion: number = is.number(lockParsed.lockfileVersion)
+      ? lockParsed.lockfileVersion
+      : parseFloat(lockParsed.lockfileVersion);
+
     const lockedVersions: Record<string, string> = {};
     const packagePathRegex = regEx(
       /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/

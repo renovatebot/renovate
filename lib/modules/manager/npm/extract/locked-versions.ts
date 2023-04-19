@@ -91,7 +91,7 @@ export async function getLockedVersions(
       logger.debug('Found pnpm lock-file');
       lockFiles.push(pnpmShrinkwrap);
       if (!lockFileCache[pnpmShrinkwrap]) {
-        logger.trace(`Retrieving/parsing  ${pnpmShrinkwrap}`);
+        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
       }
       const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];

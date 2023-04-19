@@ -16,3 +16,7 @@ packages:
     dependencies:
       sax: 1.2.4
     dev: false
+
+  /sux-1.2.4: #invlaid
+    resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
+    dev: false

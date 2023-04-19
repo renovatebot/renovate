@@ -31,7 +31,7 @@ export interface GenerateLockFileResult {
 }
 
 export interface PnpmLockFile {
-  lockfileVersion?: number;
+  lockfileVersion: number | string;
   packages?: Record<string, any>;
 }
 
