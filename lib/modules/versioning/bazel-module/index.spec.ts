@@ -1,4 +1,3 @@
-import semver from 'semver';
 import type { NewValueConfig } from '../types';
 import { api as bzlmod } from '.';
 
@@ -15,10 +14,7 @@ describe('modules/versioning/bazel-module/index', () => {
     expect(bzlmod.getPatch('1.2.3')).toBe(3);
   });
 
-  it.each([
-    { a: '1.2.3', expMajor: 1, expMinor: 2, expPatch: 3 },
-    { a: semver.coerce('1.2.3')!, expMajor: 1, expMinor: 2, expPatch: 3 },
-  ])(
+  it.each([{ a: '1.2.3', expMajor: 1, expMinor: 2, expPatch: 3 }])(
     'getMajor(), getMinor(), getPatch() with $a',
     ({ a, expMajor, expMinor, expPatch }) => {
       expect(bzlmod.getMajor(a)).toBe(expMajor);

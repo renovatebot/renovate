@@ -1,4 +1,3 @@
-import type { SemVer } from 'semver';
 import type { NewValueConfig, VersioningApi } from '../types';
 import { BzlmodVersion } from './bzlmod-version';
 
@@ -7,23 +6,19 @@ export const displayName = 'Bazel Module';
 export const urls = ['https://bazel.build/external/module'];
 export const supportsRanges = false;
 
-function getBzlmodVersion(version: string | SemVer): BzlmodVersion {
-  if (typeof version === 'string') {
-    return new BzlmodVersion(version);
-  } else {
-    return new BzlmodVersion(version.raw);
-  }
+function getBzlmodVersion(version: string): BzlmodVersion {
+  return new BzlmodVersion(version);
 }
 
-function getMajor(version: string | SemVer): null | number {
+function getMajor(version: string): null | number {
   return getBzlmodVersion(version).release.major;
 }
 
-function getMinor(version: string | SemVer): null | number {
+function getMinor(version: string): null | number {
   return getBzlmodVersion(version).release.minor;
 }
 
-function getPatch(version: string | SemVer): null | number {
+function getPatch(version: string): null | number {
   return getBzlmodVersion(version).release.patch;
 }
 
