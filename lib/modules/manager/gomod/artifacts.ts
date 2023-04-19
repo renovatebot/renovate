@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import semver from 'semver';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { PlatformId } from '../../../constants';
@@ -10,6 +11,7 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureCacheDir,
+  isValidLocalPath,
   readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
@@ -296,7 +298,25 @@ export async function updateArtifacts({
 
     const execCommands: string[] = [];
 
-    let args = 'get -d -t ./...';
+    let goGetDirs: string | undefined;
+    if (config.goGetDirs) {
+      goGetDirs = config.goGetDirs
+        .filter((dir) => {
+          const isValid = isValidLocalPath(dir);
+          if (!isValid) {
+            logger.warn({ dir }, 'Invalid path in goGetDirs');
+          }
+          return isValid;
+        })
+        .map(quote)
+        .join(' ');
+
+      if (goGetDirs === '') {
+        throw new Error('Invalid goGetDirs');
+      }
+    }
+
+    let args = `get -d -t ${goGetDirs ?? './...'}`;
     logger.trace({ cmd, args }, 'go get command included');
     execCommands.push(`${cmd} ${args}`);
 

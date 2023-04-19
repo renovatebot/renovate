@@ -366,6 +366,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
+  },
   // Log options
   {
     name: 'logFile',
@@ -917,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
