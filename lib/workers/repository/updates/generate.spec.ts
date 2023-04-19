@@ -357,7 +357,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBeTrue();
     });
 
-    it('skips appending updateType to prTitle when prTitleAppendUpdateTypeWhenSeparatedGroup is false', () => {
+    it('skips appending baseBranch and updateType to prTitle when prTitleStrict is true', () => {
       const branch = [
         {
           manager: 'some-manager',
@@ -377,7 +377,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
           updateType: 'minor',
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: false,
+          prTitleStrict: true,
         },
         {
           manager: 'some-manager',
@@ -397,7 +397,7 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
           updateType: 'minor',
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: false,
+          prTitleStrict: true,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -432,7 +432,6 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
           updateType: 'minor',
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: true,
         },
         {
           manager: 'some-manager',
@@ -452,7 +451,6 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-08T20:01:41+00:00',
           updateType: 'minor',
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: true,
         },
       ] satisfies BranchUpgradeConfig[];
       const res = generateBranchConfig(branch);
@@ -1053,7 +1051,6 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: true,
           updateType: 'minor' as UpdateType,
           fileReplacePosition: 1,
         },
@@ -1066,7 +1063,6 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: true,
           updateType: 'major' as UpdateType,
           fileReplacePosition: 2,
         },
@@ -1080,7 +1076,6 @@ describe('workers/repository/updates/generate', () => {
           isGroup: true,
           separateMajorMinor: true,
           separateMinorPatch: true,
-          prTitleAppendUpdateTypeWhenSeparatedGroup: true,
           updateType: 'patch' as UpdateType,
           fileReplacePosition: 0,
         },

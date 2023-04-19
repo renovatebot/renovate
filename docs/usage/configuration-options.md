@@ -2710,7 +2710,7 @@ Here's an example of how you would define PR priority so that devDependencies ar
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
-## prTitleAppendUpdateTypeWhenSeparatedGroup
+## prTitleStrict
 
 ## printConfig
 
