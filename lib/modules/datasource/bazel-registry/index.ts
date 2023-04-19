@@ -1,4 +1,5 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
 import { Datasource } from '../datasource';
@@ -16,6 +17,7 @@ export class BazelRegistryDatasource extends Datasource {
   ];
   override readonly registryStrategy = 'hunt';
   override readonly customRegistrySupport = true;
+  override readonly caching = true;
 
   static packageMetatdataPath(packageName: string): string {
     return `/modules/${packageName}/metadata.json`;
@@ -25,16 +27,11 @@ export class BazelRegistryDatasource extends Datasource {
     super(BazelRegistryDatasource.id);
   }
 
-  // TODO(grindel): Figure out what the cache settings should be!
-  // import { cache } from '../../../util/cache/package/decorator';
-  // override readonly caching = true;
-  // @cache({
-  //   namespace: `datasource-${BazelRegistryDatasource.id}`,
-  //   key: ({ registryUrl, packageName }: GetReleasesConfig) =>
-  //     // TODO: types (#7154)
-  //     `${registryUrl!}:${getImageType(packageName)}`,
-  // })
-  //
+  @cache({
+    namespace: `datasource-${BazelRegistryDatasource.id}`,
+    key: ({ registryUrl, packageName }: GetReleasesConfig) =>
+      `${registryUrl!}:${packageName}`,
+  })
   async getReleases({
     registryUrl,
     packageName,
