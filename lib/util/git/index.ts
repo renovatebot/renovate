@@ -1032,7 +1032,7 @@ export async function prepareCommit({
 
     return result;
   } catch (err) /* istanbul ignore next */ {
-    return handleCommitError(files, branchName, err);
+    return handleCommitError(err, branchName, files);
   }
 }
 
@@ -1061,15 +1061,14 @@ export async function pushCommit({
     incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
-    handleCommitError(files, sourceRef, err);
+    handleCommitError(err, sourceRef, files);
   }
   return result;
 }
 
-export async function fetchCommit({
-  branchName,
-  files,
-}: CommitFilesConfig): Promise<CommitSha | null> {
+export async function fetchBranch(
+  branchName: string
+): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
@@ -1080,7 +1079,7 @@ export async function fetchCommit({
     config.branchIsModified[branchName] = false;
     return commit;
   } catch (err) /* istanbul ignore next */ {
-    return handleCommitError(files, branchName, err);
+    return handleCommitError(err, branchName);
   }
 }
 

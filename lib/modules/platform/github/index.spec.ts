@@ -642,10 +642,10 @@ describe('modules/platform/github/index', () => {
 
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-    const t1 = t.plus({ minutes: 1 }).toISO();
-    const t2 = t.plus({ minutes: 2 }).toISO();
-    const t3 = t.plus({ minutes: 3 }).toISO();
-    const t4 = t.plus({ minutes: 4 }).toISO();
+    const t1 = t.plus({ minutes: 1 }).toISO()!;
+    const t2 = t.plus({ minutes: 2 }).toISO()!;
+    const t3 = t.plus({ minutes: 3 }).toISO()!;
+    const t4 = t.plus({ minutes: 4 }).toISO()!;
 
     const pr1: GhRestPr = {
       number: 1,
@@ -3202,7 +3202,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {

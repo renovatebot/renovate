@@ -164,7 +164,7 @@ In short, the number of `{{argx}}` parameters in the definition is how many para
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
-Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
+Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
 
@@ -211,7 +211,10 @@ Renovate will determine the current platform and look up the preset from there.
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from?
-Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
+
+Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
+The maintainers can also help improve the preset, and let you know where to put it in the code.
 
 ## Organization level presets
 
