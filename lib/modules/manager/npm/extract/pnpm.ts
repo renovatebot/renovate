@@ -144,7 +144,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
   const pnpmLockRaw = (await readLocalFile(filePath, 'utf8'))!;
   try {
     const lockParsed = load(pnpmLockRaw) as PnpmLockFile;
-    logger.debug({ lockParsed }, 'pnpm lockfile parsed');
+    logger.trace({ lockParsed }, 'pnpm lockfile parsed');
 
     let { lockfileVersion } = lockParsed;
     // field lockfileVersion is type string in lockfileVersion 6 and type number in <6
@@ -165,14 +165,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
 
       const packageName = result.groups.packageName;
       const version = result.groups.version;
-      logger.debug({
+      logger.trace({
         packagePath,
         packageName,
         version,
       });
       lockedVersions[packageName] = version;
     }
-    logger.debug({ lockedVersions, lockfileVersion }, 'pnpm lockfile parsed');
     return {
       lockedVersions,
       lockfileVersion,
