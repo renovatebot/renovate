@@ -531,7 +531,7 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 ```
 
 <!-- prettier-ignore -->
-!!! caution
+!!! warning
     The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     Renovate may downgrade JSON5 content to plain JSON.
     When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
