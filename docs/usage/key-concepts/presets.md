@@ -51,7 +51,7 @@ Once you find a preset you like, put it in an `extends` array in your config fil
 
 If you have a Renovate config that may help others, you can put it into Renovate's built-in presets.
 
-Read [Contributing to presets](./config-presets.md#contributing-to-presets) to learn how.
+Read [Contributing to presets](../config-presets.md#contributing-to-presets) to learn how.
 
 ## Summary
 
