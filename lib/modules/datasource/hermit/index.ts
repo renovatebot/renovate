@@ -34,7 +34,7 @@ export class HermitDatasource extends Datasource {
   constructor() {
     super(HermitDatasource.id);
     this.http = new GithubHttp(id);
-    this.pathRegex = regEx('^\\/(?<owner>[^/]+)\\/(?<repo>[^/]+)$');
+    this.pathRegex = regEx('^/(?<owner>[^/]+)/(?<repo>[^/]+)$');
   }
 
   @cache({

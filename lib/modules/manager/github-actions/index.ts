@@ -4,8 +4,8 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: [
-    '^(workflow-templates|\\.github\\/workflows)\\/[^/]+\\.ya?ml$',
-    '(^|\\/)action\\.ya?ml$',
+    '^(workflow-templates|\\.github/workflows)/[^/]+\\.ya?ml$',
+    '(^|/)action\\.ya?ml$',
   ],
 };
 

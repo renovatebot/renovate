@@ -18,7 +18,7 @@ describe('modules/datasource/rubygems/index', () => {
     const params = {
       versioning: rubyVersioning.id,
       datasource: RubyGemsDatasource.id,
-      depName: 'rails',
+      packageName: 'rails',
       registryUrls: [
         'https://thirdparty.com',
         'https://firstparty.com/basepath/',

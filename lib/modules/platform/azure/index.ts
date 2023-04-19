@@ -16,7 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -82,6 +82,8 @@ const defaults: {
 } = {
   hostType: 'azure',
 };
+
+export const id = 'azure';
 
 export function initPlatform({
   endpoint,
@@ -381,7 +383,8 @@ export async function getBranchStatusCheck(
 }
 
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatusCheck(branchName);
@@ -391,7 +394,7 @@ export async function getBranchStatus(
     return 'yellow';
   }
   const noOfFailures = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.Error ||
       status.state === GitStatusState.Failed
   ).length;
@@ -399,11 +402,24 @@ export async function getBranchStatus(
     return 'red';
   }
   const noOfPending = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.NotSet ||
       status.state === GitStatusState.Pending
   ).length;
   if (noOfPending) {
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === GitStatusState.Succeeded &&
+        status.context?.genre === 'renovate'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   return 'green';
@@ -456,7 +472,7 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  if (platformOptions?.azureAutoApprove) {
+  if (platformOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -892,8 +908,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

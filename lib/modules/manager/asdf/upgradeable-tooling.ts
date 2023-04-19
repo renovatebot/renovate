@@ -1,9 +1,12 @@
+import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
+import { FlutterVersionDatasource } from '../../datasource/flutter-version';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeDatasource } from '../../datasource/node';
+import { NodeVersionDatasource } from '../../datasource/node-version';
+import { NpmDatasource } from '../../datasource/npm';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
@@ -79,6 +82,12 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'crystal-lang/crystal',
     },
   },
+  dart: {
+    asdfPluginUrl: 'https://github.com/PatOConnor43/asdf-dart',
+    config: {
+      datasource: DartVersionDatasource.id,
+    },
+  },
   deno: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-deno',
     config: {
@@ -122,6 +131,12 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'erlang/otp',
       extractVersion: '^OTP-(?<version>\\S+)',
       versioning: `${regexVersioning.id}:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$`,
+    },
+  },
+  flutter: {
+    asdfPluginUrl: 'https://github.com/oae/asdf-flutter',
+    config: {
+      datasource: FlutterVersionDatasource.id,
     },
   },
   gauche: {
@@ -251,7 +266,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-nodejs',
     config: {
       depName: 'node',
-      datasource: NodeDatasource.id,
+      datasource: NodeVersionDatasource.id,
     },
   },
   ocaml: {
@@ -275,6 +290,22 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'php/php-src',
       extractVersion: '^php-(?<version>\\S+)',
+    },
+  },
+  pnpm: {
+    asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pnpm',
+    config: {
+      datasource: NpmDatasource.id,
+      packageName: 'pnpm',
+      versioning: semverVersioning.id,
+    },
+  },
+  pulumi: {
+    asdfPluginUrl: 'https://github.com/canha/asdf-pulumi.git',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pulumi/pulumi',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   python: {
@@ -336,11 +367,27 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  sops: {
+    asdfPluginUrl: 'https://github.com/feniix/asdf-sops',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mozilla/sops',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   terraform: {
     asdfPluginUrl: 'https://github.com/asdf-community/asdf-hashicorp',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'hashicorp/terraform',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  terragrunt: {
+    asdfPluginUrl: 'https://github.com/ohmer/asdf-terragrunt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'gruntwork-io/terragrunt',
       extractVersion: '^v(?<version>\\S+)',
     },
   },

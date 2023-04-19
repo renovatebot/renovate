@@ -24,7 +24,7 @@ import type {
 } from '../types';
 import type { PoetryFile, PoetryLock, PoetrySource } from './types';
 
-function getPythonConstraint(
+export function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string | undefined | null {
@@ -48,7 +48,7 @@ function getPythonConstraint(
 
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
-function getPoetryRequirement(pyProjectContent: string): string | null {
+export function getPoetryRequirement(pyProjectContent: string): string | null {
   try {
     const pyproject: PoetryFile = parse(pyProjectContent);
     // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
@@ -173,8 +173,11 @@ export async function updateArtifacts({
           .join(' ')}`
       );
     }
-    const constraint = getPythonConstraint(existingLockFileContent, config);
-    const poetryVersion =
+    const pythonConstraint = getPythonConstraint(
+      existingLockFileContent,
+      config
+    );
+    const poetryConstraint =
       config.constraints?.poetry ?? getPoetryRequirement(newPackageFileContent);
     const extraEnv = {
       ...getSourceCredentialVars(newPackageFileContent, packageFileName),
@@ -185,9 +188,9 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv,
       docker: {},
-      toolConstraints: [{ toolName: 'python', constraint }],
-      preCommands: [
-        `pip install --user ${quote(`poetry${poetryVersion ?? ''}`)}`,
+      toolConstraints: [
+        { toolName: 'python', constraint: pythonConstraint },
+        { toolName: 'poetry', constraint: poetryConstraint },
       ],
     };
     await exec(cmd, execOptions);

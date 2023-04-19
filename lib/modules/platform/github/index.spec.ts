@@ -274,7 +274,7 @@ describe('modules/platform/github/index', () => {
     repository: string,
     forkExisted: boolean,
     forkResult = 200,
-    forkDefaulBranch = 'master'
+    forkDefaultBranch = 'master'
   ): void {
     scope
       // repo info
@@ -307,7 +307,7 @@ describe('modules/platform/github/index', () => {
               {
                 full_name: 'forked/repo',
                 owner: { login: 'forked' },
-                default_branch: forkDefaulBranch,
+                default_branch: forkDefaultBranch,
               },
             ]
           : []
@@ -642,15 +642,15 @@ describe('modules/platform/github/index', () => {
 
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-    const t1 = t.plus({ minutes: 1 }).toISO();
-    const t2 = t.plus({ minutes: 2 }).toISO();
-    const t3 = t.plus({ minutes: 3 }).toISO();
-    const t4 = t.plus({ minutes: 4 }).toISO();
+    const t1 = t.plus({ minutes: 1 }).toISO()!;
+    const t2 = t.plus({ minutes: 2 }).toISO()!;
+    const t3 = t.plus({ minutes: 3 }).toISO()!;
+    const t4 = t.plus({ minutes: 4 }).toISO()!;
 
     const pr1: GhRestPr = {
       number: 1,
       head: { ref: 'branch-1', sha: '111', repo: { full_name: 'some/repo' } },
-      base: { repo: { pushed_at: '' } },
+      base: { repo: { pushed_at: '' }, ref: 'repo/fork_branch' },
       state: 'open',
       title: 'PR #1',
       created_at: t1,
@@ -998,8 +998,30 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not consider internal statuses as success', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [
+            {
+              context: 'renovate/stability-days',
+              state: 'success',
+            },
+          ],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
+        .reply(200, []);
+
+      await github.initRepo({ repository: 'some/repo' });
+      const res = await github.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -1014,7 +1036,7 @@ describe('modules/platform/github/index', () => {
         .reply(200, []);
 
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -1029,7 +1051,7 @@ describe('modules/platform/github/index', () => {
         .get('/repos/some/repo/commits/somebranch/check-runs?per_page=100')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -1061,7 +1083,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -1099,7 +1121,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
     });
 
@@ -1130,7 +1152,7 @@ describe('modules/platform/github/index', () => {
           ],
         });
       await github.initRepo({ repository: 'some/repo' });
-      const res = await github.getBranchStatus('somebranch');
+      const res = await github.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });
@@ -2180,6 +2202,96 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({ number: 123 });
     });
 
+    describe('with forkToken', () => {
+      let scope: httpMock.Scope;
+
+      beforeEach(async () => {
+        scope = httpMock.scope(githubApiHost);
+        forkInitRepoMock(scope, 'some/repo', false);
+        scope.get('/user').reply(200, {
+          login: 'forked',
+        });
+        scope.post('/repos/some/repo/forks').reply(200, {
+          full_name: 'forked/repo',
+          default_branch: 'master',
+        });
+
+        await github.initRepo({
+          repository: 'some/repo',
+          forkToken: 'true',
+        });
+      });
+
+      it('should allow maintainer edits if explicitly enabled via options', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is set in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR can be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: false,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should allow maintainer edits if not explicitly set', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === true
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+
+      it('should disallow maintainer edits if explicitly disabled', async () => {
+        scope
+          .post(
+            '/repos/some/repo/pulls',
+            // Ensure the `maintainer_can_modify` option is `false` in the REST API request.
+            (body) => body.maintainer_can_modify === false
+          )
+          .reply(200, {
+            number: 123,
+            head: { repo: { full_name: 'some/repo' }, ref: 'some-branch' },
+          });
+        const pr = await github.createPr({
+          sourceBranch: 'some-branch',
+          targetBranch: 'main',
+          prTitle: 'PR title',
+          prBody: 'PR *cannot* be edited by maintainers.',
+          labels: null,
+          platformOptions: {
+            forkModeDisallowMaintainerEdits: true,
+          },
+        });
+        expect(pr).toMatchObject({ number: 123 });
+      });
+    });
+
     describe('automerge', () => {
       const createdPrResp = {
         number: 123,
@@ -2450,7 +2562,6 @@ describe('modules/platform/github/index', () => {
       expect(pr).toMatchObject({
         number: 2500,
         bodyStruct: { hash: expect.any(String) },
-        displayNumber: 'Pull Request #2500',
         sourceBranch: 'renovate/jest-monorepo',
         sourceRepo: 'some/repo',
         state: 'open',
@@ -2578,7 +2689,6 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: expect.any(String),
         },
-        displayNumber: 'Pull Request #1234',
         hasAssignees: true,
         number: 1234,
         sourceBranch: 'some/branch',
@@ -2612,7 +2722,6 @@ describe('modules/platform/github/index', () => {
         bodyStruct: {
           hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
         },
-        displayNumber: 'Pull Request #1234',
         number: 1234,
         sourceBranch: 'some/branch',
         state: 'open',
@@ -2692,6 +2801,27 @@ describe('modules/platform/github/index', () => {
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .replyWithError('merge error');
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle merge block', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Required status check "build" is expected.' });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1234,
@@ -3072,7 +3202,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {

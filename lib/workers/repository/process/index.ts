@@ -6,9 +6,11 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import { branchExists } from '../../../util/git';
+import { getBranchList } from '../../../util/git';
+import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
@@ -81,6 +83,23 @@ async function getBaseBranchConfig(
   return baseBranchConfig;
 }
 
+function unfoldBaseBranches(baseBranches: string[]): string[] {
+  const unfoldedList: string[] = [];
+
+  const allBranches = getBranchList();
+  for (const baseBranch of baseBranches) {
+    const isAllowedPred = configRegexPredicate(baseBranch);
+    if (isAllowedPred) {
+      const matchingBranches = allBranches.filter(isAllowedPred);
+      unfoldedList.push(...matchingBranches);
+    } else {
+      unfoldedList.push(baseBranch);
+    }
+  }
+
+  return [...new Set(unfoldedList)];
+}
+
 export async function extractDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
@@ -91,11 +110,12 @@ export async function extractDependencies(
     packageFiles: null!,
   };
   if (config.baseBranches?.length) {
+    config.baseBranches = unfoldBaseBranches(config.baseBranches);
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
-      if (branchExists(baseBranch)) {
+      if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
@@ -104,7 +124,7 @@ export async function extractDependencies(
     }
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
-      if (branchExists(baseBranch)) {
+      if (await scm.branchExists(baseBranch)) {
         addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];

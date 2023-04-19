@@ -1,13 +1,17 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
   _filename: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);

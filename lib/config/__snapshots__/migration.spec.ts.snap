@@ -131,6 +131,7 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
     "config:js-lib",
     ":dependencyDashboard",
   ],
+  "forkProcessing": "enabled",
   "hostRules": [
     {
       "hostType": "docker",
@@ -142,7 +143,6 @@ exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`
   "ignorePaths": [
     "node_modules/",
   ],
-  "includeForks": true,
   "lockFileMaintenance": {
     "automerge": true,
     "exposeAllEnv": false,

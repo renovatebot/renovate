@@ -15,11 +15,16 @@ import {
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import {
+  getPrBodyStruct,
+  hashBody,
+} from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { fingerprint } from '../../../../util/fingerprint';
+import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -32,6 +37,8 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
+import { getPrCache, setPrCache } from './pr-cache';
+import { generatePrFingerprintConfig, validatePrCache } from './pr-fingerprint';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -43,10 +50,11 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: config.azureAutoApprove,
-    azureWorkItemId: config.azureWorkItemId,
-    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    autoApprove: !!config.autoApprove,
+    azureWorkItemId: config.azureWorkItemId ?? 0,
+    bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
+    gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -92,21 +100,39 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
-  );
-
   const config: BranchConfig = { ...prConfig };
-
+  const filteredPrConfig = generatePrFingerprintConfig(config);
+  const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const {
+    branchName,
+    ignoreTests,
+    internalChecksAsSuccess,
+    prTitle = '',
+    upgrades,
+  } = config;
+  const getBranchStatus = memoize(() =>
+    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests)
+  );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
-  // Check if existing PR exists
+  // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
+  const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
+    if (existingPr.bodyStruct?.rebaseRequested) {
+      logger.debug('PR rebase requested, so skipping cache check');
+    } else if (prCache) {
+      logger.trace({ prCache }, 'Found existing PR cache');
+      // return if pr cache is valid and pr was not changed in the past 24hrs
+      if (validatePrCache(prCache, prFingerprint)) {
+        return { type: 'with-pr', pr: existingPr };
+      }
+    } else if (config.repositoryCache === 'enabled') {
+      logger.debug('PR cache not found');
+    }
   }
   config.upgrades = [];
 
@@ -115,75 +141,74 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
-  // Only create a PR if a branch automerge has failed
-  if (
-    config.automerge === true &&
-    config.automergeType?.startsWith('branch') &&
-    !config.forcePr
-  ) {
-    logger.debug(`Branch automerge is enabled`);
+  if (!existingPr) {
+    // Only create a PR if a branch automerge has failed
     if (
-      config.stabilityStatus !== 'yellow' &&
-      (await getBranchStatus()) === 'yellow' &&
-      is.number(config.prNotPendingHours)
+      config.automerge === true &&
+      config.automergeType?.startsWith('branch') &&
+      !config.forcePr
     ) {
-      logger.debug('Checking how long this branch has been pending');
-      const lastCommitTime = await getBranchLastCommitTime(branchName);
-      if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
-        logger.debug('Branch exceeds prNotPending hours - forcing PR creation');
-        config.forcePr = true;
-      }
-    }
-    if (config.forcePr || (await getBranchStatus()) === 'red') {
-      logger.debug(`Branch tests failed, so will create PR`);
-    } else {
-      // Branch should be automerged, so we don't want to create a PR
-      return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
-    }
-  }
-  if (config.prCreation === 'status-success') {
-    logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) !== 'green') {
-      logger.debug(`Branch status isn't green - not creating PR`);
-      return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
-    }
-    logger.debug('Branch status success');
-  } else if (
-    config.prCreation === 'approval' &&
-    !existingPr &&
-    dependencyDashboardCheck !== 'approvePr'
-  ) {
-    return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
-  } else if (
-    config.prCreation === 'not-pending' &&
-    !existingPr &&
-    !config.forcePr
-  ) {
-    logger.debug('Checking branch combined status');
-    if ((await getBranchStatus()) === 'yellow') {
-      logger.debug(`Branch status is yellow - checking timeout`);
-      const lastCommitTime = await getBranchLastCommitTime(branchName);
-      const elapsedHours = getElapsedHours(lastCommitTime);
+      logger.debug(`Branch automerge is enabled`);
       if (
-        !dependencyDashboardCheck &&
-        ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
-          (is.number(config.prNotPendingHours) &&
-            elapsedHours < config.prNotPendingHours))
+        config.stabilityStatus !== 'yellow' &&
+        (await getBranchStatus()) === 'yellow' &&
+        is.number(config.prNotPendingHours)
       ) {
-        logger.debug(
-          `Branch is ${elapsedHours} hours old - skipping PR creation`
-        );
-        return {
-          type: 'without-pr',
-          prBlockedBy: 'AwaitingTests',
-        };
+        logger.debug('Checking how long this branch has been pending');
+        const lastCommitTime = await getBranchLastCommitTime(branchName);
+        if (getElapsedHours(lastCommitTime) >= config.prNotPendingHours) {
+          logger.debug(
+            'Branch exceeds prNotPending hours - forcing PR creation'
+          );
+          config.forcePr = true;
+        }
       }
-      const prNotPendingHours = String(config.prNotPendingHours);
-      logger.debug(
-        `prNotPendingHours=${prNotPendingHours} threshold hit - creating PR`
-      );
+      if (config.forcePr || (await getBranchStatus()) === 'red') {
+        logger.debug(`Branch tests failed, so will create PR`);
+      } else {
+        // Branch should be automerged, so we don't want to create a PR
+        return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
+      }
     }
-    logger.debug('Branch status success');
+    if (!existingPr && config.prCreation === 'status-success') {
+      logger.debug('Checking branch combined status');
+      if ((await getBranchStatus()) !== 'green') {
+        logger.debug(`Branch status isn't green - not creating PR`);
+        return { type: 'without-pr', prBlockedBy: 'AwaitingTests' };
+      }
+      logger.debug('Branch status success');
+    } else if (
+      config.prCreation === 'approval' &&
+      dependencyDashboardCheck !== 'approvePr'
+    ) {
+      return { type: 'without-pr', prBlockedBy: 'NeedsApproval' };
+    } else if (config.prCreation === 'not-pending' && !config.forcePr) {
+      logger.debug('Checking branch combined status');
+      if ((await getBranchStatus()) === 'yellow') {
+        logger.debug(`Branch status is yellow - checking timeout`);
+        const lastCommitTime = await getBranchLastCommitTime(branchName);
+        const elapsedHours = getElapsedHours(lastCommitTime);
+        if (
+          !dependencyDashboardCheck &&
+          ((config.stabilityStatus && config.stabilityStatus !== 'yellow') ||
+            (is.number(config.prNotPendingHours) &&
+              elapsedHours < config.prNotPendingHours))
+        ) {
+          logger.debug(
+            `Branch is ${elapsedHours} hours old - skipping PR creation`
+          );
+          return {
+            type: 'without-pr',
+            prBlockedBy: 'AwaitingTests',
+          };
+        }
+        const prNotPendingHours = String(config.prNotPendingHours);
+        logger.debug(
+          `prNotPendingHours=${prNotPendingHours} threshold hit - creating PR`
+        );
+      }
+      logger.debug('Branch status success');
+    }
   }
 
   const processedUpgrades: string[] = [];
@@ -307,8 +332,11 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
-        // TODO: types (#7154)
-        logger.debug(`${existingPr.displayNumber!} does not need updating`);
+        // adds or-cache for existing PRs
+        setPrCache(branchName, prFingerprint, false);
+        logger.debug(
+          `Pull Request #${existingPr.number} does not need updating`
+        );
         return { type: 'with-pr', pr: existingPr };
       }
       // PR must need updating
@@ -331,6 +359,7 @@ export async function ensurePr(
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+        return { type: 'with-pr', pr: existingPr };
       } else {
         await platform.updatePr({
           number: existingPr.number,
@@ -339,8 +368,16 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        setPrCache(branchName, prFingerprint, true);
       }
-      return { type: 'with-pr', pr: existingPr };
+      return {
+        type: 'with-pr',
+        pr: {
+          ...existingPr,
+          bodyStruct: getPrBodyStruct(prBody),
+          title: prTitle,
+        },
+      };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     if (config.updateType === 'rollback') {
@@ -349,7 +386,7 @@ export async function ensurePr(
     let pr: Pr | null;
     if (GlobalConfig.get('dryRun')) {
       logger.info('DRY-RUN: Would create PR: ' + prTitle);
-      pr = { number: 0, displayNumber: 'Dry run PR' } as never;
+      pr = { number: 0 } as never;
     } else {
       try {
         if (
@@ -367,7 +404,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: config.draftPR,
+          draftPR: !!config.draftPR,
         });
 
         incLimitedValue('PullRequests');
@@ -389,7 +426,7 @@ export async function ensurePr(
             { branch: branchName },
             'Deleting branch due to server error'
           );
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
         return { type: 'without-pr', prBlockedBy: 'Error' };
       }
@@ -430,8 +467,8 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
-      // TODO: types (#7154)
-      logger.debug(`Created ${pr.displayNumber!}`);
+      setPrCache(branchName, prFingerprint, true);
+      logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }
   } catch (err) {

@@ -3,7 +3,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { coerceArray } from '../../../util/array';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type {
   TektonBundle,
   TektonResolverParamsField,
@@ -14,7 +14,7 @@ import type {
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('tekton.extractPackageFile()');
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];

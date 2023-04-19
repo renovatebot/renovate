@@ -532,7 +532,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -574,7 +574,7 @@ describe('modules/platform/gitlab/index', () => {
             status: 'success',
           },
         });
-      const res = await gitlab.getBranchStatus('some-branch');
+      const res = await gitlab.getBranchStatus('some-branch', true);
       expect(res).toBe('green');
     });
 
@@ -584,13 +584,34 @@ describe('modules/platform/gitlab/index', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }, { status: 'success' }])
+        .reply(200, [
+          { context: 'renovate/stability-days', status: 'success' },
+          { context: 'renovate/other', status: 'success' },
+        ])
         .get(
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('returns pending if all are internal success', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [
+          { name: 'renovate/stability-days', status: 'success' },
+          { name: 'renovate/other', status: 'success' },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
+        )
+        .reply(200, []);
+      const res = await gitlab.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('returns success if optional jobs fail', async () => {
@@ -607,7 +628,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
     });
 
@@ -622,7 +643,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
     });
 
@@ -637,7 +658,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
     });
 
@@ -652,7 +673,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -667,7 +688,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -686,7 +707,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -701,7 +722,7 @@ describe('modules/platform/gitlab/index', () => {
           '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&scope=created_by_me'
         )
         .reply(200, []);
-      const res = await gitlab.getBranchStatus('somebranch');
+      const res = await gitlab.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -709,7 +730,7 @@ describe('modules/platform/gitlab/index', () => {
       expect.assertions(1);
       git.branchExists.mockReturnValue(false);
       await initRepo();
-      await expect(gitlab.getBranchStatus('somebranch')).rejects.toThrow(
+      await expect(gitlab.getBranchStatus('somebranch', true)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -1568,7 +1589,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1684,7 +1704,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1736,7 +1755,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1788,7 +1806,6 @@ describe('modules/platform/gitlab/index', () => {
         })
       ).toMatchInlineSnapshot(`
         {
-          "displayNumber": "Merge Request #12345",
           "id": 1,
           "iid": 12345,
           "number": 12345,
@@ -1947,7 +1964,6 @@ describe('modules/platform/gitlab/index', () => {
         bodyStruct: {
           hash: '23f41dbec0785a6c77457dd6ebf99ae5970c5fffc9f7a8ad7f66c1b8eeba5b90',
         },
-        displayNumber: 'Merge Request #12345',
         hasAssignees: false,
         headPipelineStatus: undefined,
         labels: undefined,
@@ -2120,13 +2136,6 @@ These updates have all been created already. Click a checkbox below to force a r
       gitlab.massageMarkdown(prBody);
       expect(smartTruncate).toHaveBeenCalledTimes(1);
       expect(smartTruncate).toHaveBeenCalledWith(expect.any(String), 1000000);
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await gitlab.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 

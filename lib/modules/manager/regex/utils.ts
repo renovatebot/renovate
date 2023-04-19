@@ -1,5 +1,6 @@
-import { URL } from 'url';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
+import { migrateDatasource } from '../../../config/migrations/custom/datasource-migration';
 import type { RegexManagerTemplates } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as template from '../../../util/template';
@@ -16,6 +17,7 @@ export const validMatchFields = [
   'extractVersion',
   'registryUrl',
   'depType',
+  'indentation',
 ] as const;
 
 type ValidMatchFields = (typeof validMatchFields)[number];
@@ -34,6 +36,12 @@ function updateDependency(
       } catch (err) {
         logger.warn({ value }, 'Invalid regex manager registryUrl');
       }
+      break;
+    case 'datasource':
+      dependency.datasource = migrateDatasource(value);
+      break;
+    case 'indentation':
+      dependency.indentation = is.emptyStringOrWhitespace(value) ? value : '';
       break;
     default:
       dependency[field] = value;

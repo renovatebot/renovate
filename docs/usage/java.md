@@ -30,24 +30,21 @@ Renovate detects versions that are specified in a string `'group:artifact:versio
 
 Renovate can update:
 
-- `build.gradle`/`build.gradle.kts` files in the root of the repository
-- `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-project configurations
-- dependencies whose version is defined in a `*.properties` file
+- `*.gradle`/`*.gradle.kts` files
+- Dependencies with version definitions in `gradle.properties` files
+- Gradle lockfiles stored in `*.lockfile` files
 - `*.versions.toml` files in any directory or `*.toml` files inside the `gradle`
   directory ([Gradle Version Catalogs docs](https://docs.gradle.org/current/userguide/platforms.html))
-- `versions.props` from [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
+- `versions.props` and `versions.lock` from the [gradle-consistent-versions](https://github.com/palantir/gradle-consistent-versions) plugin
 
 Renovate does not support:
 
-- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root
 - Android projects that require extra configuration to run (e.g. setting the Android SDK)
-- Gradle versions older than version 5.0
-- Catalogs defined inside a `build.gradle` or `build.gradle.kts` file rather than in TOML
 - Catalogs with version ranges
-- Catalogs versions using `reject`, and `rejectAll` constraints
-- Catalogs versions using more than one of `require`, `strictly`, `prefer` in a single declaration
+- Catalog versions using `reject`, and `rejectAll` constraints
+- Catalog versions using more than one of `require`, `strictly`, `prefer` in a single declaration
 - Catalogs with custom names that do not end in `.toml`
-- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml`
+- Catalogs outside the `gradle` folder whose names do not end in `.versions.toml` (unless overridden via [`fileMatch`](https://docs.renovatebot.com/configuration-options/#filematch) configuration)
 
 ## Gradle Wrapper
 

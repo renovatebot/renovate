@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import { join } from 'upath';
 import {
   envMock,
@@ -36,12 +36,11 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-jest.spyOn(os, 'platform').mockReturnValue('linux');
+const osPlatformSpy = jest.spyOn(os, 'platform');
 
 describe('modules/manager/gradle/artifacts', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
-
+    osPlatformSpy.mockReturnValue('linux');
     env.getChildProcessEnv.mockReturnValue({
       ...envMock.basic,
       LANG: 'en_US.UTF-8',
@@ -84,7 +83,7 @@ describe('modules/manager/gradle/artifacts', () => {
         content = 'New gradle.lockfile';
       } else if (fileName === 'gradle/wrapper/gradle-wrapper.properties') {
         content =
-          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.4-bin.zip';
+          'distributionUrl=https\\://services.gradle.org/distributions/gradle-7.2-bin.zip';
       }
 
       return Promise.resolve(content);
@@ -159,7 +158,49 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
+        cmd: './gradlew --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine > /dev/null',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
+  });
+
+  it('updates lock file in win32', async () => {
+    osPlatformSpy.mockReturnValue('win32');
+
+    const execSnapshots = mockExecAll();
+
+    const res = await updateArtifacts({
+      packageFileName: 'build.gradle',
+      updatedDeps: [
+        { depName: 'org.junit.jupiter:junit-jupiter-api' },
+        { depName: 'org.junit.jupiter:junit-jupiter-engine' },
+      ],
+      newPackageFileContent: '',
+      config: {},
+    });
+
+    expect(res).toEqual([
+      {
+        file: {
+          type: 'addition',
+          path: 'gradle.lockfile',
+          contents: 'New gradle.lockfile',
+        },
+      },
+    ]);
+
+    // In win32, gradle.bat will be used and /dev/null redirection isn't used yet
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'gradlew.bat --console=plain -q properties',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+      {
+        cmd: 'gradlew.bat --console=plain -q :dependencies --update-locks org.junit.jupiter:junit-jupiter-api,org.junit.jupiter:junit-jupiter-engine',
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -201,7 +242,7 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin',
+        cmd: './gradlew --console=plain -q :dependencies --update-locks org.springframework.boot:org.springframework.boot.gradle.plugin > /dev/null',
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -251,7 +292,7 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -280,7 +321,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -291,7 +332,7 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
@@ -309,11 +350,11 @@ describe('modules/manager/gradle/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar' +
+          'containerbase/sidecar' +
           ' bash -l -c "' +
           'install-tool java 16.0.1' +
           ' && ' +
-          './gradlew --console=plain -q :dependencies --write-locks' +
+          './gradlew --console=plain -q :dependencies --write-locks > /dev/null' +
           '"',
         options: { cwd: '/tmp/github/some/repo' },
       },
@@ -348,7 +389,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
       { cmd: 'install-tool java 16.0.1' },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);
@@ -384,7 +425,7 @@ describe('modules/manager/gradle/artifacts', () => {
         },
       },
       {
-        cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks',
+        cmd: './gradlew --console=plain -q :dependencies :sub1:dependencies :sub2:dependencies --write-locks > /dev/null',
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -485,7 +526,7 @@ describe('modules/manager/gradle/artifacts', () => {
       },
       { cmd: 'install-tool java 11.0.1' },
       {
-        cmd: './gradlew --console=plain -q :dependencies --write-locks',
+        cmd: './gradlew --console=plain -q :dependencies --write-locks > /dev/null',
         options: { cwd: '/tmp/github/some/repo' },
       },
     ]);

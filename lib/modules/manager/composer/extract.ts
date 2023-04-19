@@ -6,7 +6,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import { api as semverComposer } from '../../versioning/composer';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type {
   ComposerConfig,
   ComposerLock,
@@ -46,6 +46,7 @@ function parseRepositories(
         switch (repo.type) {
           case 'vcs':
           case 'git':
+          case 'path':
             repositories[name!] = repo;
             break;
           case 'composer':
@@ -81,7 +82,7 @@ function parseRepositories(
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace(`composer.extractPackageFile(${fileName})`);
   let composerJson: ComposerConfig;
   try {
@@ -92,7 +93,7 @@ export async function extractPackageFile(
   }
   const repositories: Record<string, Repo> = {};
   const registryUrls: string[] = [];
-  const res: PackageFile = { deps: [] };
+  const res: PackageFileContent = { deps: [] };
 
   // handle lockfile
   const lockfilePath = fileName.replace(regEx(/\.json$/), '.lock');
@@ -144,6 +145,14 @@ export async function extractPackageFile(
                   datasource = GitTagsDatasource.id;
                   packageName = repositories[depName].url;
                   break;
+                case 'path':
+                  deps.push({
+                    depType,
+                    depName,
+                    currentValue,
+                    skipReason: 'path-dependency',
+                  });
+                  continue;
               }
             }
             const dep: PackageDependency = {

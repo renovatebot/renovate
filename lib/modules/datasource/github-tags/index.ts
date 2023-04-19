@@ -2,6 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { queryReleases, queryTags } from '../../../util/github/graphql';
 import type { GithubReleaseItem } from '../../../util/github/graphql/types';
+import { findCommitOfTag } from '../../../util/github/tags';
 import { getApiBaseUrl, getSourceUrl } from '../../../util/github/url';
 import { GithubHttp } from '../../../util/http/github';
 import { Datasource } from '../datasource';
@@ -22,26 +23,6 @@ export class GithubTagsDatasource extends Datasource {
   constructor() {
     super(GithubTagsDatasource.id);
     this.http = new GithubHttp(GithubTagsDatasource.id);
-  }
-
-  async getTagCommit(
-    registryUrl: string | undefined,
-    packageName: string,
-    tag: string
-  ): Promise<string | null> {
-    try {
-      const tags = await queryTags({ packageName, registryUrl }, this.http);
-      const tagItem = tags.find(({ version }) => version === tag);
-      if (tagItem) {
-        return tagItem.hash;
-      }
-    } catch (err) {
-      logger.debug(
-        { githubRepo: packageName, err },
-        'Error getting tag commit from GitHub repo'
-      );
-    }
-    return null;
   }
 
   async getCommit(
@@ -75,7 +56,7 @@ export class GithubTagsDatasource extends Datasource {
     newValue?: string
   ): Promise<string | null> {
     return newValue
-      ? this.getTagCommit(registryUrl, repo!, newValue)
+      ? findCommitOfTag(registryUrl, repo!, newValue, this.http)
       : this.getCommit(registryUrl, repo!);
   }
 

@@ -82,6 +82,22 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 
 The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
 
+### Automerge monorepo PRs
+
+Say you want to automerge `patch` and `minor` updates for packages in the `group:ionic-nativeMonorepo` preset:
+
+```json
+{
+  "packageRules": [
+    {
+      "extends": ["monorepo:ionic-native"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### Faster merges with platform-native automerge
 
 You can speed up merges by letting Renovate use your platform's native automerge.
@@ -102,6 +118,69 @@ For example:
 ```
 
 For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
+
+### GitHub Merge Queue
+
+Renovate supports GitHub's Merge Queue.
+
+Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) first.
+
+The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
+
+<!-- prettier-ignore -->
+!!! tip "GitHub Merge Queue overview page"
+    GitHub has a page that shows all the PRs in the Merge Queue.
+    The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
+    For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
+
+<!-- prettier-ignore -->
+!!! warning "GitHub Merge Queue is in beta"
+    GitHub's Merge Queue feature is labeled as a beta feature by GitHub.
+    The Merge Queue may stop working, have bugs, or you may need to update your configuration when GitHub changes things.
+
+#### If you use GitHub Actions
+
+If you use GitHub Actions as your CI provider, follow these steps:
+
+Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
+
+```yaml
+on:
+  pull_request:
+  merge_group:
+```
+
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
+
+Then go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+```json
+{
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
+}
+```
+
+#### If you don't use GitHub Actions
+
+If you _don't_ use GitHub Actions as your CI provider, follow these steps:
+
+Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this.
+
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
+Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example).
 
 ## Automerging and scheduling
 

@@ -32,6 +32,7 @@ Read the [GitHub Docs, renaming a branch](https://docs.github.com/en/repositorie
   - Only use `istanbul` comments for unreachable code coverage that is needed for `codecov` completion
   - Use descriptive `istanbul` comments
 - Avoid cast or prefer `x as T` instead of `<T>x` cast
+- Prefer `satisfies` operator over `as`, read the [TypeScript release notes for `satisfies` operator](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-4-9.html#the-satisfies-operator) to learn more
 - Avoid `Boolean` instead use `is` functions from `@sindresorhus/is` package, for example: `is.string`
 
 ```ts

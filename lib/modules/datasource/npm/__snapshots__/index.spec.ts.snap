@@ -2,7 +2,7 @@
 
 exports[`modules/datasource/npm/index should fetch package info from custom registry 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com",
   "releases": [
     {
@@ -19,13 +19,12 @@ exports[`modules/datasource/npm/index should fetch package info from custom regi
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should fetch package info from npm 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": false,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -42,13 +41,12 @@ exports[`modules/datasource/npm/index should fetch package info from npm 1`] = `
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should handle foobar 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -65,13 +63,12 @@ exports[`modules/datasource/npm/index should handle foobar 1`] = `
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should handle no time 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -87,13 +84,12 @@ exports[`modules/datasource/npm/index should handle no time 1`] = `
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should not send an authorization header if public package 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -110,13 +106,12 @@ exports[`modules/datasource/npm/index should not send an authorization header if
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should parse repo url (string) 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -128,13 +123,12 @@ exports[`modules/datasource/npm/index should parse repo url (string) 1`] = `
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should parse repo url 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -146,13 +140,12 @@ exports[`modules/datasource/npm/index should parse repo url 1`] = `
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should replace any environment variable in npmrc 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.from-env.com",
   "releases": [
     {
@@ -169,7 +162,6 @@ exports[`modules/datasource/npm/index should replace any environment variable in
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
@@ -180,8 +172,7 @@ exports[`modules/datasource/npm/index should return deprecated 1`] = `
 \`This is deprecated\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
-  "deprecationSource": "npm",
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -198,7 +189,6 @@ Marking the latest version of an npm package as deprecated results in the entire
   "tags": {
     "latest": "0.0.2",
   },
-  "versions": {},
 }
 `;
 
@@ -212,7 +202,7 @@ Marking the latest version of an npm package as deprecated results in the entire
 
 exports[`modules/datasource/npm/index should send an authorization header if provided 1`] = `
 {
-  "name": "@foobar/core",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -229,13 +219,12 @@ exports[`modules/datasource/npm/index should send an authorization header if pro
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should use default registry if missing from npmrc 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://registry.npmjs.org",
   "releases": [
     {
@@ -252,13 +241,12 @@ exports[`modules/datasource/npm/index should use default registry if missing fro
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com/_packaging/mycustomregistry/npm/registry",
   "releases": [
     {
@@ -275,13 +263,12 @@ exports[`modules/datasource/npm/index should use host rules by baseUrl if provid
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;
 
 exports[`modules/datasource/npm/index should use host rules by hostName if provided 1`] = `
 {
-  "name": "foobar",
+  "isPrivate": true,
   "registryUrl": "https://npm.mycustomregistry.com",
   "releases": [
     {
@@ -298,6 +285,5 @@ exports[`modules/datasource/npm/index should use host rules by hostName if provi
   "tags": {
     "latest": "0.0.1",
   },
-  "versions": {},
 }
 `;

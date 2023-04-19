@@ -239,8 +239,14 @@ export class GithubGraphqlDatasourceFetcher<
       const resultItems: ResultItem[] = [];
       for (const node of queryResult.nodes) {
         const item = this.datasourceAdapter.transform(node);
-        // istanbul ignore if: will be tested later
         if (!item) {
+          logger.once.info(
+            {
+              packageName: `${this.repoOwner}/${this.repoName}`,
+              baseUrl: this.baseUrl,
+            },
+            `GitHub GraphQL datasource: skipping empty item`
+          );
           continue;
         }
         resultItems.push(item);

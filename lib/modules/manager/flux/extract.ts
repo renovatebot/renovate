@@ -2,7 +2,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -10,7 +10,12 @@ import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { isSystemManifest } from './common';
 import type {
   FluxManagerData,
@@ -125,7 +130,7 @@ function resolveGitRepositoryPerSourceTag(
 
   const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitUrl)?.groups;
   if (bitbucketMatchGroups) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketMatchGroups.packageName;
     dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
     return;
@@ -219,7 +224,7 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
           dep.autoReplaceStringTemplate =
-            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';
@@ -235,7 +240,7 @@ function resolveResourceManifest(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile<FluxManagerData> | null {
+): PackageFileContent<FluxManagerData> | null {
   const manifest = readManifest(content, packageFile);
   if (!manifest) {
     return null;

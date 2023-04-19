@@ -9,7 +9,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -34,7 +34,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -49,12 +49,14 @@ bun 0.2.2
 cargo-make 0.36.2
 clojure 1.11.1.1182
 crystal 1.6.1
+dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
 dprint 0.32.2
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
+flutter 3.7.6
 gauche 0.9.12
 gohugo extended_0.104.3
 golang 1.19.2
@@ -74,6 +76,8 @@ nodejs 18.12.0
 ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
+pnpm 7.26.2
+pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
 rust 1.64.0
@@ -81,6 +85,7 @@ scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
 terraform 1.3.3
+terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
 dummy 1.2.3
@@ -129,6 +134,11 @@ dummy 1.2.3
             depName: 'crystal',
           },
           {
+            currentValue: '2.19.3',
+            datasource: 'dart-version',
+            depName: 'dart',
+          },
+          {
             currentValue: '1.26.2',
             datasource: 'github-releases',
             packageName: 'denoland/deno',
@@ -167,6 +177,11 @@ dummy 1.2.3
             versioning:
               'regex:^(?<major>\\d+?)\\.(?<minor>\\d+?)(\\.(?<patch>\\d+))?$',
             depName: 'erlang',
+          },
+          {
+            currentValue: '3.7.6',
+            datasource: 'flutter-version',
+            depName: 'flutter',
           },
           {
             currentValue: '0.9.12',
@@ -272,7 +287,7 @@ dummy 1.2.3
           },
           {
             currentValue: '18.12.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
           {
@@ -294,6 +309,20 @@ dummy 1.2.3
             packageName: 'php/php-src',
             depName: 'php',
             extractVersion: '^php-(?<version>\\S+)',
+          },
+          {
+            currentValue: '7.26.2',
+            datasource: 'npm',
+            packageName: 'pnpm',
+            depName: 'pnpm',
+            versioning: 'semver',
+          },
+          {
+            currentValue: '3.57.1',
+            datasource: 'github-releases',
+            packageName: 'pulumi/pulumi',
+            depName: 'pulumi',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '3.11.0',
@@ -340,6 +369,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'hashicorp/terraform',
             depName: 'terraform',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.43.2',
+            datasource: 'github-releases',
+            packageName: 'gruntwork-io/terragrunt',
+            depName: 'terragrunt',
             extractVersion: '^v(?<version>\\S+)',
           },
           {
@@ -453,7 +489,7 @@ dummy 1.2.3
               deps: [
                 {
                   currentValue: data.expect,
-                  datasource: 'node',
+                  datasource: 'node-version',
                   depName: 'node',
                 },
               ],
@@ -482,7 +518,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
             },
           ],
@@ -495,7 +531,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
               skipReason: 'ignored',
             },

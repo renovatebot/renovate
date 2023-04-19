@@ -10,7 +10,7 @@ import type {
   GitlabPipeline,
 } from '../gitlabci/types';
 import { replaceReferenceTags } from '../gitlabci/utils';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import {
   filterIncludeFromGitlabPipeline,
   isGitlabIncludeProject,
@@ -63,7 +63,7 @@ function getAllIncludeProjects(data: GitlabPipeline): GitlabIncludeProject[] {
   return childrenData;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const { platform, endpoint } = GlobalConfig.get();
   try {

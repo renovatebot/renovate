@@ -6,14 +6,14 @@ const datasource = KubernetesApiDatasource.id;
 describe('modules/datasource/kubernetes-api/index', () => {
   describe('getReleases', () => {
     it('returns null for an unknown Kubernetes API type', async () => {
-      const res = await getPkgReleases({ datasource, depName: 'Unknown' });
+      const res = await getPkgReleases({ datasource, packageName: 'Unknown' });
       expect(res).toBeNull();
     });
 
     it('returns for a known Kubernetes API type', async () => {
       const res = await getPkgReleases({
         datasource,
-        depName: 'CSIStorageCapacity',
+        packageName: 'CSIStorageCapacity',
       });
       expect(res).not.toBeNull();
       expect(res).toStrictEqual({
@@ -27,7 +27,7 @@ describe('modules/datasource/kubernetes-api/index', () => {
     it('is case sensitive', async () => {
       const res = await getPkgReleases({
         datasource,
-        depName: 'csistoragecapacity',
+        packageName: 'csistoragecapacity',
       });
       expect(res).toBeNull();
     });

@@ -1,9 +1,9 @@
 import type { ReleaseResult } from '../types';
 import {
   ComposerRelease,
-  ComposerReleasesArray,
-  ComposerReleasesRecord,
+  ComposerReleases,
   MinifiedArray,
+  RegistryMeta,
   parsePackagesResponse,
   parsePackagesResponses,
 } from './schema';
@@ -80,85 +80,109 @@ describe('modules/datasource/packagist/schema', () => {
     });
 
     it('parses ComposerRelease', () => {
-      expect(ComposerRelease.parse({ version: '' })).toEqual({ version: '' });
+      expect(ComposerRelease.parse({ version: '' })).toEqual({
+        version: '',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
       expect(ComposerRelease.parse({ version: 'dev-main' })).toEqual({
         version: 'dev-main',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
       });
 
       expect(ComposerRelease.parse({ version: '1.2.3' })).toEqual({
         version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
       });
 
       expect(ComposerRelease.parse({ version: '1.2.3', homepage: 42 })).toEqual(
-        { version: '1.2.3', homepage: null }
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        }
       );
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', homepage: 'example.com' })
-      ).toEqual({ version: '1.2.3', homepage: 'example.com' });
+      ).toEqual({
+        version: '1.2.3',
+        homepage: 'example.com',
+        source: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: 'nonsense' })
-      ).toEqual({ version: '1.2.3', source: null });
+      ).toEqual({
+        version: '1.2.3',
+        homepage: null,
+        source: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', source: { url: 'foobar' } })
-      ).toEqual({ version: '1.2.3', source: { url: 'foobar' } });
+      ).toEqual({
+        version: '1.2.3',
+        source: { url: 'foobar' },
+        homepage: null,
+        time: null,
+        require: null,
+      });
 
       expect(
         ComposerRelease.parse({ version: '1.2.3', time: '12345' })
-      ).toEqual({ version: '1.2.3', time: '12345' });
-    });
-  });
-
-  describe('ComposerReleasesArray', () => {
-    it('rejects ComposerReleasesArray', () => {
-      expect(() => ComposerReleasesArray.parse(null)).toThrow();
-      expect(() => ComposerReleasesArray.parse(undefined)).toThrow();
-      expect(() => ComposerReleasesArray.parse('')).toThrow();
-      expect(() => ComposerReleasesArray.parse({})).toThrow();
-    });
-
-    it('parses ComposerReleasesArray', () => {
-      expect(ComposerReleasesArray.parse([])).toEqual([]);
-      expect(ComposerReleasesArray.parse([null])).toEqual([]);
-      expect(ComposerReleasesArray.parse([1, 2, 3])).toEqual([]);
-      expect(ComposerReleasesArray.parse(['foobar'])).toEqual([]);
-      expect(
-        ComposerReleasesArray.parse([
-          { version: '1.2.3' },
-          { version: 'dev-main' },
-        ])
-      ).toEqual([{ version: '1.2.3' }, { version: 'dev-main' }]);
-    });
-  });
-
-  describe('ComposerReleasesRecord', () => {
-    it('rejects ComposerReleasesRecord', () => {
-      expect(() => ComposerReleasesRecord.parse(null)).toThrow();
-      expect(() => ComposerReleasesRecord.parse(undefined)).toThrow();
-      expect(() => ComposerReleasesRecord.parse('')).toThrow();
-      expect(() => ComposerReleasesRecord.parse([])).toThrow();
-    });
-
-    it('parses ComposerReleasesRecord', () => {
-      expect(ComposerReleasesRecord.parse({})).toEqual({});
-      expect(ComposerReleasesRecord.parse({ foo: null })).toEqual({});
-      expect(ComposerReleasesRecord.parse({ foo: 1, bar: 2, baz: 3 })).toEqual(
-        {}
-      );
-      expect(ComposerReleasesRecord.parse({ foo: 'bar' })).toEqual({});
-      expect(
-        ComposerReleasesRecord.parse({
-          '0.0.1': { foo: 'bar' },
-          '0.0.2': { version: '0.0.1' },
-          '1.2.3': { version: '1.2.3' },
-          'dev-main': { version: 'dev-main' },
-        })
       ).toEqual({
-        '1.2.3': { version: '1.2.3' },
-        'dev-main': { version: 'dev-main' },
+        version: '1.2.3',
+        time: '12345',
+        homepage: null,
+        source: null,
+        require: null,
       });
+    });
+  });
+
+  describe('ComposerReleases', () => {
+    it('parses ComposerReleases', () => {
+      expect(ComposerReleases.parse(null)).toBeEmptyArray();
+      expect(ComposerReleases.parse(undefined)).toBeEmptyArray();
+      expect(ComposerReleases.parse('')).toBeEmptyArray();
+      expect(ComposerReleases.parse({})).toBeEmptyArray();
+      expect(ComposerReleases.parse([])).toBeEmptyArray();
+      expect(ComposerReleases.parse([null])).toBeEmptyArray();
+      expect(ComposerReleases.parse([1, 2, 3])).toBeEmptyArray();
+      expect(ComposerReleases.parse(['foobar'])).toBeEmptyArray();
+      expect(
+        ComposerReleases.parse([{ version: '1.2.3' }, { version: 'dev-main' }])
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+        {
+          version: 'dev-main',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
   });
 
@@ -168,6 +192,7 @@ describe('modules/datasource/packagist/schema', () => {
       expect(parsePackagesResponse('foo/bar', {})).toEqual([]);
       expect(parsePackagesResponse('foo/bar', { packages: '123' })).toEqual([]);
       expect(parsePackagesResponse('foo/bar', { packages: {} })).toEqual([]);
+
       expect(
         parsePackagesResponse('foo/bar', {
           packages: {
@@ -175,7 +200,32 @@ describe('modules/datasource/packagist/schema', () => {
             'baz/qux': [{ version: '4.5.6' }],
           },
         })
-      ).toEqual([{ version: '1.2.3' }]);
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
+
+      expect(
+        parsePackagesResponse('foo/bar', {
+          packages: {
+            'foo/bar': { '1.2.3': { version: '1.2.3' } },
+            'baz/qux': { '4.5.6': { version: '4.5.6' } },
+          },
+        })
+      ).toEqual([
+        {
+          version: '1.2.3',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
 
     it('expands minified fields', () => {
@@ -194,14 +244,56 @@ describe('modules/datasource/packagist/schema', () => {
           },
         })
       ).toEqual([
-        { version: '3.3.3', require: { php: '^8.0' } },
-        { version: '2.2.2', require: { php: '^8.0' } },
-        { version: '1.1.1', require: { php: '^8.0' } },
-        { version: '0.0.4', require: { php: '^7.0' } },
-        { version: '0.0.3', require: { php: '^7.0' } },
-        { version: '0.0.2' },
-        { version: '0.0.1' },
-      ] satisfies ComposerRelease[]);
+        {
+          version: '3.3.3',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '2.2.2',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '1.1.1',
+          require: { php: '^8.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.4',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.3',
+          require: { php: '^7.0' },
+          homepage: null,
+          source: null,
+          time: null,
+        },
+        {
+          version: '0.0.2',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+        {
+          version: '0.0.1',
+          homepage: null,
+          source: null,
+          time: null,
+          require: null,
+        },
+      ]);
     });
   });
 
@@ -232,6 +324,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '222',
                   homepage: 'https://example.com/2',
                   source: { url: 'git@example.com:baz/qux-2' },
+                  require: null,
                 },
               ],
             },
@@ -253,6 +346,7 @@ describe('modules/datasource/packagist/schema', () => {
                   time: '444',
                   homepage: 'https://example.com/4',
                   source: { url: 'git@example.com:baz/qux-3' },
+                  require: null,
                 },
               ],
             },
@@ -276,6 +370,21 @@ describe('modules/datasource/packagist/schema', () => {
           },
         ],
       } satisfies ReleaseResult);
+    });
+  });
+
+  describe('RegistryMeta', () => {
+    it('falls back to default values', () => {
+      expect(RegistryMeta.parse('nonsense')).toEqual({
+        files: [],
+        includesFiles: [],
+        packages: {},
+        providerPackages: {},
+        includesPackages: {},
+        providersLazyUrl: null,
+        providersUrl: null,
+        metadataUrl: null,
+      });
     });
   });
 });

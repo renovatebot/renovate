@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
@@ -16,7 +16,7 @@ import {
   TEMPORARY_ERROR,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gitlab';
@@ -78,6 +78,8 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
   version: '0.0.0',
 };
+
+export const id = 'gitlab';
 
 const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
@@ -396,7 +398,8 @@ const gitlabToRenovateStatusMapping: Record<BranchState, BranchStatus> = {
 
 // Returns the combined status for a branch.
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
 
@@ -426,6 +429,19 @@ export async function getBranchStatus(
   const res = branchStatuses.filter((check) => check.status !== 'skipped');
   if (res.length === 0) {
     // Return 'pending' if we have no status checks
+    return 'yellow';
+  }
+  if (
+    !internalChecksAsSuccess &&
+    branchStatuses.every(
+      (check) =>
+        check.name?.startsWith('renovate/') &&
+        gitlabToRenovateStatusMapping[check.status] === 'green'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
     return 'yellow';
   }
   let status: BranchStatus = 'green'; // default to green
@@ -603,7 +619,6 @@ export async function createPr({
   const pr = res.body;
   pr.number = pr.iid;
   pr.sourceBranch = sourceBranch;
-  pr.displayNumber = `Merge Request #${pr.iid}`;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -623,7 +638,6 @@ export async function getPr(iid: number): Promise<GitlabPr> {
     sourceBranch: mr.source_branch,
     targetBranch: mr.target_branch,
     number: mr.iid,
-    displayNumber: `Merge Request #${mr.iid}`,
     bodyStruct: getPrBodyStruct(mr.description),
     state: mr.state === 'opened' ? 'open' : mr.state,
     headPipelineStatus: mr.head_pipeline?.status,
@@ -1193,10 +1207,6 @@ export async function ensureCommentRemoval(
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }
 
 export async function filterUnavailableUsers(

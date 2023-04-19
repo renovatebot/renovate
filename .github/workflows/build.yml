@@ -6,6 +6,7 @@ on:
       - main
 
   pull_request:
+  merge_group:
 
   workflow_dispatch:
     inputs:
@@ -38,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        node-version: [16, 18]
+        node-version: [18]
         # skip macOS and Windows test on pull requests without 'ci:fulltest' label
         include: >-
           ${{ fromJSON((github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:fulltest')) && '[{
@@ -54,7 +55,7 @@ jobs:
       NODE_VERSION: ${{ matrix.node-version }}
 
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 2
 
@@ -76,14 +77,14 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --ignore-engines # semantic release will fail to install otherwise
+        run: yarn install --frozen-lockfile
 
       # build before tests to for static file check
       - name: Build
         run: yarn build
 
       - name: Cache jest cache
-        uses: actions/cache@6998d139ddd3e68c71e9e398d8e40b71a2f39812 # v3.2.5
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: .cache/jest
           key: ${{ runner.os }}-${{ matrix.node-version }}-jest-${{ hashFiles('yarn.lock') }}
@@ -92,7 +93,7 @@ jobs:
         run: yarn jest --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
+        uses: codecov/codecov-action@40a12dcee2df644d47232dde008099a3e9e4f865 # v3.1.2
         if: always() && env.coverage == 'true'
 
       - name: E2E Test
@@ -105,7 +106,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 2
 
@@ -155,7 +156,7 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 0
 

@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import { sanitize } from '../../../util/sanitize';
@@ -65,6 +65,8 @@ interface GiteaRepoConfig {
   cloneSubmodules: boolean;
 }
 
+export const id = 'gitea';
+
 const DRAFT_PREFIX = 'WIP: ';
 
 const defaults = {
@@ -118,7 +120,6 @@ function toRenovatePR(data: PR): Pr | null {
 
   return {
     number: data.number,
-    displayNumber: `Pull Request #${data.number}`,
     state: data.state,
     title,
     isDraft,
@@ -388,7 +389,10 @@ const platform: Platform = {
     }
   },
 
-  async getBranchStatus(branchName: string): Promise<BranchStatus> {
+  async getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus> {
     let ccs: CombinedCommitStatus;
     try {
       ccs = await helper.getCombinedCommitStatus(config.repository, branchName);
@@ -405,6 +409,17 @@ const platform: Platform = {
     }
 
     logger.debug({ ccs }, 'Branch status check result');
+    if (
+      !internalChecksAsSuccess &&
+      ccs.worstStatus === 'success' &&
+      ccs.statuses.every((status) => status.context?.startsWith('renovate/'))
+    ) {
+      logger.debug(
+        'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+      );
+      return 'yellow';
+    }
+
     return helper.giteaToRenovateStatusMapping[ccs.worstStatus] ?? 'yellow';
   },
 
@@ -934,10 +949,6 @@ const platform: Platform = {
   massageMarkdown(prBody: string): string {
     return smartTruncate(smartLinks(prBody), 1000000);
   },
-
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-    return Promise.resolve([]);
-  },
 };
 
 /* eslint-disable @typescript-eslint/unbound-method */
@@ -964,7 +975,6 @@ export const {
   getPrList,
   getRepoForceRebase,
   getRepos,
-  getVulnerabilityAlerts,
   initPlatform,
   initRepo,
   mergePr,

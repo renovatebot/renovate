@@ -1,6 +1,11 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
+import {
+  looseArray,
+  looseRecord,
+  looseValue,
+} from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -39,63 +44,46 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
 });
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
-export const ComposerRelease = z
-  .object({
-    version: z.string(),
-  })
-  .merge(
-    z
-      .object({
-        homepage: z.string().nullable().catch(null),
-        source: z
-          .object({
-            url: z.string(),
-          })
-          .nullable()
-          .catch(null),
-        time: z.string().nullable().catch(null),
-        require: z
-          .object({
-            php: z.string(),
-          })
-          .nullable()
-          .catch(null),
-      })
-      .partial()
-  );
+export const ComposerRelease = z.object({
+  version: z.string(),
+  homepage: looseValue(z.string()),
+  source: looseValue(z.object({ url: z.string() })),
+  time: looseValue(z.string()),
+  require: looseValue(z.object({ php: z.string() })),
+});
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
 
-export const ComposerReleasesArray = z
-  .array(ComposerRelease.nullable().catch(null))
-  .transform((xs) => xs.filter((x): x is ComposerRelease => x !== null));
-export type ComposerReleasesArray = z.infer<typeof ComposerReleasesArray>;
+const ComposerReleasesLooseArray = looseArray(ComposerRelease);
+type ComposerReleasesLooseArray = z.infer<typeof ComposerReleasesLooseArray>;
 
-export const ComposerReleasesRecord = z
-  .record(ComposerRelease.nullable().catch(null))
-  .transform((map) => {
-    const res: Record<string, ComposerRelease> = {};
-    for (const [key, value] of Object.entries(map)) {
-      if (value !== null && value.version === key) {
-        res[key] = value;
-      }
-    }
-    return res;
-  });
-export type ComposerReleasesRecord = z.infer<typeof ComposerReleasesRecord>;
+export const ComposerReleases = z
+  .union([
+    MinifiedArray.transform((xs) => ComposerReleasesLooseArray.parse(xs)),
+    looseRecord(ComposerRelease).transform((map) => Object.values(map)),
+  ])
+  .catch([]);
+export type ComposerReleases = z.infer<typeof ComposerReleases>;
 
-export const ComposerPackagesResponse = z.object({
-  packages: z.record(z.unknown()),
-});
+export const ComposerPackagesResponse = z
+  .object({
+    packageName: z.string(),
+    packagesResponse: z.object({
+      packages: z.record(z.unknown()),
+    }),
+  })
+  .transform(
+    ({ packageName, packagesResponse }) =>
+      packagesResponse.packages[packageName]
+  )
+  .transform((xs) => ComposerReleases.parse(xs));
+export type ComposerPackagesResponse = z.infer<typeof ComposerPackagesResponse>;
 
 export function parsePackagesResponse(
   packageName: string,
   packagesResponse: unknown
-): ComposerReleasesArray {
+): ComposerReleases {
   try {
-    const { packages } = ComposerPackagesResponse.parse(packagesResponse);
-    const array = MinifiedArray.parse(packages[packageName]);
-    const releases = ComposerReleasesArray.parse(array);
-    return releases;
+    return ComposerPackagesResponse.parse({ packageName, packagesResponse });
   } catch (err) {
     logger.debug(
       { packageName, err },
@@ -106,7 +94,7 @@ export function parsePackagesResponse(
 }
 
 export function extractReleaseResult(
-  ...composerReleasesArrays: ComposerReleasesArray[]
+  ...composerReleasesArrays: ComposerReleases[]
 ): ReleaseResult | null {
   const releases: Release[] = [];
   let homepage: string | null | undefined;
@@ -156,6 +144,13 @@ export function extractReleaseResult(
   return result;
 }
 
+export function extractDepReleases(
+  composerReleases: unknown
+): ReleaseResult | null {
+  const parsedReleases = ComposerReleases.parse(composerReleases);
+  return extractReleaseResult(parsedReleases);
+}
+
 export function parsePackagesResponses(
   packageName: string,
   packagesResponses: unknown[]
@@ -165,3 +160,74 @@ export function parsePackagesResponses(
   );
   return extractReleaseResult(...releaseArrays);
 }
+
+export const HashSpec = z.union([
+  z
+    .object({ sha256: z.string().nullable() })
+    .transform(({ sha256 }) => ({ hash: sha256 })),
+  z
+    .object({ sha1: z.string().nullable() })
+    .transform(({ sha1 }) => ({ hash: sha1 })),
+]);
+export type HashSpec = z.infer<typeof HashSpec>;
+
+export const RegistryFile = z.intersection(
+  HashSpec,
+  z.object({ key: z.string() })
+);
+export type RegistryFile = z.infer<typeof RegistryFile>;
+
+export const PackagesResponse = z.object({
+  packages: looseRecord(ComposerReleases),
+});
+export type PackagesResponse = z.infer<typeof PackagesResponse>;
+
+export const PackagistFile = PackagesResponse.merge(
+  z.object({
+    providers: looseRecord(HashSpec).transform((x) =>
+      Object.fromEntries(
+        Object.entries(x).map(([key, { hash }]) => [key, hash])
+      )
+    ),
+  })
+);
+export type PackagistFile = z.infer<typeof PackagistFile>;
+
+export const RegistryMeta = z
+  .preprocess(
+    (x) => (is.plainObject(x) ? x : {}),
+    PackagistFile.merge(
+      z.object({
+        ['includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
+        ),
+        ['provider-includes']: looseRecord(HashSpec).transform((x) =>
+          Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
+        ),
+        ['providers-lazy-url']: looseValue(z.string()),
+        ['providers-url']: looseValue(z.string()),
+        ['metadata-url']: looseValue(z.string()),
+      })
+    )
+  )
+  .transform(
+    ({
+      ['includes']: includesFiles,
+      ['packages']: packages,
+      ['provider-includes']: files,
+      ['providers']: providerPackages,
+      ['providers-lazy-url']: providersLazyUrl,
+      ['providers-url']: providersUrl,
+      ['metadata-url']: metadataUrl,
+    }) => ({
+      packages,
+      includesFiles,
+      providerPackages,
+      files,
+      providersUrl,
+      providersLazyUrl,
+      metadataUrl,
+      includesPackages: {} as Record<string, ReleaseResult | null>,
+    })
+  );
+export type RegistryMeta = z.infer<typeof RegistryMeta>;

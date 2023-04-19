@@ -8,7 +8,7 @@ import _simpleGit, {
 } from 'simple-git';
 import { GlobalConfig } from '../../../config/global';
 import * as hostRules from '../../../util/host-rules';
-import type { PackageFile } from '../types';
+import type { PackageFileContent } from '../types';
 import { extractPackageFile } from '.';
 
 jest.mock('simple-git');
@@ -54,7 +54,7 @@ describe('modules/manager/git-submodules/extract', () => {
     it('extracts submodules', async () => {
       GlobalConfig.set({ localDir: `${__dirname}/__fixtures__` });
       hostRules.add({ matchHost: 'github.com', token: '123test' });
-      let res: PackageFile | null;
+      let res: PackageFileContent | null;
       expect(await extractPackageFile('', '.gitmodules.1', {})).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', {});
       expect(res?.deps).toHaveLength(1);

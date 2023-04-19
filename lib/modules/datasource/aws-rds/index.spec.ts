@@ -105,7 +105,7 @@ describe('modules/datasource/aws-rds/index', () => {
       });
       const res = await getPkgReleases({
         datasource: AwsRdsDataSource.id,
-        depName: '[{"Name":"engine","Values":["mysql"]}]',
+        packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toBeNull();
     });
@@ -117,7 +117,7 @@ describe('modules/datasource/aws-rds/index', () => {
       });
       const res = await getPkgReleases({
         datasource: AwsRdsDataSource.id,
-        depName: '[{"Name":"engine","Values":["mysql"]}]',
+        packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toStrictEqual({
         releases: [
@@ -136,7 +136,7 @@ describe('modules/datasource/aws-rds/index', () => {
       });
       const res = await getPkgReleases({
         datasource: AwsRdsDataSource.id,
-        depName: '[{"Name":"engine","Values":["mysql"]}]',
+        packageName: '[{"Name":"engine","Values":["mysql"]}]',
       });
       expect(res).toStrictEqual({
         releases: [

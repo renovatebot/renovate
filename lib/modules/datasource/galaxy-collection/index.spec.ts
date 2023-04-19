@@ -29,7 +29,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'foo.bar',
+          packageName: 'foo.bar',
         })
       ).toBeNull();
     });
@@ -39,7 +39,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'foo.bar',
+          packageName: 'foo.bar',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -52,7 +52,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'community.kubernetes',
+          packageName: 'community.kubernetes',
         })
       ).toBeNull();
     });
@@ -67,7 +67,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'community.kubernetes',
+          packageName: 'community.kubernetes',
         })
       ).toBeNull();
     });
@@ -82,7 +82,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'community.kubernetes',
+          packageName: 'community.kubernetes',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -103,7 +103,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
 
       const res = await getPkgReleases({
         datasource,
-        depName: 'community.kubernetes',
+        packageName: 'community.kubernetes',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -115,7 +115,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: '',
+          packageName: '',
         })
       ).toBeNull();
     });
@@ -124,7 +124,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: '',
+          packageName: '',
         })
       ).toBeNull();
     });
@@ -137,7 +137,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName: 'foo.bar',
+          packageName: 'foo.bar',
         })
       ).toBeNull();
     });
@@ -157,7 +157,7 @@ describe('modules/datasource/galaxy-collection/index', () => {
         .reply(200, communityKubernetesDetails0111);
       const res = await getPkgReleases({
         datasource,
-        depName: 'community.kubernetes',
+        packageName: 'community.kubernetes',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

@@ -4,7 +4,7 @@ import minimatch from 'minimatch';
 import { GlobalConfig } from '../../../../config/global';
 import { CONFIG_SECRETS_EXPOSED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
+import { scm } from '../../../../modules/platform/scm';
 import { sanitize } from '../../../../util/sanitize';
 import type { BranchConfig } from '../../../types';
 
@@ -51,7 +51,7 @@ export function commitFilesToBranch(
   }
 
   // API will know whether to create new branch or not
-  return commitAndPush({
+  return scm.commitAndPush({
     baseBranch: config.baseBranch,
     branchName: config.branchName,
     files: updatedFiles,

@@ -1,6 +1,6 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
-import { getConfig } from '../../../../config/defaults';
+import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
@@ -8,8 +8,9 @@ const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
   '../../../../util/fs'
 );
 
-// TODO: fix types
-const defaultConfig = getConfig();
+const defaultExtractConfig = {
+  skipInstalls: null,
+} satisfies ExtractConfig;
 
 const input01Content = Fixtures.get('inputs/01.json', '..');
 const input02Content = Fixtures.get('inputs/02.json', '..');
@@ -35,7 +36,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         'not json',
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toBeNull();
     });
@@ -44,7 +45,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         invalidNameContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [{ skipReason: 'invalid-name' }],
@@ -55,7 +56,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         vendorisedContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toBeNull();
     });
@@ -65,7 +66,7 @@ describe('modules/manager/npm/extract/index', () => {
         npmExtract.extractPackageFile(
           '{ "renovate": {} }',
           'backend/package.json',
-          defaultConfig
+          defaultExtractConfig
         )
       ).rejects.toThrow();
     });
@@ -74,7 +75,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         '{ "renovate": {} }',
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toBeNull();
     });
@@ -83,7 +84,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         '{"dependencies": true, "devDependencies": []}',
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toBeNull();
     });
@@ -92,7 +93,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -119,11 +120,11 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01GlobContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res?.deps).toHaveLength(13);
       expect(res).toMatchSnapshot({
-        constraints: {},
+        extractedConstraints: {},
         deps: [
           ...[{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}],
           {
@@ -154,9 +155,13 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
-      expect(res).toMatchSnapshot({ yarnLock: 'yarn.lock' });
+      expect(res).toMatchSnapshot({
+        managerData: {
+          yarnLock: 'yarn.lock',
+        },
+      });
     });
 
     it('finds and filters .npmrc', async () => {
@@ -179,7 +184,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        { ...defaultConfig, npmrc: 'config-npmrc' }
+        { ...defaultExtractConfig, npmrc: 'config-npmrc' }
       );
       expect(res?.npmrc).toBe('config-npmrc');
     });
@@ -277,12 +282,14 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'npm',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'npm',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -296,12 +303,14 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'npm',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'npm',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -315,12 +324,14 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
-        lernaClient: 'yarn',
-        lernaPackages: undefined,
-        managerData: { lernaJsonFile: 'lerna.json' },
+        managerData: {
+          lernaClient: 'yarn',
+          lernaJsonFile: 'lerna.json',
+          lernaPackages: undefined,
+        },
       });
     });
 
@@ -334,9 +345,11 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         workspacesSimpleContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
@@ -349,9 +362,11 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         workspacesSimpleContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('finds complex yarn workspaces', async () => {
@@ -364,9 +379,11 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         workspacesContent,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
-      expect(res).toMatchSnapshot({ yarnWorkspacesPackages: ['packages/*'] });
+      expect(res).toMatchSnapshot({
+        managerData: { workspacesPackages: ['packages/*'] },
+      });
     });
 
     it('extracts engines', async () => {
@@ -395,10 +412,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: {
+        extractedConstraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
           vscode: '>=1.49.3',
@@ -478,7 +495,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -509,7 +526,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -552,7 +569,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
 
       expect(res).toMatchObject({
@@ -606,7 +623,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -719,7 +736,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
         deps: [
@@ -744,7 +761,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         input01Content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot();
     });
@@ -757,10 +774,10 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         pJsonStr,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchSnapshot({
-        constraints: { yarn: '3.0.0' },
+        extractedConstraints: { yarn: '3.0.0' },
         deps: [
           {
             commitMessageTopic: 'Yarn',
@@ -799,7 +816,7 @@ describe('modules/manager/npm/extract/index', () => {
       const res = await npmExtract.extractPackageFile(
         content,
         'package.json',
-        defaultConfig
+        defaultExtractConfig
       );
       expect(res).toMatchObject({
         deps: [

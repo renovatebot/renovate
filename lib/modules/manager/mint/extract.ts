@@ -1,8 +1,8 @@
 import { newlineRegex } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex).map((s) => s.trim())) {

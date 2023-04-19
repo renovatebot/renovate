@@ -264,24 +264,13 @@ describe('workers/repository/update/branch/schedule', () => {
     });
 
     describe('supports timezone', () => {
-      const cases: [string, string, string, boolean][] = [
-        ['after 4pm', 'Asia/Singapore', '2017-06-30T15:59:00.000+0800', false],
-        ['after 4pm', 'Asia/Singapore', '2017-06-30T16:01:00.000+0800', true],
-        [
-          'before 3am on Monday',
-          'Asia/Tokyo',
-          '2017-06-26T02:59:00.000+0900',
-          true,
-        ],
-        [
-          'before 3am on Monday',
-          'Asia/Tokyo',
-          '2017-06-26T03:01:00.000+0900',
-          false,
-        ],
-      ];
-
-      test.each(cases)('%p, %p, %p', (sched, tz, datetime, expected) => {
+      test.each`
+        sched                     | tz                  | datetime                          | expected
+        ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T15:59:00.000+0800'} | ${false}
+        ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
+        ${'before 3am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T02:59:00.000+0900'} | ${true}
+        ${'before 3am on Monday'} | ${'Asia/Tokyo'}     | ${'2017-06-26T03:01:00.000+0900'} | ${false}
+      `('$sched, $tz, $datetime', ({ sched, tz, datetime, expected }) => {
         config.schedule = [sched];
         config.timezone = tz;
         mockDate.set(datetime);

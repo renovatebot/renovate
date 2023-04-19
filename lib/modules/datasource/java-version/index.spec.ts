@@ -9,7 +9,7 @@ function getPath(page: number, imageType = 'jdk'): string {
   return `/v3/info/release_versions?page_size=${pageSize}&image_type=${imageType}&project=jdk&release_type=ga&sort_method=DATE&sort_order=DESC&page=${page}`;
 }
 
-const depName = 'java';
+const packageName = 'java';
 
 describe('modules/datasource/java-version/index', () => {
   describe('getReleases', () => {
@@ -21,7 +21,7 @@ describe('modules/datasource/java-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -31,7 +31,7 @@ describe('modules/datasource/java-version/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).toBeNull();
     });
@@ -41,7 +41,7 @@ describe('modules/datasource/java-version/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).toBeNull();
     });
@@ -54,7 +54,7 @@ describe('modules/datasource/java-version/index', () => {
       expect(
         await getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).toBeNull();
     });
@@ -64,7 +64,7 @@ describe('modules/datasource/java-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName,
+          packageName,
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -76,7 +76,7 @@ describe('modules/datasource/java-version/index', () => {
         .reply(200, Fixtures.get('page.json'));
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(3);
@@ -89,7 +89,7 @@ describe('modules/datasource/java-version/index', () => {
         .reply(200, Fixtures.get('jre.json'));
       const res = await getPkgReleases({
         datasource,
-        depName: 'java-jre',
+        packageName: 'java-jre',
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(2);
@@ -107,7 +107,7 @@ describe('modules/datasource/java-version/index', () => {
         .reply(404);
       const res = await getPkgReleases({
         datasource,
-        depName,
+        packageName,
       });
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(50);

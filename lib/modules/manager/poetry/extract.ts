@@ -11,7 +11,7 @@ import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractLockFileEntries } from './locked-version';
 import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
@@ -131,7 +131,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${fileName})`);
   let pyprojectfile: PoetryFile;
   try {
@@ -180,7 +180,7 @@ export async function extractPackageFile(
       pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
-  const res: PackageFile = {
+  const res: PackageFileContent = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
     extractedConstraints,

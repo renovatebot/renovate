@@ -15,17 +15,23 @@ export class GithubGraphqlPackageCacheStrategy<
   async persist(
     cacheRecord: GithubGraphqlCacheRecord<GithubItem>
   ): Promise<void> {
-    const expiry = this.createdAt.plus({
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
-    });
-    const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
-    if (ttlMinutes && ttlMinutes > 0) {
-      await packageCache.set(
-        this.cacheNs,
-        this.cacheKey,
-        cacheRecord,
-        ttlMinutes
-      );
+    if (this.hasUpdatedItems) {
+      const expiry = this.createdAt
+        .plus({
+          // Not using 'days' as it does not handle adjustments for Daylight Saving time.
+          // The offset in the resulting DateTime object does not match that of the expiry or this.now.
+          hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
+        })
+        .toUTC();
+      const ttlMinutes = expiry.diff(this.now, ['minutes']).as('minutes');
+      if (ttlMinutes && ttlMinutes > 0) {
+        await packageCache.set(
+          this.cacheNs,
+          this.cacheKey,
+          cacheRecord,
+          ttlMinutes
+        );
+      }
     }
   }
 }

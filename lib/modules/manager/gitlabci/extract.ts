@@ -1,9 +1,14 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { isValidLocalPath, readLocalFile } from '../../../util/fs';
 import { trimLeadingSlash } from '../../../util/url';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFile,
+  PackageFileContent,
+} from '../types';
 import { isGitlabIncludeLocal } from './common';
 import type { GitlabPipeline, Image, Job, Services } from './types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
@@ -75,7 +80,7 @@ export function extractPackageFile(
   content: string,
   _fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   let deps: PackageDependency[] = [];
   try {
     const doc = load(replaceReferenceTags(content), {
@@ -127,6 +132,11 @@ export async function extractAllPackageFiles(
   // extract all includes from the files
   while (filesToExamine.length > 0) {
     const file = filesToExamine.pop()!;
+
+    if (!isValidLocalPath(file)) {
+      logger.debug(`Invalid gitlabci file path ${file}`);
+      continue;
+    }
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {

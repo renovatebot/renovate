@@ -218,6 +218,14 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'constraintsFiltering',
+    description: 'Perform release filtering based on language constraints.',
+    type: 'string',
+    allowedValues: ['none', 'strict'],
+    cli: false,
+    default: 'none',
+  },
+  {
     name: 'repositoryCache',
     description:
       'This option decides if Renovate uses a JSON cache to speed up extractions.',
@@ -340,7 +348,7 @@ const options: RenovateOptions[] = [
     description:
       'Change this value to override the default Renovate Docker sidecar image name prefix.',
     type: 'string',
-    default: 'docker.io/renovate',
+    default: 'docker.io/containerbase',
     globalOnly: true,
   },
   {
@@ -357,6 +365,14 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     default: [],
+  },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
   },
   // Log options
   {
@@ -411,12 +427,13 @@ const options: RenovateOptions[] = [
     experimentalIssues: [17633],
   },
   {
-    name: 'includeForks',
+    name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
     stage: 'repository',
-    type: 'boolean',
-    default: false,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'forkToken',
@@ -743,14 +760,16 @@ const options: RenovateOptions[] = [
     description: 'List of Repositories.',
     stage: 'global',
     type: 'array',
+    subType: 'string',
     cli: false,
     globalOnly: true,
   },
   {
     name: 'baseBranches',
     description:
-      'An array of one or more custom base branches to be processed. If left empty, the default branch will be chosen.',
+      'List of one or more custom base branches defined as exact strings and/or via regex expressions.',
     type: 'array',
+    subType: 'string',
     stage: 'package',
     cli: false,
   },
@@ -797,6 +816,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
+    subType: 'string',
     mergeable: false,
     stage: 'repository',
   },
@@ -905,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
@@ -953,7 +973,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchBaseBranches',
     description:
-      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release\\/.*/"]`). Valid only within a `packageRules` object.',
+      'List of strings containing exact matches (e.g. `["main"]`) and/or regex expressions (e.g. `["/^release/.*/"]`). Valid only within a `packageRules` object.',
     type: 'array',
     subType: 'string',
     allowString: true,
@@ -1188,10 +1208,27 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'autoReplaceGlobalMatch',
+    description:
+      'Control whether replacement regular expressions are global matches or only the first match.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'replacementName',
     description:
       'The name of the new dependency that replaces the old deprecated dependency.',
     type: 'string',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'replacementNameTemplate',
+    description: 'Controls what the replacement package name.',
+    type: 'string',
+    default: '{{{packageName}}}',
     stage: 'package',
     parent: 'packageRules',
     cli: false,
@@ -1206,6 +1243,21 @@ const options: RenovateOptions[] = [
     parent: 'packageRules',
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchConfidence',
+    description:
+      'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'matchUpdateTypes',
@@ -1223,6 +1275,7 @@ const options: RenovateOptions[] = [
       'lockFileMaintenance',
       'rollback',
       'bump',
+      'replacement',
     ],
     allowString: true,
     stage: 'package',
@@ -1334,7 +1387,7 @@ const options: RenovateOptions[] = [
     name: 'rangeStrategy',
     description: 'Determines how to modify or update existing ranges.',
     type: 'string',
-    default: 'replace',
+    default: 'auto',
     allowedValues: [
       'auto',
       'pin',
@@ -1531,11 +1584,17 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
-    name: 'stabilityDays',
+    name: 'minimumReleaseAge',
+    description: 'Time required before a new release is considered stable.',
+    type: 'string',
+    default: null,
+  },
+  {
+    name: 'internalChecksAsSuccess',
     description:
-      'Number of days required before a new release is considered stable.',
-    type: 'integer',
-    default: 0,
+      'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
+    type: 'boolean',
+    default: false,
   },
   /*
    * Undocumented experimental feature
@@ -1571,16 +1630,16 @@ const options: RenovateOptions[] = [
   {
     name: 'prHourlyLimit',
     description:
-      'Rate limit PRs to maximum x created per hour. 0 (default) means no limit.',
+      'Rate limit PRs to maximum x created per hour. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 2,
   },
   {
     name: 'prConcurrentLimit',
     description:
-      'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
+      'Limit to a maximum of x concurrent branches/PRs. 0 means no limit.',
     type: 'integer',
-    default: 0, // no limit
+    default: 10,
   },
   {
     name: 'branchConcurrentLimit',
@@ -1604,6 +1663,14 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: true,
     supportedPlatforms: ['bitbucket', 'bitbucket-server'],
+  },
+  {
+    name: 'bbUseDevelopmentBranch',
+    description: `Use the repository's [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as the repository's default branch.`,
+    type: 'boolean',
+    default: false,
+    supportedPlatforms: ['bitbucket'],
+    globalOnly: true,
   },
   // Automatic merging
   {
@@ -1659,7 +1726,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      stabilityDays: 0,
+      minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
@@ -1676,7 +1743,7 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     experimental: true,
-    experimentalIssues: [6562],
+    experimentalIssues: [20542],
   },
   {
     name: 'pruneBranchAfterAutomerge',
@@ -1774,7 +1841,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyTemplate',
     description:
-      'Pull Request body template. Controls which sections are rendered in the body.',
+      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
     default:
       '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
@@ -1929,6 +1996,14 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['gitlab'],
   },
   {
+    name: 'forkModeDisallowMaintainerEdits',
+    description:
+      'Disallow maintainers to push to Renovate pull requests when running in fork mode.',
+    type: 'boolean',
+    supportedPlatforms: ['github'],
+    default: false,
+  },
+  {
     name: 'confidential',
     description:
       'If enabled, issues created by Renovate are set as confidential.',
@@ -1987,6 +2062,7 @@ const options: RenovateOptions[] = [
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
     default: [],
+    subType: 'string',
     allowedValues: [
       'bundlerConservative',
       'helmUpdateSubChartArchives',
@@ -1996,6 +2072,7 @@ const options: RenovateOptions[] = [
       'gomodTidy1.17',
       'gomodTidyE',
       'npmDedupe',
+      'pnpmDedupe',
       'yarnDedupeFewer',
       'yarnDedupeHighest',
     ],
@@ -2234,14 +2311,27 @@ const options: RenovateOptions[] = [
     experimental: true,
   },
   {
+    name: 'artifactAuth',
+    description:
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    allowedValues: ['composer'],
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'cacheHardTtlMinutes',
     description:
       'Maximum duration in minutes to keep datasource cache entries.',
     type: 'integer',
     stage: 'repository',
-    default: 0,
+    default: 24 * 60,
     globalOnly: true,
-    experimental: true,
   },
   {
     name: 'prBodyDefinitions',

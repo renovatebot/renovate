@@ -16,7 +16,7 @@ import type {
 } from '../modules/manager/types';
 import type { PlatformPrOptions } from '../modules/platform/types';
 import type { FileChange } from '../util/git/types';
-import type { MergeConfidence } from '../util/merge-confidence';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 import type {
   ChangeLogRelease,
   ChangeLogResult,
@@ -38,6 +38,7 @@ export interface BranchUpgradeConfig
   currentDigest?: string;
   currentDigestShort?: string;
   currentValue?: string;
+  depIndex?: number;
   excludeCommitPaths?: string[];
   githubName?: string;
   group?: GroupConfig;
@@ -60,7 +61,7 @@ export interface BranchUpgradeConfig
   releases?: ReleaseWithNotes[];
   releaseTimestamp?: string;
   repoName?: string;
-  minimumConfidence?: MergeConfidence;
+  minimumConfidence?: MergeConfidence | undefined;
   sourceDirectory?: string;
 
   updatedPackageFiles?: FileChange[];

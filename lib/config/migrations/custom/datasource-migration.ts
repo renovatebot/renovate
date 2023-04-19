@@ -6,17 +6,20 @@ export class DatasourceMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.string(value)) {
-      let newValue = value;
-      switch (newValue) {
-        case 'adoptium-java':
-          newValue = 'java-version';
-          break;
-        case 'dotnet':
-          newValue = 'dotnet-version';
-          break;
-      }
-
+      const newValue = migrateDatasource(value);
       this.rewrite(newValue);
     }
   }
+}
+
+export function migrateDatasource(value: string): string {
+  switch (value) {
+    case 'adoptium-java':
+      return 'java-version';
+    case 'dotnet':
+      return 'dotnet-version';
+    case 'node':
+      return 'node-version';
+  }
+  return value;
 }

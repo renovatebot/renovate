@@ -1,7 +1,7 @@
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { DartDatasource } from '../../datasource/dart';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 function getDeps(
   depsObj: { [x: string]: any },
@@ -38,7 +38,7 @@ function getDeps(
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   try {
     // TODO: fix me (#9610)
     const doc = load(content, { json: true }) as any;
@@ -53,7 +53,6 @@ export function extractPackageFile(
 
     if (deps.length) {
       return {
-        packageFile,
         datasource: DartDatasource.id,
         deps,
       };

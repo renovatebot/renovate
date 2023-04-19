@@ -632,7 +632,7 @@ describe('modules/platform/gitea/index', () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch');
+      return gitea.getBranchStatus('some-branch', true);
     };
 
     it('should return yellow for unknown result', async () => {
@@ -654,7 +654,7 @@ describe('modules/platform/gitea/index', () => {
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -664,9 +664,46 @@ describe('modules/platform/gitea/index', () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
+    });
+
+    it('should treat internal checks as success', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce({
+        worstStatus: 'success',
+        statuses: [
+          {
+            id: 1,
+            status: 'success',
+            context: 'renovate/stability-days',
+            description: 'internal check',
+            target_url: '',
+            created_at: '',
+          },
+        ],
+      });
+      expect(await gitea.getBranchStatus('some-branch', true)).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initFakeRepo();
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<CombinedCommitStatus>({
+          worstStatus: 'success',
+          statuses: [
+            {
+              id: 1,
+              status: 'success',
+              context: 'renovate/stability-days',
+              description: 'internal check',
+              target_url: '',
+              created_at: '',
+            },
+          ],
+        })
+      );
+      expect(await gitea.getBranchStatus('some-branch', false)).toBe('yellow');
     });
   });
 
@@ -1075,7 +1112,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should abort when response for created pull request is invalid', async () => {
-      helper.createPR.mockResolvedValueOnce(partial<PR>({}));
+      helper.createPR.mockResolvedValueOnce(partial<PR>());
 
       await initFakeRepo();
       await expect(
@@ -1879,12 +1916,6 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts', () => {
-    it('should return an empty list - unsupported by platform', async () => {
-      expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
@@ -1940,7 +1971,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('returns null on missing content', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>({}));
+      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>());
       await initFakeRepo({ full_name: 'some/repo' });
       expect(await gitea.getJsonFile('file.json')).toBeNull();
     });

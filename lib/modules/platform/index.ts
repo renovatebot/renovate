@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import type { AllConfig } from '../../config/types';
 import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
@@ -7,6 +7,7 @@ import type { HostRule } from '../../types';
 import { setGitAuthor, setNoVerify, setPrivateKey } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import platforms from './api';
+import { setPlatformScmApi } from './scm';
 import type { Platform } from './types';
 
 export * from './types';
@@ -36,6 +37,7 @@ export function setPlatformApi(name: PlatformId): void {
     );
   }
   _platform = platforms.get(name);
+  setPlatformScmApi(name);
 }
 
 export async function initPlatform(config: AllConfig): Promise<AllConfig> {

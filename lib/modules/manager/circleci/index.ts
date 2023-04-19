@@ -1,6 +1,7 @@
 import { DockerDatasource } from '../../datasource/docker';
 import { OrbDatasource } from '../../datasource/orb';
 import { extractPackageFile } from './extract';
+export { getRangeStrategy } from './range';
 
 export { extractPackageFile };
 

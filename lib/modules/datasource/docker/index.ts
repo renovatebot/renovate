@@ -1,4 +1,4 @@
-import URL from 'url';
+import URL from 'node:url';
 import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
@@ -234,7 +234,7 @@ export async function getAuthHeaders(
 }
 
 async function getECRAuthToken(
-  region: string | undefined,
+  region: string,
   opts: HostRule
 ): Promise<string | null> {
   const config: ECRClientConfig = { region };
@@ -628,12 +628,30 @@ export class DockerDatasource extends Datasource {
     currentDigest: string
   ): Promise<string | null | undefined> {
     try {
-      const manifestResponse = await this.getManifestResponse(
-        registryHost,
-        dockerRepository,
-        currentDigest,
-        'head'
-      );
+      let manifestResponse: HttpResponse<string> | null;
+
+      try {
+        manifestResponse = await this.getManifestResponse(
+          registryHost,
+          dockerRepository,
+          currentDigest,
+          'head'
+        );
+      } catch (_err) {
+        const err = _err instanceof ExternalHostError ? _err.err : _err;
+
+        if (
+          typeof err.statusCode === 'number' &&
+          err.statusCode >= 500 &&
+          err.statusCode < 600
+        ) {
+          // querying the digest manifest for a non existent image leads to a 500 statusCode
+          return null;
+        }
+
+        /* istanbul ignore next */
+        throw _err;
+      }
 
       if (
         manifestResponse?.headers['content-type'] !==
@@ -883,7 +901,15 @@ export class DockerDatasource extends Datasource {
       }
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link);
-      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      if (isArtifactoryServer(res)) {
+        // Artifactory incorrectly returns a next link without the virtual repository name
+        // this is due to a bug in Artifactory https://jfrog.atlassian.net/browse/RTFACT-18971
+        url = linkHeader?.next?.last
+          ? `${url}&last=${linkHeader.next.last}`
+          : null;
+      } else {
+        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+      }
       page += 1;
     } while (url && page < 20);
     return tags;
@@ -909,10 +935,9 @@ export class DockerDatasource extends Datasource {
         tags = await this.getDockerApiTags(registryHost, dockerRepository);
       }
       return tags;
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
+    } catch (_err) /* istanbul ignore next */ {
+      const err = _err instanceof ExternalHostError ? _err.err : _err;
+
       if (
         (err.statusCode === 404 || err.message === PAGE_NOT_FOUND_ERROR) &&
         !dockerRepository.includes('/')
@@ -974,7 +999,7 @@ export class DockerDatasource extends Datasource {
       if (isDockerHost(registryHost)) {
         logger.info({ err }, 'Docker Hub lookup failure');
       }
-      throw err;
+      throw _err;
     }
   }
 
@@ -1087,6 +1112,24 @@ export class DockerDatasource extends Datasource {
         if (!digest) {
           digest = extractDigestFromResponseBody(manifestResponse!);
         }
+      }
+
+      if (
+        !manifestResponse &&
+        !dockerRepository.includes('/') &&
+        !packageName.includes('/')
+      ) {
+        logger.debug(
+          `Retrying Digest for ${registryHost}/${dockerRepository} using library/ prefix`
+        );
+        return this.getDigest(
+          {
+            registryUrl,
+            packageName: 'library/' + packageName,
+            currentDigest,
+          },
+          newValue
+        );
       }
 
       if (manifestResponse) {
