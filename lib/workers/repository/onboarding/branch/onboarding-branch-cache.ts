@@ -17,7 +17,7 @@ export function setOnboardingCache(
       is.nonEmptyString(onboardingBranchSha)
     )
   ) {
-    logger.trace('Onboarding cache not updated');
+    logger.debug('Onboarding cache not updated');
     return;
   }
 
@@ -29,9 +29,9 @@ export function setOnboardingCache(
     isModified,
   };
   if (cache.onboardingBranchCache) {
-    logger.trace({ onboardingCache }, 'Update Onboarding Cache');
+    logger.debug({ onboardingCache }, 'Update Onboarding Cache');
   } else {
-    logger.trace({ onboardingCache }, 'Create Onboarding Cache');
+    logger.debug({ onboardingCache }, 'Create Onboarding Cache');
   }
   cache.onboardingBranchCache = onboardingCache;
 }
@@ -63,15 +63,16 @@ export async function isOnboardingBranchModified(
   onboardingBranch: string
 ): Promise<boolean> {
   const cache = getCache();
+  const onboardingCache = cache.onboardingBranchCache;
   const onboardingSha = getBranchCommit(onboardingBranch);
   let isModified = false;
 
   if (
-    cache.onboardingBranchCache &&
-    onboardingSha === cache.onboardingBranchCache.onboardingBranchSha &&
-    cache.onboardingBranchCache.isModified
+    onboardingCache &&
+    onboardingSha === onboardingCache.onboardingBranchSha &&
+    !is.undefined(onboardingCache.isModified)
   ) {
-    return cache.onboardingBranchCache.isModified;
+    return onboardingCache.isModified;
   } else {
     isModified = await scm.isBranchModified(onboardingBranch);
   }
@@ -93,7 +94,7 @@ export async function isOnboardingBranchConflicted(
     onboardingCache &&
     defaultBranchSha === onboardingCache.defaultBranchSha &&
     onboardingSha === onboardingCache.onboardingBranchSha &&
-    onboardingCache.isConflicted
+    !is.undefined(onboardingCache.isConflicted)
   ) {
     return onboardingCache.isConflicted;
   } else {
