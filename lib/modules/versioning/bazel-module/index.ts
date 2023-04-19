@@ -66,8 +66,12 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  // TODO: Rework this to be more efficient.
-  return versions.find((version) => equals(version, range)) ? range : null;
+  const target = new BzlmodVersion(range);
+  const result = versions.find((ver) => {
+    const bv = new BzlmodVersion(ver);
+    return target.equals(bv);
+  });
+  return result ? range : null;
 }
 
 /**
