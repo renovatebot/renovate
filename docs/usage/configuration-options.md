@@ -2225,7 +2225,7 @@ The following matches any file in directories starting with `app/`:
 ```
 
 <!-- prettier-ignore -->
-!!! caution
+!!! warning
     Partial matches for `matchPaths` are deprecated.
     Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
