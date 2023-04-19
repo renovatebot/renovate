@@ -73,5 +73,18 @@ describe('modules/datasource/bazel-registry/index', () => {
       expect(res).toMatchSnapshot();
       expect(res?.releases).toHaveLength(4);
     });
+
+    it('metadata with yanked versions', async () => {
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(path)
+        .reply(200, Fixtures.get('metadata-with-yanked-versions.json'));
+      const res = await getPkgReleases({
+        datasource,
+        packageName,
+      });
+      expect(res).toMatchSnapshot();
+      expect(res?.releases).toHaveLength(3);
+    });
   });
 });
