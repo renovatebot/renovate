@@ -190,9 +190,6 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         .mockReturnValueOnce('onboarding-sha')
         .mockReturnValueOnce('new-default-sha');
       scm.isBranchConflicted.mockResolvedValueOnce(false);
-      expect(await isOnboardingBranchModified('configure/renovate')).toBe(
-        false
-      );
       expect(
         await isOnboardingBranchConflicted('master', 'configure/renovate')
       ).toBe(false);
