@@ -63,9 +63,10 @@ export class BazelRegistryDatasource extends Datasource {
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
-        if (err.response?.statusCode !== 404) {
-          throw new ExternalHostError(err);
+        if (err.response?.statusCode === 404) {
+          return null;
         }
+        throw new ExternalHostError(err);
       }
       this.handleGenericErrors(err);
     }
