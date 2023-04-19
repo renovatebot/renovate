@@ -45,6 +45,15 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
 
   describe('VersionPart', () => {
     it.each([
+      { a: [], expLen: 0, expStr: '' },
+      { a: ['1', new Identifier('0')], expLen: 2, expStr: '1.0' },
+    ])('VersionPart.create(...$a}', ({ a, expLen, expStr }) => {
+      const vp = VersionPart.create(...a);
+      expect(vp).toHaveLength(expLen);
+      expect(vp.asString).toBe(expStr);
+    });
+
+    it.each([
       { a: [], exp: '' },
       { a: ['1', '2', '3'], exp: '1.2.3' },
     ])('.asString', ({ a, exp }) => {
