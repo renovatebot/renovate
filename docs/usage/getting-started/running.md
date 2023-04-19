@@ -42,7 +42,7 @@ You must run the Docker images in a `linux/amd64` container.
 We're working on `linux/arm64` container support.
 You can't run the Docker images on a Windows or macOS container.
 
-In general, you can run Renovate on Windows with global mode.
+In general, you can run Renovate natively on Windows as long as you have all tools it will need (e.g. `npm`, `pipenv`, etc.) preinstalled before you run Renovate.
 
 There are two flavors:
 
