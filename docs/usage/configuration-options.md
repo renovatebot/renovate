@@ -997,31 +997,31 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 By default, Renovate skips any forked repositories when in `autodiscover` mode.
 It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-### Process a fork in `autodiscover` mode`
+**Process a fork in `autodiscover` mode`**
 
 If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
 - Add `"forkProcessing": "enabled"` to your repository config,
 - Or run the CLI command with `--fork-processing=enabled`
 
-### Process a fork in other modes
+**Process a fork in other modes**
 
 If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: set `"forkProcessing": "disabled"` in your _global_ config.
 
-### When using the hosted GitHub Mend Renovate app
+**When using the hosted GitHub Mend Renovate app**
 
 The behavior of `forkProcessing` depends on how you allow Renovate to run on your account.
 
-#### Renovate runs on all repositories
+**Renovate runs on all repositories**
 
 If you allow Renovate to run on all your repositories, `forkProcessing` will be `"disabled"`.
 To run Renovate on a fork: add `"forkProcessing": "enabled"` to the forked repository's `renovate.json` file.
 
-#### Renovate runs on selected repositories
+**Renovate runs on selected repositories**
 
 If you allow Renovate to run on "Selected" repositories, `forkProcessing` will be `"enabled"` for each "Selected" repository.
 
-### Allowed filenames
+**Allowed filenames**
 
 Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`.
 You can't use other filenames because Renovate only checks the default filename when using the Git-hosting platform's API.
