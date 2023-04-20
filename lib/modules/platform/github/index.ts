@@ -1836,6 +1836,6 @@ export async function commitFiles(
   // Replace locally created branch with the remotely created one
   // and return the remote commit SHA
   await git.resetToCommit(commitResult.parentCommitSha);
-  const commitSha = await git.fetchCommit(config);
+  const commitSha = await git.fetchBranch(branchName);
   return commitSha;
 }
