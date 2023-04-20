@@ -46,13 +46,10 @@ export class BazelRegistryDatasource extends Datasource {
     try {
       const { body: metadata } =
         await this.http.getJson<BazelModuleMetadataResponse>(url);
-      // TODO(grindel): Revert to simplified form if approved by maintainers.
-      // https://renovatebot.slack.com/archives/CAFH752JU/p1681933718434939
-      // bzlmodVersions.sort(BzlmodVersion.defaultCompare);
       const bzlmodVersions = metadata.versions
         .filter((v) => !metadata.yanked_versions[v])
         .map((v) => new BzlmodVersion(v))
-        .sort((a, b) => BzlmodVersion.defaultCompare(a, b));
+        .sort(BzlmodVersion.defaultCompare);
       for (const bv of bzlmodVersions) {
         const release = { registryUrl, version: bv.original };
         result.releases.push(release);
