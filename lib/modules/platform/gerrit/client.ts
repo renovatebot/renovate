@@ -10,7 +10,7 @@ import type {
 } from './types';
 
 class GerritClient {
-  requestDetails = [
+  private requestDetails = [
     'SUBMITTABLE', //include the submittable field in ChangeInfo, which can be used to tell if the change is reviewed and ready for submit.
     'CHECK', // include potential problems with the change.
     'MESSAGES',
@@ -18,7 +18,7 @@ class GerritClient {
     'LABELS',
     'CURRENT_ACTIONS', //to check if current_revision can be "rebase"
     'CURRENT_REVISION', //get RevisionInfo::ref to fetch
-  ];
+  ] as const;
 
   private gerritHttp = new GerritHttp();
 

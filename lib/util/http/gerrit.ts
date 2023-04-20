@@ -1,4 +1,5 @@
 import { regEx } from '../regex';
+import { validateUrl } from '../url';
 import type { HttpOptions, HttpResponse, InternalHttpOptions } from './types';
 import { Http } from './index';
 
@@ -22,9 +23,8 @@ export class GerritHttp extends Http {
     path: string,
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
-    const url = baseUrl + path;
+    const url = validateUrl(path) ? path : baseUrl + path;
     const opts: InternalHttpOptions = {
-      baseUrl,
       parseJson: (text: string) =>
         JSON.parse(text.replace(GerritHttp.magicPrefix, '')),
       ...options,

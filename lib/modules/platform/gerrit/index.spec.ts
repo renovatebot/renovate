@@ -13,7 +13,7 @@ import type {
   GerritProjectInfo,
 } from './types';
 import { TAG_PULL_REQUEST_BODY, mapGerritChangeToPr } from './utils';
-import { mergeToConfig } from '.';
+import { writeToConfig } from '.';
 import * as gerrit from '.';
 
 const gerritEndpointUrl = 'https://dev.gerrit.com/renovate';
@@ -41,7 +41,7 @@ describe('modules/platform/gerrit/index', () => {
       username: 'user',
       password: 'pass',
     });
-    mergeToConfig({
+    writeToConfig({
       repository: 'test/repo',
       labels: {},
     });
@@ -192,7 +192,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('updatePr()', () => {
     beforeAll(() => {
-      gerrit.mergeToConfig({ labels: {} });
+      gerrit.writeToConfig({ labels: {} });
     });
 
     it('updatePr() - new prTitle => copy to commit msg', async () => {
@@ -294,7 +294,7 @@ describe('modules/platform/gerrit/index', () => {
 
   describe('createPr() - success', () => {
     beforeAll(() => {
-      gerrit.mergeToConfig({ labels: {} });
+      gerrit.writeToConfig({ labels: {} });
     });
 
     const change = partial<GerritChange>({
@@ -473,7 +473,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('getBranchStatusCheck()', () => {
     describe('GerritLabel is not available', () => {
       beforeAll(() => {
-        mergeToConfig({ labels: {} });
+        writeToConfig({ labels: {} });
       });
 
       it.each([
@@ -490,7 +490,7 @@ describe('modules/platform/gerrit/index', () => {
 
     describe('GerritLabel is available', () => {
       beforeEach(() => {
-        mergeToConfig({
+        writeToConfig({
           labelMappings: {
             stabilityDaysLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
@@ -550,7 +550,7 @@ describe('modules/platform/gerrit/index', () => {
   describe('setBranchStatus()', () => {
     describe('GerritLabel is not available', () => {
       beforeEach(() => {
-        mergeToConfig({ labels: {} });
+        writeToConfig({ labels: {} });
       });
 
       it('setBranchStatus(renovate/stability-days)', async () => {
@@ -579,7 +579,7 @@ describe('modules/platform/gerrit/index', () => {
 
     describe('GerritLabel is available', () => {
       beforeEach(() => {
-        mergeToConfig({
+        writeToConfig({
           labelMappings: {
             stabilityDaysLabel: 'Renovate-Stability',
             mergeConfidenceLabel: 'Renovate-Merge-Confidence',
@@ -749,7 +749,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getRawFile() - repo/branch from config', async () => {
-      mergeToConfig({
+      writeToConfig({
         repository: 'repo',
         head: 'master',
         labels: {},
@@ -763,7 +763,7 @@ describe('modules/platform/gerrit/index', () => {
     });
 
     it('getRawFile() - repo/branch defaults', async () => {
-      mergeToConfig({
+      writeToConfig({
         repository: undefined,
         head: undefined,
         labels: {},

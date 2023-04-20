@@ -67,7 +67,7 @@ let config: {
   },
 };
 
-export function mergeToConfig(newConfig: typeof config): void {
+export function writeToConfig(newConfig: typeof config): void {
   config = { ...config, ...newConfig };
 }
 
@@ -110,10 +110,9 @@ export async function getRepos(): Promise<string[]> {
  */
 export async function initRepo({
   repository,
-  endpoint,
   gitUrl,
 }: RepoParams): Promise<RepoResult> {
-  logger.debug(`initRepo(${repository}, ${endpoint!}, ${gitUrl!})`);
+  logger.debug(`initRepo(${repository}, ${gitUrl!})`);
   const projectInfo = await client.getProjectInfo(repository);
   const branchInfo = await client.getBranchInfo(repository);
 
@@ -124,7 +123,7 @@ export async function initRepo({
     config: projectInfo,
     labels: projectInfo.labels ?? {},
   };
-  const baseUrl = endpoint ?? defaults.endpoint!;
+  const baseUrl = defaults.endpoint!;
   const url = getGerritRepoUrl(repository, baseUrl);
   configureScm(repository, config.gerritUsername!);
   await git.initRepo({ url });
@@ -322,7 +321,7 @@ export async function mergePr(config: MergePRConfig): Promise<boolean> {
 }
 
 /**
- * BranchStatus for Gerrit: TODO: what should we check here? How can this work with: automergeType: "branch"
+ * BranchStatus for Gerrit assumes that the branchName refers to a change.
  * @param branchName
  */
 export async function getBranchStatus(

@@ -11,14 +11,14 @@ describe('util/http/gerrit', () => {
     setBaseUrl(baseUrl);
   });
 
-  it('get', async () => {
+  it.each(['some-url/', baseUrl + 'some-url/'])('get %p', async (pathOrUrl) => {
     const body = 'body result';
     httpMock
       .scope(baseUrl)
-      .get('/some-url')
+      .get(/some-url\/$/)
       .reply(200, body, { 'content-type': 'text/plain;charset=utf-8' });
 
-    const res = await api.get('some-url');
+    const res = await api.get(pathOrUrl);
     expect(res.body).toEqual(body);
   });
 
