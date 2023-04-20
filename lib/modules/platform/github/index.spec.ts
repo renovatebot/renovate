@@ -3202,7 +3202,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {

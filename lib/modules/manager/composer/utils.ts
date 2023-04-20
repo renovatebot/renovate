@@ -3,8 +3,8 @@
 import { quote } from 'shlex';
 import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import type { HostRuleSearchResult } from '../../../types';
 import type { ToolConstraint } from '../../../util/exec/types';
-import { HostRuleSearch, find as findHostRule } from '../../../util/host-rules';
 import { api, id as composerVersioningId } from '../../versioning/composer';
 import type { UpdateArtifactsConfig } from '../types';
 import type { ComposerConfig, ComposerLock } from './types';
@@ -111,8 +111,10 @@ export function extractConstraints(
   return res;
 }
 
-export function findGithubToken(search: HostRuleSearch): string | undefined {
-  return findHostRule(search)?.token?.replace('x-access-token:', '');
+export function findGithubToken(
+  searchResult: HostRuleSearchResult
+): string | undefined {
+  return searchResult?.token?.replace('x-access-token:', '');
 }
 
 export function isGithubPersonalAccessToken(token: string): boolean {
@@ -172,4 +174,8 @@ export function takePersonalAccessTokenIfPossible(
   }
 
   return githubToken;
+}
+
+export function isArtifactAuthEnabled(rule: HostRuleSearchResult): boolean {
+  return !rule.artifactAuth || rule.artifactAuth.includes('composer');
 }
