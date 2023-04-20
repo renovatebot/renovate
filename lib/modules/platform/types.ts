@@ -88,7 +88,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;

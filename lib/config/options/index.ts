@@ -366,6 +366,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
+  },
   // Log options
   {
     name: 'logFile',
@@ -917,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
@@ -2301,6 +2309,20 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+  },
+  {
+    name: 'artifactAuth',
+    description:
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    allowedValues: ['composer'],
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'cacheHardTtlMinutes',

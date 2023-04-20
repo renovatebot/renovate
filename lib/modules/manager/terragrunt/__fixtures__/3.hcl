@@ -14,7 +14,7 @@ terraform {
     execute      = ["echo", "Running Terraform"]
   }
 
-  source = "github.com/myuser/myrepo//folder/modules/moduleone?ref=v0.0.9"
+  source = "github.com/myuser/myrepo//folder/modules/moduleone?ref=v0.0.9&depth=1"
 
   after_hook "after_hook" {
     commands     = ["apply", "plan"]
@@ -25,22 +25,22 @@ terraform {
 
 #foo
 terraform {
-  source = "github.com/hashicorp/example?ref=v1.0.0"
+  source = "github.com/hashicorp/example?ref=v1.0.0&depth=1"
 }
 
 #bar
 terraform {
-  source = "github.com/hashicorp/example?ref=next"
+  source = "github.com/hashicorp/example?ref=next&depth=3"
 }
 
 #IP
 terraform {
-  source = "https://104.196.242.174/example?ref=next"
+  source = "https://104.196.242.174/example?ref=next&depth=1"
 }
 
 #local hostname
 terraform {
-  source = "my.host.local/example?ref=v1.2.1"
+  source = "my.host.local/example?ref=v1.2.1&depth=1"
 }
 
 #local hostname
@@ -50,7 +50,7 @@ terraform {
 
 #local hostname
 terraform {
-  source = "my.host/modules/test?ref=v1.2.1"
+  source = "my.host/modules/test?ref=v1.2.1&depth=1"
 }
 
 #local hostname
@@ -60,32 +60,32 @@ terraform {
 
 #local hostname
 terraform {
-  source = "my.host.local/sources/example?ref=v1.2.1"
+  source = "my.host.local/sources/example?ref=v1.2.1&depth=1"
 }
 
 #hostname
 terraform {
-  source = "my.host/example?ref=next"
+  source = "my.host/example?ref=next&depth=1"
 }
 
 #invalid
 terraform {
-  source = "//terraform/module/test?ref=next"
+  source = "//terraform/module/test?ref=next&depth=1"
 }
 
 #repo-with-non-semver-ref
 terraform {
-  source = "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
+  source = "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9&depth=1"
 }
 
 #repo-with-dot
 terraform {
-  source = "github.com/hashicorp/example.2.3?ref=v1.0.0"
+  source = "github.com/hashicorp/example.2.3?ref=v1.0.0&depth=1"
 }
 
 #repo-with-dot-and-git-suffix
 terraform {
-  source = "github.com/hashicorp/example.2.3.git?ref=v1.0.0"
+  source = "github.com/hashicorp/example.2.3.git?ref=v1.0.0&depth=1"
 }
 
 #source without pinning
@@ -95,16 +95,16 @@ terraform {
 
 # source with double-slash
 terraform {
-  source         = "github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0"
+  source         = "github.com/tieto-cem/terraform-aws-ecs-task-definition//modules/container-definition?ref=v0.1.0&depth=1"
 }
 
 # regular sources
 terraform {
-  source = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0"
+  source = "github.com/tieto-cem/terraform-aws-ecs-task-definition?ref=v0.1.0&depth=1"
 }
 
 terraform {
-  source = "git@github.com:hashicorp/example.git?ref=v2.0.0"
+  source = "git@github.com:hashicorp/example.git?ref=v2.0.0&depth=1"
 }
 
 terraform {
@@ -127,32 +127,32 @@ terraform {
 
 # foobar
 terraform {
-  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+  source = "https://bitbucket.com/hashicorp/example?ref=v1.0.0&depth=1"
 }
 
 # gittags
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0"
+  source = "git::https://bitbucket.com/hashicorp/example?ref=v1.0.0&depth=1"
 }
 
 # gittags_badversion
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example?ref=next"
+  source = "git::https://bitbucket.com/hashicorp/example?ref=next&depth=1"
 }
 
 # gittags_subdir
 terraform {
-  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1"
+  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.1&depth=1"
 }
 
 # gittags_http
 terraform {
-  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2"
+  source = "git::http://bitbucket.com/hashicorp/example?ref=v1.0.2&depth=1"
 }
 
 # gittags_ssh
 terraform {
-  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
+  source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3&depth=1"
 }
 
 # invalid, ignored by test since it does not have source on the next line

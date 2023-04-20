@@ -176,7 +176,8 @@ Let's automerge it if all the linting updates pass:
 ```
 
 Have you come up with a rule that you think others would benefit from?
-How about a PR back to [renovate-config](https://github.com/singapore/renovate-config) with the above rule named `":automergeEslintWeekly"` ?
+How about a PR to [our presets](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal)?
+For example the above rule could be named `":automergeEslintWeekly"` in `schedule.ts`.
 
 ## Lock file considerations
 

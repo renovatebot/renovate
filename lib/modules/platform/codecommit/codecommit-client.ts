@@ -147,7 +147,7 @@ export async function createPrComment(
 
 export async function updatePrStatus(
   pullRequestId: string,
-  pullRequestStatus: PullRequestStatusEnum.CLOSED | PullRequestStatusEnum.OPEN
+  pullRequestStatus: PullRequestStatusEnum
 ): Promise<UpdatePullRequestStatusOutput> {
   const input: UpdatePullRequestStatusInput = {
     pullRequestId,
