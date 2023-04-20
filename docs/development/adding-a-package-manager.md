@@ -14,17 +14,17 @@ Common application logic for Renovate, not specific to particular managers, usua
 
 The manager's `index.ts` file supports the following values/functions:
 
-| Value/function                | Optional |
-| ----------------------------- | -------- |
-| `bumpPackageVersion`          | yes      |
-| `extractPackageFile`          |          |
-| `extractAllPackageFiles`      |          |
-| `getRangeStrategy`            | yes      |
-| `language`                    | yes      |
-| `supportsLockFileMaintenance` | yes      |
-| `updateArtifacts`             | yes      |
-| `updateDependency`            | yes      |
-| `updateLockedDependency`      | yes      |
+| Value/function                | Optional | Async |
+| ----------------------------- | -------- | ----- |
+| `bumpPackageVersion`          | yes      |       |
+| `extractPackageFile`          |          | yes   |
+| `extractAllPackageFiles`      |          | yes   |
+| `getRangeStrategy`            | yes      |       |
+| `language`                    | yes      |       |
+| `supportsLockFileMaintenance` | yes      |       |
+| `updateArtifacts`             | yes      | yes   |
+| `updateDependency`            | yes      |       |
+| `updateLockedDependency`      | yes      |       |
 
 ### `bumpPackageVersion` (optional)
 
