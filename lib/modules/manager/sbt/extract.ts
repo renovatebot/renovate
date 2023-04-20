@@ -24,8 +24,6 @@ import type {
 } from './types';
 import { normalizeScalaVersion } from './util';
 
-// type Vars = Record<string, string>;
-
 interface Ctx {
   globalVars: Variables;
   localVars: Variables;
@@ -54,6 +52,7 @@ const sbtVersionRegex = regEx(
   'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
 );
 
+// var1 or var1.var2.var3
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 const nestedVariableLiteral = (handler: q.SymMatcherHandler<Ctx>) =>
   q.sym<Ctx>(handler).opt(q.many(q.op<Ctx>('.').sym(handler)));
@@ -108,7 +107,7 @@ const packageFileVersionMatch = q
         ctx.packageFileVersion = packageFileVersion.val;
       }
       return ctx;
-    }) // support var1, var1.var2.var3
+    })
   );
 
 const variableNameMatch = q
