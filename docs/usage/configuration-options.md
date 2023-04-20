@@ -1006,7 +1006,7 @@ If you want Renovate to run on a forked repository when in `autodiscover` mode t
 
 ### Process a fork in other modes
 
-If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: you must configure `"forkProcessing": "disabled"` in your global config.
+If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: set `"forkProcessing": "disabled"` in your _global_ config.
 
 ### When using the hosted GitHub Mend Renovate app
 
