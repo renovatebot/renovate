@@ -82,10 +82,15 @@ Set to true if this package manager needs to update lock files in addition to pa
 
 ### `updateArtifacts` (async, optional)
 
-This function is triggered if a dependency has been updated for a package file or `lockfileMaintenance` has been triggered.
+This function triggers:
+
+- after a dependency update (for a package file), or
+- during `lockfileMaintenance`
 
 This function is mostly used to directly (or indirectly) update lock files.
 An example of indirectly updating the lock file: running external binaries.
+
+In case of directly updating dependencies in lock files use `updateLockedDependency` instead.
 
 ### `updateDependency` (optional)
 
@@ -93,4 +98,4 @@ An example of indirectly updating the lock file: running external binaries.
 
 ### `updateLockedDependency` (optional)
 
-???
+This function should be used if dependencies in lock files are directly updated.
