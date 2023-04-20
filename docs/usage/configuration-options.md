@@ -994,17 +994,37 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 
 ## forkProcessing
 
-By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+By default, Renovate skips any forked repositories when in `autodiscover` mode.
+It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-<!-- prettier-ignore -->
-!!! note
-    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
+### Process a fork in `autodiscover` mode`
 
-If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
+If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
-If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
+- Add `"forkProcessing": "enabled"` to your repository config,
+- Or run the CLI command with `--fork-processing=enabled`
+
+### Process a fork in other modes
+
+If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: you must configure `"forkProcessing": "disabled"` in your global config.
+
+### When using the hosted GitHub Mend Renovate app
+
+The behavior of `forkProcessing` depends on how you allow Renovate to run on your account.
+
+#### Renovate runs on all repositories
+
+If you allow Renovate to run on all your repositories, `forkProcessing` will be `"disabled"`.
+To run Renovate on a fork: add `"forkProcessing": "enabled"` to the forked repository's `renovate.json` file.
+
+#### Renovate runs on selected repositories
+
+If you allow Renovate to run on "Selected" repositories, `forkProcessing` will be `"enabled"` for each "Selected" repository.
+
+### Allowed filenames
+
+Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`.
+You can't use other filenames because Renovate only checks the default filename when using the Git-hosting platform's API.
 
 ## gitAuthor
 
