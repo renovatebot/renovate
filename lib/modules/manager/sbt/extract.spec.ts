@@ -1,6 +1,13 @@
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { extractPackageFile as extract } from './extract';
+import { GlobalConfig } from '../../../config/global';
+import type { RepoGlobalConfig } from '../../../config/types';
+import { REGISTRY_URLS } from '../gradle/parser/common';
+import type { ExtractConfig, PackageFile } from '../types';
+import {
+  extractPackageFile as extract,
+  extractAllPackageFiles,
+} from './extract';
 
 const extractPackageFile = (content: string) =>
   extract(content, {
@@ -9,6 +16,8 @@ const extractPackageFile = (content: string) =>
     globalVars: {},
     deps: [],
   });
+
+const fixturesDir = 'lib/modules/manager/sbt/__fixtures__';
 
 const sbt = Fixtures.get(`sample.sbt`);
 const sbtScalaVersionVariable = Fixtures.get(`scala-version-variable.sbt`);
@@ -471,6 +480,296 @@ describe('modules/manager/sbt/extract', () => {
           }
         )
       ).toBeNull();
+    });
+  });
+
+  describe('extractAllPackageFiles()', () => {
+    const config: ExtractConfig = {};
+
+    afterEach(() => {
+      GlobalConfig.reset();
+    });
+
+    it('extract simple-project with Versions.scala variable file', async () => {
+      const adminConfig: RepoGlobalConfig = {
+        localDir: `${fixturesDir}/simple-project`,
+      };
+      GlobalConfig.set(adminConfig);
+      const registryUrls = [REGISTRY_URLS.mavenCentral];
+      expect(
+        await extractAllPackageFiles(config, [
+          `build.sbt`,
+          `project/plugins.sbt`,
+          `project/Versions.scala`,
+          `submodule/build.sbt`,
+        ])
+      ).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.13.8',
+              datasource: 'maven',
+              depName: 'scala',
+              packageName: 'org.scala-lang:scala-library',
+              registryUrls,
+              separateMinorPatch: true,
+            },
+            {
+              currentValue: '1.2.11',
+              datasource: 'sbt-package',
+              depName: 'ch.qos.logback:logback-classic',
+              packageName: 'ch.qos.logback:logback-classic',
+              registryUrls,
+            },
+          ],
+          packageFile: 'build.sbt',
+        },
+        {
+          deps: [
+            {
+              currentValue: '0.13.0',
+              datasource: 'sbt-package',
+              depName: 'io.circe:circe-generic',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 7,
+              groupName: 'circe',
+              packageName: 'io.circe:circe-generic_2.13',
+              registryUrls,
+              variableName: 'circe',
+            },
+            {
+              currentValue: '10.2.6',
+              datasource: 'sbt-package',
+              depName: 'com.typesafe.akka:akka-http',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 3,
+              groupName: 'akkaHttp',
+              packageName: 'com.typesafe.akka:akka-http_2.13',
+              registryUrls,
+              variableName: 'akkaHttp',
+            },
+            {
+              currentValue: '2.6.18',
+              datasource: 'sbt-package',
+              depName: 'com.typesafe.akka:akka-stream',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 2,
+              groupName: 'akka',
+              packageName: 'com.typesafe.akka:akka-stream_2.13',
+              registryUrls,
+              variableName: 'akka',
+            },
+            {
+              currentValue: '1.3.1',
+              datasource: 'sbt-package',
+              depName: 'org.sangria-graphql:sangria-circe',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 6,
+              groupName: 'sangriacirce',
+              packageName: 'org.sangria-graphql:sangria-circe_2.13',
+              registryUrls,
+              variableName: 'sangriacirce',
+            },
+            {
+              currentValue: '3.2.11',
+              datasource: 'sbt-package',
+              depName: 'org.scalatest:scalatest-wordspec',
+              depType: 'Test',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 13,
+              groupName: 'scalaTest',
+              packageName: 'org.scalatest:scalatest-wordspec_2.13',
+              registryUrls,
+              variableName: 'scalaTest',
+            },
+            {
+              currentValue: '3.2.11',
+              datasource: 'sbt-package',
+              depName: 'org.scalatest:scalatest-funsuite',
+              depType: 'Test',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 13,
+              groupName: 'scalaTest',
+              packageName: 'org.scalatest:scalatest-funsuite_2.13',
+              registryUrls,
+              variableName: 'scalaTest',
+            },
+            {
+              currentValue: '1.17.5',
+              datasource: 'sbt-package',
+              depName: 'org.mockito:mockito-scala-scalatest',
+              depType: 'Test',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 14,
+              groupName: 'mockito',
+              packageName: 'org.mockito:mockito-scala-scalatest_2.13',
+              registryUrls,
+              variableName: 'mockito',
+            },
+            {
+              currentValue: '3.1.9',
+              datasource: 'sbt-package',
+              depName:
+                'com.softwaremill.sttp.client3:async-http-client-backend-future',
+              depType: 'Test',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 4,
+              groupName: 'sttp',
+              packageName:
+                'com.softwaremill.sttp.client3:async-http-client-backend-future_2.13',
+              registryUrls,
+              variableName: 'sttp',
+            },
+          ],
+          packageFile: `project/Versions.scala`,
+        },
+        {
+          deps: [
+            {
+              currentValue: '1.9.3',
+              datasource: 'sbt-plugin',
+              depName: 'org.scoverage:sbt-scoverage',
+              depType: 'plugin',
+              packageName: 'org.scoverage:sbt-scoverage',
+              registryUrls: [
+                ...registryUrls,
+                'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+              ],
+            },
+            {
+              currentValue: '1.0.1',
+              datasource: 'sbt-plugin',
+              depName: 'com.typesafe:sbt-mima-plugin',
+              depType: 'plugin',
+              packageName: 'com.typesafe:sbt-mima-plugin_2.13',
+              registryUrls: [
+                ...registryUrls,
+                'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+              ],
+            },
+            {
+              currentValue: '0.4.3',
+              datasource: 'sbt-plugin',
+              depName: 'pl.project13.scala:sbt-jmh',
+              depType: 'plugin',
+              packageName: 'pl.project13.scala:sbt-jmh',
+              registryUrls: [
+                ...registryUrls,
+                'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+              ],
+            },
+          ],
+          packageFile: 'project/plugins.sbt',
+        },
+        {
+          deps: [
+            {
+              currentValue: undefined,
+              datasource: 'sbt-package',
+              depName: 'com.github.tomakehurst:wiremock-jre8',
+              depType: 'Test',
+              packageName: 'com.github.tomakehurst:wiremock-jre8',
+              registryUrls: ['https://repo.maven.apache.org/maven2'],
+            },
+          ],
+          packageFile: 'submodule/build.sbt',
+        },
+      ] as PackageFile[]);
+    });
+
+    it('extract simple-project with maven resolver', async () => {
+      const adminConfig: RepoGlobalConfig = {
+        localDir: `${fixturesDir}/simple-project-with-resolver`,
+      };
+      GlobalConfig.set(adminConfig);
+
+      const registryUrls = [
+        'https://repo.maven.apache.org/maven2',
+        'https://example.org.com/internal-maven',
+      ];
+      expect(
+        await extractAllPackageFiles(config, [
+          `build.sbt`,
+          `project/plugins.sbt`,
+          `project/Versions.scala`,
+          `submodule/build.sbt`,
+        ])
+      ).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.13.5',
+              datasource: 'maven',
+              depName: 'scala',
+              packageName: 'org.scala-lang:scala-library',
+              registryUrls,
+              separateMinorPatch: true,
+            },
+            {
+              currentValue: '1.2.11',
+              datasource: 'sbt-package',
+              depName: 'ch.qos.logback:logback-classic',
+              packageName: 'ch.qos.logback:logback-classic',
+              registryUrls,
+            },
+          ],
+          packageFile: `build.sbt`,
+        },
+        {
+          deps: [
+            {
+              currentValue: '0.13.0',
+              datasource: 'sbt-package',
+              depName: 'io.circe:circe-generic',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 5,
+              groupName: 'circe',
+              packageName: 'io.circe:circe-generic_2.13',
+              registryUrls,
+              variableName: 'circe',
+            },
+            {
+              currentValue: '10.2.6',
+              datasource: 'sbt-package',
+              depName: 'com.typesafe.akka:akka-http',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 3,
+              groupName: 'akkaHttp',
+              packageName: 'com.typesafe.akka:akka-http_2.13',
+              registryUrls,
+              variableName: 'akkaHttp',
+            },
+            {
+              currentValue: '2.6.18',
+              datasource: 'sbt-package',
+              depName: 'com.typesafe.akka:akka-stream',
+              editFile: `project/Versions.scala`,
+              fileReplacePosition: 2,
+              groupName: 'akka',
+              packageName: 'com.typesafe.akka:akka-stream_2.13',
+              registryUrls,
+              variableName: 'akka',
+            },
+          ],
+          packageFile: `project/Versions.scala`,
+        },
+        {
+          deps: [
+            {
+              currentValue: '1.9.5',
+              datasource: 'sbt-plugin',
+              depName: 'org.scoverage:sbt-scoverage',
+              depType: 'plugin',
+              packageName: 'org.scoverage:sbt-scoverage',
+              registryUrls: [
+                ...registryUrls,
+                'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases',
+              ],
+            },
+          ],
+          packageFile: `project/plugins.sbt`,
+        },
+      ] as PackageFile[]);
     });
   });
 });
