@@ -473,7 +473,8 @@ Use the `extends` field instead of this if, for example, you need the ability fo
 <!-- prettier-ignore -->
 !!! warning
     `globalExtends` presets can't be private.
-    TODO FOR MAINTAINERS: please explain _why_ it can't be private, or what resources must be public.
+    When Renovate resolves `globalExtends` it does not fully process the configuration.
+    This means that Renovate does not have the authentication it needs to fetch private things.
 
 ## logContext
 
