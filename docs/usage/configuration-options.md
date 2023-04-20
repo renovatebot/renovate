@@ -1001,7 +1001,7 @@ It even skips a forked repository that has a Renovate configuration file, becaus
 
 If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
-- Add `"forkProcessing": "enabled"` to your repository config,
+- Ensure a `renovate.json` config exists with `"forkProcessing": "enabled"` in your repository,
 - Or run the CLI command with `--fork-processing=enabled`
 
 **Process a fork in other modes**
