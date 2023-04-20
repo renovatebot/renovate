@@ -14,15 +14,6 @@ describe('modules/versioning/bazel-module/index', () => {
     expect(bzlmod.getPatch('1.2.3')).toBe(3);
   });
 
-  it.each([{ a: '1.2.3', expMajor: 1, expMinor: 2, expPatch: 3 }])(
-    'getMajor(), getMinor(), getPatch() with $a',
-    ({ a, expMajor, expMinor, expPatch }) => {
-      expect(bzlmod.getMajor(a)).toBe(expMajor);
-      expect(bzlmod.getMinor(a)).toBe(expMinor);
-      expect(bzlmod.getPatch(a)).toBe(expPatch);
-    }
-  );
-
   it.each`
     a          | b          | exp
     ${'1.2.3'} | ${'1.2.3'} | ${true}
