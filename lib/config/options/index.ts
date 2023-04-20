@@ -1858,7 +1858,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prTitleStrict',
     description:
-      'Whether to bypass appending to the Pull Request title the `baseBranch` or `updateType` if update is part of a group and either `separateMajorMinor` or `separateMinorPatch` is true.',
+      'Whether to bypass appending extra context to the Pull Request title.',
     type: 'boolean',
     default: false,
     cli: false,
