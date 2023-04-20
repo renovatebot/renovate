@@ -39,3 +39,8 @@ lazy val root = project.in(file("."))
   .disablePlugins(MimaPlugin)
   .dependsOn(performance, server)
   .aggregate(submodule)
+
+val resolvers = Seq(
+  "Company Maven Snapshot" at "https://repo-company.com/maven-local-snapshot",
+  "Company Maven" at "https://repo-company.com/maven"
+)

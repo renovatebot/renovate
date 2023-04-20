@@ -495,7 +495,11 @@ describe('modules/manager/sbt/extract', () => {
         localDir: `${fixturesDir}/simple-project`,
       };
       GlobalConfig.set(adminConfig);
-      const registryUrls = [REGISTRY_URLS.mavenCentral];
+      const registryUrls = [
+        REGISTRY_URLS.mavenCentral,
+        'https://repo-company.com/maven-local-snapshot',
+        'https://repo-company.com/maven',
+      ];
       expect(
         await extractAllPackageFiles(config, [
           `build.sbt`,
@@ -669,7 +673,7 @@ describe('modules/manager/sbt/extract', () => {
               depName: 'com.github.tomakehurst:wiremock-jre8',
               depType: 'Test',
               packageName: 'com.github.tomakehurst:wiremock-jre8',
-              registryUrls: ['https://repo.maven.apache.org/maven2'],
+              registryUrls,
             },
           ],
           packageFile: 'submodule/build.sbt',
