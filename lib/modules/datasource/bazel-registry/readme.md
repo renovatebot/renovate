@@ -1,2 +1,2 @@
-The `bazel-registry` datasource is designed to query [Bazel
-regitries](https://bazel.build/external/registry).
+The `bazel-registry` datasource is designed to query one or more [Bazel
+registries](https://bazel.build/external/registry) using the first successful result.
