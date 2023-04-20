@@ -1,3 +1,4 @@
+import fsExtra from 'fs-extra';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
@@ -380,6 +381,43 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'external-dns',
             currentValue: '2.0.0',
             registryUrls: ['https://charts.helm.sh/stable'],
+          },
+        ],
+        managerData: { needKustomize: true },
+      });
+    });
+
+    it('detects kustomize and respects relative paths', async () => {
+      // Use actual fs.localPathExists and fs.getParentDir, and only mock fs-extra.stat
+      fs.localPathExists =
+        jest.requireActual<typeof fs>('../../../util/fs').localPathExists;
+      fs.getParentDir =
+        jest.requireActual<typeof fs>('../../../util/fs').getParentDir;
+
+      jest.spyOn(fsExtra, 'stat').mockImplementationOnce(() => {
+        return true;
+      });
+
+      const result = await extractPackageFile(
+        Fixtures.get('uses-kustomization.yaml'),
+        'project/helmfile.yaml', // In subdir
+        {
+          registryAliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        }
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: 'my-chart',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
         ],
         managerData: { needKustomize: true },
