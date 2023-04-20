@@ -23,78 +23,86 @@ describe('modules/versioning/bazel-module/index', () => {
     }
   );
 
-  it.each([
-    { a: '1.2.3', b: '1.2.3', exp: true },
-    { a: '1.2.3', b: '1.2.4', exp: false },
-  ])('equals($a, $b)', ({ a, b, exp }) => {
+  it.each`
+    a          | b          | exp
+    ${'1.2.3'} | ${'1.2.3'} | ${true}
+    ${'1.2.3'} | ${'1.2.4'} | ${false}
+  `('equals($a, $b)', ({ a, b, exp }) => {
     expect(bzlmod.equals(a, b)).toBe(exp);
     // The following are currently aliases for equals.
     expect(bzlmod.matches(a, b)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.4', b: '1.2.3', exp: true },
-    { a: '1.2.3', b: '1.2.3', exp: false },
-    { a: '1.2.2', b: '1.2.3', exp: false },
-  ])('isGreaterThan($a, $b)', ({ a, b, exp }) => {
+  it.each`
+    a          | b          | exp
+    ${'1.2.4'} | ${'1.2.3'} | ${true}
+    ${'1.2.3'} | ${'1.2.3'} | ${false}
+    ${'1.2.2'} | ${'1.2.3'} | ${false}
+  `('isGreaterThan($a, $b)', ({ a, b, exp }) => {
     expect(bzlmod.isGreaterThan(a, b)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.4', b: '1.2.3', exp: false },
-    { a: '1.2.3', b: '1.2.3', exp: false },
-    { a: '1.2.2', b: '1.2.3', exp: true },
-  ])('isLessThanRange($a, $b)', ({ a, b, exp }) => {
+  it.each`
+    a          | b          | exp
+    ${'1.2.4'} | ${'1.2.3'} | ${false}
+    ${'1.2.3'} | ${'1.2.3'} | ${false}
+    ${'1.2.2'} | ${'1.2.3'} | ${true}
+  `('isLessThanRange($a, $b)', ({ a, b, exp }) => {
     expect(bzlmod.isLessThanRange!(a, b)).toBe(exp);
   });
 
-  it.each([
-    { vers: [], rng: '1.2.3', exp: null },
-    { vers: ['1.1.0', '1.2.0', '2.0.0'], rng: '1.2.0', exp: '1.2.0' },
-    { vers: ['1.1.0', '1.2.0', '2.0.0'], rng: '1.2.3', exp: null },
-  ])('getSatisfyingVersion(vers, rng)', ({ vers, rng, exp }) => {
+  it.each`
+    vers                           | rng        | exp
+    ${[]}                          | ${'1.2.3'} | ${null}
+    ${['1.1.0', '1.2.0', '2.0.0']} | ${'1.2.0'} | ${'1.2.0'}
+    ${['1.1.0', '1.2.0', '2.0.0']} | ${'1.2.3'} | ${null}
+  `('getSatisfyingVersion(vers, rng)', ({ vers, rng, exp }) => {
     expect(bzlmod.getSatisfyingVersion(vers, rng)).toBe(exp);
     // The following are currently aliases for getSatisfyingVersion.
     expect(bzlmod.minSatisfyingVersion(vers, rng)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.3', b: '1.2.3', exp: 0 },
-    { a: '1.2.3', b: '1.2.4', exp: -1 },
-    { a: '1.2.4', b: '1.2.3', exp: 1 },
-  ])('sortVersions($a, $b)', ({ a, b, exp }) => {
+  it.each`
+    a          | b          | exp
+    ${'1.2.3'} | ${'1.2.3'} | ${0}
+    ${'1.2.3'} | ${'1.2.4'} | ${-1}
+    ${'1.2.4'} | ${'1.2.3'} | ${1}
+  `('sortVersions($a, $b)', ({ a, b, exp }) => {
     expect(bzlmod.sortVersions(a, b)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.3', exp: true },
-    { a: '1.2.3-pre', exp: false },
-    { a: '1.2.3+build', exp: true },
-  ])('isStable', ({ a, exp }) => {
+  it.each`
+    a                | exp
+    ${'1.2.3'}       | ${true}
+    ${'1.2.3-pre'}   | ${false}
+    ${'1.2.3+build'} | ${true}
+  `('isStable', ({ a, exp }) => {
     expect(bzlmod.isStable(a)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.3', exp: true },
-    { a: '1.2.3-pre', exp: true },
-    { a: '1.2.3+build', exp: true },
-    { a: '1.2.3-pre+build', exp: true },
-    { a: '1.2.3-pre+build', exp: true },
-    { a: '-abc', exp: false },
-    { a: '1_2', exp: false },
-  ])('isValid($a)', ({ a, exp }) => {
+  it.each`
+    a                    | exp
+    ${'1.2.3'}           | ${true}
+    ${'1.2.3-pre'}       | ${true}
+    ${'1.2.3+build'}     | ${true}
+    ${'1.2.3-pre+build'} | ${true}
+    ${'1.2.3-pre+build'} | ${true}
+    ${'-abc'}            | ${false}
+    ${'1_2'}             | ${false}
+  `('isValid($a)', ({ a, exp }) => {
     expect(bzlmod.isValid(a)).toBe(exp);
     // The following are currently aliases for isValid.
     expect(bzlmod.isCompatible(a)).toBe(exp);
     expect(bzlmod.isSingleVersion(a)).toBe(exp);
   });
 
-  it.each([
-    { a: '1.2.3', exp: true },
-    { a: '-abc', exp: false },
-    { a: null, exp: false },
-    { a: undefined, exp: false },
-  ])('isVersion($a)', ({ a, exp }) => {
+  it.each`
+    a            | exp
+    ${'1.2.3'}   | ${true}
+    ${'-abc'}    | ${false}
+    ${null}      | ${false}
+    ${undefined} | ${false}
+  `('isVersion($a)', ({ a, exp }) => {
     expect(bzlmod.isVersion(a)).toBe(exp);
   });
 

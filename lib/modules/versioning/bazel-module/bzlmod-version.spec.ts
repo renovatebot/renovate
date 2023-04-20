@@ -16,27 +16,29 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
       expect(ident.isDigitsOnly).toBe(false);
     });
 
-    it.each([
-      { a: '1', b: '1', exp: true },
-      { a: '1', b: '2', exp: false },
-      { a: 'foo1', b: '1', exp: false },
-      { a: 'a', b: 'a', exp: true },
-      { a: 'a', b: 'b', exp: false },
-    ])('$a equals $b', ({ a, b, exp }) => {
+    it.each`
+      a         | b      | exp
+      ${'1'}    | ${'1'} | ${true}
+      ${'1'}    | ${'2'} | ${false}
+      ${'foo1'} | ${'1'} | ${false}
+      ${'a'}    | ${'a'} | ${true}
+      ${'a'}    | ${'b'} | ${false}
+    `('$a equals $b', ({ a, b, exp }) => {
       const aIdent = new Identifier(a);
       const bIdent = new Identifier(b);
       expect(aIdent.equals(bIdent)).toBe(exp);
     });
 
-    it.each([
-      { a: '1', b: '1', exp: false },
-      { a: '1', b: '2', exp: true },
-      { a: '2', b: '1', exp: false },
-      { a: 'foo1', b: '1', exp: false },
-      { a: '1', b: 'foo1', exp: true },
-      { a: 'a', b: 'b', exp: true },
-      { a: 'b', b: 'a', exp: false },
-    ])('$a is isLessThan $b', ({ a, b, exp }) => {
+    it.each`
+      a         | b         | exp
+      ${'1'}    | ${'1'}    | ${false}
+      ${'1'}    | ${'2'}    | ${true}
+      ${'2'}    | ${'1'}    | ${false}
+      ${'foo1'} | ${'1'}    | ${false}
+      ${'1'}    | ${'foo1'} | ${true}
+      ${'a'}    | ${'b'}    | ${true}
+      ${'b'}    | ${'a'}    | ${false}
+    `('$a is isLessThan $b', ({ a, b, exp }) => {
       const aIdent = new Identifier(a);
       const bIdent = new Identifier(b);
       expect(aIdent.isLessThan(bIdent)).toBe(exp);
@@ -44,108 +46,102 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
   });
 
   describe('VersionPart', () => {
-    it.each([
-      { a: [], expLen: 0, expStr: '' },
-      { a: ['1', new Identifier('0')], expLen: 2, expStr: '1.0' },
-    ])('VersionPart.create(...$a}', ({ a, expLen, expStr }) => {
+    it.each`
+      a                             | expLen | expStr
+      ${[]}                         | ${0}   | ${''}
+      ${['1', new Identifier('0')]} | ${2}   | ${'1.0'}
+    `('VersionPart.create(...$a}', ({ a, expLen, expStr }) => {
       const vp = VersionPart.create(...a);
       expect(vp).toHaveLength(expLen);
       expect(vp.asString).toBe(expStr);
     });
 
-    it.each([
-      { a: [], exp: '' },
-      { a: ['1', '2', '3'], exp: '1.2.3' },
-    ])('.asString', ({ a, exp }) => {
+    it.each`
+      a                  | exp
+      ${[]}              | ${''}
+      ${['1', '2', '3']} | ${'1.2.3'}
+    `('.asString', ({ a, exp }) => {
       const avp = VersionPart.create(...a);
       expect(avp.asString).toBe(exp);
     });
 
-    it.each([
-      { a: [], exp: 0 },
-      { a: ['2'], exp: 2 },
-      { a: ['1', '2', '3'], exp: 1 },
-    ])('.major', ({ a, exp }) => {
+    it.each`
+      a                  | exp
+      ${[]}              | ${0}
+      ${['2']}           | ${2}
+      ${['1', '2', '3']} | ${1}
+    `('.major', ({ a, exp }) => {
       const avp = VersionPart.create(...a);
       expect(avp.major).toBe(exp);
     });
 
-    it.each([
-      { a: [], exp: 0 },
-      { a: ['1', '2', '3'], exp: 2 },
-    ])('.minor', ({ a, exp }) => {
+    it.each`
+      a                  | exp
+      ${[]}              | ${0}
+      ${['1', '2', '3']} | ${2}
+    `('.minor', ({ a, exp }) => {
       const avp = VersionPart.create(...a);
       expect(avp.minor).toBe(exp);
     });
 
-    it.each([
-      { a: [], exp: 0 },
-      { a: ['1', '2', '3'], exp: 3 },
-    ])('.patch', ({ a, exp }) => {
+    it.each`
+      a                  | exp
+      ${[]}              | ${0}
+      ${['1', '2', '3']} | ${3}
+    `('.patch', ({ a, exp }) => {
       const avp = VersionPart.create(...a);
       expect(avp.patch).toBe(exp);
     });
 
-    it.each([
-      { a: ['1', '0'], b: ['1', '0'], exp: true },
-      { a: ['1', '0'], b: ['1', '1'], exp: false },
-      { a: ['foo1', '0'], b: ['foo1', '0'], exp: true },
-    ])('$a equals $b', ({ a, b, exp }) => {
+    it.each`
+      a                | b                | exp
+      ${['1', '0']}    | ${['1', '0']}    | ${true}
+      ${['1', '0']}    | ${['1', '1']}    | ${false}
+      ${['foo1', '0']} | ${['foo1', '0']} | ${true}
+    `('$a equals $b', ({ a, b, exp }) => {
       const avp = VersionPart.create(...a);
       const bvp = VersionPart.create(...b);
       expect(avp.equals(bvp)).toBe(exp);
     });
 
-    it.each([
-      { a: ['1', '0'], b: ['1', '0'], exp: false },
-      { a: ['1', '0'], b: ['1', '1'], exp: true },
-      { a: ['1', '1'], b: ['1', '0'], exp: false },
-      { a: ['a'], b: ['b'], exp: true },
-      { a: [], b: ['1'], exp: false },
-      { a: ['1'], b: [], exp: true },
-      { a: ['1', '0'], b: ['2'], exp: true },
-      { a: ['2'], b: ['1', '0'], exp: false },
-      { a: ['1', '9'], b: ['2', '0'], exp: true },
-      { a: ['2', '0'], b: ['1', '9'], exp: false },
-    ])('$a is isLessThan $b', ({ a, b, exp }) => {
+    it.each`
+      a             | b             | exp
+      ${['1', '0']} | ${['1', '0']} | ${false}
+      ${['1', '0']} | ${['1', '1']} | ${true}
+      ${['1', '1']} | ${['1', '0']} | ${false}
+      ${['a']}      | ${['b']}      | ${true}
+      ${[]}         | ${['1']}      | ${false}
+      ${['1']}      | ${[]}         | ${true}
+      ${['1', '0']} | ${['2']}      | ${true}
+      ${['2']}      | ${['1', '0']} | ${false}
+      ${['1', '9']} | ${['2', '0']} | ${true}
+      ${['2', '0']} | ${['1', '9']} | ${false}
+    `('$a is isLessThan $b', ({ a, b, exp }) => {
       const avp = VersionPart.create(...a);
       const bvp = VersionPart.create(...b);
       expect(avp.isLessThan(bvp)).toBe(exp);
     });
 
-    it.each([
-      { a: [], exp: true },
-      { a: ['1'], exp: false },
-      { a: ['1', '0'], exp: false },
-    ])('.isEmpty', ({ a, exp }) => {
+    it.each`
+      a             | exp
+      ${[]}         | ${true}
+      ${['1']}      | ${false}
+      ${['1', '0']} | ${false}
+    `('.isEmpty', ({ a, exp }) => {
       const avp = VersionPart.create(...a);
       expect(avp.isEmpty).toBe(exp);
     });
   });
 
   describe('BzlmodVersion', () => {
-    it.each([
-      { v: '1.2.3', rexp: '1.2.3', pexp: '', bexp: '' },
-      { v: '', rexp: '', pexp: '', bexp: '' },
-      {
-        v: '1.2.3-pre.20230417.1',
-        rexp: '1.2.3',
-        pexp: 'pre.20230417.1',
-        bexp: '',
-      },
-      {
-        v: '1.2.3+build5',
-        rexp: '1.2.3',
-        pexp: '',
-        bexp: 'build5',
-      },
-      {
-        v: '1.2.3-pre.20230417.1+build5',
-        rexp: '1.2.3',
-        pexp: 'pre.20230417.1',
-        bexp: 'build5',
-      },
-    ])('constructor($v)', ({ v, rexp, pexp, bexp }) => {
+    it.each`
+      v                                | rexp       | pexp                | bexp
+      ${'1.2.3'}                       | ${'1.2.3'} | ${''}               | ${''}
+      ${''}                            | ${''}      | ${''}               | ${''}
+      ${'1.2.3-pre.20230417.1'}        | ${'1.2.3'} | ${'pre.20230417.1'} | ${''}
+      ${'1.2.3+build5'}                | ${'1.2.3'} | ${''}               | ${'build5'}
+      ${'1.2.3-pre.20230417.1+build5'} | ${'1.2.3'} | ${'pre.20230417.1'} | ${'build5'}
+    `('constructor($v)', ({ v, rexp, pexp, bexp }) => {
       const bv = new BzlmodVersion(v);
       expect(bv.release.asString).toBe(rexp);
       expect(bv.prerelease.asString).toBe(pexp);
@@ -154,137 +150,108 @@ describe('modules/versioning/bazel-module/bzlmod-version', () => {
 
     // Tests replicated from
     // https://cs.opensource.google/bazel/bazel/+/master:src/test/java/com/google/devtools/build/lib/bazel/bzlmod/VersionTest.java
-    it.each([
-      { a: '-abc' },
-      { a: '-1_2' },
-      { a: 'ßážëł' },
-      { a: '1.0-pre?' },
-      { a: '1.0-pre///' },
-      { a: '1..0' },
-      { a: '1.0-pre..erp' },
-    ])('bad versions $a', ({ a }) => {
+    it.each`
+      a
+      ${'-abc'}
+      ${'-1_2'}
+      ${'ßážëł'}
+      ${'1.0-pre?'}
+      ${'1.0-pre///'}
+      ${'1..0'}
+      ${'1.0-pre..erp'}
+    `('bad versions $a', ({ a }) => {
       expect(() => {
         new BzlmodVersion(a);
       }).toThrow();
     });
 
-    it.each([
-      { a: '1.2.3', b: '1.2.3', ignoreBuild: undefined, exp: true },
-      { a: '1.2.3', b: '1.2.4', ignoreBuild: undefined, exp: false },
-      {
-        a: '1.2.3',
-        b: '1.2.3-pre.20230417.1',
-        ignoreBuild: undefined,
-        exp: false,
-      },
-      { a: '1.2.3', b: '1.2.3+build5', ignoreBuild: undefined, exp: false },
-      { a: '1.2.3', b: '1.2.3+build5', ignoreBuild: false, exp: false },
-      { a: '1.2.3', b: '1.2.3+build5', ignoreBuild: true, exp: true },
-      {
-        a: '1.2.3',
-        b: '1.2.3-pre.20230417.1+build5',
-        ignoreBuild: undefined,
-        exp: false,
-      },
-      {
-        a: '1.2.3-pre.20230417.1+build5',
-        b: '1.2.3-pre.20230417.1+build5',
-        ignoreBuild: undefined,
-        exp: true,
-      },
-      {
-        a: '1.2.3-pre.20230417.1+build4',
-        b: '1.2.3-pre.20230417.1+build5',
-        ignoreBuild: undefined,
-        exp: false,
-      },
-      { a: '1.2.3', b: 'foo1.2.3', ignoreBuild: undefined, exp: false },
-      { a: '1.2.3', b: '', ignoreBuild: undefined, exp: false },
-      { a: '', b: '', ignoreBuild: undefined, exp: true },
-    ])('$a equals $b', ({ a, b, ignoreBuild, exp }) => {
+    it.each`
+      a                                | b                                | ignoreBuild  | exp
+      ${'1.2.3'}                       | ${'1.2.3'}                       | ${undefined} | ${true}
+      ${'1.2.3'}                       | ${'1.2.4'}                       | ${undefined} | ${false}
+      ${'1.2.3'}                       | ${'1.2.3-pre.20230417.1'}        | ${undefined} | ${false}
+      ${'1.2.3'}                       | ${'1.2.3+build5'}                | ${undefined} | ${false}
+      ${'1.2.3'}                       | ${'1.2.3+build5'}                | ${false}     | ${false}
+      ${'1.2.3'}                       | ${'1.2.3+build5'}                | ${true}      | ${true}
+      ${'1.2.3'}                       | ${'1.2.3-pre.20230417.1+build5'} | ${undefined} | ${false}
+      ${'1.2.3-pre.20230417.1+build5'} | ${'1.2.3-pre.20230417.1+build5'} | ${undefined} | ${true}
+      ${'1.2.3-pre.20230417.1+build4'} | ${'1.2.3-pre.20230417.1+build5'} | ${undefined} | ${false}
+      ${'1.2.3'}                       | ${'foo1.2.3'}                    | ${undefined} | ${false}
+      ${'1.2.3'}                       | ${''}                            | ${undefined} | ${false}
+      ${''}                            | ${''}                            | ${undefined} | ${true}
+    `('$a equals $b', ({ a, b, ignoreBuild, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
       expect(abv.equals(bbv, ignoreBuild)).toBe(exp);
     });
 
-    it.each([
-      { a: '1.2.3', b: '1.2.3', exp: false },
-      { a: '1.2.3', b: '1.2.4', exp: true },
-      { a: '1.2.3', b: '1.2.3-pre.20230417.1', exp: false },
-      { a: '1.2.3-pre.20230417.1', b: '1.2.3', exp: true },
-      { a: '', b: '1.2.3', exp: false },
-      { a: '1.2.3', b: '', exp: true },
-      { a: '', b: '', exp: false },
-      {
-        a: '1.2.3-pre.20230417.1+build5',
-        b: '1.2.3-pre.20230417.1+build5',
-        exp: false,
-      },
-      // NOTE: We ignore the build value for precedence comparison per the Semver spec.
-      // https://semver.org/#spec-item-10
-      {
-        a: '1.2.3-pre.20230417.1+build4',
-        b: '1.2.3-pre.20230417.1+build5',
-        exp: false,
-      },
-      { a: '4', b: 'a', exp: true },
-      { a: 'abc', b: 'abd', exp: true },
-      { a: 'pre', b: 'pre.foo', exp: true },
-    ])('$a is isLessThan $b', ({ a, b, exp }) => {
+    it.each`
+      a                                | b                                | exp
+      ${'1.2.3'}                       | ${'1.2.3'}                       | ${false}
+      ${'1.2.3'}                       | ${'1.2.4'}                       | ${true}
+      ${'1.2.3'}                       | ${'1.2.3-pre.20230417.1'}        | ${false}
+      ${'1.2.3-pre.20230417.1'}        | ${'1.2.3'}                       | ${true}
+      ${''}                            | ${'1.2.3'}                       | ${false}
+      ${'1.2.3'}                       | ${''}                            | ${true}
+      ${''}                            | ${''}                            | ${false}
+      ${'1.2.3-pre.20230417.1+build5'} | ${'1.2.3-pre.20230417.1+build5'} | ${false}
+      ${'1.2.3-pre.20230417.1+build4'} | ${'1.2.3-pre.20230417.1+build5'} | ${false}
+      ${'4'}                           | ${'a'}                           | ${true}
+      ${'abc'}                         | ${'abd'}                         | ${true}
+      ${'pre'}                         | ${'pre.foo'}                     | ${true}
+    `('$a is isLessThan $b', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
       expect(abv.isLessThan(bbv)).toBe(exp);
     });
 
-    it.each([
-      { a: '1.2.3', b: '1.2.3', exp: false },
-      { a: '1.2.3', b: '1.2.4', exp: false },
-      { a: '1.2.4', b: '1.2.3', exp: true },
-    ])('$a isGreaterThan $b', ({ a, b, exp }) => {
+    it.each`
+      a          | b          | exp
+      ${'1.2.3'} | ${'1.2.3'} | ${false}
+      ${'1.2.3'} | ${'1.2.4'} | ${false}
+      ${'1.2.4'} | ${'1.2.3'} | ${true}
+    `('$a isGreaterThan $b', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
       expect(abv.isGreaterThan(bbv)).toBe(exp);
     });
 
-    it.each([
-      { a: '1.2.3', b: '1.2.3', exp: 0 },
-      { a: '1.2.3-pre.20230417.1', b: '1.2.3', exp: -1 },
-      { a: '1.2.3', b: '1.2.3-pre.20230417.1', exp: 1 },
-      { a: '2', b: '1.0', exp: 1 },
-      // Tests replicated from
-      // https://cs.opensource.google/bazel/bazel/+/master:src/test/java/com/google/devtools/build/lib/bazel/bzlmod/VersionTest.java
-      // Empty beats everything
-      { a: '', b: '1.0', exp: 1 },
-      { a: '', b: '1.0+build', exp: 1 },
-      { a: '', b: '1.0-pre', exp: 1 },
-      { a: '', b: '1.0-pre+build-kek.lol', exp: 1 },
-      // Release Version
-      { a: '2.0', b: '1.0', exp: 1 },
-      { a: '2.0', b: '1.9', exp: 1 },
-      { a: '11.0', b: '3.0', exp: 1 },
-      { a: '1.0.1', b: '1.0', exp: 1 },
-      { a: '1.0.0', b: '1.0', exp: 1 },
-      { a: '1.0+build2', b: '1.0+build3', exp: 0 },
-      { a: '1.0', b: '1.0-pre', exp: 1 },
-      { a: '1.0', b: '1.0+build-notpre', exp: 0 },
-      // Release Version with Letters
-      { a: '1.0.patch.3', b: '1.0', exp: 1 },
-      { a: '1.0.patch.3', b: '1.0.patch.2', exp: 1 },
-      { a: '1.0.patch.3', b: '1.0.patch.10', exp: -1 },
-      { a: '1.0.patch3', b: '1.0.patch10', exp: 1 },
-      { a: '4', b: 'a', exp: -1 },
-      { a: 'abc', b: 'abd', exp: -1 },
-      // Prerelease Version
-      { a: '1.0-pre', b: '1.0-are', exp: 1 },
-      { a: '1.0-3', b: '1.0-2', exp: 1 },
-      { a: '1.0-pre', b: '1.0-pre.foo', exp: -1 },
-      { a: '1.0-pre.3', b: '1.0-pre.2', exp: 1 },
-      { a: '1.0-pre.10', b: '1.0-pre.2', exp: 1 },
-      { a: '1.0-pre.10a', b: '1.0-pre.2a', exp: -1 },
-      { a: '1.0-pre.99', b: '1.0-pre.2a', exp: -1 },
-      { a: '1.0-pre.patch.3', b: '1.0-pre.patch.4', exp: -1 },
-      { a: '1.0--', b: '1.0----', exp: -1 },
-    ])('defaultCompare($a, $b)', ({ a, b, exp }) => {
+    // Tests replicated from
+    // https://cs.opensource.google/bazel/bazel/+/master:src/test/java/com/google/devtools/build/lib/bazel/bzlmod/VersionTest.java
+    it.each`
+      a                         | b                          | exp
+      ${'1.2.3'}                | ${'1.2.3'}                 | ${0}
+      ${'1.2.3-pre.20230417.1'} | ${'1.2.3'}                 | ${-1}
+      ${'1.2.3'}                | ${'1.2.3-pre.20230417.1'}  | ${1}
+      ${'2'}                    | ${'1.0'}                   | ${1}
+      ${''}                     | ${'1.0'}                   | ${1}
+      ${''}                     | ${'1.0+build'}             | ${1}
+      ${''}                     | ${'1.0-pre'}               | ${1}
+      ${''}                     | ${'1.0-pre+build-kek.lol'} | ${1}
+      ${'2.0'}                  | ${'1.0'}                   | ${1}
+      ${'2.0'}                  | ${'1.9'}                   | ${1}
+      ${'11.0'}                 | ${'3.0'}                   | ${1}
+      ${'1.0.1'}                | ${'1.0'}                   | ${1}
+      ${'1.0.0'}                | ${'1.0'}                   | ${1}
+      ${'1.0+build2'}           | ${'1.0+build3'}            | ${0}
+      ${'1.0'}                  | ${'1.0-pre'}               | ${1}
+      ${'1.0'}                  | ${'1.0+build-notpre'}      | ${0}
+      ${'1.0.patch.3'}          | ${'1.0'}                   | ${1}
+      ${'1.0.patch.3'}          | ${'1.0.patch.2'}           | ${1}
+      ${'1.0.patch.3'}          | ${'1.0.patch.10'}          | ${-1}
+      ${'1.0.patch3'}           | ${'1.0.patch10'}           | ${1}
+      ${'4'}                    | ${'a'}                     | ${-1}
+      ${'abc'}                  | ${'abd'}                   | ${-1}
+      ${'1.0-pre'}              | ${'1.0-are'}               | ${1}
+      ${'1.0-3'}                | ${'1.0-2'}                 | ${1}
+      ${'1.0-pre'}              | ${'1.0-pre.foo'}           | ${-1}
+      ${'1.0-pre.3'}            | ${'1.0-pre.2'}             | ${1}
+      ${'1.0-pre.10'}           | ${'1.0-pre.2'}             | ${1}
+      ${'1.0-pre.10a'}          | ${'1.0-pre.2a'}            | ${-1}
+      ${'1.0-pre.99'}           | ${'1.0-pre.2a'}            | ${-1}
+      ${'1.0-pre.patch.3'}      | ${'1.0-pre.patch.4'}       | ${-1}
+      ${'1.0--'}                | ${'1.0----'}               | ${-1}
+    `('defaultCompare($a, $b)', ({ a, b, exp }) => {
       const abv = new BzlmodVersion(a);
       const bbv = new BzlmodVersion(b);
       expect(BzlmodVersion.defaultCompare(abv, bbv)).toBe(exp);
