@@ -128,7 +128,10 @@ const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
   return ctx;
 });
 
-const assignmentMatch = q.sym<Ctx>('val').join(variableNameMatch).op('=');
+const assignmentMatch = q
+  .alt<Ctx>(q.sym<Ctx>('val'), q.sym('var'))
+  .join(variableNameMatch)
+  .op('=');
 
 const variableDefinitionMatch = q
   .alt(

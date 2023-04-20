@@ -611,6 +611,22 @@ describe('modules/manager/sbt/extract', () => {
               variableName: 'mockito',
             },
             {
+              currentValue: '2.31.0',
+              datasource: 'sbt-package',
+              depName: 'com.github.tomakehurst:wiremock-jre8',
+              depType: 'Test',
+              editFile: 'project/Versions.scala',
+              fileReplacePosition: 12,
+              groupName: 'wiremock',
+              packageName: 'com.github.tomakehurst:wiremock-jre8',
+              registryUrls: [
+                'https://repo.maven.apache.org/maven2',
+                'https://repo-company.com/maven-local-snapshot',
+                'https://repo-company.com/maven',
+              ],
+              variableName: 'wiremock',
+            },
+            {
               currentValue: '3.1.9',
               datasource: 'sbt-package',
               depName:
@@ -664,19 +680,6 @@ describe('modules/manager/sbt/extract', () => {
             },
           ],
           packageFile: 'project/plugins.sbt',
-        },
-        {
-          deps: [
-            {
-              currentValue: undefined,
-              datasource: 'sbt-package',
-              depName: 'com.github.tomakehurst:wiremock-jre8',
-              depType: 'Test',
-              packageName: 'com.github.tomakehurst:wiremock-jre8',
-              registryUrls,
-            },
-          ],
-          packageFile: 'submodule/build.sbt',
         },
       ] as PackageFile[]);
     });
