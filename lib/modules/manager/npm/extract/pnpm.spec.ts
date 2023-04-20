@@ -302,7 +302,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
       expect(Object.keys(res.lockedVersions)).toHaveLength(2);
-      expect(logger.logger.debug).toHaveBeenLastCalledWith(
+      expect(logger.logger.trace).toHaveBeenLastCalledWith(
         'Invalid package path /sux-1.2.4'
       );
     });
