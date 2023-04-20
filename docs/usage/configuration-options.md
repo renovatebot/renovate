@@ -1006,13 +1006,6 @@ If you are running in non-autodiscover mode (e.g. supplying a list of repositori
 
 If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
 
-## gerritAutoApprove
-
-If set to `true`, Renovate automatically approves its own changes.
-This means Renovate assigns the Code-Review label = +2.
-
-You can also configure this using `packageRules` if you want to use it selectively (e.g. per-package).
-
 ## gerritLabelMapping
 
 The name of the Gerrit labels to use for the `StabilityDays` and `Merge-Confidence` status.

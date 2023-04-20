@@ -929,7 +929,7 @@ const options: RenovateOptions[] = [
     description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
-    supportedPlatforms: ['azure'],
+    supportedPlatforms: ['azure', 'gerrit'],
   },
   // depType
   {
@@ -2608,14 +2608,6 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
     supportedPlatforms: ['github'],
-  },
-  {
-    name: 'gerritAutoApprove',
-    description:
-      'If set to `true`, Renovate automatically approves its own changes. This means Renovate assigns the Code-Review label = +2.',
-    type: 'boolean',
-    default: false,
-    supportedPlatforms: ['gerrit'],
   },
   {
     name: 'gerritLabelMapping',

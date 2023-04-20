@@ -27,7 +27,7 @@ import type {
 import { repoFingerprint } from '../util';
 
 import { smartTruncate } from '../utils/pr-body';
-import readOnlyIssueBody from '../utils/read-only-issue-body';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { client } from './client';
 import { configureScm } from './scm';
 import type {
@@ -198,7 +198,7 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   if (prConfig.prBody) {
     await updatePullRequestBody(prConfig.number, prConfig.prBody);
   }
-  if (prConfig.platformOptions?.gerritAutoApprove) {
+  if (prConfig.platformOptions?.autoApprove) {
     await client.approveChange(prConfig.number);
   }
   if (prConfig.state && prConfig.state === 'closed') {
@@ -228,7 +228,7 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       await updatePullRequestTitle(pr._number, pr.change_id, prConfig.prTitle);
     }
     await updatePullRequestBody(pr._number, prConfig.prBody);
-    if (prConfig.platformOptions?.gerritAutoApprove) {
+    if (prConfig.platformOptions?.autoApprove) {
       await client.approveChange(pr._number);
     }
     return getPr(pr._number);

@@ -225,7 +225,7 @@ describe('modules/platform/gerrit/index', () => {
         number: 123456,
         prTitle: 'subject',
         platformOptions: {
-          gerritAutoApprove: true,
+          autoApprove: true,
         },
       });
       expect(clientMock.approveChange).toHaveBeenCalledWith(123456);
@@ -320,7 +320,7 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: 'title',
         prBody: 'body',
         platformOptions: {
-          gerritAutoApprove: false,
+          autoApprove: false,
         },
       });
       expect(pr).toHaveProperty('number', 123456);
@@ -343,7 +343,7 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: change.subject,
         prBody: 'body',
         platformOptions: {
-          gerritAutoApprove: true,
+          autoApprove: true,
         },
       });
       expect(pr).toHaveProperty('number', 123456);
