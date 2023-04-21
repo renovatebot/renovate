@@ -12,7 +12,14 @@ import type { ComposerManagerData } from './types';
 
 export const ComposerRepo = z.object({
   type: z.literal('composer'),
-  url: z.string(),
+  /**
+   * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
+   * to use a base URL containing packages.json. Composer still works in this scenario by determining
+   * whether to add / remove packages.json from the URL.
+   *
+   * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
+   */
+  url: z.string().transform((url) => url.replace(/\/packages\.json$/, '')),
 });
 export type ComposerRepo = z.infer<typeof ComposerRepo>;
 
@@ -109,15 +116,7 @@ export const Repos = z
 
     for (const repo of repos) {
       if (repo.type === 'composer') {
-        /**
-         * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
-         * to use a base URL containing packages.json. Composer still works in this scenario by determining
-         * whether to add / remove packages.json from the URL.
-         *
-         * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
-         */
-        const url = repo.url.replace(/\/packages\.json$/, '');
-        registryUrls.push(url);
+        registryUrls.push(repo.url);
       } else if (repo.type === 'git') {
         gitRepos[repo.name] = repo;
       } else if (repo.type === 'path') {
