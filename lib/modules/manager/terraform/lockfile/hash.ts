@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import extract from 'extract-zip';
 import upath from 'upath';
 import { logger } from '../../../../logger';
@@ -32,7 +32,7 @@ export class TerraformProviderHash {
 
       // add double space, the filename and a new line char
       rootHash.update('  ');
-      const fileName = file.replace(regEx(/^.*[\\/]/), '');
+      const fileName = file.replace(regEx(/^.*[/]/), '');
       rootHash.update(fileName);
       rootHash.update('\n');
     }

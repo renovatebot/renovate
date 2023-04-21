@@ -12,7 +12,7 @@ const testRegistryUrl = 'https://jfrog.company.com/artifactory';
 const testLookupName = 'project';
 const testConfig = {
   registryUrls: [testRegistryUrl],
-  depName: testLookupName,
+  packageName: testLookupName,
 };
 const fixtureReleasesAsFolders = Fixtures.get('releases-as-folders.html');
 const fixtureReleasesAsFiles = Fixtures.get('releases-as-files.html');
@@ -70,7 +70,6 @@ describe('modules/datasource/artifactory/index', () => {
         .reply(200, '<html>\n<h1>Header</h1>\n<a>1.3.0</a>\n<hmtl/>');
       const res = await getPkgReleases({
         registryUrls: [testRegistryUrl, secondRegistryUrl],
-        depName: testLookupName,
         datasource,
         packageName: testLookupName,
       });
@@ -81,7 +80,6 @@ describe('modules/datasource/artifactory/index', () => {
     it('returns null without registryUrl + warning', async () => {
       const res = await getPkgReleases({
         datasource,
-        depName: testLookupName,
         packageName: testLookupName,
       });
       expect(logger.warn).toHaveBeenCalledTimes(1);

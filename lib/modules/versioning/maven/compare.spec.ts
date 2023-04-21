@@ -187,6 +187,7 @@ describe('modules/versioning/maven/compare', () => {
         ${'1-0.alpha'}                                  | ${'1-0.beta'}
         ${'1_5ea'}                                      | ${'1_c3b'}
         ${'1_c3b'}                                      | ${'2'}
+        ${'17.0.5'}                                     | ${'17.0.5+8'}
       `('$x < $y', ({ x, y }) => {
         expect(compare(x, y)).toBe(-1);
         expect(compare(y, x)).toBe(1);

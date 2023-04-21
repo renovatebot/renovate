@@ -28,7 +28,7 @@
     Hi there,
 
 
-    We have found that there's a problem with the logs.
+    We found a problem with the logs.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
@@ -95,6 +95,12 @@
 
     </details>
 
+
+    Good luck,
+
+
+    The Renovate team
+
 'new package manager':
   comment: >
     Hi there,
@@ -133,11 +139,17 @@
 
 
     You're skipping code tests with `istanbul ignore`.
+
+
     Please only skip tests if:
       - you cannot test the code, or
       - the code is very difficult to test, or
       - the edge case won't usually happen at runtime
-    If you skip a test then always comment why:
+
+
+    If you skip a test, always comment why:
+
+
     ```ts
     // istanbul ignore next: typescript strict null check
     if (!url) {
@@ -166,17 +178,33 @@
 
     The Renovate team
 
-'invalid':
+'needs-discussion':
+  unlabel:
+    - 'type:bug'
+    - 'type:feature'
+    - 'priority-5-triage'
+    - 'status:requirements'
   comment: >
-    Hi there,
+    **Please create a GitHub Discussion instead of this issue.**
 
 
-    This issue has been marked as invalid and will be closed and potentially deleted too.
-    Deletion is done so that invalid issues (such as mistaken bug reports) don't show up in repository searches and confuse future users.
-
-    In future, please create _Discussions_ instead of Issues (including for the topic of this Issue if you still wish to discuss it).
-
-    Good luck,
+    As this issue has been labeled as `needs-discussion` by a maintainer it is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
 
 
-    The Renovate team
+    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
+
+
+    Thanks, The Renovate team
+  close: true
+  lock: true
+  lock-reason: 'resolved'
+
+'needs-code-formatting':
+  comment: >
+    Hi, please format your code or logs so they're readable.
+
+
+    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+
+
+    Thanks, The Renovate team

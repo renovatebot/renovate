@@ -46,7 +46,6 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
     versioning: 'go-mod-directive',
-    rangeStrategy: 'replace',
   };
 }
 

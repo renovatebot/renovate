@@ -1,3 +1,4 @@
+import { dequal } from 'dequal';
 import { DateTime } from 'luxon';
 import type {
   GithubDatasourceItem,
@@ -22,7 +23,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
   /**
    * The time which is used during single cache access cycle.
    */
-  protected readonly now = DateTime.now();
+  protected readonly now = DateTime.now().toUTC();
 
   /**
    * Set of all versions which were reconciled
@@ -35,7 +36,20 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private items: Record<string, GithubItem> | undefined;
   protected createdAt = this.now;
-  protected updatedAt = this.now;
+
+  /**
+   * This flag helps to indicate whether the cache record
+   * should be persisted after the current cache access cycle.
+   */
+  protected hasUpdatedItems = false;
+
+  /**
+   * Loading and persisting data is delegated to the concrete strategy.
+   */
+  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
+  abstract persist(
+    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
+  ): Promise<void>;
 
   constructor(
     protected readonly cacheNs: string,
@@ -53,22 +67,20 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
 
     let result: GithubGraphqlCacheRecord<GithubItem> = {
       items: {},
-      createdAt: this.createdAt.toISO(),
-      updatedAt: this.updatedAt.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
 
     const storedData = await this.load();
     if (storedData) {
       const cacheTTLDuration = {
-        days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+        hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
       };
       if (!isDateExpired(this.now, storedData.createdAt, cacheTTLDuration)) {
         result = storedData;
       }
     }
 
-    this.createdAt = DateTime.fromISO(result.createdAt);
-    this.updatedAt = DateTime.fromISO(result.updatedAt);
+    this.createdAt = DateTime.fromISO(result.createdAt).toUTC();
     this.items = result.items;
     return this.items;
   }
@@ -79,7 +91,7 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
    */
   private isStabilized(item: GithubItem): boolean {
     const unstableDuration = {
-      days: AbstractGithubGraphqlCacheStrategy.cacheTTLDays,
+      hours: AbstractGithubGraphqlCacheStrategy.cacheTTLDays * 24,
     };
     return isDateExpired(this.now, item.releaseTimestamp, unstableDuration);
   }
@@ -99,8 +111,14 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
       // If we reached previously stored item that is stabilized,
       // we assume the further pagination will not yield any new items.
       const oldItem = cachedItems[version];
-      if (oldItem && this.isStabilized(oldItem)) {
-        isPaginationDone = true;
+      if (oldItem) {
+        if (this.isStabilized(oldItem)) {
+          isPaginationDone = true;
+        }
+
+        if (!dequal(oldItem, item)) {
+          this.hasUpdatedItems = true;
+        }
       }
 
       cachedItems[version] = item;
@@ -129,23 +147,11 @@ export abstract class AbstractGithubGraphqlCacheStrategy<
     return Object.values(resultItems);
   }
 
-  /**
-   * Update `updatedAt` field and persist the data.
-   */
   private async store(cachedItems: Record<string, GithubItem>): Promise<void> {
     const cacheRecord: GithubGraphqlCacheRecord<GithubItem> = {
       items: cachedItems,
-      createdAt: this.createdAt.toISO(),
-      updatedAt: this.now.toISO(),
+      createdAt: this.createdAt.toISO()!,
     };
     await this.persist(cacheRecord);
   }
-
-  /**
-   * Loading and persisting data is delegated to the concrete strategy.
-   */
-  abstract load(): Promise<GithubGraphqlCacheRecord<GithubItem> | undefined>;
-  abstract persist(
-    cacheRecord: GithubGraphqlCacheRecord<GithubItem>
-  ): Promise<void>;
 }

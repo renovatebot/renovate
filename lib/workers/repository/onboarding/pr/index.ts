@@ -171,7 +171,10 @@ If you need any further assistance then you can also [request help here](${
         prTitle: config.onboardingPrTitle!,
         prBody,
         labels,
-        platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
+        platformOptions: getPlatformPrOptions({
+          ...config,
+          automerge: false,
+        }),
       });
       logger.info(
         { pr: `Pull Request #${pr!.number}` },

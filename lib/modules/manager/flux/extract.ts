@@ -2,7 +2,7 @@ import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -130,7 +130,7 @@ function resolveGitRepositoryPerSourceTag(
 
   const bitbucketMatchGroups = bitbucketUrlRegex.exec(gitUrl)?.groups;
   if (bitbucketMatchGroups) {
-    dep.datasource = BitBucketTagsDatasource.id;
+    dep.datasource = BitbucketTagsDatasource.id;
     dep.packageName = bitbucketMatchGroups.packageName;
     dep.sourceUrl = `https://bitbucket.org/${dep.packageName}`;
     return;
@@ -224,7 +224,7 @@ function resolveResourceManifest(
         } else if (resource.spec.ref?.tag) {
           dep = getDep(`${container}:${resource.spec.ref.tag}`, false);
           dep.autoReplaceStringTemplate =
-            '{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+            '{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
           dep.replaceString = resource.spec.ref.tag;
         } else {
           dep.skipReason = 'unversioned-reference';

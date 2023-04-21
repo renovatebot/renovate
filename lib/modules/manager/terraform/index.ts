@@ -1,4 +1,4 @@
-import { BitBucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
 import { DockerDatasource } from '../../datasource/docker';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -12,7 +12,7 @@ export { updateLockedDependency } from './lockfile/update-locked';
 export { extractPackageFile } from './extract';
 
 export const supportedDatasources = [
-  BitBucketTagsDatasource.id,
+  BitbucketTagsDatasource.id,
   DockerDatasource.id,
   GitTagsDatasource.id,
   GithubTagsDatasource.id,

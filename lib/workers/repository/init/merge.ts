@@ -17,6 +17,7 @@ import {
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
@@ -51,7 +52,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    const configFileRaw = await platform.getRawFile(configFileName);
+    let configFileRaw: string | null;
+    try {
+      configFileRaw = await platform.getRawFile(configFileName);
+    } catch (err) {
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      configFileRaw = null;
+    }
     if (configFileRaw) {
       let configFileParsed = JSON5.parse(configFileRaw);
       if (configFileName !== 'package.json') {
@@ -61,6 +71,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       return { configFileName, configFileParsed }; // don't return raw 'package.json'
     } else {
       logger.debug('Existing config file no longer exists');
+      delete cache.configFileName;
     }
   }
   configFileName = (await detectConfigFile()) ?? undefined;

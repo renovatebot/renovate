@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import is from '@sindresorhus/is';
 import type { IGitApi } from 'azure-devops-node-api/GitApi';
 import {
@@ -577,8 +577,26 @@ describe('modules/platform/azure/index', () => {
             ]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', false);
+      expect(res).toBe('yellow');
     });
 
     it('should pass through failed', async () => {
@@ -590,7 +608,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('red');
     });
 
@@ -603,7 +621,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
 
@@ -616,7 +634,7 @@ describe('modules/platform/azure/index', () => {
             getStatuses: jest.fn(() => []),
           } as any)
       );
-      const res = await azure.getBranchStatus('somebranch');
+      const res = await azure.getBranchStatus('somebranch', true);
       expect(res).toBe('yellow');
     });
   });
@@ -787,7 +805,7 @@ describe('modules/platform/azure/index', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { azureAutoApprove: true },
+        platformOptions: { autoApprove: true },
       });
       expect(updateFn).toHaveBeenCalled();
       expect(pr).toMatchSnapshot();
@@ -1328,13 +1346,6 @@ describe('modules/platform/azure/index', () => {
       );
       expect(logger.warn).toHaveBeenCalled();
       expect(res).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await azure.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
     });
   });
 

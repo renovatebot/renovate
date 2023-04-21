@@ -25,7 +25,7 @@ async function updateAllLocks(
       const updateConfig: GetPkgReleasesConfig = {
         versioning: 'hashicorp',
         datasource: 'terraform-provider',
-        depName: lock.packageName,
+        packageName: lock.packageName,
       };
       const { releases } = (await getPkgReleases(updateConfig)) ?? {};
       // istanbul ignore if: needs test

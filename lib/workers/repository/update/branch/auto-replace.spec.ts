@@ -233,6 +233,24 @@ describe('workers/repository/update/branch/auto-replace', () => {
       await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
 
+    it('fails with digest mismatch', async () => {
+      const dockerfile = codeBlock`
+        FROM java:11@sha256-1234 as build
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.pinDigests = true;
+      upgrade.depName = 'java';
+      upgrade.currentValue = '11';
+      upgrade.currentDigest = 'sha256-1234';
+      upgrade.depIndex = 0;
+      upgrade.newName = 'java';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256-5678';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
     it('updates with docker replacement', async () => {
       const dockerfile = 'FROM bitnami/redis:6.0.8';
       upgrade.manager = 'dockerfile';
@@ -1044,12 +1062,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
         FROM ubuntu:18.04
       `;
       upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '18.04';
       upgrade.currentDigest = undefined;
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'ubuntu:18.04';
       upgrade.newName = 'alpine';
       upgrade.newValue = '3.16';
@@ -1068,12 +1086,12 @@ describe('workers/repository/update/branch/auto-replace', () => {
         FROM ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0
       `;
       upgrade.manager = 'dockerfile';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
       upgrade.depName = 'ubuntu';
       upgrade.currentValue = '18.04';
       upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'ubuntu:18.04@sha256:q1w2e3r4t5z6u7i8o9p0';
       upgrade.newName = 'alpine';
       upgrade.newValue = '3.16';
@@ -1087,9 +1105,55 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
+    it('autoReplaceGlobalMatch: throws error when globally replacing recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
+    });
+
+    it('autoReplaceGlobalMatch: updates when replacing first match only of recurring values across version and digests', async () => {
+      const dockerfile = codeBlock`
+        FROM java:6@sha256:q1w2e3r4t5z6u7i8o9p0
+      `;
+      upgrade.autoReplaceGlobalMatch = false;
+      upgrade.manager = 'dockerfile';
+      upgrade.depName = 'java';
+      upgrade.currentValue = '6';
+      upgrade.currentDigest = 'sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.depIndex = 0;
+      upgrade.pinDigests = true;
+      upgrade.updateType = 'replacement';
+      upgrade.replaceString = 'java:6@sha256:q1w2e3r4t5z6u7i8o9p0';
+      upgrade.newName = 'eclipse-temurin';
+      upgrade.newValue = '11';
+      upgrade.newDigest = 'sha256:p0o9i8u7z6t5r4e3w2q1';
+      upgrade.packageFile = 'Dockerfile';
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
+      expect(res).toBe(
+        codeBlock`
+          FROM eclipse-temurin:11@sha256:p0o9i8u7z6t5r4e3w2q1
+        `
+      );
+    });
+
     it('regex: updates with pinDigest enabled but no currentDigest value', async () => {
       const yml = 'image: "some.url.com/my-repository:1.0"';
       upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';
       upgrade.currentValue = '1.0';
@@ -1111,6 +1175,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       const yml =
         'image: "some.url.com/my-repository:1.0@sha256:q1w2e3r4t5z6u7i8o9p0"';
       upgrade.manager = 'regex';
+      upgrade.updateType = 'replacement';
       upgrade.pinDigests = true;
       upgrade.depName = 'some.url.com/my-repository';
       upgrade.currentValue = '1.0';
@@ -1131,7 +1196,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('github-actions: update with newValue only', async () => {
+    it('github-actions: updates with newValue only', async () => {
       const githubAction = codeBlock`
         jobs:
           build:
@@ -1140,6 +1205,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               - uses: actions/checkout@v1.0.0
       `;
       upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
       upgrade.autoReplaceStringTemplate =
         '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
       upgrade.depName = 'actions/checkout';
@@ -1147,8 +1213,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.currentDigest = undefined;
       upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@v1.0.0';
       upgrade.newValue = 'v2.0.0';
       upgrade.newDigest = undefined;
@@ -1169,7 +1233,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
       );
     });
 
-    it('github-actions: update with newValue and newDigest', async () => {
+    it('github-actions: updates with newValue and newDigest', async () => {
       const githubAction = codeBlock`
         jobs:
           build:
@@ -1178,6 +1242,7 @@ describe('workers/repository/update/branch/auto-replace', () => {
               - uses: actions/checkout@v1.0.0
       `;
       upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
       upgrade.autoReplaceStringTemplate =
         '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
       upgrade.depName = 'actions/checkout';
@@ -1185,8 +1250,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.currentDigest = undefined;
       upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@v1.0.0';
       upgrade.newValue = 'v2.0.0';
       upgrade.newDigest = '1cf887';
@@ -1216,6 +1279,8 @@ describe('workers/repository/update/branch/auto-replace', () => {
               - uses: actions/checkout@v1.0.0
       `;
       upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
       upgrade.autoReplaceStringTemplate =
         '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
       upgrade.depName = 'actions/checkout';
@@ -1223,8 +1288,6 @@ describe('workers/repository/update/branch/auto-replace', () => {
       upgrade.currentDigest = undefined;
       upgrade.currentDigestShort = undefined;
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@v1.0.0';
       upgrade.newName = 'some-other-action/checkout';
       upgrade.newValue = 'v2.0.0';
@@ -1255,14 +1318,14 @@ describe('workers/repository/update/branch/auto-replace', () => {
               - uses: actions/checkout@2485f4 # tag=v1.0.0
       `;
       upgrade.manager = 'github-actions';
+      upgrade.updateType = 'replacement';
+      upgrade.pinDigests = true;
       upgrade.autoReplaceStringTemplate =
         '{{depName}}@{{#if newDigest}}{{newDigest}}{{#if newValue}} # {{newValue}}{{/if}}{{/if}}{{#unless newDigest}}{{newValue}}{{/unless}}';
       upgrade.depName = 'actions/checkout';
       upgrade.currentValue = 'v1.0.0';
       upgrade.currentDigestShort = '2485f4';
       upgrade.depIndex = 0;
-      upgrade.pinDigests = true;
-      upgrade.updateType = 'replacement';
       upgrade.replaceString = 'actions/checkout@2485f4 # tag=v1.0.0';
       upgrade.newName = 'some-other-action/checkout';
       upgrade.newValue = 'v2.0.0';

@@ -4,7 +4,25 @@ import { clone } from '../../../clone';
 import type { GithubDatasourceItem, GithubGraphqlCacheRecord } from '../types';
 import { GithubGraphqlMemoryCacheStrategy } from './memory-cache-strategy';
 
-const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO();
+// const isoTs = (t: string) => DateTime.fromJSDate(new Date(t)).toISO()!;
+
+const hourMinRe = /T\d{2}:\d{2}$/;
+const hourMinSecRe = /T\d{2}:\d{2}:\d{2}$/;
+const hourMinSecMillisRe = /T\d{2}:\d{2}:\d{2}\.\d\d\d$/;
+
+const isoTs = (t: string) => {
+  let iso = t.replace(' ', 'T');
+  if (hourMinSecMillisRe.test(iso)) {
+    iso = iso + 'Z';
+  } else if (hourMinSecRe.test(iso)) {
+    iso = iso + '.000Z';
+  } else if (hourMinRe.test(iso)) {
+    iso = iso + ':00.000Z';
+  } else {
+    throw new Error('Unrecognized date-time string. ' + t);
+  }
+  return iso;
+};
 
 const mockTime = (input: string): void => {
   const now = DateTime.fromISO(isoTs(input)).valueOf();
@@ -26,7 +44,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items,
       createdAt: isoTs('2022-10-01 15:30'),
-      updatedAt: isoTs('2022-10-30 12:35'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -40,10 +57,7 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
 
     expect(res).toEqual(Object.values(items));
     expect(isPaginationDone).toBe(true);
-    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
-      ...cacheRecord,
-      updatedAt: isoTs(now),
-    });
+    expect(memCache.get('github-graphql-cache:foo:bar')).toEqual(cacheRecord);
 
     // One second later, the cache is invalid
     now = '2022-10-31 15:30:00';
@@ -58,7 +72,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     expect(memCache.get('github-graphql-cache:foo:bar')).toEqual({
       items: {},
       createdAt: isoTs(now),
-      updatedAt: isoTs(now),
     });
   });
 
@@ -71,7 +84,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -96,7 +108,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
         '4': newItem,
       },
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs(now),
     });
   });
 
@@ -109,7 +120,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -136,7 +146,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items: oldItems,
       createdAt: isoTs('2022-12-31 12:00'),
-      updatedAt: isoTs('2022-12-31 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -181,7 +190,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
     const cacheRecord: CacheRecord = {
       items,
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-30 12:00'),
     };
     memCache.set('github-graphql-cache:foo:bar', clone(cacheRecord));
 
@@ -219,7 +227,6 @@ describe('util/github/graphql/cache-strategies/memory-cache-strategy', () => {
         '8': { version: '8', releaseTimestamp: isoTs('2022-10-08 10:00') },
       },
       createdAt: isoTs('2022-10-30 12:00'),
-      updatedAt: isoTs('2022-10-31 15:30'),
     });
   });
 });

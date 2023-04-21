@@ -1,7 +1,7 @@
 This datasource can be used in combination with [regex managers](https://docs.renovatebot.com/modules/manager/regex/) to keep dependencies up-to-date which are not specifically supported by Renovate.
 
 This datasource returns a reference from a Git repository.
-The `depName` (or `packageName` if in use) must be a fully qualified domain name.
+The `packageName` must be a fully qualified domain name.
 To fetch the latest digest of a reference instead of the named reference, specify the reference as the `currentValue` and match on the `currentDigest`.
 
 **Usage example**

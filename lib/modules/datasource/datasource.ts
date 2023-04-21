@@ -22,7 +22,7 @@ export abstract class Datasource implements DatasourceApi {
 
   defaultRegistryUrls?: string[] | (() => string[]);
 
-  defaultVersioning: string | undefined;
+  defaultVersioning?: string | undefined;
 
   registryStrategy: RegistryStrategy | undefined = 'first';
 

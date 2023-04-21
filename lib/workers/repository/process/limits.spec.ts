@@ -41,13 +41,14 @@ describe('workers/repository/process/limits', () => {
     });
 
     it('returns prHourlyLimit if errored', async () => {
-      config.prHourlyLimit = 2;
+      config.prHourlyLimit = 5;
       platform.getPrList.mockRejectedValue('Unknown error');
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toBe(2);
+      expect(res).toBe(5);
     });
 
     it('returns 99 if no hourly limit', async () => {
+      config.prHourlyLimit = 0;
       const res = await limits.getPrHourlyRemaining(config);
       expect(res).toBe(99);
     });
@@ -73,6 +74,7 @@ describe('workers/repository/process/limits', () => {
     });
 
     it('returns 99 if no concurrent limit', async () => {
+      config.prConcurrentLimit = 0;
       const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toBe(99);
     });
@@ -80,16 +82,16 @@ describe('workers/repository/process/limits', () => {
 
   describe('getPrsRemaining()', () => {
     it('returns hourly limit', async () => {
-      config.prHourlyLimit = 5;
+      config.prHourlyLimit = 1;
       platform.getPrList.mockResolvedValueOnce([]);
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toBe(5);
+      expect(res).toBe(1);
     });
 
     it('returns concurrent limit', async () => {
-      config.prConcurrentLimit = 5;
+      config.prConcurrentLimit = 1;
       const res = await limits.getPrsRemaining(config, []);
-      expect(res).toBe(5);
+      expect(res).toBe(1);
     });
   });
 
@@ -120,9 +122,9 @@ describe('workers/repository/process/limits', () => {
       expect(res).toBe(99);
     });
 
-    it('returns 99 if no limits are set', async () => {
+    it('returns 10 if no limits are set', async () => {
       const res = await limits.getConcurrentBranchesRemaining(config, []);
-      expect(res).toBe(99);
+      expect(res).toBe(10);
     });
 
     it('returns prConcurrentLimit if errored', async () => {

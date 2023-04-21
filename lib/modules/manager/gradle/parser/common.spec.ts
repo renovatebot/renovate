@@ -1,11 +1,15 @@
 import type { lexer } from 'good-enough-parser';
 import { partial } from '../../../../../test/util';
-import type { Ctx, PackageVariables } from '../types';
+import type { Ctx } from '../types';
 import {
   cleanupTempVars,
   coalesceVariable,
+  findVariable,
+  increaseNestingDepth,
   interpolateString,
   loadFromTokenMap,
+  prependNestingDepth,
+  reduceNestingDepth,
   storeInTokenMap,
   storeVarToken,
   stripReservedPrefixFromKeyTokens,
@@ -13,7 +17,7 @@ import {
 
 describe('modules/manager/gradle/parser/common', () => {
   let ctx: Ctx;
-  const token = partial<lexer.Token>({});
+  const token = partial<lexer.Token>({ value: 'test' });
 
   beforeEach(() => {
     ctx = {
@@ -26,6 +30,7 @@ describe('modules/manager/gradle/parser/common', () => {
       registryUrls: [],
 
       varTokens: [],
+      tmpNestingDepth: [],
       tmpTokenStore: {},
       tokenMap: {},
     };
@@ -34,6 +39,33 @@ describe('modules/manager/gradle/parser/common', () => {
   it('storeVarToken', () => {
     storeVarToken(ctx, token);
     expect(ctx.varTokens).toStrictEqual([token]);
+  });
+
+  it('increaseNestingDepth', () => {
+    ctx.tmpNestingDepth = ctx.varTokens = [token];
+    increaseNestingDepth(ctx);
+    expect(ctx).toMatchObject({
+      tmpNestingDepth: [token, token],
+      varTokens: [],
+    });
+  });
+
+  it('reduceNestingDepth', () => {
+    ctx.tmpNestingDepth = [token, token];
+    reduceNestingDepth(ctx);
+    expect(ctx.tmpNestingDepth).toHaveLength(1);
+  });
+
+  it('prependNestingDepth', () => {
+    ctx.tmpNestingDepth = ctx.varTokens = [token];
+    prependNestingDepth(ctx);
+    expect(ctx.varTokens).toStrictEqual([token, token]);
+
+    coalesceVariable(ctx);
+    expect(ctx).toMatchObject({
+      tmpNestingDepth: [{ value: 'test' }],
+      varTokens: [{ value: 'test.test' }],
+    });
   });
 
   it('storeInTokenMap', () => {
@@ -81,8 +113,17 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(ctx.varTokens).toStrictEqual([{ value: 'foo.bar.baz.qux' }]);
   });
 
+  it('findVariable', () => {
+    ctx.globalVars = {
+      foo: { key: 'foo', value: 'bar' },
+    };
+
+    expect(findVariable('unknown-global-var', ctx)).toBeUndefined();
+    expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['foo']);
+  });
+
   it('interpolateString', () => {
-    expect(interpolateString([], {})).toBeEmptyString();
+    expect(interpolateString([], ctx)).toBeEmptyString();
     expect(
       interpolateString(
         partial<lexer.Token>([
@@ -90,6 +131,7 @@ describe('modules/manager/gradle/parser/common', () => {
           { type: 'symbol', value: 'bar' },
           { type: 'string-value', value: 'baz' },
         ]),
+        ctx,
         {
           bar: { key: '', value: 'BAR' },
         }
@@ -98,13 +140,13 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: 'symbol', value: 'foo' }]),
-        partial<PackageVariables>()
+        ctx
       )
     ).toBeNull();
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: '_', value: 'foo' }]),
-        partial<PackageVariables>()
+        ctx
       )
     ).toBeNull();
   });

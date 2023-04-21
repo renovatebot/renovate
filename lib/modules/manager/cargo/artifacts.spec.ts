@@ -210,7 +210,7 @@ describe('modules/manager/cargo/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       {},
       {
         cmd:
@@ -220,7 +220,7 @@ describe('modules/manager/cargo/artifacts', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "/tmp/github/some/repo" ' +
-          'renovate/sidecar ' +
+          'containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool rust 1.65.0' +
           ' && ' +

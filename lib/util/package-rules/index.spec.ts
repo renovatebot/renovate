@@ -1,6 +1,7 @@
 import type { PackageRuleInputConfig, UpdateType } from '../../config/types';
 import { DockerDatasource } from '../../modules/datasource/docker';
 import { OrbDatasource } from '../../modules/datasource/orb';
+import type { MergeConfidence } from '../merge-confidence/types';
 import { applyPackageRules } from './index';
 
 type TestConfig = PackageRuleInputConfig & {
@@ -625,6 +626,60 @@ describe('util/package-rules/index', () => {
     expect(res.x).toBeUndefined();
   });
 
+  it('matches matchConfidence', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchConfidence: ['high'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      mergeConfidenceLevel: 'high' as MergeConfidence,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBe(1);
+  });
+
+  it('non-matches matchConfidence', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchConfidence: ['high'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      mergeConfidenceLevel: 'low' as MergeConfidence,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
+  it('does not match matchConfidence when there is no mergeConfidenceLevel', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          matchConfidence: ['high'],
+          x: 1,
+        },
+      ],
+    };
+    const dep = {
+      depType: 'dependencies',
+      depName: 'a',
+      mergeConfidenceLevel: undefined,
+    };
+    const res = applyPackageRules({ ...config, ...dep });
+    expect(res.x).toBeUndefined();
+  });
+
   it('filters naked depType', () => {
     const config: TestConfig = {
       packageRules: [
@@ -662,6 +717,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],
@@ -699,6 +755,7 @@ describe('util/package-rules/index', () => {
 
   it('checks if matchCurrentVersion selector is valid and satisfies the condition on pinned to range overlap', () => {
     const config: TestConfig = {
+      versioning: 'semver',
       packageRules: [
         {
           matchPackageNames: ['test'],

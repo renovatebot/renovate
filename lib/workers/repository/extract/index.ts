@@ -52,11 +52,19 @@ export async function extractAllDependencies(
     extractResult.extractionFingerprints[manager] = hashMap.get(manager);
   }
 
+  const extractDurations: Record<string, number> = {};
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
+      const start = Date.now();
       const packageFiles = await getManagerPackageFiles(managerConfig);
+      const durationMs = Math.round(Date.now() - start);
+      extractDurations[managerConfig.manager] = durationMs;
       return { manager: managerConfig.manager, packageFiles };
     })
+  );
+  logger.debug(
+    { managers: extractDurations },
+    'manager extract durations (ms)'
   );
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {

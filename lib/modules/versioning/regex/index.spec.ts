@@ -1,14 +1,24 @@
-import { VersioningApi, get } from '..';
+import { get } from '..';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 
 describe('modules/versioning/regex/index', () => {
   describe('regex versioning', () => {
-    const regex: VersioningApi = get(
+    const regex = get(
       'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?<prerelease>[^.-]+)?(?:-(?<compatibility>.*))?$'
     );
 
     it('requires a valid configuration to be initialized', () => {
       expect(() => get('regex:not a regex')).toThrow();
+    });
+
+    it('works without config', () => {
+      const re = get('regex');
+      expect(re.isValid('alpine')).toBeFalse();
+    });
+
+    it('works with missing version', () => {
+      const re = get('regex:^(?<major>\\d+)?(?<compabillity>.+)');
+      expect(re.isValid('alpine')).toBeTrue();
     });
 
     describe('throws', () => {
@@ -43,7 +53,7 @@ describe('modules/versioning/regex/index', () => {
       ${'1.2.aardvark-foo'} | ${false}
       ${'1.2a2.3'}          | ${false}
     `('isValid("$version") === $expected', ({ version, expected }) => {
-      expect(!!regex.isValid(version)).toBe(expected);
+      expect(regex.isValid(version)).toBe(expected);
     });
 
     test.each`
@@ -342,9 +352,9 @@ describe('modules/versioning/regex/index', () => {
     );
   });
 
-  describe('Supported 4th number as build', () => {
+  describe('Supported 4th number as build and 5th as revision', () => {
     const re = get(
-      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.*-r)(?<build>\\d+))?$'
+      'regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(:?-(?<compatibility>.+)(?<build>\\d+)-r(?<revision>\\d+))?$'
     );
 
     test.each`
