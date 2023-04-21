@@ -59,10 +59,6 @@ export const ReposRecord = LooseRecord(z.union([Repo, z.literal(false)]), {
 }).transform((repos) => {
   const result: (NamedRepo | DisablePackagist)[] = [];
   for (const [name, repo] of Object.entries(repos)) {
-    if (repo === null) {
-      continue;
-    }
-
     if (repo === false) {
       if (name === 'packagist' || name === 'packagist.org') {
         result.push({ type: 'disable-packagist' });
