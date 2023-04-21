@@ -49,61 +49,63 @@ export const NamedRepo = z.discriminatedUnion('type', [
 ]);
 export type NamedRepo = z.infer<typeof NamedRepo>;
 
-const NoPackagist = z.literal(false).transform(() => null);
-const NoPackagistMarker = z.object({
-  type: z.literal('disable-packagist'),
-});
-export type NoPackagistMarker = z.infer<typeof NoPackagistMarker>;
+const DisablePackagist = z.object({ type: z.literal('disable-packagist') });
+export type DisablePackagist = z.infer<typeof DisablePackagist>;
 
-export const ReposRecord = z
-  .record(
-    z.union([Repo, NoPackagist]).catch(({ error: err }) => {
-      logger.warn({ err }, 'Composer: repository parsing error');
-      return null;
-    })
-  )
-  .transform((repos) => {
-    const result: (NamedRepo | NoPackagistMarker)[] = [];
-    for (const [name, repo] of Object.entries(repos)) {
-      if (repo === null) {
-        if (name === 'packagist' || name === 'packagist.org') {
-          result.push({ type: 'disable-packagist' });
-        }
-      } else if (repo.type === 'path' || repo.type === 'git') {
-        result.push({ name, ...repo });
-      } else if (repo.type === 'composer') {
-        result.push(repo);
-      }
+export const ReposRecord = LooseRecord(z.union([Repo, z.literal(false)]), {
+  onError: ({ error: err }) => {
+    logger.warn({ err }, 'Composer: error parsing repositories object');
+  },
+}).transform((repos) => {
+  const result: (NamedRepo | DisablePackagist)[] = [];
+  for (const [name, repo] of Object.entries(repos)) {
+    if (repo === null) {
+      continue;
     }
 
-    return result;
-  });
+    if (repo === false) {
+      if (name === 'packagist' || name === 'packagist.org') {
+        result.push({ type: 'disable-packagist' });
+      }
+      continue;
+    }
+
+    if (repo.type === 'path' || repo.type === 'git') {
+      result.push({ name, ...repo });
+      continue;
+    }
+
+    if (repo.type === 'composer') {
+      result.push(repo);
+      continue;
+    }
+  }
+
+  return result;
+});
 export type ReposRecord = z.infer<typeof ReposRecord>;
 
-export const ReposArray = z
-  .array(
+export const ReposArray = LooseArray(
+  z.union([
+    NamedRepo,
     z
       .union([
-        NamedRepo,
-        z
-          .union([
-            z.object({ packagist: NoPackagist }),
-            z.object({ 'packagist.org': NoPackagist }),
-          ])
-          .transform((): NoPackagistMarker => ({ type: 'disable-packagist' })),
+        z.object({ packagist: z.literal(false) }),
+        z.object({ 'packagist.org': z.literal(false) }),
       ])
-      .nullable()
-      .catch(({ error: err }) => {
-        logger.warn({ err }, 'Composer: repository parsing error');
-        return null;
-      })
-  )
-  .transform((repos) => repos.filter((x): x is NamedRepo => x !== null));
+      .transform((): DisablePackagist => ({ type: 'disable-packagist' })),
+  ]),
+  {
+    onError: ({ error: err }) => {
+      logger.warn({ err }, 'Composer: error parsing repositories array');
+    },
+  }
+).transform((repos) => repos.filter((x): x is NamedRepo => x !== null));
 export type ReposArray = z.infer<typeof ReposArray>;
 
 export const Repos = z
   .union([ReposRecord, ReposArray])
-  .default([]) // Prevents packages without repositories from being logged
+  .default([]) // Prevents warnings for packages without repositories field
   .catch(({ error: err }) => {
     logger.warn({ err }, 'Composer: repositories parsing error');
     return [];
