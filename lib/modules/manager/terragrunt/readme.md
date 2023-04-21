@@ -23,4 +23,5 @@ terraform {
 
 ### Terraform lockfiles
 
-The Terragrunt manager supports [lock file maintenance](https://docs.renovatebot.com/configuration-options/#lockfilemaintenance) for `.terraform.lock.hcl` artifacts. These artifacts will be updated if and only if the update type is `lockFileMaintenance`.
+The Terragrunt manager supports [lock file maintenance](https://docs.renovatebot.com/configuration-options/#lockfilemaintenance) for `.terraform.lock.hcl` artifacts.
+These artifacts will be updated if and only if the update type is `lockFileMaintenance`.
