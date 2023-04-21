@@ -1,3 +1,5 @@
+import { parse } from '../bazel/parser';
+import type { RecordFragment } from '../bazel/types';
 import type { PackageDependency, PackageFileContent } from '../types';
 
 // import { parse } from './parser';
@@ -10,10 +12,10 @@ export function extractPackageFile(
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
-  // const fragments: RecordFragment[] | null = parse(content, packageFile);
-  // if (!fragments) {
-  //   return null;
-  // }
+  const fragments: RecordFragment[] | null = parse(content, packageFile);
+  if (!fragments) {
+    return null;
+  }
 
   // for (let idx = 0; idx < fragments.length; idx += 1) {
   //   const fragment = fragments[idx];
