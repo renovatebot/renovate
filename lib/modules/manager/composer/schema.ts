@@ -96,7 +96,7 @@ export type ReposArray = z.infer<typeof ReposArray>;
 
 export const Repos = z
   .union([ReposRecord, ReposArray])
-  .default([])
+  .default([]) // Prevents packages without repositories from being logged
   .catch(({ error: err }) => {
     logger.warn({ err }, 'Composer: repositories parsing error');
     return [];
