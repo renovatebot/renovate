@@ -46,6 +46,7 @@ describe('modules/manager/ansible-galaxy/extract', () => {
         version: 2.7.5`;
       const res = extractPackageFile(yamlFile, 'requirements.yml');
       expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('2.7.5');
       expect(res?.deps[0].registryUrls).toBeUndefined();
       expect(res?.deps[0].packageName).toBe(
         'git@github.com:ansible-collections/community.docker'
