@@ -14,7 +14,6 @@ jest.mock('../init/apis');
 jest.mock('../init/config');
 jest.mock('../init/merge');
 jest.mock('../../../config/secrets');
-jest.mock('../init/semantic');
 
 const apis = mocked(_apis);
 const config = mocked(_config);

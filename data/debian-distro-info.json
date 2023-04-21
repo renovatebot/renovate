@@ -129,5 +129,10 @@
     "codename": "Trixie",
     "series": "trixie",
     "created": "2023-08-01"
+  },
+  "v14": {
+    "codename": "Forky",
+    "series": "forky",
+    "created": "2025-08-01"
   }
 }

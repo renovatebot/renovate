@@ -19,7 +19,7 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts orbs too', () => {
       const res = extractPackageFile(file2);
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         {
           depName: 'release-workflows',
           currentValue: '4.1.0',
@@ -49,7 +49,7 @@ describe('modules/manager/circleci/extract', () => {
 
     it('extracts image without leading dash', () => {
       const res = extractPackageFile(file3);
-      expect(res?.deps).toMatchSnapshot([
+      expect(res?.deps).toMatchObject([
         { currentValue: '14.8.0', depName: 'cimg/node' },
       ]);
     });

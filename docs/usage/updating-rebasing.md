@@ -52,13 +52,13 @@ This way:
 
 ## Manual rebasing
 
-You can request that Renovate rebase a PR by ticking the rebase/retry checkbox on GitHub or GitLab.
+You can request that Renovate rebase a PR by selecting the rebase/retry checkbox on GitHub or GitLab.
 Or you can add a "rebase" label to the PR.
 The label name is configurable via the `rebaseLabel` option.
 
 If you apply a rebase label then Renovate will regenerate its commit for the branch, even if the branch has been modified.
 The rebase label is useful in situations like:
 
-- If a branch is stale but you don't have `rebaseWhen=behind-base-branch` enabled
+- If a branch is behind the base branch but you don't have `rebaseWhen=behind-base-branch` enabled
 - If a branch has been edited and you want to discard the edits and have Renovate create it again
 - If a branch was created with an error (e.g. lockfile generation) and you want Renovate to try again

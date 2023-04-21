@@ -162,10 +162,10 @@ function mockGenericPackage(opts: MockOpts = {}) {
 }
 
 function get(
-  depName = 'org.example:package',
+  packageName = 'org.example:package',
   ...registryUrls: string[]
 ): Promise<ReleaseResult | null> {
-  const conf = { versioning, datasource, depName };
+  const conf = { versioning, datasource, packageName };
   return getPkgReleases(registryUrls ? { ...conf, registryUrls } : conf);
 }
 
@@ -215,7 +215,7 @@ describe('modules/datasource/maven/index', () => {
       snapshots: [
         {
           version: '1.0.3-SNAPSHOT',
-          meta: meta,
+          meta,
           jarStatus: 200,
         },
       ],

@@ -1,5 +1,5 @@
 import type { CodeFormat } from './code-format';
-import { IndentationType } from './indentation-type';
+import type { IndentationType } from './indentation-type';
 
 export class JSONWriter {
   private readonly indentationType: IndentationType;
@@ -8,7 +8,7 @@ export class JSONWriter {
 
   constructor(codeFormat: CodeFormat = {}) {
     this.indentationSize = codeFormat.indentationSize ?? 2;
-    this.indentationType = codeFormat.indentationType ?? IndentationType.Space;
+    this.indentationType = codeFormat.indentationType ?? 'space';
   }
 
   public write(json: unknown, newLineAtTheEnd = true): string {
@@ -22,7 +22,7 @@ export class JSONWriter {
   }
 
   private get indentation(): string | number {
-    if (this.indentationType === IndentationType.Tab) {
+    if (this.indentationType === 'tab') {
       return '\t';
     }
 

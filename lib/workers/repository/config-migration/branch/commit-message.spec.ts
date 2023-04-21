@@ -5,10 +5,6 @@ describe('workers/repository/config-migration/branch/commit-message', () => {
   const config = getConfig();
   const fileName = 'renovate.json';
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   afterAll(() => {
     jest.resetAllMocks();
   });

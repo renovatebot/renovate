@@ -3,18 +3,6 @@
 exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenance 1`] = `
 [
   {
-    "file": {
-      "contents": "Updated jsonnetfile.lock.json",
-      "path": "jsonnetfile.lock.json",
-      "type": "addition",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenance 2`] = `
-[
-  {
     "cmd": "jb update",
     "options": {
       "cwd": "/tmp/github/some/repo",
@@ -36,17 +24,6 @@ exports[`modules/manager/jsonnet-bundler/artifacts performs lock file maintenanc
 `;
 
 exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update fails 1`] = `
-[
-  {
-    "artifactError": {
-      "lockFile": "jsonnetfile.lock.json",
-      "stderr": "jb released the magic smoke",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update fails 2`] = `
 [
   {
     "cmd": "jb update",
@@ -72,45 +49,6 @@ exports[`modules/manager/jsonnet-bundler/artifacts returns error when jb update 
 exports[`modules/manager/jsonnet-bundler/artifacts returns null if there are no changes 1`] = `[]`;
 
 exports[`modules/manager/jsonnet-bundler/artifacts updates the vendor dir when dependencies change 1`] = `
-[
-  {
-    "file": {
-      "contents": "Updated jsonnetfile.json",
-      "path": "jsonnetfile.json",
-      "type": "addition",
-    },
-  },
-  {
-    "file": {
-      "contents": "Updated jsonnetfile.lock.json",
-      "path": "jsonnetfile.lock.json",
-      "type": "addition",
-    },
-  },
-  {
-    "file": {
-      "contents": "New foo/main.jsonnet",
-      "path": "vendor/foo/main.jsonnet",
-      "type": "addition",
-    },
-  },
-  {
-    "file": {
-      "contents": "New bar/main.jsonnet",
-      "path": "vendor/bar/main.jsonnet",
-      "type": "addition",
-    },
-  },
-  {
-    "file": {
-      "path": "vendor/baz/deleted.jsonnet",
-      "type": "deletion",
-    },
-  },
-]
-`;
-
-exports[`modules/manager/jsonnet-bundler/artifacts updates the vendor dir when dependencies change 2`] = `
 [
   {
     "cmd": "jb update https://github.com/foo/foo.git ssh://git@github.com/foo/foo.git/bar",

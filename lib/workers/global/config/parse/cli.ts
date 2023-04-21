@@ -1,10 +1,10 @@
 import { Command } from 'commander';
-import JSON5 from 'json5';
 import { getOptions } from '../../../../config/options';
 import type { AllConfig } from '../../../../config/types';
 import { pkg } from '../../../../expose.cjs';
 import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
+import { coersions } from './coersions';
 import type { ParseConfigOptions } from './types';
 
 export function getCliName(option: ParseConfigOptions): string {
@@ -32,49 +32,13 @@ export function getConfig(input: string[]): AllConfig {
         .replace(/^--dry-run$/, '--dry-run=true')
         .replace(/^--require-config$/, '--require-config=true')
         .replace('--aliases', '--registry-aliases')
+        .replace('--include-forks=true', '--fork-processing=enabled')
+        .replace('--include-forks', '--fork-processing=enabled')
     )
     .filter((a) => !a.startsWith('--git-fs'));
   const options = getOptions();
 
   const config: Record<string, any> = {};
-
-  const coersions: Record<string, (arg: string) => unknown> = {
-    boolean: (val: string): boolean => {
-      if (val === 'true' || val === '') {
-        return true;
-      }
-      if (val === 'false') {
-        return false;
-      }
-      throw new Error(
-        "Invalid boolean value: expected 'true' or 'false', but got '" +
-          val +
-          "'"
-      );
-    },
-    array: (val: string): string[] => {
-      if (val === '') {
-        return [];
-      }
-      try {
-        return JSON5.parse(val);
-      } catch (err) {
-        return val.split(',').map((el) => el.trim());
-      }
-    },
-    object: (val: string): any => {
-      if (val === '') {
-        return {};
-      }
-      try {
-        return JSON5.parse(val);
-      } catch (err) {
-        throw new Error("Invalid JSON value: '" + val + "'");
-      }
-    },
-    string: (val: string): string => val,
-    integer: parseInt,
-  };
 
   let program = new Command().arguments('[repositories...]');
 

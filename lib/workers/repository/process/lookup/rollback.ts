@@ -40,14 +40,19 @@ export function getRollbackUpdate(
   );
 
   lessThanVersions.sort((a, b) => version.sortVersions(a.version, b.version));
-  let newVersion;
+  let newRelease;
   if (currentValue && version.isStable(currentValue)) {
-    newVersion = lessThanVersions
+    newRelease = lessThanVersions
       .filter((v) => version.isStable(v.version))
-      .pop()?.version;
+      .pop();
   }
+  let newVersion = newRelease?.version;
+  let registryUrl = newRelease?.registryUrl;
+
   if (!newVersion) {
-    newVersion = lessThanVersions.pop()?.version;
+    newRelease = lessThanVersions.pop();
+    newVersion = newRelease?.version;
+    registryUrl = newRelease?.registryUrl;
   }
   // istanbul ignore if
   if (!newVersion) {
@@ -66,6 +71,7 @@ export function getRollbackUpdate(
     newMajor: version.getMajor(newVersion)!,
     newValue: newValue!,
     newVersion,
+    registryUrl,
     updateType: 'rollback',
   };
 }

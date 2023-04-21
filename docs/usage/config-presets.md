@@ -47,6 +47,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | GitHub default                              | `github>abc/foo`                 | `default` | `https://github.com/abc/foo` | `default.json`  | Default branch |
 | GitHub with preset name                     | `github>abc/foo:xyz`             | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | Default branch |
 | GitHub with preset name (JSON5)             | `github>abc/foo:xyz.json5`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json5`     | Default branch |
+| GitHub with preset name and path            | `github>abc/foo//path/xyz`       | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | Default branch |
 | GitHub default with a tag                   | `github>abc/foo#1.2.3`           | `default` | `https://github.com/abc/foo` | `default.json`  | `1.2.3`        |
 | GitHub with preset name with a tag          | `github>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | GitHub with preset name and path with a tag | `github>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
@@ -83,6 +84,7 @@ You can set a Git tag (like a SemVer) to use a specific release of your shared c
 | Local default                              | `local>abc/foo`                 | `default` | `https://github.company.com/abc/foo` | `default.json`  | Default branch |
 | Local with preset path                     | `local>abc/foo:xyz`             | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | Default branch |
 | Local with preset path (JSON5)             | `local>abc/foo:xyz.json5`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json5`     | Default branch |
+| Local with preset name and path            | `local>abc/foo//path/xyz`       | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | Default branch |
 | Local default with a tag                   | `local>abc/foo#1.2.3`           | `default` | `https://github.company.com/abc/foo` | `default.json`  | `1.2.3`        |
 | Local with preset name with a tag          | `local>abc/foo:xyz#1.2.3`       | `xyz`     | `https://github.company.com/abc/foo` | `xyz.json`      | `1.2.3`        |
 | Local with preset name and path with a tag | `local>abc/foo//path/xyz#1.2.3` | `xyz`     | `https://github.company.com/abc/foo` | `path/xyz.json` | `1.2.3`        |
@@ -162,7 +164,7 @@ In short, the number of `{{argx}}` parameters in the definition is how many para
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
 If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
-Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
+Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository, see [Contributing to presets](#contributing-to-presets).
 
 ## GitHub-hosted Presets
 
@@ -209,7 +211,10 @@ Renovate will determine the current platform and look up the preset from there.
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from?
-Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Please consider contributing it to the [Renovate repository](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) so that it gains higher visibility and saves others from reinventing the same thing.
+
+Create a [discussion](https://github.com/renovatebot/renovate/discussions) to propose your preset to the Renovate maintainers.
+The maintainers can also help improve the preset, and let you know where to put it in the code.
 
 ## Organization level presets
 

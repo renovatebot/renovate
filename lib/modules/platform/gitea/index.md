@@ -1,8 +1,7 @@
-# Gitea
+# Gitea and Forgejo
 
-Renovate uses modern Git upload filters to suppress large blob downloads.
-For Gitea you need to manually enable upload filters.
-Read the official [Gitea docs](https://docs.gitea.io/en-us/clone-filters/) for more information.
+Renovate supports [Gitea](https://gitea.io) and the new fork [Forgejo](https://forgejo.org).
+Forgejo exists since `v1.18.0` and is currently fully compatible to Gitea.
 
 ## Authentication
 
@@ -18,9 +17,16 @@ Either the account should have full name and email address set to allow Renovate
 
 ## Unsupported platform features/concepts
 
-- **Adding reviewers to PRs not supported**: Gitea versions older than v1.14.0 do not have the required API.
+- **Adding reviewers to PRs not supported**: Gitea versions older than `v1.14.0` do not have the required API.
 - **Setting `platformAutomerge` to use platform-native automerge for PRs not supported**: Gitea versions older than v1.17.0 do not have the required API.
+- **Git upload filters**: If you're using a Gitea version older than `v1.16.0` then you must enable [clone filters](https://docs.gitea.io/en-us/clone-filters/).
 
 ## Features awaiting implementation
 
 - none
+
+## Repo autodiscover sorting
+
+You can change the default server-side sort method and order for autodiscover API.
+Set those via [`RENOVATE_X_AUTODISCOVER_REPO_SORT`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_sort) and [`RENOVATE_X_AUTODISCOVER_REPO_ORDER`](https://docs.renovatebot.com/self-hosted-experimental/#renovate_x_autodiscover_repo_order).
+Read the [Gitea swagger docs](https://try.gitea.io/api/swagger#/repository/repoSearch) for more details.

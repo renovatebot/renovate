@@ -2,7 +2,7 @@ import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { env, mockedFunction, partial } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
-import type { PackageFile, PostUpdateConfig } from '../../types';
+import type { PackageFileContent, PostUpdateConfig } from '../../types';
 import * as lernaHelper from './lerna';
 import { getNodeToolConstraint } from './node-version';
 
@@ -12,22 +12,22 @@ jest.mock('../../../datasource');
 
 process.env.BUILDPACK = 'true';
 
-function lernaPkgFile(lernaClient: string): Partial<PackageFile> {
+function lernaPkgFile(lernaClient: string): Partial<PackageFileContent> {
   return {
-    lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+    managerData: { lernaClient },
   };
 }
 
 function lernaPkgFileWithoutLernaDep(
   lernaClient: string
-): Partial<PackageFile> {
+): Partial<PackageFileContent> {
   return {
-    lernaClient,
+    managerData: { lernaClient },
   };
 }
 
-const config = partial<PostUpdateConfig>({});
+const config = partial<PostUpdateConfig>();
 
 describe('modules/manager/npm/post-update/lerna', () => {
   const globalConfig: RepoGlobalConfig = {
@@ -144,7 +144,7 @@ describe('modules/manager/npm/post-update/lerna', () => {
       );
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'docker pull renovate/sidecar',
+          cmd: 'docker pull containerbase/sidecar',
         },
         {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
@@ -154,7 +154,8 @@ describe('modules/manager/npm/post-update/lerna', () => {
             'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
             '-v "/tmp/cache":"/tmp/cache" ' +
             '-e BUILDPACK_CACHE_DIR ' +
-            '-w "some-dir" renovate/sidecar ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "some-dir" containerbase/sidecar ' +
             'bash -l -c "' +
             'install-tool node 16.16.0 ' +
             '&& ' +
@@ -239,19 +240,19 @@ describe('modules/manager/npm/post-update/lerna', () => {
       const pkg = {
         deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if pkg has no deps at all', () => {
       const pkg = {};
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
 
     it('returns latest if specified lerna version is not a valid semVer range', () => {
       const pkg = {
         deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
       };
-      expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+      expect(lernaHelper.getLernaVersion(pkg)).toBeNull();
     });
   });
 });

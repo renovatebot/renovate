@@ -1,6 +1,5 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import pAll from 'p-all';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
@@ -13,8 +12,11 @@ import type {
   PackageFile,
 } from '../../../modules/manager/types';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import * as memCache from '../../../util/cache/memory';
+import type { LookupStats } from '../../../util/cache/memory/types';
 import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
+import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
@@ -28,7 +30,8 @@ async function fetchDepUpdates(
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
   }
-  if (!is.nonEmptyString(dep.depName)) {
+  dep.packageName ??= dep.depName;
+  if (!is.nonEmptyString(dep.packageName)) {
     dep.skipReason = 'invalid-name';
   }
   if (dep.isInternal && !packageFileConfig.updateInternalDeps) {
@@ -44,19 +47,26 @@ async function fetchDepUpdates(
   depConfig = mergeChildConfig(depConfig, datasourceDefaultConfig);
   depConfig.versioning ??= getDefaultVersioning(depConfig.datasource);
   depConfig = applyPackageRules(depConfig);
+  depConfig.packageName ??= depConfig.depName;
   if (depConfig.ignoreDeps!.includes(depName!)) {
-    logger.debug({ dependency: depName }, 'Dependency is ignored');
+    // TODO: fix types (#7154)
+    logger.debug(`Dependency: ${depName!}, is ignored`);
     dep.skipReason = 'ignored';
   } else if (depConfig.enabled === false) {
-    logger.debug({ dependency: depName }, 'Dependency is disabled');
+    logger.debug(`Dependency: ${depName!}, is disabled`);
     dep.skipReason = 'disabled';
   } else {
     if (depConfig.datasource) {
       try {
+        const start = Date.now();
         dep = {
           ...dep,
           ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
         };
+        const duration = Date.now() - start;
+        const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+        lookups.push({ datasource: depConfig.datasource, duration });
+        memCache.set('lookup-stats', lookups);
       } catch (err) {
         if (
           packageFileConfig.repoIsOnboarded ||
@@ -85,6 +95,14 @@ async function fetchManagerPackagerFileUpdates(
   pFile: PackageFile
 ): Promise<void> {
   const { packageFile } = pFile;
+  if (pFile.extractedConstraints) {
+    pFile.constraints = {
+      ...pFile.extractedConstraints,
+      ...config.constraints,
+      ...pFile.constraints,
+    };
+    delete pFile.extractedConstraints;
+  }
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
   const queue = pFile.deps.map(
@@ -96,7 +114,7 @@ async function fetchManagerPackagerFileUpdates(
     'fetchManagerPackagerFileUpdates starting with concurrency'
   );
 
-  pFile.deps = await pAll(queue, { concurrency: 5 });
+  pFile.deps = await p.all(queue);
   logger.trace({ packageFile }, 'fetchManagerPackagerFileUpdates finished');
 }
 
@@ -114,7 +132,7 @@ async function fetchManagerUpdates(
     { manager, queueLength: queue.length },
     'fetchManagerUpdates starting'
   );
-  await pAll(queue, { concurrency: 5 });
+  await p.all(queue);
   logger.trace({ manager }, 'fetchManagerUpdates finished');
 }
 

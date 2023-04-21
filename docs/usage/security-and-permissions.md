@@ -7,10 +7,12 @@ This page talks about our security stance, and explains what permissions are nee
 Renovate is open source software, and comes with no guarantees or warranties of any kind.
 That said, we will try to fix security problems in a reasonable timeframe if possible.
 
-### No certifications
+### Certifications
 
-Renovate the Open Source project does **not** have ISO 27001 or SOC2 certifications.
-Mend the company, which maintains Renovate and operates the hosted Renovate App for GitHub, does have ISO 27001 and SOC2 certifications.
+Renovate the open source project is **not** certified.
+
+The company which maintains Renovate and provides the hosted Renovate App for GitHub is called Mend.
+Mend is ISO 27001 and SOC2 certified.
 
 ### Security / Disclosure
 

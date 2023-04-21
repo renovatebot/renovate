@@ -17,10 +17,13 @@ import {
 import { logger } from '../../../logger';
 import * as npmApi from '../../../modules/datasource/npm';
 import { platform } from '../../../modules/platform';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import * as queue from '../../../util/http/queue';
+import * as throttle from '../../../util/http/throttle';
 import type { RepoFileConfig } from './types';
 
 async function detectConfigFile(): Promise<string | null> {
@@ -49,7 +52,16 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const cache = getCache();
   let { configFileName } = cache;
   if (configFileName) {
-    const configFileRaw = await platform.getRawFile(configFileName);
+    let configFileRaw: string | null;
+    try {
+      configFileRaw = await platform.getRawFile(configFileName);
+    } catch (err) {
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      configFileRaw = null;
+    }
     if (configFileRaw) {
       let configFileParsed = JSON5.parse(configFileRaw);
       if (configFileName !== 'package.json') {
@@ -59,6 +71,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       return { configFileName, configFileParsed }; // don't return raw 'package.json'
     } else {
       logger.debug('Existing config file no longer exists');
+      delete cache.configFileName;
     }
   }
   configFileName = (await detectConfigFile()) ?? undefined;
@@ -221,7 +234,11 @@ export async function mergeRenovateConfig(
   }
   // Decrypt after resolving in case the preset contains npm authentication instead
   let resolvedConfig = await decryptConfig(
-    await presets.resolveConfigPresets(decryptedConfig, config),
+    await presets.resolveConfigPresets(
+      decryptedConfig,
+      config,
+      config.ignorePresets
+    ),
     repository
   );
   logger.trace({ config: resolvedConfig }, 'resolved config');
@@ -255,6 +272,9 @@ export async function mergeRenovateConfig(
         );
       }
     }
+    // host rules can change concurrency
+    queue.clear();
+    throttle.clear();
     delete resolvedConfig.hostRules;
   }
   returnConfig = mergeChildConfig(returnConfig, resolvedConfig);

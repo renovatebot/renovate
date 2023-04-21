@@ -28,25 +28,25 @@
     Hi there,
 
 
-    We have found that there's a problem with the logs.
+    We found a problem with the logs.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
     ### No logs at all
 
-    If there's no log posted yet, we need you to find and copy/paste the log into the issue template.
+    If you haven't posted any log yet, we need you to find and copy/paste the log into the issue template.
 
 
     #### Finding logs on hosted app
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     If you use the Renovate app (GitHub):
 
     1. Go to the affected PR, and search for "View repository job log here"
 
-    1. Click on the link to go to the "Mend Renovate Dashboard" and log in
+    1. Select the link to go to the "Mend Renovate Dashboard" and log in
 
     1. You are now in the correct repository log overview screen
 
@@ -59,7 +59,7 @@
 
     #### Finding logs when self-hosting
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
@@ -69,43 +69,49 @@
 
     ### Insufficient logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
-    If you already provided logs, and the Renovate team said they are not enough, follow the instructions from the **No logs at all** section.
+    If you already gave us a log, and the Renovate team said it's not enough, then follow the instructions from the **No logs at all** section.
 
     </details>
 
 
     ### Formatting your logs
 
-    <details><summary>Click me to read instructions</summary>
+    <details><summary>Select me to read instructions</summary>
 
 
     Please put your logs in a `<details>` and `<summary>` element like this:
 
 
-        <details><summary>Click me to see logs</summary>
+        <details><summary>Select me to see logs</summary>
 
         ```
-        Copy/paste any log here, between the starting and ending backticks
+        Copy/paste your logs here, between the starting and ending backticks
         ```
 
         </details>
 
     </details>
 
+
+    Good luck,
+
+
+    The Renovate team
+
 'new package manager':
   comment: >
     Hi there,
 
 
-    You're requesting support for a new package manager.
+    You're asking us to support a new package manager.
     We need to know some basic information about this package manager first.
     Please copy/paste [the new package manager questionnaire](https://github.com/renovatebot/renovate/blob/main/docs/development/new-package-manager-template.md), and fill it out in full.
 
 
-    Once the questionnaire is filled out we will evaluate if adding support for this manager is something we want to do.
+    Once the questionnaire is filled out we'll decide if we want to support this new manager.
 
 
     Good luck,
@@ -118,7 +124,7 @@
     Hi there,
 
 
-    You're reporting a problem with an outdated version of Renovate.
+    You're reporting a problem with an old version of Renovate.
     Please try the latest version and tell us if that fixes your problem.
 
 
@@ -126,3 +132,79 @@
 
 
     The Renovate team
+
+'pr:no-coverage-ignore':
+  comment: >
+    Hi there,
+
+
+    You're skipping code tests with `istanbul ignore`.
+
+
+    Please only skip tests if:
+      - you cannot test the code, or
+      - the code is very difficult to test, or
+      - the edge case won't usually happen at runtime
+
+
+    If you skip a test, always comment why:
+
+
+    ```ts
+    // istanbul ignore next: typescript strict null check
+    if (!url) {
+      return null;
+    }
+    ```
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'pr:no-done-comments':
+  comment: >
+    Hi there,
+
+
+    You are using simple `done` comments which cause a lot of noise.
+    Instead, please use GitHub's web interface to request another review.
+    Please read our [contributing guidelines](https://github.com/renovatebot/renovate/blob/main/.github/contributing.md#resolve-review-comments-instead-of-commenting) to reduce noise.
+
+
+    Good luck,
+
+
+    The Renovate team
+
+'needs-discussion':
+  unlabel:
+    - 'type:bug'
+    - 'type:feature'
+    - 'priority-5-triage'
+    - 'status:requirements'
+  comment: >
+    **Please create a GitHub Discussion instead of this issue.**
+
+
+    As this issue has been labeled as `needs-discussion` by a maintainer it is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
+
+
+    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
+
+
+    Thanks, The Renovate team
+  close: true
+  lock: true
+  lock-reason: 'resolved'
+
+'needs-code-formatting':
+  comment: >
+    Hi, please format your code or logs so they're readable.
+
+
+    You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
+
+
+    Thanks, The Renovate team

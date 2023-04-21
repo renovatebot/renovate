@@ -3,14 +3,18 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { getSiblingFileName, localPathExists } from '../../../util/fs';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { parseRepository, resolveAlias } from './utils';
 
 export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   let chart: {
     apiVersion: string;
     name: string;
@@ -35,13 +39,13 @@ export async function extractPackageFile(
       return null;
     }
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
+    logger.debug(`Failed to parse helm Chart.yaml from ${fileName}`);
     return null;
   }
   const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
   if (!is.nonEmptyArray(chart?.dependencies)) {
-    logger.debug({ fileName }, 'Chart has no dependencies');
+    logger.debug(`Chart has no dependencies in ${fileName}`);
     return null;
   }
   const validDependencies = chart.dependencies.filter(
@@ -73,7 +77,7 @@ export async function extractPackageFile(
     };
     return result;
   });
-  const res: PackageFile = {
+  const res: PackageFileContent = {
     deps,
     datasource: HelmDatasource.id,
     packageFileVersion,

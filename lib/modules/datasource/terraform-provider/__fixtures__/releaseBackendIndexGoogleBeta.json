@@ -1,0 +1,101 @@
+{
+  "name": "terraform-provider-google-beta",
+  "versions": {
+    "1.19.0": {
+      "name": "terraform-provider-google-beta",
+      "version": "1.19.0",
+      "shasums": "terraform-provider-google-beta_1.19.0_SHA256SUMS",
+      "shasums_signature": "terraform-provider-google-beta_1.19.0_SHA256SUMS.sig",
+      "builds": [
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.19.0",
+          "os": "darwin",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_1.19.0_darwin_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_darwin_amd64.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.19.0",
+          "os": "freebsd",
+          "arch": "386",
+          "filename": "terraform-provider-google-beta_1.19.0_freebsd_386.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_freebsd_386.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.19.0",
+          "os": "freebsd",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_1.19.0_freebsd_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.19.0/terraform-provider-google-beta_1.19.0_freebsd_amd64.zip"
+        }
+      ]
+    },
+    "1.20.0": {
+      "name": "terraform-provider-google-beta",
+      "version": "1.20.0",
+      "shasums": "terraform-provider-google-beta_1.20.0_SHA256SUMS",
+      "shasums_signature": "terraform-provider-google-beta_1.20.0_SHA256SUMS.sig",
+      "builds": [
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.20.0",
+          "os": "darwin",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_1.20.0_darwin_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_darwin_amd64.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.20.0",
+          "os": "freebsd",
+          "arch": "386",
+          "filename": "terraform-provider-google-beta_1.20.0_freebsd_386.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_freebsd_386.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "1.20.0",
+          "os": "freebsd",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_1.20.0_freebsd_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/1.20.0/terraform-provider-google-beta_1.20.0_freebsd_amd64.zip"
+        }
+      ]
+    },
+    "2.0.0": {
+      "name": "terraform-provider-google-beta",
+      "version": "2.0.0",
+      "shasums": "terraform-provider-google-beta_2.0.0_SHA256SUMS",
+      "shasums_signature": "terraform-provider-google-beta_2.0.0_SHA256SUMS.sig",
+      "builds": [
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "2.0.0",
+          "os": "darwin",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_2.0.0_darwin_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_darwin_amd64.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "2.0.0",
+          "os": "freebsd",
+          "arch": "386",
+          "filename": "terraform-provider-google-beta_2.0.0_freebsd_386.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_freebsd_386.zip"
+        },
+        {
+          "name": "terraform-provider-google-beta",
+          "version": "2.0.0",
+          "os": "freebsd",
+          "arch": "amd64",
+          "filename": "terraform-provider-google-beta_2.0.0_freebsd_amd64.zip",
+          "url": "https://releases.hashicorp.com/terraform-provider-google-beta/2.0.0/terraform-provider-google-beta_2.0.0_freebsd_amd64.zip"
+        }
+      ]
+    }
+  }
+}

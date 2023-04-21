@@ -15,13 +15,17 @@ import type {
 } from '../../config/types';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
+import { instrument } from '../../instrumentation';
 import { getProblems, logger, setMeta } from '../../logger';
 import * as hostRules from '../../util/host-rules';
+import * as queue from '../../util/http/queue';
+import * as throttle from '../../util/http/throttle';
+import { addSecretForSanitizing } from '../../util/sanitize';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { parseConfigs } from './config/parse';
 import { globalFinalize, globalInitialize } from './initialize';
-import { Limit, isLimitReached } from './limits';
+import { isLimitReached } from './limits';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -47,7 +51,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (isLimitReached(Limit.Commits)) {
+  if (isLimitReached('Commits')) {
     logger.info('Max commits created for this run.');
     return true;
   }
@@ -59,7 +63,7 @@ function checkEnv(): void {
   const range = pkg.engines!.node!;
   const rangeNext = pkg['engines-next']?.node;
   if (process.release?.name !== 'node' || !process.versions?.node) {
-    logger.warn(
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { release: process.release, versions: process.versions },
       'Unknown node environment detected.'
     );
@@ -72,7 +76,7 @@ function checkEnv(): void {
     rangeNext &&
     !semver.satisfies(process.versions?.node, rangeNext)
   ) {
-    logger.warn(
+    logger[process.env.RENOVATE_X_IGNORE_NODE_WARN ? 'info' : 'warn'](
       { versions: process.versions },
       `Please upgrade the version of Node.js used to run Renovate to satisfy "${rangeNext}". Support for your current version will be removed in Renovate's next major release.`
     );
@@ -106,30 +110,44 @@ export async function resolveGlobalExtends(
 export async function start(): Promise<number> {
   let config: AllConfig;
   try {
-    // read global config from file, env and cli args
-    config = await getGlobalConfig();
-    if (config?.globalExtends) {
-      // resolve global presets immediately
-      config = mergeChildConfig(
-        config,
-        await resolveGlobalExtends(config.globalExtends)
-      );
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SECRET_ACCESS_KEY)) {
+      addSecretForSanitizing(process.env.AWS_SECRET_ACCESS_KEY, 'global');
     }
-    // initialize all submodules
-    config = await globalInitialize(config);
+    if (is.nonEmptyStringAndNotWhitespace(process.env.AWS_SESSION_TOKEN)) {
+      addSecretForSanitizing(process.env.AWS_SESSION_TOKEN, 'global');
+    }
 
-    // Set platform and endpoint in case local presets are used
-    GlobalConfig.set({ platform: config.platform, endpoint: config.endpoint });
+    await instrument('config', async () => {
+      // read global config from file, env and cli args
+      config = await getGlobalConfig();
+      if (config?.globalExtends) {
+        // resolve global presets immediately
+        config = mergeChildConfig(
+          config,
+          await resolveGlobalExtends(config.globalExtends)
+        );
+      }
+      // initialize all submodules
+      config = await globalInitialize(config);
 
-    await validatePresets(config);
+      // Set platform and endpoint in case local presets are used
+      GlobalConfig.set({
+        platform: config.platform,
+        endpoint: config.endpoint,
+      });
 
-    checkEnv();
+      await validatePresets(config);
 
-    // validate secrets. Will throw and abort if invalid
-    validateConfigSecrets(config);
+      checkEnv();
+
+      // validate secrets. Will throw and abort if invalid
+      validateConfigSecrets(config);
+    });
 
     // autodiscover repositories (needs to come after platform initialization)
-    config = await autodiscoverRepositories(config);
+    config = await instrument('discover', () =>
+      autodiscoverRepositories(config)
+    );
 
     if (is.nonEmptyString(config.writeDiscoveredRepos)) {
       const content = JSON.stringify(config.repositories);
@@ -145,15 +163,33 @@ export async function start(): Promise<number> {
       if (haveReachedLimits()) {
         break;
       }
-      const repoConfig = await getRepositoryConfig(config, repository);
-      if (repoConfig.hostRules) {
-        logger.debug('Reinitializing hostRules for repo');
-        hostRules.clear();
-        repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
-        repoConfig.hostRules = [];
-      }
-      await repositoryWorker.renovateRepository(repoConfig);
-      setMeta({});
+      await instrument(
+        'repository',
+        async () => {
+          const repoConfig = await getRepositoryConfig(config, repository);
+          if (repoConfig.hostRules) {
+            logger.debug('Reinitializing hostRules for repo');
+            hostRules.clear();
+            repoConfig.hostRules.forEach((rule) => hostRules.add(rule));
+            repoConfig.hostRules = [];
+          }
+
+          // host rules can change concurrency
+          queue.clear();
+          throttle.clear();
+
+          await repositoryWorker.renovateRepository(repoConfig);
+          setMeta({});
+        },
+        {
+          attributes: {
+            repository:
+              typeof repository === 'string'
+                ? repository
+                : repository.repository,
+          },
+        }
+      );
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

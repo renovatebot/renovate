@@ -14,6 +14,8 @@ import * as replacements from './replacements';
 import * as schedulePreset from './schedule';
 import * as workaroundsPreset from './workarounds';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const groups: Record<string, Record<string, Preset>> = {
   compatibility: compatibilityPreset.presets,
   config: configPreset.presets,

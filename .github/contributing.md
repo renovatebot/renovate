@@ -14,7 +14,12 @@ If you want help with your Renovate configuration, go to the [discussions tab in
 
 ## Bug Reports and Feature Requests
 
-If you've found a **bug** or have a **feature request** then please create an issue in this repository (but search first in case a similar issue already exists).
+**Bugs**: First search for related bugs in the issues and discussions, if you don't find anything then:
+
+1. Create a [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md)
+1. Open a new _discussion_ and link to the minimal reproduction
+
+For **feature requests**: first search for related requests in the issues and discussions, if you don't find anything: create a _discussion_.
 
 ## Code
 
@@ -46,8 +51,8 @@ Force pushing a PR is OK when:
 
 Maintainers can suggest changes while reviewing your pull request, please follow these steps to apply them:
 
-1. Batch the suggestions into a logical group by clicking on the **Add suggestion to batch** button
-2. Click on the **Commit suggestions** button
+1. Batch the suggestions into a logical group by selecting the **Add suggestion to batch** button
+1. Select the **Commit suggestions** button
 
 Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/incorporating-feedback-in-your-pull-request#applying-suggested-changes) to learn more.
 
@@ -56,7 +61,7 @@ Read the [GitHub docs, Applying suggested changes](https://docs.github.com/en/pu
 A maintainer/contributor can ask you to make changes, without providing a suggestion that you can apply.
 In this case you need to do some work yourself to address the feedback.
 
-Once you've done the work, resolve the conversation by clicking on the **Resolve conversation** button in the PR overview.
+Once you've done the work, resolve the conversation by selecting the **Resolve conversation** button in the PR overview.
 Avoid posting comments like "I've done the work", or "Done".
 
 Read the [GitHub Docs, resolving conversations](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request#resolving-conversations) to learn more.

@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
-import { PlatformId } from '../../../constants';
 import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { GitlabTagsDatasource } from '../../datasource/gitlab-tags';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import {
   matchesPrecommitConfigHeuristic,
   matchesPrecommitDependencyHeuristic,
@@ -51,9 +50,8 @@ function determineDatasource(
     return { skipReason: 'unknown-registry', registryUrls: [hostname] };
   }
   for (const [hostType, sourceId] of [
-    [PlatformId.Gitea, GitlabTagsDatasource.id],
-    [PlatformId.Github, GithubTagsDatasource.id],
-    [PlatformId.Gitlab, GitlabTagsDatasource.id],
+    ['github', GithubTagsDatasource.id],
+    ['gitlab', GitlabTagsDatasource.id],
   ]) {
     if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
@@ -65,7 +63,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostUrl },
-    'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
+    'Provided hostname did not match any of the hostRules of hostType github nor gitlab'
   );
   return { skipReason: 'unknown-registry', registryUrls: [hostname] };
 }
@@ -81,11 +79,11 @@ function extractDependency(
   skipReason?: SkipReason;
   currentValue?: string;
 } {
-  logger.debug({ tag }, 'Found version');
+  logger.debug(`Found version ${tag}`);
 
   const urlMatchers = [
     // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
-    regEx('^https?:\\/\\/(?<hostname>[^\\/]+)\\/(?<depName>\\S*)'),
+    regEx('^https?://(?<hostname>[^/]+)/(?<depName>\\S*)'),
     // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
     regEx('^git@(?<hostname>[^:]+):(?<depName>\\S*)'),
     // This split "git://github.com/pre-commit/pre-commit-hooks" -> "github.com" "pre-commit/pre-commit-hooks"
@@ -149,7 +147,7 @@ function findDependencies(precommitFile: PreCommitConfig): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   filename: string
-): PackageFile | null {
+): PackageFileContent | null {
   type ParsedContent = Record<string, unknown> | PreCommitConfig;
   let parsedContent: ParsedContent;
   try {

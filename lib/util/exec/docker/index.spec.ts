@@ -11,6 +11,7 @@ import {
   removeDanglingContainers,
   removeDockerContainer,
   resetPrefetchedImages,
+  sideCarImage,
 } from '.';
 
 const getPkgReleases: jest.Mock<typeof _getPkgReleases> =
@@ -202,21 +203,20 @@ describe('util/exec/docker/index', () => {
     const preCommands = [null as never, 'foo', undefined as never];
     const commands = ['bar'];
     const envVars = ['FOO', 'BAR'];
-    const image = 'sample_image';
+    const image = sideCarImage;
     const dockerOptions = {
-      image,
       cwd: '/tmp/foobar',
       envVars,
     };
     const command = (img: string, vol?: string): string =>
       `docker run --rm ` +
-      `--name=renovate_sample_image ` +
+      `--name=renovate_${img} ` +
       `--label=renovate_child ` +
       `--user=some-user ` +
       (vol ? `${vol} ` : '') +
       `-e FOO -e BAR ` +
       `-w "/tmp/foobar" ` +
-      `renovate/${img} ` +
+      `containerbase/${img} ` +
       `bash -l -c "foo && bar"`;
 
     beforeEach(() => {
@@ -252,30 +252,52 @@ describe('util/exec/docker/index', () => {
       );
     });
 
-    it('handles tag parameter', async () => {
+    it('adds custom containerbaseDir to volumes', async () => {
       mockExecAll();
+      GlobalConfig.set({
+        cacheDir: '/tmp/cache',
+        containerbaseDir: '/tmp/containerbase',
+        dockerUser: 'some-user',
+      });
+      const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
-        tag: '1.2.3',
+        volumes: [...volumes, ...volumes],
       });
-      expect(res).toBe(command(`${image}:1.2.3`));
+      expect(res).toBe(
+        command(
+          image,
+          `-v "/tmp/cache":"/tmp/cache" -v "/tmp/containerbase":"/tmp/containerbase" -v "/tmp/foo":"/tmp/foo"`
+        )
+      );
     });
 
-    it('handles tag constraint', async () => {
+    it('adds dedupes default containerbaseDir in volumes', async () => {
       mockExecAll();
-      getPkgReleases.mockResolvedValueOnce({
-        releases: [
-          { version: '1.2.3' },
-          { version: '1.2.4' },
-          { version: '2.0.0' },
-        ],
-      } as never);
+      GlobalConfig.set({
+        cacheDir: '/tmp/cache',
+        containerbaseDir: '/tmp/cache/containerbase',
+        dockerUser: 'some-user',
+      });
+      const volumes: VolumeOption[] = ['/tmp/foo'];
       const res = await generateDockerCommand(commands, preCommands, {
         ...dockerOptions,
-        tagScheme: 'npm',
-        tagConstraint: '^1.2.3',
+        volumes: [...volumes, ...volumes],
       });
-      expect(res).toBe(command(`${image}:1.2.4`));
+      expect(res).toBe(
+        command(image, `-v "/tmp/cache":"/tmp/cache" -v "/tmp/foo":"/tmp/foo"`)
+      );
     });
+
+    // TODO: it('handles tag constraint', async () => {
+    //   mockExecAll();
+    //   getPkgReleases.mockResolvedValueOnce({
+    //     releases: [{ version: '5.5.5' }, { version: '6.0.0' }],
+    //   } as never);
+    //   const res = await generateDockerCommand(commands, preCommands, {
+    //     ...dockerOptions,
+    //   });
+    //   expect(res).toBe(command(`${image}:5.5.5`));
+    // });
   });
 });

@@ -81,29 +81,54 @@ describe('modules/versioning/hermit/index', () => {
   );
 
   test.each`
-    version      | other        | expected
-    ${'@1'}      | ${'@1.2'}    | ${false}
-    ${'@1.2'}    | ${'@1.2'}    | ${true}
-    ${'@1.2.3'}  | ${'@1.2'}    | ${false}
-    ${'@latest'} | ${'@1'}      | ${false}
-    ${'@stable'} | ${'@stable'} | ${true}
+    version      | range              | expected
+    ${'0.6.1'}   | ${'>0.6.0 <0.7.0'} | ${true}
+    ${'0.6.1'}   | ${'<0.7.0'}        | ${true}
+    ${'0.6.1'}   | ${'<=0.7.0'}       | ${true}
+    ${'0.6.1'}   | ${'>=0.6.0'}       | ${true}
+    ${'0.6.1'}   | ${'>0.6.0'}        | ${true}
+    ${'0.6.1'}   | ${'0.6.x'}         | ${true}
+    ${'0.6.1'}   | ${'0.6.*'}         | ${true}
+    ${'0.6.1'}   | ${'0.6.0 - 0.6.3'} | ${true}
+    ${'0.6.1'}   | ${'~0.6'}          | ${true}
+    ${'0.6.1'}   | ${'0.6.1'}         | ${true}
+    ${'0.0.6'}   | ${'^0.0.6'}        | ${true}
+    ${'0.0.6'}   | ${'@0.0.6'}        | ${false}
+    ${'@0.0.6'}  | ${'0.0.6'}         | ${false}
+    ${'@1'}      | ${'@1.2'}          | ${false}
+    ${'@1.2'}    | ${'@1.2'}          | ${true}
+    ${'@1.2.3'}  | ${'@1.2'}          | ${false}
+    ${'@latest'} | ${'@1'}            | ${false}
+    ${'@stable'} | ${'@stable'}       | ${true}
   `(
-    'matches("$version", "$other") === $expected',
-    ({ version, other, expected }) => {
-      expect(versioning.matches(version, other)).toBe(expected);
+    'matches("$version", "$range") === $expected',
+    ({ version, range, expected }) => {
+      expect(versioning.matches(version, range)).toBe(expected);
     }
   );
 
   test.each`
-    version      | other        | expected
-    ${'@1'}      | ${'@1.2'}    | ${true}
-    ${'@1.2'}    | ${'@1.2'}    | ${false}
-    ${'@1.2'}    | ${'@1.3'}    | ${false}
-    ${'@1.2.3'}  | ${'@1.2'}    | ${false}
-    ${'1.2.3'}   | ${'@latest'} | ${true}
-    ${'@latest'} | ${'@1'}      | ${false}
-    ${'@stable'} | ${'@latest'} | ${true}
-    ${'@latest'} | ${'@stable'} | ${false}
+    version           | other             | expected
+    ${'@1'}           | ${'@1.2'}         | ${true}
+    ${'@1.2'}         | ${'@1.2'}         | ${false}
+    ${'@1.2'}         | ${'@1.3'}         | ${false}
+    ${'@1.2.3'}       | ${'@1.2'}         | ${false}
+    ${'@11.0.10_9'}   | ${'@11.0.10.1_1'} | ${true}
+    ${'@11.0.10_9'}   | ${'@11.0.14.1_1'} | ${false}
+    ${'@11.0.10_9'}   | ${'@11.0.14_1'}   | ${false}
+    ${'@11.0.10.1_9'} | ${'@11.0.10.2_8'} | ${false}
+    ${'@11.0.10.2_9'} | ${'@11.0.14_1'}   | ${false}
+    ${'@11.0.10.2_9'} | ${'@11.0.14.1_1'} | ${false}
+    ${'1.2.3'}        | ${'@latest'}      | ${true}
+    ${'@latest'}      | ${'@1'}           | ${false}
+    ${'@stable'}      | ${'@latest'}      | ${true}
+    ${'@latest'}      | ${'@stable'}      | ${false}
+    ${'11.0.10_9'}    | ${'11.0.10.2_1'}  | ${false}
+    ${'11.0.10_9'}    | ${'11.0.14.1_1'}  | ${false}
+    ${'11.0.10_9'}    | ${'11.0.14_1'}    | ${false}
+    ${'11.0.10.1_9'}  | ${'11.0.10.2_8'}  | ${false}
+    ${'11.0.10.2_9'}  | ${'11.0.14_1'}    | ${false}
+    ${'11.0.10.2_9'}  | ${'11.0.14.1_1'}  | ${false}
   `(
     'isGreaterThan("$version", "$other") === $expected',
     ({ version, other, expected }) => {
@@ -112,13 +137,25 @@ describe('modules/versioning/hermit/index', () => {
   );
 
   test.each`
-    version      | other        | expected
-    ${'@1'}      | ${'@1.2'}    | ${false}
-    ${'@1.2'}    | ${'@1.2'}    | ${false}
-    ${'@1.2.3'}  | ${'@1.2'}    | ${true}
-    ${'@latest'} | ${'@1'}      | ${true}
-    ${'@stable'} | ${'@latest'} | ${false}
-    ${'@latest'} | ${'@stable'} | ${true}
+    version           | other             | expected
+    ${'@1'}           | ${'@1.2'}         | ${false}
+    ${'@1.2'}         | ${'@1.2'}         | ${false}
+    ${'@1.2.3'}       | ${'@1.2'}         | ${true}
+    ${'@11.0.10_9'}   | ${'@11.0.10.1_1'} | ${false}
+    ${'@11.0.10_9'}   | ${'@11.0.14.1_1'} | ${true}
+    ${'@11.0.10_9'}   | ${'@11.0.14_1'}   | ${true}
+    ${'@11.0.10.1_9'} | ${'@11.0.10.2_8'} | ${true}
+    ${'@11.0.10.1_9'} | ${'@11.0.14_1'}   | ${true}
+    ${'@11.0.10.1_9'} | ${'@11.0.14.1_1'} | ${true}
+    ${'@latest'}      | ${'@1'}           | ${true}
+    ${'@stable'}      | ${'@latest'}      | ${false}
+    ${'@latest'}      | ${'@stable'}      | ${true}
+    ${'11.0.10_9'}    | ${'11.0.10.2_1'}  | ${true}
+    ${'11.0.10_9'}    | ${'11.0.14.1_1'}  | ${true}
+    ${'11.0.10_9'}    | ${'11.0.14_1'}    | ${true}
+    ${'11.0.10.1_9'}  | ${'11.0.10.2_8'}  | ${true}
+    ${'11.0.10.2_9'}  | ${'11.0.14_1'}    | ${true}
+    ${'11.0.10.2_9'}  | ${'11.0.14.1_1'}  | ${true}
   `(
     'isLessThanRange("$version", "$other") === $expected',
     ({ version, other, expected }) => {

@@ -20,6 +20,14 @@ export interface Comment {
   body: string;
 }
 
+export interface GhRestRepo {
+  full_name: string;
+  default_branch: string;
+  owner: {
+    login: string;
+  };
+}
+
 export interface GhRestPr {
   head: {
     ref: string;
@@ -33,6 +41,7 @@ export interface GhRestPr {
     repo: {
       pushed_at?: string;
     };
+    ref: string;
   };
   mergeable_state: string;
   number: number;
@@ -53,22 +62,9 @@ export interface GhRestPr {
   _links?: unknown;
 }
 
-export interface GhGraphQlPr {
-  number: number;
-  title: string;
-  body?: string;
-  state?: string;
-  headRefName: string;
-  baseRefName?: string;
-  labels?: { nodes?: { name: string }[] };
-  assignees?: { totalCount: number };
-  reviewRequests?: { totalCount: number };
-  comments?: {
-    nodes?: {
-      databaseId: number;
-      body: string;
-    }[];
-  };
+export interface GhPr extends Pr {
+  updated_at: string;
+  node_id: string;
 }
 
 export interface UserDetails {
@@ -93,15 +89,15 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string | null;
-  forkMode?: boolean;
   forkToken?: string;
-  prList: Pr[] | null;
+  prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: 'rebase' | 'squash' | 'merge';
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
   renovateUsername: string | undefined;
+  renovateForkUser: string | undefined;
   productLinks: any;
   ignorePrAuthor: boolean;
   autoMergeAllowed: boolean;
@@ -145,5 +141,4 @@ export interface ApiPageItem {
 export interface ApiPageCache<T extends ApiPageItem = ApiPageItem> {
   items: Record<number, T>;
   lastModified?: string;
-  etag?: string;
 }

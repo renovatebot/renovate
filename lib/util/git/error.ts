@@ -73,9 +73,9 @@ export function checkForPlatformFailure(err: Error): Error | null {
 
 // istanbul ignore next
 export function handleCommitError(
-  files: FileChange[],
+  err: Error,
   branchName: string,
-  err: Error
+  files?: FileChange[]
 ): null {
   checkForPlatformFailure(err);
   if (err.message.includes(`'refs/heads/renovate' exists`)) {
@@ -137,4 +137,10 @@ export function handleCommitError(
   logger.debug({ err }, 'Unknown error committing files');
   // We don't know why this happened, so this will cause bubble up to a branch error
   throw err;
+}
+
+export function bulkChangesDisallowed(err: Error): boolean {
+  return err.message.includes(
+    'remote: Repository policies do not allow pushes that update more than'
+  );
 }

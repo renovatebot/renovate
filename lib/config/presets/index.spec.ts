@@ -23,35 +23,33 @@ const gitHub = mocked(_github);
 
 const presetIkatyang = Fixtures.getJson('renovate-config-ikatyang.json');
 
-npm.getPreset.mockImplementation(({ repo, presetName }) => {
-  if (repo === 'renovate-config-ikatyang') {
-    return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
-      'renovate-config'
-    ][presetName!];
-  }
-  if (repo === 'renovate-config-notfound') {
-    throw new Error(PRESET_DEP_NOT_FOUND);
-  }
-  if (repo === 'renovate-config-noconfig') {
-    throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
-  }
-  if (repo === 'renovate-config-throw') {
-    throw new Error('whoops');
-  }
-  if (repo === 'renovate-config-wrongpreset') {
-    throw new Error(PRESET_NOT_FOUND);
-  }
-  return null;
-});
-
 describe('config/presets/index', () => {
   describe('resolvePreset', () => {
     let config: RenovateConfig;
 
     beforeEach(() => {
       config = {};
-      jest.clearAllMocks();
       memCache.init();
+      npm.getPreset.mockImplementation(({ repo, presetName }) => {
+        if (repo === 'renovate-config-ikatyang') {
+          return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
+            'renovate-config'
+          ][presetName!];
+        }
+        if (repo === 'renovate-config-notfound') {
+          throw new Error(PRESET_DEP_NOT_FOUND);
+        }
+        if (repo === 'renovate-config-noconfig') {
+          throw new Error(PRESET_RENOVATE_CONFIG_NOT_FOUND);
+        }
+        if (repo === 'renovate-config-throw') {
+          throw new Error('whoops');
+        }
+        if (repo === 'renovate-config-wrongpreset') {
+          throw new Error(PRESET_NOT_FOUND);
+        }
+        return null;
+      });
     });
 
     it('returns same if no presets', async () => {
@@ -247,7 +245,7 @@ describe('config/presets/index', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(4);
+      expect(res.matchPackageNames).toHaveLength(6);
       expect(res.matchPackagePatterns).toHaveLength(1);
       expect(res.matchPackagePrefixes).toHaveLength(4);
     });
@@ -258,7 +256,7 @@ describe('config/presets/index', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules![0];
       expect(rule.automerge).toBeTrue();
-      expect(rule.matchPackageNames).toHaveLength(4);
+      expect(rule.matchPackageNames).toHaveLength(6);
       expect(rule.matchPackagePatterns).toHaveLength(1);
       expect(rule.matchPackagePrefixes).toHaveLength(4);
     });
@@ -840,11 +838,9 @@ describe('config/presets/index', () => {
           ':dependencyDashboard',
           ':semanticPrefixFixDepsChoreOthers',
           ':ignoreModulesAndTests',
-          ':autodetectPinVersions',
-          ':prHourlyLimit2',
-          ':prConcurrentLimit10',
           'group:monorepos',
           'group:recommended',
+          'replacements:all',
           'workarounds:all',
         ],
       });
@@ -862,7 +858,7 @@ describe('config/presets/index', () => {
           "description": [
             "opentelemetry-js monorepo",
           ],
-          "matchSourceUrlPrefixes": [
+          "matchSourceUrls": [
             "https://github.com/open-telemetry/opentelemetry-js",
           ],
         }
@@ -897,7 +893,7 @@ describe('config/presets/index', () => {
     it('gets linters', async () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
-      expect(res.matchPackageNames).toHaveLength(1);
+      expect(res.matchPackageNames).toHaveLength(3);
       expect(res.extends).toHaveLength(4);
     });
 

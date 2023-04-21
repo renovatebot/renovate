@@ -1,6 +1,5 @@
 import * as httpMock from '../../../../test/http-mock';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/bitbucket';
 import type { Platform, PlatformResult, RepoParams } from '../types';
@@ -172,6 +171,58 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
+  describe('bbUseDevelopmentBranch', () => {
+    it('not enabled: defaults to using main branch', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: false,
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
+
+    it('enabled: uses development branch when development branch exists', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop', branch: { name: 'develop' } },
+        });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
+      });
+
+      expect(res.defaultBranch).toBe('develop');
+    });
+
+    it('enabled: falls back to mainbranch if development branch does not exist', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo')
+        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
+        .get('/2.0/repositories/some/repo/branching-model')
+        .reply(200, {
+          development: { name: 'develop' },
+        });
+
+      const res = await bitbucket.initRepo({
+        repository: 'some/repo',
+        bbUseDevelopmentBranch: true,
+      });
+
+      expect(res.defaultBranch).toBe('master');
+    });
+  });
+
   describe('getRepoForceRebase()', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
@@ -226,7 +277,7 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('master')).toBe(BranchStatus.red);
+      expect(await bitbucket.getBranchStatus('master', true)).toBe('red');
     });
 
     it('getBranchStatus 4', async () => {
@@ -246,14 +297,12 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [
             {
-              key: 'foo',
+              key: 'renovate/stability-days',
               state: 'SUCCESSFUL',
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('branch')).toBe(
-        BranchStatus.green
-      );
+      expect(await bitbucket.getBranchStatus('branch', true)).toBe('green');
     });
 
     it('getBranchStatus 5', async () => {
@@ -278,8 +327,8 @@ describe('modules/platform/bitbucket/index', () => {
             },
           ],
         });
-      expect(await bitbucket.getBranchStatus('pending/branch')).toBe(
-        BranchStatus.yellow
+      expect(await bitbucket.getBranchStatus('pending/branch', true)).toBe(
+        'yellow'
       );
     });
 
@@ -302,9 +351,34 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200, {
           values: [],
         });
-      expect(await bitbucket.getBranchStatus('branch-with-empty-status')).toBe(
-        BranchStatus.yellow
-      );
+      expect(
+        await bitbucket.getBranchStatus('branch-with-empty-status', true)
+      ).toBe('yellow');
+    });
+
+    it('getBranchStatus 7', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/refs/branches/branch')
+        .reply(200, {
+          name: 'branch',
+          target: {
+            hash: 'branch_hash',
+            parents: [{ hash: 'master_hash' }],
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'renovate/stability-days',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+      expect(await bitbucket.getBranchStatus('branch', false)).toBe('yellow');
     });
   });
 
@@ -335,9 +409,7 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('getBranchStatusCheck 2', async () => {
-      expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe(
-        BranchStatus.red
-      );
+      expect(await bitbucket.getBranchStatusCheck('master', 'foo')).toBe('red');
     });
 
     it('getBranchStatusCheck 3', async () => {
@@ -376,7 +448,7 @@ describe('modules/platform/bitbucket/index', () => {
           branchName: 'branch',
           context: 'context',
           description: 'description',
-          state: BranchStatus.red,
+          state: 'red',
           url: 'targetUrl',
         })
       ).toResolve();
@@ -385,10 +457,12 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('findIssue()', () => {
     it('does not throw', async () => {
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.uuid%3D%2212345%22'
         )
         .reply(200, {
           values: [
@@ -416,7 +490,7 @@ describe('modules/platform/bitbucket/index', () => {
       );
       scope
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, {
           values: [],
@@ -430,7 +504,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, {
           values: [
@@ -462,11 +536,11 @@ describe('modules/platform/bitbucket/index', () => {
       );
       scope
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, { values: [] })
         .get(
-          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, { values: [] })
         .post('/2.0/repositories/some/empty/issues')
@@ -484,7 +558,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, {
           values: [
@@ -521,7 +595,7 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get(
-          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+          '/2.0/repositories/some/repo/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)'
         )
         .reply(200, {
           values: [
@@ -552,11 +626,13 @@ describe('modules/platform/bitbucket/index', () => {
     });
 
     it('get issues', async () => {
+      httpMock.scope(baseUrl).get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
       const scope = await initRepoMock({}, { has_issues: true });
       scope
         .get('/2.0/repositories/some/repo/issues')
         .query({
-          q: '(state = "new" OR state = "open") AND reporter.username="abc"',
+          q: '(state = "new" OR state = "open") AND reporter.uuid="12345"',
         })
         .reply(200, {
           values: [
@@ -583,7 +659,7 @@ describe('modules/platform/bitbucket/index', () => {
       scope
         .get('/2.0/repositories/some/repo/issues')
         .query({
-          q: '(state = "new" OR state = "open") AND reporter.username="abc"',
+          q: '(state = "new" OR state = "open")',
         })
         .reply(500, {});
       const issues = await bitbucket.getIssueList();
@@ -608,6 +684,27 @@ describe('modules/platform/bitbucket/index', () => {
         .reply(200);
       await expect(
         bitbucket.addReviewers(5, ['someuser', 'someotheruser'])
+      ).toResolve();
+    });
+
+    it('should handle reviewers as username or UUID', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, pr)
+        .put('/2.0/repositories/some/repo/pullrequests/5', {
+          title: pr.title,
+          reviewers: [
+            { username: 'someuser' },
+            { uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}' },
+          ],
+        })
+        .reply(200);
+      await expect(
+        bitbucket.addReviewers(5, [
+          'someuser',
+          '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        ])
       ).toResolve();
     });
   });
@@ -696,11 +793,29 @@ describe('modules/platform/bitbucket/index', () => {
 
   describe('createPr()', () => {
     it('posts PR', async () => {
+      const projectReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'project',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
+      };
+      const repoReviewer = {
+        type: 'default_reviewer',
+        reviewer_type: 'repository',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
+      };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
-          values: [{ uuid: '{1234-5678}' }],
+          values: [projectReviewer, repoReviewer],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -716,22 +831,37 @@ describe('modules/platform/bitbucket/index', () => {
       expect(pr?.number).toBe(5);
     });
 
-    it('removes inactive reviewers when updating pr', async () => {
+    it('removes inactive reviewers when creating pr', async () => {
       const inactiveReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
-      const activeReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
+      const activeReviewerOutsideOfWorkspace = {
+        user: {
+          display_name: 'Alice Smith',
+          uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
+          account_id: '789',
+        },
+      };
+      const activeReviewerWithinWorkspace = {
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
-          values: [activeReviewer, inactiveReviewer],
+          values: [
+            activeReviewerWithinWorkspace,
+            activeReviewerOutsideOfWorkspace,
+            inactiveReviewer,
+          ],
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(400, {
@@ -743,13 +873,25 @@ describe('modules/platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
         .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+        )
+        .reply(404)
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
         })
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
@@ -767,18 +909,22 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('removes default reviewers no longer member of the workspace when creating pr', async () => {
       const notMemberReviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
       const memberReviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
-        account_id: '456',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+          account_id: '456',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [memberReviewer, notMemberReviewer],
         })
@@ -819,13 +965,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('throws exception when unable to check default reviewers workspace membership', async () => {
       const reviewer = {
-        display_name: 'Bob Smith',
-        uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
-        account_id: '123',
+        user: {
+          display_name: 'Bob Smith',
+          uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
+          account_id: '123',
+        },
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -861,13 +1009,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('rethrows exception when PR create error due to unknown reviewers error', async () => {
       const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        },
       };
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -896,13 +1046,15 @@ describe('modules/platform/bitbucket/index', () => {
 
     it('rethrows exception when PR create error not due to reviewers field', async () => {
       const reviewer = {
-        display_name: 'Jane Smith',
-        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        user: {
+          display_name: 'Jane Smith',
+          uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        },
       };
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/default-reviewers')
+        .get('/2.0/repositories/some/repo/effective-default-reviewers')
         .reply(200, {
           values: [reviewer],
         })
@@ -960,15 +1112,41 @@ describe('modules/platform/bitbucket/index', () => {
 
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
     });
+
+    it('reviewers', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+        account_id: '456',
+      };
+      const scope = await initRepoMock();
+      scope.get('/2.0/repositories/some/repo/pullrequests/5').reply(200, {
+        ...pr,
+        reviewers: [reviewer],
+      });
+      expect(await bitbucket.getPr(5)).toEqual({
+        bodyStruct: {
+          hash: '761b7ad8ad439b2855fcbb611331c646ef0870b0631247bba3f3025cb6df5a53',
+        },
+        createdAt: '2018-07-02T07:02:25.275030+00:00',
+        number: 5,
+        reviewers: ['{90b6646d-1724-4a64-9fd9-539515fe94e9}'],
+        sourceBranch: 'branch',
+        state: 'open',
+        targetBranch: 'master',
+        title: 'title',
+      });
+    });
   });
 
   describe('massageMarkdown()', () => {
     it('returns diff files', () => {
-      expect(
-        bitbucket.massageMarkdown(
-          '<details><summary>foo</summary>bar</details>text<details>'
-        )
-      ).toMatchSnapshot();
+      const prBody =
+        '<details><summary>foo</summary>\n<blockquote>\n\n<details><summary>text</summary>' +
+        '\n---\n\n - [ ] <!-- rebase-check --> rebase\n<!--renovate-config-hash:-->' +
+        '\n\n</details>\n\n</blockquote>\n</details>';
+
+      expect(bitbucket.massageMarkdown(prBody)).toMatchSnapshot();
     });
   });
 
@@ -995,7 +1173,12 @@ describe('modules/platform/bitbucket/index', () => {
         uuid: '{d2238482-2e9f-48b3-8630-de22ccb9e42f}',
         account_id: '123',
       };
-      const activeReviewer = {
+      const activeReviewerOutsideOfWorkspace = {
+        display_name: 'Alice Smith',
+        uuid: '{a10e0228-ad84-11ed-afa1-0242ac120002}',
+        account_id: '789',
+      };
+      const activeReviewerWithinWorkspace = {
         display_name: 'Jane Smith',
         uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
         account_id: '456',
@@ -1003,7 +1186,13 @@ describe('modules/platform/bitbucket/index', () => {
       const scope = await initRepoMock();
       scope
         .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(200, { reviewers: [activeReviewer, inactiveReviewer] })
+        .reply(200, {
+          reviewers: [
+            activeReviewerWithinWorkspace,
+            activeReviewerOutsideOfWorkspace,
+            inactiveReviewer,
+          ],
+        })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(400, {
           type: 'error',
@@ -1014,13 +1203,25 @@ describe('modules/platform/bitbucket/index', () => {
             message: 'reviewers: Malformed reviewers list',
           },
         })
-        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
-        .reply(200, {
-          account_status: 'inactive',
-        })
         .get('/2.0/users/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D')
         .reply(200, {
           account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7B90b6646d-1724-4a64-9fd9-539515fe94e9%7D'
+        )
+        .reply(200)
+        .get('/2.0/users/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D')
+        .reply(200, {
+          account_status: 'active',
+        })
+        .get(
+          '/2.0/workspaces/some/members/%7Ba10e0228-ad84-11ed-afa1-0242ac120002%7D'
+        )
+        .reply(404)
+        .get('/2.0/users/%7Bd2238482-2e9f-48b3-8630-de22ccb9e42f%7D')
+        .reply(200, {
+          account_status: 'inactive',
         })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
@@ -1179,7 +1380,7 @@ describe('modules/platform/bitbucket/index', () => {
         await bitbucket.updatePr({
           number: pr.id,
           prTitle: pr.title,
-          state: PrState.Closed,
+          state: 'closed',
         })
       ).toBeUndefined();
     });
@@ -1252,12 +1453,6 @@ describe('modules/platform/bitbucket/index', () => {
           strategy: 'fast-forward',
         })
       ).toBeTrue();
-    });
-  });
-
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty array', async () => {
-      expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
     });
   });
 

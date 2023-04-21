@@ -7,6 +7,10 @@ const repoGroups = {
   accounts: 'https://github.com/accounts-js/accounts',
   acot: 'https://github.com/acot-a11y/acot',
   'ag-grid': 'https://github.com/ag-grid/ag-grid',
+  'algolia-instantsearch': [
+    'https://github.com/algolia/instantsearch',
+    'https://github.com/algolia/instantsearch.js',
+  ],
   'algolia-react-instantsearch':
     'https://github.com/algolia/react-instantsearch',
   'algoliasearch-autocomplete': 'https://github.com/algolia/autocomplete',
@@ -31,7 +35,13 @@ const repoGroups = {
   'aspnet aspnetwebstack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet extensions': 'https://github.com/aspnet/Extensions',
   'aspnet-api-versioning': 'https://github.com/Microsoft/aspnet-api-versioning',
+  'automapper-dotnet': [
+    'https://github.com/AutoMapper/AutoMapper',
+    'https://github.com/AutoMapper/AutoMapper.Extensions.Microsoft.DependencyInjection',
+  ],
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-lambda-powertools-typescript':
+    'https://github.com/awslabs/aws-lambda-powertools-typescript',
   'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'aws-sdk-net': 'https://github.com/aws/aws-sdk-net',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -74,6 +84,8 @@ const repoGroups = {
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   emojibase: 'https://github.com/milesj/emojibase',
   emotion: 'https://github.com/emotion-js/emotion',
+  'eslint-config-globex':
+    'https://github.com/GlobexDesignsInc/eslint-config-globex',
   expo: 'https://github.com/expo/expo',
   feathers: 'https://github.com/feathersjs/feathers',
   feign: 'https://github.com/OpenFeign/feign',
@@ -84,18 +96,19 @@ const repoGroups = {
   formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
+  gitbeaker: 'https://github.com/jdalrymple/gitbeaker',
   grafana: 'https://github.com/grafana/grafana',
   'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   graphqlcodegenerator: [
+    'https://github.com/dotansimha/graphql-code-generator-community',
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
   groovy: 'https://github.com/apache/groovy',
   guava: 'https://github.com/google/guava',
   Hangfire: 'https://github.com/HangfireIO/Hangfire',
-  hapijs: 'https://github.com/hapijs',
   hotchocolate: 'https://github.com/ChilliCream/hotchocolate',
   'infrastructure-ui': 'https://github.com/instructure/instructure-ui',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
@@ -108,14 +121,16 @@ const repoGroups = {
   jest: 'https://github.com/facebook/jest',
   jsplumb: 'https://github.com/jsplumb/jsplumb',
   junit5: 'https://github.com/junit-team/junit5',
+  kotlin: 'https://github.com/JetBrains/kotlin',
   lerna: 'https://github.com/lerna/lerna',
   linguijs: 'https://github.com/lingui/js-lingui',
-  lodash: 'https://github.com/lodash/',
   loopback: [
     'https://github.com/strongloop/loopback-next', // old repo (see: https://github.com/loopbackio/loopback-next/issues/7595)
     'https://github.com/loopbackio/loopback-next',
   ],
   lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
+  mailing: 'https://github.com/sofn-xyz/mailing',
+  mantine: 'https://github.com/mantinedev/mantine',
   mapstruct: 'https://github.com/mapstruct/mapstruct',
   masstransit: 'https://github.com/MassTransit/MassTransit',
   'material-components-web':
@@ -126,6 +141,7 @@ const repoGroups = {
   ],
   'mdc-react': 'material-components/material-components-web-react',
   mdx: 'https://github.com/mdx-js/mdx',
+  'middy-js': 'https://github.com/middyjs/middy',
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
@@ -145,11 +161,10 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
-  ngrx: 'https://github.com/ngrx/',
+  nextra: 'https://github.com/shuding/nextra',
   'ngx-formly': 'https://github.com/ngx-formly/ngx-formly',
   'ngxs-store': 'https://github.com/ngxs/store',
   nivo: 'https://github.com/plouc/nivo',
-  nrwl: 'https://github.com/nrwl/',
   nswag: 'https://github.com/RicoSuter/NSwag',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
   'opentelemetry-dotnet':
@@ -160,7 +175,10 @@ const repoGroups = {
   parcel: 'https://github.com/parcel-bundler/parcel',
   'percy-cli': 'https://github.com/percy/cli',
   picassojs: 'https://github.com/qlik-oss/picasso.js',
-  pixijs: 'https://github.com/pixijs/pixi.js',
+  pixijs: [
+    'https://github.com/pixijs/pixi.js', // old repo
+    'https://github.com/pixijs/pixijs',
+  ],
   playwright: 'https://github.com/Microsoft/playwright',
   pnpjs: 'https://github.com/pnp/pnpjs',
   pollyjs: 'https://github.com/Netflix/pollyjs',
@@ -188,17 +206,18 @@ const repoGroups = {
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
   sanity: 'https://github.com/sanity-io/sanity',
-  'semantic-release': 'https://github.com/semantic-release/',
   'sendgrid-nodejs': 'https://github.com/sendgrid/sendgrid-nodejs',
   'sentry-dotnet': 'https://github.com/getsentry/sentry-dotnet',
   'sentry-javascript': 'https://github.com/getsentry/sentry-javascript',
   'sentry-ruby': 'https://github.com/getsentry/sentry-ruby',
+  shedlock: 'https://github.com/lukas-krecan/ShedLock',
   'shopify-app-bridge': 'https://github.com/Shopify/app-bridge',
   'sitecore-jss': 'https://github.com/Sitecore/jss',
   skiasharp: 'https://github.com/mono/SkiaSharp',
   springfox: 'https://github.com/springfox/springfox',
   steeltoe: 'https://github.com/SteeltoeOSS/steeltoe',
   storybook: 'https://github.com/storybookjs/storybook',
+  'storybook-react-native': 'https://github.com/storybookjs/react-native',
   strapi: 'https://github.com/strapi/strapi',
   'stryker-js': 'https://github.com/stryker-mutator/stryker-js',
   surveyjs: 'https://github.com/surveyjs/surveyjs',
@@ -206,16 +225,24 @@ const repoGroups = {
     'https://github.com/domaindrivendev/Swashbuckle.AspNetCore',
   'system.io.abstractions':
     'https://github.com/System-IO-Abstractions/System.IO.Abstractions/',
+  'tanstack-query': 'https://github.com/TanStack/query',
   tauri: 'https://github.com/tauri-apps/tauri',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'telus-tds-core': 'https://github.com/telus/tds-core',
+  'temporalio-ts': 'https://github.com/temporalio/sdk-typescript',
+  'testcontainers-java':
+    'https://github.com/testcontainers/testcontainers-java',
   'theme-ui': 'https://github.com/system-ui/theme-ui',
+  tiptap: 'https://github.com/ueberdosis/tiptap',
   treat: 'https://github.com/seek-oss/treat',
+  trpc: 'https://github.com/trpc/trpc',
   tsoa: 'https://github.com/lukeautry/tsoa',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
   uppy: 'https://github.com/transloadit/uppy',
+  vaadinWebComponents: 'https://github.com/vaadin/web-components',
+  vitest: 'https://github.com/vitest-dev/vitest',
   vstest: 'https://github.com/microsoft/vstest',
   vue: ['https://github.com/vuejs/vue', 'https://github.com/vuejs/core'],
   'vue-cli': 'https://github.com/vuejs/vue-cli',
@@ -224,8 +251,22 @@ const repoGroups = {
   workbox: 'https://github.com/googlechrome/workbox',
   xterm: 'https://github.com/xtermjs/xterm.js',
   'xunit-dotnet': 'https://github.com/xunit/xunit',
+  yarn: 'https://github.com/yarnpkg/berry',
   'zxing-net': 'https://github.com/micjahn/ZXing.Net',
 };
+
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
+const orgGroups = {
+  hapijs: 'https://github.com/hapijs/',
+  lodash: 'https://github.com/lodash/',
+  ngrx: 'https://github.com/ngrx/',
+  nrwl: 'https://github.com/nrwl/',
+  'semantic-release': 'https://github.com/semantic-release/',
+  swc: 'https://github.com/swc-project/',
+};
+
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 
 const patternGroups = {
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
@@ -236,6 +277,9 @@ const patternGroups = {
   clarity: ['^@cds/', '^@clr/'],
   embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
+  spfx: ['^@microsoft/sp-', '^@microsoft/eslint-.+-spfx$'],
+  spock: '^org\\.spockframework:spock-',
+  'syncfusion-dotnet': '^Syncfusion\\.',
   wordpress: '^@wordpress/',
 };
 
@@ -244,9 +288,17 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
+    matchSourceUrls: is.array(value) ? value : [value],
+  };
+}
+
+for (const [name, value] of Object.entries(orgGroups)) {
+  presets[name] = {
+    description: `${name} monorepo`,
     matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
+
 for (const [name, value] of Object.entries(patternGroups)) {
   presets[name] = {
     description: `${name} monorepo`,

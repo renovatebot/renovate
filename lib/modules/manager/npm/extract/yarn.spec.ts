@@ -42,5 +42,17 @@ describe('modules/manager/npm/extract/yarn', () => {
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(10);
     });
+
+    it('ignores individual invalid entries', async () => {
+      const invalidNameLock = Fixtures.get(
+        'yarn1-invalid-name/yarn.lock',
+        '..'
+      );
+      fs.readLocalFile.mockResolvedValueOnce(invalidNameLock);
+      const res = await getYarnLock('package.json');
+      expect(res.isYarn1).toBeTrue();
+      expect(res.lockfileVersion).toBeUndefined();
+      expect(Object.keys(res.lockedVersions)).toHaveLength(14);
+    });
   });
 });

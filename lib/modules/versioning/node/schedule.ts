@@ -22,7 +22,7 @@ for (const version of Object.keys(nodeSchedule)) {
   const schedule = nodeSchedule[version];
   if (schedule.codename) {
     nodeCodenames.set(schedule.codename.toUpperCase(), {
-      version: version,
+      version,
       ...schedule,
     });
   }

@@ -15,14 +15,21 @@ describe('modules/manager/range', () => {
       manager: 'npm',
       rangeStrategy: 'auto',
       depType: 'dependencies',
-      packageJsonType: 'app',
     };
-    expect(getRangeStrategy(config)).toBe('pin');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
+  });
+
+  it('defaults to update-lockfile if updateLockedDependency() is supported', () => {
+    const config: RangeConfig = {
+      manager: 'bundler',
+      rangeStrategy: 'auto',
+    };
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 
   it('defaults to replace', () => {
     const config: RangeConfig = {
-      manager: 'circleci',
+      manager: 'sbt',
       rangeStrategy: 'auto',
     };
     expect(getRangeStrategy(config)).toBe('replace');

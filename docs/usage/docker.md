@@ -246,6 +246,25 @@ module.exports = {
 };
 ```
 
+#### AWS ECR (Amazon Web Services Elastic Container Registry)
+
+Renovate can authenticate with AWS ECR using AWS access key id & secret as the username & password, for example:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "matchHost": "12345612312.dkr.ecr.us-east-1.amazonaws.com",
+      "username": "AKIAABCDEFGHIJKLMNOPQ",
+      "encrypted": {
+        "password": "w...A"
+      }
+    }
+  ]
+}
+```
+
 #### Google Container Registry / Google Artifact Registry
 
 ##### Using long-lived service account credentials
@@ -272,7 +291,6 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
         "hostRules": [
           {
             "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
             "username": "_json_key_base64",
             "password": "<base64 service account>"
           }
@@ -287,7 +305,6 @@ If all your dependencies are on the Google Artifact Registry, you can base64 enc
         "hostRules": [
           {
             "matchHost": "europe-docker.pkg.dev",
-            "authType": "Basic",
             "username": "_json_key_base64",
             "encrypted": {
               "password": "<encrypted base64 service account>"
@@ -371,7 +388,7 @@ To get access to the token a custom Renovate Docker image is needed that include
 The Dockerfile to create such an image can look like this:
 
 ```Dockerfile
-FROM renovate/renovate:32.169.1
+FROM renovate/renovate:35.48.2
 # Include the "Docker tip" which you can find here https://cloud.google.com/sdk/docs/install
 # under "Installation" for "Debian/Ubuntu"
 RUN ...

@@ -1,19 +1,20 @@
 import { logger } from '../../../../logger';
+import { DotnetVersionDatasource } from '../../../datasource/dotnet-version';
 import { NugetDatasource } from '../../../datasource/nuget';
-import type { PackageDependency, PackageFile } from '../../types';
+import type { PackageDependency, PackageFileContent } from '../../types';
 import type { MsbuildGlobalManifest } from '../types';
 
 export function extractMsbuildGlobalManifest(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   let manifest: MsbuildGlobalManifest;
 
   try {
     manifest = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName: packageFile }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${packageFile}`);
     return null;
   }
 
@@ -30,7 +31,7 @@ export function extractMsbuildGlobalManifest(
       depType: 'dotnet-sdk',
       depName: 'dotnet-sdk',
       currentValue: manifest.sdk?.version,
-      skipReason: 'unsupported-datasource',
+      datasource: DotnetVersionDatasource.id,
     });
   }
 

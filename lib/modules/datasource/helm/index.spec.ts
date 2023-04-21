@@ -17,7 +17,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: undefined as never, // #7154
+          packageName: undefined as never, // #7154
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -32,7 +32,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: [],
         })
       ).toBeNull();
@@ -46,7 +46,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'non_existent_chart',
+          packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -60,7 +60,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'non_existent_chart',
+          packageName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -74,7 +74,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -88,7 +88,7 @@ describe('modules/datasource/helm/index', () => {
       await expect(
         getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
@@ -102,7 +102,7 @@ describe('modules/datasource/helm/index', () => {
       expect(
         await getPkgReleases({
           datasource: HelmDatasource.id,
-          depName: 'some_chart',
+          packageName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -115,7 +115,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, '# A comment');
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -134,7 +134,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, res);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -147,7 +147,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'non_existent_chart',
+        packageName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -160,7 +160,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const releases = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'ambassador',
+        packageName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
@@ -174,7 +174,7 @@ describe('modules/datasource/helm/index', () => {
         .reply(200, indexYaml);
       const res = await getPkgReleases({
         datasource: HelmDatasource.id,
-        depName: 'ambassador',
+        packageName: 'ambassador',
         registryUrls: ['https://example-repository.com/subdir'],
       });
 

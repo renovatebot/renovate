@@ -2,7 +2,8 @@
 
 ## Authentication
 
-First, [create a Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) for the bot account, select `repo` scope.
+First, [create a classic Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-personal-access-token-classic) for the bot account, select `repo` scope.
+Fine-grained Personal Access Tokens do not support the GitHub GraphQL API and cannot be used with Renovate.
 
 Let Renovate use your PAT by doing _one_ of the following:
 
@@ -18,6 +19,11 @@ You can choose where you want to set `endpoint`:
 - In your `config.js` file
 - In a environment variable
 - In a CLI parameter
+
+<!-- prettier-ignore -->
+!!! tip "Labels and forking mode"
+    If you're self-hosting Renovate on GitHub.com with GitHub Actions in forking mode, and want Renovate to apply labels then you must give the PAT `triage` level rights on `issues`.
+    The `triage` level allows the PAT to apply/dismiss existing labels.
 
 ## Running as a GitHub App
 
@@ -49,7 +55,7 @@ The slug name of your app with `[bot]` appended
 
 The [GitHub App associated email](https://github.community/t/logging-into-git-as-a-github-app/115916/2) to match commits to the bot.
 It needs to have the user id _and_ the username followed by the `users.noreply.`-domain of either github.com or the GitHub Enterprise Server.
-A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/user/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/uer/self-hosted-renovate[bot]` (GitHub Enterprise Server).
+A way to get the user id of a GitHub app is to [query the user API](https://docs.github.com/en/rest/reference/users#get-a-user) at `api.github.com/users/self-hosted-renovate[bot]` (github.com) or `github.enterprise.com/api/v3/users/self-hosted-renovate[bot]` (GitHub Enterprise Server).
 
 **`token:"ghs_123exampletoken"`**
 

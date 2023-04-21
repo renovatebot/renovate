@@ -1,9 +1,27 @@
 import { logger } from '../../../../../../logger';
 import {
   GetPkgReleasesConfig,
+  ReleaseResult,
   getPkgReleases,
 } from '../../../../../datasource';
 import { api as semver } from '../../../../../versioning/npm';
+
+const pkgCache = new Map<string, Promise<ReleaseResult | null>>();
+
+function getPkgReleasesCached(
+  packageName: string
+): Promise<ReleaseResult | null> {
+  let cachedResult = pkgCache.get(packageName);
+  if (!cachedResult) {
+    const lookupConfig: GetPkgReleasesConfig = {
+      datasource: 'npm',
+      packageName,
+    };
+    cachedResult = getPkgReleases(lookupConfig);
+    pkgCache.set(packageName, cachedResult);
+  }
+  return cachedResult;
+}
 
 /**
  * Finds the first stable version of parentName after parentStartingVersion which either:
@@ -26,14 +44,10 @@ export async function findFirstParentVersion(
     `Finding first version of ${parentName} starting with ${parentStartingVersion} which supports >= ${targetDepName}@${targetVersion}`
   );
   try {
-    let lookupConfig: GetPkgReleasesConfig = {
-      datasource: 'npm',
-      depName: targetDepName,
-    };
-    const targetDep = await getPkgReleases(lookupConfig);
+    const targetDep = await getPkgReleasesCached(targetDepName);
     // istanbul ignore if
     if (!targetDep) {
-      logger.warn(
+      logger.info(
         { targetDepName },
         'Could not look up target dependency for remediation'
       );
@@ -48,11 +62,7 @@ export async function findFirstParentVersion(
           (version === targetVersion ||
             semver.isGreaterThan(version, targetVersion))
       );
-    lookupConfig = {
-      datasource: 'npm',
-      depName: parentName,
-    };
-    const parentDep = await getPkgReleases(lookupConfig);
+    const parentDep = await getPkgReleasesCached(parentName);
     // istanbul ignore if
     if (!parentDep) {
       logger.info(

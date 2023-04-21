@@ -84,54 +84,86 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
-          packageJsonName: '@demo/nested-group-a',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/nested-group-a',
+          },
         },
         {
           packageFile: 'nested-packages/group/b/package.json',
-          packageJsonName: '@demo/nested-group-b',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/nested-group-b',
+          },
         },
         {
           packageFile: 'non-nested-packages/a/package.json',
-          packageJsonName: '@demo/non-nested-a',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/non-nested-a',
+          },
         },
         {
           packageFile: 'non-nested-packages/b/package.json',
-          packageJsonName: '@demo/non-nested-b',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/non-nested-b',
+          },
         },
         {
           packageFile: 'solo-package/package.json',
-          packageJsonName: '@demo/solo',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/solo',
+          },
         },
         {
           packageFile: 'solo-package-leading-dot-slash/package.json',
-          packageJsonName: '@demo/solo-leading-dot-slash',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/solo-leading-dot-slash',
+          },
         },
         {
           packageFile: 'solo-package-leading-double-dot-slash/package.json',
-          packageJsonName: '@demo/solo-leading-double-dot-slash',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/solo-leading-double-dot-slash',
+          },
         },
         {
           packageFile: 'solo-package-trailing-slash/package.json',
-          packageJsonName: '@demo/solo-trailing-slash',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/solo-trailing-slash',
+          },
+        },
+        {
+          packageFile: 'test/test-package/package.json',
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/test-package',
+          },
+        },
+        {
+          packageFile: 'tests/test-package2/package.json',
+          managerData: {
+            pnpmShrinkwrap: undefined as undefined | string,
+            packageJsonName: '@demo/test-package2',
+          },
         },
       ];
 
       await detectPnpmWorkspaces(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(
-        packageFiles.every((packageFile) => packageFile.pnpmShrinkwrap)
+        packageFiles.every(
+          (packageFile) => packageFile.managerData.pnpmShrinkwrap
+        )
       ).toBeTrue();
     });
 
@@ -139,7 +171,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
       ];
 
@@ -147,7 +179,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
       ]);
     });
@@ -156,17 +188,17 @@ describe('modules/manager/npm/extract/pnpm', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: { pnpmShrinkwrap: undefined as undefined | string },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          pnpmShrinkwrap: undefined as undefined | string,
+          managerData: { pnpmShrinkwrap: undefined as undefined | string },
         },
       ];
 
@@ -174,24 +206,24 @@ describe('modules/manager/npm/extract/pnpm', () => {
       expect(packageFiles).toEqual([
         {
           packageFile: 'package.json',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'nested-packages/group/a/package.json',
           packageJsonName: '@demo/nested-group-a',
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
+          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         },
         {
           packageFile: 'not-matching/b/package.json',
           packageJsonName: '@not-matching/b',
-          pnpmShrinkwrap: undefined,
+          managerData: { pnpmShrinkwrap: undefined },
         },
       ]);
       expect(
         packageFiles.find(
           (packageFile) =>
             packageFile.packageFile === 'not-matching/b/package.json'
-        )?.pnpmShrinkwrap
+        )?.managerData.pnpmShrinkwrap
       ).toBeUndefined();
     });
   });

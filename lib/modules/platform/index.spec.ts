@@ -1,11 +1,12 @@
 import * as httpMock from '../../../test/http-mock';
-import { PlatformId } from '../../constants';
+import type { PlatformId } from '../../constants';
 import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { loadModules } from '../../util/modules';
 import type { Platform } from './types';
 import * as platform from '.';
 
 jest.unmock('.');
+jest.unmock('./scm');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {
@@ -42,7 +43,11 @@ describe('modules/platform/index', () => {
   });
 
   it('throws if wrong platform', async () => {
-    const config = { platform: 'wrong', username: 'abc', password: '123' };
+    const config = {
+      platform: 'wrong' as PlatformId,
+      username: 'abc',
+      password: '123',
+    };
     await expect(platform.initPlatform(config)).rejects.toThrow();
   });
 
@@ -53,7 +58,7 @@ describe('modules/platform/index', () => {
       .basicAuth({ user: 'abc', pass: '123' })
       .reply(200, { uuid: 123 });
     const config = {
-      platform: PlatformId.Bitbucket,
+      platform: 'bitbucket' as PlatformId,
       gitAuthor: 'user@domain.com',
       username: 'abc',
       password: '123',
@@ -69,7 +74,48 @@ describe('modules/platform/index', () => {
           username: 'abc',
         },
       ],
-      platform: PlatformId.Bitbucket,
+      platform: 'bitbucket',
+    });
+  });
+
+  it('merges config hostRules with platform hostRules', async () => {
+    httpMock.scope('https://ghe.renovatebot.com').head('/').reply(200);
+
+    const config = {
+      platform: 'github' as PlatformId,
+      endpoint: 'https://ghe.renovatebot.com',
+      gitAuthor: 'user@domain.com',
+      username: 'abc',
+      token: '123',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+      ],
+    };
+
+    expect(await platform.initPlatform(config)).toEqual({
+      endpoint: 'https://ghe.renovatebot.com/',
+      gitAuthor: 'user@domain.com',
+      hostRules: [
+        {
+          hostType: 'github',
+          matchHost: 'github.com',
+          token: '456',
+          username: 'def',
+        },
+        {
+          hostType: 'github',
+          matchHost: 'ghe.renovatebot.com',
+          token: '123',
+          username: 'abc',
+        },
+      ],
+      platform: 'github',
+      renovateUsername: 'abc',
     });
   });
 });

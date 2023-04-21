@@ -5,6 +5,7 @@ import { join, resolve } from 'upath';
 import { mockedFunction } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import {
+  cachePathExists,
   chmodLocalFile,
   createCacheWriteStream,
   deleteLocalFile,
@@ -13,8 +14,10 @@ import {
   ensureLocalDir,
   findLocalSiblingOrParent,
   findUpLocal,
+  getLocalFiles,
   getParentDir,
   getSiblingFileName,
+  isValidLocalPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -34,6 +37,7 @@ import {
 
 jest.mock('../exec/env');
 jest.mock('find-up');
+jest.mock('../git');
 
 const findUp = mockedFunction(_findUp);
 
@@ -202,7 +206,17 @@ describe('util/fs/index', () => {
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBe(false);
+      expect(await localPathExists('file.txt')).toBeFalse();
+    });
+  });
+
+  describe('isLocalPath', () => {
+    it('returns true for valid local path', () => {
+      expect(isValidLocalPath('./foo/...')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(isValidLocalPath('/file.txt')).toBeFalse();
     });
   });
 
@@ -426,6 +440,14 @@ describe('util/fs/index', () => {
     });
   });
 
+  describe('cachePathExists', () => {
+    it('reads file', async () => {
+      await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
+      expect(await cachePathExists(`foo/bar/file.txt1`)).toBeFalse();
+      expect(await cachePathExists(`foo/bar/file.txt`)).toBeTrue();
+    });
+  });
+
   describe('readCacheFile', () => {
     it('reads file', async () => {
       await fs.outputFile(`${cacheDir}/foo/bar/file.txt`, 'foobar');
@@ -450,6 +472,27 @@ describe('util/fs/index', () => {
       await fs.outputFile(path, 'foobar', { encoding: 'utf8' });
       expect(await readSystemFile(path, 'utf8')).toBe('foobar');
       expect(await readSystemFile(path)).toEqual(Buffer.from('foobar'));
+    });
+  });
+
+  describe('getLocalFiles', () => {
+    it('reads list of files from local fs', async () => {
+      const fileContentMap = {
+        file1: 'foobar',
+        file2: 'foobar2',
+      };
+
+      await fs.outputFile(`${localDir}/file1`, fileContentMap.file1);
+      await fs.outputFile(`${localDir}/file2`, fileContentMap.file2);
+      const res = await getLocalFiles(Object.keys(fileContentMap));
+      expect(res).toStrictEqual(fileContentMap);
+    });
+
+    it('returns null as content if file is not found', async () => {
+      const res = await getLocalFiles(['invalidfile']);
+      expect(res).toStrictEqual({
+        invalidfile: null,
+      });
     });
   });
 });

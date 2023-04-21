@@ -8,19 +8,24 @@ import { newlineRegex, regEx } from '../../../../util/regex';
 import { GithubTagsDatasource } from '../../../datasource/github-tags';
 import { NpmDatasource } from '../../../datasource/npm';
 import * as nodeVersioning from '../../../versioning/node';
-import { isValid, isVersion } from '../../../versioning/npm';
+import { api, isValid, isVersion } from '../../../versioning/npm';
 import type {
   ExtractConfig,
-  NpmLockFiles,
   PackageDependency,
   PackageFile,
+  PackageFileContent,
 } from '../../types';
-import type { NpmManagerData } from '../types';
+import type { NpmLockFiles, NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import {
+  YarnConfig,
+  loadConfigFromLegacyYarnrc,
+  loadConfigFromYarnrcYml,
+  resolveRegistryUrl,
+} from './yarnrc';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -39,7 +44,7 @@ export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Promise<PackageFile<NpmManagerData> | null> {
+): Promise<PackageFileContent<NpmManagerData> | null> {
   logger.trace(`npm.extractPackageFile(${fileName})`);
   logger.trace({ content });
   const deps: PackageDependency[] = [];
@@ -47,7 +52,7 @@ export async function extractPackageFile(
   try {
     packageJson = JSON.parse(content);
   } catch (err) {
-    logger.debug({ fileName }, 'Invalid JSON');
+    logger.debug(`Invalid JSON in ${fileName}`);
     return null;
   }
 
@@ -67,15 +72,12 @@ export async function extractPackageFile(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
   const packageFileVersion = packageJson.version;
-  let yarnWorkspacesPackages: string[] | undefined;
+  let workspacesPackages: string[] | undefined;
   if (is.array(packageJson.workspaces)) {
-    yarnWorkspacesPackages = packageJson.workspaces;
+    workspacesPackages = packageJson.workspaces;
   } else {
-    yarnWorkspacesPackages = packageJson.workspaces?.packages;
+    workspacesPackages = packageJson.workspaces?.packages;
   }
-  const packageJsonType = mightBeABrowserLibrary(packageJson)
-    ? 'library'
-    : 'app';
 
   const lockFiles: NpmLockFiles = {
     yarnLock: 'yarn.lock',
@@ -108,6 +110,7 @@ export async function extractPackageFile(
         { npmrcFileName },
         'Repo .npmrc file is ignored due to config.npmrc with config.npmrcMerge=false'
       );
+      npmrc = config.npmrc;
     } else {
       npmrc = config.npmrc ?? '';
       if (npmrc.length) {
@@ -134,10 +137,24 @@ export async function extractPackageFile(
       }
       npmrc += repoNpmrc;
     }
+  } else if (is.string(config.npmrc)) {
+    npmrc = config.npmrc;
   }
 
   const yarnrcYmlFileName = getSiblingFileName(fileName, '.yarnrc.yml');
   const yarnZeroInstall = await isZeroInstall(yarnrcYmlFileName);
+
+  let yarnConfig: YarnConfig | null = null;
+  const repoYarnrcYml = await readLocalFile(yarnrcYmlFileName, 'utf8');
+  if (is.string(repoYarnrcYml)) {
+    yarnConfig = loadConfigFromYarnrcYml(repoYarnrcYml);
+  }
+
+  const legacyYarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
+  const repoLegacyYarnrc = await readLocalFile(legacyYarnrcFileName, 'utf8');
+  if (is.string(repoLegacyYarnrc)) {
+    yarnConfig = loadConfigFromLegacyYarnrc(repoLegacyYarnrc);
+  }
 
   let lernaJsonFile: string | undefined;
   let lernaPackages: string[] | undefined;
@@ -177,7 +194,7 @@ export async function extractPackageFile(
     overrides: 'overrides',
   };
 
-  const constraints: Record<string, any> = {};
+  const extractedConstraints: Record<string, any> = {};
 
   function extractDependency(
     depType: string,
@@ -199,28 +216,27 @@ export async function extractPackageFile(
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
-        constraints.node = dep.currentValue;
+        extractedConstraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
-        constraints.yarn = dep.currentValue;
-        if (
-          dep.currentValue.startsWith('2') ||
-          dep.currentValue.startsWith('3')
-        ) {
+        extractedConstraints.yarn = dep.currentValue;
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
           dep.packageName = '@yarnpkg/cli';
         }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'npm';
-        constraints.npm = dep.currentValue;
+        extractedConstraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'microsoft/vscode';
-        constraints.vscode = dep.currentValue;
+        extractedConstraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = 'unknown-engines';
       }
@@ -239,6 +255,11 @@ export async function extractPackageFile(
       } else if (depName === 'yarn') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'Yarn';
+        const major =
+          isVersion(dep.currentValue) && api.getMajor(dep.currentValue);
+        if (major && major > 1) {
+          dep.packageName = '@yarnpkg/cli';
+        }
       } else if (depName === 'npm') {
         dep.datasource = NpmDatasource.id;
       } else {
@@ -269,11 +290,14 @@ export async function extractPackageFile(
       hasFancyRefs = true;
       return dep;
     }
+    if (yarnConfig) {
+      const registryUrlFromYarnConfig = resolveRegistryUrl(depName, yarnConfig);
+      if (registryUrlFromYarnConfig) {
+        dep.registryUrls = [registryUrlFromYarnConfig];
+      }
+    }
     if (isValid(dep.currentValue)) {
       dep.datasource = NpmDatasource.id;
-      if (dep.currentValue === '*') {
-        dep.skipReason = 'any-version';
-      }
       if (dep.currentValue === '') {
         dep.skipReason = 'empty';
       }
@@ -435,7 +459,7 @@ export async function extractPackageFile(
         packageFileVersion ||
         npmrc ||
         lernaJsonFile ||
-        yarnWorkspacesPackages
+        workspacesPackages
       )
     ) {
       logger.debug('Skipping file');
@@ -459,27 +483,28 @@ export async function extractPackageFile(
 
   return {
     deps,
-    packageJsonName,
     packageFileVersion,
-    packageJsonType,
     npmrc,
-    ...lockFiles,
     managerData: {
+      ...lockFiles,
+      lernaClient,
       lernaJsonFile,
+      lernaPackages,
+      packageJsonName,
       yarnZeroInstall,
       hasPackageManager: is.nonEmptyStringAndNotWhitespace(
         packageJson.packageManager
       ),
+      workspacesPackages,
     },
-    lernaClient,
-    lernaPackages,
     skipInstalls,
-    yarnWorkspacesPackages,
-    constraints,
+    extractedConstraints,
   };
 }
 
-export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
+export async function postExtract(
+  packageFiles: PackageFile<NpmManagerData>[]
+): Promise<void> {
   await detectMonorepos(packageFiles);
   await getLockedVersions(packageFiles);
 }
@@ -487,8 +512,8 @@ export async function postExtract(packageFiles: PackageFile[]): Promise<void> {
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
-): Promise<PackageFile[]> {
-  const npmFiles: PackageFile[] = [];
+): Promise<PackageFile<NpmManagerData>[]> {
+  const npmFiles: PackageFile<NpmManagerData>[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     // istanbul ignore else
@@ -496,12 +521,12 @@ export async function extractAllPackageFiles(
       const deps = await extractPackageFile(content, packageFile, config);
       if (deps) {
         npmFiles.push({
-          packageFile,
           ...deps,
+          packageFile,
         });
       }
     } else {
-      logger.debug({ packageFile }, 'packageFile has no content');
+      logger.debug(`No content found in ${packageFile}`);
     }
   }
 
@@ -509,7 +534,7 @@ export async function extractAllPackageFiles(
   return npmFiles;
 }
 
-function setNodeCommitTopic(dep: NpmManagerData): void {
+function setNodeCommitTopic(dep: PackageDependency<NpmManagerData>): void {
   // This is a special case for Node.js to group it together with other managers
   if (dep.depName === 'node') {
     dep.commitMessageTopic = 'Node.js';

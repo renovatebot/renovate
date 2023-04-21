@@ -23,7 +23,7 @@ describe('modules/datasource/golang-version/index', () => {
         .reply(200, golangReleasesContent);
       const res = await getPkgReleases({
         datasource,
-        depName: 'golang',
+        packageName: 'golang',
       });
       expect(res?.releases).toHaveLength(132);
       expect(res?.releases[0]).toEqual({
@@ -31,6 +31,26 @@ describe('modules/datasource/golang-version/index', () => {
         version: '1.0.0',
       });
       expect(res).toMatchSnapshot();
+    });
+
+    it('supports custom registry URL', async () => {
+      httpMock
+        .scope('https://custom-registry/website')
+        .get('/HEAD/internal/history/release.go')
+        .reply(200, golangReleasesContent);
+      const config = {
+        registryUrls: ['https://custom-registry/website'],
+      };
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        packageName: 'golang',
+      });
+      expect(res?.releases).toHaveLength(132);
+      expect(res?.releases[0]).toEqual({
+        releaseTimestamp: '2012-03-28T00:00:00.000Z',
+        version: '1.0.0',
+      });
     });
 
     it('throws ExternalHostError for invalid release with no versions', async () => {
@@ -41,7 +61,7 @@ describe('modules/datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'golang',
+          packageName: 'golang',
         })
       ).rejects.toThrow(ExternalHostError);
     });
@@ -54,7 +74,7 @@ describe('modules/datasource/golang-version/index', () => {
       await expect(
         getPkgReleases({
           datasource,
-          depName: 'golang',
+          packageName: 'golang',
         })
       ).rejects.toThrow(ExternalHostError);
     });
@@ -65,7 +85,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, {});
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -75,7 +95,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent3);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -85,7 +105,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent4);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -95,7 +115,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(404);
       expect(
-        await getPkgReleases({ datasource, depName: 'golang' })
+        await getPkgReleases({ datasource, packageName: 'golang' })
       ).toBeNull();
     });
 
@@ -105,7 +125,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent5);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
 
@@ -115,7 +135,7 @@ describe('modules/datasource/golang-version/index', () => {
         .get('/golang/website/HEAD/internal/history/release.go')
         .reply(200, golangReleasesInvalidContent6);
       await expect(
-        getPkgReleases({ datasource, depName: 'golang' })
+        getPkgReleases({ datasource, packageName: 'golang' })
       ).rejects.toThrow(ExternalHostError);
     });
   });

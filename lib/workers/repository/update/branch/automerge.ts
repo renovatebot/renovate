@@ -1,10 +1,8 @@
-// TODO #7154
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
-import { BranchStatus } from '../../../../types';
-import { mergeBranch } from '../../../../util/git';
+import { checkoutBranch, mergeBranch } from '../../../../util/git';
 import { isScheduledNow } from './schedule';
 import { resolveBranchStatus } from './status-checks';
 
@@ -34,15 +32,17 @@ export async function tryBranchAutomerge(
   }
   const branchStatus = await resolveBranchStatus(
     config.branchName!,
+    !!config.internalChecksAsSuccess,
     config.ignoreTests
   );
-  if (branchStatus === BranchStatus.green) {
+  if (branchStatus === 'green') {
     logger.debug(`Automerging branch`);
     try {
       if (GlobalConfig.get('dryRun')) {
         // TODO: types (#7154)
         logger.info(`DRY-RUN: Would automerge branch ${config.branchName!}`);
       } else {
+        await checkoutBranch(config.baseBranch!);
         await mergeBranch(config.branchName!);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
@@ -87,7 +87,7 @@ export async function tryBranchAutomerge(
       logger.warn({ err }, 'Unknown error when attempting branch automerge');
       return 'failed';
     }
-  } else if (branchStatus === BranchStatus.red) {
+  } else if (branchStatus === 'red') {
     return 'branch status error';
   } else {
     logger.debug(`Branch status is "${branchStatus}" - skipping automerge`);

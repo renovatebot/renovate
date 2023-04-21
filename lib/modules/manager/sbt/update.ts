@@ -26,7 +26,7 @@ export function bumpPackageVersion(
   if (bumpedContent === content) {
     logger.debug('Version was already bumped');
   } else {
-    logger.debug({ bumpedVersion }, 'Bumped build.sbt version');
+    logger.debug(`Bumped build.sbt version to ${bumpedVersion}`);
   }
 
   return { bumpedContent };

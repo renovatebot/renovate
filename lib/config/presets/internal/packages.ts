@@ -1,5 +1,7 @@
 import type { Preset } from '../types';
 
+/* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
+
 export const presets: Record<string, Preset> = {
   angularJs: {
     description: 'All AngularJS packages.',
@@ -10,18 +12,9 @@ export const presets: Record<string, Preset> = {
       'angular-sanitize',
     ],
   },
-  react: {
-    description: 'All React packages.',
-    matchPackageNames: ['@types/react'],
-    matchPackagePrefixes: ['react'],
-  },
   apollographql: {
     description: 'All packages published by Apollo GraphQL.',
     matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
-  },
-  mapbox: {
-    description: 'All Mapbox-related packages.',
-    matchPackagePrefixes: ['leaflet', 'mapbox'],
   },
   emberTemplateLint: {
     description: 'All ember-template-lint packages.',
@@ -32,29 +25,19 @@ export const presets: Record<string, Preset> = {
     matchPackageNames: ['@types/eslint', 'babel-eslint'],
     matchPackagePrefixes: ['@typescript-eslint/', 'eslint'],
   },
-  stylelint: {
-    description: 'All Stylelint packages.',
-    matchPackagePrefixes: ['stylelint'],
+  gatsby: {
+    description: 'All packages published by Gatsby.',
+    extends: ['monorepo:gatsby'],
   },
-  tslint: {
-    description: 'All TSLint packages.',
-    matchPackageNames: ['codelyzer'],
-    matchPackagePatterns: ['\\btslint\\b'],
+  googleapis: {
+    description: 'All `googleapis` packages.',
+    matchDatasources: ['npm'],
+    matchPackageNames: ['google-auth-library'],
+    matchPackagePrefixes: ['@google-cloud/'],
   },
-  linters: {
-    description: 'All lint-related packages.',
-    extends: [
-      'packages:emberTemplateLint',
-      'packages:eslint',
-      'packages:stylelint',
-      'packages:tslint',
-    ],
-    matchPackageNames: ['remark-lint'],
-  },
-  postcss: {
-    description: 'All PostCSS packages.',
-    matchPackageNames: ['postcss'],
-    matchPackagePrefixes: ['postcss-'],
+  jsTest: {
+    description: 'JavaScript test packages.',
+    extends: ['packages:jsUnitTest'],
   },
   jsUnitTest: {
     description: 'Unit test packages for JavaScript.',
@@ -81,10 +64,13 @@ export const presets: Record<string, Preset> = {
       'nyc',
       'proxyquire',
       'supertest',
+      'ts-auto-mock',
       'ts-jest',
+      'vitest',
     ],
     matchPackagePrefixes: [
       '@testing-library',
+      '@vitest',
       'chai',
       'jest',
       'mocha',
@@ -93,25 +79,45 @@ export const presets: Record<string, Preset> = {
       'sinon',
     ],
   },
-  unitTest: {
-    description: 'All unit test packages.',
-    extends: ['packages:jsUnitTest'],
+  linters: {
+    description: 'All lint-related packages.',
+    extends: [
+      'packages:emberTemplateLint',
+      'packages:eslint',
+      'packages:stylelint',
+      'packages:tslint',
+    ],
+    matchPackageNames: ['prettier', 'remark-lint', 'standard'],
   },
-  jsTest: {
-    description: 'JavaScript test packages.',
-    extends: ['packages:jsUnitTest'],
+  mapbox: {
+    description: 'All Mapbox-related packages.',
+    matchPackagePrefixes: ['leaflet', 'mapbox'],
+  },
+  postcss: {
+    description: 'All PostCSS packages.',
+    matchPackageNames: ['postcss'],
+    matchPackagePrefixes: ['postcss-'],
+  },
+  react: {
+    description: 'All React packages.',
+    matchPackageNames: ['@types/react'],
+    matchPackagePrefixes: ['react'],
+  },
+  stylelint: {
+    description: 'All Stylelint packages.',
+    matchPackagePrefixes: ['stylelint'],
   },
   test: {
     description: 'Test packages.',
     extends: ['packages:unitTest'],
   },
-  gatsby: {
-    description: 'All packages published by Gatsby.',
-    extends: ['monorepo:gatsby'],
+  tslint: {
+    description: 'All TSLint packages.',
+    matchPackageNames: ['codelyzer'],
+    matchPackagePatterns: ['\\btslint\\b'],
   },
-  googleapis: {
-    matchDatasources: ['npm'],
-    description: 'All `googleapis` packages.',
-    matchPackagePrefixes: ['@google-cloud/'],
+  unitTest: {
+    description: 'All unit test packages.',
+    extends: ['packages:jsUnitTest'],
   },
 };

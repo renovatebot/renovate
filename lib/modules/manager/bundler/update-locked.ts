@@ -2,31 +2,21 @@ import { logger } from '../../../logger';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
 import { extractLockFileEntries } from './locked-version';
 
-// TODO: fix coverage after strict null checks finished
-
 export function updateLockedDependency(
   config: UpdateLockedConfig
 ): UpdateLockedResult {
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `bundler.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = extractLockFileEntries(
-      lockFileContent ?? /* istanbul ignore next: should never happen */ ''
-    );
-    if (
-      locked.get(
-        depName ?? /* istanbul ignore next: should never happen */ ''
-      ) === newVersion
-    ) {
+    const locked = extractLockFileEntries(lockFileContent ?? '');
+    if (locked.get(depName ?? '') === newVersion) {
       return { status: 'already-updated' };
     }
     return { status: 'unsupported' };
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     logger.debug({ err }, 'bundler.updateLockedDependency() error');
     return { status: 'update-failed' };
   }

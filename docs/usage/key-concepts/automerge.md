@@ -18,7 +18,7 @@ Renovate's approach is to ensure that automerging branches are up-to-date with t
 This means merging multiple branches in a row won't work reliably, so we prefer not to do that.
 What all this means is that Renovate will only automerge at most one branch/PR per target branch per run, before you need to wait for the next run.
 
-As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just click "merge" anyway.
+As a general guide, we recommend that you enable automerge for any type of dependency updates where you would just select "merge" anyway.
 For any updates where you want to review the release notes - or code - before you merge, you can keep automerge disabled.
 
 Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
@@ -27,7 +27,7 @@ For example, if you have Jest or Mocha as a development dependency, and it has a
 If you have a linter like ESLint or TSLint and its update passes... automerge them!
 If you have an API with 100% test coverage and Express is updated... automerge it!
 
-![Automerged PR](/assets/images/automerged-pr.png)
+![Automerged PR](/assets/images/automerged-pr.png){ loading=lazy }
 
 ## Configuration examples
 
@@ -82,6 +82,22 @@ Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they 
 
 The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
 
+### Automerge monorepo PRs
+
+Say you want to automerge `patch` and `minor` updates for packages in the `group:ionic-nativeMonorepo` preset:
+
+```json
+{
+  "packageRules": [
+    {
+      "extends": ["monorepo:ionic-native"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true
+    }
+  ]
+}
+```
+
 ### Faster merges with platform-native automerge
 
 You can speed up merges by letting Renovate use your platform's native automerge.
@@ -102,6 +118,69 @@ For example:
 ```
 
 For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
+
+### GitHub Merge Queue
+
+Renovate supports GitHub's Merge Queue.
+
+Read the [GitHub Docs, managing a merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue) first.
+
+The steps to enable GitHub's Merge Queue differ based on whether you use GitHub Actions or another CI provider.
+
+<!-- prettier-ignore -->
+!!! tip "GitHub Merge Queue overview page"
+    GitHub has a page that shows all the PRs in the Merge Queue.
+    The page link follows this pattern: `https://github.com/organization-name/repository-name/queue/base-branch-name`.
+    For example, here's [Renovate's main repository's Merge Queue overview](https://github.com/renovatebot/renovate/queue/main).
+
+<!-- prettier-ignore -->
+!!! warning "GitHub Merge Queue is in beta"
+    GitHub's Merge Queue feature is labeled as a beta feature by GitHub.
+    The Merge Queue may stop working, have bugs, or you may need to update your configuration when GitHub changes things.
+
+#### If you use GitHub Actions
+
+If you use GitHub Actions as your CI provider, follow these steps:
+
+Add the `on.merge_group` event to your GitHub Action `.yaml` files, for example:
+
+```yaml
+on:
+  pull_request:
+  merge_group:
+```
+
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
+
+Then go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file, for example:
+
+```json
+{
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    }
+  ]
+}
+```
+
+#### If you don't use GitHub Actions
+
+If you _don't_ use GitHub Actions as your CI provider, follow these steps:
+
+Update your CI provider's configuration so it also runs tests on the temporary `gh-readonly-queue/{base_branch}` branches, read your CI providers's documentation to learn how to do this.
+
+On `github.com`, go to your repository's "homepage", click on Settings, scroll down to the Pull Requests section and [enable the "Allow auto-merge" checkbox](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-auto-merge-for-pull-requests-in-your-repository#managing-auto-merge).
+Go to your repository's branch protection rules for your base branch (usually `main`) and enable the "Require merge queue" setting.
+Confirm you've set the correct "required checks" for your base branch.
+
+Finally, allow Renovate to automerge by setting `automerge=true` and `platformAutomerge=true` in your Renovate config file (see earlier example).
 
 ## Automerging and scheduling
 
@@ -136,6 +215,9 @@ If you have enabled branch protection which prevents Renovate from automerging d
 
 When automerge is enabled on a PR, Renovate will _not_ add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
 If tests subsequently _fail_, making automerge not possible, then Renovate will add the configured assignees and/or reviewers.
+
+Note: Renovate won't add assignees and reviewers to a PR with failing checks if the PR already has assignees or reviewers present.
+If there are accounts you wish to ignore (i.e. add assignees and reviewers regardless) then add them to `ignoreReviewers` to specify those which should be filtered out in such consideration.
 
 ## Frequent problems and how to resolve them
 

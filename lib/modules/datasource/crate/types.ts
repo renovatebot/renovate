@@ -1,14 +1,12 @@
-// eslint-disable-next-line typescript-enum/no-enum
-export enum RegistryFlavor {
+export type RegistryFlavor =
   /** https://crates.io, supports rawgit access */
-  CratesIo,
+  | 'crates.io'
 
   /** https://cloudsmith.io, needs git clone */
-  Cloudsmith,
+  | 'cloudsmith'
 
   /** unknown, assuming private git repository */
-  Other,
-}
+  | 'other';
 
 export interface RegistryInfo {
   flavor: RegistryFlavor;
@@ -18,6 +16,9 @@ export interface RegistryInfo {
 
   /** parsed URL of the registry */
   url: URL;
+
+  /** whether the registry uses sparse indexing (rfc-2789) */
+  isSparse: boolean;
 
   /** path where the registry is cloned */
   clonePath?: string;

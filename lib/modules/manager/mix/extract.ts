@@ -1,25 +1,33 @@
 import { logger } from '../../../logger';
 import { findLocalSiblingOrParent, localPathExists } from '../../../util/fs';
 import { newlineRegex, regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexDatasource } from '../../datasource/hex';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 const depSectionRegExp = regEx(/defp\s+deps.*do/g);
 const depMatchRegExp = regEx(
-  /{:(?<depName>\w+),\s*(?<datasource>[^:"]+)?:?\s*"(?<currentValue>[^"]+)",?\s*(?:organization: "(?<organization>.*)")?.*}/gm
+  /{:(?<app>\w+)(\s*,\s*"(?<requirement>[^"]+)")?(\s*,\s*(?<opts>[^}]+))?}/gm
 );
+const gitRegexp = regEx(/git:\s*"(?<value>[^"]+)"/);
+const githubRegexp = regEx(/github:\s*"(?<value>[^"]+)"/);
+const refRegexp = regEx(/ref:\s*"(?<value>[^"]+)"/);
+const branchOrTagRegexp = regEx(/(?:branch|tag):\s*"(?<value>[^"]+)"/);
+const organizationRegexp = regEx(/organization:\s*"(?<value>[^"]+)"/);
+const commentMatchRegExp = regEx(/#.*$/);
 
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace('mix.extractPackageFile()');
   const deps: PackageDependency[] = [];
-  const contentArr = content.split(newlineRegex);
-
+  const contentArr = content
+    .split(newlineRegex)
+    .map((line) => line.replace(commentMatchRegExp, ''));
   for (let lineNumber = 0; lineNumber < contentArr.length; lineNumber += 1) {
     if (contentArr[lineNumber].match(depSectionRegExp)) {
-      logger.trace(`Matched dep section on line ${lineNumber}`);
       let depBuffer = '';
       do {
         depBuffer += contentArr[lineNumber] + '\n';
@@ -27,27 +35,33 @@ export async function extractPackageFile(
       } while (!contentArr[lineNumber].includes('end'));
       let depMatchGroups = depMatchRegExp.exec(depBuffer)?.groups;
       while (depMatchGroups) {
-        const { depName, datasource, currentValue, organization } =
-          depMatchGroups;
+        const { app, requirement, opts } = depMatchGroups;
+        const github = githubRegexp.exec(opts)?.groups?.value;
+        const git = gitRegexp.exec(opts)?.groups?.value;
+        const ref = refRegexp.exec(opts)?.groups?.value;
+        const branchOrTag = branchOrTagRegexp.exec(opts)?.groups?.value;
+        const organization = organizationRegexp.exec(opts)?.groups?.value;
 
-        const dep: PackageDependency = {
-          depName,
-          currentValue,
-        };
+        let dep: PackageDependency;
 
-        dep.datasource = datasource || HexDatasource.id;
-
-        if (dep.datasource === HexDatasource.id) {
-          dep.currentValue = currentValue;
-          dep.packageName = depName;
-        }
-
-        if (organization) {
-          dep.packageName += ':' + organization;
-        }
-
-        if (dep.datasource !== HexDatasource.id) {
-          dep.skipReason = 'non-hex-dep-types';
+        if (git ?? github) {
+          dep = {
+            depName: app,
+            currentDigest: ref,
+            currentValue: branchOrTag,
+            datasource: git ? GitTagsDatasource.id : GithubTagsDatasource.id,
+            packageName: git ?? github,
+          };
+        } else {
+          dep = {
+            depName: app,
+            currentValue: requirement,
+            datasource: HexDatasource.id,
+            packageName: organization ? `${app}:${organization}` : app,
+          };
+          if (requirement?.startsWith('==')) {
+            dep.currentVersion = requirement.replace(regEx(/^==\s*/), '');
+          }
         }
 
         deps.push(dep);
@@ -55,7 +69,7 @@ export async function extractPackageFile(
       }
     }
   }
-  const res: PackageFile = { deps };
+  const res: PackageFileContent = { deps };
   const lockFileName =
     (await findLocalSiblingOrParent(fileName, 'mix.lock')) ?? 'mix.lock';
   // istanbul ignore if

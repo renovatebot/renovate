@@ -74,14 +74,6 @@
 - [ ] Supports range constraints (e.g `^1.0.0` or `1.x`)
 - [ ] No
 
-### Is this package manager used for applications, libraries, or both? If both, is there a way to tell which is which?
-
-- [ ] Applications
-- [ ] Libraries
-- [ ] Both (explain how to tell which is which)
-
-### If ranges are supported, are there any cases when Renovate should pin ranges to exact versions if rangeStrategy=auto?
-
 ---
 
 ## Lookup

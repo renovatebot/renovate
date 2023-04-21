@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mockedFunction } from '../../../../test/util';
+import { env, fs, git, mockedFunction, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -24,6 +24,7 @@ const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
+  containerbaseDir: join('/tmp/renovate/cache/containerbase'),
 };
 const dockerAdminConfig = { ...adminConfig, binarySource: 'docker' };
 
@@ -115,9 +116,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('current pipfile.lock');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
     expect(
       await pipenv.updateArtifacts({
@@ -139,9 +142,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await pipenv.updateArtifacts({
@@ -163,9 +168,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/renovate/cache/others/pip');
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await pipenv.updateArtifacts({
@@ -208,9 +215,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce('Current Pipfile.lock');
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('New Pipfile.lock');
     expect(
       await pipenv.updateArtifacts({
@@ -231,9 +240,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await pipenv.updateArtifacts({
@@ -254,9 +265,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await pipenv.updateArtifacts({
@@ -277,9 +290,11 @@ describe('modules/manager/pipenv/artifacts', () => {
     );
     fs.readLocalFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(
+      partial<StatusResult>({
+        modified: ['Pipfile.lock'],
+      })
+    );
     fs.readLocalFile.mockResolvedValueOnce('new lock');
     expect(
       await pipenv.updateArtifacts({

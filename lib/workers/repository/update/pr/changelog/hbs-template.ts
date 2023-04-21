@@ -11,7 +11,7 @@ export default `### Release Notes
 
 {{#if release.releaseNotes}}
 
-### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}})
+### [\`v{{{release.version}}}\`]({{{release.releaseNotes.url}}}){{#if release.releaseNotes.name}}: {{release.releaseNotes.name}}{{/if}}
 
 {{#if release.compare.url}}
 

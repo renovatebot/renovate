@@ -10,14 +10,13 @@ import {
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import delay from 'delay';
 import JSON5 from 'json5';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -40,7 +39,7 @@ import type {
   RepoResult,
   UpdatePrConfig,
 } from '../types';
-import { repoFingerprint } from '../util';
+import { getNewBranchName, repoFingerprint } from '../util';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
@@ -49,7 +48,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getNewBranchName,
   getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
@@ -73,6 +71,7 @@ interface Config {
 interface User {
   id: string;
   name: string;
+  isRequired: boolean;
 }
 
 let config: Config = {} as any;
@@ -81,8 +80,10 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.Azure,
+  hostType: 'azure',
 };
+
+export const id = 'azure';
 
 export function initPlatform({
   endpoint,
@@ -261,7 +262,7 @@ export async function getPrList(): Promise<AzurePr[]> {
     } while (fetchedPrs.length > 0);
 
     config.prList = prs.map(getRenovatePRFormat);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests count: ${config.prList.length}`);
   }
   return config.prList;
 }
@@ -289,14 +290,13 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     .filter((label) => label.active)
     .map((label) => label.name)
     .filter(is.string);
-  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -311,11 +311,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case PrState.All:
+      case 'all':
         // no more filter needed, we can go further...
         break;
-      case PrState.NotOpen:
-        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
+      case '!open':
+        prsFiltered = prsFiltered.filter((item) => item.state !== 'open');
         break;
       default:
         prsFiltered = prsFiltered.filter((item) => item.state === state);
@@ -334,7 +334,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -360,12 +360,12 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
 }
 
 const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
-  [GitStatusState.Succeeded]: BranchStatus.green,
-  [GitStatusState.NotApplicable]: BranchStatus.green,
-  [GitStatusState.NotSet]: BranchStatus.yellow,
-  [GitStatusState.Pending]: BranchStatus.yellow,
-  [GitStatusState.Error]: BranchStatus.red,
-  [GitStatusState.Failed]: BranchStatus.red,
+  [GitStatusState.Succeeded]: 'green',
+  [GitStatusState.NotApplicable]: 'green',
+  [GitStatusState.NotSet]: 'yellow',
+  [GitStatusState.Pending]: 'yellow',
+  [GitStatusState.Error]: 'red',
+  [GitStatusState.Failed]: 'red',
 };
 
 export async function getBranchStatusCheck(
@@ -376,39 +376,53 @@ export async function getBranchStatusCheck(
   for (const check of res) {
     if (getGitStatusContextCombinedName(check.context) === context) {
       // TODO #7154
-      return azureToRenovateStatusMapping[check.state!] ?? BranchStatus.yellow;
+      return azureToRenovateStatusMapping[check.state!] ?? 'yellow';
     }
   }
   return null;
 }
 
 export async function getBranchStatus(
-  branchName: string
+  branchName: string,
+  internalChecksAsSuccess: boolean
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
   if (!statuses.length) {
     logger.debug('empty branch status check result = returning "pending"');
-    return BranchStatus.yellow;
+    return 'yellow';
   }
   const noOfFailures = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.Error ||
       status.state === GitStatusState.Failed
   ).length;
   if (noOfFailures) {
-    return BranchStatus.red;
+    return 'red';
   }
   const noOfPending = statuses.filter(
-    (status: GitStatus) =>
+    (status) =>
       status.state === GitStatusState.NotSet ||
       status.state === GitStatusState.Pending
   ).length;
   if (noOfPending) {
-    return BranchStatus.yellow;
+    return 'yellow';
   }
-  return BranchStatus.green;
+  if (
+    !internalChecksAsSuccess &&
+    statuses.every(
+      (status) =>
+        status.state === GitStatusState.Succeeded &&
+        status.context?.genre === 'renovate'
+    )
+  ) {
+    logger.debug(
+      'Successful checks are all internal renovate/ checks, so returning "pending" branch status'
+    );
+    return 'yellow';
+  }
+  return 'green';
 }
 
 export async function createPr({
@@ -458,7 +472,7 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  if (platformOptions?.azureAutoApprove) {
+  if (platformOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -504,13 +518,13 @@ export async function updatePr({
     objToUpdate.description = max4000Chars(sanitize(body));
   }
 
-  if (state === PrState.Open) {
+  if (state === 'open') {
     await azureApiGit.updatePullRequest(
       { status: PullRequestStatus.Active },
       config.repoId,
       prNo
     );
-  } else if (state === PrState.Closed) {
+  } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
 
@@ -624,10 +638,9 @@ export async function ensureCommentRemoval(
 }
 
 const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {
-  [BranchStatus.green]: [GitStatusState.Succeeded],
-  [BranchStatus.green]: GitStatusState.Succeeded,
-  [BranchStatus.yellow]: GitStatusState.Pending,
-  [BranchStatus.red]: GitStatusState.Failed,
+  ['green']: GitStatusState.Succeeded,
+  ['yellow']: GitStatusState.Pending,
+  ['red']: GitStatusState.Failed,
 };
 
 export async function setBranchStatus({
@@ -747,7 +760,7 @@ export function massageMarkdown(input: string): string {
       'rename PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
-    .replace(regEx(/<!--renovate-debug:.*?-->/), '');
+    .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
 
 /* istanbul ignore next */
@@ -779,6 +792,7 @@ async function getUserIds(users: string[]): Promise<User[]> {
   const azureApiCore = await azureApi.coreApi();
   const repos = await azureApiGit.getRepositories();
   const repo = repos.filter((c) => c.id === config.repoId)[0];
+  const requiredReviewerPrefix = 'required:';
 
   // TODO #7154
   const teams = await azureApiCore.getTeams(repo.project!.id!);
@@ -793,17 +807,27 @@ async function getUserIds(users: string[]): Promise<User[]> {
     )
   );
 
-  const ids: { id: string; name: string }[] = [];
+  const ids: { id: string; name: string; isRequired: boolean }[] = [];
   members.forEach((listMembers) => {
     listMembers.forEach((m) => {
       users.forEach((r) => {
+        let reviewer = r;
+        let isRequired = false;
+        if (reviewer.startsWith(requiredReviewerPrefix)) {
+          reviewer = reviewer.replace(requiredReviewerPrefix, '');
+          isRequired = true;
+        }
         if (
-          r.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
-          r.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
+          reviewer.toLowerCase() === m.identity?.displayName?.toLowerCase() ||
+          reviewer.toLowerCase() === m.identity?.uniqueName?.toLowerCase()
         ) {
           if (ids.filter((c) => c.id === m.identity?.id).length === 0) {
             // TODO #7154
-            ids.push({ id: m.identity.id!, name: r });
+            ids.push({
+              id: m.identity.id!,
+              name: reviewer,
+              isRequired,
+            });
           }
         }
       });
@@ -812,10 +836,16 @@ async function getUserIds(users: string[]): Promise<User[]> {
 
   teams.forEach((t) => {
     users.forEach((r) => {
-      if (r.toLowerCase() === t.name?.toLowerCase()) {
+      let reviewer = r;
+      let isRequired = false;
+      if (reviewer.startsWith(requiredReviewerPrefix)) {
+        reviewer = reviewer.replace(requiredReviewerPrefix, '');
+        isRequired = true;
+      }
+      if (reviewer.toLowerCase() === t.name?.toLowerCase()) {
         if (ids.filter((c) => c.id === t.id).length === 0) {
           // TODO #7154
-          ids.push({ id: t.id!, name: r });
+          ids.push({ id: t.id!, name: reviewer, isRequired });
         }
       }
     });
@@ -859,7 +889,9 @@ export async function addReviewers(
   await Promise.all(
     ids.map(async (obj) => {
       await azureApiGit.createPullRequestReviewer(
-        {},
+        {
+          isRequired: obj.isRequired,
+        },
         config.repoId,
         prNo,
         obj.id
@@ -876,8 +908,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

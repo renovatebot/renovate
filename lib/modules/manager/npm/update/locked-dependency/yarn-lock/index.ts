@@ -12,8 +12,6 @@ export function updateLockedDependency(
   const { depName, currentVersion, newVersion, lockFile, lockFileContent } =
     config;
   logger.debug(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `npm.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   let yarnLock: YarnLock;
@@ -24,17 +22,8 @@ export function updateLockedDependency(
     logger.warn({ err }, 'Failed to parse yarn files');
     return { status: 'update-failed' };
   }
-  if ('__metadata' in yarnLock) {
-    logger.debug('Yarn 2+ unsupported');
-    return { status: 'unsupported' };
-  }
   try {
-    const lockedDeps = getLockedDependencies(
-      yarnLock,
-      depName,
-      // TODO #7154
-      currentVersion!
-    );
+    const lockedDeps = getLockedDependencies(yarnLock, depName, currentVersion);
     if (!lockedDeps.length) {
       const newLockedDeps = getLockedDependencies(
         yarnLock,
@@ -43,18 +32,20 @@ export function updateLockedDependency(
       );
       if (newLockedDeps.length) {
         logger.debug(
-          // TODO: types (#7154)
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           `${depName}@${currentVersion} not found in ${lockFile} but ${depName}@${newVersion} was - looks like it's already updated`
         );
         return { status: 'already-updated' };
       }
       logger.debug(
-        // TODO: types (#7154)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         `${depName}@${currentVersion} not found in ${lockFile} - cannot update`
       );
       return { status: 'update-failed' };
+    }
+    if ('__metadata' in yarnLock) {
+      logger.debug(
+        'Cannot patch Yarn 2+ lock file directly - falling back to using yarn'
+      );
+      return { status: 'unsupported' };
     }
     logger.debug(
       `Found matching dependencies with length ${lockedDeps.length}`

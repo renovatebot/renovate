@@ -12,16 +12,13 @@ export class PackageFiles {
   ): void {
     logger.debug(
       { baseBranch },
-      `PackageFiles.add() - Package file saved for branch`
+      `PackageFiles.add() - Package file saved for base branch`
     );
     this.data.set(baseBranch, packageFiles);
   }
 
   static clear(): void {
-    logger.debug(
-      { baseBranches: [...this.data.keys()] },
-      'PackageFiles.clear() - Package files deleted'
-    );
+    logger.debug('PackageFiles.clear() - Package files deleted');
     this.data.clear();
   }
 
@@ -108,8 +105,7 @@ export class PackageFiles {
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          // TODO: types (#7154)
-          deps += `<details><summary>${packageFile.packageFile!}</summary>\n\n`;
+          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;

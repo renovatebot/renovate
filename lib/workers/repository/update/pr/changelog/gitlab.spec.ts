@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../../../test/http-mock';
-import { PlatformId } from '../../../../../constants';
+import { partial } from '../../../../../../test/util';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -7,11 +7,11 @@ import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
-const upgrade: BranchUpgradeConfig = {
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
   endpoint: 'https://gitlab.com/api/v4/ ',
-  depName: 'renovate',
+  packageName: 'renovate',
   versioning: semverVersioning.id,
   currentVersion: '5.2.0',
   newVersion: '5.7.0',
@@ -27,7 +27,7 @@ const upgrade: BranchUpgradeConfig = {
     { version: '5.6.0', releaseTimestamp: '2020-02-13T15:37:00.000Z' },
     { version: '5.6.1' },
   ],
-};
+});
 
 const matchHost = 'https://gitlab.com/';
 
@@ -41,7 +41,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost,
         token: 'abc',
       });
@@ -85,7 +85,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -127,7 +127,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -162,7 +162,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -197,7 +197,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab.com/api/v4/',
           baseUrl: 'https://gitlab.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab.com/meno/dropzone/',
@@ -250,7 +250,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
 
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost: 'https://gitlab-enterprise.example.com/',
         token: 'abc',
       });
@@ -266,7 +266,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://gitlab-enterprise.example.com/api/v4/',
           baseUrl: 'https://gitlab-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://gitlab-enterprise.example.com/meno/dropzone/',
@@ -284,7 +284,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
     it('supports self-hosted gitlab changelog', async () => {
       httpMock.scope('https://git.test.com').persist().get(/.*/).reply(200, []);
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
@@ -292,7 +292,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          platform: PlatformId.Gitlab,
+          platform: 'gitlab',
           sourceUrl: 'https://git.test.com/meno/dropzone/',
           endpoint: 'https://git.test.com/api/v4/',
         })
@@ -301,7 +301,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://git.test.com/api/v4/',
           baseUrl: 'https://git.test.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'meno/dropzone',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/meno/dropzone/',
@@ -323,13 +323,13 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         'https://git.test.com/replacement/sourceurl/';
       const config = {
         ...upgrade,
-        platform: PlatformId.Gitlab,
+        platform: 'gitlab',
         endpoint: 'https://git.test.com/api/v4/',
         sourceUrl,
         customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
-        hostType: PlatformId.Gitlab,
+        hostType: 'gitlab',
         matchHost: 'https://git.test.com/',
         token: 'abc',
       });
@@ -339,7 +339,7 @@ describe('workers/repository/update/pr/changelog/gitlab', () => {
         project: {
           apiBaseUrl: 'https://git.test.com/api/v4/',
           baseUrl: 'https://git.test.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'replacement/sourceurl',
           sourceDirectory: undefined,
           sourceUrl: 'https://git.test.com/replacement/sourceurl/',

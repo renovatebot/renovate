@@ -5,19 +5,12 @@ import {
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
-import { HostRule, PrState } from '../../../types';
+import type { HostRule, PrState } from '../../../types';
 import type { GitOptions } from '../../../types/git';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { toBase64 } from '../../../util/string';
 import { getPrBodyStruct } from '../pr-body';
 import type { AzurePr } from './types';
-
-export function getNewBranchName(branchName?: string): string | undefined {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
 
 export function getGitStatusContextCombinedName(
   context: GitStatusContext | null | undefined
@@ -85,14 +78,12 @@ export function getBranchNameWithoutRefsPrefix(
 }
 
 const stateMap = {
-  [PullRequestStatus.Abandoned]: PrState.Closed,
-  [PullRequestStatus.Completed]: PrState.Merged,
+  [PullRequestStatus.Abandoned]: 'closed',
+  [PullRequestStatus.Completed]: 'merged',
 } as Record<PullRequestStatus, PrState | undefined>;
 
 export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
-  // TODO: types (#7154)
-  const displayNumber = `Pull Request #${number!}`;
 
   const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.sourceRefName
@@ -105,7 +96,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const createdAt = azurePr.creationDate?.toISOString();
 
   // TODO #7154
-  const state = stateMap[azurePr.status!] ?? PrState.Open;
+  const state = stateMap[azurePr.status!] ?? 'open';
 
   const sourceRefName = azurePr.sourceRefName;
 
@@ -114,7 +105,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
     sourceBranch,
     state,
     number,
-    displayNumber,
     bodyStruct,
     sourceRefName,
     targetBranch,

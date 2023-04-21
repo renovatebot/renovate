@@ -2,24 +2,28 @@ import is from '@sindresorhus/is';
 import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { HelmDatasource } from '../../datasource/helm';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   let deps = [];
   // TODO: fix type
   let doc: any;
   try {
     doc = load(content, { json: true }); // TODO #9610
   } catch (err) {
-    logger.debug({ fileName }, 'Failed to parse helm requirements.yaml');
+    logger.debug(`Failed to parse helm requirements.yaml in ${fileName}`);
     return null;
   }
   if (!(doc && is.array(doc.dependencies))) {
-    logger.debug({ fileName }, 'requirements.yaml has no dependencies');
+    logger.debug(`requirements.yaml in ${fileName} has no dependencies`);
     return null;
   }
   deps = doc.dependencies.map((dep: Record<string, any>) => {

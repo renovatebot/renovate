@@ -2,7 +2,6 @@
 import { REPOSITORY_CHANGED } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
-import { PrState } from '../../../../types';
 import type { BranchConfig } from '../../../types';
 
 export async function prAlreadyExisted(
@@ -18,7 +17,7 @@ export async function prAlreadyExisted(
   let pr = await platform.findPr({
     branchName: config.branchName,
     prTitle: config.prTitle,
-    state: PrState.NotOpen,
+    state: '!open',
   });
 
   if (!pr && config.branchPrefix !== config.branchPrefixOld) {
@@ -28,7 +27,7 @@ export async function prAlreadyExisted(
         config.branchPrefixOld!
       ),
       prTitle: config.prTitle,
-      state: PrState.NotOpen,
+      state: '!open',
     });
     if (pr) {
       logger.debug('Found closed PR with branchPrefixOld');
@@ -39,7 +38,7 @@ export async function prAlreadyExisted(
     logger.debug('Found closed PR with current title');
     const prDetails = await platform.getPr(pr.number);
     // istanbul ignore if
-    if (prDetails!.state === PrState.Open) {
+    if (prDetails!.state === 'open') {
       logger.debug('PR reopened - aborting run');
       throw new Error(REPOSITORY_CHANGED);
     }

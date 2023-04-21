@@ -10,7 +10,7 @@ import type {
 } from './types';
 
 const providerStartLineRegex = regEx(
-  `^provider "(?<registryUrl>[^/]*)\\/(?<namespace>[^/]*)\\/(?<depName>[^/]*)"`
+  `^provider "(?<registryUrl>[^/]*)/(?<namespace>[^/]*)/(?<depName>[^/]*)"`
 );
 const versionLineRegex = regEx(
   `^(?<prefix>[\\s]*version[\\s]*=[\\s]*")(?<version>[^"']+)(?<suffix>".*)$`

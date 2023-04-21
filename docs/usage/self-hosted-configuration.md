@@ -85,11 +85,24 @@ You can limit which repositories Renovate can access by using the `autodiscoverF
 You can use this option to filter the list of repositories that the Renovate bot account can access through `autodiscover`.
 It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style or regex pattern.
 
+If you set multiple filters, then the matches of each filter are added to the overall result.
+
+If you use an environment variable or the CLI to set the value for `autodiscoverFilter`, then commas `,` within filters are not supported.
+Commas will be used as delimiter for a new filter.
+
+```
+# DO NOT use commas inside the filter if your are using env or cli variables to configure it.
+RENOVATE_AUTODISCOVER_FILTER="/myapp/{readme.md,src/**}"
+
+# in this example you can use regex instead
+RENOVATE_AUTODISCOVER_FILTER="/myapp/(readme\.md|src/.*)/"
+```
+
 **Minimatch**:
 
 ```json
 {
-  "autodiscoverFilter": "project/*"
+  "autodiscoverFilter": ["project/*"]
 }
 ```
 
@@ -99,15 +112,17 @@ All text inside the start and end `/` will be treated as a regular expression.
 
 ```json
 {
-  "autodiscoverFilter": "/project/.*/"
+  "autodiscoverFilter": ["/project/.*/"]
 }
 ```
 
-You can negate the regex by putting a `!` in front:
+You can negate the regex by putting an `!` in front.
+Only use a single negation and don't mix with other filters because all filters are combined with `or`.
+If using negations, all repositories except those who match the regex are added to the result:
 
 ```json
 {
-  "autodiscoverFilter": "!/project/.*/"
+  "autodiscoverFilter": ["!/project/.*/"]
 }
 ```
 
@@ -124,6 +139,14 @@ For example:
 }
 ```
 
+## bbUseDevelopmentBranch
+
+By default, Renovate will use a repository's "main branch" (typically called `main` or `master`) as the "default branch".
+
+Configuring this to `true` means that Renovate will detect and use the Bitbucket [development branch](https://support.atlassian.com/bitbucket-cloud/docs/branch-a-repository/#The-branching-model) as defined by the repository's branching model.
+
+If the "development branch" is configured but the branch itself does not exist (e.g. it was deleted), Renovate will fall back to using the repository's "main branch". This fall back behavior matches that of the Bitbucket Cloud web interface.
+
 ## binarySource
 
 Renovate often needs to use third-party binaries in its PRs, like `npm` to update `package-lock.json` or `go` to update `go.sum`.
@@ -136,7 +159,7 @@ But you can tell Renovate to use "sidecar" containers for third-party tools by s
 For this to work, `docker` needs to be installed and the Docker socket available to Renovate.
 Now Renovate uses `docker run` to create containers like Node.js or Python to run tools in as-needed.
 
-Additionally, when Renovate is run inside a container built using [`containerbase/buildpack`](https://github.com/containerbase/buildpack), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
+Additionally, when Renovate is run inside a container built using [`containerbase`](https://github.com/containerbase), such as the official Renovate images on Docker Hub, then `binarySource=install` can be used.
 This mode means that Renovate will dynamically install the version of tools available, if supported.
 
 Supported tools for dynamic install are:
@@ -144,8 +167,11 @@ Supported tools for dynamic install are:
 - `bundler`
 - `cargo`
 - `composer`
+- `dotnet`
 - `flux`
+- `golang`
 - `gradle-wrapper`
+- `helm`
 - `jb`
 - `jsonnet-bundler`
 - `lerna`
@@ -158,6 +184,7 @@ Supported tools for dynamic install are:
 - `pnpm`
 - `poetry`
 - `python`
+- `rust`
 - `yarn`
 
 If all projects are managed by Hermit, you can tell Renovate to use the tooling versions specified in each project via Hermit by setting `binarySource=hermit`.
@@ -180,6 +207,23 @@ For example:
   "cacheDir": "/my-own-different-cache-folder"
 }
 ```
+
+## cacheHardTtlMinutes
+
+This experimental feature is used to implement the concept of a "soft" cache expiry for datasources, starting with `npm`.
+It should be set to a non-zero value, recommended to be at least 60 (i.e. one hour).
+
+When this value is set, the `npm` datasource will use the `cacheHardTtlMinutes` value for cache expiry, instead of its default expiry of 15 minutes, which becomes the "soft" expiry value.
+Results which are soft expired are reused in the following manner:
+
+- The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
+- If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
+
+## containerbaseDir
+
+This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
+
+Use this option if you need such downloads to be stored outside of Renovate's regular cache directory (`cacheDir`).
 
 ## customEnvVariables
 
@@ -266,9 +310,9 @@ You can skip the host part, and use just the datasource and credentials.
 
 Adds a custom prefix to the default Renovate sidecar Docker containers name and label.
 
-For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `renovate/node` is:
+For example, if you set `dockerChildPrefix=myprefix_` then the final container created from the `containerbase/sidecar` is:
 
-- called `myprefix_node` instead of `renovate_node`
+- called `myprefix_sidecar` instead of `renovate_sidecar`
 - labeled `myprefix_child` instead of `renovate_child`
 
 <!-- prettier-ignore -->
@@ -277,19 +321,19 @@ For example, if you set `dockerChildPrefix=myprefix_` then the final container c
 
 ## dockerImagePrefix
 
-By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
+By default Renovate pulls the sidecar Docker containers from `docker.io/containerbase`.
 You can use the `dockerImagePrefix` option to override this default.
 
-Say you want to pull your images from `ghcr.io/renovatebot`.
+Say you want to pull your images from `ghcr.io/containerbase` to bypass Docker Hub limits.
 You would put this in your configuration file:
 
 ```json
 {
-  "dockerImagePrefix": "ghcr.io/renovatebot"
+  "dockerImagePrefix": "ghcr.io/containerbase"
 }
 ```
 
-If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
+Now when Renovate pulls a new `sidecar` image, the final image is `ghcr.io/containerbase/sidecar` instead of `docker.io/containerbase/sidecar`.
 
 ## dockerUser
 
@@ -338,8 +382,15 @@ If this option is not set, Renovate will fallback to 15 minutes.
 ## exposeAllEnv
 
 To keep you safe, Renovate only passes a limited set of environment variables to package managers.
-Confidential data can be leaked if a malicious script enumerates all environment variables.
+If you must expose all environment variables to package managers, you can set this option to `true`.
+
+<!-- prettier-ignore -->
+!!! warning
+    Always consider the security implications of using `exposeAllEnv`!
+    Secrets and other confidential information stored in environment variables could be leaked by a malicious script, that enumerates all environment variables.
+
 Set `exposeAllEnv` to `true` only if you have reviewed, and trust, the repositories which Renovate bot runs against.
+Alternatively, you can use the [`customEnvVariables`](https://docs.renovatebot.com/self-hosted-configuration/#customenvvariables) config option to handpick a set of variables you need to expose.
 
 Setting this to `true` also allows for variable substitution in `.npmrc` files.
 
@@ -355,16 +406,15 @@ In practice, it is implemented by converting the `force` configuration into a `p
 This is set to `true` by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
-## forkMode
-
-You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
-If this is set to `true` then Renovate will fork the repository into the personal space of the person owning the Personal Access Token.
-
 ## forkToken
 
-You probably don't need this option - it is an experimental setting for the Renovate hosted GitHub App.
-This should be set to a Personal Access Token (GitHub only) when `forkMode` is set to `true`.
-Renovate will use this token to fork the repository into the personal space of the person owning the Personal Access Token.
+You probably don't need this option - it is an experimental setting developed for the Forking Renovate hosted GitHub App.
+
+If this value is configured then Renovate:
+
+- forks the target repository into the account that owns the PAT
+- keep this fork's default branch up-to-date with the target
+
 Renovate will then create branches on the fork and opens Pull Requests on the parent repository.
 
 ## gitNoVerify
@@ -420,6 +470,12 @@ Use the `globalExtends` field if your preset has any global-only configuration o
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
 
+<!-- prettier-ignore -->
+!!! warning
+    `globalExtends` presets can't be private.
+    When Renovate resolves `globalExtends` it does not fully process the configuration.
+    This means that Renovate does not have the authentication it needs to fetch private things.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output.
@@ -446,6 +502,10 @@ modules.exports = {
 ```
 
 In the above example any reference to the `@company` preset will be replaced with `local>org/renovate-config`.
+
+<!-- prettier-ignore -->
+!!! tip
+    Combine `migratePresets` with `configMigration` if you'd like your config migrated by PR.
 
 ## onboarding
 
@@ -484,7 +544,20 @@ Otherwise, Renovate skips onboarding a repository if it finds no dependencies in
 
 Similarly to `onboardingBranch`, if you have an existing Renovate installation and you change `onboardingPrTitle` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingRebaseCheckbox
+
 ## optimizeForDisabled
+
+When this option is `true`, Renovate will do the following during repository initialization:
+
+- Attempt to fetch the default config file (`renovate.json`)
+- Check if the file contains `"enabled": false`
+
+If the file exists and the config is disabled, Renovate will skip the repo without cloning it.
+Otherwise, it will continue as normal.
+
+This option is only useful where the ratio of disabled repos is quite high.
+It costs one extra API call per repo but has the benefit of skipping cloning of those which are disabled.
 
 ## password
 
@@ -605,7 +678,7 @@ Override this object if you want to change the URLs that Renovate links to, e.g.
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
-Example url: `redis://localhost`.
+Example URL structure: `redis://[[username]:[password]]@localhost:6379/0`.
 
 ## repositories
 
@@ -613,10 +686,7 @@ Elements in the `repositories` array can be an object if you wish to define addi
 
 ```js
 {
-  repositories: [
-    { repository: 'g/r1', bumpVersion: true },
-    'g/r2'
-  ],
+  repositories: [{ repository: 'g/r1', bumpVersion: true }, 'g/r2'];
 }
 ```
 
@@ -627,6 +697,35 @@ Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
 JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
 
 ## repositoryCacheType
+
+Set this to an S3 URI to enable S3 backed repository cache.
+
+```ts
+{
+  repositoryCacheType: 's3://bucket-name';
+}
+```
+
+<!-- prettier-ignore -->
+!!! note
+    [IAM is supported](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/loading-node-credentials-iam.html) when running renovate within an EC2 instance in an ECS cluster. In this case, no additional environment variables are required.
+    Otherwise, the following environment variables should be set for the S3 client to work.
+
+```
+    AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY
+    AWS_SESSION_TOKEN
+    AWS_REGION
+```
+
+<!-- prettier-ignore -->
+!!! tip
+    If you're storing the repository cache on Amazon S3 then you may set a folder hierarchy as part of `repositoryCacheType`.
+    For example, `repositoryCacheType: 's3://bucket-name/dir1/.../dirN/'`.
+
+<!-- prettier-ignore -->
+!!! note
+    S3 repository is used as a repository cache (e.g. extracted dependencies) and not a lookup cache (e.g. available versions of dependencies). To keep the later remotely, define [Redis URL](#redisurl).
 
 ## requireConfig
 
@@ -714,7 +813,11 @@ If you're using a Personal Access Token (PAT) to authenticate then you should no
 
 ## writeDiscoveredRepos
 
-Optional parameter which allows to write the discovered repositories into a JSON file instead of renovating them.
+By default, Renovate processes each repository that it finds.
+You can use this optional parameter so Renovate writes the discovered repositories to a JSON file and exits.
+
+Known use cases consist, among other things, of horizontal scaling setups.
+See [Scaling Renovate Bot on self-hosted GitLab](https://github.com/renovatebot/renovate/discussions/13172).
 
 Usage: `renovate --write-discovered-repos=/tmp/renovate-repos.json`
 

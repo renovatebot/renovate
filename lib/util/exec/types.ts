@@ -1,4 +1,4 @@
-import type { SpawnOptions as ChildProcessSpawnOptions } from 'child_process';
+import type { SpawnOptions as ChildProcessSpawnOptions } from 'node:child_process';
 
 export interface ToolConstraint {
   toolName: string;
@@ -7,7 +7,8 @@ export interface ToolConstraint {
 
 export interface ToolConfig {
   datasource: string;
-  depName: string;
+  extractVersion?: string;
+  packageName: string;
   hash?: boolean;
   versioning: string;
 }
@@ -18,16 +19,11 @@ export type VolumesPair = [string, string];
 export type VolumeOption = Opt<string | VolumesPair>;
 
 export interface DockerOptions {
-  image: string;
-  tag?: Opt<string>;
-  tagScheme?: Opt<string>;
-  tagConstraint?: Opt<string>;
   volumes?: Opt<VolumeOption[]>;
   envVars?: Opt<Opt<string>[]>;
   cwd?: Opt<string>;
 }
 
-// TODO: rename #16653
 export interface RawExecOptions extends ChildProcessSpawnOptions {
   // TODO: to be removed in #16655
   /**
@@ -38,7 +34,6 @@ export interface RawExecOptions extends ChildProcessSpawnOptions {
   cwd?: string;
 }
 
-// TODO: rename #16653
 export interface ExecResult {
   stdout: string;
   stderr: string;
@@ -46,7 +41,6 @@ export interface ExecResult {
 
 export type ExtraEnv<T = unknown> = Record<string, T>;
 
-// TODO: rename #16653
 export interface ExecOptions {
   cwd?: string;
   cwdFile?: string;

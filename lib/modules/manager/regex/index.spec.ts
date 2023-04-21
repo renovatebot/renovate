@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { logger } from '../../../logger';
 import type { CustomExtractConfig } from '../types';
@@ -162,6 +163,8 @@ describe('modules/manager/regex/index', () => {
           datasource: 'gradle-version',
           depName: 'gradle',
           versioning: 'maven',
+          replaceString:
+            'ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven\n',
         },
       ],
     });
@@ -211,6 +214,60 @@ describe('modules/manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
+  });
+
+  it('extracts indentation: maintains indentation value if whitespace or empty', async () => {
+    const config = {
+      matchStrings: [
+        '(?<indentation>\\s*)image:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      '     image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          currentValue: '17.0.0-alpine',
+          datasource: 'docker',
+          indentation: '     ',
+          replaceString: '     image: eclipse-temurin:17.0.0-alpine',
+        },
+      ],
+    });
+  });
+
+  it('extracts indentation: discards non-whitespace content', async () => {
+    const config = {
+      matchStrings: [
+        '(?<indentation>.*)image:\\s+(?<depName>[^\\s]+):(?<currentValue>[^\\s]+)',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n{{{indentation}}}  name: {{{depName}}}:{{{newValue}}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'name: image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          currentValue: '17.0.0-alpine',
+          datasource: 'docker',
+          indentation: '',
+          replaceString: 'name: image: eclipse-temurin:17.0.0-alpine',
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy', async () => {
@@ -288,6 +345,58 @@ describe('modules/manager/regex/index', () => {
     );
     expect(res).toMatchSnapshot();
     expect(res?.deps).toHaveLength(1);
+  });
+
+  it('extracts with combination strategy: sets replaceString when current version group present', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'image: eclipse-temurin:17.0.0-alpine',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          datasource: 'docker',
+          currentValue: '17.0.0-alpine',
+          replaceString: 'image: eclipse-temurin:17.0.0-alpine',
+        },
+      ],
+    });
+  });
+
+  it('extracts with combination strategy: sets replaceString when current digest group present', async () => {
+    const config = {
+      matchStrings: [
+        'image:\\s+(?<depName>[a-z-]+)(?::(?<currentValue>[a-z0-9.-]+))?(?:@(?<currentDigest>sha256:[a-f0-9]+))?',
+      ],
+      autoReplaceStringTemplate:
+        'image:\n  name: {{{depName}}}{{#if newValue}}:{{{newValue}}}{{/if}}{{#if newDigest}}@{{{newDigest}}}{{/if}}',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      'image: eclipse-temurin@sha256:1234567890abcdef',
+      'bitbucket-pipelines.yml',
+      config
+    );
+    expect(res).toMatchObject({
+      deps: [
+        {
+          depName: 'eclipse-temurin',
+          datasource: 'docker',
+          currentDigest: 'sha256:1234567890abcdef',
+          replaceString: 'image: eclipse-temurin@sha256:1234567890abcdef',
+        },
+      ],
+    });
   });
 
   it('extracts with combination strategy and templates', async () => {
@@ -449,4 +558,69 @@ describe('modules/manager/regex/index', () => {
       ],
     });
   });
+
+  it.each([
+    [
+      'dotnet',
+      codeBlock`
+    # renovate: datasource=dotnet packageName=dotnet-runtime
+    RUN install-tool dotnet 6.0.13
+  `,
+      'Dockerfile',
+      'dotnet-version',
+      'dotnet-runtime',
+      'dotnet',
+    ],
+    [
+      'adoptium-java',
+      codeBlock`
+    # renovate: datasource=adoptium-java packageName=java
+    RUN install-tool java 6.0.13
+  `,
+      'Dockerfile',
+      'java-version',
+      'java',
+      'java',
+    ],
+    [
+      'node',
+      codeBlock`
+    # renovate: datasource=node packageName=node
+    RUN install-tool node 6.0.13
+  `,
+      'Dockerfile',
+      'node-version',
+      'node',
+      'node',
+    ],
+  ])(
+    'migrates %s',
+    async (
+      _oldDatasource,
+      content,
+      packageFile,
+      newDatasource,
+      packageName,
+      depName
+    ) => {
+      const config: CustomExtractConfig = {
+        matchStrings: [
+          '# renovate: datasource=(?<datasource>[a-z-]+?)(?: (?:packageName|lookupName)=(?<packageName>.+?))?(?: versioning=(?<versioning>[a-z-]+?))?\\sRUN install-[a-z]+? (?<depName>[a-z-]+?) (?<currentValue>.+?)(?:\\s|$)',
+        ],
+        versioningTemplate:
+          '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+      };
+      const res = await extractPackageFile(content, packageFile, config);
+      expect(res).toMatchObject({
+        deps: [
+          {
+            depName,
+            packageName,
+            currentValue: '6.0.13',
+            datasource: newDatasource,
+          },
+        ],
+      });
+    }
+  );
 });

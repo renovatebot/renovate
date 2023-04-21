@@ -82,5 +82,10 @@ describe('util/emoji', () => {
       setEmojiConfig({ unicodeEmoji: false });
       expect(stripEmojis(`foo ${x} bar`)).toBe(`foo ${y} bar`);
     });
+
+    it('does not throw on standalone modifiers', () => {
+      // This is based on a string from an actual PR description.
+      expect(stripEmojis("foo '🏻' bar")).toBe("foo '' bar");
+    });
   });
 });

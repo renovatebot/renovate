@@ -44,7 +44,7 @@ function isDigit(char: string): boolean {
 }
 
 function isLetter(char: string): boolean {
-  return regEx(/^[a-z_]$/i).test(char);
+  return regEx(/^[a-z_+]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -166,16 +166,15 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum QualifierTypes {
-  Alpha = 1,
-  Beta,
-  Milestone,
-  RC,
-  Snapshot,
-  Release,
-  SP,
-}
+export const QualifierTypes = {
+  Alpha: 1,
+  Beta: 2,
+  Milestone: 3,
+  RC: 4,
+  Snapshot: 5,
+  Release: 6,
+  SP: 7,
+} as const;
 
 export function qualifierType(token: Token): number | null {
   const val = token.val;
@@ -282,7 +281,7 @@ function isVersion(version: unknown): version is string {
   if (!version || typeof version !== 'string') {
     return false;
   }
-  if (!regEx(/^[a-z_0-9.-]+$/i).test(version)) {
+  if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
     return false;
   }
   if (regEx(/^[.-]/).test(version)) {
@@ -368,7 +367,7 @@ function parseRange(rangeStr: string): Range[] | null {
   if (interval.leftType) {
     return null;
   } // something like '[1,2],[3'
-  if (!ranges || !ranges.length) {
+  if (!ranges?.length) {
     return null;
   }
 

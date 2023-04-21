@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'node:url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../logger';
 import { parse } from '../../../util/html';

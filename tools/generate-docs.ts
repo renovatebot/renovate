@@ -3,7 +3,9 @@ import shell from 'shelljs';
 import { getProblems, logger } from '../lib/logger';
 import { generateConfig } from './docs/config';
 import { generateDatasources } from './docs/datasources';
+import { getOpenGitHubItems } from './docs/github-query-items';
 import { generateManagers } from './docs/manager';
+import { generateManagerAsdfSupportedPlugins } from './docs/manager-asdf-supported-plugins';
 import { generatePlatforms } from './docs/platforms';
 import { generatePresets } from './docs/presets';
 import { generateSchema } from './docs/schema';
@@ -30,25 +32,32 @@ process.on('unhandledRejection', (err) => {
     }
 
     logger.info('* static');
-    r = shell.cp('-r', 'docs/usage/*', `${dist}/`);
+    r = shell.cp('-r', 'docs/usage/.', `${dist}`);
     if (r.code) {
       return;
     }
 
-    logger.info('* platforms');
-    await generatePlatforms(dist);
+    logger.info('* fetching open GitHub issues');
+    const openItems = await getOpenGitHubItems();
 
-    // versionigs
-    logger.info('* versionigs');
+    logger.info('* platforms');
+    await generatePlatforms(dist, openItems.platforms);
+
+    // versionings
+    logger.info('* versionings');
     await generateVersioning(dist);
 
     // datasources
     logger.info('* datasources');
-    await generateDatasources(dist);
+    await generateDatasources(dist, openItems.datasources);
 
     // managers
     logger.info('* managers');
-    await generateManagers(dist);
+    await generateManagers(dist, openItems.managers);
+
+    // managers/asdf supported plugins
+    logger.info('* managers/asdf/supported-plugins');
+    await generateManagerAsdfSupportedPlugins(dist);
 
     // presets
     logger.info('* presets');

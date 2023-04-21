@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { DirectoryResult, dir } from 'tmp-promise';
 import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
@@ -30,6 +31,8 @@ describe('modules/manager/cargo/extract', () => {
       };
 
       GlobalConfig.set(adminConfig);
+      delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
+      delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
     });
 
     afterEach(async () => {
@@ -110,6 +113,112 @@ describe('modules/manager/cargo/extract', () => {
       });
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts registry urls from environment', async () => {
+      process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
+        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
+      process.env.CARGO_REGISTRIES_MCORBIN_INDEX =
+        'https://github.com/mcorbin/testregistry';
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: ['https://github.com/mcorbin/testregistry'],
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+        },
+      ]);
+    });
+
+    it('extracts workspace dependencies', async () => {
+      const cargoToml = codeBlock`
+[package]
+name = "renovate-test"
+version = "0.1.0"
+authors = ["John Doe <john.doe@example.org>"]
+edition = "2018"
+
+[dependencies]
+git2 = "0.14.0"
+
+[workspace]
+members = ["pcap-sys"]
+
+[workspace.dependencies]
+serde = "1.0.146"
+tokio = { version = "1.21.1" }`;
+      const res = await extractPackageFile(cargoToml, 'Cargo.toml', config);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.14.0',
+          datasource: 'crate',
+          depName: 'git2',
+          depType: 'dependencies',
+          managerData: { nestedVersion: false },
+        },
+        {
+          currentValue: '1.0.146',
+          datasource: 'crate',
+          depName: 'serde',
+          depType: 'workspace.dependencies',
+          managerData: { nestedVersion: false },
+        },
+        {
+          currentValue: '1.21.1',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'workspace.dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+        },
+      ]);
+    });
+
+    it('skips workspace dependency', async () => {
+      const cargotoml = '[dependencies]\nfoobar = { workspace = true }';
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '',
+          datasource: 'crate',
+          depName: 'foobar',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+          skipReason: 'inherited-dependency',
+        },
+      ]);
     });
 
     it('skips unknown registries', async () => {

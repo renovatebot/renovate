@@ -1,12 +1,11 @@
-import { TokenType } from './common';
 import type { VariableRegistry } from './types';
 import {
   getVars,
-  interpolateString,
   isDependencyString,
   parseDependencyString,
   reorderFiles,
   toAbsolutePath,
+  updateVars,
   versionLikeSubstring,
 } from './utils';
 
@@ -37,14 +36,16 @@ describe('modules/manager/gradle/utils', () => {
   it('isDependencyString', () => {
     expect(isDependencyString('foo:bar:1.2.3')).toBeTrue();
     expect(isDependencyString('foo.foo:bar.bar:1.2.3')).toBeTrue();
-    expect(isDependencyString('foo:bar:baz:qux')).toBeFalse();
+    expect(isDependencyString('foo:bar:baz:qux')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.3')).toBeTrue();
+    expect(isDependencyString('foo.bar:baz:1.2.3:linux-cpu-x86_64')).toBeTrue();
     expect(isDependencyString('foo.bar:baz:1.2.+')).toBeTrue();
-    expect(isDependencyString('foo.bar:baz:qux:quux')).toBeFalse();
+    expect(isDependencyString('foo:bar:baz:qux:quux')).toBeFalse();
     expect(isDependencyString("foo:bar:1.2.3'")).toBeFalse();
     expect(isDependencyString('foo:bar:1.2.3"')).toBeFalse();
     expect(isDependencyString('-Xep:ParameterName:OFF')).toBeFalse();
     expect(isDependencyString('foo$bar:baz:1.2.+')).toBeFalse();
+    expect(isDependencyString('scm:git:https://some.git')).toBeFalse();
   });
 
   it('parseDependencyString', () => {
@@ -56,7 +57,10 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo.foo:bar.bar',
       currentValue: '1.2.3',
     });
-    expect(parseDependencyString('foo:bar:baz:qux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux')).toMatchObject({
+      depName: 'foo:bar',
+      currentValue: 'baz',
+    });
     expect(parseDependencyString('foo.bar:baz:1.2.3')).toMatchObject({
       depName: 'foo.bar:baz',
       currentValue: '1.2.3',
@@ -65,38 +69,10 @@ describe('modules/manager/gradle/utils', () => {
       depName: 'foo:bar',
       currentValue: '1.2.+',
     });
-    expect(parseDependencyString('foo.bar:baz:qux:quux')).toBeNull();
+    expect(parseDependencyString('foo:bar:baz:qux:quux')).toBeNull();
     expect(parseDependencyString("foo:bar:1.2.3'")).toBeNull();
     expect(parseDependencyString('foo:bar:1.2.3"')).toBeNull();
     expect(parseDependencyString('-Xep:ParameterName:OFF')).toBeNull();
-  });
-
-  it('interpolateString', () => {
-    expect(interpolateString([], {})).toBeEmptyString();
-    expect(
-      interpolateString(
-        [
-          { type: TokenType.String, value: 'foo' },
-          { type: TokenType.Variable, value: 'bar' },
-          { type: TokenType.String, value: 'baz' },
-        ] as never,
-        {
-          bar: { value: 'BAR' },
-        } as never
-      )
-    ).toBe('fooBARbaz');
-    expect(
-      interpolateString(
-        [{ type: TokenType.Variable, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
-    expect(
-      interpolateString(
-        [{ type: TokenType.UnknownFragment, value: 'foo' }] as never,
-        {} as never
-      )
-    ).toBeNull();
   });
 
   it('reorderFiles', () => {
@@ -199,6 +175,23 @@ describe('modules/manager/gradle/utils', () => {
       bar: { key: 'bar', value: 'bar' },
       baz: { key: 'baz', value: 'baz' },
       qux: { key: 'qux', value: 'QUX' },
+    });
+  });
+
+  it('updateVars', () => {
+    const registry: VariableRegistry = {
+      [toAbsolutePath('/foo/bar/baz')]: {
+        bar: { key: 'bar', value: 'bar' } as never,
+        baz: { key: 'baz', value: 'baz' } as never,
+      },
+    };
+
+    updateVars(registry, '/foo/bar/baz', { qux: { key: 'qux', value: 'qux' } });
+    const res = getVars(registry, '/foo/bar/baz/build.gradle');
+    expect(res).toStrictEqual({
+      bar: { key: 'bar', value: 'bar' },
+      baz: { key: 'baz', value: 'baz' },
+      qux: { key: 'qux', value: 'qux' },
     });
   });
 });

@@ -63,6 +63,30 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
     });
 
+    it('catches invalid matchCurrentValue', async () => {
+      const config = {
+        packageRules: [
+          {
+            matchPackageNames: ['foo'],
+            matchCurrentValue: '/^2/',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['bar'],
+            matchCurrentValue: '^1',
+            enabled: true,
+          },
+          {
+            matchPackageNames: ['quack'],
+            matchCurrentValue: '<1.0.0',
+            enabled: true,
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
+    });
+
     it('catches invalid matchCurrentVersion regex', async () => {
       const config = {
         packageRules: [
@@ -91,6 +115,19 @@ describe('config/validation', () => {
       const { errors } = await configValidation.validateConfig(config);
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
+    });
+
+    it('catches invalid baseBranches regex', async () => {
+      const config = {
+        baseBranches: ['/***$}{]][/'],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toEqual([
+        {
+          topic: 'Configuration Error',
+          message: 'Invalid regExp for baseBranches: `/***$}{]][/`',
+        },
+      ]);
     });
 
     it('returns nested errors', async () => {
@@ -209,7 +246,9 @@ describe('config/validation', () => {
           },
           'what?' as any,
           {
+            matchDepPatterns: 'abc ([a-z]+) ([a-z]+))',
             matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            excludeDepPatterns: ['abc ([a-z]+) ([a-z]+))'],
             excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
@@ -221,15 +260,17 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(13);
+      expect(errors).toHaveLength(15);
     });
 
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
+        matchDepNames: ['angular'],
         matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
+              matchDepNames: ['meteor'],
               matchPackageNames: ['meteor'],
               enabled: true,
             },
@@ -237,6 +278,7 @@ describe('config/validation', () => {
         },
         docker: {
           minor: {
+            matchDepNames: ['meteor'],
             matchPackageNames: ['testPackage'],
           },
         },
@@ -244,9 +286,9 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(2);
+      expect(warnings).toHaveLength(4);
       expect(errors).toMatchSnapshot();
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(4);
     });
 
     it('ignore packageRule nesting validation for presets', async () => {
@@ -526,7 +568,7 @@ describe('config/validation', () => {
         registryAliases: {
           sample: {
             example1: 'http://www.example.com',
-          },
+          } as unknown as string, // intentional incorrect config to check error message
         },
       };
       const { warnings, errors } = await configValidation.validateConfig(

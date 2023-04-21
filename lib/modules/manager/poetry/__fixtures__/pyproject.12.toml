@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "example 12"
+include = [
+  "README.md",
+  { path = "tests", format = "sdist" }
+]
+exclude = [
+  "afile",
+  { path = "adir", format = ["wheel"] }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dep1 = "0.0.0"
+dep2 = "^0.6.0"

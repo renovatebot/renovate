@@ -4,8 +4,7 @@ import type { RangeStrategy } from '../../../types';
 import type { RangeConfig } from '../types';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
-  const { depType, depName, packageJsonType, currentValue, rangeStrategy } =
-    config;
+  const { depType, currentValue, rangeStrategy } = config;
   // TODO #7154
   const isComplexRange = parseRange(currentValue!).length > 1;
   if (rangeStrategy === 'bump' && isComplexRange) {
@@ -18,16 +17,6 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (rangeStrategy !== 'auto') {
     return rangeStrategy;
   }
-  if (depType === 'devDependencies') {
-    // Always pin devDependencies
-    logger.trace({ dependency: depName }, 'Pinning devDependency');
-    return 'pin';
-  }
-  if (depType === 'dependencies' && packageJsonType === 'app') {
-    // Pin dependencies if we're pretty sure it's not a browser library
-    logger.trace({ dependency: depName }, 'Pinning app dependency');
-    return 'pin';
-  }
   if (depType === 'peerDependencies') {
     // Widen peer dependencies
     logger.debug('Widening peer dependencies');
@@ -36,5 +25,5 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   if (isComplexRange) {
     return 'widen';
   }
-  return 'replace';
+  return 'update-lockfile';
 }

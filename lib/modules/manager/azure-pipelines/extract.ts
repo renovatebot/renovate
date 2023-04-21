@@ -1,10 +1,13 @@
 import { load } from 'js-yaml';
+import { GlobalConfig } from '../../../config/global';
 import { logger } from '../../../logger';
+import { coerceArray } from '../../../util/array';
 import { regEx } from '../../../util/regex';
+import { joinUrlParts } from '../../../util/url';
 import { AzurePipelinesTasksDatasource } from '../../datasource/azure-pipelines-tasks';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { getDep } from '../dockerfile/extract';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { AzurePipelines, Container, Repository } from './types';
 
 const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
@@ -12,7 +15,37 @@ const AzurePipelinesTaskRegex = regEx(/^(?<name>[^@]+)@(?<version>.*)$/);
 export function extractRepository(
   repository: Repository
 ): PackageDependency | null {
-  if (repository.type !== 'github') {
+  let repositoryUrl = null;
+
+  if (repository.type === 'github') {
+    repositoryUrl = `https://github.com/${repository.name}.git`;
+  } else if (repository.type === 'git') {
+    // "git" type indicates an AzureDevOps repository.
+    // The repository URL is only deducible if we are running on AzureDevOps (so can use the endpoint)
+    // and the name is of the form `Project/Repository`.
+    // The name could just be the repository name, in which case AzureDevOps defaults to the
+    // same project, which is not currently accessible here. It could be deduced later by exposing
+    // the repository URL to managers.
+    // https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema/resources-repositories-repository?view=azure-pipelines#types
+    const { platform, endpoint } = GlobalConfig.get();
+    if (platform === 'azure' && endpoint) {
+      if (repository.name.includes('/')) {
+        const [projectName, repoName] = repository.name.split('/');
+        repositoryUrl = joinUrlParts(
+          endpoint,
+          encodeURIComponent(projectName),
+          '_git',
+          encodeURIComponent(repoName)
+        );
+      } else {
+        logger.debug(
+          'Renovate cannot update repositories that do not include the project name'
+        );
+      }
+    }
+  }
+
+  if (repositoryUrl === null) {
     return null;
   }
 
@@ -26,7 +59,7 @@ export function extractRepository(
     datasource: GitTagsDatasource.id,
     depName: repository.name,
     depType: 'gitTags',
-    packageName: `https://github.com/${repository.name}.git`,
+    packageName: repositoryUrl,
     replaceString: repository.ref,
   };
 }
@@ -84,7 +117,7 @@ export function parseAzurePipelines(
 export function extractPackageFile(
   content: string,
   filename: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace(`azurePipelines.extractPackageFile(${filename})`);
   const deps: PackageDependency[] = [];
 
@@ -93,23 +126,23 @@ export function extractPackageFile(
     return null;
   }
 
-  for (const repository of pkg.resources?.repositories ?? []) {
+  for (const repository of coerceArray(pkg.resources?.repositories)) {
     const dep = extractRepository(repository);
     if (dep) {
       deps.push(dep);
     }
   }
 
-  for (const container of pkg.resources?.containers ?? []) {
+  for (const container of coerceArray(pkg.resources?.containers)) {
     const dep = extractContainer(container);
     if (dep) {
       deps.push(dep);
     }
   }
 
-  for (const { jobs } of pkg.stages ?? []) {
-    for (const { steps } of jobs ?? []) {
-      for (const step of steps ?? []) {
+  for (const { jobs } of coerceArray(pkg.stages)) {
+    for (const { steps } of coerceArray(jobs)) {
+      for (const step of coerceArray(steps)) {
         const task = extractAzurePipelinesTasks(step.task);
         if (task) {
           deps.push(task);
@@ -118,8 +151,8 @@ export function extractPackageFile(
     }
   }
 
-  for (const { steps } of pkg.jobs ?? []) {
-    for (const step of steps ?? []) {
+  for (const { steps } of coerceArray(pkg.jobs)) {
+    for (const step of coerceArray(steps)) {
       const task = extractAzurePipelinesTasks(step.task);
       if (task) {
         deps.push(task);
@@ -127,7 +160,7 @@ export function extractPackageFile(
     }
   }
 
-  for (const step of pkg.steps ?? []) {
+  for (const step of coerceArray(pkg.steps)) {
     const task = extractAzurePipelinesTasks(step.task);
     if (task) {
       deps.push(task);

@@ -1,6 +1,6 @@
 import { logger } from '../../../../../logger';
-import { detectPlatform } from '../../../../../modules/platform/util';
 import * as allVersioning from '../../../../../modules/versioning';
+import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
 import * as sourceGithub from './source-github';
 import * as sourceGitlab from './source-gitlab';

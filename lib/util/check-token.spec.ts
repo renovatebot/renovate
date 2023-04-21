@@ -1,7 +1,8 @@
 import { hostRules, logger } from '../../test/util';
+import { GlobalConfig } from '../config/global';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFile } from '../modules/manager/types';
+import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import { checkGithubToken } from './check-token';
 
@@ -11,6 +12,7 @@ describe('util/check-token', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     memCache.reset();
+    GlobalConfig.set({ githubTokenWarn: true });
   });
 
   it('does nothing if data is empty', () => {
@@ -28,6 +30,20 @@ describe('util/check-token', () => {
       url: 'https://api.github.com',
     });
     expect(logger.logger.trace).toHaveBeenCalledWith('GitHub token is found');
+    expect(logger.logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('returns early if token warnings are disabled', () => {
+    GlobalConfig.set({ githubTokenWarn: false });
+    hostRules.find.mockReturnValueOnce({});
+    checkGithubToken({});
+    expect(hostRules.find).toHaveBeenCalledWith({
+      hostType: 'github',
+      url: 'https://api.github.com',
+    });
+    expect(logger.logger.trace).toHaveBeenCalledWith(
+      'GitHub token warning is disabled'
+    );
     expect(logger.logger.warn).not.toHaveBeenCalled();
   });
 
@@ -75,7 +91,7 @@ describe('util/check-token', () => {
 
   it('logs warning once', () => {
     hostRules.find.mockReturnValueOnce({});
-    const packageFiles: Record<string, PackageFile[]> = {
+    const packageFiles: Record<string, PackageFileContent[]> = {
       npm: [
         {
           deps: [

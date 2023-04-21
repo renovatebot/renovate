@@ -56,16 +56,22 @@ export async function checkYarnrc(
       const yarnBinaryExists = yarnPath
         ? await localPathIsFile(yarnPath)
         : false;
+      let scrubbedYarnrc = yarnrc
+        .replace('--install.pure-lockfile true', '')
+        .replace('--install.frozen-lockfile true', '');
       if (!yarnBinaryExists) {
-        const scrubbedYarnrc = yarnrc.replace(
+        scrubbedYarnrc = scrubbedYarnrc.replace(
           regEx(/^yarn-path\s+"?.+?"?$/gm),
           ''
         );
+        yarnPath = null;
+      }
+      if (yarnrc !== scrubbedYarnrc) {
+        logger.debug(`Writing scrubbed .yarnrc to ${lockFileDir}`);
         await writeLocalFile(
           upath.join(lockFileDir, '.yarnrc'),
           scrubbedYarnrc
         );
-        yarnPath = null;
       }
     }
   } catch (err) /* istanbul ignore next */ {
@@ -93,7 +99,7 @@ export async function generateLockFile(
   let lockFile: string | null = null;
   try {
     const toolConstraints: ToolConstraint[] = [
-      await getNodeToolConstraint(config, upgrades),
+      await getNodeToolConstraint(config, upgrades, lockFileDir),
     ];
     const yarnUpdate = upgrades.find(isYarnUpdate);
     const yarnCompatibility = yarnUpdate
@@ -113,7 +119,12 @@ export async function generateLockFile(
       constraint: '^1.22.18', // needs to be a v1 yarn, otherwise v2 will be installed
     };
 
-    if (!isYarn1 && config.managerData?.hasPackageManager) {
+    // check first upgrade, see #17786
+    const hasPackageManager =
+      !!config.managerData?.hasPackageManager ||
+      !!upgrades[0]?.managerData?.hasPackageManager;
+
+    if (!isYarn1 && hasPackageManager) {
       toolConstraints.push({ toolName: 'corepack' });
     } else {
       toolConstraints.push(yarnTool);
@@ -176,9 +187,7 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwdFile: lockFileName,
       extraEnv,
-      docker: {
-        image: 'sidecar',
-      },
+      docker: {},
       toolConstraints,
     };
     // istanbul ignore if
@@ -190,8 +199,7 @@ export async function generateLockFile(
     if (yarnUpdate && !isYarn1) {
       logger.debug('Updating Yarn binary');
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      commands.push(`yarn set version ${yarnUpdate.newValue}`);
+      commands.push(`yarn set version ${quote(yarnUpdate.newValue!)}`);
     }
 
     // This command updates the lock file based on package.json
@@ -209,16 +217,17 @@ export async function generateLockFile(
             .map((update) => update.depName)
             .filter(is.string)
             .filter(uniqueStrings)
+            .map(quote)
             .join(' ')}${cmdOptions}`
         );
       } else {
-        // `yarn up` updates to the latest release, so the range should be specified
+        // `yarn up -R` updates to the latest release in each range
         commands.push(
-          `yarn up ${lockUpdates
+          `yarn up -R ${lockUpdates
             // TODO: types (#7154)
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            .map((update) => `${update.depName}@${update.newValue}`)
+            .map((update) => `${update.depName!}`)
             .filter(uniqueStrings)
+            .map(quote)
             .join(' ')}${cmdOptions}`
         );
       }

@@ -2,7 +2,6 @@ import type { Content } from 'mdast';
 import remark from 'remark';
 import type { Plugin, Transformer } from 'unified';
 import { logger } from '../../../logger';
-import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 
 interface UrlMatch {
@@ -11,8 +10,9 @@ interface UrlMatch {
   replaceTo: string;
 }
 
+//according to https://github.com/dead-claudia/github-limits
 const urlRegex =
-  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-_a-z0-9]+\/[-_a-z0-9]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
+  /(?:https?:)?(?:\/\/)?(?:www\.)?(?<!api\.)(?:to)?github\.com\/[-a-z0-9]+\/[-_a-z0-9.]+\/(?:discussions|issues|pull)\/[0-9]+(?:#[-_a-z0-9]+)?/i; // TODO #12872 (?<!re) after text not matching
 
 function massageLink(input: string): string {
   return input.replace(regEx(/(?:to)?github\.com/i), 'togithub.com');
@@ -44,7 +44,7 @@ function collectLinkPosition(input: string, matches: UrlMatch[]): Plugin {
         const newUrl = massageLink(url);
         matches.push({ start, end, replaceTo: `[${url}](${newUrl})` });
       }
-    } else if (hasKey('children', tree)) {
+    } else if ('children' in tree) {
       tree.children.forEach((child: Content) => {
         transformer(child);
       });

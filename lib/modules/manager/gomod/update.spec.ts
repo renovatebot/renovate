@@ -96,7 +96,7 @@ describe('modules/manager/gomod/update', () => {
         depType: 'require',
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
-      expect(res).not.toEqual(gomod2);
+      expect(res).not.toEqual(gomod1);
       expect(res).toContain('github.com/pkg/errors/v2 v2.0.0');
     });
 
@@ -112,8 +112,25 @@ describe('modules/manager/gomod/update', () => {
       };
       const res = updateDependency({ fileContent: gomod1, upgrade });
       expect(res).toMatchSnapshot();
-      expect(res).not.toEqual(gomod2);
+      expect(res).not.toEqual(gomod1);
       expect(res).toContain('gopkg.in/russross/blackfriday.v2 v2.0.0');
+    });
+
+    it('skip replacing incompatible major updates', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        managerData: { lineNumber: 8 },
+        newMajor: 26,
+        updateType: 'major' as UpdateType,
+        currentValue: 'v25.1.0+incompatible',
+        newValue: 'v26.0.0+incompatible',
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
     });
 
     it('returns null if mismatch', () => {
@@ -259,6 +276,23 @@ describe('modules/manager/gomod/update', () => {
       );
     });
 
+    it('handles +incompatible tag without duplicating it', () => {
+      const upgrade = {
+        depName: 'github.com/Azure/azure-sdk-for-go',
+        managerData: { lineNumber: 8 },
+        newValue: 'v26.0.0+incompatible',
+        depType: 'require',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).not.toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible+incompatible'
+      );
+      expect(res).toContain(
+        'github.com/Azure/azure-sdk-for-go v26.0.0+incompatible'
+      );
+    });
+
     it('handles replace line with minor version update', () => {
       const upgrade = {
         depName: 'github.com/pravesht/gocql',
@@ -344,6 +378,30 @@ describe('modules/manager/gomod/update', () => {
         upgrade: { updateType: 'replacement' },
       });
       expect(res).toBeNull();
+    });
+
+    it('should perform indirect upgrades when top-level', () => {
+      const upgrade = {
+        depName: 'github.com/davecgh/go-spew',
+        managerData: { lineNumber: 4 },
+        newValue: 'v1.1.1',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod1, upgrade });
+      expect(res).not.toEqual(gomod1);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
+    });
+
+    it('should perform indirect upgrades when in require blocks', () => {
+      const upgrade = {
+        depName: 'github.com/go-ole/go-ole',
+        managerData: { lineNumber: 23, multiLine: true },
+        newValue: 'v1.5.0',
+        depType: 'indirect',
+      };
+      const res = updateDependency({ fileContent: gomod3, upgrade });
+      expect(res).not.toEqual(gomod2);
+      expect(res).toContain(`${upgrade.newValue} // indirect`);
     });
   });
 });

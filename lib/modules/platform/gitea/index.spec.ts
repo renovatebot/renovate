@@ -6,7 +6,6 @@ import type {
   RepoResult,
 } from '..';
 import { mocked, partial } from '../../../../test/util';
-import { PlatformId } from '../../../constants';
 import {
   CONFIG_GIT_URL_UNAVAILABLE,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -17,7 +16,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../../constants/error-messages';
 import type { logger as _logger } from '../../../logger';
-import { BranchStatus, PrState } from '../../../types';
+import type { BranchStatus, PrState } from '../../../types';
 import type * as _git from '../../../util/git';
 import { setBaseUrl } from '../../../util/http/gitea';
 import type { PlatformResult } from '../types';
@@ -31,7 +30,6 @@ import type {
   Issue,
   Label,
   PR,
-  PRState,
   Repo,
   RepoContents,
   User,
@@ -84,7 +82,7 @@ describe('modules/platform/gitea/index', () => {
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
-      state: PrState.Open,
+      state: 'open',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
       closed_at: undefined,
@@ -100,7 +98,7 @@ describe('modules/platform/gitea/index', () => {
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
-      state: PrState.Closed,
+      state: 'closed',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/2.diff',
       created_at: '2011-08-18T22:30:38Z',
       closed_at: '2016-01-09T10:03:21Z',
@@ -116,7 +114,7 @@ describe('modules/platform/gitea/index', () => {
       number: 3,
       title: 'WIP: Draft PR',
       body: 'other random pull request',
-      state: PrState.Open,
+      state: 'open',
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
       created_at: '2011-08-18T22:30:39Z',
       closed_at: '2016-01-09T10:03:22Z',
@@ -201,7 +199,6 @@ describe('modules/platform/gitea/index', () => {
 
   beforeEach(async () => {
     jest.resetModules();
-    jest.clearAllMocks();
     jest.mock('./gitea-helper');
     jest.mock('../../../util/git');
     jest.mock('../../../logger');
@@ -216,6 +213,9 @@ describe('modules/platform/gitea/index', () => {
     hostRules.clear();
 
     setBaseUrl('https://gitea.renovatebot.com/');
+
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT;
+    delete process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER;
   });
 
   function initFakePlatform(version = GITEA_VERSION): Promise<PlatformResult> {
@@ -305,6 +305,26 @@ describe('modules/platform/gitea/index', () => {
 
       const repos = await gitea.getRepos();
       expect(repos).toEqual(['a/b', 'c/d']);
+      expect(helper.searchRepos).toHaveBeenCalledWith({
+        uid: undefined,
+        archived: false,
+      });
+    });
+
+    it('Sorts repos', async () => {
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_SORT = 'updated';
+      process.env.RENOVATE_X_AUTODISCOVER_REPO_ORDER = 'desc';
+      helper.searchRepos.mockResolvedValueOnce(mockRepos);
+
+      const repos = await gitea.getRepos();
+      expect(repos).toEqual(['a/b', 'c/d']);
+
+      expect(helper.searchRepos).toHaveBeenCalledWith({
+        uid: undefined,
+        archived: false,
+        sort: 'updated',
+        order: 'desc',
+      });
     });
   });
 
@@ -472,7 +492,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });
@@ -500,7 +520,7 @@ describe('modules/platform/gitea/index', () => {
 
       const token = 'abc';
       hostRules.add({
-        hostType: PlatformId.Gitea,
+        hostType: 'gitea',
         matchHost: 'https://gitea.com/',
         token,
       });
@@ -542,7 +562,7 @@ describe('modules/platform/gitea/index', () => {
       await initFakeRepo();
       await gitea.setBranchStatus({
         branchName: 'some-branch',
-        state: BranchStatus.green,
+        state: 'green',
         context: 'some-context',
         description: 'some-description',
         ...bsc,
@@ -612,29 +632,29 @@ describe('modules/platform/gitea/index', () => {
         })
       );
 
-      return gitea.getBranchStatus('some-branch');
+      return gitea.getBranchStatus('some-branch', true);
     };
 
     it('should return yellow for unknown result', async () => {
-      expect(await getBranchStatus('unknown')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('unknown')).toBe('yellow');
     });
 
     it('should return pending state for pending result', async () => {
-      expect(await getBranchStatus('pending')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('pending')).toBe('yellow');
     });
 
     it('should return success state for success result', async () => {
-      expect(await getBranchStatus('success')).toEqual(BranchStatus.green);
+      expect(await getBranchStatus('success')).toBe('green');
     });
 
     it('should return null for all other results', async () => {
-      expect(await getBranchStatus('invalid')).toEqual(BranchStatus.yellow);
+      expect(await getBranchStatus('invalid')).toBe('yellow');
     });
 
     it('should abort when branch status returns 404', async () => {
       helper.getCombinedCommitStatus.mockRejectedValueOnce({ statusCode: 404 });
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
     });
@@ -644,9 +664,46 @@ describe('modules/platform/gitea/index', () => {
         new Error('getCombinedCommitStatus()')
       );
 
-      await expect(gitea.getBranchStatus('some-branch')).rejects.toThrow(
+      await expect(gitea.getBranchStatus('some-branch', true)).rejects.toThrow(
         'getCombinedCommitStatus()'
       );
+    });
+
+    it('should treat internal checks as success', async () => {
+      helper.getCombinedCommitStatus.mockResolvedValueOnce({
+        worstStatus: 'success',
+        statuses: [
+          {
+            id: 1,
+            status: 'success',
+            context: 'renovate/stability-days',
+            description: 'internal check',
+            target_url: '',
+            created_at: '',
+          },
+        ],
+      });
+      expect(await gitea.getBranchStatus('some-branch', true)).toBe('green');
+    });
+
+    it('should not treat internal checks as success', async () => {
+      await initFakeRepo();
+      helper.getCombinedCommitStatus.mockResolvedValueOnce(
+        partial<CombinedCommitStatus>({
+          worstStatus: 'success',
+          statuses: [
+            {
+              id: 1,
+              status: 'success',
+              context: 'renovate/stability-days',
+              description: 'internal check',
+              target_url: '',
+              created_at: '',
+            },
+          ],
+        })
+      );
+      expect(await gitea.getBranchStatus('some-branch', false)).toBe('yellow');
     });
   });
 
@@ -688,7 +745,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual(BranchStatus.yellow);
+      ).toBe('yellow');
     });
 
     it('should return green of matching result', async () => {
@@ -705,7 +762,7 @@ describe('modules/platform/gitea/index', () => {
 
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
-      ).toEqual(BranchStatus.green);
+      ).toBe('green');
     });
   });
 
@@ -733,7 +790,7 @@ describe('modules/platform/gitea/index', () => {
           number: 3,
           title: 'Third-party PR',
           body: 'other random pull request',
-          state: PrState.Open,
+          state: 'open',
           diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
           created_at: '2011-08-18T22:30:38Z',
           closed_at: '2016-01-09T10:03:21Z',
@@ -859,7 +916,7 @@ describe('modules/platform/gitea/index', () => {
       expect(
         await gitea.findPr({
           branchName: mockPR.head.label,
-          state: `!${mockPR.state}` as PRState,
+          state: `!${mockPR.state as PrState}` as never, // wrong argument being passed intentionally
         })
       ).toBeNull();
     });
@@ -905,7 +962,7 @@ describe('modules/platform/gitea/index', () => {
   describe('createPr', () => {
     const mockNewPR: MockPr = {
       number: 42,
-      state: PrState.Open,
+      state: 'open',
       head: {
         label: 'pr-branch',
         sha: mockCommitHash,
@@ -1055,7 +1112,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('should abort when response for created pull request is invalid', async () => {
-      helper.createPR.mockResolvedValueOnce(partial<PR>({}));
+      helper.createPR.mockResolvedValueOnce(partial<PR>());
 
       await initFakeRepo();
       await expect(
@@ -1212,13 +1269,13 @@ describe('modules/platform/gitea/index', () => {
         number: 1,
         prTitle: 'New Title',
         prBody: 'New Body',
-        state: PrState.Closed,
+        state: 'closed',
       });
 
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
         title: 'New Title',
         body: 'New Body',
-        state: PrState.Closed,
+        state: 'closed',
       });
     });
   });
@@ -1859,12 +1916,6 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts', () => {
-    it('should return an empty list - unsupported by platform', async () => {
-      expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
@@ -1920,7 +1971,7 @@ describe('modules/platform/gitea/index', () => {
     });
 
     it('returns null on missing content', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>({}));
+      helper.getRepoContents.mockResolvedValueOnce(partial<RepoContents>());
       await initFakeRepo({ full_name: 'some/repo' });
       expect(await gitea.getJsonFile('file.json')).toBeNull();
     });

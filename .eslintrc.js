@@ -41,8 +41,18 @@ module.exports = {
     ],
     'import/prefer-default-export': 0, // no benefit
 
+    'import/no-cycle': 2, // cycles don't work when moving to esm
+
+    /*
+     * This rule is not needed since the project uses typescript and the rule
+     * `@typescript-eslint/explicit-function-return-type`.
+     *
+     * Any non-exhaustive definition of the function will therefore result in a
+     * typescript TS2366 error.
+     */
+    'consistent-return': 0,
+
     // other rules
-    'consistent-return': 'error',
     eqeqeq: 'error',
     'no-console': 'error',
     'no-negated-condition': 'error',
@@ -97,7 +107,7 @@ module.exports = {
       {
         vars: 'all',
         args: 'none',
-        ignoreRestSiblings: false,
+        ignoreRestSiblings: true,
       },
     ],
     '@typescript-eslint/prefer-optional-chain': 2,
@@ -133,6 +143,13 @@ module.exports = {
 
     'typescript-enum/no-const-enum': 2,
     'typescript-enum/no-enum': 2,
+    'object-shorthand': [
+      'error',
+      'always',
+      {
+        avoidQuotes: true,
+      },
+    ],
   },
   settings: {
     'import/parsers': {

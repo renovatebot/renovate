@@ -1,14 +1,13 @@
+import JSON5 from 'json5';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { commitAndPush } from '../../../../modules/platform/commit';
-import {
-  getFile,
-  isBranchBehindBase,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { checkoutBranch, getFile } from '../../../../util/git';
+import { quickStringify } from '../../../../util/stringify';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
+import { MigratedDataFactory } from './migrated-data';
 import type { MigratedData } from './migrated-data';
 
 export async function rebaseMigrationBranch(
@@ -17,16 +16,15 @@ export async function rebaseMigrationBranch(
 ): Promise<string | null> {
   logger.debug('Checking if migration branch needs rebasing');
   const branchName = getMigrationBranchName(config);
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('Migration branch has been edited and cannot be rebased');
     return null;
   }
   const configFileName = migratedConfigData.filename;
-  const contents = migratedConfigData.content;
+  let contents = migratedConfigData.content;
   const existingContents = await getFile(configFileName, branchName);
   if (
-    contents === existingContents &&
-    !(await isBranchBehindBase(branchName))
+    jsonStripWhitespaces(contents) === jsonStripWhitespaces(existingContents)
   ) {
     logger.debug('Migration branch is up to date');
     return null;
@@ -44,7 +42,12 @@ export async function rebaseMigrationBranch(
   );
   const commitMessage = commitMessageFactory.getCommitMessage();
 
-  return commitAndPush({
+  await checkoutBranch(config.defaultBranch!);
+  contents = await MigratedDataFactory.applyPrettierFormatting(
+    migratedConfigData
+  );
+  return scm.commitAndPush({
+    baseBranch: config.baseBranch,
     branchName,
     files: [
       {
@@ -56,4 +59,22 @@ export async function rebaseMigrationBranch(
     message: commitMessage.toString(),
     platformCommit: !!config.platformCommit,
   });
+}
+
+/**
+ * @param json a JSON string
+ * @return a minimal json string. i.e. does not contain any formatting/whitespaces
+ */
+export function jsonStripWhitespaces(json: string | null): string | null {
+  if (!json) {
+    return null;
+  }
+  /**
+   * JSON.stringify(value, replacer, space):
+   * If "space" is anything other than a string or number —
+   * for example, is null or not provided — no white space is used.
+   *
+   * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#parameters
+   */
+  return quickStringify(JSON5.parse(json)) ?? null;
 }

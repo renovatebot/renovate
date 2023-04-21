@@ -2,6 +2,7 @@ export interface PoetrySection {
   dependencies: Record<string, PoetryDependency | string>;
   'dev-dependencies': Record<string, PoetryDependency | string>;
   extras: Record<string, PoetryDependency | string>;
+  group: Record<string, PoetryGroup>;
   source?: PoetrySource[];
 }
 
@@ -25,6 +26,10 @@ export interface PoetryDependency {
 export interface PoetrySource {
   name: string;
   url?: string;
+}
+
+export interface PoetryGroup {
+  dependencies: Record<string, PoetryDependency | string>;
 }
 
 export interface PoetryLockSection {

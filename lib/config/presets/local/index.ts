@@ -1,21 +1,30 @@
-import { PlatformId } from '../../../constants';
+import type { PlatformId } from '../../../constants';
 import { GlobalConfig } from '../../global';
-import * as azure from '../azure';
-import * as bitbucket from '../bitbucket';
-import * as bitbucketServer from '../bitbucket-server';
 import * as gitea from '../gitea';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import type { Preset, PresetConfig } from '../types';
+import * as local from './common';
+
+interface Resolver {
+  getPresetFromEndpoint(
+    repo: string,
+    filePreset: string,
+    presetPath?: string,
+    endpoint?: string,
+    tag?: string
+  ): Promise<Preset | undefined>;
+}
 
 const resolvers = {
-  [PlatformId.Azure]: azure,
-  [PlatformId.Bitbucket]: bitbucket,
-  [PlatformId.BitbucketServer]: bitbucketServer,
-  [PlatformId.Gitea]: gitea,
-  [PlatformId.Github]: github,
-  [PlatformId.Gitlab]: gitlab,
-} as const;
+  azure: local,
+  bitbucket: local,
+  'bitbucket-server': local,
+  codecommit: null,
+  gitea,
+  github,
+  gitlab,
+} satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({
   repo,
@@ -27,11 +36,10 @@ export function getPreset({
   if (!platform) {
     throw new Error(`Missing platform config for local preset.`);
   }
-  const resolver = resolvers[platform.toLowerCase() as PlatformId];
+  const resolver = resolvers[platform];
   if (!resolver) {
     throw new Error(
-      // TODO: can be undefined? #7154
-      `Unsupported platform '${platform}' for local preset.`
+      `The platform you're using ($platform) does not support local presets.`
     );
   }
   return resolver.getPresetFromEndpoint(

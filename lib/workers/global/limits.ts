@@ -1,11 +1,6 @@
 import { logger } from '../../logger';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum Limit {
-  Commits = 'Commits',
-  PullRequests = 'PullRequests',
-  Branches = 'Branches',
-}
+export type Limit = 'Commits' | 'PullRequests' | 'Branches';
 
 interface LimitValue {
   max: number | null;

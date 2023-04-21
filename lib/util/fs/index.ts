@@ -1,12 +1,12 @@
-import stream from 'stream';
-import util from 'util';
+import stream from 'node:stream';
+import util from 'node:util';
 import is from '@sindresorhus/is';
 import findUp from 'find-up';
 import fs from 'fs-extra';
 import upath from 'upath';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
-import { ensureCachePath, ensureLocalPath } from './util';
+import { ensureCachePath, ensureLocalPath, isValidPath } from './util';
 
 export const pipeline = util.promisify(stream.pipeline);
 
@@ -29,7 +29,7 @@ export async function readLocalFile(
 ): Promise<string | null>;
 export async function readLocalFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer | null> {
   const localFileName = ensureLocalPath(fileName);
   try {
@@ -118,6 +118,15 @@ export async function localPathExists(pathName: string): Promise<boolean> {
   } catch (_) {
     return false;
   }
+}
+
+/**
+ * Validate local path without throwing.
+ * @param path Path to check
+ * @returns `true` if given `path` is a valid local path, otherwise `false`.
+ */
+export function isValidLocalPath(path: string): boolean {
+  return isValidPath(path, 'localDir');
 }
 
 /**
@@ -246,6 +255,16 @@ export async function rmCache(path: string): Promise<void> {
   await fs.rm(fullPath, { recursive: true });
 }
 
+export async function cachePathExists(pathName: string): Promise<boolean> {
+  const path = ensureCachePath(pathName);
+  try {
+    const s = await fs.stat(path);
+    return !!s;
+  } catch (_) {
+    return false;
+  }
+}
+
 export async function readCacheFile(fileName: string): Promise<Buffer>;
 export async function readCacheFile(
   fileName: string,
@@ -253,13 +272,16 @@ export async function readCacheFile(
 ): Promise<string>;
 export function readCacheFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   const fullPath = ensureCachePath(fileName);
   return encoding ? fs.readFile(fullPath, encoding) : fs.readFile(fullPath);
 }
 
-export function outputCacheFile(file: string, data: unknown): Promise<void> {
+export function outputCacheFile(
+  file: string,
+  data: string | NodeJS.ArrayBufferView
+): Promise<void> {
   const filePath = ensureCachePath(file);
   return fs.outputFile(filePath, data);
 }
@@ -271,7 +293,19 @@ export async function readSystemFile(
 ): Promise<string>;
 export function readSystemFile(
   fileName: string,
-  encoding?: string
+  encoding?: BufferEncoding
 ): Promise<string | Buffer> {
   return encoding ? fs.readFile(fileName, encoding) : fs.readFile(fileName);
+}
+
+export async function getLocalFiles(
+  fileNames: string[]
+): Promise<Record<string, string | null>> {
+  const fileContentMap: Record<string, string | null> = {};
+
+  for (const fileName of fileNames) {
+    fileContentMap[fileName] = await readLocalFile(fileName, 'utf8');
+  }
+
+  return fileContentMap;
 }

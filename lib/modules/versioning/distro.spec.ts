@@ -6,7 +6,7 @@ describe('modules/versioning/distro', () => {
 
   beforeAll(() => {
     const dt = DateTime.fromISO('2021-03-20');
-    jest.spyOn(Settings, 'now').mockReturnValue(dt.valueOf());
+    Settings.now = () => dt.valueOf();
   });
 
   it.each`

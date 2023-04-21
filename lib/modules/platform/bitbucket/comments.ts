@@ -1,7 +1,8 @@
 import { logger } from '../../../logger';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import { Config, accumulateValues } from './utils';
+import type { Config } from './types';
+import { accumulateValues } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -12,7 +13,7 @@ interface Comment {
 
 export type CommentsConfig = Pick<Config, 'repository'>;
 
-interface EnsureBitBucketCommentConfig extends EnsureCommentConfig {
+interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
 }
 
@@ -70,7 +71,7 @@ export async function ensureComment({
   number: prNo,
   topic,
   content,
-}: EnsureBitBucketCommentConfig): Promise<boolean> {
+}: EnsureBitbucketCommentConfig): Promise<boolean> {
   try {
     const comments = await getComments(config, prNo);
     let body: string;
@@ -95,6 +96,10 @@ export async function ensureComment({
         }
       });
     }
+
+    // sanitize any language that isn't supported by Bitbucket Cloud
+    body = sanitizeCommentBody(body);
+
     if (!commentId) {
       await addComment(config, prNo, body);
       logger.info(
@@ -145,4 +150,11 @@ export async function ensureCommentRemoval(
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Error ensuring comment removal');
   }
+}
+
+function sanitizeCommentBody(body: string): string {
+  return body.replace(
+    'checking the rebase/retry box above',
+    'renaming this PR to start with "rebase!"'
+  );
 }

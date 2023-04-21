@@ -4,7 +4,7 @@ import { newlineRegex, regEx } from '../../../util/regex';
 import { GoDatasource } from '../../datasource/go';
 import { GolangVersionDatasource } from '../../datasource/golang-version';
 import { isVersion } from '../../versioning/semver';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { MultiLineParseResult } from './types';
 
 function getDep(
@@ -28,9 +28,9 @@ function getDep(
   } else {
     dep.skipReason = 'unsupported-version';
   }
-  const digestMatch = regEx(/v0\.0.0-\d{14}-([a-f0-9]{12})/).exec(currentValue);
-  if (digestMatch) {
-    [, dep.currentDigest] = digestMatch;
+  const digestMatch = regEx(GoDatasource.pversionRegexp).exec(currentValue);
+  if (digestMatch?.groups?.digest) {
+    dep.currentDigest = digestMatch.groups.digest;
     dep.digestOneAndOnly = true;
   }
   return dep;
@@ -45,14 +45,12 @@ function getGoDep(lineNumber: number, goVer: string): PackageDependency {
     depType: 'golang',
     currentValue: goVer,
     datasource: GolangVersionDatasource.id,
-    versioning: 'npm',
-    rangeStrategy: 'replace',
+    versioning: 'go-mod-directive',
   };
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
-  const constraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split(newlineRegex);
@@ -62,7 +60,6 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (goVer && semver.validRange(goVer)) {
         const dep = getGoDep(lineNumber, goVer);
         deps.push(dep);
-        constraints.go = line.replace('go ', '^');
       }
       const replaceMatch = regEx(
         /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/
@@ -72,10 +69,17 @@ export function extractPackageFile(content: string): PackageFile | null {
         deps.push(dep);
       }
       const requireMatch = regEx(/^require\s+([^\s]+)\s+([^\s]+)/).exec(line);
-      if (requireMatch && !line.endsWith('// indirect')) {
-        logger.trace({ lineNumber }, `require line: "${line}"`);
-        const dep = getDep(lineNumber, requireMatch, 'require');
-        deps.push(dep);
+      if (requireMatch) {
+        if (line.endsWith('// indirect')) {
+          logger.trace({ lineNumber }, `indirect line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'indirect');
+          dep.enabled = false;
+          deps.push(dep);
+        } else {
+          logger.trace({ lineNumber }, `require line: "${line}"`);
+          const dep = getDep(lineNumber, requireMatch, 'require');
+          deps.push(dep);
+        }
       }
       if (line.trim() === 'require (') {
         logger.trace(`Matched multi-line require on line ${lineNumber}`);
@@ -107,7 +111,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  return { constraints, deps };
+  return { deps };
 }
 
 function parseMultiLine(
@@ -128,6 +132,12 @@ function parseMultiLine(
       logger.trace({ lineNumber }, `${blockType} line: "${line}"`);
       const dep = getDep(lineNumber, multiMatch, blockType);
       dep.managerData!.multiLine = true;
+      deps.push(dep);
+    } else if (multiMatch && line.endsWith('// indirect')) {
+      logger.trace({ lineNumber }, `${blockType} indirect line: "${line}"`);
+      const dep = getDep(lineNumber, multiMatch, 'indirect');
+      dep.managerData!.multiLine = true;
+      dep.enabled = false;
       deps.push(dep);
     } else if (line.trim() !== ')') {
       logger.trace(`No multi-line match: ${line}`);

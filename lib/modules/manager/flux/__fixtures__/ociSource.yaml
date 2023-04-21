@@ -1,0 +1,11 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: OCIRepository
+metadata:
+  name: kyverno-controller
+  namespace: flux-system
+spec:
+  interval: 1h0m0s
+  provider: generic
+  url: oci://ghcr.io/kyverno/manifests/kyverno
+  ref:
+    tag: v1.8.2

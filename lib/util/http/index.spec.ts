@@ -1,10 +1,15 @@
+import { z } from 'zod';
 import * as httpMock from '../../../test/http-mock';
+import { logger } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
   HOST_DISABLED,
 } from '../../constants/error-messages';
+import * as memCache from '../cache/memory';
 import * as hostRules from '../host-rules';
 import * as queue from './queue';
+import * as throttle from './throttle';
+import type { HttpResponse } from './types';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -16,6 +21,7 @@ describe('util/http/index', () => {
     http = new Http('dummy');
     hostRules.clear();
     queue.clear();
+    throttle.clear();
   });
 
   it('get', async () => {
@@ -63,7 +69,14 @@ describe('util/http/index', () => {
   });
 
   it('getJson', async () => {
-    httpMock.scope(baseUrl).get('/').reply(200, '{ "test": true }');
+    httpMock
+      .scope(baseUrl, {
+        reqheaders: {
+          accept: 'application/json',
+        },
+      })
+      .get('/')
+      .reply(200, '{ "test": true }');
     expect(await http.getJson('http://renovate.com')).toEqual({
       authorization: false,
       body: {
@@ -299,5 +312,117 @@ describe('util/http/index', () => {
     const res = await http.getBuffer('http://renovate.com');
     expect(res?.body).toBeInstanceOf(Buffer);
     expect(res?.body.toString('utf-8')).toBe('test');
+  });
+
+  describe('Schema support', () => {
+    const SomeSchema = z
+      .object({ x: z.number(), y: z.number() })
+      .transform(({ x, y }) => `${x} + ${y} = ${x + y}`);
+
+    beforeEach(() => {
+      jest.resetAllMocks();
+      memCache.init();
+    });
+
+    afterEach(() => {
+      memCache.reset();
+    });
+
+    describe('getJson', () => {
+      it('uses schema for response body', async () => {
+        httpMock
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
+          .get('/')
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
+
+        const { body }: HttpResponse<string> = await http.getJson(
+          'http://renovate.com',
+          { headers: { accept: 'application/json' } },
+          SomeSchema
+        );
+
+        expect(body).toBe('2 + 2 = 4');
+        expect(logger.logger.once.info).not.toHaveBeenCalled();
+      });
+
+      it('throws on schema mismatch', async () => {
+        httpMock
+          .scope(baseUrl, {
+            reqheaders: {
+              accept: 'application/json',
+            },
+          })
+          .get('/')
+          .reply(200, JSON.stringify({ foo: 'bar' }));
+
+        await expect(
+          http.getJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
+      });
+    });
+
+    describe('postJson', () => {
+      it('uses schema for response body', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ x: 2, y: 2 }));
+
+        const { body }: HttpResponse<string> = await http.postJson(
+          'http://renovate.com',
+          SomeSchema
+        );
+
+        expect(body).toBe('2 + 2 = 4');
+        expect(logger.logger.once.info).not.toHaveBeenCalled();
+      });
+
+      it('throws on schema mismatch', async () => {
+        httpMock
+          .scope(baseUrl)
+          .post('/')
+          .reply(200, JSON.stringify({ foo: 'bar' }));
+
+        await expect(
+          http.postJson('http://renovate.com', SomeSchema)
+        ).rejects.toThrow(z.ZodError);
+      });
+    });
+  });
+
+  describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('works without throttling', async () => {
+      jest.useFakeTimers({ advanceTimers: 1 });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeLessThan(100);
+    });
+
+    it('limits request rate by host', async () => {
+      jest.useFakeTimers({ advanceTimers: true });
+      httpMock.scope(baseUrl).get('/foo').twice().reply(200, 'bar');
+      hostRules.add({ matchHost: 'renovate.com', maxRequestsPerSecond: 0.25 });
+
+      const t1 = Date.now();
+      await http.get('http://renovate.com/foo');
+      jest.advanceTimersByTime(4000);
+      await http.get('http://renovate.com/foo');
+      const t2 = Date.now();
+
+      expect(t2 - t1).toBeGreaterThanOrEqual(4000);
+    });
   });
 });

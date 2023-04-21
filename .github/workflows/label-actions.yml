@@ -15,7 +15,7 @@ jobs:
   reaction:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/label-actions@93ea5ec1d65e6a21427a1571a18a5b8861206b0b # renovate: tag=v2.2.0
+      - uses: dessant/label-actions@074b96a62f35c226ecb38e840f44941bde0343a6 # v3.0.0
         with:
           github-token: ${{ github.token }}
           process-only: 'issues, discussions'

@@ -1,6 +1,5 @@
 import { newlineRegex, regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
-import { TerragruntDependencyTypes } from './common';
 import type { ExtractionResult, TerraformManagerData } from './types';
 import { keyValueExtractionRegex } from './util';
 
@@ -34,7 +33,7 @@ export function extractTerragruntProvider(
   const deps: PackageDependency<TerraformManagerData>[] = [];
   const managerData: TerraformManagerData = {
     moduleName,
-    terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
+    terragruntDependencyType: 'terraform',
   };
   const dep: PackageDependency<TerraformManagerData> = { managerData };
   const teraformContent = lines

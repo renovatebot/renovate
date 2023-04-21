@@ -9,6 +9,8 @@ export interface CargoDep {
   registry?: string;
   /** Name of a package to look up */
   package?: string;
+  /** Whether the dependency is inherited from the workspace*/
+  workspace?: boolean;
 }
 
 export type CargoDeps = Record<string, CargoDep | string>;
@@ -21,6 +23,7 @@ export interface CargoSection {
 
 export interface CargoManifest extends CargoSection {
   target?: Record<string, CargoSection>;
+  workspace?: CargoSection;
 }
 
 export interface CargoConfig {

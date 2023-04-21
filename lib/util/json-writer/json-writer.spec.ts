@@ -1,4 +1,3 @@
-import { IndentationType } from './indentation-type';
 import { JSONWriter } from './json-writer';
 
 describe('util/json-writer/json-writer', () => {
@@ -14,7 +13,7 @@ describe('util/json-writer/json-writer', () => {
 
   it('should apply indentation size', () => {
     const jsonWriter = new JSONWriter({
-      indentationType: IndentationType.Space,
+      indentationType: 'space',
       indentationSize: 10,
     });
 
@@ -23,7 +22,7 @@ describe('util/json-writer/json-writer', () => {
 
   it('should apply indentation type', () => {
     const jsonWriter = new JSONWriter({
-      indentationType: IndentationType.Tab,
+      indentationType: 'tab',
     });
 
     expect(jsonWriter.write(DATA)).toBe('{\n\t"value": 1\n}\n');
@@ -31,7 +30,7 @@ describe('util/json-writer/json-writer', () => {
 
   it('new line at the end should be optional', () => {
     const jsonWriter = new JSONWriter({
-      indentationType: IndentationType.Space,
+      indentationType: 'space',
       indentationSize: 10,
     });
 

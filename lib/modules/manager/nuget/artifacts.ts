@@ -6,13 +6,13 @@ import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
 import {
   ensureDir,
+  getLocalFiles,
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
-  readLocalFile,
   writeLocalFile,
 } from '../../../util/fs';
-import { getFile } from '../../../util/git';
+import { getFiles } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
 import { NugetDatasource } from '../../datasource/nuget';
@@ -38,7 +38,7 @@ async function addSourceCmds(
     (await getConfiguredRegistries(packageFileName)) ?? getDefaultRegistries();
   const result: string[] = [];
   for (const registry of registries) {
-    const { username, password } = hostRules.find({
+    const { password, username } = hostRules.find({
       hostType: NugetDatasource.id,
       url: registry.url,
     });
@@ -50,9 +50,14 @@ async function addSourceCmds(
       // Add name for registry, if known.
       addSourceCmd += ` --name ${quote(registry.name)}`;
     }
-    if (username && password) {
-      // Add registry credentials from host rules, if configured.
-      addSourceCmd += ` --username ${quote(username)} --password ${quote(
+    // Add registry credentials from host rules, if configured.
+    if (username) {
+      // Add username from host rules, if configured.
+      addSourceCmd += ` --username ${quote(username)}`;
+    }
+    if (password) {
+      // Add password from host rules, if configured.
+      addSourceCmd += ` --password ${quote(
         password
       )} --store-password-in-clear-text`;
     }
@@ -69,10 +74,14 @@ async function runDotnetRestore(
   const nugetCacheDir = join(privateCacheDir(), 'nuget');
 
   const execOptions: ExecOptions = {
-    docker: {
-      image: 'dotnet',
+    docker: {},
+    extraEnv: {
+      NUGET_PACKAGES: join(nugetCacheDir, 'packages'),
+      MSBUILDDISABLENODEREUSE: '1',
     },
-    extraEnv: { NUGET_PACKAGES: join(nugetCacheDir, 'packages') },
+    toolConstraints: [
+      { toolName: 'dotnet', constraint: config.constraints?.dotnet },
+    ],
   };
 
   const nugetConfigFile = join(nugetCacheDir, `nuget.config`);
@@ -94,21 +103,6 @@ async function runDotnetRestore(
     ),
   ];
   await exec(cmds, execOptions);
-}
-
-async function getLockFileContentMap(
-  lockFileNames: string[],
-  local = false
-): Promise<Record<string, string | null>> {
-  const lockFileContentMap: Record<string, string | null> = {};
-
-  for (const lockFileName of lockFileNames) {
-    lockFileContentMap[lockFileName] = local
-      ? await readLocalFile(lockFileName, 'utf8')
-      : await getFile(lockFileName);
-  }
-
-  return lockFileContentMap;
 }
 
 export async function updateArtifacts({
@@ -142,24 +136,22 @@ export async function updateArtifacts({
     return null;
   }
 
-  const packageFiles = [
-    ...(await getDependentPackageFiles(packageFileName, isCentralManament)),
-  ];
-
-  if (!isCentralManament) {
-    packageFiles.push(packageFileName);
-  }
+  const deps = await getDependentPackageFiles(
+    packageFileName,
+    isCentralManament
+  );
+  const packageFiles = deps.filter((d) => d.isLeaf).map((d) => d.name);
 
   logger.trace(
     { packageFiles },
     `Found ${packageFiles.length} dependent package files`
   );
 
-  const lockFileNames = packageFiles.map((f) =>
-    getSiblingFileName(f, 'packages.lock.json')
+  const lockFileNames = deps.map((f) =>
+    getSiblingFileName(f.name, 'packages.lock.json')
   );
 
-  const existingLockFileContentMap = await getLockFileContentMap(lockFileNames);
+  const existingLockFileContentMap = await getFiles(lockFileNames);
 
   const hasLockFileContent = Object.values(existingLockFileContentMap).some(
     (val) => !!val
@@ -184,10 +176,7 @@ export async function updateArtifacts({
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 
-    const newLockFileContentMap = await getLockFileContentMap(
-      lockFileNames,
-      true
-    );
+    const newLockFileContentMap = await getLocalFiles(lockFileNames);
 
     const retArray: UpdateArtifactsResult[] = [];
     for (const lockFileName of lockFileNames) {

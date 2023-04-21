@@ -11,29 +11,23 @@ For example, if you think anything is unclear, or you think something needs to b
 You need the following dependencies for local development:
 
 - Git `>=2.33.0`
-- Node.js `>=14.15.4`
+- Node.js `>=18.12.0`
 - Yarn `^1.22.5`
 - C++ compiler
-- Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
-
-You need Java to execute Gradle tests.
-If you don’t have Java installed, the Gradle tests will be skipped.
 
 #### Linux
 
 You can use the following commands on Ubuntu.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
-sudo apt-get install -y git build-essential nodejs yarn default-jre-headless
+sudo apt-get install -y git build-essential nodejs yarn
 ```
-
-You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
 #### Windows
 
@@ -44,7 +38,6 @@ If you already installed a part, skip the corresponding step.
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
-- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
   You can see what versions you're using like this:
 
@@ -52,18 +45,23 @@ If you already installed a part, skip the corresponding step.
   PS C:\Windows\system32> git --version
   PS C:\Windows\system32> node --version
   PS C:\Windows\system32> yarn --version
-  PS C:\Windows\system32> java -version
   ```
 
-#### VS Code Remote Development
+#### VS Code Dev Containers
 
-If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
+If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/devcontainers/containers) instead.
 
-- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
+- Install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
 - Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
 The VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
+
+To build inside the container:
+
+```shell
+yarn build
+```
 
 #### Local Docker
 
@@ -91,6 +89,8 @@ To ensure everything is working properly on your end, you must:
 1. Make a build with `yarn build`, which should pass with no errors
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `You must configure a GitHub personal access token`
+
+Do not worry about the token error for now, as you will be given instructions on how to configure the token a little later down in this document.
 
 You only need to do these steps once.
 
@@ -176,17 +176,6 @@ To do this, see these GitHub guides:
 
 ## Tips and tricks
 
-### Running Renovate against forked repositories
-
-Quite often, the quickest way for you to test or fix something is to fork an existing repository.
-But by default Renovate skips over repositories that are forked.
-To override this default, you need to specify the setting `includeForks` as `true`.
-
-Tell Renovate to run on your forked repository by doing one of the following:
-
-1. Add `"includeForks": true` to the `renovate.json` file in your forked repository
-1. Run Renovate with the CLI flag `--renovate-fork=true`
-
 ### Log files
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
@@ -215,10 +204,10 @@ Also create documentation for the option in the `docs/usage/configuration-option
 It's really easy to debug Renovate with the help of Chrome's inspect tool.
 Here's an example:
 
-1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
+1. Open `chrome://inspect` in Chrome, then select "Open dedicated DevTools for Node"
 1. Add a `debugger;` statement somewhere in the source code where you want to start debugging
 1. Run Renovate using `yarn debug ...` instead of `yarn start ...`
-1. Click "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
+1. Select "Resume script execution" in Chrome DevTools and wait for your break point to be triggered
 
 ### VS Code
 

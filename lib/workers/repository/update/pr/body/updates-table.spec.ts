@@ -1,3 +1,4 @@
+import { partial } from '../../../../../../test/util';
 import type { BranchConfig, BranchUpgradeConfig } from '../../../../types';
 import { getPrUpdatesTable } from './updates-table';
 
@@ -6,6 +7,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [],
       prBodyColumns: undefined,
     };
@@ -14,7 +16,7 @@ describe('workers/repository/update/pr/body/updates-table', () => {
   });
 
   it('checks results for getPrUpdatesTable', () => {
-    const upgrade0: BranchUpgradeConfig = {
+    const upgrade0 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
@@ -29,9 +31,9 @@ describe('workers/repository/update/pr/body/updates-table', () => {
         'Package file': '{{{packageFile}}}',
       },
       updateType: 'lockFileMaintenance',
-    };
+    });
 
-    const upgrade1: BranchUpgradeConfig = {
+    const upgrade1 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
@@ -56,9 +58,9 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       newVersion: '1.7.0',
       displayFrom: '^1.7.0',
       displayTo: '1.7.0',
-    };
+    });
 
-    const upgrade2: BranchUpgradeConfig = {
+    const upgrade2 = partial<BranchUpgradeConfig>({
       manager: 'some-manager',
       branchName: 'some-branch',
       prBodyDefinitions: {
@@ -84,12 +86,13 @@ describe('workers/repository/update/pr/body/updates-table', () => {
       newVersion: '6.2.3',
       displayFrom: '^6.2.3',
       displayTo: '6.2.3',
-    };
+    });
     // TODO #7154 allow or filter undefined
     const upgrade3 = undefined as never;
     const configObj: BranchConfig = {
       manager: 'some-manager',
       branchName: 'some-branch',
+      baseBranch: 'base',
       upgrades: [upgrade0, upgrade1, upgrade2, upgrade3],
       prBodyColumns: ['Package', 'Type', 'Update', 'Change', 'Pending'],
       prBodyDefinitions: {

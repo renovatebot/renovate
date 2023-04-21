@@ -2,7 +2,7 @@
 
 Renovate was created by [Mend](https://www.mend.io/) staff and they continue to work on Renovate.
 
-More than 650 outside contributors helped improve Renovate.
+More than 750 outside contributors helped improve Renovate.
 
 ## Special thanks
 
@@ -16,6 +16,7 @@ Renovate is maintained by:
 - [@rarkins](https://github.com/rarkins)
 - [@viceice](https://github.com/viceice)
 - [@JamieMagee](https://github.com/JamieMagee)
+- [@secustor](https://github.com/secustor)
 
 ### Maintainers for features
 
@@ -36,6 +37,7 @@ Some features made a lot of people happy, and efficient!
 - [@astellingwerf](https://github.com/astellingwerf) reviews PRs
 - [@danports](https://github.com/danports) worked on the Flux manager, and other managers. Feel free to ping `@danports` for any Flux-related issue or PR
 - [@shegox](https://github.com/shegox) worked on the Go manager, and improved our docs
+- [@setchy](https://github.com/setchy) focused on Bitbucket Cloud and replacement features
 
 ## Renovate development
 

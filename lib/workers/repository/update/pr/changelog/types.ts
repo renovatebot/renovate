@@ -24,7 +24,7 @@ export interface ChangeLogRelease {
 }
 
 export interface ChangeLogProject {
-  depName?: string;
+  packageName?: string;
   type: 'github' | 'gitlab';
   apiBaseUrl?: string;
   baseUrl: string;
@@ -33,11 +33,7 @@ export interface ChangeLogProject {
   sourceDirectory?: string;
 }
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum ChangeLogError {
-  MissingGithubToken = 1,
-  MissingGitlabToken = 2,
-}
+export type ChangeLogError = 'MissingGithubToken' | 'MissingGitlabToken';
 
 export interface ChangeLogResult {
   hasReleaseNotes?: boolean;

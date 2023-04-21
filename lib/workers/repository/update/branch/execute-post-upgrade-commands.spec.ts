@@ -10,7 +10,7 @@ jest.mock('../../../../util/git');
 describe('workers/repository/update/branch/execute-post-upgrade-commands', () => {
   describe('postUpgradeCommandsExecutor', () => {
     it('handles an artifact which is a directory', async () => {
-      const commands: BranchUpgradeConfig[] = [
+      const commands = partial<BranchUpgradeConfig>([
         {
           manager: 'some-manager',
           branchName: 'main',
@@ -19,7 +19,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
             commands: ['disallowed_command'],
           },
         },
-      ];
+      ]);
       const config: BranchConfig = {
         manager: 'some-manager',
         updatedPackageFiles: [],
@@ -30,6 +30,7 @@ describe('workers/repository/update/branch/execute-post-upgrade-commands', () =>
         artifactErrors: [],
         upgrades: [],
         branchName: 'main',
+        baseBranch: 'base',
       };
       git.getRepoStatus.mockResolvedValueOnce(
         partial<StatusResult>({

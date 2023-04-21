@@ -1,5 +1,5 @@
-import os from 'os';
-import { promisify } from 'util';
+import os from 'node:os';
+import { promisify } from 'node:util';
 import fs from 'fs-extra';
 import g from 'glob';
 import JSON5 from 'json5';
@@ -16,7 +16,7 @@ const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
  *  1. Clones the Azure Pipelines Tasks repo
  *  2. Finds all `task.json` files
  *  3. For each `task.json` it finds each commit that has that file
- *  4. For each commit it gets the `task.json` content and extracts the task name and version
+ *  4. For each commit it gets the `task.json` content and extracts the task name, id and version
  *  5. After all the `task.json` files have been processed it writes the results to `./data/azure-pipelines-tasks.json`
  */
 await (async () => {
@@ -49,11 +49,14 @@ await (async () => {
       try {
         // Get the content of the file at the commit
         const content = await git.show([`${rev}:${file}`]);
-        /** @type {{name: string, version: {Major: number, Minor: number, Patch: number}}} */
+        /** @type {{name: string, id: string, version: {Major: number, Minor: number, Patch: number}}} */
         const parsedContent = JSON5.parse(content);
         const version = `${parsedContent.version.Major}.${parsedContent.version.Minor}.${parsedContent.version.Patch}`;
         tasks[parsedContent.name.toLowerCase()] =
           tasks[parsedContent.name.toLowerCase()]?.add(version) ??
+          new Set([version]);
+        tasks[parsedContent.id.toLowerCase()] =
+          tasks[parsedContent.id.toLowerCase()]?.add(version) ??
           new Set([version]);
       } catch (e) {
         shell.echo(`Failed to parse ${file} at ${rev}`);

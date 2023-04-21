@@ -1,5 +1,5 @@
 import type { MergeStrategy } from '../../config/types';
-import type { BranchStatus, PrState, VulnerabilityAlert } from '../../types';
+import type { BranchStatus, VulnerabilityAlert } from '../../types';
 import type { CommitFilesConfig, CommitSha } from '../../util/git/types';
 
 type VulnerabilityKey = string;
@@ -37,12 +37,12 @@ export interface RepoParams {
   repository: string;
   endpoint?: string;
   gitUrl?: GitUrlOption;
-  forkMode?: string;
   forkToken?: string;
-  includeForks?: boolean;
+  forkProcessing?: 'enabled' | 'disabled';
   renovateUsername?: string;
   cloneSubmodules?: boolean;
   ignorePrAuthor?: boolean;
+  bbUseDevelopmentBranch?: boolean;
 }
 
 export interface PrDebugData {
@@ -52,6 +52,7 @@ export interface PrDebugData {
 
 export interface PrBodyStruct {
   hash: string;
+  rawConfigHash?: string;
   rebaseRequested?: boolean;
   debugData?: PrDebugData;
 }
@@ -65,9 +66,7 @@ export interface Pr {
   cannotMergeReason?: string; // for reflecting platform policies which may prevent merging
   createdAt?: string;
   closedAt?: string;
-  displayNumber?: string;
   hasAssignees?: boolean;
-  hasReviewers?: boolean;
   labels?: string[];
   number: number;
   reviewers?: string[];
@@ -89,12 +88,14 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
   usePlatformAutomerge?: boolean;
+  forkModeDisallowMaintainerEdits?: boolean;
 };
+
 export interface CreatePRConfig {
   sourceBranch: string;
   targetBranch: string;
@@ -109,7 +110,7 @@ export interface UpdatePrConfig {
   platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
-  state?: PrState.Open | PrState.Closed;
+  state?: 'open' | 'closed';
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -130,7 +131,7 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
+  state?: 'open' | 'closed' | '!open' | 'all';
   refreshCache?: boolean;
 }
 export interface MergePRConfig {
@@ -164,7 +165,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
     repoName?: string,
@@ -205,9 +206,22 @@ export interface Platform {
   getPr(number: number): Promise<Pr | null>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr | null>;
   refreshPr?(number: number): Promise<void>;
-  getBranchStatus(branchName: string): Promise<BranchStatus>;
+  getBranchStatus(
+    branchName: string,
+    internalChecksAsSuccess: boolean
+  ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: PlatformParams): Promise<PlatformResult>;
   filterUnavailableUsers?(users: string[]): Promise<string[]>;
   commitFiles?(config: CommitFilesConfig): Promise<CommitSha | null>;
+}
+
+export interface PlatformScm {
+  isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
+  isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
+  branchExists(branchName: string): Promise<boolean>;
+  getBranchCommit(branchName: string): Promise<CommitSha | null>;
+  deleteBranch(branchName: string): Promise<void>;
+  commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
 }

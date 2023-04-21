@@ -1,6 +1,6 @@
 # Creating/editing Renovate presets
 
-Renovate comes with default presets that you can find in the `lib/config/presets/internal` directory.
+Renovate comes with default presets that you can find in the [`lib/config/presets/internal`](https://github.com/renovatebot/renovate/tree/main/lib/config/presets/internal) directory.
 You can suggest changes to the presets with a pull request.
 
 Follow the rules below to increase the chance that your pull request gets merged.

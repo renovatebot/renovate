@@ -1,4 +1,4 @@
-import { Stream } from 'stream';
+import { Stream } from 'node:stream';
 import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
@@ -85,6 +85,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
           err.name === 'TimeoutError' ? undefined : clone(err.response.body),
         headers: clone(err.response.headers),
         httpVersion: err.response.httpVersion,
+        retryCount: err.response.retryCount,
       };
     }
   }
@@ -243,7 +244,7 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
 }
 
 // Can't use `util/regex` because of circular reference to logger
-const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
+const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
 
 export function sanitizeUrls(text: string): string {

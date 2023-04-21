@@ -1,9 +1,11 @@
 import is from '@sindresorhus/is';
 import { cache } from '../../../util/cache/package/decorator';
+import { regEx } from '../../../util/regex';
 import { addSecretForSanitizing } from '../../../util/sanitize';
 import { parseUrl } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
+import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
 import type { DigestConfig, GetReleasesConfig, ReleaseResult } from '../types';
@@ -23,6 +25,10 @@ export class GoDatasource extends Datasource {
   readonly goproxy = new GoProxyDatasource();
   readonly direct = new GoDirectDatasource();
 
+  // Pseudo versions https://go.dev/ref/mod#pseudo-versions
+  static readonly pversionRegexp = regEx(
+    /v\d+\.\d+\.\d+-(?:\w+\.)?(?:0\.)?\d{14}-(?<digest>[a-f0-9]{12})/
+  );
   @cache({
     namespace: `datasource-${GoDatasource.id}`,
     // TODO: types (#7154)
@@ -30,9 +36,7 @@ export class GoDatasource extends Datasource {
     key: ({ packageName }: Partial<DigestConfig>) => `${packageName}-digest`,
   })
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
-    return process.env.GOPROXY
-      ? this.goproxy.getReleases(config)
-      : this.direct.getReleases(config);
+    return this.goproxy.getReleases(config);
   }
 
   /**
@@ -58,14 +62,21 @@ export class GoDatasource extends Datasource {
       return null;
     }
 
-    // ignore v0.0.0- pseudo versions that are used Go Modules - look up default branch instead
-    const tag = value && !value.startsWith('v0.0.0-2') ? value : undefined;
+    // ignore vX.Y.Z-(0.)? pseudo versions that are used Go Modules - look up default branch instead
+    // ignore v0.0.0 versions to fetch the digest of default branch, not the commit of non-existing tag `v0.0.0`
+    const tag =
+      value && !GoDatasource.pversionRegexp.test(value) && value !== 'v0.0.0'
+        ? value
+        : undefined;
 
     switch (source.datasource) {
+      case GitTagsDatasource.id: {
+        return this.direct.git.getDigest?.(source, tag) ?? null;
+      }
       case GithubTagsDatasource.id: {
         return this.direct.github.getDigest(source, tag);
       }
-      case BitBucketTagsDatasource.id: {
+      case BitbucketTagsDatasource.id: {
         return this.direct.bitbucket.getDigest?.(source, tag) ?? null;
       }
       case GitlabTagsDatasource.id: {
@@ -82,10 +93,9 @@ export class GoDatasource extends Datasource {
 // istanbul ignore if
 if (is.string(process.env.GOPROXY)) {
   const uri = parseUrl(process.env.GOPROXY);
-  if (uri?.username) {
-    addSecretForSanitizing(uri.username, 'global');
-  }
   if (uri?.password) {
     addSecretForSanitizing(uri.password, 'global');
+  } else if (uri?.username) {
+    addSecretForSanitizing(uri.username, 'global');
   }
 }

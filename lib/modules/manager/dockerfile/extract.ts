@@ -4,7 +4,11 @@ import { escapeRegExp, newlineRegex, regEx } from '../../../util/regex';
 import { DockerDatasource } from '../../datasource/docker';
 import * as debianVersioning from '../../versioning/debian';
 import * as ubuntuVersioning from '../../versioning/ubuntu';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 
 const variableMarker = '$';
 
@@ -89,6 +93,10 @@ function processDepForAutoReplace(
     .map((lineNumber) => lines[lineNumber])
     .join(linefeed);
 
+  if (!dep.currentDigest) {
+    dep.replaceString += linefeed;
+  }
+
   dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
 }
 
@@ -157,7 +165,7 @@ export function getDep(
   specifyReplaceString = true,
   registryAliases?: Record<string, string>
 ): PackageDependency {
-  if (!is.string(currentFrom)) {
+  if (!is.string(currentFrom) || is.emptyStringOrWhitespace(currentFrom)) {
     return {
       skipReason: 'invalid-value',
     };
@@ -208,7 +216,10 @@ export function getDep(
     dep.versioning = ubuntuVersioning.id;
   }
 
-  if (dep.depName === 'debian') {
+  if (
+    dep.depName === 'debian' &&
+    debianVersioning.api.isVersion(dep.currentValue)
+  ) {
     dep.versioning = debianVersioning.id;
   }
 
@@ -230,7 +241,7 @@ export function extractPackageFile(
   content: string,
   _filename: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   const stageNames: string[] = [];
   const args: Record<string, string> = {};
@@ -273,7 +284,7 @@ export function extractPackageFile(
     const argRegex = regEx(
       '^[ \\t]*ARG(?:' +
         escapeChar +
-        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\S+)[ =](?<value>.*)',
+        '[ \\t]*\\r?\\n| |\\t|#.*?\\r?\\n)+(?<name>\\w+)[ =](?<value>\\S*)',
       'im'
     );
     const argMatch = argRegex.exec(instruction);
@@ -324,7 +335,7 @@ export function extractPackageFile(
       if (fromImage === 'scratch') {
         logger.debug('Skipping scratch');
       } else if (fromImage && stageNames.includes(fromImage)) {
-        logger.debug({ image: fromImage }, 'Skipping alias FROM');
+        logger.debug(`Skipping alias FROM image:${fromImage}`);
       } else {
         const dep = getDep(fromImage, true, config.registryAliases);
         processDepForAutoReplace(dep, lineNumberRanges, lines, lineFeed);

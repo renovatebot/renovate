@@ -1,9 +1,6 @@
-import { configure } from 'safe-stable-stringify';
-
-const stringify = configure({
-  deterministic: false,
-});
+import { quickStringify } from './stringify';
 
 export function clone<T>(input: T | null = null): T {
-  return JSON.parse(stringify(input));
+  const stringifiedInput = quickStringify(input);
+  return stringifiedInput ? JSON.parse(stringifiedInput) : null;
 }

@@ -13,7 +13,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@9c1b1c6e115ca2af09755448e0dbba24e5061cc8 # tag=v5.1.1
+      - uses: actions/stale@1160a2240286f5da8ec72b1c0816ce2481aabf84 # v8.0.0
         with:
           # Rate limit per run, (defaults to 30, but we've increased it to 40 for now).
           operations-per-run: 40
@@ -35,9 +35,6 @@ jobs:
           # Close out issue after 7 stale days.
           days-before-issue-close: 7
           close-issue-message: 'This bug report has been closed as we need a reproduction to work on this. If the original poster or anybody else with the same problem discovers that they can reproduce it, please create a new issue, and reference this issue.'
-
-          # Close stale issues as "not planned" on GitHub.
-          close-issue-reason: 'not_planned'
 
           # Never label/close any pull requests.
           days-before-pr-close: -1

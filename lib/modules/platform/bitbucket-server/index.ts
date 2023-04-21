@@ -1,15 +1,13 @@
-import is from '@sindresorhus/is';
 import delay from 'delay';
 import JSON5 from 'json5';
 import type { PartialDeep } from 'type-fest';
-import { PlatformId } from '../../../constants';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { BranchStatus, PrState, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
@@ -61,6 +59,8 @@ import * as utils from './utils';
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
 
+export const id = 'bitbucket-server';
+
 let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -69,7 +69,7 @@ const defaults: {
   endpoint?: string;
   hostType: string;
 } = {
-  hostType: PlatformId.BitbucketServer,
+  hostType: 'bitbucket-server',
 };
 
 /* istanbul ignore next */
@@ -133,7 +133,7 @@ export async function getRawFile(
   const res = await bitbucketServerHttp.getJson<FileData>(fileUrl);
   const { isLastPage, lines, size } = res.body;
   if (isLastPage) {
-    return lines.map(({ text }) => text).join('');
+    return lines.map(({ text }) => text).join('\n');
   }
   const msg = `The file is too big (${size}B)`;
   logger.warn({ size }, msg);
@@ -150,7 +150,7 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,
@@ -262,11 +262,9 @@ export async function getPr(
   );
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
   };
-  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   // TODO #7154
   pr.version = updatePrVersion(pr.number, pr.version!);
 
@@ -276,7 +274,7 @@ export async function getPr(
 // TODO: coverage (#9624)
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
+  if (desiredState === 'all') {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -312,7 +310,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
     );
 
     config.prList = values.map(utils.prInfo);
-    logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
+    logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   } else {
     logger.debug('returning cached PR list');
   }
@@ -324,7 +322,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PrState.All,
+  state = 'all',
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle!}", "${state}")`);
@@ -343,7 +341,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PrState.Open,
+    state: 'open',
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -392,17 +390,15 @@ export async function getBranchStatus(
     logger.debug({ commitStatus }, 'branch status check result');
 
     if (commitStatus.failed > 0) {
-      return BranchStatus.red;
+      return 'red';
     }
     if (commitStatus.inProgress > 0) {
-      return BranchStatus.yellow;
+      return 'yellow';
     }
-    return commitStatus.successful > 0
-      ? BranchStatus.green
-      : BranchStatus.yellow;
+    return commitStatus.successful > 0 ? 'green' : 'yellow';
   } catch (err) {
     logger.warn({ err }, `Failed to get branch status`);
-    return BranchStatus.red;
+    return 'red';
   }
 }
 
@@ -434,12 +430,12 @@ export async function getBranchStatusCheck(
       if (state.key === context) {
         switch (state.state) {
           case 'SUCCESSFUL':
-            return BranchStatus.green;
+            return 'green';
           case 'INPROGRESS':
-            return BranchStatus.yellow;
+            return 'yellow';
           case 'FAILED':
           default:
-            return BranchStatus.red;
+            return 'red';
         }
       }
     }
@@ -474,13 +470,13 @@ export async function setBranchStatus({
     };
 
     switch (state) {
-      case BranchStatus.green:
+      case 'green':
         body.state = 'SUCCESSFUL';
         break;
-      case BranchStatus.yellow:
+      case 'yellow':
         body.state = 'INPROGRESS';
         break;
-      case BranchStatus.red:
+      case 'red':
       default:
         body.state = 'FAILED';
         break;
@@ -837,7 +833,6 @@ export async function createPr({
   }
 
   const pr: BbsPr = {
-    displayNumber: `Pull Request #${prInfoRes.body.id}`,
     ...utils.prInfo(prInfoRes.body),
   };
 
@@ -894,8 +889,8 @@ export async function updatePr({
     const currentState = updatedPr.state;
     // TODO #7154
     const newState = {
-      [PrState.Open]: 'OPEN',
-      [PrState.Closed]: 'DECLINED',
+      ['open']: 'OPEN',
+      ['closed']: 'DECLINED',
     }[state!];
 
     if (
@@ -903,7 +898,7 @@ export async function updatePr({
       ['OPEN', 'DECLINED'].includes(currentState) &&
       currentState !== newState
     ) {
-      const command = state === PrState.Open ? 'reopen' : 'decline';
+      const command = state === 'open' ? 'reopen' : 'decline';
       const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
         version: number;
       }>(
@@ -967,7 +962,7 @@ export async function mergePr({
     }
   }
 
-  logger.debug({ pr: prNo }, 'PR merged');
+  logger.debug(`PR merged, PrNo:${prNo}`);
   return true;
 }
 
@@ -983,9 +978,4 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  logger.debug(`getVulnerabilityAlerts()`);
-  return Promise.resolve([]);
 }

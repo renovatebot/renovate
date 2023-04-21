@@ -1,0 +1,19 @@
+jobs:
+  test:
+    steps:
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2.3
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1.2
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # 1
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2.3
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1.2
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # v1
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # @v2.1.0
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # pin @v2.1.0
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 # tag=v2.1.0
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97  #   v2.1.0
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0
+      - uses: actions/checkout@1e204e9a9253d643386038d443f96446fa156a97 #v2.1.0
+      - uses: actions/checkout@1e204e # v2.1.0
+      - uses: actions/checkout@01aecc#v2.1.0
+      - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # comment containing 2.1.0
+      - uses: actions/checkout@689fcce700ae7ffc576f2b029b51b2ffb66d3abd # v2.1.0 additional comment

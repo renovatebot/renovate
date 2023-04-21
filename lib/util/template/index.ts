@@ -2,8 +2,10 @@ import is from '@sindresorhus/is';
 import handlebars from 'handlebars';
 import { GlobalConfig } from '../../config/global';
 import { logger } from '../../logger';
+import { getChildEnv } from '../exec';
 
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
+handlebars.registerHelper('decodeURIComponent', decodeURIComponent);
 
 handlebars.registerHelper('stringToPrettyJSON', (input: string): string =>
   JSON.stringify(JSON.parse(input), null, 2)
@@ -21,6 +23,8 @@ handlebars.registerHelper('lowercase', (str: string) => str?.toLowerCase());
 handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
+
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
 
 handlebars.registerHelper({
   and(...args) {
@@ -85,6 +89,7 @@ export const allowedFields = {
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
+  indentation: 'The indentation of the dependency being updated',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
@@ -169,6 +174,10 @@ const allowedTemplateFields = new Set([
 
 const compileInputProxyHandler: ProxyHandler<CompileInput> = {
   get(target: CompileInput, prop: keyof CompileInput): unknown {
+    if (prop === 'env') {
+      return target[prop];
+    }
+
     if (!allowedTemplateFields.has(prop)) {
       return undefined;
     }
@@ -201,13 +210,17 @@ export function compile(
   input: CompileInput,
   filterFields = true
 ): string {
-  const data = { ...GlobalConfig.get(), ...input };
+  const env = getChildEnv({});
+  const data = { ...GlobalConfig.get(), ...input, env };
   const filteredInput = filterFields ? proxyCompileInput(data) : data;
   logger.trace({ template, filteredInput }, 'Compiling template');
   if (filterFields) {
     const matches = template.matchAll(templateRegex);
     for (const match of matches) {
       const varNames = match[1].split('.');
+      if (varNames[0] === 'env') {
+        continue;
+      }
       for (const varName of varNames) {
         if (!allowedFieldsList.includes(varName)) {
           logger.info(
@@ -219,6 +232,19 @@ export function compile(
     }
   }
   return handlebars.compile(template)(filteredInput);
+}
+
+export function safeCompile(
+  template: string,
+  input: CompileInput,
+  filterFields = true
+): string {
+  try {
+    return compile(template, input, filterFields);
+  } catch (err) {
+    logger.warn({ err, template }, 'Error compiling template');
+    return '';
+  }
 }
 
 export function containsTemplates(

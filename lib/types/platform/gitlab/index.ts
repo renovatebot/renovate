@@ -12,3 +12,10 @@ export type GitlabTreeNode = {
   id: string;
   name: string;
 } & GitTreeNode;
+
+/**
+ * https://docs.gitlab.com/ee/api/projects.html#get-single-project
+ */
+export interface GitlabProject {
+  default_branch: string;
+}

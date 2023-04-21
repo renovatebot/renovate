@@ -15,7 +15,8 @@ export function getPrNotes(config: BranchConfig): string {
             notes.push(res);
           }
         } catch (err) {
-          logger.warn({ note }, 'Error compiling upgrade note');
+          logger.debug({ err }, 'Error compiling upgrade note');
+          notes.push(note);
         }
       }
     }

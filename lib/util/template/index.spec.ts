@@ -1,7 +1,24 @@
+import { mocked } from '../../../test/util';
 import { getOptions } from '../../config/options';
+import * as _exec from '../exec';
 import * as template from '.';
 
+jest.mock('../exec');
+
+const exec = mocked(_exec);
+
 describe('util/template/index', () => {
+  beforeEach(() => {
+    exec.getChildEnv.mockReturnValue({
+      CUSTOM_FOO: 'foo',
+      HOME: '/root',
+    });
+  });
+
+  it('returns empty string if cannot compile', () => {
+    expect(template.safeCompile('{{abc', {})).toBe('');
+  });
+
   it('has valid exposed config options', () => {
     const allOptions = getOptions().map((option) => option.name);
     const missingOptions = template.exposedConfigOptions.filter(
@@ -85,6 +102,18 @@ describe('util/template/index', () => {
     expect(output).toBe('foo');
   });
 
+  it('has access to basic environment variables (basicEnvVars)', () => {
+    const userTemplate = 'HOME is {{env.HOME}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('HOME is /root');
+  });
+
+  it('and has access to custom variables (customEnvVariables)', () => {
+    const userTemplate = 'CUSTOM_FOO is {{env.CUSTOM_FOO}}';
+    const output = template.compile(userTemplate, {});
+    expect(output).toBe('CUSTOM_FOO is foo');
+  });
+
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
     const forbiddenField = 'foobar';
@@ -156,6 +185,58 @@ describe('util/template/index', () => {
 
     it('does not contain template', () => {
       expect(template.containsTemplates('{{body}}', ['logJSON'])).toBeFalse();
+    });
+  });
+
+  describe('percent encoding', () => {
+    it('encodes values', () => {
+      const output = template.compile(
+        '{{{encodeURIComponent "@fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('%40fsouza%2Fprettierd');
+    });
+
+    it('decodes values', () => {
+      const output = template.compile(
+        '{{{decodeURIComponent "%40fsouza/prettierd"}}}',
+        undefined as never
+      );
+      expect(output).toBe('@fsouza/prettierd');
+    });
+  });
+
+  describe('equals', () => {
+    it('equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'git-refs',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('https://github.com/renovatebot/renovate');
+    });
+
+    it('not equals', () => {
+      const output = template.compile(
+        '{{#if (equals datasource "git-refs")}}https://github.com/{{packageName}}{{else}}{{packageName}}{{/if}}',
+        {
+          datasource: 'github-releases',
+          packageName: 'renovatebot/renovate',
+        }
+      );
+      expect(output).toBe('renovatebot/renovate');
+    });
+
+    it('not strict equals', () => {
+      const output = template.compile(
+        '{{#if (equals newMajor "3")}}equals{{else}}not equals{{/if}}',
+        {
+          newMajor: 3,
+        }
+      );
+      expect(output).toBe('not equals');
     });
   });
 });

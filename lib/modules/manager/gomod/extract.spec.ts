@@ -3,7 +3,6 @@ import { extractPackageFile } from '.';
 
 const gomod1 = Fixtures.get('1/go.mod');
 const gomod2 = Fixtures.get('2/go.mod');
-const gomod3 = Fixtures.get('3/go.mod');
 
 describe('modules/manager/gomod/extract', () => {
   describe('extractPackageFile()', () => {
@@ -14,31 +13,33 @@ describe('modules/manager/gomod/extract', () => {
     it('extracts single-line requires', () => {
       const res = extractPackageFile(gomod1)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(8);
+      expect(res).toHaveLength(9);
+      expect(res?.filter((e) => e.depType === 'require')).toHaveLength(7);
+      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(1);
       expect(res?.filter((e) => e.depType === 'replace')).toHaveLength(1);
-    });
-
-    it('extracts constraints and golang', () => {
-      const res = extractPackageFile(gomod3);
-      expect(res?.deps).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            depType: 'golang',
-            depName: 'go',
-            datasource: 'golang-version',
-            rangeStrategy: 'replace',
-          }),
-        ])
-      );
-      expect(res?.constraints?.go).toBe('^1.13');
     });
 
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2)?.deps;
       expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(58);
+      expect(res).toHaveLength(59);
       expect(res?.filter((e) => e.skipReason)).toHaveLength(0);
+      expect(res?.filter((e) => e.depType === 'indirect')).toHaveLength(1);
+    });
+
+    it('ignores empty spaces in multi-line requires', () => {
+      const goMod = `
+module github.com/renovate-tests/gomod
+go 1.19
+require (
+	cloud.google.com/go v0.45.1
+
+	github.com/Microsoft/go-winio v0.4.15-0.20190919025122-fc70bd9a86b5 // indirect
+)
+`;
+      const res = extractPackageFile(goMod)?.deps;
+      expect(res).toHaveLength(3);
     });
 
     it('extracts replace directives from multi-line and single line', () => {
@@ -56,9 +57,6 @@ replace (
 )`;
       const res = extractPackageFile(goMod);
       expect(res).toEqual({
-        constraints: {
-          go: '^1.18',
-        },
         deps: [
           {
             managerData: {
@@ -68,8 +66,7 @@ replace (
             depType: 'golang',
             currentValue: '1.18',
             datasource: 'golang-version',
-            versioning: 'npm',
-            rangeStrategy: 'replace',
+            versioning: 'go-mod-directive',
           },
           {
             managerData: {
@@ -97,6 +94,17 @@ replace (
             },
             depName: 'k8s.io/cloud-provider',
             depType: 'replace',
+            currentValue: 'v0.17.3',
+            datasource: 'go',
+          },
+          {
+            managerData: {
+              lineNumber: 9,
+              multiLine: true,
+            },
+            depName: 'k8s.io/cluster-bootstrap',
+            depType: 'indirect',
+            enabled: false,
             currentValue: 'v0.17.3',
             datasource: 'go',
           },

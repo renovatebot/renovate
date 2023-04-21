@@ -6,26 +6,19 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
-import { BranchStatus } from '../../../../types';
-import {
-  deleteBranch,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
 import type { BranchConfig } from '../../../types';
 import { isScheduledNow } from '../branch/schedule';
 import { resolveBranchStatus } from '../branch/status-checks';
 
-// eslint-disable-next-line typescript-enum/no-enum
-export enum PrAutomergeBlockReason {
-  BranchModified = 'BranchModified',
-  BranchNotGreen = 'BranchNotGreen',
-  Conflicted = 'Conflicted',
-  DryRun = 'DryRun',
-  PlatformNotReady = 'PlatformNotReady',
-  PlatformRejection = 'PlatformRejection',
-  OffSchedule = 'off schedule',
-}
+export type PrAutomergeBlockReason =
+  | 'BranchModified'
+  | 'BranchNotGreen'
+  | 'Conflicted'
+  | 'DryRun'
+  | 'PlatformNotReady'
+  | 'PlatformRejection'
+  | 'off schedule';
 
 export interface AutomergePrResult {
   automerged: boolean;
@@ -52,17 +45,17 @@ export async function checkAutoMerge(
     logger.debug(`PR automerge is off schedule`);
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.OffSchedule,
+      prAutomergeBlockReason: 'off schedule',
     };
   }
   const isConflicted =
     config.isConflicted ??
-    (await isBranchConflicted(config.baseBranch!, config.branchName));
+    (await scm.isBranchConflicted(config.baseBranch, config.branchName));
   if (isConflicted) {
     logger.debug('PR is conflicted');
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.Conflicted,
+      prAutomergeBlockReason: 'Conflicted',
     };
   }
   if (!ignoreTests && pr.cannotMergeReason) {
@@ -71,28 +64,29 @@ export async function checkAutoMerge(
     );
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.PlatformNotReady,
+      prAutomergeBlockReason: 'PlatformNotReady',
     };
   }
   const branchStatus = await resolveBranchStatus(
     config.branchName,
+    !!config.internalChecksAsSuccess,
     config.ignoreTests
   );
-  if (branchStatus !== BranchStatus.green) {
+  if (branchStatus !== 'green') {
     logger.debug(
       `PR is not ready for merge (branch status is ${branchStatus})`
     );
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.BranchNotGreen,
+      prAutomergeBlockReason: 'BranchNotGreen',
     };
   }
   // Check if it's been touched
-  if (await isBranchModified(branchName)) {
+  if (await scm.isBranchModified(branchName)) {
     logger.debug('PR is ready for automerge but has been modified');
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.BranchModified,
+      prAutomergeBlockReason: 'BranchModified',
     };
   }
   if (automergeType === 'pr-comment') {
@@ -105,7 +99,7 @@ export async function checkAutoMerge(
       );
       return {
         automerged: false,
-        prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
+        prAutomergeBlockReason: 'DryRun',
       };
     }
     if (rebaseRequested) {
@@ -133,7 +127,7 @@ export async function checkAutoMerge(
     );
     return {
       automerged: false,
-      prAutomergeBlockReason: PrAutomergeBlockReason.DryRun,
+      prAutomergeBlockReason: 'DryRun',
     };
   }
   // TODO: types (#7154)
@@ -151,7 +145,7 @@ export async function checkAutoMerge(
     }
     let branchRemoved = false;
     try {
-      await deleteBranch(branchName);
+      await scm.deleteBranch(branchName);
       branchRemoved = true;
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ branchName, err }, 'Branch auto-remove failed');
@@ -160,6 +154,6 @@ export async function checkAutoMerge(
   }
   return {
     automerged: false,
-    prAutomergeBlockReason: PrAutomergeBlockReason.PlatformRejection,
+    prAutomergeBlockReason: 'PlatformRejection',
   };
 }

@@ -29,8 +29,6 @@ If you need Renovate to support any non-npm lock files like Bundler then you'll 
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
-Renovate requires Node.js `>=14.15.0` and Git `>=2.33.0`.
-
 #### Docker image
 
 The `renovate` npm package is also distributed via pre-built Node.js images on Docker Hub (`renovate/renovate`).
@@ -167,7 +165,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 - [Azure DevOps](https://docs.renovatebot.com/modules/platform/azure/)
 - [Bitbucket Cloud](https://docs.renovatebot.com/modules/platform/bitbucket/)
 - [Bitbucket Server](https://docs.renovatebot.com/modules/platform/bitbucket-server/)
-- [Gitea](https://docs.renovatebot.com/modules/platform/gitea/)
+- [Gitea and Forgejo](https://docs.renovatebot.com/modules/platform/gitea/)
 - [github.com and GitHub Enterprise Server](https://docs.renovatebot.com/modules/platform/github/)
 - [GitLab](https://docs.renovatebot.com/modules/platform/gitlab/)
 

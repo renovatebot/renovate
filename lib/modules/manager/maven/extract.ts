@@ -33,7 +33,7 @@ export function parsePom(raw: string): XmlDocument | null {
 }
 
 function containsPlaceholder(str: string | null | undefined): boolean {
-  return !!str && regEx(/\${.*?}/g).test(str);
+  return !!str && regEx(/\${[^}]*?}/).test(str);
 }
 
 function depFromNode(
@@ -126,7 +126,7 @@ function applyProps(
 ): PackageDependency<Record<string, any>> {
   let result = dep;
   let anyChange = false;
-  const alreadySeenProps: string[] = [];
+  const alreadySeenProps: Set<string> = new Set();
 
   do {
     const [returnedResult, returnedAnyChange, fatal] = applyPropsInternal(
@@ -156,22 +156,24 @@ function applyPropsInternal(
   dep: PackageDependency<Record<string, any>>,
   depPackageFile: string,
   props: MavenProp,
-  alreadySeenProps: string[]
+  previouslySeenProps: Set<string>
 ): [PackageDependency<Record<string, any>>, boolean, boolean] {
   let anyChange = false;
   let fatal = false;
 
+  const seenProps: Set<string> = new Set();
+
   const replaceAll = (str: string): string =>
-    str.replace(regEx(/\${.*?}/g), (substr) => {
+    str.replace(regEx(/\${[^}]*?}/g), (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
       const propValue = (props as any)[propKey] as MavenProp;
       if (propValue) {
         anyChange = true;
-        if (alreadySeenProps.find((it) => it === propKey)) {
+        if (previouslySeenProps.has(propKey)) {
           fatal = true;
         } else {
-          alreadySeenProps.push(propKey);
+          seenProps.add(propKey);
         }
         return propValue.val;
       }
@@ -185,7 +187,7 @@ function applyPropsInternal(
   let propSource = dep.propSource;
   let groupName: string | null = null;
   const currentValue = dep.currentValue!.replace(
-    regEx(/^\${.*?}$/),
+    regEx(/^\${[^}]*?}$/),
     (substr) => {
       const propKey = substr.slice(2, -1).trim();
       // TODO: wrong types here, props is already `MavenProp`
@@ -197,10 +199,10 @@ function applyPropsInternal(
         fileReplacePosition = propValue.fileReplacePosition;
         propSource = propValue.packageFile ?? undefined;
         anyChange = true;
-        if (alreadySeenProps.find((it) => it === propKey)) {
+        if (previouslySeenProps.has(propKey)) {
           fatal = true;
         } else {
-          alreadySeenProps.push(propKey);
+          seenProps.add(propKey);
         }
         return propValue.val;
       }
@@ -225,6 +227,9 @@ function applyPropsInternal(
     result.editFile = propSource;
   }
 
+  for (const prop of seenProps) {
+    previouslySeenProps.add(prop);
+  }
   return [result, anyChange, fatal];
 }
 
@@ -240,10 +245,15 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
+interface MavenInterimPackageFile extends PackageFile {
+  mavenProps?: Record<string, any>;
+  parent?: string;
+}
+
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
-): PackageFile<Record<string, any>> | null {
+  packageFile: string
+): PackageFile | null {
   if (!rawContent) {
     return null;
   }
@@ -253,7 +263,7 @@ export function extractPackage(
     return null;
   }
 
-  const result: PackageFile = {
+  const result: MavenInterimPackageFile = {
     datasource: MavenDatasource.id,
     packageFile,
     deps: [],
@@ -361,12 +371,12 @@ export function parseSettings(raw: string): XmlDocument | null {
 
 export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
-  const extractedPackages: Record<string, PackageFile> = {};
+  const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -379,7 +389,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
-    let pkg: PackageFile | null = extractedPackages[name];
+    let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
 
@@ -413,27 +423,41 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     });
   });
 
+  const rootDeps = new Set<string>();
   // Resolve placeholders
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, name, extractedProps[name]);
+      if (dep.depType === 'parent') {
+        const parentPkg = extractedPackages[pkg.parent!];
+        if (parentPkg && !parentPkg.parent) {
+          rootDeps.add(dep.depName!);
+        }
+      }
       const sourceName = dep.propSource ?? name;
       extractedDeps[sourceName].push(dep);
     });
   });
 
-  return packageFileNames.map((name) => ({
-    ...extractedPackages[name],
-    deps: extractedDeps[name],
-  }));
+  const packageFiles = packageFileNames.map((packageFile) => {
+    const pkg = extractedPackages[packageFile];
+    const deps = extractedDeps[packageFile];
+    for (const dep of deps) {
+      if (rootDeps.has(dep.depName!)) {
+        dep.depType = 'parent-root';
+      }
+    }
+    return { ...pkg, deps };
+  });
+
+  return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: PackageFile<Record<string, any>>[]
-): PackageFile<Record<string, any>>[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
+    delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
     });

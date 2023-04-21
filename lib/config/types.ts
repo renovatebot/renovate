@@ -1,7 +1,8 @@
 import type { LogLevel } from 'bunyan';
-import type { Range } from 'semver';
+import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -25,14 +26,18 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
   branchName?: string;
   branchNameStrict?: boolean;
-  manager?: string | null;
+  manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -48,6 +53,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -84,9 +90,10 @@ export interface RenovateSharedConfig {
 // The below should contain config options where stage=global
 export interface GlobalOnlyConfig {
   autodiscover?: boolean;
-  autodiscoverFilter?: string;
+  autodiscoverFilter?: string[] | string;
   baseDir?: string;
   cacheDir?: string;
+  containerbaseDir?: string;
   detectHostRulesFromEnv?: boolean;
   forceCli?: boolean;
   gitNoVerify?: GitNoVerifyOption[];
@@ -99,7 +106,7 @@ export interface GlobalOnlyConfig {
   privateKeyPathOld?: string;
   redisUrl?: string;
   repositories?: RenovateRepository[];
-  platform?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -112,6 +119,7 @@ export interface RepoGlobalConfig {
   allowScripts?: boolean;
   allowedPostUpgradeCommands?: string[];
   binarySource?: 'docker' | 'global' | 'install' | 'hermit';
+  cacheHardTtlMinutes?: number;
   customEnvVariables?: Record<string, string>;
   dockerChildPrefix?: string;
   dockerImagePrefix?: string;
@@ -126,7 +134,8 @@ export interface RepoGlobalConfig {
   privateKeyOld?: string;
   localDir?: string;
   cacheDir?: string;
-  platform?: string;
+  containerbaseDir?: string;
+  platform?: PlatformId;
   endpoint?: string;
 }
 
@@ -139,6 +148,7 @@ export interface LegacyAdminConfig {
   onboardingBranch?: string;
   onboardingCommitMessage?: string;
   onboardingNoDeps?: boolean;
+  onboardingRebaseCheckbox?: boolean;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
   onboardingConfigFileName?: string;
@@ -178,11 +188,12 @@ export interface RegexManagerTemplates {
 export interface RegExManager extends RegexManagerTemplates {
   fileMatch: string[];
   matchStrings: string[];
-  matchStringsStrategy?: string;
+  matchStringsStrategy?: MatchStringsStrategy;
   autoReplaceStringTemplate?: string;
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -207,7 +218,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -225,9 +236,11 @@ export interface RenovateConfig
   postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+  forkModeDisallowMaintainerEdits?: boolean;
 
   defaultRegistryUrls?: string[];
-  registryUrls?: string[];
+  registryUrls?: string[] | null;
+  registryAliases?: Record<string, string>;
 
   repoIsOnboarded?: boolean;
   repoIsActivated?: boolean;
@@ -237,12 +250,16 @@ export interface RenovateConfig
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
+  osvVulnerabilityAlerts?: boolean;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
+  skipInstalls?: boolean | null;
+
+  constraintsFiltering?: ConstraintsFilter;
 }
 
 export interface AllConfig
@@ -254,6 +271,7 @@ export interface AssigneesAndReviewersConfig {
   assigneesFromCodeOwners?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  ignoreReviewers?: string[];
   reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;
@@ -296,17 +314,23 @@ export interface PackageRule
   matchManagers?: string | string[];
   matchDatasources?: string[];
   matchDepTypes?: string[];
+  matchDepNames?: string[];
+  matchDepPatterns?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
   matchPackagePrefixes?: string[];
+  excludeDepNames?: string[];
+  excludeDepPatterns?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
-  matchCurrentVersion?: string | Range;
+  matchCurrentValue?: string;
+  matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
-  registryUrls?: string[];
+  matchConfidence?: MergeConfidence[];
+  registryUrls?: string[] | null;
 }
 
 export interface ValidationMessage {
@@ -354,6 +378,8 @@ export interface RenovateOptionBase {
   experimentalDescription?: string;
 
   experimentalIssues?: number[];
+
+  advancedUse?: boolean;
 }
 
 export interface RenovateArrayOption<
@@ -429,15 +455,17 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   depType?: string;
   depTypes?: string[];
   depName?: string;
+  packageName?: string | null;
   currentValue?: string | null;
   currentVersion?: string;
-  lockedVersion?: string | null;
+  lockedVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
   language?: string;
   baseBranch?: string;
-  manager?: string | null;
+  manager?: string;
   datasource?: string;
   packageRules?: (PackageRule & PackageRuleInputConfig)[];
 }

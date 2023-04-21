@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
@@ -8,9 +7,18 @@ import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
+import { safeStringify } from '../../../util/stringify';
 import * as template from '../../../util/template';
 import type { BranchConfig, BranchUpgradeConfig } from '../../types';
 import { CommitMessage } from '../model/commit-message';
+
+function prettifyVersion(version: string): string {
+  if (regEx(/^\d/).test(version)) {
+    return `v${version}`;
+  }
+
+  return version;
+}
 
 function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
@@ -75,6 +83,28 @@ export function generateBranchConfig(
   const toVersions: string[] = [];
   const toValues = new Set<string>();
   for (const upg of branchUpgrades) {
+    if (upg.currentDigest) {
+      upg.currentDigestShort =
+        upg.currentDigestShort ??
+        upg.currentDigest.replace('sha256:', '').substring(0, 7);
+    }
+    if (upg.newDigest) {
+      upg.newDigestShort =
+        upg.newDigestShort ||
+        upg.newDigest.replace('sha256:', '').substring(0, 7);
+    }
+    if (upg.isDigest || upg.isPinDigest) {
+      upg.displayFrom = upg.currentDigestShort;
+      upg.displayTo = upg.newDigestShort;
+    } else if (upg.isLockfileUpdate) {
+      upg.displayFrom = upg.currentVersion;
+      upg.displayTo = upg.newVersion;
+    } else if (!upg.isLockFileMaintenance) {
+      upg.displayFrom = upg.currentValue;
+      upg.displayTo = upg.newValue;
+    }
+    upg.displayFrom ??= '';
+    upg.displayTo ??= '';
     if (!depNames.includes(upg.depName!)) {
       depNames.push(upg.depName!);
     }
@@ -84,9 +114,7 @@ export function generateBranchConfig(
     toValues.add(upg.newValue!);
     // prettify newVersion and newMajor for printing
     if (upg.newVersion) {
-      upg.prettyNewVersion = upg.newVersion.startsWith('v')
-        ? upg.newVersion
-        : `v${upg.newVersion}`;
+      upg.prettyNewVersion = prettifyVersion(upg.newVersion);
     }
     if (upg.newMajor) {
       upg.prettyNewMajor = `v${upg.newMajor}`;
@@ -117,28 +145,6 @@ export function generateBranchConfig(
       upgrade.commitMessageExtra = `to v${toVersions[0]}`;
     }
 
-    if (upgrade.currentDigest) {
-      upgrade.currentDigestShort =
-        upgrade.currentDigestShort ??
-        upgrade.currentDigest.replace('sha256:', '').substring(0, 7);
-    }
-    if (upgrade.newDigest) {
-      upgrade.newDigestShort =
-        upgrade.newDigestShort ||
-        upgrade.newDigest.replace('sha256:', '').substring(0, 7);
-    }
-    if (upgrade.isDigest || upgrade.isPinDigest) {
-      upgrade.displayFrom = upgrade.currentDigestShort;
-      upgrade.displayTo = upgrade.newDigestShort;
-    } else if (upgrade.isLockfileUpdate) {
-      upgrade.displayFrom = upgrade.currentVersion;
-      upgrade.displayTo = upgrade.newVersion;
-    } else if (!upgrade.isLockFileMaintenance) {
-      upgrade.displayFrom = upgrade.currentValue;
-      upgrade.displayTo = upgrade.newValue;
-    }
-    upgrade.displayFrom ??= '';
-    upgrade.displayTo ??= '';
     const pendingVersionsLength = upgrade.pendingVersions?.length;
     if (pendingVersionsLength) {
       upgrade.displayPending = `\`${upgrade
@@ -173,7 +179,10 @@ export function generateBranchConfig(
       logger.trace({ toValues });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
-    } else if (newValue.length > 1 && upgrade.isDigest) {
+    } else if (
+      newValue.length > 1 &&
+      (upgrade.isDigest || upgrade.isPinDigest)
+    ) {
       logger.trace({ newValue });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
@@ -381,10 +390,21 @@ export function generateBranchConfig(
   const tableRows = config.upgrades
     .map(getTableValues)
     .filter((x): x is string[] => is.array(x, is.string));
+
   if (tableRows.length) {
-    let table: string[][] = [];
+    const table: string[][] = [];
     table.push(['datasource', 'package', 'from', 'to']);
-    table = table.concat(tableRows!);
+
+    const seenRows = new Set<string>();
+
+    for (const row of tableRows) {
+      const key = safeStringify(row);
+      if (seenRows.has(key)) {
+        continue;
+      }
+      seenRows.add(key);
+      table.push(row);
+    }
     config.commitMessage += '\n\n' + mdTable(table) + '\n';
   }
   return config;

@@ -10,6 +10,7 @@ import type {
   TerraformModuleVersions,
   TerraformRelease,
 } from './types';
+import { createSDBackendURL } from './utils';
 
 export class TerraformModuleDatasource extends TerraformDatasource {
   static override readonly id = 'terraform-module';
@@ -21,6 +22,11 @@ export class TerraformModuleDatasource extends TerraformDatasource {
   override readonly defaultRegistryUrls = ['https://registry.terraform.io'];
 
   override readonly defaultVersioning = hashicorpVersioning.id;
+
+  readonly extendedApiRegistryUrls = [
+    'https://registry.terraform.io',
+    'https://app.terraform.io',
+  ];
 
   /**
    * This function will fetch a package from the specified Terraform registry and return all semver versions.
@@ -51,7 +57,7 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     const serviceDiscovery = await this.getTerraformServiceDiscoveryResult(
       registryUrlNormalized
     );
-    if (registryUrlNormalized === this.defaultRegistryUrls[0]) {
+    if (this.extendedApiRegistryUrls.includes(registryUrlNormalized)) {
       return await this.queryRegistryExtendedApi(
         serviceDiscovery,
         registryUrlNormalized,
@@ -81,8 +87,13 @@ export class TerraformModuleDatasource extends TerraformDatasource {
 
     try {
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}`;
+
+      pkgUrl = createSDBackendURL(
+        registryUrl,
+        'modules.v1',
+        serviceDiscovery,
+        repository
+      );
       res = (await this.http.getJson<TerraformRelease>(pkgUrl)).body;
       const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
       if (returnedName !== repository) {
@@ -126,8 +137,12 @@ export class TerraformModuleDatasource extends TerraformDatasource {
     let pkgUrl: string;
     try {
       // TODO: types (#7154)
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-      pkgUrl = `${registryUrl}${serviceDiscovery['modules.v1']}${repository}/versions`;
+      pkgUrl = createSDBackendURL(
+        registryUrl,
+        'modules.v1',
+        serviceDiscovery,
+        `${repository}/versions`
+      );
       res = (await this.http.getJson<TerraformModuleVersions>(pkgUrl)).body;
       if (res.modules.length < 1) {
         logger.warn({ pkgUrl }, 'Terraform registry result mismatch');

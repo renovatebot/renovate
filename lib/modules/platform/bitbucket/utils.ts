@@ -1,59 +1,20 @@
-import url from 'url';
+import URL from 'node:url';
 import type { MergeStrategy } from '../../../config/types';
-import { BranchStatus, PrState } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
-import type {
-  HttpOptions,
-  HttpPostOptions,
-  HttpResponse,
-} from '../../../util/http/types';
+import type { HttpOptions, HttpResponse } from '../../../util/http/types';
 import { getPrBodyStruct } from '../pr-body';
 import type { Pr } from '../types';
-import type { BitbucketMergeStrategy, MergeRequestBody } from './types';
+import type {
+  BitbucketBranchState,
+  BitbucketMergeStrategy,
+  MergeRequestBody,
+  PrResponse,
+  RepoInfo,
+  RepoInfoBody,
+} from './types';
 
 const bitbucketHttp = new BitbucketHttp();
-
-export interface Config {
-  defaultBranch: string;
-  has_issues: boolean;
-  mergeMethod: string;
-  owner: string;
-  prList: Pr[];
-  repository: string;
-  username: string;
-  userUuid: string;
-  ignorePrAuthor: boolean;
-}
-
-export interface PagedResult<T = any> {
-  pagelen: number;
-  size?: number;
-  next?: string;
-  values: T[];
-}
-
-export interface RepoInfo {
-  isFork: boolean;
-  owner: string;
-  mainbranch: string;
-  mergeMethod: string;
-  has_issues: boolean;
-  uuid: string;
-}
-
-export type BitbucketBranchState = 'SUCCESSFUL' | 'FAILED' | 'INPROGRESS';
-export interface BitbucketStatus {
-  key: string;
-  state: BitbucketBranchState;
-}
-
-export interface RepoInfoBody {
-  parent?: any;
-  owner: { username: string };
-  mainbranch: { name: string };
-  has_issues: boolean;
-  uuid: string;
-}
 
 export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
@@ -103,8 +64,8 @@ export const buildStates: Record<BranchStatus, BitbucketBranchState> = {
 };
 
 const addMaxLength = (inputUrl: string, pagelen = 100): string => {
-  const { search, ...parsedUrl } = url.parse(inputUrl, true); // eslint-disable-line @typescript-eslint/no-unused-vars
-  const maxedUrl = url.format({
+  const { search, ...parsedUrl } = URL.parse(inputUrl, true);
+  const maxedUrl = URL.format({
     ...parsedUrl,
     query: { ...parsedUrl.query, pagelen },
   });
@@ -114,20 +75,22 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: HttpOptions | HttpPostOptions
+  options?: HttpOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.postJson<T>(apiUrl, options);
     case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.putJson<T>(apiUrl, options);
     case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.patchJson<T>(apiUrl, options);
     case 'head':
-      return bitbucketHttp.headJson<T>(apiUrl, options);
+      return bitbucketHttp.headJson(apiUrl, options) as Promise<
+        HttpResponse<T>
+      >;
     case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options as HttpPostOptions);
+      return bitbucketHttp.deleteJson<T>(apiUrl, options);
     case 'get':
     default:
       return bitbucketHttp.getJson<T>(apiUrl, options);
@@ -137,7 +100,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions | HttpPostOptions,
+  options?: HttpOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -156,48 +119,16 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export interface PrResponse {
-  id: number;
-  title: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  summary?: { raw: string };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  destination: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<Account>;
-  created_on: string;
-}
-
 export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
-    displayNumber: `Pull Request #${pr.id}`,
     bodyStruct: getPrBodyStruct(pr.summary?.raw),
     sourceBranch: pr.source?.branch?.name,
     targetBranch: pr.destination?.branch?.name,
     title: pr.title,
     state: prStates.closed?.includes(pr.state)
-      ? /* istanbul ignore next */ PrState.Closed
+      ? /* istanbul ignore next */ 'closed'
       : pr.state?.toLowerCase(),
     createdAt: pr.created_on,
   };
-}
-
-export interface Account {
-  display_name?: string;
-  uuid: string;
-  nickname?: string;
-  account_status?: string;
 }

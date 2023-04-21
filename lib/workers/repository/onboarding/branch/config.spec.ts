@@ -19,7 +19,6 @@ describe('workers/repository/onboarding/branch/config', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
     config = getConfig();
     config.platform = 'github';
     config.repository = 'some/repo';

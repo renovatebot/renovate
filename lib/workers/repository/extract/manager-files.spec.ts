@@ -59,7 +59,7 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toEqual([
         {
           packageFile: 'Dockerfile',
-          deps: [{ depIndex: 0 }, { depIndex: 1, replaceString: 'abc' }],
+          deps: [{}, { replaceString: 'abc' }],
         },
       ]);
     });
@@ -75,10 +75,9 @@ describe('workers/repository/extract/manager-files', () => {
         '{"dependencies":{"chalk":"2.0.0"}}'
       );
       const res = await getManagerPackageFiles(managerConfig);
-      expect(res).toMatchSnapshot([
+      expect(res).toMatchObject([
         {
           packageFile: 'package.json',
-          packageJsonType: 'app',
           deps: [
             {
               currentValue: '2.0.0',

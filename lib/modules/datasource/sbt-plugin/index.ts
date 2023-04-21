@@ -10,7 +10,7 @@ import { getLatestVersion, parseIndexDir } from '../sbt-package/util';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 export const SBT_PLUGINS_REPO =
-  'https://dl.bintray.com/sbt/sbt-plugin-releases';
+  'https://repo.scala-sbt.org/scalasbt/sbt-plugin-releases';
 
 export const defaultRegistryUrls = [SBT_PLUGINS_REPO];
 

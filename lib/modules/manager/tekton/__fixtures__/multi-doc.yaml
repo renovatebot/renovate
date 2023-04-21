@@ -1,0 +1,213 @@
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
+  finally:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-finally:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      resolver: bundles
+      params:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: List
+items:
+- kind: Pipeline
+  spec:
+    tasks:
+    - taskRef:
+        bundle: >-
+          gcr.io/tekton-releases/catalog/upstream/list-pipeline
+- kind: PipelineRun
+  spec:
+    pipelineRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-pipeline-run
+- kind: TaskRun
+  spec:
+    taskRef:
+      bundle: >-
+        gcr.io/tekton-releases/catalog/upstream/list-task-run
+---
+kind: TriggerTemplate
+spec:
+  resourcetemplates:
+  - kind: TaskRun
+    spec:
+      taskRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run
+  - kind: TaskRun
+    spec:
+      taskRef:
+        resolver: bundles
+        params:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-task-run-resolver
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run
+  - kind: PipelineRun
+    spec:
+      pipelineRef:
+        resolver: bundles
+        params:
+        - name: bundle
+          value: gcr.io/tekton-releases/catalog/upstream/trigger-template-pipeline-run-resolver
+---
+kind: TaskRun
+spec:
+  taskRef:
+    resolver: bundles
+    params:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run
+---
+kind: TaskRun
+spec:
+  taskRef:
+    resolver: bundles
+    params:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/task-run-resolver
+---
+kind: PipelineRun
+spec:
+  pipelineRef:
+    bundle: gcr.io/tekton-releases/catalog/upstream/pipeline-run
+---
+kind: PipelineRun
+spec:
+  pipelineRef:
+    resolver: bundles
+    params:
+    - name: bundle
+      value: gcr.io/tekton-releases/catalog/upstream/pipeline-run-resolver
+---
+kind: PipelineRun
+spec:
+  pipelineSpec:
+    tasks:
+    - taskRef:
+        bundle: gcr.io/tekton-releases/catalog/upstream/inline-pipeline
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: true
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: ""
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      resolver: bundles
+      params:
+      - name: bundle
+        value: ""
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resolver: bundles
+      params:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: Pipeline
+spec:
+  tasks:
+  - taskRef:
+      bundle: gcr.io/tekton-releases/catalog/upstream/ignored:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+      resolver: bundles
+      resource:
+      - name: bundle
+        value: gcr.io/tekton-releases/catalog/upstream/pipeline-resolver:1.0@sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b
+---
+kind: List
+items:
+  - kind: TaskRun
+    spec:
+      taskSpec:
+        steps:
+          - image: example.io/taskrun/spec/taskSpec/steps/0/image
+        stepTemplate:
+          image: example.io/taskrun/spec/taskSpec/stepTemplate/image
+        sidecars:
+          - image: example.io/taskrun/spec/taskSpec/sidecars/0/image
+  - kind: Task
+    spec:
+      steps:
+        - image: example.io/task/spec/steps/0/image
+      stepTemplate:
+        image: example.io/task/spec/stepTemplate/image
+      sidecars:
+        - image: example.io/task/spec/sidecars/0/image
+  - kind: Pipeline
+    spec:
+      tasks:
+        - taskSpec:
+            steps:
+              - image: example.com/pipeline/spec/tasks/0/taskSpec/steps/0/image
+            stepTemplate:
+              image: example.com/pipeline/spec/tasks/0/taskSpec/stepTemplate/image
+            sidecars:
+              - image: example.com/pipeline/spec/tasks/0/taskSpec/sidecars/0/image
+      finally:
+        - taskSpec:
+            steps:
+              - image: example.com/pipeline/spec/finally/0/taskSpec/steps/0/image
+            stepTemplate:
+              image: example.com/pipeline/spec/finally/0/taskSpec/stepTemplate/image
+            sidecars:
+              - image: example.com/pipeline/spec/finally/0/taskSpec/sidecars/0/image
+  - kind: PipelineRun
+    spec:
+      pipelineSpec:
+        tasks:
+          - taskSpec:
+              steps:
+                - image: example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/steps/0/image
+              stepTemplate:
+                image: example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/stepTemplate/image
+              sidecars:
+                - image: example.com/pipelinerun/spec/pipelineSpec/tasks/0/taskSpec/sidecars/0/image
+        finally:
+          - taskSpec:
+              steps:
+                - image: example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/steps/0/image
+              stepTemplate:
+                image: example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/stepTemplate/image
+              sidecars:
+                - image: example.com/pipelinerun/spec/pipelineSpec/finally/0/taskSpec/sidecars/0/image
+---
+kind: TriggerTemplate
+spec:
+  resourcetemplates:
+    - kind: TaskRun
+      spec:
+        taskSpec:
+          steps:
+            - image: example.com/triggertemplate/spec/resourcetemplates/0/taskrun/spec/taskSpec/steps/0/image
+---

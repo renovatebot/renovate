@@ -19,7 +19,7 @@ export function bumpPackageVersion(
     if (!newChartVersion) {
       throw new Error('semver inc failed');
     }
-    logger.debug({ newChartVersion });
+    logger.debug(`newChartVersion: ${newChartVersion}`);
     bumpedContent = content.replace(
       regEx(`^(?<version>version:\\s*).*$`, 'm'),
       `$<version>${newChartVersion}`

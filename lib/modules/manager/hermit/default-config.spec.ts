@@ -1,5 +1,5 @@
 import minimatch from 'minimatch';
-import { regEx } from '../../../util/regex';
+import { regexMatches } from '../../../../test/util';
 import { defaultConfig } from './default-config';
 
 describe('modules/manager/hermit/default-config', () => {
@@ -27,13 +27,6 @@ describe('modules/manager/hermit/default-config', () => {
   });
 
   describe('fileMatch', () => {
-    function regexMatches(target: string, patterns: string[]): boolean {
-      return patterns.some((patt: string) => {
-        const re = regEx(patt);
-        return re.test(target);
-      });
-    }
-
     test.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}

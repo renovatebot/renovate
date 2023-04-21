@@ -19,6 +19,7 @@ dependencyOverrides ++= {
 
   Seq(
     groupIdExample %% "quuz" % "0.0.6" % "test",           // comment
+    groupIdExample %%% "abc" % "0.0.42" % "test",          // comment
     "org.example" % artifactIdExample % "0.0.7" % Provided // comment
     ,"org.example" % "grault" % versionExample % Test,     // comment
   )

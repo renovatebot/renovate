@@ -1,18 +1,19 @@
 import * as httpMock from '../../../../../../test/http-mock';
+import { partial } from '../../../../../../test/util';
 import { GlobalConfig } from '../../../../../config/global';
-import { PlatformId } from '../../../../../constants';
-import { CacheableGithubTags } from '../../../../../modules/datasource/github-tags/cache';
 import * as semverVersioning from '../../../../../modules/versioning/semver';
+import * as githubGraphql from '../../../../../util/github/graphql';
+import type { GithubTagItem } from '../../../../../util/github/graphql/types';
 import * as hostRules from '../../../../../util/host-rules';
 import type { BranchUpgradeConfig } from '../../../../types';
-import { ChangeLogError, getChangeLogJSON } from '.';
+import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../../modules/datasource/npm');
 
-const upgrade: BranchUpgradeConfig = {
+const upgrade = partial<BranchUpgradeConfig>({
   manager: 'some-manager',
   branchName: '',
-  depName: 'renovate',
+  packageName: 'renovate',
   endpoint: 'https://api.github.com/',
   versioning: semverVersioning.id,
   currentVersion: '1.0.0',
@@ -30,7 +31,7 @@ const upgrade: BranchUpgradeConfig = {
     { version: '2.4.2', releaseTimestamp: '2017-12-24T03:20:46.238Z' },
     { version: '2.5.2' },
   ],
-};
+});
 
 describe('workers/repository/update/pr/changelog/github', () => {
   afterEach(() => {
@@ -43,7 +44,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
     beforeEach(() => {
       hostRules.clear();
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://api.github.com/',
         token: 'abc',
       });
@@ -96,7 +97,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -121,7 +122,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -140,14 +141,14 @@ describe('workers/repository/update/pr/changelog/github', () => {
       expect(
         await getChangeLogJSON({
           ...upgrade,
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
         })
       ).toMatchSnapshot({
         hasReleaseNotes: true,
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: '@renovate/no',
+          packageName: '@renovate/no',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -173,7 +174,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -213,7 +214,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
           ...upgrade,
           sourceUrl: 'https://github.com',
         })
-      ).toEqual({ error: ChangeLogError.MissingGithubToken });
+      ).toEqual({ error: 'MissingGithubToken' });
     });
 
     it('handles no releases', async () => {
@@ -236,7 +237,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
     it('supports github enterprise and github.com changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -250,7 +251,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/chalk/chalk',
@@ -274,7 +275,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         token: 'super_secret',
         matchHost: 'https://github-enterprise.example.com/',
       });
@@ -283,7 +284,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://api.github.com/',
           baseUrl: 'https://github.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github.com/sindresorhus/got',
@@ -295,7 +296,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
 
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
@@ -311,7 +312,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'chalk/chalk',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
@@ -337,7 +338,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         customChangelogUrl: replacementSourceUrl,
       };
       hostRules.add({
-        hostType: PlatformId.Github,
+        hostType: 'github',
         matchHost: 'https://github-enterprise.example.com/',
         token: 'abc',
       });
@@ -347,7 +348,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
         project: {
           apiBaseUrl: 'https://github-enterprise.example.com/api/v3/',
           baseUrl: 'https://github-enterprise.example.com/',
-          depName: 'renovate',
+          packageName: 'renovate',
           repository: 'sindresorhus/got',
           sourceDirectory: undefined,
           sourceUrl: 'https://github-enterprise.example.com/sindresorhus/got',
@@ -358,22 +359,20 @@ describe('workers/repository/update/pr/changelog/github', () => {
     });
 
     it('works with same version releases but different prefix', async () => {
-      const githubTagsMock = jest.spyOn(
-        CacheableGithubTags.prototype,
-        'getItems'
+      const githubTagsMock = jest.spyOn(githubGraphql, 'queryTags');
+      githubTagsMock.mockResolvedValue(
+        partial<GithubTagItem>([
+          { version: 'v1.0.1' },
+          { version: '1.0.1' },
+          { version: 'correctPrefix/target@1.0.1' },
+          { version: 'wrongPrefix/target-1.0.1' },
+        ])
       );
 
-      githubTagsMock.mockResolvedValue([
-        { version: 'v1.0.1' },
-        { version: '1.0.1' },
-        { version: 'correctPrefix/target@1.0.1' },
-        { version: 'wrongPrefix/target-1.0.1' },
-      ] as never);
-
-      const upgradeData: BranchUpgradeConfig = {
+      const upgradeData = partial<BranchUpgradeConfig>({
         manager: 'some-manager',
         branchName: '',
-        depName: 'correctPrefix/target',
+        packageName: 'correctPrefix/target',
         endpoint: 'https://api.github.com/',
         versioning: 'npm',
         currentVersion: '1.0.0',
@@ -383,7 +382,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
           { version: '1.0.1', gitRef: '123456' },
           { version: '0.1.1', gitRef: 'npm_1.0.0' },
         ],
-      };
+      });
       expect(
         await getChangeLogJSON({
           ...upgradeData,
@@ -396,7 +395,7 @@ describe('workers/repository/update/pr/changelog/github', () => {
           repository: 'chalk/chalk',
           sourceUrl: 'https://github.com/chalk/chalk',
           sourceDirectory: undefined,
-          depName: 'correctPrefix/target',
+          packageName: 'correctPrefix/target',
         },
         versions: [
           {

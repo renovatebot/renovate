@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 
 interface FvmConfig {
   flutterSdkVersion: string;
@@ -10,7 +10,7 @@ interface FvmConfig {
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   let fvmConfig: FvmConfig;
   try {
     fvmConfig = JSON.parse(content);

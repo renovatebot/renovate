@@ -9,7 +9,6 @@ import {
   platform,
 } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
-import { PlatformId } from '../../constants';
 import type {
   PackageDependency,
   PackageFile,
@@ -19,20 +18,22 @@ import {
   GitHubMaxPrBodyLen,
   massageMarkdown,
 } from '../../modules/platform/github';
-import { BranchConfig, BranchResult, BranchUpgradeConfig } from '../types';
+import { regEx } from '../../util/regex';
+import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { PackageFiles } from './package-files';
 
 type PrUpgrade = BranchUpgradeConfig;
 
-const massageMdSpy = jest.spyOn(platform, 'massageMarkdown');
+const massageMdSpy = platform.massageMarkdown;
+const getIssueSpy = platform.getIssue;
+
 let config: RenovateConfig;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   massageMdSpy.mockImplementation(massageMarkdown);
   config = getConfig();
-  config.platform = PlatformId.Github;
+  config.platform = 'github';
   config.errors = [];
   config.warnings = [];
 });
@@ -63,11 +64,10 @@ function genRandPackageFile(
 
 async function dryRun(
   branches: BranchConfig[],
-  platform: jest.Mocked<Platform>,
-  ensureIssueClosingCalls = 0,
-  ensureIssueCalls = 0
+  platform: jest.MockedObject<Platform>,
+  ensureIssueClosingCalls: number,
+  ensureIssueCalls: number
 ) {
-  jest.clearAllMocks();
   GlobalConfig.set({ dryRun: 'full' });
   await dependencyDashboard.ensureDependencyDashboard(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
@@ -92,6 +92,8 @@ describe('workers/repository/dependency-dashboard', () => {
       });
       await dependencyDashboard.readDashboardBody(conf);
       expect(conf).toEqual({
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
         dependencyDashboardChecks: {
           branchName1: 'approve',
         },
@@ -101,12 +103,65 @@ describe('workers/repository/dependency-dashboard', () => {
         prCreation: 'approval',
       });
     });
+
+    it('reads dashboard body all pending approval', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+          '- [ ] <!-- approve-all-pending-prs -->',
+          '- [x] <!-- approve-all-pending-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName1: 'approve',
+          branchName2: 'approve',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: true,
+        dependencyDashboardAllRateLimited: false,
+      });
+    });
+
+    it('reads dashboard body open all rate-limited', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt').replace(
+          '- [ ] <!-- create-all-rate-limited-prs -->',
+          '- [x] <!-- create-all-rate-limited-prs -->'
+        ),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        dependencyDashboardChecks: {
+          branchName5: 'unlimit',
+          branchName6: 'unlimit',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: true,
+      });
+    });
   });
 
   describe('ensureDependencyDashboard()', () => {
     beforeEach(() => {
       PackageFiles.add('main', null);
       GlobalConfig.reset();
+      logger.getProblems.mockReturnValue([]);
     });
 
     it('do nothing if dependencyDashboard is disabled', async () => {
@@ -116,7 +171,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('do nothing if it has no dependencyDashboardApproval branches', async () => {
@@ -136,7 +191,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true', async () => {
@@ -151,7 +206,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
@@ -159,12 +214,12 @@ describe('workers/repository/dependency-dashboard', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
-          result: BranchResult.Automerged,
+          result: 'automerged',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          result: BranchResult.Automerged,
+          result: 'automerged',
           dependencyDashboardApproval: false,
         },
       ];
@@ -178,7 +233,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 1, 0);
     });
 
     it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
@@ -195,7 +250,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('open or update Dependency Dashboard when rules contain approvals', async () => {
@@ -226,7 +281,7 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 Pending Approvals, 2 not scheduled, 2 pr-hourly-limit-reached and 2 in error', async () => {
@@ -235,63 +290,63 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          result: BranchResult.PrLimitReached,
+          result: 'pr-limit-reached',
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
-          result: BranchResult.Error,
+          result: 'error',
           branchName: 'branchName8',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr9',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep9' }],
-          result: BranchResult.Done,
+          result: 'done',
           prBlockedBy: 'BranchAutomerge',
           branchName: 'branchName9',
         },
@@ -308,7 +363,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR pr-edited', async () => {
@@ -318,7 +373,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prNo: 1,
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName1',
         },
         {
@@ -329,7 +384,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.PrEdited,
+          result: 'pr-edited',
           branchName: 'branchName2',
         },
       ];
@@ -345,7 +400,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in progress and rebase all option', async () => {
@@ -354,7 +409,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           prNo: 1,
           branchName: 'branchName1',
         },
@@ -366,7 +421,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName2',
         },
         {
@@ -374,7 +429,7 @@ describe('workers/repository/dependency-dashboard', () => {
           prTitle: 'pr3',
           prNo: 3,
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.Rebase,
+          result: 'rebase',
           branchName: 'branchName3',
         },
       ];
@@ -390,7 +445,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 2 PR closed / ignored', async () => {
@@ -399,7 +454,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName1',
         },
         {
@@ -409,7 +464,7 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.AlreadyExisted,
+          result: 'already-existed',
           branchName: 'branchName2',
         },
       ];
@@ -425,7 +480,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform, 0, 0);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('checks an issue with 3 PR in approval', async () => {
@@ -434,7 +489,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName1',
         },
         {
@@ -444,21 +499,21 @@ describe('workers/repository/dependency-dashboard', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NeedsPrApproval,
+          result: 'needs-pr-approval',
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName4',
         },
       ];
@@ -475,7 +530,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     it('contains logged problems', async () => {
@@ -486,7 +541,7 @@ describe('workers/repository/dependency-dashboard', () => {
           upgrades: [
             { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
           ],
-          result: BranchResult.Pending,
+          result: 'pending',
           branchName: 'branchName1',
         },
       ];
@@ -527,34 +582,151 @@ describe('workers/repository/dependency-dashboard', () => {
       expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
 
-    it('rechecks branches', async () => {
+    it('dependency Dashboard All Pending Approval', async () => {
       const branches: BranchConfig[] = [
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          result: BranchResult.NeedsApproval,
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep2' }],
+          result: 'needs-approval',
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'approve-branch',
+        branchName2: 'approve-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      getIssueSpy.mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+
+        ## Pending Approval
+
+        These branches will be created by Renovate only once you click their checkbox below.
+
+         - [ ] <!-- approve-branch=branchName1 -->pr1
+         - [ ] <!-- approve-branch=branchName2 -->pr2
+         - [x] <!-- approve-all-pending-prs -->🔐 **Create all pending approval PRs at once** 🔐`,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      const checkApprovePendingSelectAll = regEx(
+        / - \[ ] <!-- approve-all-pending-prs -->/g
+      );
+      const checkApprovePendingBranch1 = regEx(
+        / - \[ ] <!-- approve-branch=branchName1 -->pr1/g
+      );
+      const checkApprovePendingBranch2 = regEx(
+        / - \[ ] <!-- approve-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkApprovePendingSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch1.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkApprovePendingBranch2.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+    });
+
+    it('dependency Dashboard Open All rate-limited', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'branch-limit-reached',
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          result: BranchResult.NeedsApproval,
+          result: 'pr-limit-reached',
+          branchName: 'branchName2',
+        },
+      ];
+      config.dependencyDashboard = true;
+      config.dependencyDashboardChecks = {
+        branchName1: 'unlimit-branch',
+        branchName2: 'unlimit-branch',
+      };
+      config.dependencyDashboardIssue = 1;
+      getIssueSpy.mockResolvedValueOnce({
+        title: 'Dependency Dashboard',
+        body: `This issue contains a list of Renovate updates and their statuses.
+        ## Rate-limited
+        These updates are currently rate-limited. Click on a checkbox below to force their creation now.
+         - [x] <!-- create-all-rate-limited-prs -->**Open all rate-limited PRs**
+         - [ ] <!-- unlimit-branch=branchName1 -->pr1
+         - [ ] <!-- unlimit-branch=branchName2 -->pr2`,
+      });
+      await dependencyDashboard.ensureDependencyDashboard(config, branches);
+      const checkRateLimitedSelectAll = regEx(
+        / - \[ ] <!-- create-all-rate-limited-prs -->/g
+      );
+      const checkRateLimitedBranch1 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName1 -->pr1/g
+      );
+      const checkRateLimitedBranch2 = regEx(
+        / - \[ ] <!-- unlimit-branch=branchName2 -->pr2/g
+      );
+      expect(
+        checkRateLimitedSelectAll.test(
+          platform.ensureIssue.mock.calls[0][0].body
+        )
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch1.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
+      expect(
+        checkRateLimitedBranch2.test(platform.ensureIssue.mock.calls[0][0].body)
+      ).toBeTrue();
+    });
+
+    it('rechecks branches', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
+          result: 'needs-approval',
+          branchName: 'branchName1',
+        },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr2',
+          upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
+          result: 'needs-approval',
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          result: BranchResult.NotScheduled,
+          result: 'not-scheduled',
           branchName: 'branchName3',
         },
       ];
       config.dependencyDashboard = true;
       config.dependencyDashboardChecks = { branchName2: 'approve-branch' };
       config.dependencyDashboardIssue = 1;
-      mockedFunction(platform.getIssue!).mockResolvedValueOnce({
+      mockedFunction(platform.getIssue).mockResolvedValueOnce({
         title: 'Dependency Dashboard',
         body: `This issue contains a list of Renovate updates and their statuses.
 
@@ -590,7 +762,7 @@ describe('workers/repository/dependency-dashboard', () => {
       ]);
 
       // same with dry run
-      await dryRun(branches, platform);
+      await dryRun(branches, platform, 0, 1);
     });
 
     describe('checks detected dependencies section', () => {
@@ -619,7 +791,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -631,7 +803,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -643,7 +815,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('shows different combinations of version+digest for a given dependency', async () => {
@@ -654,7 +826,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -672,7 +844,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when packageFiles is empty', async () => {
@@ -683,7 +855,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('show default message in issues body when when packageFiles is null', async () => {
@@ -694,7 +866,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
 
         it('truncates the body of a really big repo', async () => {
@@ -710,7 +882,7 @@ describe('workers/repository/dependency-dashboard', () => {
           ).toBeTrue();
 
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 
@@ -745,7 +917,7 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
           expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
           // same with dry run
-          await dryRun(branches, platform);
+          await dryRun(branches, platform, 0, 1);
         });
       });
 

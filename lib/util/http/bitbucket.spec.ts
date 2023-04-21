@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/http-mock';
-import { PlatformId } from '../../constants';
 import * as hostRules from '../host-rules';
 import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
@@ -17,7 +16,7 @@ describe('util/http/bitbucket', () => {
     // clean up hostRules
     hostRules.clear();
     hostRules.add({
-      hostType: PlatformId.Bitbucket,
+      hostType: 'bitbucket',
       matchHost: baseUrl,
       token: 'token',
     });

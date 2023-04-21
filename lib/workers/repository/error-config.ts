@@ -3,7 +3,6 @@ import { GlobalConfig } from '../../config/global';
 import type { RenovateConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
-import { PrState } from '../../types';
 import { regEx } from '../../util/regex';
 
 export async function raiseConfigWarningIssue(
@@ -23,7 +22,7 @@ export async function raiseConfigWarningIssue(
     )}\`\n`;
   }
   const pr = await platform.getBranchPr(config.onboardingBranch!);
-  if (pr?.state === PrState.Open) {
+  if (pr?.state === 'open') {
     logger.debug('Updating onboarding PR with config error notice');
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
     body += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;

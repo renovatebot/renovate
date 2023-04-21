@@ -2,7 +2,6 @@ import type { RangeStrategy } from '../../../types/versioning';
 import { regEx } from '../../../util/regex';
 import type { NewValueConfig, VersioningApi } from '../types';
 import {
-  RangeBound,
   TokenType,
   compare,
   isValid,
@@ -75,6 +74,7 @@ const getPatch = (version: string): number | null => {
 const isGreaterThan = (a: string, b: string): boolean => compare(a, b) === 1;
 
 const unstable = new Set([
+  'dev',
   'a',
   'alpha',
   'b',
@@ -138,14 +138,14 @@ const matches = (a: string, b: string): boolean => {
 
   if (leftVal) {
     leftResult =
-      leftBound === RangeBound.Exclusive
+      leftBound === 'exclusive'
         ? compare(leftVal, a) === -1
         : compare(leftVal, a) !== 1;
   }
 
   if (rightVal) {
     rightResult =
-      rightBound === RangeBound.Exclusive
+      rightBound === 'exclusive'
         ? compare(a, rightVal) === -1
         : compare(a, rightVal) !== 1;
   }

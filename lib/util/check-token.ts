@@ -1,16 +1,17 @@
-import { PlatformId } from '../constants';
+import { GlobalConfig } from '../config/global';
 import { logger } from '../logger';
+import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github-release-attachments';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFile } from '../modules/manager/types';
+import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFile[]> | undefined
+  packageFiles: Record<string, PackageFileContent[]> | undefined
 ): void {
   const { token } = hostRules.find({
-    hostType: PlatformId.Github,
+    hostType: 'github',
     url: 'https://api.github.com',
   });
 
@@ -19,13 +20,20 @@ export function checkGithubToken(
     return;
   }
 
+  if (!GlobalConfig.get('githubTokenWarn')) {
+    logger.trace('GitHub token warning is disabled');
+    return;
+  }
+
   const githubDeps: string[] = [];
   for (const files of Object.values(packageFiles ?? {})) {
     for (const file of files ?? []) {
       for (const dep of file.deps ?? []) {
         if (
-          dep.datasource === GithubTagsDatasource.id ||
-          dep.datasource === GithubReleasesDatasource.id
+          !dep.skipReason &&
+          (dep.datasource === GithubTagsDatasource.id ||
+            dep.datasource === GithubReleasesDatasource.id ||
+            dep.datasource === GithubReleaseAttachmentsDatasource.id)
         ) {
           dep.skipReason = 'github-token-required';
           if (dep.depName) {

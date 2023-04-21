@@ -15,6 +15,7 @@ describe('modules/manager/poetry/update-locked', () => {
       lockFileContent,
       depName: 'urllib3',
       newVersion: '1.26.3',
+      currentVersion: '1.26.2',
     };
     expect(updateLockedDependency(config).status).toBe('already-updated');
   });
@@ -26,6 +27,7 @@ describe('modules/manager/poetry/update-locked', () => {
       lockFileContent,
       depName: 'urllib3',
       newVersion: '1.26.4',
+      currentVersion: '1.26.2',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });
@@ -36,6 +38,7 @@ describe('modules/manager/poetry/update-locked', () => {
       lockFile,
       depName: 'urllib3',
       newVersion: '1.26.4',
+      currentVersion: '1.26.2',
     };
     expect(updateLockedDependency(config).status).toBe('unsupported');
   });

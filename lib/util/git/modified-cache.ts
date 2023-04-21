@@ -1,40 +1,34 @@
-import is from '@sindresorhus/is';
+import { logger } from '../../logger';
 import { getCache } from '../cache/repository';
-import type { BranchCache } from '../cache/repository/types';
 
 export function getCachedModifiedResult(
   branchName: string,
-  branchSha: string
+  branchSha: string | null
 ): boolean | null {
-  const { branches } = getCache();
-  const branch = branches?.find((branch) => branch.branchName === branchName);
+  const cache = getCache();
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
 
-  if (branch?.sha !== branchSha) {
-    return null;
+  if (branch?.sha === branchSha && branch.isModified !== undefined) {
+    return branch.isModified;
   }
 
-  return branch.isModified;
+  return null;
 }
 
 export function setCachedModifiedResult(
   branchName: string,
-  branchSha: string,
   isModified: boolean
 ): void {
   const cache = getCache();
-  cache.branches ??= [];
-  const { branches } = cache;
-  const branch =
-    branches?.find((branch) => branch.branchName === branchName) ??
-    ({ branchName: branchName } as BranchCache);
+  const branch = cache.branches?.find(
+    (branch) => branch.branchName === branchName
+  );
 
-  // if branch not present add it to cache
-  if (is.undefined(branch.sha)) {
-    branches.push(branch);
-  }
-
-  if (branch.sha !== branchSha) {
-    branch.sha = branchSha;
+  if (!branch) {
+    logger.debug(`setCachedModifiedResult(): Branch cache not present`);
+    return;
   }
 
   branch.isModified = isModified;

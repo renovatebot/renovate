@@ -1,4 +1,4 @@
-import { ProgrammingLanguage } from '../../constants';
+import { programmingLanguages } from '../../constants';
 import type { RangeStrategy } from '../../types';
 import managers from './api';
 import type {
@@ -6,13 +6,14 @@ import type {
   GlobalManagerConfig,
   ManagerApi,
   PackageFile,
+  PackageFileContent,
   RangeConfig,
   Result,
 } from './types';
 export { hashMap } from './fingerprint.generated';
 const managerList = Array.from(managers.keys());
 
-const languageList = Object.values(ProgrammingLanguage);
+const languageList = programmingLanguages.concat();
 
 export function get<T extends keyof ManagerApi>(
   manager: string,
@@ -61,7 +62,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Result<PackageFile | null> {
+): Result<PackageFileContent | null> {
   if (!managers.has(manager)) {
     return null;
   }
@@ -86,6 +87,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
+    if (m.updateLockedDependency) {
+      return 'update-lockfile';
+    }
     // default to 'replace' for auto
     return 'replace';
   }

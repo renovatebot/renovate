@@ -7,29 +7,58 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import { extractLockFileEntries } from './locked-version';
-import type { PoetryFile, PoetrySection } from './types';
+import type { PoetryDependency, PoetryFile, PoetrySection } from './types';
 
-function extractFromSection(
+function extractFromDependenciesSection(
   parsedFile: PoetryFile,
-  section: keyof Omit<PoetrySection, 'source'>,
+  section: keyof Omit<PoetrySection, 'source' | 'group'>,
   poetryLockfile: Record<string, string>
 ): PackageDependency[] {
-  const deps: PackageDependency[] = [];
-  const sectionContent = parsedFile.tool?.poetry?.[section];
+  return extractFromSection(
+    parsedFile.tool?.poetry?.[section],
+    section,
+    poetryLockfile
+  );
+}
+
+function extractFromDependenciesGroupSection(
+  parsedFile: PoetryFile,
+  group: string,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
+  return extractFromSection(
+    parsedFile.tool?.poetry?.group[group]?.dependencies,
+    group,
+    poetryLockfile
+  );
+}
+
+function extractFromSection(
+  sectionContent: Record<string, PoetryDependency | string> | undefined,
+  depType: string,
+  poetryLockfile: Record<string, string>
+): PackageDependency[] {
   if (!sectionContent) {
     return [];
   }
+
+  const deps: PackageDependency[] = [];
 
   for (const depName of Object.keys(sectionContent)) {
     if (depName === 'python' || depName === 'source') {
       continue;
     }
 
+    const pep503NormalizeRegex = regEx(/[-_.]+/g);
+    const packageName = depName
+      .toLowerCase()
+      .replace(pep503NormalizeRegex, '-');
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
@@ -56,13 +85,16 @@ function extractFromSection(
     }
     const dep: PackageDependency = {
       depName,
-      depType: section,
-      currentValue: currentValue,
+      depType,
+      currentValue,
       managerData: { nestedVersion },
       datasource: PypiDatasource.id,
     };
-    if (depName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[depName];
+    if (packageName in poetryLockfile) {
+      dep.lockedVersion = poetryLockfile[packageName];
+    }
+    if (depName !== packageName) {
+      dep.packageName = packageName;
     }
     if (skipReason) {
       dep.skipReason = skipReason;
@@ -99,7 +131,7 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
 export async function extractPackageFile(
   content: string,
   fileName: string
-): Promise<PackageFile | null> {
+): Promise<PackageFileContent | null> {
   logger.trace(`poetry.extractPackageFile(${fileName})`);
   let pyprojectfile: PoetryFile;
   try {
@@ -121,10 +153,22 @@ export async function extractPackageFile(
   const lockfileMapping = extractLockFileEntries(lockContents);
 
   const deps = [
-    ...extractFromSection(pyprojectfile, 'dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'dev-dependencies', lockfileMapping),
-    ...extractFromSection(pyprojectfile, 'extras', lockfileMapping),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(
+      pyprojectfile,
+      'dev-dependencies',
+      lockfileMapping
+    ),
+    ...extractFromDependenciesSection(pyprojectfile, 'extras', lockfileMapping),
+    ...Object.keys(pyprojectfile.tool?.poetry?.group ?? []).flatMap((group) =>
+      extractFromDependenciesGroupSection(pyprojectfile, group, lockfileMapping)
+    ),
   ];
+
   if (!deps.length) {
     return null;
   }
@@ -136,7 +180,7 @@ export async function extractPackageFile(
       pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
-  const res: PackageFile = {
+  const res: PackageFileContent = {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
     extractedConstraints,

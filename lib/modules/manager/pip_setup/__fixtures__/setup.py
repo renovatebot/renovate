@@ -78,6 +78,7 @@ setup(
         'raven>=5.27.1,<7.0', # pyup: nothing
         'future>=0.15.2,<0.17',
         'ipaddress>=1.0.16,<2.0;python_version<"3.3"',
+        'zope.interface>=5.5.2,<6.0.0',
     ],
     keywords=[
         'talisker',

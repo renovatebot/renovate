@@ -102,7 +102,7 @@ There are some dependencies that either (a) don't have the potential to break so
 
 For example, it's very hard for `eslint` to break anything in production.
 If your build/tests pass, then you are fine.
-Consider enabling automerge for all lint packages to save yourself the pointless click when you manually approve them each time.
+Consider enabling automerge for all lint packages to save yourself the work of manually approving the update each time.
 In this case you might wake up to 5/10 of your overnight Pull Requests having already merged themselves.
 
 Another example of a good candidate for automerging might be a database driver like `node-postgres` (`pg` on npm), if you have 100% test coverage of your API.
@@ -142,7 +142,7 @@ You can add a package rule in our Renovate configuration to group these together
 Since both `yarn` and `npm@5` both support lock files, it's a common question to ask "Why should I pin dependencies if I'm already using a lock file?".
 It's a good question!
 
-![broken-lockfile](assets/images/broken-lockfile.jpg)
+![broken-lockfile](assets/images/broken-lockfile.jpg){ loading=lazy }
 
 Lock files are a great companion to SemVer ranges _or_ pinning dependencies, because these files lock (pin) deeper into your dependency tree than you see in `package.json`.
 
@@ -158,7 +158,7 @@ If a lock file gets out of sync with its `package.json`, it can no longer be gua
 
 The lock file has only delayed the inevitable problem, and provides much less visibility than `package.json`, because it's not designed to be human readable and is quite dense.
 
-![all-dead](assets/images/all-dead.jpg)
+![all-dead](assets/images/all-dead.jpg){ loading=lazy }
 
 If the `package.json` has a range, and a new in-range version is released that would break the build, then essentially your `package.json` is in a state of "broken", even if the lock file is still holding things together.
 
@@ -184,7 +184,7 @@ Meanwhile you could be upgrading all the other essential fixes of other dependen
 You could even be running `yarn upgrade` regularly to be getting _indirect_ package updates in the lockfile and seeing if everything still passes.
 
 So the lock file does not solve the same SemVer problems that pinning solves - but it compliments it.
-For this reason our usual recommendation using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
+For this reason our usual recommendation is using a lock file regardless of whether you pin dependencies or not, and pinning even if you have a lock file.
 
 Don't forget though that our motto is "Flexible, so you don't need to be", so go ahead and configure however you want.
 Also, we're open to ideas for how to make lock file updates more "visible" too.
