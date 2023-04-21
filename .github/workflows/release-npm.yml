@@ -25,6 +25,7 @@ env:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   release-npm:

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { getSourceUrl as getGithubSourceUrl } from '../../../util/github/url';
-import { looseArray } from '../../../util/schema-utils';
+import { LooseArray } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
 export const DenoApiTag = z.object({
@@ -9,13 +9,15 @@ export const DenoApiTag = z.object({
 });
 
 export const DenoAPIModuleResponse = z.object({
-  tags: looseArray(DenoApiTag).transform((tags) => {
-    const record: Record<string, string> = {};
-    for (const { kind, value } of tags) {
-      record[kind] = value;
-    }
-    return record;
-  }),
+  tags: LooseArray(DenoApiTag)
+    .transform((tags) => {
+      const record: Record<string, string> = {};
+      for (const { kind, value } of tags) {
+        record[kind] = value;
+      }
+      return record;
+    })
+    .catch({}),
   versions: z.array(z.string()),
 });
 
