@@ -141,12 +141,11 @@ export async function getMergeMethod(
   };
 
   const policyConfigurations = (
-    await (await azureApi.policyApi()).getPolicyConfigurations(project)
+    await (
+      await azureApi.policyApi()
+    ).getPolicyConfigurations(project, mergePolicyGuid)
   )
-    .filter(
-      (p) =>
-        p.settings.scope.some(isRelevantScope) && p.type?.id === mergePolicyGuid
-    )
+    .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
 
   logger.trace(
