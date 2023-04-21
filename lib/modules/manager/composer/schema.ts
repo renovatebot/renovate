@@ -125,7 +125,7 @@ export const Repos = z
     }
 
     if (packagist) {
-      registryUrls.push('https://packagist.org');
+      registryUrls.unshift('https://packagist.org');
     }
 
     return { registryUrls, gitRepos, pathRepos };

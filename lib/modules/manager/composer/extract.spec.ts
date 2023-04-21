@@ -193,9 +193,9 @@ describe('modules/manager/composer/extract', () => {
             depName: 'aws/aws-sdk-php',
             depType: 'require',
             registryUrls: [
+              'https://packagist.org',
               'https://wpackagist.org',
               'https://gitlab.vendor.com/api/v4/group/2/-/packages/composer',
-              'https://packagist.org',
             ],
           },
           {
@@ -226,7 +226,7 @@ describe('modules/manager/composer/extract', () => {
             datasource: 'packagist',
             depName: 'aws/aws-sdk-php',
             depType: 'require',
-            registryUrls: ['https://wpackagist.org', 'https://packagist.org'],
+            registryUrls: ['https://packagist.org', 'https://wpackagist.org'],
           },
           {
             currentValue: 'dev-trunk',
