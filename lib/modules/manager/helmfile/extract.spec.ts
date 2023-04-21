@@ -1,15 +1,17 @@
-import fsExtra from 'fs-extra';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
+const LOCAL_DIR = '/tmp/github/some/repo';
+
 describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      GlobalConfig.set({ localDir: '/tmp/github/some/repo' });
+      GlobalConfig.set({ localDir: LOCAL_DIR });
       jest.resetAllMocks();
     });
 
@@ -388,19 +390,19 @@ describe('modules/manager/helmfile/extract', () => {
     });
 
     it('detects kustomize and respects relative paths', async () => {
-      // Use actual fs.localPathExists and fs.getParentDir, and only mock fs-extra.stat
-      fs.localPathExists =
-        jest.requireActual<typeof fs>('../../../util/fs').localPathExists;
-      fs.getParentDir =
-        jest.requireActual<typeof fs>('../../../util/fs').getParentDir;
-
-      jest.spyOn(fsExtra, 'stat').mockImplementationOnce(() => {
+      // eslint-disable-next-line require-await, @typescript-eslint/require-await
+      fs.localPathExists.mockImplementationOnce(async (path) => {
+        if (!path.startsWith(GlobalConfig.get('localDir') ?? '')) {
+          throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+        }
         return true;
       });
 
+      const parentDir = `${LOCAL_DIR}/project`;
+      fs.getParentDir.mockReturnValue(parentDir);
       const result = await extractPackageFile(
         Fixtures.get('uses-kustomization.yaml'),
-        'project/helmfile.yaml', // In subdir
+        `${parentDir}/helmfile.yaml`, // In subdir
         {
           registryAliases: {
             stable: 'https://charts.helm.sh/stable',
