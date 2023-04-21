@@ -2,12 +2,7 @@ import { z } from 'zod';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
-import {
-  Json,
-  looseArray,
-  looseRecord,
-  looseValue,
-} from '../../../util/schema-utils';
+import { Json, LooseArray, LooseRecord } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
@@ -140,18 +135,21 @@ export const Repos = z
   });
 export type Repos = z.infer<typeof Repos>;
 
-const RequireDefs = looseRecord(z.string().transform((x) => x.trim()));
+const RequireDefs = LooseRecord(z.string().transform((x) => x.trim())).catch(
+  {}
+);
 
 export const PackageFile = z
   .object({
     type: z.string().optional(),
-    config: looseValue(
-      z.object({
+    config: z
+      .object({
         platform: z.object({
           php: z.string(),
         }),
       })
-    ),
+      .nullable()
+      .catch(null),
     repositories: Repos,
     require: RequireDefs,
     'require-dev': RequireDefs,
@@ -182,8 +180,8 @@ type LockedPackage = z.infer<typeof LockedPackage>;
 export const Lockfile = z
   .object({
     'plugin-api-version': z.string().optional(),
-    packages: looseArray(LockedPackage),
-    'packages-dev': looseArray(LockedPackage),
+    packages: LooseArray(LockedPackage).catch([]),
+    'packages-dev': LooseArray(LockedPackage).catch([]),
   })
   .transform(
     ({
