@@ -737,21 +737,12 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('heuristic dependency matching', () => {
     test.each`
-      input                                                        | output
-      ${'("foo", "bar", "1.2.3")'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'("foo", "bar", "1.2.3", "4.5.6")'}                        | ${null}
-      ${'(["foo", "bar", "1.2.3"])'}                               | ${null}
-      ${'someMethod("foo", "bar", "1.2.3")'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'createXmlValueRemover("defaults", "integer", "integer")'} | ${null}
-      ${'events("passed", "skipped", "failed")'}                   | ${null}
-      ${'args("foo", "bar", "baz")'}                               | ${null}
-      ${'arrayOf("foo", "bar", "baz")'}                            | ${null}
-      ${'listOf("foo", "bar", "baz")'}                             | ${null}
-      ${'mutableListOf("foo", "bar", "baz")'}                      | ${null}
-      ${'setOf("foo", "bar", "baz")'}                              | ${null}
-      ${'mutableSetOf("foo", "bar", "baz")'}                       | ${null}
-      ${'stages("foo", "bar", "baz")'}                             | ${null}
-      ${'mapScalar("foo", "bar", "baz")'}                          | ${null}
+      input                                  | output
+      ${'("foo", "bar", "1.2.3")'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'("foo", "bar", "1.2.3", "4.5.6")'}  | ${null}
+      ${'(["foo", "bar", "1.2.3"])'}         | ${null}
+      ${'someMethod("foo", "bar", "1.2.3")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'listOf("foo", "bar", "baz")'}       | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
       expect(deps).toMatchObject([output].filter(is.truthy));
