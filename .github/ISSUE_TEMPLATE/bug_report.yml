@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        STOP! Don't create a Bug Report like this unless you are a maintainer of Renovate.
+        STOP! Only create a Bug Report if you're a maintainer of Renovate.
         Users should instead create GitHub Discussions in this repo, so please go back a step and select Discussion instead of Issue.
 
   - type: dropdown
