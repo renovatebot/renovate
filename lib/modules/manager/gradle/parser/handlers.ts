@@ -8,7 +8,6 @@ import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
 import { parseDependencyString } from '../utils';
 import {
-  ANNOYING_METHODS,
   GRADLE_PLUGINS,
   REGISTRY_URLS,
   findVariable,
@@ -170,6 +169,10 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     return ctx;
   }
 
+  if (!regEx(/\d/).test(version)) {
+    return ctx;
+  }
+
   const dep = parseDependencyString([groupId, artifactId, version].join(':'));
   if (!dep) {
     return ctx;
@@ -197,10 +200,6 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
       fileReplacePosition: versionTokens[0].offset,
       packageFile: ctx.packageFile,
     };
-  }
-
-  if (methodName?.[0] && ANNOYING_METHODS.has(methodName[0].value)) {
-    dep.skipReason = 'ignored';
   }
 
   ctx.deps.push(dep);
