@@ -102,5 +102,16 @@ describe('modules/manager/sbt/update', () => {
 
       expect(bumpedContent).toEqual(updatedVersionFile);
     });
+
+    it('no content build.sbt', () => {
+      const versionFile = `
+      `;
+      const bumpedContent = sbtUpdater.updateDependency({
+        fileContent: versionFile,
+        upgrade: {},
+      });
+
+      expect(bumpedContent).toBeNull();
+    });
   });
 });
