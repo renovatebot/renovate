@@ -7,7 +7,7 @@ import { BazelRegistryDatasource } from '.';
 const datasource = BazelRegistryDatasource.id;
 const defaultRegistryUrl = BazelRegistryDatasource.bazelCentralRepoUrl;
 const packageName = 'rules_foo';
-const path = BazelRegistryDatasource.packageMetatdataPath(packageName);
+const path = BazelRegistryDatasource.packageMetadataPath(packageName);
 
 describe('modules/datasource/bazel-registry/index', () => {
   describe('getReleases', () => {

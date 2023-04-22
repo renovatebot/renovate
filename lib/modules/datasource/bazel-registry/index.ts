@@ -19,7 +19,7 @@ export class BazelRegistryDatasource extends Datasource {
   override readonly customRegistrySupport = true;
   override readonly caching = true;
 
-  static packageMetatdataPath(packageName: string): string {
+  static packageMetadataPath(packageName: string): string {
     return `/modules/${packageName}/metadata.json`;
   }
 
@@ -36,7 +36,7 @@ export class BazelRegistryDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const path = BazelRegistryDatasource.packageMetatdataPath(packageName);
+    const path = BazelRegistryDatasource.packageMetadataPath(packageName);
     const url = `${registryUrl!}${path}`;
 
     const result: ReleaseResult = {
