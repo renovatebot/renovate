@@ -4,7 +4,7 @@ import { HttpError } from '../../../util/http';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import type { BazelModuleMetadataResponse } from './types';
+import { BazelModuleMetadata } from './schema';
 
 export class BazelRegistryDatasource extends Datasource {
   static readonly id = 'bazel-registry';
@@ -39,14 +39,14 @@ export class BazelRegistryDatasource extends Datasource {
     const path = BazelRegistryDatasource.packageMetadataPath(packageName);
     const url = `${registryUrl!}${path}`;
 
-    const result: ReleaseResult = {
-      releases: [],
-    };
+    const result: ReleaseResult = { releases: [] };
     try {
-      const { body: metadata } =
-        await this.http.getJson<BazelModuleMetadataResponse>(url);
+      const { body: metadata } = await this.http.getJson(
+        url,
+        BazelModuleMetadata
+      );
       result.releases = metadata.versions
-        .filter((v) => !metadata?.yanked_versions?.[v])
+        .filter((v) => !metadata.yanked_versions[v])
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => ({ version: bv.original }));
