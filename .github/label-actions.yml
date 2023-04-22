@@ -188,10 +188,10 @@
     **Please create a GitHub Discussion instead of this issue.**
 
 
-    As this issue has been labeled as `needs-discussion` by a maintainer it is being automatically closed and locked. It will later be deleted to avoid polluting repository searches with duplicate or incorrect content.
-
-
-    This doesn't necessarily mean that what you've reported isn't a problem or a reasonable idea, but it does mean that it should be raised as a Discussion first and not an Issue. Please create a Discussion now, assuming you still wish to discuss it.
+    Issue creation is reserved for Renovate maintainers only, which they do once a Discussion has been triaged and confirmed. As a user, please create a GitHub Discussion in this repo instead.
+    
+    
+    This issue has been closed, locked and will later be batch deleted in order not to pollute the repository with duplicates or incorrectly created bug reports.
 
 
     Thanks, The Renovate team
