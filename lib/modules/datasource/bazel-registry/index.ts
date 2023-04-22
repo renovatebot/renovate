@@ -40,7 +40,6 @@ export class BazelRegistryDatasource extends Datasource {
     const url = `${registryUrl!}${path}`;
 
     const result: ReleaseResult = {
-      registryUrl: url,
       releases: [],
     };
     try {
@@ -50,7 +49,7 @@ export class BazelRegistryDatasource extends Datasource {
         .filter((v) => !metadata.yanked_versions[v])
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
-        .map((bv) => ({ registryUrl, version: bv.original }));
+        .map((bv) => ({ version: bv.original }));
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {

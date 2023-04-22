@@ -2,18 +2,15 @@
 
 exports[`modules/datasource/bazel-registry/index getReleases metadata with yanked versions 1`] = `
 {
-  "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/rules_foo/metadata.json",
+  "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
   "releases": [
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.14.8",
     },
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.14.9",
     },
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.16.0",
     },
   ],
@@ -22,22 +19,18 @@ exports[`modules/datasource/bazel-registry/index getReleases metadata with yanke
 
 exports[`modules/datasource/bazel-registry/index getReleases metadata without yanked versions 1`] = `
 {
-  "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main/modules/rules_foo/metadata.json",
+  "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
   "releases": [
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.14.8",
     },
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.14.9",
     },
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.15.0",
     },
     {
-      "registryUrl": "https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main",
       "version": "0.16.0",
     },
   ],
