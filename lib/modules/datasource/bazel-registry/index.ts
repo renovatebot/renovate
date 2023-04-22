@@ -46,7 +46,7 @@ export class BazelRegistryDatasource extends Datasource {
       const { body: metadata } =
         await this.http.getJson<BazelModuleMetadataResponse>(url);
       result.releases = metadata.versions
-        .filter((v) => !metadata.yanked_versions[v])
+        .filter((v) => !metadata?.yanked_versions?.[v])
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => ({ version: bv.original }));
