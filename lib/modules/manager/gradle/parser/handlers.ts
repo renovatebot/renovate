@@ -169,10 +169,6 @@ export function handleLongFormDep(ctx: Ctx): Ctx {
     return ctx;
   }
 
-  if (!regEx(/\d/).test(version)) {
-    return ctx;
-  }
-
   const dep = parseDependencyString([groupId, artifactId, version].join(':'));
   if (!dep) {
     return ctx;
