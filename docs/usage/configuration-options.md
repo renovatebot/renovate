@@ -1821,7 +1821,7 @@ For example you have multiple `package.json` and want to use `dependencyDashboar
 {
   "packageRules": [
     {
-      "matchPaths": ["+(package.json)"],
+      "matchFiles": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
