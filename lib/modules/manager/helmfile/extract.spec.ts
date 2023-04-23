@@ -6,12 +6,12 @@ import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
-const LOCAL_DIR = '/tmp/github/some/repo';
+const localDir = '/tmp/github/some/repo';
 
 describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      GlobalConfig.set({ localDir: LOCAL_DIR });
+      GlobalConfig.set({ localDir });
       jest.resetAllMocks();
     });
 
@@ -398,7 +398,7 @@ describe('modules/manager/helmfile/extract', () => {
         return true;
       });
 
-      const parentDir = `${LOCAL_DIR}/project`;
+      const parentDir = `${localDir}/project`;
       fs.getParentDir.mockReturnValue(parentDir);
       const result = await extractPackageFile(
         Fixtures.get('uses-kustomization.yaml'),
