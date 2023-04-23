@@ -702,6 +702,16 @@ It is pointless to edit the labels, as Renovate bot restores the labels on each 
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
 
+## dependencyDashboardVulnerabilitySummary
+
+Set this function to control if a summary of the CVEs affected should be added to the dependency dashboard.
+
+Available options are:
+
+- `none` ( default ) no section will be added.
+- `unresolved` only vulnerabilities will be added if there are no fixes available.
+- `all` list all vulnerabilities which affect this repository.
+
 ## description
 
 The description field can be used inside any configuration object to add a human-readable description of the object's config purpose.

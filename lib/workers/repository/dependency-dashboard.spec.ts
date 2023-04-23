@@ -21,7 +21,18 @@ import {
 import { regEx } from '../../util/regex';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
+import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
+// import { Vulnerabilities } from './process/vulnerabilities';
+//
+// jest.mock('./process/vulnerabilities', () => {
+//   return {
+//     Vulnerabilities: {
+//       create: jest.fn(),
+//       fetchVulnerabilities: jest.fn(),
+//     },
+//   };
+// });
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -992,6 +1003,64 @@ describe('workers/repository/dependency-dashboard', () => {
           expect(post.includes('dev')).toBeTrue();
         });
       });
+    });
+  });
+
+  describe('getDashboardMarkdownVulnerabilities()', () => {
+    const packageFiles = Fixtures.getJson<Record<string, PackageFile[]>>(
+      './package-files.json'
+    );
+
+    it('return empty string if summary is empty', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        config,
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return empty string if summary is set to none', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardVulnerabilitySummary: 'none',
+        },
+        packageFiles
+      );
+      expect(result).toBeEmpty();
+    });
+
+    it('return no data section if summary is set to all and no vulnerabilities', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardVulnerabilitySummary: 'all',
+        },
+        {}
+      );
+      expect(result).toBe(`## Vulnerabilities\n\nNone detected.\n\n`);
+    });
+
+    it('return all vulnerabilities if set to all', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardVulnerabilitySummary: 'all',
+        },
+        packageFiles
+      );
+      expect(result).toBe(`## Vulnerabilities\n\n TODO add list`);
+    });
+
+    it('return unresolved vulnerabilities if set to "unresolved"', async () => {
+      const result = await getDashboardMarkdownVulnerabilities(
+        {
+          ...config,
+          dependencyDashboardVulnerabilitySummary: 'unresolved',
+        },
+        packageFiles
+      );
+      expect(result).toBe(`## Vulnerabilities\n\n TODO add list`);
     });
   });
 });

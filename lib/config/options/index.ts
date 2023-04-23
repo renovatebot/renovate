@@ -521,6 +521,15 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'dependencyDashboardVulnerabilitySummary',
+    description:
+      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    type: 'string',
+    allowedValues: ['none', 'all', 'unresolved'],
+    default: 'none',
+    experimental: true,
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',
