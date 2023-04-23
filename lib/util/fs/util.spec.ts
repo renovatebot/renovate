@@ -73,6 +73,7 @@ describe('util/fs/util', () => {
     ${'/foo'}           | ${false}
     ${'&&'}             | ${false}
     ${';'}              | ${true}
+    ${'./[foo]/bar'}    | ${true}
   `('isValidPath($value) == $expected', ({ value, expected }) => {
     expect(isValidPath(value, 'cacheDir')).toBe(expected);
   });

@@ -429,7 +429,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
