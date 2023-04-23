@@ -702,7 +702,7 @@ It is pointless to edit the labels, as Renovate bot restores the labels on each 
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
 
-## dependencyDashboardVulnerabilitySummary
+## dependencyDashboardOSVVulnerabilitySummary
 
 Set this function to control if a summary of the CVEs affected should be added to the dependency dashboard.
 

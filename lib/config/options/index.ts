@@ -521,7 +521,7 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
-    name: 'dependencyDashboardVulnerabilitySummary',
+    name: 'dependencyDashboardOSVVulnerabilitySummary',
     description:
       'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
     type: 'string',

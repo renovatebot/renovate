@@ -466,8 +466,8 @@ export async function getDashboardMarkdownVulnerabilities(
   let result = '';
 
   if (
-    is.nullOrUndefined(config.dependencyDashboardVulnerabilitySummary) ||
-    config.dependencyDashboardVulnerabilitySummary === 'none'
+    is.nullOrUndefined(config.dependencyDashboardOSVVulnerabilitySummary) ||
+    config.dependencyDashboardOSVVulnerabilitySummary === 'none'
   ) {
     return result;
   }
@@ -492,7 +492,7 @@ export async function getDashboardMarkdownVulnerabilities(
   result += `${unresolvedVulnerabilities.length} of a total of ${vulnerabilities.length} CVEs have no fixes in this repository.\n`;
 
   let renderedVulnerabilities: Vulnerability[];
-  switch (config.dependencyDashboardVulnerabilitySummary) {
+  switch (config.dependencyDashboardOSVVulnerabilitySummary) {
     // filter vulnerabilities to display based on configuration
     case 'unresolved':
       renderedVulnerabilities = unresolvedVulnerabilities;

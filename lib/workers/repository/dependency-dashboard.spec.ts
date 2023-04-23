@@ -1023,7 +1023,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
-          dependencyDashboardVulnerabilitySummary: 'none',
+          dependencyDashboardOSVVulnerabilitySummary: 'none',
         },
         packageFiles
       );
@@ -1034,7 +1034,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
-          dependencyDashboardVulnerabilitySummary: 'all',
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
         },
         {}
       );
@@ -1045,7 +1045,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
-          dependencyDashboardVulnerabilitySummary: 'all',
+          dependencyDashboardOSVVulnerabilitySummary: 'all',
         },
         packageFiles
       );
@@ -1056,7 +1056,7 @@ describe('workers/repository/dependency-dashboard', () => {
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
-          dependencyDashboardVulnerabilitySummary: 'unresolved',
+          dependencyDashboardOSVVulnerabilitySummary: 'unresolved',
         },
         packageFiles
       );
