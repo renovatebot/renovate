@@ -1,7 +1,19 @@
 import is from '@sindresorhus/is';
+import { regEx } from '../../../util/regex';
 import type { PackageDependency } from '../types';
 
-export function parsePEP508(value: string): PackageDependency {
+const pep508Regex = regEx(
+  /^(?<packageName>[A-Z0-9._-]+)\s*(\[[A-Z0-9,._-]+\])?\s*(?<currentValue>[^;]+)(;(?<environmentMarker>.*))?/i
+);
+
+export function parsePEP508(value: string): PackageDependency | null {
+  const result = pep508Regex.exec(value);
+  if (is.nullOrUndefined(result)) {
+    // TODO logging
+    return null;
+  }
+
+  return {};
   // TODO implement
 }
 
@@ -28,7 +40,10 @@ export function parseDependencyList(
 
   const deps: PackageDependency[] = [];
   for (const element of list) {
-    deps.push(parsePEP508(element));
+    const dep = parsePEP508(element);
+    if (is.truthy(dep)) {
+      deps.push(dep);
+    }
   }
   return deps;
 }
