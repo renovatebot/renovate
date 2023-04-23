@@ -31,6 +31,8 @@ describe('modules/manager/cargo/extract', () => {
       };
 
       GlobalConfig.set(adminConfig);
+      delete process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX;
+      delete process.env.CARGO_REGISTRIES_MCORBIN_INDEX;
     });
 
     afterEach(async () => {
@@ -111,6 +113,50 @@ describe('modules/manager/cargo/extract', () => {
       });
       expect(res?.deps).toMatchSnapshot();
       expect(res?.deps).toHaveLength(3);
+    });
+
+    it('extracts registry urls from environment', async () => {
+      process.env.CARGO_REGISTRIES_PRIVATE_CRATES_INDEX =
+        'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git';
+      process.env.CARGO_REGISTRIES_MCORBIN_INDEX =
+        'https://github.com/mcorbin/testregistry';
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+      });
+
+      expect(res?.deps).toEqual([
+        {
+          currentValue: '0.1.0',
+          datasource: 'crate',
+          depName: 'proprietary-crate',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: [
+            'https://dl.cloudsmith.io/basic/my-org/my-repo/cargo/index.git',
+          ],
+        },
+        {
+          currentValue: '3.0.0',
+          datasource: 'crate',
+          depName: 'mcorbin-test',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: true,
+          },
+          registryUrls: ['https://github.com/mcorbin/testregistry'],
+        },
+        {
+          currentValue: '0.2',
+          datasource: 'crate',
+          depName: 'tokio',
+          depType: 'dependencies',
+          managerData: {
+            nestedVersion: false,
+          },
+        },
+      ]);
     });
 
     it('extracts workspace dependencies', async () => {

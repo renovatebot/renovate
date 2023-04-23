@@ -88,7 +88,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -165,7 +165,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
-  getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
     repoName?: string,
