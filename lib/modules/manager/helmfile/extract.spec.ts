@@ -390,12 +390,11 @@ describe('modules/manager/helmfile/extract', () => {
     });
 
     it('detects kustomize and respects relative paths', async () => {
-      // eslint-disable-next-line require-await, @typescript-eslint/require-await
-      fs.localPathExists.mockImplementationOnce(async (path) => {
+      fs.localPathExists.mockImplementationOnce((path) => {
         if (!path.startsWith(GlobalConfig.get('localDir') ?? '')) {
           throw new Error(FILE_ACCESS_VIOLATION_ERROR);
         }
-        return true;
+        return Promise.resolve(true);
       });
 
       const parentDir = `${localDir}/project`;
