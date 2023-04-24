@@ -1,6 +1,7 @@
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
+import { joinUrlParts } from '../../../util/url';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -35,7 +36,7 @@ export class BazelDatasource extends Datasource {
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const path = BazelDatasource.packageMetadataPath(packageName);
-    const url = `${registryUrl!}${path}`;
+    const url = joinUrlParts(registryUrl!, path);
 
     const result: ReleaseResult = { releases: [] };
     try {
