@@ -1,4 +1,5 @@
-import { lang, query as q } from 'good-enough-parser';
+import { lang, parser, query as q } from 'good-enough-parser';
+import type { SeqBuilder } from 'good-enough-parser/dist/cjs/query/builder';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -53,8 +54,9 @@ const sbtVersionRegex = regEx(
 );
 
 // var1 or var1.var2.var3
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-const nestedVariableLiteral = (handler: q.SymMatcherHandler<Ctx>) =>
+const nestedVariableLiteral = (
+  handler: q.SymMatcherHandler<Ctx>
+): SeqBuilder<Ctx, parser.Node> =>
   q.sym<Ctx>(handler).opt(q.many(q.op<Ctx>('.').sym(handler)));
 
 const scalaVersionMatch = q
