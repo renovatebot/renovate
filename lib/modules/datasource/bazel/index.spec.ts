@@ -2,14 +2,14 @@ import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
-import { BazelRegistryDatasource } from '.';
+import { BazelDatasource } from '.';
 
-const datasource = BazelRegistryDatasource.id;
-const defaultRegistryUrl = BazelRegistryDatasource.bazelCentralRepoUrl;
+const datasource = BazelDatasource.id;
+const defaultRegistryUrl = BazelDatasource.bazelCentralRepoUrl;
 const packageName = 'rules_foo';
-const path = BazelRegistryDatasource.packageMetadataPath(packageName);
+const path = BazelDatasource.packageMetadataPath(packageName);
 
-describe('modules/datasource/bazel-registry/index', () => {
+describe('modules/datasource/bazel/index', () => {
   describe('getReleases', () => {
     it('throws for error', async () => {
       httpMock.scope(defaultRegistryUrl).get(path).replyWithError('error');

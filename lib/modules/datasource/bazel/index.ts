@@ -6,15 +6,13 @@ import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { BazelModuleMetadata } from './schema';
 
-export class BazelRegistryDatasource extends Datasource {
-  static readonly id = 'bazel-registry';
+export class BazelDatasource extends Datasource {
+  static readonly id = 'bazel';
 
   static readonly bazelCentralRepoUrl =
     'https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main';
 
-  override readonly defaultRegistryUrls = [
-    BazelRegistryDatasource.bazelCentralRepoUrl,
-  ];
+  override readonly defaultRegistryUrls = [BazelDatasource.bazelCentralRepoUrl];
   override readonly registryStrategy = 'hunt';
   override readonly customRegistrySupport = true;
   override readonly caching = true;
@@ -24,11 +22,11 @@ export class BazelRegistryDatasource extends Datasource {
   }
 
   constructor() {
-    super(BazelRegistryDatasource.id);
+    super(BazelDatasource.id);
   }
 
   @cache({
-    namespace: `datasource-${BazelRegistryDatasource.id}`,
+    namespace: `datasource-${BazelDatasource.id}`,
     key: ({ registryUrl, packageName }: GetReleasesConfig) =>
       `${registryUrl!}:${packageName}`,
   })
@@ -36,7 +34,7 @@ export class BazelRegistryDatasource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    const path = BazelRegistryDatasource.packageMetadataPath(packageName);
+    const path = BazelDatasource.packageMetadataPath(packageName);
     const url = `${registryUrl!}${path}`;
 
     const result: ReleaseResult = { releases: [] };
