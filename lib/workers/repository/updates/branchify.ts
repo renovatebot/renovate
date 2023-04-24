@@ -19,7 +19,6 @@ export async function branchifyUpgrades(
   packageFiles: Record<string, any[]>
 ): Promise<BranchifiedConfig> {
   logger.debug('branchifyUpgrades');
-  logger.debug(JSON.stringify(packageFiles));
   const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
