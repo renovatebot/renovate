@@ -1,8 +1,4 @@
 {
-    "homepage": "https://github.com/someone/rules_foo",
-    "repository": [
-        "github:someone/rules_foo"
-    ],
     "versions": [
         "0.14.8",
         "0.14.9",
