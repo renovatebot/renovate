@@ -470,15 +470,11 @@ export async function extractAllPackageFiles(
         localVars: {},
         globalVars,
       });
-      if (res) {
-        if (res?.deps) {
-          for (const dep of res.deps) {
-            const variableSourceFile = dep?.editFile ?? packageFile;
-            dep.registryUrls = [...new Set(dep.registryUrls)];
-            mapDepsToPackageFile[variableSourceFile] ??= [];
-            mapDepsToPackageFile[variableSourceFile].push(dep);
-          }
-        }
+      for (const dep of res?.deps ?? []) {
+        const variableSourceFile = dep?.editFile ?? packageFile;
+        dep.registryUrls = [...new Set(dep.registryUrls)];
+        mapDepsToPackageFile[variableSourceFile] ??= [];
+        mapDepsToPackageFile[variableSourceFile].push(dep);
       }
     }
   }
