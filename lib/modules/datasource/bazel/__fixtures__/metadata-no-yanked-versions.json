@@ -1,15 +1,4 @@
 {
-    "homepage": "https://github.com/someone/rules_foo",
-    "maintainers": [
-        {
-            "email": "foo.maintainer@gmail.com",
-            "github": "foomaster",
-            "name": "Foo Maintainer"
-        }
-    ],
-    "repository": [
-        "github:someone/rules_foo"
-    ],
     "versions": [
         "0.14.8",
         "0.14.9",

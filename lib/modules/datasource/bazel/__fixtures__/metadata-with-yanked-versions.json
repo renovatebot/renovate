@@ -1,12 +1,5 @@
 {
     "homepage": "https://github.com/someone/rules_foo",
-    "maintainers": [
-        {
-            "email": "foo.maintainer@gmail.com",
-            "github": "foomaster",
-            "name": "Foo Maintainer"
-        }
-    ],
     "repository": [
         "github:someone/rules_foo"
     ],
