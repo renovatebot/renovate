@@ -49,9 +49,8 @@ export class BazelDatasource extends Datasource {
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => ({
           version: bv.original,
-          isDeprecated: is.truthy(metadata.yanked_versions[bv.original])
-            ? true
-            : undefined,
+          isDeprecated:
+            is.truthy(metadata.yanked_versions[bv.original]) || undefined,
         }));
     } catch (err) {
       // istanbul ignore else: not testable with nock
