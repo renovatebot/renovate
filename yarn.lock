@@ -8275,10 +8275,10 @@ open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openpgp@5.7.0:
-  version "5.7.0"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.7.0.tgz#fe0a346f26171ffb726636ae7ccb24a504281dbc"
-  integrity sha512-wchYJQfFbSaocUvUIYqNrWD+lRSmFSG1d3Ak2CHeXFocDSEsf7Uc1zUzHjSdlZPTvGeeXPQ+MJrwVtalL4QCBg==
+openpgp@5.8.0:
+  version "5.8.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.8.0.tgz#5e3033e8df59d1626ce65aa01b3cf5abee7ff26b"
+  integrity sha512-hq4+4s/vpjuwGgZSjplGp4j5FzSz+KwiFRiqMx+ZXr7VCK3CvTkktYilMTZMrf2vHsFH8aQ0596Lmn07HeKRmQ==
   dependencies:
     asn1.js "^5.0.0"
 
