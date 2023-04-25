@@ -5,9 +5,9 @@ export class Stack<T> extends Array<T> {
     return stack;
   }
 
-  get current(): T | null {
+  get current(): T | undefined {
     if (!this.length) {
-      return null;
+      return undefined;
     }
     return this[this.length - 1];
   }

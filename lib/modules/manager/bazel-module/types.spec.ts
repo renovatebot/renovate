@@ -4,7 +4,7 @@ describe('modules/manager/bazel-module/types', () => {
   describe('Stack', () => {
     it.each`
       items                  | exp
-      ${[]}                  | ${null}
+      ${[]}                  | ${undefined}
       ${['first', 'second']} | ${'second'}
     `('get current for $items', ({ items, exp }) => {
       const stack = Stack.create(...items);
