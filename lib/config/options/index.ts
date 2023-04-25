@@ -1860,6 +1860,7 @@ const options: RenovateOptions[] = [
     description:
       'Whether to bypass appending extra context to the Pull Request title.',
     type: 'boolean',
+    experimental: true,
     default: false,
     cli: false,
   },
