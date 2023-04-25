@@ -2266,8 +2266,8 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchUpdateTypes
 
-Use this field to match rules against types of updates.
-For example to apply a special label for Major updates:
+Use `matchUpdateTypes` to match rules against types of updates.
+For example to apply a special label to `major` updates:
 
 ```json
 {
@@ -2279,6 +2279,13 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
+    Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
+    When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
+    Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
 ### matchConfidence
 
