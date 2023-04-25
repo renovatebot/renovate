@@ -70,6 +70,7 @@ describe('modules/datasource/bazel/index', () => {
         releases: [
           { version: '0.14.8' },
           { version: '0.14.9' },
+          { version: '0.15.0', isDeprecated: true },
           { version: '0.16.0' },
         ],
       });

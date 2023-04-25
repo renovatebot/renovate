@@ -45,10 +45,14 @@ export class BazelDatasource extends Datasource {
         BazelModuleMetadata
       );
       result.releases = metadata.versions
-        .filter((v) => is.falsy(metadata.yanked_versions[v]))
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
-        .map((bv) => ({ version: bv.original }));
+        .map((bv) => ({
+          version: bv.original,
+          isDeprecated: is.truthy(metadata.yanked_versions[bv.original])
+            ? true
+            : undefined,
+        }));
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
