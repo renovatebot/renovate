@@ -29,7 +29,10 @@ describe('modules/datasource/bazel/index', () => {
     });
 
     it('returns null for empty 200 OK', async () => {
-      httpMock.scope(defaultRegistryUrl).get(path).reply(200, { versions: [] });
+      httpMock
+        .scope(defaultRegistryUrl)
+        .get(path)
+        .reply(200, '{ "versions": [], "yanked_versions": {} }');
       expect(await getPkgReleases({ datasource, packageName })).toBeNull();
     });
 
