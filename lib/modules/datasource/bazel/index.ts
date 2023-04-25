@@ -5,7 +5,7 @@ import { HttpError } from '../../../util/http';
 import { joinUrlParts } from '../../../util/url';
 import { BzlmodVersion } from '../../versioning/bazel-module/bzlmod-version';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, ReleaseResult } from '../types';
+import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
 import { BazelModuleMetadata } from './schema';
 
 export class BazelDatasource extends Datasource {
@@ -47,11 +47,13 @@ export class BazelDatasource extends Datasource {
       result.releases = metadata.versions
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
-        .map((bv) => ({
-          version: bv.original,
-          isDeprecated:
-            is.truthy(metadata.yanked_versions[bv.original]) || undefined,
-        }));
+        .map((bv) => {
+          const release: Release = { version: bv.original };
+          if (is.truthy(metadata.yanked_versions[bv.original])) {
+            release.isDeprecated = true;
+          }
+          return release;
+        });
     } catch (err) {
       // istanbul ignore else: not testable with nock
       if (err instanceof HttpError) {
