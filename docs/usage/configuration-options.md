@@ -2736,6 +2736,14 @@ Here's an example of how you would define PR priority so that devDependencies ar
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
 
+## prTitleStrict
+
+There are certain scenarios where the default behavior appends extra context to the PR title.
+
+These scenarios include if a `baseBranch` or if there is a grouped update and either `separateMajorMinor` or `separateMinorPatch` is true.
+
+Using this option allows you to skip these default behaviors and use other templating methods to control the format of the PR title.
+
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets.
