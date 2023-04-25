@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { cache } from '../../../util/cache/package/decorator';
 import { HttpError } from '../../../util/http';
@@ -44,7 +45,7 @@ export class BazelDatasource extends Datasource {
         BazelModuleMetadata
       );
       result.releases = metadata.versions
-        .filter((v) => !metadata.yanked_versions[v])
+        .filter((v) => is.falsy(metadata.yanked_versions[v]))
         .map((v) => new BzlmodVersion(v))
         .sort(BzlmodVersion.defaultCompare)
         .map((bv) => ({ version: bv.original }));
