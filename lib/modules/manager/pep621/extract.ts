@@ -5,7 +5,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { PyProjectSchema } from './schema';
+import { PyProject, PyProjectSchema } from './schema';
 import { parseDependencyGroupRecord, parseDependencyList } from './utils';
 
 export function extractPackageFile(
@@ -17,19 +17,33 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
 
-  const jsonMap = toml.parse(content);
-  const result = PyProjectSchema.safeParse(jsonMap);
-  if (!result.success) {
-    // TODO implement logging
+  let def: PyProject;
+  try {
+    const jsonMap = toml.parse(content);
+    def = PyProjectSchema.parse(jsonMap);
+  } catch (err) {
+    logger.warn(
+      { fileName, err },
+      `Failed to parse and validate pyproject file`
+    );
     return null;
   }
 
-  const def = result.data;
-  deps.push(...parseDependencyList(def.project?.dependencies));
   deps.push(
-    ...parseDependencyGroupRecord(def.project?.['optional-dependencies'])
+    ...parseDependencyList('project.dependencies', def.project?.dependencies)
   );
-  deps.push(...parseDependencyGroupRecord(def.tool?.pdm?.['dev-dependencies']));
+  deps.push(
+    ...parseDependencyGroupRecord(
+      'project.optional-dependencies',
+      def.project?.['optional-dependencies']
+    )
+  );
+  deps.push(
+    ...parseDependencyGroupRecord(
+      'tool.pdm.dev-dependencies',
+      def.tool?.pdm?.['dev-dependencies']
+    )
+  );
 
   return deps.length ? { deps } : null;
 }

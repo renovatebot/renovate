@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export type PyProject = z.infer<typeof PyProjectSchema>;
+
 export const PyProjectSchema = z.object({
   project: z
     .object({
