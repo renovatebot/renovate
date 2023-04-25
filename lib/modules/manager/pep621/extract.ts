@@ -5,6 +5,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
+import { processPDM } from './pdm';
 import { PyProject, PyProjectSchema } from './schema';
 import { parseDependencyGroupRecord, parseDependencyList } from './utils';
 
@@ -38,12 +39,8 @@ export function extractPackageFile(
       def.project?.['optional-dependencies']
     )
   );
-  deps.push(
-    ...parseDependencyGroupRecord(
-      'tool.pdm.dev-dependencies',
-      def.tool?.pdm?.['dev-dependencies']
-    )
-  );
 
-  return deps.length ? { deps } : null;
+  const processedDeps = processPDM(def, deps);
+
+  return processedDeps.length ? { deps: processedDeps } : null;
 }

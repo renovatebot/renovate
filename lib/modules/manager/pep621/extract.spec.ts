@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../test/fixtures';
 import { extractPackageFile } from './extract';
 
 const pdmPyProject = Fixtures.get('pyproject_with_pdm.toml');
+const pdmSourcesPyProject = Fixtures.get('pyproject_pdm_sources.toml');
 
 describe('modules/manager/pep621/extract', () => {
   describe('extractPackageFile()', () => {
@@ -154,6 +155,96 @@ describe('modules/manager/pep621/extract', () => {
           depType: 'tool.pdm.dev-dependencies',
           currentValue: '>=0.5',
           depName: 'tox/tox-pdm',
+        },
+      ]);
+    });
+
+    it('should return dependencies with overwritten pypi registryUrl', function () {
+      const result = extractPackageFile(pdmSourcesPyProject, 'pyproject.toml');
+
+      expect(result?.deps).toEqual([
+        {
+          packageName: 'blinker',
+          datasource: 'pypi',
+          depType: 'project.dependencies',
+          skipReason: 'invalid-value',
+          registryUrls: [
+            'https://private-site.org/pypi/simple',
+            'https://private.pypi.org/simple',
+          ],
+        },
+        {
+          packageName: 'packaging',
+          datasource: 'pypi',
+          depType: 'project.dependencies',
+          currentValue: '>=20.9,!=22.0',
+          registryUrls: [
+            'https://private-site.org/pypi/simple',
+            'https://private.pypi.org/simple',
+          ],
+        },
+        {
+          packageName: 'pytest',
+          datasource: 'pypi',
+          depType: 'project.optional-dependencies',
+          currentValue: '>12',
+          depName: 'pytest/pytest',
+          registryUrls: [
+            'https://private-site.org/pypi/simple',
+            'https://private.pypi.org/simple',
+          ],
+        },
+        {
+          packageName: 'pytest-rerunfailures',
+          datasource: 'pypi',
+          depType: 'tool.pdm.dev-dependencies',
+          currentValue: '>=10.2',
+          depName: 'test/pytest-rerunfailures',
+          registryUrls: [
+            'https://private-site.org/pypi/simple',
+            'https://private.pypi.org/simple',
+          ],
+        },
+        {
+          packageName: 'tox-pdm',
+          datasource: 'pypi',
+          depType: 'tool.pdm.dev-dependencies',
+          currentValue: '>=0.5',
+          depName: 'tox/tox-pdm',
+          registryUrls: [
+            'https://private-site.org/pypi/simple',
+            'https://private.pypi.org/simple',
+          ],
+        },
+      ]);
+    });
+
+    it('should return dependencies with original pypi registryUrl', function () {
+      const result = extractPackageFile(
+        codeBlock`
+      [project]
+      dependencies = [
+        "packaging>=20.9,!=22.0",
+      ]
+
+      [[tool.pdm.source]]
+      url = "https://private-site.org/pypi/simple"
+      verify_ssl = true
+      name = "internal"
+      `,
+        'pyproject.toml'
+      );
+
+      expect(result?.deps).toEqual([
+        {
+          packageName: 'packaging',
+          datasource: 'pypi',
+          depType: 'project.dependencies',
+          currentValue: '>=20.9,!=22.0',
+          registryUrls: [
+            'https://pypi.org/pypi/',
+            'https://private-site.org/pypi/simple',
+          ],
         },
       ]);
     });

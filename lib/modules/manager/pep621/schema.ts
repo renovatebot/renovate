@@ -18,6 +18,15 @@ export const PyProjectSchema = z.object({
           'dev-dependencies': z
             .record(z.string(), z.array(z.string()))
             .optional(),
+          source: z
+            .array(
+              z.object({
+                url: z.string(),
+                name: z.string(),
+                verify_ssl: z.boolean().optional(),
+              })
+            )
+            .optional(),
         })
         .optional(),
     })
