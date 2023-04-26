@@ -2280,8 +2280,8 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchUpdateTypes
 
-Use this field to match rules against types of updates.
-For example to apply a special label for Major updates:
+Use `matchUpdateTypes` to match rules against types of updates.
+For example to apply a special label to `major` updates:
 
 ```json
 {
@@ -2293,6 +2293,13 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
+    Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
+    When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
+    Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
 ### matchConfidence
 
@@ -2742,6 +2749,14 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## prTitleStrict
+
+There are certain scenarios where the default behavior appends extra context to the PR title.
+
+These scenarios include if a `baseBranch` or if there is a grouped update and either `separateMajorMinor` or `separateMinorPatch` is true.
+
+Using this option allows you to skip these default behaviors and use other templating methods to control the format of the PR title.
 
 ## printConfig
 

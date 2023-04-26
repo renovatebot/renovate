@@ -1856,6 +1856,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prTitleStrict',
+    description:
+      'Whether to bypass appending extra context to the Pull Request title.',
+    type: 'boolean',
+    experimental: true,
+    default: false,
+    cli: false,
+  },
+  {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
