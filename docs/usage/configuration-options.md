@@ -2597,6 +2597,7 @@ You can use variable templating in your commands as long as [`allowPostUpgradeCo
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
+Dotfiles are included.
 
 ### executionMode
 
