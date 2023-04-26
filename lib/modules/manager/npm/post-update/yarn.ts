@@ -248,7 +248,9 @@ export async function generateLockFile(
         } else if (isYarnDedupeAvailable && s === 'highest') {
           commands.push(`yarn dedupe --strategy ${s}${cmdOptions}`);
         } else {
-          logger.debug(`yarn dedupe ${s} not available`);
+          commands.push(`npx yarn-berry-deduplicate --strategy ${s}`);
+          // Run yarn again in case any changes are necessary
+          commands.push(`yarn install${cmdOptions}`);
         }
       }
     });
