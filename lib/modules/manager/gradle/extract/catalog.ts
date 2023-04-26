@@ -207,7 +207,7 @@ function extractDependency({
     };
   }
   const versionRef = isVersionPointer(descriptor.version)
-    ? descriptor.version.ref
+    ? descriptor.version.ref.replaceAll('.', '-').replaceAll('_', '-')
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
