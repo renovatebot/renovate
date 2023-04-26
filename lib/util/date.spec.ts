@@ -1,37 +1,52 @@
-import { getElapsedDays, getElapsedHours, getElapsedMinutes } from './date';
-
-const ONE_MINUTE_MS = 60 * 1000;
-const ONE_HOUR_MS = 60 * ONE_MINUTE_MS;
-const ONE_DAY_MS = 24 * ONE_HOUR_MS;
+import { DateTime } from 'luxon';
+import {
+  getElapsedDays,
+  getElapsedHours,
+  getElapsedMinutes,
+  getElapsedMs,
+} from './date';
 
 describe('util/date', () => {
-  const Jan1 = new Date(new Date().getFullYear(), 0, 1);
+  const t0 = DateTime.fromISO('2020-10-10');
 
-  it('returns elapsed days', () => {
-    const elapsedDays = Math.floor(
-      (new Date().getTime() - new Date(Jan1).getTime()) / ONE_DAY_MS
-    );
-    expect(getElapsedDays(Jan1.toDateString())).toBe(elapsedDays);
+  beforeAll(() => {
+    jest.useFakeTimers();
   });
 
-  it('returns elapsed minutes', () => {
-    const elapsedMinutes = Math.floor(
-      (new Date().getTime() - new Date(Jan1).getTime()) / ONE_MINUTE_MS
-    );
-    expect(getElapsedMinutes(new Date(Jan1))).toBe(elapsedMinutes);
+  beforeEach(() => {
+    jest.setSystemTime(t0.toMillis());
+  });
+
+  describe('getElapsedDays', () => {
+    it('returns elapsed days', () => {
+      const t = t0.minus({ days: 42 });
+      expect(getElapsedDays(t.toISO()!)).toBe(42);
+    });
+  });
+
+  describe('getElapsedMinutes', () => {
+    it('returns elapsed minutes', () => {
+      const t = t0.minus({ minutes: 42 });
+      expect(getElapsedMinutes(t.toJSDate())).toBe(42);
+    });
   });
 
   describe('getElapsedHours', () => {
     it('returns elapsed hours', () => {
-      const elapsedHours = Math.floor(
-        (new Date().getTime() - new Date(Jan1).getTime()) / ONE_HOUR_MS
-      );
-      expect(getElapsedHours(Jan1.toISOString())).toBe(elapsedHours); // ISOstring
-      expect(getElapsedHours(Jan1)).toBe(elapsedHours); // JS Date
+      const t = t0.minus({ hours: 42 });
+      expect(getElapsedHours(t.toISO()!)).toBe(42); // ISOstring
+      expect(getElapsedHours(t.toJSDate())).toBe(42); // JS Date
     });
 
     it('returns zero when date passed is invalid', () => {
       expect(getElapsedHours(new Date('invalid_date_string'))).toBe(0);
+    });
+  });
+
+  describe('getElapsedMs', () => {
+    it('returns elapsed time in milliseconds', () => {
+      const t = t0.minus({ milliseconds: 42 });
+      expect(getElapsedMs(t.toISO()!)).toBe(42);
     });
   });
 });

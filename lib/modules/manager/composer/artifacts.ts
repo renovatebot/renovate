@@ -21,13 +21,13 @@ import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import { ComposerConfig, ComposerLock } from './schema';
-import type { AuthJson } from './types';
+import type { AuthJson, ComposerLock } from './types';
 import {
   extractConstraints,
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
@@ -35,27 +35,36 @@ import {
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubToken = findGithubToken({
+  const githubHostRule = hostRules.find({
     hostType: 'github',
     url: 'https://api.github.com/',
   });
 
-  const gitTagsGithubToken = findGithubToken({
+  const gitTagsHostRule = hostRules.find({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
   });
 
   const selectedGithubToken = takePersonalAccessTokenIfPossible(
-    githubToken,
-    gitTagsGithubToken
+    isArtifactAuthEnabled(githubHostRule)
+      ? findGithubToken(githubHostRule)
+      : undefined,
+    isArtifactAuthEnabled(gitTagsHostRule)
+      ? findGithubToken(gitTagsHostRule)
+      : undefined
   );
+
   if (selectedGithubToken) {
     authJson['github-oauth'] = {
       'github.com': selectedGithubToken,
     };
   }
 
-  hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
+  for (const gitlabHostRule of hostRules.findAll({ hostType: 'gitlab' })) {
+    if (!isArtifactAuthEnabled(gitlabHostRule)) {
+      continue;
+    }
+
     if (gitlabHostRule?.token) {
       const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
@@ -66,20 +75,24 @@ function getAuthJson(): string | null {
         ...(authJson['gitlab-domains'] ?? []),
       ];
     }
-  });
+  }
 
-  hostRules
-    .findAll({ hostType: PackagistDatasource.id })
-    ?.forEach((hostRule) => {
-      const { resolvedHost, username, password, token } = hostRule;
-      if (resolvedHost && username && password) {
-        authJson['http-basic'] = authJson['http-basic'] ?? {};
-        authJson['http-basic'][resolvedHost] = { username, password };
-      } else if (resolvedHost && token) {
-        authJson.bearer = authJson.bearer ?? {};
-        authJson.bearer[resolvedHost] = token;
-      }
-    });
+  for (const packagistHostRule of hostRules.findAll({
+    hostType: PackagistDatasource.id,
+  })) {
+    if (!isArtifactAuthEnabled(packagistHostRule)) {
+      continue;
+    }
+
+    const { resolvedHost, username, password, token } = packagistHostRule;
+    if (resolvedHost && username && password) {
+      authJson['http-basic'] = authJson['http-basic'] ?? {};
+      authJson['http-basic'][resolvedHost] = { username, password };
+    } else if (resolvedHost && token) {
+      authJson.bearer = authJson.bearer ?? {};
+      authJson.bearer[resolvedHost] = token;
+    }
+  }
 
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
@@ -105,32 +118,12 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const composerLockResult = ComposerLock.safeParse(
-      JSON.parse(existingLockFileContent)
-    );
-    // istanbul ignore if
-    if (!composerLockResult.success) {
-      logger.warn(
-        { error: composerLockResult.error },
-        'Unable to parse composer.lock'
-      );
-      return null;
-    }
-
-    const newPackageFileResult = ComposerConfig.safeParse(
-      JSON.parse(newPackageFileContent)
-    );
-    // istanbul ignore if
-    if (!newPackageFileResult.success) {
-      logger.warn(
-        { error: newPackageFileResult.error },
-        'Unable to parse composer.json'
-      );
-      return null;
-    }
-
+    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractConstraints(newPackageFileResult.data, composerLockResult.data),
+      ...extractConstraints(
+        JSON.parse(newPackageFileContent),
+        existingLockFile
+      ),
       ...config.constraints,
     };
 
@@ -157,7 +150,7 @@ export async function updateArtifacts({
     const commands: string[] = [];
 
     // Determine whether install is required before update
-    if (requireComposerDependencyInstallation(composerLockResult.data)) {
+    if (requireComposerDependencyInstallation(existingLockFile)) {
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);

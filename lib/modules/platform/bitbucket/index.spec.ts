@@ -1456,12 +1456,6 @@ describe('modules/platform/bitbucket/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty array', async () => {
-      expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };
