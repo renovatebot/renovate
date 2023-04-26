@@ -2,6 +2,7 @@ import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
 import { supportedRulesRegex } from './rules';
 import {
+  ArrayFragment,
   AttributeFragment,
   ChildFragments,
   Fragment,
@@ -9,16 +10,17 @@ import {
   RecordFragment,
   Stack,
   StringFragment,
+  ValueFragment,
 } from './types';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {
-  results: RecordFragment[];
+  results: ValueFragment[];
   stack: Stack<Fragment>;
 }
 
 export class Ctx implements CtxCompatible {
-  results: RecordFragment[] = [];
+  results: ValueFragment[] = [];
   stack = Stack.create<Fragment>();
 
   // This exists because the good-enough-parser gives a cloned instance of our
@@ -52,6 +54,58 @@ export class Ctx implements CtxCompatible {
     throw this.newError('Requested current attribute, but does not exist.');
   }
 
+  get currentArray(): ArrayFragment {
+    const current = this.stack.current;
+    if (current instanceof ArrayFragment) {
+      return current;
+    }
+    throw this.newError('Requested current array, but does not exist.');
+  }
+
+  private popStack(): void {
+    const current = this.stack.pop();
+    if (!current) {
+      return;
+    }
+    const value = Fragments.safeAsValue(current);
+    const attribute = Fragments.safeAsAttribute(current);
+    const newCurrent = this.stack.safeCurrent;
+    if (value) {
+      if (newCurrent && 'addValue' in newCurrent) {
+        newCurrent.addValue(value);
+        return;
+      }
+      if (!newCurrent) {
+        this.results.push(value);
+        return;
+      }
+    } else if (attribute) {
+      if (newCurrent && 'addAttribute' in newCurrent) {
+        newCurrent.addAttribute(attribute);
+        return;
+      }
+      if (!newCurrent) {
+        throw this.newError('Processing an attribute but there is no parent.');
+      }
+    } else {
+      throw this.newError('We are in a bad place.');
+    }
+  }
+
+  private processStack(): Ctx {
+    let current = this.stack.safeCurrent;
+    while (current?.isComplete) {
+      this.popStack();
+      current = this.stack.safeCurrent;
+    }
+    return this;
+  }
+
+  addString(value: string): Ctx {
+    this.stack.push(new StringFragment(value));
+    return this.processStack();
+  }
+
   startRecord(children: ChildFragments): Ctx {
     const record = new RecordFragment(children);
     this.stack.push(record);
@@ -60,9 +114,8 @@ export class Ctx implements CtxCompatible {
 
   endRecord(): Ctx {
     const record = this.currentRecord;
-    this.results.push(record);
-    this.stack.pop();
-    return this;
+    record.isComplete = true;
+    return this.processStack();
   }
 
   startRule(name: string): Ctx {
@@ -75,24 +128,35 @@ export class Ctx implements CtxCompatible {
 
   startAttribute(name: string): Ctx {
     this.stack.push(new AttributeFragment(name));
+    return this.processStack();
+  }
+
+  // endAttribute(): Ctx {
+  //   const attrib = this.currentAttribute;
+  //   if (!attrib.value) {
+  //     throw this.newError(`No value was set for the attribute. ${attrib.name}`);
+  //   }
+  //   this.stack.pop();
+  //   const record = this.currentRecord;
+  //   record.children[attrib.name] = attrib.value;
+  //   return this;
+  // }
+
+  startArray(): Ctx {
+    this.stack.push(new ArrayFragment());
+    return this.processStack();
+  }
+
+  addArrayItem(value: string): Ctx {
+    const array = this.currentArray;
+    array.items.push(new StringFragment(value));
     return this;
   }
 
-  setAttributeValue(value: string): Ctx {
-    const attrib = this.currentAttribute;
-    attrib.value = new StringFragment(value);
-    return this.endAttribute();
-  }
-
-  endAttribute(): Ctx {
-    const attrib = this.currentAttribute;
-    if (!attrib.value) {
-      throw this.newError(`No value was set for the attribute. ${attrib.name}`);
-    }
-    this.stack.pop();
-    const record = this.currentRecord;
-    record.children[attrib.name] = attrib.value;
-    return this;
+  endArray(): Ctx {
+    const array = this.currentArray;
+    array.isComplete = true;
+    return this.processStack();
   }
 }
 
@@ -117,7 +181,7 @@ const kwParams = q
   })
   .op('=')
   .str((ctx, token) => {
-    return Ctx.from(ctx).setAttributeValue(token.value);
+    return Ctx.from(ctx).addString(token.value);
   });
 
 const moduleRules = q
@@ -148,10 +212,10 @@ const starlark = lang.createLang('starlark');
 export function parse(
   input: string,
   packageFile?: string
-): RecordFragment[] | null {
+): ValueFragment[] | null {
   // TODO: Add the mem cache.
 
-  let result: RecordFragment[] | null = null;
+  let result: ValueFragment[] | null = null;
   try {
     const parsedResult = starlark.query(input, query, new Ctx());
     if (parsedResult) {

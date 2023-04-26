@@ -1,4 +1,4 @@
-// import type { lexer } from 'good-enough-parser';
+import is from '@sindresorhus/is';
 
 export class Stack<T> extends Array<T> {
   static create<T>(...items: Array<T>): Stack<T> {
@@ -31,20 +31,40 @@ export interface FragmentCompatible {
 
 export class StringFragment implements FragmentCompatible {
   readonly type: FragmentType = 'string';
+  readonly isComplete = true;
   constructor(readonly value: string) {}
 }
 
 export class ArrayFragment implements FragmentCompatible {
   readonly type: FragmentType = 'array';
+  isComplete = false;
   items: ValueFragment[] = [];
+
+  constructor(items: ValueFragment[] = [], isComplete = false) {
+    this.items = items;
+    this.isComplete = isComplete;
+  }
+
+  addValue(item: ValueFragment): void {
+    this.items.push(item);
+  }
 }
 
 export class RecordFragment implements FragmentCompatible {
   readonly type: FragmentType = 'record';
+  isComplete = false;
   children: ChildFragments;
 
-  constructor(children: ChildFragments = {}) {
+  constructor(children: ChildFragments = {}, isComplete = false) {
     this.children = children;
+    this.isComplete = isComplete;
+  }
+
+  addAttribute(attrib: AttributeFragment): void {
+    if (!attrib.value) {
+      throw new Error('The attribute fragment does not have a value.');
+    }
+    this.children[attrib.name] = attrib.value;
   }
 }
 
@@ -52,6 +72,14 @@ export class AttributeFragment implements FragmentCompatible {
   readonly type: FragmentType = 'attribute';
   value?: ValueFragment;
   constructor(readonly name: string) {}
+
+  get isComplete(): boolean {
+    return is.truthy(this.value);
+  }
+
+  addValue(item: ValueFragment): void {
+    this.value = item;
+  }
 }
 
 export type ValueFragment = ArrayFragment | RecordFragment | StringFragment;
@@ -132,13 +160,25 @@ export class Fragments {
     return record;
   }
 
-  static asAttribute(frag: FragmentCompatible): AttributeFragment {
-    Fragments.checkType('attribute', frag.type);
+  static safeAsAttribute(
+    frag: FragmentCompatible
+  ): AttributeFragment | undefined {
+    if (frag.type !== 'attribute') {
+      return undefined;
+    }
     Object.setPrototypeOf(frag, AttributeFragment.prototype);
     const attribute = frag as AttributeFragment;
     if (attribute.value) {
       attribute.value = Fragments.asValue(attribute.value);
     }
     return attribute;
+  }
+
+  static asAttribute(frag: FragmentCompatible): AttributeFragment {
+    const attribute = Fragments.safeAsAttribute(frag);
+    if (attribute) {
+      return attribute;
+    }
+    throw this.typeError('attribute', frag.type);
   }
 }

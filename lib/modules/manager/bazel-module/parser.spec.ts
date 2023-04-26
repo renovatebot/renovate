@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
 import { Ctx, parse } from './parser';
-import { RecordFragment, StringFragment } from './types';
+import { ArrayFragment, RecordFragment, StringFragment } from './types';
 
 describe('modules/manager/bazel-module/parser', () => {
   describe('Ctx', () => {
@@ -8,17 +8,47 @@ describe('modules/manager/bazel-module/parser', () => {
       const ctx = new Ctx()
         .startRule('bazel_dep')
         .startAttribute('name')
-        .setAttributeValue('rules_foo')
+        .addString('rules_foo')
         .startAttribute('version')
-        .setAttributeValue('1.2.3')
+        .addString('1.2.3')
         .endRule();
 
       expect(ctx.results).toEqual([
-        new RecordFragment({
-          rule: new StringFragment('bazel_dep'),
-          name: new StringFragment('rules_foo'),
-          version: new StringFragment('1.2.3'),
-        }),
+        new RecordFragment(
+          {
+            rule: new StringFragment('bazel_dep'),
+            name: new StringFragment('rules_foo'),
+            version: new StringFragment('1.2.3'),
+          },
+          true
+        ),
+      ]);
+    });
+
+    it('construct a rule with array arg', () => {
+      const ctx = new Ctx()
+        .startRule('foo_library')
+        .startAttribute('name')
+        .addString('my_library')
+        .startAttribute('srcs')
+        .startArray()
+        .addArrayItem('first')
+        .addArrayItem('second')
+        .endArray()
+        .endRule();
+
+      expect(ctx.results).toEqual([
+        new RecordFragment(
+          {
+            rule: new StringFragment('foo_library'),
+            name: new StringFragment('my_library'),
+            srcs: new ArrayFragment(
+              [new StringFragment('first'), new StringFragment('second')],
+              true
+            ),
+          },
+          true
+        ),
       ]);
     });
   });
@@ -30,11 +60,14 @@ describe('modules/manager/bazel-module/parser', () => {
       `;
       const res = parse(input, 'MODULE.bazel');
       expect(res).toEqual([
-        new RecordFragment({
-          rule: new StringFragment('bazel_dep'),
-          name: new StringFragment('rules_foo'),
-          version: new StringFragment('1.2.3'),
-        }),
+        new RecordFragment(
+          {
+            rule: new StringFragment('bazel_dep'),
+            name: new StringFragment('rules_foo'),
+            version: new StringFragment('1.2.3'),
+          },
+          true
+        ),
       ]);
     });
   });
