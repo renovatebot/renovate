@@ -1,6 +1,5 @@
 import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
-import { supportedRulesRegex } from './rules';
 import {
   ArrayFragment,
   AttributeFragment,
@@ -8,10 +7,11 @@ import {
   Fragment,
   Fragments,
   RecordFragment,
-  Stack,
   StringFragment,
   ValueFragment,
-} from './types';
+} from './fragments';
+import { supportedRulesRegex } from './rules';
+import { Stack } from './types';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {

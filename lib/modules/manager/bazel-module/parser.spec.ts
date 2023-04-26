@@ -1,6 +1,6 @@
 import { codeBlock } from 'common-tags';
+import { ArrayFragment, RecordFragment, StringFragment } from './fragments';
 import { Ctx, parse } from './parser';
-import { ArrayFragment, RecordFragment, StringFragment } from './types';
 
 describe('modules/manager/bazel-module/parser', () => {
   describe('Ctx', () => {
