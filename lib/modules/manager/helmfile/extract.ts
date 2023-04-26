@@ -75,7 +75,7 @@ export async function extractPackageFile(
       if (isLocalPath(dep.chart)) {
         if (
           kustomizationsKeysUsed(dep) ||
-          (await localChartHasKustomizationsYaml(dep))
+          (await localChartHasKustomizationsYaml(dep, fileName))
         ) {
           needKustomize = true;
         }
