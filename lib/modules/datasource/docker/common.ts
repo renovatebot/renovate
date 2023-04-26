@@ -136,6 +136,8 @@ export async function getAuthHeaders(
       return opts.headers ?? null;
     }
 
+    const authUrl = new URL(`${authenticateHeader.params.realm}`);
+
     let scope = `repository:${dockerRepository}:pull`;
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (
@@ -144,23 +146,20 @@ export async function getAuthHeaders(
     ) {
       scope = authenticateHeader.params.scope;
     }
+    authUrl.searchParams.append('scope', scope);
 
-    let service = authenticateHeader.params.service;
-    if (is.string(service)) {
-      service = `service=${service}&`;
-    } else {
-      service = ``;
+    if (is.string(authenticateHeader.params.service)) {
+      authUrl.searchParams.append('service', authenticateHeader.params.service);
     }
 
-    const authUrl = `${authenticateHeader.params.realm}?${service}scope=${scope}`;
     logger.trace(
-      { registryHost, dockerRepository, authUrl },
+      { registryHost, dockerRepository, url: authUrl.href },
       `Obtaining docker registry token`
     );
     opts.noAuth = true;
     const authResponse = (
       await http.getJson<{ token?: string; access_token?: string }>(
-        authUrl,
+        authUrl.href,
         opts
       )
     ).body;
