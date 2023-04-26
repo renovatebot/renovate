@@ -161,10 +161,13 @@ export async function getAuthHeaders(
     }
 
     let service = authenticateHeader.params.service;
-    if (!is.string(service)) {
-      service = '';
+    if (is.string(service)) {
+      service = `service=${service}&`;
+    } else {
+      service = ``;
     }
-    const authUrl = `${authenticateHeader.params.realm}?service=${service}&scope=${scope}`;
+
+    const authUrl = `${authenticateHeader.params.realm}?${service}scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -971,13 +974,6 @@ export class DockerDatasource extends Datasource {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: too many requests'
-        );
-        throw new ExternalHostError(err);
-      }
-      if (err.statusCode === 401 && isDockerHost(registryHost)) {
-        logger.warn(
-          { registryHost, dockerRepository, err },
-          'docker registry failure: unauthorized'
         );
         throw new ExternalHostError(err);
       }

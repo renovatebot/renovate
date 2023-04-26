@@ -429,7 +429,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
@@ -1853,6 +1853,15 @@ const options: RenovateOptions[] = [
       'Pull Request title template (deprecated). Inherits from `commitMessage` if null.',
     type: 'string',
     default: null,
+    cli: false,
+  },
+  {
+    name: 'prTitleStrict',
+    description:
+      'Whether to bypass appending extra context to the Pull Request title.',
+    type: 'boolean',
+    experimental: true,
+    default: false,
     cli: false,
   },
   {

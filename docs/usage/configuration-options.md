@@ -531,7 +531,7 @@ After we changed the [`baseBranches`](https://docs.renovatebot.com/configuration
 ```
 
 <!-- prettier-ignore -->
-!!! caution
+!!! warning
     The `configMigration` feature writes plain JSON for `.json` files, and JSON5 for `.json5` files.
     Renovate may downgrade JSON5 content to plain JSON.
     When downgrading JSON5 to JSON Renovate may also remove the JSON5 comments.
@@ -553,7 +553,6 @@ Configure this option to `false` if you prefer Renovate to open a new issue when
 
 Constraints are used in package managers which use third-party tools to update "artifacts" like lock files or checksum files.
 Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
-Manually specifying constraints is supported for `ruby`, `bundler`, `composer`, `go`, `helmfile`, `npm`, `yarn`, `pnpm`, `python`, `pipenv`, and `poetry`.
 
 Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support.
 For now this datasource constraint feature only supports `python`, other compatibility restrictions will be added in the future.
@@ -995,17 +994,37 @@ If this option is enabled, reviewers will need to create a new PR if additional 
 
 ## forkProcessing
 
-By default, Renovate will skip over any repositories that are forked if Renovate is using `autodiscover` mode.
-This includes if the forked repository has a Renovate config file in the repo, because Renovate can't tell if that file was added by the original repository or not.
-If you wish to enable processing of a forked repository by Renovate when autodiscovering, you need to add `"forkProcessing": "enabled"` to your repository config or run the CLI command with `--fork-processing=enabled`.
+By default, Renovate skips any forked repositories when in `autodiscover` mode.
+It even skips a forked repository that has a Renovate configuration file, because Renovate doesn't know if that file was added by the forked repository.
 
-<!-- prettier-ignore -->
-!!! note
-    Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`. You cannot use other filenames because Renovate will use the platform API to check only for the default filename.
+**Process a fork in `autodiscover` mode`**
 
-If you are running in non-autodiscover mode (e.g. supplying a list of repositories to Renovate) but wish to skip forked repositories, you need to configure `"forkProcessing": "disabled"` in your global config.
+If you want Renovate to run on a forked repository when in `autodiscover` mode then:
 
-If you are using the hosted Mend Renovate then this option will be configured to `"enabled"` automatically if you "Selected" repositories individually but `"disabled"` if you installed for "All" repositories. If you have installed Renovate into "All" repositories but have a fork you want to use, then add `"forkProcessing": "enabled"` to the repository's `renovate.json` file.
+- Ensure a `renovate.json` config exists with `"forkProcessing": "enabled"` in your repository,
+- Or run the CLI command with `--fork-processing=enabled`
+
+**Process a fork in other modes**
+
+If you're running Renovate in some other mode, for example when giving a list of repositories to Renovate, but want to skip forked repositories: set `"forkProcessing": "disabled"` in your _global_ config.
+
+**When using the hosted GitHub Mend Renovate app**
+
+The behavior of `forkProcessing` depends on how you allow Renovate to run on your account.
+
+**Renovate runs on all repositories**
+
+If you allow Renovate to run on all your repositories, `forkProcessing` will be `"disabled"`.
+To run Renovate on a fork: add `"forkProcessing": "enabled"` to the forked repository's `renovate.json` file.
+
+**Renovate runs on selected repositories**
+
+If you allow Renovate to run on "Selected" repositories, `forkProcessing` will be `"enabled"` for each "Selected" repository.
+
+**Allowed filenames**
+
+Only the `onboardingConfigFileName` (which defaults to `renovate.json`) is supported for `forkProcessing`.
+You can't use other filenames because Renovate only checks the default filename when using the Git-hosting platform's API.
 
 ## gitAuthor
 
@@ -1814,22 +1833,25 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["+(package.json)"],
+      "matchFiles": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
 }
 ```
 
-Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
+<!-- prettier-ignore -->
+!!! tip
+    Renovate evaluates all `packageRules` and does not stop after the first match.
+    Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
+    This way important rules override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -2119,11 +2141,17 @@ Renovate will compare `matchFiles` for an exact match against the dependency's p
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 
-```
-  "matchFiles": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "matchFiles": ["package.json"]
+    }
+  ]
+}
 ```
 
-Use `matchPaths` instead if you need more flexible matching.
+Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
 
 ### matchDepNames
 
@@ -2185,9 +2213,9 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
+Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
 
-For example the following would match any `package.json`, including files like `backend/package.json`:
+For example the following matches any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
@@ -2201,7 +2229,7 @@ For example the following would match any `package.json`, including files like `
 }
 ```
 
-The following would match any file in directories starting with `app/`:
+The following matches any file in directories starting with `app/`:
 
 ```json
 {
@@ -2214,6 +2242,11 @@ The following would match any file in directories starting with `app/`:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Partial matches for `matchPaths` are deprecated.
+    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
@@ -2247,8 +2280,8 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchUpdateTypes
 
-Use this field to match rules against types of updates.
-For example to apply a special label for Major updates:
+Use `matchUpdateTypes` to match rules against types of updates.
+For example to apply a special label to `major` updates:
 
 ```json
 {
@@ -2260,6 +2293,13 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
+    Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
+    When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
+    Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
 ### matchConfidence
 
@@ -2709,6 +2749,14 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## prTitleStrict
+
+There are certain scenarios where the default behavior appends extra context to the PR title.
+
+These scenarios include if a `baseBranch` or if there is a grouped update and either `separateMajorMinor` or `separateMinorPatch` is true.
+
+Using this option allows you to skip these default behaviors and use other templating methods to control the format of the PR title.
 
 ## printConfig
 

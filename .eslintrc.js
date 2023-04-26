@@ -137,7 +137,7 @@ module.exports = {
       },
     ],
 
-    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/unbound-method': [2, { ignoreStatic: true }],
     '@typescript-eslint/ban-types': 2,
     '@renovate/jest-root-describe': 2,
 

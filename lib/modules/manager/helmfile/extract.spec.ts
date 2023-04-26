@@ -1,14 +1,17 @@
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
+import { FILE_ACCESS_VIOLATION_ERROR } from '../../../constants/error-messages';
 import { extractPackageFile } from '.';
 
 jest.mock('../../../util/fs');
 
+const localDir = '/tmp/github/some/repo';
+
 describe('modules/manager/helmfile/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
-      GlobalConfig.set({ localDir: '/tmp/github/some/repo' });
+      GlobalConfig.set({ localDir });
       jest.resetAllMocks();
     });
 
@@ -380,6 +383,42 @@ describe('modules/manager/helmfile/extract', () => {
             depName: 'external-dns',
             currentValue: '2.0.0',
             registryUrls: ['https://charts.helm.sh/stable'],
+          },
+        ],
+        managerData: { needKustomize: true },
+      });
+    });
+
+    it('detects kustomize and respects relative paths', async () => {
+      fs.localPathExists.mockImplementationOnce((path) => {
+        if (!path.startsWith(GlobalConfig.get('localDir') ?? '')) {
+          throw new Error(FILE_ACCESS_VIOLATION_ERROR);
+        }
+        return Promise.resolve(true);
+      });
+
+      const parentDir = `${localDir}/project`;
+      fs.getParentDir.mockReturnValue(parentDir);
+      const result = await extractPackageFile(
+        Fixtures.get('uses-kustomization.yaml'),
+        `${parentDir}/helmfile.yaml`, // In subdir
+        {
+          registryAliases: {
+            stable: 'https://charts.helm.sh/stable',
+          },
+        }
+      );
+      expect(result).toMatchObject({
+        datasource: 'helm',
+        deps: [
+          {
+            depName: 'my-chart',
+            skipReason: 'local-chart',
+          },
+          {
+            depName: 'memcached',
+            currentValue: '6.0.0',
+            registryUrls: ['https://charts.bitnami.com/bitnami'],
           },
         ],
         managerData: { needKustomize: true },

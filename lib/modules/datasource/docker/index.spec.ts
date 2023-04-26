@@ -546,7 +546,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
       httpMock
         .scope(authUrl)
-        .get('/token?service=&scope=repository:library/some-other-dep:pull')
+        .get('/token?scope=repository:library/some-other-dep:pull')
         .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', packageName: 'some-other-dep' },
