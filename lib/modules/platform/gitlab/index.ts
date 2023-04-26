@@ -107,12 +107,16 @@ export async function initPlatform({
   try {
     if (!gitAuthor) {
       const user = (
-        await gitlabApi.getJson<{ email: string; name: string; id: number }>(
-          `user`,
-          { token }
-        )
+        await gitlabApi.getJson<{
+          email: string;
+          name: string;
+          id: number;
+          commit_email?: string;
+        }>(`user`, { token })
       ).body;
-      platformConfig.gitAuthor = `${user.name} <${user.email}>`;
+      platformConfig.gitAuthor = `${user.name} <${
+        user.commit_email ?? user.email
+      }>`;
     }
     // istanbul ignore if: experimental feature
     if (process.env.RENOVATE_X_PLATFORM_VERSION) {
