@@ -1,37 +1,43 @@
-import type { Fragment, FragmentData } from '../../bazel/types';
-import type { PackageDependency } from '../../types';
-import { BazelDepTarget } from './bazel-dep';
+import { regEx } from '../../../../util/regex';
 
-export function extractDepsFromFragment(
-  fragment: Fragment
-): PackageDependency[] {
-  const fragmentData = extract(fragment);
-  return extractDepsFromFragmentData(fragmentData);
-}
+const supportedRules = ['bazel_dep'];
+export const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
-function extract(fragment: Fragment): FragmentData {
-  if (fragment.type === 'string') {
-    return fragment.value;
-  }
+// import type { Fragment, FragmentData } from '../../bazel/types';
+// import type { PackageDependency } from '../../types';
+// import { BazelDepTarget } from './bazel-dep';
 
-  if (fragment.type === 'record') {
-    const { children } = fragment;
-    const result: Record<string, FragmentData> = {};
-    for (const [key, value] of Object.entries(children)) {
-      result[key] = extract(value);
-    }
-    return result;
-  }
+// export function extractDepsFromFragment(
+//   fragment: Fragment
+// ): PackageDependency[] {
+//   const fragmentData = extract(fragment);
+//   return extractDepsFromFragmentData(fragmentData);
+// }
 
-  return fragment.children.map(extract);
-}
+// function extract(fragment: Fragment): FragmentData {
+//   if (fragment.type === 'string') {
+//     return fragment.value;
+//   }
 
-function extractDepsFromFragmentData(
-  fragmentData: FragmentData
-): PackageDependency[] {
-  const res = BazelDepTarget.safeParse(fragmentData);
-  if (!res.success) {
-    return [];
-  }
-  return res.data;
-}
+//   if (fragment.type === 'record') {
+//     const { children } = fragment;
+//     const result: Record<string, FragmentData> = {};
+//     for (const [key, value] of Object.entries(children)) {
+//       result[key] = extract(value);
+//     }
+//     return result;
+//   }
+
+//   return fragment.children.map(extract);
+// }
+
+// function extractDepsFromFragmentData(
+//   fragmentData: FragmentData
+// ): PackageDependency[] {
+//   const res = BazelDepTarget.safeParse(fragmentData);
+//   if (!res.success) {
+//     return [];
+//   }
+//   return res.data;
+// }
+//

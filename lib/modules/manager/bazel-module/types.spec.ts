@@ -8,7 +8,7 @@ describe('modules/manager/bazel-module/types', () => {
       ${['first', 'second']} | ${'second'}
     `('get current for $items', ({ items, exp }) => {
       const stack = Stack.create(...items);
-      expect(stack.current).toBe(exp);
+      expect(stack.safeCurrent).toBe(exp);
     });
   });
 });

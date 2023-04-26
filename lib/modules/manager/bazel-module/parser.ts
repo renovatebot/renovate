@@ -1,70 +1,168 @@
-// // import { lang, lexer, parser, query as q } from 'good-enough-parser';
-// import { logger } from '../../../logger';
-// import type { NestedFragment, RecordFragment } from '../bazel/types';
+import { lang, query as q } from 'good-enough-parser';
+import { logger } from '../../../logger';
+import { supportedRulesRegex } from './rules';
+import {
+  AttributeFragment,
+  ChildFragments,
+  Fragment,
+  Fragments,
+  RecordFragment,
+  Stack,
+  StringFragment,
+} from './types';
 
-// class Ctx {
-//   results: RecordFragment[] = [];
-//   stack: NestedFragment[] = [];
-//   // recordKey?: string;
-//   // subRecordKey?: string;
-//   // argIndex?: number;
+// Represents the fields that the context must have.
+export interface CtxCompatible {
+  results: RecordFragment[];
+  stack: Stack<Fragment>;
+}
 
-//   constructor(readonly source: string) {}
+export class Ctx implements CtxCompatible {
+  results: RecordFragment[] = [];
+  stack = Stack.create<Fragment>();
 
-//   // get currentFragment(): NestedFragment {
-//   //   if (!this.stack) {
-//   //     return
-//   //   }
-//   // }
-// }
+  // This exists because the good-enough-parser gives a cloned instance of our
+  // Ctx instance. This instance is missing the Ctx prototype.
+  static from(obj: CtxCompatible): Ctx {
+    Object.setPrototypeOf(obj, Ctx.prototype);
+    const ctx = obj as Ctx;
+    const stackItems = ctx.stack.map((item) => Fragments.asFragment(item));
+    ctx.stack = Stack.create(...stackItems);
+    ctx.results = ctx.results.map((item) => Fragments.asRecord(item));
+    return ctx;
+  }
 
-// // function currentFragment(ctx: Ctx): NestedFragment {
-// //   const deepestFragment = ctx.stack[ctx.stack.length - 1];
-// //   return deepestFragment;
-// // }
+  private newError(msg: string): Error {
+    return new Error(`${msg} ctx: ${JSON.stringify(this)}`);
+  }
 
-// // function ruleNameHandler(ctx: Ctx, { value, offset }: lexer.Token): Ctx {
-// //   const ruleFragment = currentFragment(ctx);
-// //   if (ruleFragment.type === 'record') {
-// //     ruleFragment.children['rule'] = { type: 'string', value, offset };
-// //   }
-// //   return ctx;
-// // }
+  get currentRecord(): RecordFragment {
+    const current = this.stack.current;
+    if (current instanceof RecordFragment) {
+      return current;
+    }
+    throw this.newError('Requested current record, but does not exist.');
+  }
 
-// const regularRule = q
-//   .sym<Ctx>(supportedRulesRegex, (ctx, token) =>
-//     ruleNameHandler(recordStartHandler(ctx, token), token)
-//   )
-//   .join(ruleCall(kwParams));
+  get currentAttribute(): AttributeFragment {
+    const current = this.stack.current;
+    if (current instanceof AttributeFragment) {
+      return current;
+    }
+    throw this.newError('Requested current attribute, but does not exist.');
+  }
 
-// const rule = q.alt<Ctx>(regularRule);
+  startRecord(children: ChildFragments): Ctx {
+    const record = new RecordFragment(children);
+    this.stack.push(record);
+    return this;
+  }
 
-// const query = q.tree<Ctx>({
-//   type: 'root-tree',
-//   maxDepth: 16,
-//   search: rule,
-// });
+  endRecord(): Ctx {
+    const record = this.currentRecord;
+    this.results.push(record);
+    this.stack.pop();
+    return this;
+  }
 
-// const starlark = lang.createLang('starlark');
+  startRule(name: string): Ctx {
+    return this.startRecord({ rule: new StringFragment(name) });
+  }
 
-// export function parse(
-//   input: string,
-//   packageFile?: string
-// ): RecordFragment[] | null {
-//   // TODO: Add the mem cache.
+  endRule(): Ctx {
+    return this.endRecord();
+  }
 
-//   let result: RecordFragment[] | null = null;
-//   try {
-//     const parsedResult = starlark.query(input, query, emptyCtx(input));
-//     if (parsedResult) {
-//       result = parsedResult.results;
-//     }
-//   } catch (err) /* istanbul ignore next */ {
-//     logger.debug({ err, packageFile }, 'Bazel parsing error');
-//   }
+  startAttribute(name: string): Ctx {
+    this.stack.push(new AttributeFragment(name));
+    return this;
+  }
 
-//   return result;
-// }
+  setAttributeValue(value: string): Ctx {
+    const attrib = this.currentAttribute;
+    attrib.value = new StringFragment(value);
+    return this.endAttribute();
+  }
+
+  endAttribute(): Ctx {
+    const attrib = this.currentAttribute;
+    if (!attrib.value) {
+      throw this.newError(`No value was set for the attribute. ${attrib.name}`);
+    }
+    this.stack.pop();
+    const record = this.currentRecord;
+    record.children[attrib.name] = attrib.value;
+    return this;
+  }
+}
+
+/**
+ * Matches key-value pairs:
+ * - `tag = "1.2.3"`
+ * - `name = "foobar"`
+ * - `deps = ["foo", "bar"]`
+ * - `
+ *     artifacts = [
+         maven.artifact(
+           group = "com.example1",
+           artifact = "foobar",
+           version = "1.2.3",
+         )
+       ]
+     `
+ **/
+const kwParams = q
+  .sym<Ctx>((ctx, token) => {
+    return Ctx.from(ctx).startAttribute(token.value);
+  })
+  .op('=')
+  .str((ctx, token) => {
+    return Ctx.from(ctx).setAttributeValue(token.value);
+  });
+
+const moduleRules = q
+  .sym<Ctx>(supportedRulesRegex, (ctx, token) => {
+    return Ctx.from(ctx).startRule(token.value);
+  })
+  .join(
+    q.tree({
+      type: 'wrapped-tree',
+      maxDepth: 1,
+      search: kwParams,
+      postHandler: (ctx, tree) => {
+        return Ctx.from(ctx).endRule();
+      },
+    })
+  );
+
+const rule = q.alt<Ctx>(moduleRules);
+
+const query = q.tree<Ctx>({
+  type: 'root-tree',
+  maxDepth: 16,
+  search: rule,
+});
+
+const starlark = lang.createLang('starlark');
+
+export function parse(
+  input: string,
+  packageFile?: string
+): RecordFragment[] | null {
+  // TODO: Add the mem cache.
+
+  let result: RecordFragment[] | null = null;
+  try {
+    const parsedResult = starlark.query(input, query, new Ctx());
+    if (parsedResult) {
+      result = parsedResult.results;
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err, packageFile }, 'Bazel parsing error');
+  }
+
+  return result;
+}
 
 // // export class Parser {
 // //   static readonly starlark = lang.createLang('starlark');
