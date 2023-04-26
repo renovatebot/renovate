@@ -35,6 +35,9 @@ describe('modules/manager/bazel-module/parser', () => {
         .addArrayItem('first')
         .addArrayItem('second')
         .endArray()
+        .startAttribute('tags')
+        .startRule('get_tags')
+        .endRule()
         .endRule();
 
       expect(ctx.results).toEqual([
@@ -44,6 +47,10 @@ describe('modules/manager/bazel-module/parser', () => {
             name: new StringFragment('my_library'),
             srcs: new ArrayFragment(
               [new StringFragment('first'), new StringFragment('second')],
+              true
+            ),
+            tags: new RecordFragment(
+              { rule: new StringFragment('get_tags') },
               true
             ),
           },
