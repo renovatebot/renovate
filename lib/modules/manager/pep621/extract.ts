@@ -5,7 +5,7 @@ import type {
   PackageDependency,
   PackageFileContent,
 } from '../types';
-import { processPDM } from './pdm';
+import { processors } from './processors';
 import { PyProject, PyProjectSchema } from './schema';
 import { parseDependencyGroupRecord, parseDependencyList } from './utils';
 
@@ -30,6 +30,7 @@ export function extractPackageFile(
     return null;
   }
 
+  // pyProject standard definitions
   deps.push(
     ...parseDependencyList('project.dependencies', def.project?.dependencies)
   );
@@ -40,7 +41,11 @@ export function extractPackageFile(
     )
   );
 
-  const processedDeps = processPDM(def, deps);
+  // process specific tool sets
+  let processedDeps = deps;
+  for (const processor of processors) {
+    processedDeps = processor.process(def, processedDeps);
+  }
 
   return processedDeps.length ? { deps: processedDeps } : null;
 }
