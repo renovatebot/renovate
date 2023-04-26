@@ -9,8 +9,39 @@ import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
+export interface LegacyHostRule {
+  hostName?: string;
+  domainName?: string;
+  baseUrl?: string;
+  host?: string;
+  endpoint?: string;
+}
+
+export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+  const cloned: LegacyHostRule & HostRule = clone(rule);
+  delete cloned.hostName;
+  delete cloned.domainName;
+  delete cloned.baseUrl;
+  const result: HostRule = cloned;
+
+  const { matchHost } = result;
+  const { hostName, domainName, baseUrl } = rule;
+  const hostValues = [matchHost, hostName, domainName, baseUrl].filter(Boolean);
+  if (hostValues.length === 1) {
+    const [matchHost] = hostValues;
+    result.matchHost = matchHost;
+  } else if (hostValues.length > 1) {
+    throw new Error(
+      `hostRules cannot contain more than one host-matching field - use "matchHost" only.`
+    );
+  }
+
+  return result;
+}
+
 export function add(params: HostRule): void {
-  const rule = clone(params);
+  const rule = migrateRule(params);
+
   const confidentialFields: (keyof HostRule)[] = ['password', 'token'];
   if (rule.matchHost) {
     const parsedUrl = parseUrl(rule.matchHost);

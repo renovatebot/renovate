@@ -1,25 +1,17 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import type { HostRule } from '../../../types';
-import { clone } from '../../../util/clone';
+import type { LegacyHostRule } from '../../../util/host-rules';
 import { AbstractMigration } from '../base/abstract-migration';
 import { migrateDatasource } from './datasource-migration';
-
-interface LegacyHostRule {
-  hostName?: string;
-  domainName?: string;
-  baseUrl?: string;
-  host?: string;
-  endpoint?: string;
-}
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';
 
   override run(value: (LegacyHostRule & HostRule)[]): void {
     const newHostRules: HostRule[] = [];
-    for (let hostRule of value) {
-      hostRule = migrateRule(hostRule);
+    for (const hostRule of value) {
+      validateHostRule(hostRule);
 
       const newRule: any = {};
 
@@ -68,16 +60,8 @@ export class HostRulesMigration extends AbstractMigration {
   }
 }
 
-function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
-  const cloned: LegacyHostRule & HostRule = clone(rule);
-  delete cloned.hostName;
-  delete cloned.domainName;
-  delete cloned.baseUrl;
-  delete cloned.endpoint;
-  delete cloned.host;
-  const result: HostRule = cloned;
-
-  const { matchHost } = result;
+function validateHostRule(rule: LegacyHostRule & HostRule): void {
+  const { matchHost } = rule;
   const { hostName, domainName, baseUrl, endpoint, host } = rule;
   const hostValues = [
     matchHost,
@@ -87,10 +71,7 @@ function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
     endpoint,
     host,
   ].filter(is.string);
-  if (hostValues.length === 1) {
-    const [matchHost] = hostValues;
-    result.matchHost = massageUrl(matchHost);
-  } else if (hostValues.length > 1) {
+  if (hostValues.length > 1) {
     const error = new Error(CONFIG_VALIDATION);
     error.validationSource = 'config';
     error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
@@ -98,8 +79,6 @@ function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
       'The renovate configuration file contains some invalid settings';
     throw error;
   }
-
-  return result;
 }
 
 function massageUrl(url: string): string {
