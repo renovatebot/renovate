@@ -16,7 +16,6 @@ export interface LegacyHostRule {
   endpoint?: string;
 }
 
-
 export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
   const cloned: LegacyHostRule & HostRule = structuredClone(rule);
   delete cloned.hostName;
