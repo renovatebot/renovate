@@ -400,6 +400,12 @@ Make sure that version is a pinned version of course, as otherwise it won't be v
 
 For `sbt` note that Renovate will update the version string only for packages that have the version string in their project's `built.sbt` file.
 
+## checkedBranches
+
+GitHub offers an interactive dependency dashboard while some other platforms don't have that option.
+
+This array will allow you to set the names of the branches you want to rebase/create as if you checked their boxes in dependency dashboard.
+
 ## cloneSubmodules
 
 Enabling this option will mean that any detected Git submodules will be cloned at time of repository clone.
