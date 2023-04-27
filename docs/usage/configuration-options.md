@@ -2554,6 +2554,10 @@ A list of commands that are executed after Renovate has updated a dependency but
 
 You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
 
+<!-- prettier-ignore -->
+!!! note
+    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](https://docs.renovatebot.com/self-hosted-configuration/#filefilters) instead.
+
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
