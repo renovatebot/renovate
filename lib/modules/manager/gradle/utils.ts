@@ -18,8 +18,17 @@ const versionLikeRegex = regEx('^(?<version>[-_.\\[\\](),a-zA-Z0-9+]+)');
 export function versionLikeSubstring(
   input: string | null | undefined
 ): string | null {
-  const match = input ? versionLikeRegex.exec(input) : null;
-  return match?.groups?.version ?? null;
+  if (!input) {
+    return null;
+  }
+
+  const match = versionLikeRegex.exec(input);
+  const version = match?.groups?.version;
+  if (!version || !regEx(/\d/).test(version)) {
+    return null;
+  }
+
+  return version;
 }
 
 export function isDependencyString(input: string): boolean {
@@ -171,4 +180,13 @@ export function getVars(
   }
   const parentVars = registry[parentDir] || {};
   return getVars(registry, parentDir, { ...parentVars, ...vars });
+}
+
+export function updateVars(
+  registry: VariableRegistry,
+  dir: string,
+  newVars: PackageVariables
+): void {
+  const oldVars = registry[dir] ?? {};
+  registry[dir] = { ...oldVars, ...newVars };
 }

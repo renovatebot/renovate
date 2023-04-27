@@ -8,6 +8,7 @@ import type {
 import type { ProgrammingLanguage } from '../../constants';
 import type { ModuleApi, RangeStrategy, SkipReason } from '../../types';
 import type { FileChange } from '../../util/git/types';
+import type { MergeConfidence } from '../../util/merge-confidence/types';
 
 export type Result<T> = T | Promise<T>;
 
@@ -32,6 +33,7 @@ export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
   composerIgnorePlatformReqs?: string[];
+  goGetDirs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
@@ -94,6 +96,7 @@ export interface LookupUpdate {
   pendingVersions?: string[];
   newVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   userStrings?: Record<string, string>;
   checksumUrl?: string;
   downloadUrl?: string;
@@ -148,6 +151,7 @@ export interface PackageDependency<T = Record<string, any>>
   extractVersion?: string;
   isInternal?: boolean;
   variableName?: string;
+  indentation?: string;
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {

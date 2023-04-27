@@ -2,7 +2,7 @@ import { cache } from '../../../util/cache/package/decorator';
 import * as azureRestApiVersioningApi from '../../versioning/azure-rest-api';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
-import { BicepTypeIndex } from './schema';
+import { BicepResourceVersionIndex } from './schema';
 
 const BICEP_TYPES_INDEX_URL =
   'https://raw.githubusercontent.com/Azure/bicep-types-az/main/generated/index.json';
@@ -25,6 +25,13 @@ export class AzureBicepResourceDatasource extends Datasource {
     super(AzureBicepResourceDatasource.id);
   }
 
+  private getChangelogUrl(packageName: string): string {
+    const firstSlashIndex = packageName.indexOf('/');
+    const namespaceProvider = packageName.slice(0, firstSlashIndex);
+    const type = packageName.slice(firstSlashIndex + 1);
+    return `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}`;
+  }
+
   @cache({
     namespace: `datasource-${AzureBicepResourceDatasource.id}`,
     key: ({ packageName }: GetReleasesConfig) => `getReleases-${packageName}`,
@@ -32,27 +39,19 @@ export class AzureBicepResourceDatasource extends Datasource {
   async getReleases(
     getReleasesConfig: GetReleasesConfig
   ): Promise<ReleaseResult | null> {
-    const { packageName } = getReleasesConfig;
-
     const resourceVersionIndex = await this.getResourceVersionIndex();
-    const versions = resourceVersionIndex[packageName.toLowerCase()];
-
-    if (!versions) {
+    const packageName = getReleasesConfig.packageName.toLowerCase();
+    const versions = resourceVersionIndex[packageName];
+    if (!versions?.length) {
       return null;
     }
 
-    const firstSlashIndex = packageName.indexOf('/');
-    const namespaceProvider = packageName
-      .slice(0, firstSlashIndex)
-      .toLowerCase();
-    const type = packageName.slice(firstSlashIndex + 1).toLowerCase();
-
-    return {
-      releases: versions.map((version) => ({
-        version,
-        changelogUrl: `https://learn.microsoft.com/en-us/azure/templates/${namespaceProvider}/change-log/${type}#${version}`,
-      })),
-    };
+    const changelogUrl = this.getChangelogUrl(packageName);
+    const releases = versions.map((version) => ({
+      version,
+      changelogUrl: `${changelogUrl}#${version}`,
+    }));
+    return { releases };
   }
 
   @cache({
@@ -60,29 +59,11 @@ export class AzureBicepResourceDatasource extends Datasource {
     key: 'getResourceVersionIndex',
     ttlMinutes: 24 * 60,
   })
-  async getResourceVersionIndex(): Promise<Record<string, string[]>> {
-    const res = await this.getBicepTypeIndex();
-
-    const releaseMap = new Map<string, string[]>();
-
-    for (const resourceReference of Object.keys(res.Resources)) {
-      const [type, version] = resourceReference.toLowerCase().split('@', 2);
-      const versions = releaseMap.get(type) ?? [];
-      versions.push(version);
-      releaseMap.set(type, versions);
-    }
-
-    for (const functionResource of Object.entries(res.Functions)) {
-      const [type, versionMap] = functionResource;
-      const versions = Object.keys(versionMap);
-      releaseMap.set(type, versions);
-    }
-
-    return Object.fromEntries(releaseMap);
-  }
-
-  private async getBicepTypeIndex(): Promise<BicepTypeIndex> {
-    const res = await this.http.getJson(BICEP_TYPES_INDEX_URL, BicepTypeIndex);
-    return res.body;
+  async getResourceVersionIndex(): Promise<BicepResourceVersionIndex> {
+    const { body } = await this.http.getJson(
+      BICEP_TYPES_INDEX_URL,
+      BicepResourceVersionIndex
+    );
+    return body;
   }
 }

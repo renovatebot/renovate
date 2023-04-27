@@ -23,7 +23,7 @@ import {
 } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedDays } from '../../../../util/date';
+import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
 import { checkoutBranch } from '../../../../util/git';
 import {
@@ -31,6 +31,7 @@ import {
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
@@ -280,25 +281,29 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
+          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
+            upgrade.releaseTimestamp) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
-      // both a stabilityDays setting and a releaseTimestamp
+      // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (is.number(upgrade.stabilityDays) && upgrade.releaseTimestamp) {
-          const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
-          if (daysElapsed < upgrade.stabilityDays) {
+        if (
+          is.nonEmptyString(upgrade.minimumReleaseAge) &&
+          upgrade.releaseTimestamp
+        ) {
+          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+          if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
             logger.debug(
               {
                 depName: upgrade.depName,
-                daysElapsed,
-                stabilityDays: upgrade.stabilityDays,
+                timeElapsed,
+                minimumReleaseAge: upgrade.minimumReleaseAge,
               },
-              'Update has not passed stability days'
+              'Update has not passed minimum release age'
             );
             config.stabilityStatus = 'yellow';
             continue;
@@ -311,13 +316,14 @@ export async function processBranch(
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
         if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence = await getMergeConfidenceLevel(
-            datasource,
-            depName,
-            currentVersion,
-            newVersion,
-            updateType
-          );
+          const confidence =
+            (await getMergeConfidenceLevel(
+              datasource,
+              depName,
+              currentVersion,
+              newVersion,
+              updateType
+            )) ?? 'neutral';
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
             config.confidenceStatus = 'green';
           } else {

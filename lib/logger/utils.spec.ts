@@ -37,6 +37,7 @@ describe('logger/utils', () => {
     input                                                                 | output
     ${' https://somepw@domain.com/gitlab/org/repo?go-get'}                | ${' https://**redacted**@domain.com/gitlab/org/repo?go-get'}
     ${'https://someuser:somepw@domain.com'}                               | ${'https://**redacted**@domain.com'}
+    ${'https://someuser:pass%word_with-speci(a)l&chars@domain.com'}       | ${'https://**redacted**@domain.com'}
     ${'https://someuser:@domain.com'}                                     | ${'https://**redacted**@domain.com'}
     ${'redis://:somepw@172.32.11.71:6379/0'}                              | ${'redis://**redacted**@172.32.11.71:6379/0'}
     ${'some text with\r\n url: https://somepw@domain.com\nand some more'} | ${'some text with\r\n url: https://**redacted**@domain.com\nand some more'}

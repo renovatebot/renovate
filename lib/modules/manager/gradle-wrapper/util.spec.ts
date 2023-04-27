@@ -1,5 +1,5 @@
-import type { Stats } from 'fs';
-import os from 'os';
+import type { Stats } from 'node:fs';
+import os from 'node:os';
 import { fs, partial } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import {

@@ -3,10 +3,9 @@ import hasha from 'hasha';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { compress, decompress } from '../../../compress';
-import * as schema from '../../../schema';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
-import { RepoCacheRecord, RepoCacheV13 } from '../schemas';
+import { RepoCacheRecord, RepoCacheV13 } from '../schema';
 import type { RepoCache, RepoCacheData } from '../types';
 
 export abstract class RepoCacheBase implements RepoCache {
@@ -44,8 +43,9 @@ export abstract class RepoCacheBase implements RepoCache {
       }
       const oldCache = JSON.parse(rawOldCache) as unknown;
 
-      if (schema.match(RepoCacheV13, oldCache)) {
-        await this.restore(oldCache);
+      const cacheV13 = RepoCacheV13.safeParse(oldCache);
+      if (cacheV13.success) {
+        await this.restore(cacheV13.data);
         logger.debug('Repository cache is restored from revision 13');
         return;
       }

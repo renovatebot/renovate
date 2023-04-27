@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:34
-docker run --rm renovate/renovate:34.24
-docker run --rm renovate/renovate:34.24.0
+docker run --rm renovate/renovate:35
+docker run --rm renovate/renovate:35.14
+docker run --rm renovate/renovate:35.14.4
 ```
 
 <!-- prettier-ignore -->
@@ -64,7 +64,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:34.24.0
+              image: renovate/renovate:35.14.4
               args:
                 - user/repo
               # Environment Variables
@@ -123,7 +123,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:34.24.0
+            - image: renovate/renovate:35.14.4
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -368,7 +368,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:34.24.0
+              image: renovate/renovate:35.14.4
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

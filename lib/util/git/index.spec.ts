@@ -500,7 +500,7 @@ describe('util/git/index', () => {
         message: 'Update something',
       };
       const commitSha = await git.commitFiles(commitConfig);
-      const remoteSha = await git.fetchCommit(commitConfig);
+      const remoteSha = await git.fetchBranch(commitConfig.branchName);
       expect(commitSha).toEqual(remoteSha);
     });
 

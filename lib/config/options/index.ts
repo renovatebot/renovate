@@ -366,6 +366,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
+  },
   // Log options
   {
     name: 'logFile',
@@ -421,7 +429,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
@@ -752,6 +760,7 @@ const options: RenovateOptions[] = [
     description: 'List of Repositories.',
     stage: 'global',
     type: 'array',
+    subType: 'string',
     cli: false,
     globalOnly: true,
   },
@@ -807,6 +816,7 @@ const options: RenovateOptions[] = [
     description:
       'A list of package managers to enable. Only managers on the list are enabled.',
     type: 'array',
+    subType: 'string',
     mergeable: false,
     stage: 'repository',
   },
@@ -915,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
@@ -1215,6 +1225,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'replacementNameTemplate',
+    description: 'Controls what the replacement package name.',
+    type: 'string',
+    default: '{{{packageName}}}',
+    stage: 'package',
+    parent: 'packageRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'replacementVersion',
     description:
       'The version of the new dependency that replaces the old deprecated dependency.',
@@ -1223,6 +1243,21 @@ const options: RenovateOptions[] = [
     parent: 'packageRules',
     cli: false,
     env: false,
+  },
+  {
+    name: 'matchConfidence',
+    description:
+      'Merge confidence levels to match against (`low`, `neutral`, `high`, `very high`). Valid only within `packageRules` object.',
+    type: 'array',
+    subType: 'string',
+    allowedValues: ['low', 'neutral', 'high', 'very high'],
+    allowString: true,
+    stage: 'package',
+    parent: 'packageRules',
+    mergeable: true,
+    cli: false,
+    env: false,
+    experimental: true,
   },
   {
     name: 'matchUpdateTypes',
@@ -1556,16 +1591,15 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
   },
   {
-    name: 'stabilityDays',
-    description:
-      'Number of days required before a new release is considered stable.',
-    type: 'integer',
-    default: 0,
+    name: 'minimumReleaseAge',
+    description: 'Time required before a new release is considered stable.',
+    type: 'string',
+    default: null,
   },
   {
     name: 'internalChecksAsSuccess',
     description:
-      'Whether to consider passing internal checks such as stabilityDays when determining branch status.',
+      'Whether to consider passing internal checks such as `minimumReleaseAge` when determining branch status.',
     type: 'boolean',
     default: false,
   },
@@ -1699,7 +1733,7 @@ const options: RenovateOptions[] = [
       groupName: null,
       schedule: [],
       dependencyDashboardApproval: false,
-      stabilityDays: 0,
+      minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
@@ -1814,7 +1848,7 @@ const options: RenovateOptions[] = [
   {
     name: 'prBodyTemplate',
     description:
-      'Pull Request body template. Controls which sections are rendered in the body.',
+      'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
     type: 'string',
     default:
       '{{{header}}}{{{table}}}{{{warnings}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
@@ -1826,6 +1860,15 @@ const options: RenovateOptions[] = [
       'Pull Request title template (deprecated). Inherits from `commitMessage` if null.',
     type: 'string',
     default: null,
+    cli: false,
+  },
+  {
+    name: 'prTitleStrict',
+    description:
+      'Whether to bypass appending extra context to the Pull Request title.',
+    type: 'boolean',
+    experimental: true,
+    default: false,
     cli: false,
   },
   {
@@ -2035,6 +2078,7 @@ const options: RenovateOptions[] = [
       'Enable post-update options to be run after package/artifact updating.',
     type: 'array',
     default: [],
+    subType: 'string',
     allowedValues: [
       'bundlerConservative',
       'helmUpdateSubChartArchives',
@@ -2281,6 +2325,20 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+  },
+  {
+    name: 'artifactAuth',
+    description:
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    allowedValues: ['composer'],
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'cacheHardTtlMinutes',
