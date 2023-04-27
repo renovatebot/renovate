@@ -1,9 +1,10 @@
 import type { lexer } from 'good-enough-parser';
 import { partial } from '../../../../../test/util';
-import type { Ctx, PackageVariables } from '../types';
+import type { Ctx } from '../types';
 import {
   cleanupTempVars,
   coalesceVariable,
+  findVariable,
   increaseNestingDepth,
   interpolateString,
   loadFromTokenMap,
@@ -58,7 +59,7 @@ describe('modules/manager/gradle/parser/common', () => {
   it('prependNestingDepth', () => {
     ctx.tmpNestingDepth = ctx.varTokens = [token];
     prependNestingDepth(ctx);
-    expect(ctx.varTokens).toStrictEqual([token, token]);
+    expect(ctx.varTokens).toEqual([token, token]);
 
     coalesceVariable(ctx);
     expect(ctx).toMatchObject({
@@ -112,8 +113,17 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(ctx.varTokens).toStrictEqual([{ value: 'foo.bar.baz.qux' }]);
   });
 
+  it('findVariable', () => {
+    ctx.globalVars = {
+      foo: { key: 'foo', value: 'bar' },
+    };
+
+    expect(findVariable('unknown-global-var', ctx)).toBeUndefined();
+    expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['foo']);
+  });
+
   it('interpolateString', () => {
-    expect(interpolateString([], {})).toBeEmptyString();
+    expect(interpolateString([], ctx)).toBeEmptyString();
     expect(
       interpolateString(
         partial<lexer.Token>([
@@ -121,6 +131,7 @@ describe('modules/manager/gradle/parser/common', () => {
           { type: 'symbol', value: 'bar' },
           { type: 'string-value', value: 'baz' },
         ]),
+        ctx,
         {
           bar: { key: '', value: 'BAR' },
         }
@@ -129,13 +140,13 @@ describe('modules/manager/gradle/parser/common', () => {
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: 'symbol', value: 'foo' }]),
-        partial<PackageVariables>()
+        ctx
       )
     ).toBeNull();
     expect(
       interpolateString(
         partial<lexer.Token>([{ type: '_', value: 'foo' }]),
-        partial<PackageVariables>()
+        ctx
       )
     ).toBeNull();
   });

@@ -366,6 +366,14 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: [],
   },
+  {
+    name: 'goGetDirs',
+    description: 'Directory pattern to run `go get` on',
+    type: 'array',
+    subType: 'string',
+    default: ['./...'],
+    supportedManagers: ['gomod'],
+  },
   // Log options
   {
     name: 'logFile',
@@ -421,7 +429,7 @@ const options: RenovateOptions[] = [
   {
     name: 'forkProcessing',
     description:
-      'Whether to process forked repositories. By default, all forked repositories are skipped when in autodiscover mode.',
+      'Whether to process forked repositories. By default, all forked repositories are skipped when in `autodiscover` mode.',
     stage: 'repository',
     type: 'string',
     allowedValues: ['auto', 'enabled', 'disabled'],
@@ -917,8 +925,8 @@ const options: RenovateOptions[] = [
     supportedPlatforms: ['azure'],
   },
   {
-    name: 'azureAutoApprove',
-    description: 'Set to `true` to automatically approve Azure DevOps PRs.',
+    name: 'autoApprove',
+    description: 'Set to `true` to automatically approve PRs.',
     type: 'boolean',
     default: false,
     supportedPlatforms: ['azure'],
@@ -1848,6 +1856,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prTitleStrict',
+    description:
+      'Whether to bypass appending extra context to the Pull Request title.',
+    type: 'boolean',
+    experimental: true,
+    default: false,
+    cli: false,
+  },
+  {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',
     type: 'string',
@@ -2301,6 +2318,20 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
     experimental: true,
+  },
+  {
+    name: 'artifactAuth',
+    description:
+      'A list of package managers to enable artifact auth. Only managers on the list are enabled. All are enabled if `null`',
+    experimental: true,
+    type: 'array',
+    subType: 'string',
+    stage: 'repository',
+    parent: 'hostRules',
+    allowedValues: ['composer'],
+    default: null,
+    cli: false,
+    env: false,
   },
   {
     name: 'cacheHardTtlMinutes',

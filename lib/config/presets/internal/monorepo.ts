@@ -77,6 +77,8 @@ const repoGroups = {
   ],
   'dotnet-azure-ad-identitymodel-extensions':
     'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
+  'dotnet-azure-ad-microsoft-identity-web':
+    'https://github.com/AzureAD/microsoft-identity-web',
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
@@ -263,6 +265,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
+  swc: 'https://github.com/swc-project/',
 };
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
