@@ -123,7 +123,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (config.requireConfig === 'required' && config.onboarding === false) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
-  
+
   if (!pr) {
     logger.debug('Found no closed onboarding PR');
     return false;
@@ -137,7 +137,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (!config.suppressNotifications!.includes('onboardingClose')) {
     // ensure PR comment
     await ensureComment({
-      number: closedPr.number,
+      number: pr.number,
       topic: `Renovate is disabled`,
       content: `Renovate is disabled due to lack of config. If you wish to re-enable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
     });
