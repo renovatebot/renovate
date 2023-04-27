@@ -79,7 +79,6 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (isVersionPointer(version)) {
-    // This is to support dot annotation version reference
     const parsedVersion = version.ref.replace(regEx(/[._]/g), '-');
     // everything else is ignored
     return extractLiteralVersion({
