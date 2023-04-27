@@ -73,7 +73,8 @@ export function parse(
   try {
     const parsedResult = starlark.query(input, query, new Ctx());
     if (parsedResult) {
-      result = parsedResult.results;
+      // The parsedResult and its associated objects are missing their types.
+      result = Ctx.from(parsedResult).results;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Bazel module parsing error');
