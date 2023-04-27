@@ -428,7 +428,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res).toMatchObject({
         foo: 2,
         isGroup: true,
-        recreateClosed: true,
+        recreateClosed: 'always',
         prTitle: 'some-group',
         commitMessage: 'some-group',
         groupName: 'some-group',
