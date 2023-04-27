@@ -44,7 +44,7 @@ function extractImages(
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
-    const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
+    const match = regEx(/^\s*-?\s*image:\s*['"]?([^\s'"]+)['"]?\s*/).exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom, true, config.registryAliases);

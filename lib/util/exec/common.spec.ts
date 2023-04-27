@@ -1,11 +1,11 @@
-import { spawn as _spawn } from 'child_process';
-import type { SendHandle, Serializable } from 'child_process';
-import { Readable } from 'stream';
+import { spawn as _spawn } from 'node:child_process';
+import type { SendHandle, Serializable } from 'node:child_process';
+import { Readable } from 'node:stream';
 import { mockedFunction, partial } from '../../../test/util';
 import { exec } from './common';
 import type { RawExecOptions } from './types';
 
-jest.mock('child_process');
+jest.mock('node:child_process');
 const spawn = mockedFunction(_spawn);
 
 type MessageListener = (message: Serializable, sendHandle: SendHandle) => void;

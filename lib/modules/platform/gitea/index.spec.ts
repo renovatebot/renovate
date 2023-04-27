@@ -1916,12 +1916,6 @@ describe('modules/platform/gitea/index', () => {
     });
   });
 
-  describe('getVulnerabilityAlerts', () => {
-    it('should return an empty list - unsupported by platform', async () => {
-      expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
-    });
-  });
-
   describe('getJsonFile()', () => {
     it('returns file content', async () => {
       const data = { foo: 'bar' };

@@ -381,6 +381,61 @@ describe('workers/repository/updates/generate', () => {
       expect(res.recreateClosed).toBe('always');
     });
 
+    it('skips appending baseBranch and updateType to prTitle when prTitleStrict is true', () => {
+      const branch = [
+        {
+          manager: 'some-manager',
+          depName: 'depB',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '5.1.2',
+          newVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-07T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleStrict: true,
+        },
+        {
+          manager: 'some-manager',
+          depName: 'depA',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          commitMessage:
+            '{{{groupName}}} {{{commitMessageExtra}}} {{{commitMessageSuffix}}}',
+          commitMessageExtra:
+            'to {{#if isMajor}}{{prettyNewMajor}}{{else}}{{prettyNewVersion}}{{/if}}',
+          foo: 1,
+          newValue: '1.1.0',
+          newVersion: '1.1.0',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-08T20:01:41+00:00',
+          updateType: 'minor',
+          separateMinorPatch: true,
+          prTitleStrict: true,
+        },
+      ] satisfies BranchUpgradeConfig[];
+      const res = generateBranchConfig(branch);
+      expect(res).toMatchObject({
+        foo: 2,
+        isGroup: true,
+        recreateClosed: true,
+        prTitle: 'some-group',
+        commitMessage: 'some-group',
+        groupName: 'some-group',
+        releaseTimestamp: '2017-02-08T20:01:41+00:00',
+      });
+    });
+
     it('groups multiple upgrades different version', () => {
       const branch = [
         {

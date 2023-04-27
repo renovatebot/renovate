@@ -14,18 +14,30 @@ import type {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../../util/cache/memory';
 import type { LookupStats } from '../../../util/cache/memory/types';
-import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
 import { lookupUpdates } from './lookup';
 import type { LookupUpdateConfig } from './lookup/types';
 
+async function withLookupStats<T>(
+  datasource: string,
+  callback: () => Promise<T>
+): Promise<T> {
+  const start = Date.now();
+  const result = await callback();
+  const duration = Date.now() - start;
+  const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
+  lookups.push({ datasource, duration });
+  memCache.set('lookup-stats', lookups);
+  return result;
+}
+
 async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  let dep = clone(indep);
+  const dep = structuredClone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
@@ -58,15 +70,10 @@ async function fetchDepUpdates(
   } else {
     if (depConfig.datasource) {
       try {
-        const start = Date.now();
-        dep = {
-          ...dep,
-          ...(await lookupUpdates(depConfig as LookupUpdateConfig)),
-        };
-        const duration = Date.now() - start;
-        const lookups = memCache.get<LookupStats[]>('lookup-stats') || [];
-        lookups.push({ datasource: depConfig.datasource, duration });
-        memCache.set('lookup-stats', lookups);
+        const updateResult = await withLookupStats(depConfig.datasource, () =>
+          lookupUpdates(depConfig as LookupUpdateConfig)
+        );
+        Object.assign(dep, updateResult);
       } catch (err) {
         if (
           packageFileConfig.repoIsOnboarded ||
@@ -98,6 +105,7 @@ async function fetchManagerPackagerFileUpdates(
   if (pFile.extractedConstraints) {
     pFile.constraints = {
       ...pFile.extractedConstraints,
+      ...config.constraints,
       ...pFile.constraints,
     };
     delete pFile.extractedConstraints;

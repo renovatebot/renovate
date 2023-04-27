@@ -2,6 +2,11 @@ import fs from 'fs-extra';
 import { GlobalConfig } from '../../config/global';
 import { applySecretsToConfig } from '../../config/secrets';
 import type { RenovateConfig } from '../../config/types';
+import {
+  REPOSITORY_DISABLED_BY_CONFIG,
+  REPOSITORY_FORKED,
+  REPOSITORY_NO_CONFIG,
+} from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { instrument } from '../../instrumentation';
 import { logger, setMeta } from '../../logger';
@@ -12,12 +17,12 @@ import { detectSemanticCommits } from '../../util/git/semantic';
 import { clearDnsCache, printDnsStats } from '../../util/http/dns';
 import * as queue from '../../util/http/queue';
 import * as throttle from '../../util/http/throttle';
-import * as schemaUtil from '../../util/schema';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { setBranchCache } from './cache';
 import { ensureDependencyDashboard } from './dependency-dashboard';
 import handleError from './error';
-import { finaliseRepo } from './finalise';
+import { finalizeRepo } from './finalize';
+import { pruneStaleBranches } from './finalize/prune';
 import { initRepo } from './init';
 import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
@@ -85,13 +90,21 @@ export async function renovateRepository(
       } else {
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
-      await finaliseRepo(config, branchList);
+      await finalizeRepo(config, branchList);
       // TODO #7154
       repoResult = processResult(config, res!);
     }
   } catch (err) /* istanbul ignore next */ {
     setMeta({ repository: config.repository });
     const errorRes = await handleError(config, err);
+    const pruneWhenErrors = [
+      REPOSITORY_DISABLED_BY_CONFIG,
+      REPOSITORY_FORKED,
+      REPOSITORY_NO_CONFIG,
+    ];
+    if (pruneWhenErrors.includes(errorRes)) {
+      await pruneStaleBranches(config, []);
+    }
     repoResult = processResult(config, errorRes);
   }
   if (localDir && !repoConfig.persistRepoData) {
@@ -112,7 +125,6 @@ export async function renovateRepository(
   printLookupStats();
   printDnsStats();
   clearDnsCache();
-  schemaUtil.reportErrors();
   const cloned = isCloned();
   logger.info({ cloned, durationMs: splits.total }, 'Repository finished');
   return repoResult;

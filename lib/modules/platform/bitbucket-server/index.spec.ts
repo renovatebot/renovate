@@ -1729,13 +1729,6 @@ Followed by some information.
         });
       });
 
-      describe('getVulnerabilityAlerts()', () => {
-        it('returns empty array', async () => {
-          expect.assertions(1);
-          expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
-        });
-      });
-
       describe('getBranchStatus()', () => {
         it('should be success', async () => {
           const scope = await initRepo();

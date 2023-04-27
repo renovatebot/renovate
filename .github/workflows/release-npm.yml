@@ -25,6 +25,7 @@ env:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   release-npm:
@@ -38,7 +39,7 @@ jobs:
             echo "NPM_TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
           fi
 
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           ref: ${{ env.GIT_SHA }}
 
