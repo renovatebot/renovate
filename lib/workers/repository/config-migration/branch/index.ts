@@ -87,7 +87,7 @@ async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
       );
     } else {
       const content =
-        '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+        '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
       await ensureComment({
         number: pr.number,
         topic: 'Renovate Ignore Notification',
