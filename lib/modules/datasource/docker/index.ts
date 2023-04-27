@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
@@ -161,10 +160,13 @@ export async function getAuthHeaders(
     }
 
     let service = authenticateHeader.params.service;
-    if (!is.string(service)) {
-      service = '';
+    if (is.string(service)) {
+      service = `service=${service}&`;
+    } else {
+      service = ``;
     }
-    const authUrl = `${authenticateHeader.params.realm}?service=${service}&scope=${scope}`;
+
+    const authUrl = `${authenticateHeader.params.realm}?${service}scope=${scope}`;
     logger.trace(
       { registryHost, dockerRepository, authUrl },
       `Obtaining docker registry token`
@@ -908,7 +910,7 @@ export class DockerDatasource extends Datasource {
           ? `${url}&last=${linkHeader.next.last}`
           : null;
       } else {
-        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
     } while (url && page < 20);
@@ -971,13 +973,6 @@ export class DockerDatasource extends Datasource {
         logger.warn(
           { registryHost, dockerRepository, err },
           'docker registry failure: too many requests'
-        );
-        throw new ExternalHostError(err);
-      }
-      if (err.statusCode === 401 && isDockerHost(registryHost)) {
-        logger.warn(
-          { registryHost, dockerRepository, err },
-          'docker registry failure: unauthorized'
         );
         throw new ExternalHostError(err);
       }

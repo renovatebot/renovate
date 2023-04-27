@@ -50,7 +50,7 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: !!config.azureAutoApprove,
+    autoApprove: !!config.autoApprove,
     azureWorkItemId: config.azureWorkItemId ?? 0,
     bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
     gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,

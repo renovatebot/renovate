@@ -1,95 +1,222 @@
 import { z } from 'zod';
-import * as schema from './schema-utils';
+import { Json, Json5, LooseArray, LooseRecord } from './schema-utils';
 
 describe('util/schema-utils', () => {
-  describe('looseArray', () => {
+  describe('LooseArray', () => {
     it('parses array', () => {
-      const s = schema.looseArray(z.string());
+      const s = LooseArray(z.string());
       expect(s.parse(['foo', 'bar'])).toEqual(['foo', 'bar']);
     });
 
-    it('handles non-array', () => {
-      const s = schema.looseArray(z.string());
-      expect(s.parse({ foo: 'bar' })).toEqual([]);
-    });
-
     it('drops wrong items', () => {
-      const s = schema.looseArray(z.string());
+      const s = LooseArray(z.string());
       expect(s.parse(['foo', 123, null, undefined, []])).toEqual(['foo']);
     });
 
     it('runs callback for wrong elements', () => {
-      let called = false;
-      const s = schema.looseArray(z.string(), () => {
-        called = true;
+      let err: z.ZodError | undefined = undefined;
+      const Schema = LooseArray(z.string(), {
+        onError: ({ error }) => {
+          err = error;
+        },
       });
-      expect(s.parse(['foo', 123, 'bar'])).toEqual(['foo', 'bar']);
-      expect(called).toBeTrue();
-    });
 
-    it('runs callback for non-array', () => {
-      let called = false;
-      const s = schema.looseArray(z.string(), () => {
-        called = true;
+      const res = Schema.parse(['foo', 123, 'bar']);
+
+      expect(res).toEqual(['foo', 'bar']);
+      expect(err).toMatchObject({
+        issues: [
+          {
+            message: 'Expected string, received number',
+            code: 'invalid_type',
+            expected: 'string',
+            received: 'number',
+            path: [1],
+          },
+        ],
       });
-      expect(s.parse('foobar')).toEqual([]);
-      expect(called).toBeTrue();
     });
   });
 
-  describe('looseRecord', () => {
+  describe('LooseRecord', () => {
     it('parses record', () => {
-      const s = schema.looseRecord(z.string());
+      const s = LooseRecord(z.string());
       expect(s.parse({ foo: 'bar' })).toEqual({ foo: 'bar' });
     });
 
-    it('handles non-record', () => {
-      const s = schema.looseRecord(z.string());
-      expect(s.parse(['foo', 'bar'])).toEqual({});
-    });
-
     it('drops wrong items', () => {
-      const s = schema.looseRecord(z.string());
+      const s = LooseRecord(z.string());
       expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({ foo: 'foo' });
     });
 
     it('runs callback for wrong elements', () => {
-      let called = false;
-      const s = schema.looseRecord(z.string(), () => {
-        called = true;
-      });
-      expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({ foo: 'foo' });
-      expect(called).toBeTrue();
-    });
+      let err: z.ZodError | undefined = undefined;
+      const Schema = LooseRecord(
+        z.object({ foo: z.object({ bar: z.string() }) }),
+        {
+          onError: ({ error }) => {
+            err = error;
+          },
+        }
+      );
 
-    it('runs callback for non-record', () => {
-      let called = false;
-      const s = schema.looseRecord(z.string(), () => {
-        called = true;
+      const res = Schema.parse({
+        aaa: { foo: { bar: 42 } },
+        bbb: { foo: { baz: 'asdf' } },
+        ccc: { foo: { bar: 'baz' } },
       });
-      expect(s.parse('foobar')).toEqual({});
-      expect(called).toBeTrue();
+
+      expect(res).toEqual({ ccc: { foo: { bar: 'baz' } } });
+      expect(err).toMatchObject({
+        issues: [
+          {
+            message: 'Expected string, received number',
+            code: 'invalid_type',
+            expected: 'string',
+            received: 'number',
+            path: ['aaa', 'foo', 'bar'],
+          },
+          {
+            message: 'Required',
+            code: 'invalid_type',
+            expected: 'string',
+            received: 'undefined',
+            path: ['bbb', 'foo', 'bar'],
+          },
+        ],
+      });
     });
   });
 
-  describe('looseValue', () => {
-    it('parses value', () => {
-      const s = schema.looseValue(z.string());
-      expect(s.parse('foobar')).toBe('foobar');
-    });
+  describe('Json', () => {
+    it('parses json', () => {
+      const Schema = Json.pipe(z.object({ foo: z.literal('bar') }));
 
-    it('falls back to null wrong value', () => {
-      const s = schema.looseValue(z.string());
-      expect(s.parse(123)).toBeNull();
-    });
+      expect(Schema.parse('{"foo": "bar"}')).toEqual({ foo: 'bar' });
 
-    it('runs callback for wrong elements', () => {
-      let called = false;
-      const s = schema.looseValue(z.string(), () => {
-        called = true;
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
       });
-      expect(s.parse(123)).toBeNull();
-      expect(called).toBeTrue();
+
+      expect(Schema.safeParse('{"foo": "foo"}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid literal value, expected "bar"',
+              code: 'invalid_literal',
+              expected: 'bar',
+              received: 'foo',
+              path: ['foo'],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('["foo", "bar"]')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected object, received array',
+              code: 'invalid_type',
+              expected: 'object',
+              received: 'array',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('{{{}}}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid JSON',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+    });
+  });
+
+  describe('Json5', () => {
+    it('parses JSON5', () => {
+      const Schema = Json5.pipe(z.object({ foo: z.literal('bar') }));
+
+      expect(Schema.parse('{"foo": "bar"}')).toEqual({ foo: 'bar' });
+
+      expect(Schema.safeParse(42)).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected string, received number',
+              code: 'invalid_type',
+              expected: 'string',
+              received: 'number',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('{"foo": "foo"}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid literal value, expected "bar"',
+              code: 'invalid_literal',
+              expected: 'bar',
+              received: 'foo',
+              path: ['foo'],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('["foo", "bar"]')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Expected object, received array',
+              code: 'invalid_type',
+              expected: 'object',
+              received: 'array',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
+
+      expect(Schema.safeParse('{{{}}}')).toMatchObject({
+        error: {
+          issues: [
+            {
+              message: 'Invalid JSON5',
+              code: 'custom',
+              path: [],
+            },
+          ],
+        },
+        success: false,
+      });
     });
   });
 });

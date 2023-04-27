@@ -17,7 +17,7 @@ import type {
 } from '../types';
 import { PipfileLockSchema } from './schema';
 
-function getPythonConstraint(
+export function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string | undefined {
@@ -51,7 +51,7 @@ function getPythonConstraint(
   return undefined;
 }
 
-function getPipenvConstraint(
+export function getPipenvConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string {

@@ -3,7 +3,6 @@ import { applySecretsToConfig } from '../../../config/secrets';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
-import { clone } from '../../../util/clone';
 import { cloneSubmodules, setUserRepoConfig } from '../../../util/git';
 import { getAll } from '../../../util/host-rules';
 import { checkIfConfigured } from '../configured';
@@ -14,7 +13,12 @@ import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
-  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+  return {
+    ...structuredClone(config),
+    errors: [],
+    warnings: [],
+    branchList: [],
+  };
 }
 
 function warnOnUnsupportedOptions(config: RenovateConfig): void {
