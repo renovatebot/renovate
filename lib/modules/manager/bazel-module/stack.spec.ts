@@ -6,9 +6,16 @@ describe('modules/manager/bazel-module/stack', () => {
       items                  | exp
       ${[]}                  | ${undefined}
       ${['first', 'second']} | ${'second'}
-    `('get current for $items', ({ items, exp }) => {
+    `('safely get current for $items', ({ items, exp }) => {
       const stack = Stack.create(...items);
       expect(stack.safeCurrent).toBe(exp);
+    });
+
+    it('current throws if no items', () => {
+      const stack = Stack.create<string>();
+      expect(() => stack.current).toThrow(
+        new Error('Requested current, but no value.')
+      );
     });
   });
 });
