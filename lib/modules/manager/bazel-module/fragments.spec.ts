@@ -1,6 +1,7 @@
 import {
   ArrayFragment,
   AttributeFragment,
+  Fragments,
   RecordFragment,
   StringFragment,
 } from './fragments';
@@ -60,6 +61,55 @@ describe('modules/manager/bazel-module/fragments', () => {
       attribute.addValue(value);
       expect(attribute.value).toEqual(value);
       expect(attribute.isComplete).toBe(true);
+    });
+  });
+
+  describe('Fragments', () => {
+    it.each`
+      frag                             | exp
+      ${new StringFragment('hello')}   | ${new StringFragment('hello')}
+      ${new ArrayFragment()}           | ${new ArrayFragment()}
+      ${new RecordFragment()}          | ${new RecordFragment()}
+      ${new AttributeFragment('name')} | ${undefined}
+    `('Fragments.safeAsValue($frag)', ({ frag, exp }) => {
+      const result = Fragments.safeAsValue(frag);
+      expect(result).toEqual(exp);
+    });
+
+    describe('asValue', () => {
+      it('returns the instance when it is a value fragment', () => {
+        const value = new StringFragment('hello');
+        const result = Fragments.asValue(value);
+        expect(result).toEqual(value);
+      });
+
+      it('throws when it is not a value fragment', () => {
+        const attribute = new AttributeFragment('name');
+        expect(() => Fragments.asValue(attribute)).toThrow(
+          new Error(`Unexpected fragment type: attribute`)
+        );
+      });
+    });
+
+    it.each`
+      frag                             | exp
+      ${new StringFragment('hello')}   | ${new StringFragment('hello')}
+      ${new ArrayFragment()}           | ${new ArrayFragment()}
+      ${new RecordFragment()}          | ${new RecordFragment()}
+      ${new AttributeFragment('name')} | ${new AttributeFragment('name')}
+    `('Fragments.asFragment($frag)', ({ frag, exp }) => {
+      const result = Fragments.asFragment(frag);
+      expect(result).toEqual(exp);
+    });
+
+    it.each`
+      fn                       | frag
+      ${Fragments.asString}    | ${new ArrayFragment()}
+      ${Fragments.asArray}     | ${new RecordFragment()}
+      ${Fragments.asRecord}    | ${new ArrayFragment()}
+      ${Fragments.asAttribute} | ${new ArrayFragment()}
+    `('$fn throws with $frag', ({ fn, frag }) => {
+      expect(() => fn(frag)).toThrow();
     });
   });
 });

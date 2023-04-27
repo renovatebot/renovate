@@ -84,13 +84,10 @@ export class Fragments {
     switch (frag.type) {
       case 'string':
         return Fragments.asString(frag);
-        break;
       case 'array':
         return Fragments.asArray(frag);
-        break;
       case 'record':
         return Fragments.asRecord(frag);
-        break;
       default:
         return undefined;
     }
@@ -101,7 +98,7 @@ export class Fragments {
     if (value) {
       return value;
     }
-    throw new Error(`Unexpected fragment type. ${frag.type}`);
+    throw new Error(`Unexpected fragment type: ${frag.type}`);
   }
 
   static asFragment(frag: FragmentCompatible): Fragment {
@@ -112,6 +109,7 @@ export class Fragments {
     if (frag.type === 'attribute') {
       return Fragments.asAttribute(frag);
     }
+    // istanbul ignore next: can only get here if new type addded, but no impl
     throw new Error(`Unexpected fragment type. ${frag.type}`);
   }
 
