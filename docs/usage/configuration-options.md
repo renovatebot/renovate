@@ -704,13 +704,15 @@ Configure this option if you prefer a different title for the Dependency Dashboa
 
 ## dependencyDashboardOSVVulnerabilitySummary
 
-Set this function to control if a summary of the CVEs affected should be added to the dependency dashboard.
+Use this option to control if the Dependency Dashboard should have a section that shows the CVEs for your repository.
 
-Available options are:
+The source of these CVEs is [OSV.dev](https://osv.dev/).
 
-- `none` ( default ) no section will be added.
-- `unresolved` only vulnerabilities will be added if there are no fixes available.
-- `all` list all vulnerabilities which affect this repository.
+You can choose from:
+
+- `none` (default) no section will be added
+- `unresolved` show vulnerabilities that have no fixes
+- `all` list all vulnerabilities
 
 ## description
 

@@ -522,8 +522,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
-    description:
-      'These labels will always be applied on the Dependency Dashboard issue, even when they have been removed manually.',
+    description: 'Set this option to display CVEs affecting dependencies.',
     type: 'string',
     allowedValues: ['none', 'all', 'unresolved'],
     default: 'none',
