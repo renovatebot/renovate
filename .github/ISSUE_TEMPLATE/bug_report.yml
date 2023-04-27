@@ -1,6 +1,7 @@
 name: Bug report
 description: Bug reports are only for maintainers. If you are a Renovate user, create a Discussion instead.
-labels: ['type:bug', 'status:requirements', 'priority-5-triage', 'needs-discussion']
+labels:
+  ['type:bug', 'status:requirements', 'priority-5-triage', 'needs-discussion']
 body:
   - type: markdown
     attributes:
