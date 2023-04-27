@@ -11,7 +11,7 @@ import {
   ValueFragment,
 } from './fragments';
 import { supportedRulesRegex } from './rules';
-import { Stack } from './types';
+import { Stack } from './stack';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {

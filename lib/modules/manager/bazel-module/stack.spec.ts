@@ -1,6 +1,6 @@
-import { Stack } from './types';
+import { Stack } from './stack';
 
-describe('modules/manager/bazel-module/types', () => {
+describe('modules/manager/bazel-module/stack', () => {
   describe('Stack', () => {
     it.each`
       items                  | exp
