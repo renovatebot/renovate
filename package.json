@@ -317,7 +317,7 @@
     "jest-mock-extended": "3.0.4",
     "lint-staged": "13.2.1",
     "markdownlint-cli2": "0.6.0",
-    "memfs": "3.5.0",
+    "memfs": "3.5.1",
     "mock-fs": "5.2.0",
     "mockdate": "3.0.5",
     "nock": "13.3.0",
