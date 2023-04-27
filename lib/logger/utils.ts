@@ -81,6 +81,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
         statusCode: err.response?.statusCode,
         statusMessage: err.response?.statusMessage,
         body:
+          // istanbul ignore if: not easily testable
           err.name === 'TimeoutError'
             ? undefined
             : structuredClone(err.response.body),
