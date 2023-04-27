@@ -387,8 +387,8 @@ export async function processBranch(
         result: 'no-work',
       };
     }
-    // if the base branch has been changed by user in renovate config, rebase the branch on the new baseBranch
-    // it's fine to use target-branch here because if the target-branch is different ie. changed by user we would stop the processing on line:210
+    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
     else if (
       branchPr?.targetBranch &&
       branchPr.targetBranch !== config.baseBranch
