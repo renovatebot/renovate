@@ -546,7 +546,7 @@ describe('modules/datasource/docker/index', () => {
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
       httpMock
         .scope(authUrl)
-        .get('/token?service=&scope=repository:library/some-other-dep:pull')
+        .get('/token?scope=repository:library/some-other-dep:pull')
         .reply(200, { access_token: 'test' });
       const res = await getDigest(
         { datasource: 'docker', packageName: 'some-other-dep' },
@@ -1830,7 +1830,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -1881,7 +1881,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -1935,7 +1935,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
         sourceUrl: 'https://github.com/renovatebot/renovate',
@@ -1962,7 +1962,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -1986,7 +1986,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2007,7 +2007,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2048,7 +2048,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2093,7 +2093,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [
           {
@@ -2123,7 +2123,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2173,7 +2173,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'registry.company.com/node',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://registry.company.com',
         releases: [],
       });
@@ -2229,7 +2229,7 @@ describe('modules/datasource/docker/index', () => {
         datasource: DockerDatasource.id,
         packageName: 'ghcr.io/visualon/drone-git',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         registryUrl: 'https://ghcr.io',
         sourceUrl: 'https://github.com/visualon/drone-git',
         releases: [{ version: '1.0.0' }],

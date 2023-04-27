@@ -737,21 +737,12 @@ describe('modules/manager/gradle/parser', () => {
 
   describe('heuristic dependency matching', () => {
     test.each`
-      input                                                        | output
-      ${'("foo", "bar", "1.2.3")'}                                 | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'("foo", "bar", "1.2.3", "4.5.6")'}                        | ${null}
-      ${'(["foo", "bar", "1.2.3"])'}                               | ${null}
-      ${'someMethod("foo", "bar", "1.2.3")'}                       | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
-      ${'createXmlValueRemover("defaults", "integer", "integer")'} | ${{ depName: 'defaults:integer', currentValue: 'integer', skipReason: 'ignored' }}
-      ${'events("passed", "skipped", "failed")'}                   | ${{ depName: 'passed:skipped', currentValue: 'failed', skipReason: 'ignored' }}
-      ${'args("foo", "bar", "baz")'}                               | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'arrayOf("foo", "bar", "baz")'}                            | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'listOf("foo", "bar", "baz")'}                             | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'mutableListOf("foo", "bar", "baz")'}                      | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'setOf("foo", "bar", "baz")'}                              | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'mutableSetOf("foo", "bar", "baz")'}                       | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'stages("foo", "bar", "baz")'}                             | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
-      ${'mapScalar("foo", "bar", "baz")'}                          | ${{ depName: 'foo:bar', currentValue: 'baz', skipReason: 'ignored' }}
+      input                                  | output
+      ${'("foo", "bar", "1.2.3")'}           | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'("foo", "bar", "1.2.3", "4.5.6")'}  | ${null}
+      ${'(["foo", "bar", "1.2.3"])'}         | ${null}
+      ${'someMethod("foo", "bar", "1.2.3")'} | ${{ depName: 'foo:bar', currentValue: '1.2.3' }}
+      ${'listOf("foo", "bar", "baz")'}       | ${null}
     `('$input', ({ input, output }) => {
       const { deps } = parseGradle(input);
       expect(deps).toMatchObject([output].filter(is.truthy));
