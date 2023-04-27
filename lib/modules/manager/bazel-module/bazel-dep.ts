@@ -17,7 +17,7 @@ const BooleanFragmentSchema = z.object({
   value: z.boolean(),
 });
 
-export const BazelDepRecord = z
+const BazelDepRecord = z
   .object({
     type: z.enum(['record']),
     isComplete: z.boolean(),
