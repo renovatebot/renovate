@@ -8,7 +8,7 @@ import {
 
 describe('modules/manager/bazel-module/fragments', () => {
   describe('StringFragment', () => {
-    it('constructor ', () => {
+    it('lifecycle ', () => {
       const string = new StringFragment('hello');
       expect(string.value).toBe('hello');
       expect(string.isComplete).toBe(true);

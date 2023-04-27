@@ -110,7 +110,7 @@ export class Fragments {
       return Fragments.asAttribute(frag);
     }
     // istanbul ignore next: can only get here if new type addded, but no impl
-    throw new Error(`Unexpected fragment type. ${frag.type}`);
+    throw new Error(`Unexpected fragment type: ${frag.type}`);
   }
 
   static asString(frag: FragmentCompatible): StringFragment {
