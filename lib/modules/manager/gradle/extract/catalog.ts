@@ -80,7 +80,7 @@ function extractVersion({
 }): VersionExtract {
   if (isVersionPointer(version)) {
     // This is to support dot annotation version reference
-    const parsedVersion = version.ref.replaceAll('.', '-').replaceAll('_', '-');
+    const parsedVersion = version.ref.replace(regEx(/[._]/g), '-');
     // everything else is ignored
     return extractLiteralVersion({
       version: versions[parsedVersion],
@@ -207,7 +207,7 @@ function extractDependency({
     };
   }
   const versionRef = isVersionPointer(descriptor.version)
-    ? descriptor.version.ref.replaceAll('.', '-').replaceAll('_', '-')
+    ? descriptor.version.ref.replace(regEx(/[._]/g), '-')
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
