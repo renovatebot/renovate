@@ -42,7 +42,10 @@ export async function detectMonorepos(
         .filter(Boolean);
 
       p.deps?.forEach((dep) => {
-        if (internalPackageNames.includes(dep.depName)) {
+        if (
+          is.string(dep.depName) &&
+          internalPackageNames.includes(dep.depName)
+        ) {
           dep.isInternal = true;
         }
       });

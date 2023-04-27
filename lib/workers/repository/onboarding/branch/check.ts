@@ -67,10 +67,13 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     return true;
   }
 
+  const pr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
+  // if onboarding cache is present and base branch has not been updated branch is not onboarded
+  // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
-    !closedPr &&
+    !pr &&
     onboardingBranchCache &&
     onboardingBranchCache.defaultBranchSha ===
       getBranchCommit(config.defaultBranch!)
@@ -120,8 +123,8 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   if (config.requireConfig === 'required' && config.onboarding === false) {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
-
-  if (!closedPr) {
+  
+  if (!pr) {
     logger.debug('Found no closed onboarding PR');
     return false;
   }

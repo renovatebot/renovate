@@ -3,6 +3,7 @@ import { hashicorp2npm, npm2hashicorp } from './convertor';
 describe('modules/versioning/hashicorp/convertor', () => {
   test.each`
     hashicorp           | npm
+    ${''}               | ${''}
     ${'4.2.0'}          | ${'4.2.0'}
     ${'4.2.0-alpha'}    | ${'4.2.0-alpha'}
     ${'~> 4.0'}         | ${'^4.0'}
