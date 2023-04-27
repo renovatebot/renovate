@@ -1,4 +1,3 @@
-import URL from 'node:url';
 import { ECR } from '@aws-sdk/client-ecr';
 import type { ECRClientConfig } from '@aws-sdk/client-ecr';
 import is from '@sindresorhus/is';
@@ -911,7 +910,7 @@ export class DockerDatasource extends Datasource {
           ? `${url}&last=${linkHeader.next.last}`
           : null;
       } else {
-        url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
+        url = linkHeader?.next ? new URL(linkHeader.next.url, url).href : null;
       }
       page += 1;
     } while (url && page < 20);

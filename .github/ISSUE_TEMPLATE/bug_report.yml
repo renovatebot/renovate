@@ -1,13 +1,14 @@
 name: Bug report
-description: Bug reports require a minimal reproduction and should be preceded by a Discussion first.
-labels: ['type:bug', 'status:requirements', 'priority-5-triage']
+description: Bug reports are only for maintainers. If you are a Renovate user, create a Discussion instead.
+labels:
+  ['type:bug', 'status:requirements', 'priority-5-triage', 'needs-discussion']
 body:
   - type: markdown
     attributes:
       value: |
-        Don't create a Bug Report like this without a GitHub Discussion and [minimal reproduction](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) first.
-        Invalid bug reports waste the time of maintainers and can confuse other users so they will closed, locked and deleted.
-        You are always welcome to create Discussions and new users should always do that instead.
+        STOP! Only create a Bug Report if you're a maintainer of Renovate.
+        If you're a user of Renovate, please create a GitHub Discussion.
+        Please go back a step and select Discussion instead of Issue.
 
   - type: dropdown
     id: how-are-you-running-renovate
