@@ -2,21 +2,41 @@ import { z } from 'zod';
 import { BazelDatasource } from '../../../datasource/bazel';
 import type { PackageDependency } from '../../types';
 
-export const BazelDepTarget = z.object({
-  rule: z.enum(['bazel_dep']),
-  name: z.string(),
-  version: z.string(),
-  dev_dependency: z.boolean().optional(),
+const StringFragmentSchema = z.object({
+  type: z.enum(['string']),
+  isComplete: z.boolean(),
+  value: z.string(),
 });
 
-export const BazelDepToPackageDependency = BazelDepTarget.transform(
-  ({ rule, name, version, dev_dependency }): PackageDependency[] => {
+const BooleanFragmentSchema = z.object({
+  type: z.enum(['boolean']),
+  isComplete: z.boolean(),
+  value: z.boolean(),
+});
+
+export const BazelDepRecord = z.object({
+  type: z.enum(['record']),
+  isComplete: z.boolean(),
+  children: z.object({
+    rule: z.object({
+      type: z.enum(['string']),
+      isComplete: z.boolean(),
+      value: z.enum(['bazel_dep']),
+    }),
+    name: StringFragmentSchema,
+    version: StringFragmentSchema,
+    dev_dependency: BooleanFragmentSchema.optional(),
+  }),
+});
+
+export const BazelDepRecordToPackageDependency = BazelDepRecord.transform(
+  ({ children: { rule, name, version } }): PackageDependency => {
     const dep: PackageDependency = {
       datasource: BazelDatasource.id,
-      depType: rule,
-      depName: name,
-      currentValue: version,
+      depType: rule.value,
+      depName: name.value,
+      currentValue: version.value,
     };
-    return [dep];
+    return dep;
   }
 );

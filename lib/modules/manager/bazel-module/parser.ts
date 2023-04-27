@@ -1,8 +1,12 @@
 import { lang, query as q } from 'good-enough-parser';
 import { logger } from '../../../logger';
+import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { ValueFragment } from './fragments';
 import { supportedRulesRegex } from './rules';
+import { StarlarkBoolean } from './starlark';
+
+const booleanValuesRegex = regEx(`^${StarlarkBoolean.stringValues.join('|')}$`);
 
 /**
  * Matches key-value pairs:
@@ -24,9 +28,14 @@ const kwParams = q
     return Ctx.from(ctx).startAttribute(token.value);
   })
   .op('=')
-  .str((ctx, token) => {
-    return Ctx.from(ctx).addString(token.value);
-  });
+  .alt(
+    q.str((ctx, token) => {
+      return Ctx.from(ctx).addString(token.value);
+    }),
+    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => {
+      return Ctx.from(ctx).addBoolean(token.value);
+    })
+  );
 
 const moduleRules = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) => {
@@ -66,7 +75,7 @@ export function parse(
       result = parsedResult.results;
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Bazel parsing error');
+    logger.debug({ err, packageFile }, 'Bazel module parsing error');
   }
 
   return result;

@@ -1,6 +1,7 @@
 import {
   ArrayFragment,
   AttributeFragment,
+  BooleanFragment,
   ChildFragments,
   Fragment,
   Fragments,
@@ -90,6 +91,11 @@ export class Ctx implements CtxCompatible {
 
   addString(value: string): Ctx {
     this.stack.push(new StringFragment(value));
+    return this.processStack();
+  }
+
+  addBoolean(value: string | boolean): Ctx {
+    this.stack.push(new BooleanFragment(value));
     return this.processStack();
   }
 

@@ -1,44 +1,25 @@
-import { parse } from '../bazel/parser';
-import type { RecordFragment } from '../bazel/types';
-import type { PackageDependency, PackageFileContent } from '../types';
-
-// import { parse } from './parser';
-// import { extractDepsFromFragment } from './rules';
-// import type { RecordFragment } from './types';
+import type { PackageFileContent } from '../types';
+import { instanceExists } from './filters';
+import { RecordFragment } from './fragments';
+import { parse } from './parser';
+import { BazelDepRecordToPackageDependency } from './rules';
 
 export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFileContent | null {
-  const deps: PackageDependency[] = [];
-
-  const fragments: RecordFragment[] | null = parse(content, packageFile);
+  const fragments = parse(content, packageFile);
   if (!fragments) {
     return null;
   }
-
-  // for (let idx = 0; idx < fragments.length; idx += 1) {
-  //   const fragment = fragments[idx];
-  //   for (const dep of extractDepsFromFragment(fragment)) {
-  //     dep.managerData = { idx };
-
-  //     // // Selectively provide `replaceString` in order
-  //     // // to auto-replace functionality work correctly.
-  //     // const replaceString = fragment.value;
-  //     // if (
-  //     //   replaceString.startsWith('container_pull') ||
-  //     //   replaceString.startsWith('oci_pull') ||
-  //     //   replaceString.startsWith('git_repository') ||
-  //     //   replaceString.startsWith('go_repository')
-  //     // ) {
-  //     //   if (dep.currentValue && dep.currentDigest) {
-  //     //     dep.replaceString = replaceString;
-  //     //   }
-  //     // }
-
-  //     deps.push(dep);
-  //   }
-  // }
-
+  const deps = fragments
+    .filter((value) => value instanceof RecordFragment)
+    .map((value) => value as RecordFragment)
+    .filter((record) => record.isRule('bazel_dep'))
+    .map((record) => {
+      const result = BazelDepRecordToPackageDependency.safeParse(record);
+      return result.success ? result.data : undefined;
+    })
+    .filter(instanceExists);
   return deps.length ? { deps } : null;
 }

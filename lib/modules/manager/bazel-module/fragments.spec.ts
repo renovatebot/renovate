@@ -1,6 +1,7 @@
 import {
   ArrayFragment,
   AttributeFragment,
+  BooleanFragment,
   Fragments,
   RecordFragment,
   StringFragment,
@@ -13,6 +14,27 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(string.value).toBe('hello');
       expect(string.isComplete).toBe(true);
     });
+  });
+
+  describe('BooleanFragment', () => {
+    it('lifecycle ', () => {
+      const bool = new BooleanFragment(true);
+      expect(bool.value).toBe(true);
+      expect(bool.isComplete).toBe(true);
+    });
+
+    it.each`
+      a          | exp
+      ${true}    | ${true}
+      ${false}   | ${false}
+      ${'True'}  | ${true}
+      ${'False'} | ${false}
+    `('new BooleanFragment($a)', ({ a, exp }) => {
+      const bool = new BooleanFragment(a);
+      expect(bool.value).toBe(exp);
+    });
+
+    it.todo('Add test for invalid string');
   });
 
   describe('ArrayFragment', () => {

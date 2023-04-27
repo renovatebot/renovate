@@ -1,6 +1,12 @@
 import is from '@sindresorhus/is';
+import { StarlarkBoolean } from './starlark';
 
-export type FragmentType = 'string' | 'array' | 'record' | 'attribute';
+export type FragmentType =
+  | 'string'
+  | 'boolean'
+  | 'array'
+  | 'record'
+  | 'attribute';
 
 export interface FragmentCompatible {
   readonly type: FragmentType;
@@ -10,6 +16,16 @@ export class StringFragment implements FragmentCompatible {
   readonly type: FragmentType = 'string';
   readonly isComplete = true;
   constructor(readonly value: string) {}
+}
+
+export class BooleanFragment implements FragmentCompatible {
+  readonly type: FragmentType = 'boolean';
+  readonly isComplete = true;
+  readonly value: boolean;
+  constructor(input: boolean | string) {
+    this.value =
+      typeof input === 'string' ? StarlarkBoolean.asBoolean(input) : input;
+  }
 }
 
 export class ArrayFragment implements FragmentCompatible {
@@ -75,7 +91,11 @@ export class AttributeFragment implements FragmentCompatible {
   }
 }
 
-export type ValueFragment = ArrayFragment | RecordFragment | StringFragment;
+export type ValueFragment =
+  | ArrayFragment
+  | BooleanFragment
+  | RecordFragment
+  | StringFragment;
 export type ChildFragments = Record<string, ValueFragment>;
 export type Fragment = ValueFragment | AttributeFragment;
 
@@ -95,6 +115,8 @@ export class Fragments {
     switch (frag.type) {
       case 'string':
         return Fragments.asString(frag);
+      case 'boolean':
+        return Fragments.asBoolean(frag);
       case 'array':
         return Fragments.asArray(frag);
       case 'record':
@@ -122,6 +144,12 @@ export class Fragments {
     }
     // istanbul ignore next: can only get here if new type addded, but no impl
     throw new Error(`Unexpected fragment type: ${frag.type}`);
+  }
+
+  static asBoolean(frag: FragmentCompatible): BooleanFragment {
+    Fragments.checkType('boolean', frag.type);
+    Object.setPrototypeOf(frag, BooleanFragment.prototype);
+    return frag as BooleanFragment;
   }
 
   static asString(frag: FragmentCompatible): StringFragment {
