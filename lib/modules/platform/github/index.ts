@@ -393,6 +393,7 @@ export async function initRepo({
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
+      logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
