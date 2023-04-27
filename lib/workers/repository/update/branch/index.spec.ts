@@ -1060,6 +1060,38 @@ describe('workers/repository/update/branch/index', () => {
       });
     });
 
+    it('rebases branch onto new basebranch if baseBranch changed by user', async () => {
+      const pr = partial<Pr>({
+        state: 'open',
+        targetBranch: 'old_base',
+        bodyStruct: partial<PrBodyStruct>({
+          debugData: partial<PrDebugData>({ targetBranch: 'old_base' }),
+        }),
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      await branchWorker.processBranch({
+        ...config,
+        baseBranch: 'new_base',
+        skipBranchUpdate: true,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
+    });
+
     it('swallows pr errors', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
         partial<PackageFilesResult>({

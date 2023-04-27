@@ -393,6 +393,9 @@ export async function processBranch(
       branchPr?.targetBranch &&
       branchPr.targetBranch !== config.baseBranch
     ) {
+      logger.debug(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
       config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
