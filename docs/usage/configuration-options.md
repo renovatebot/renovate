@@ -402,9 +402,9 @@ For `sbt` note that Renovate will update the version string only for packages th
 
 ## checkedBranches
 
-GitHub offers an interactive dependency dashboard while some other platforms don't have that option.
+This array will allow you to set the names of the branches you want to rebase/create as if you ticked their checkboxes in dependency dashboard.
 
-This array will allow you to set the names of the branches you want to rebase/create as if you checked their boxes in dependency dashboard.
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will result in the rebasing of the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
 
 ## cloneSubmodules
 
