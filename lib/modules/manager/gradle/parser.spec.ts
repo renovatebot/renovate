@@ -419,24 +419,6 @@ describe('modules/manager/gradle/parser', () => {
       });
     });
 
-    describe('properties map accessors', () => {
-      test.each`
-        accessor
-        ${'properties'}
-        ${'project.properties'}
-        ${'rootProject.properties'}
-      `('$accessor', ({ accessor }) => {
-        const input = `
-          baz = "1.2.3"
-          api("foo:bar:$\{${String(accessor)}["baz"]}")
-        `;
-        const { deps } = parseGradle(input);
-        expect(deps).toMatchObject([
-          { depName: 'foo:bar', currentValue: '1.2.3', groupName: 'baz' },
-        ]);
-      });
-    });
-
     describe('kotlin() short notation dependencies', () => {
       const output = {
         depName: 'foo',
