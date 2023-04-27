@@ -43,6 +43,17 @@ export class RecordFragment implements FragmentCompatible {
     }
     this.children[attrib.name] = attrib.value;
   }
+
+  isRule(type?: string): boolean {
+    let result = 'rule' in this.children;
+    if (type) {
+      const ruleValue = this.children['rule'];
+      const ruleValueStr =
+        ruleValue instanceof StringFragment ? ruleValue : undefined;
+      result = result && ruleValueStr?.value === type;
+    }
+    return result;
+  }
 }
 
 export class AttributeFragment implements FragmentCompatible {

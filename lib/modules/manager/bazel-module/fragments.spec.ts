@@ -48,6 +48,18 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(record.children).toEqual({ name: new StringFragment('chicken') });
       expect(record.isComplete).toBe(false);
     });
+
+    it.each`
+      record                                                           | type           | exp
+      ${new RecordFragment()}                                          | ${undefined}   | ${false}
+      ${new RecordFragment()}                                          | ${'bazel_dep'} | ${false}
+      ${new RecordFragment({ rule: new StringFragment('bazel_dep') })} | ${undefined}   | ${true}
+      ${new RecordFragment({ rule: new StringFragment('bazel_dep') })} | ${'bazel_dep'} | ${true}
+      ${new RecordFragment({ rule: new StringFragment('foo') })}       | ${'bazel_dep'} | ${false}
+      ${new RecordFragment({ rule: new ArrayFragment() })}             | ${'bazel_dep'} | ${false}
+    `('.isRule', ({ record, type, exp }) => {
+      expect(record.isRule(type)).toBe(exp);
+    });
   });
 
   describe('AttributeFragment', () => {
