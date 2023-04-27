@@ -3,10 +3,11 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { ValueFragment } from './fragments';
-import { supportedRulesRegex } from './rules';
 import { StarlarkBoolean } from './starlark';
 
 const booleanValuesRegex = regEx(`^${StarlarkBoolean.stringValues.join('|')}$`);
+const supportedRules = ['bazel_dep'];
+const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 /**
  * Matches key-value pairs:

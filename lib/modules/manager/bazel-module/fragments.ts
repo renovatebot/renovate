@@ -147,18 +147,27 @@ export class Fragments {
   }
 
   static asBoolean(frag: FragmentCompatible): BooleanFragment {
+    if (frag instanceof BooleanFragment) {
+      return frag;
+    }
     Fragments.checkType('boolean', frag.type);
     Object.setPrototypeOf(frag, BooleanFragment.prototype);
     return frag as BooleanFragment;
   }
 
   static asString(frag: FragmentCompatible): StringFragment {
+    if (frag instanceof StringFragment) {
+      return frag;
+    }
     Fragments.checkType('string', frag.type);
     Object.setPrototypeOf(frag, StringFragment.prototype);
     return frag as StringFragment;
   }
 
   static asArray(frag: FragmentCompatible): ArrayFragment {
+    if (frag instanceof ArrayFragment) {
+      return frag;
+    }
     Fragments.checkType('array', frag.type);
     Object.setPrototypeOf(frag, ArrayFragment.prototype);
     const array = frag as ArrayFragment;
@@ -169,6 +178,9 @@ export class Fragments {
   }
 
   static asRecord(frag: FragmentCompatible): RecordFragment {
+    if (frag instanceof RecordFragment) {
+      return frag;
+    }
     Fragments.checkType('record', frag.type);
     Object.setPrototypeOf(frag, RecordFragment.prototype);
     const record = frag as RecordFragment;
@@ -182,6 +194,9 @@ export class Fragments {
   static safeAsAttribute(
     frag: FragmentCompatible
   ): AttributeFragment | undefined {
+    if (frag instanceof AttributeFragment) {
+      return frag;
+    }
     if (frag.type !== 'attribute') {
       return undefined;
     }
