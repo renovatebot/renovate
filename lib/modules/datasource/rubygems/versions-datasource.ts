@@ -10,9 +10,11 @@ import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+type PackageReleases = Record<string, string[]>;
+
 interface RegistryCache {
   lastSync: Date;
-  packageReleases: Record<string, string[]>; // Because we might need a "constructor" key
+  packageReleases: PackageReleases;
   contentLength: number;
   isSupported: boolean;
   registryUrl: string;
@@ -99,8 +101,10 @@ export class VersionsDatasource extends Datasource {
     return (' ' + x).slice(1);
   }
 
-  private updateRegistryCache(regCache: RegistryCache, lines: Lines): void {
-    const { packageReleases } = regCache;
+  private updatePackageReleases(
+    packageReleases: PackageReleases,
+    lines: Lines
+  ): void {
     for (const line of lines) {
       const packageName = VersionsDatasource.copystr(line.packageName);
       let versions = packageReleases[packageName] ?? [];
@@ -140,26 +144,30 @@ export class VersionsDatasource extends Datasource {
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
-      regCache.isSupported = true;
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         regCache.isSupported = false;
         return;
       }
-      if (err.statusCode !== 416) {
-        regCache.contentLength = 0;
-        regCache.packageReleases = {};
-        logger.debug({ err }, 'Rubygems fetch error');
-        throw new ExternalHostError(new Error('Rubygems fetch error'));
+
+      if (err.statusCode === 416) {
+        logger.debug('Rubygems: No update');
+        regCache.lastSync = new Date();
+        return;
       }
-      logger.debug('Rubygems: No update');
-      regCache.lastSync = new Date();
-      return;
+
+      regCache.contentLength = 0;
+      regCache.packageReleases = {};
+
+      logger.debug({ err }, 'Rubygems fetch error');
+      throw new ExternalHostError(err);
     }
 
-    const lines = Lines.parse(newLines);
-    this.updateRegistryCache(regCache, lines);
+    regCache.isSupported = true;
     regCache.lastSync = new Date();
+
+    const lines = Lines.parse(newLines);
+    this.updatePackageReleases(regCache.packageReleases, lines);
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
