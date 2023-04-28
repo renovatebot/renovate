@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
@@ -5,6 +6,7 @@ import * as memCache from '../../../util/cache/memory';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
+import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -15,6 +17,35 @@ interface RegistryCache {
   isSupported: boolean;
   registryUrl: string;
 }
+
+const Lines = z
+  .string()
+  .transform((x) => x.split(newlineRegex))
+  .pipe(
+    LooseArray(
+      z
+        .string()
+        .transform((line) => line.trim())
+        .refine((line) => line.length > 0)
+        .refine((line) => !line.startsWith('created_at:'))
+        .refine((line) => line !== '---')
+        .transform((line) => line.split(' '))
+        .pipe(z.tuple([z.string(), z.string()]).rest(z.string()))
+        .transform(([packageName, versions]) => {
+          const deletedVersions = new Set<string>();
+          const addedVersions: string[] = [];
+          for (const version of versions.split(',')) {
+            if (version.startsWith('-')) {
+              deletedVersions.add(version.slice(1));
+            } else {
+              addedVersions.push(version);
+            }
+          }
+          return { packageName, deletedVersions, addedVersions };
+        })
+    )
+  );
+type Lines = z.infer<typeof Lines>;
 
 export class VersionsDatasource extends Datasource {
   constructor(override readonly id: string) {
@@ -69,6 +100,29 @@ export class VersionsDatasource extends Datasource {
     return (' ' + x).slice(1);
   }
 
+  private updateRegistryCache(regCache: RegistryCache, lines: Lines): void {
+    const { packageReleases } = regCache;
+    for (const line of lines) {
+      const packageName = VersionsDatasource.copystr(line.packageName);
+      let versions = packageReleases[packageName] ?? [];
+
+      const { deletedVersions, addedVersions } = line;
+
+      if (deletedVersions.size > 0) {
+        versions = versions.filter((v) => !deletedVersions.has(v));
+      }
+
+      for (const addedVersion of addedVersions) {
+        if (!versions.includes(addedVersion)) {
+          const version = VersionsDatasource.copystr(addedVersion);
+          versions.push(version);
+        }
+      }
+
+      packageReleases[packageName] = versions;
+    }
+  }
+
   async updateRubyGemsVersions(regCache: RegistryCache): Promise<void> {
     const url = `${regCache.registryUrl}/versions`;
     const options = {
@@ -101,55 +155,16 @@ export class VersionsDatasource extends Datasource {
       return;
     }
 
-    for (const line of newLines.split(newlineRegex)) {
-      this.processLine(regCache, line);
-    }
+    const lines = Lines.parse(newLines);
+    this.updateRegistryCache(regCache, lines);
     regCache.lastSync = new Date();
-  }
-
-  private processLine(regCache: RegistryCache, line: string): void {
-    let split: string[] | undefined;
-    let pkg: string | undefined;
-    let versions: string | undefined;
-    try {
-      const l = line.trim();
-      if (!l.length || l.startsWith('created_at:') || l === '---') {
-        return;
-      }
-      split = l.split(' ');
-      [pkg, versions] = split;
-      pkg = VersionsDatasource.copystr(pkg);
-      regCache.packageReleases[pkg] ??= [];
-      const lineVersions = versions.split(',').map((version) => version.trim());
-      for (const lineVersion of lineVersions) {
-        if (lineVersion.startsWith('-')) {
-          const deletedVersion = lineVersion.slice(1);
-          logger.trace({ pkg, deletedVersion }, 'Rubygems: Deleting version');
-          regCache.packageReleases[pkg] = regCache.packageReleases[pkg].filter(
-            (version) => version !== deletedVersion
-          );
-        } else {
-          regCache.packageReleases[pkg].push(
-            VersionsDatasource.copystr(lineVersion)
-          );
-        }
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn(
-        { err, line, split, pkg, versions },
-        'Rubygems line parsing error'
-      );
-    }
-  }
-
-  private isDataStale({ lastSync }: RegistryCache): boolean {
-    return getElapsedMinutes(lastSync) >= 15;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
 
   async syncVersions(regCache: RegistryCache): Promise<void> {
-    if (this.isDataStale(regCache)) {
+    const isStale = getElapsedMinutes(regCache.lastSync) >= 15;
+    if (isStale) {
       this.updateRubyGemsVersionsPromise =
         this.updateRubyGemsVersionsPromise ??
         this.updateRubyGemsVersions(regCache);
