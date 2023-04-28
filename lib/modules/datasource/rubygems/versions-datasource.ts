@@ -48,6 +48,8 @@ const Lines = z
 type Lines = z.infer<typeof Lines>;
 
 export class VersionsDatasource extends Datasource {
+  private isInitialFetch = true;
+
   constructor(override readonly id: string) {
     super(id);
   }
@@ -93,16 +95,28 @@ export class VersionsDatasource extends Datasource {
   }
 
   /**
-   * https://bugs.chromium.org/p/v8/issues/detail?id=2869
+   * Since each `/versions` reponse exceed 10MB,
+   * there is potential for a memory leak if we construct slices
+   * of the response body and cache them long-term:
+   *
+   *   https://bugs.chromium.org/p/v8/issues/detail?id=2869
+   *
+   * This method meant to be called for `version` and `packageName`
+   * before storing them in the cache.
    */
-  private static copystr(x: string): string {
-    return (' ' + x).slice(1);
+  private copystr(x: string): string {
+    const len = Buffer.byteLength(x, 'utf8');
+    const buf = this.isInitialFetch
+      ? Buffer.allocUnsafe(len) // allocate from pre-allocated buffer
+      : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
+    buf.write(x, 'utf8');
+    return buf.toString('utf8');
   }
 
   private updateRegistryCache(regCache: RegistryCache, lines: Lines): void {
     const { packageReleases } = regCache;
     for (const line of lines) {
-      const packageName = VersionsDatasource.copystr(line.packageName);
+      const packageName = this.copystr(line.packageName);
       let versions = packageReleases[packageName] ?? [];
 
       const { deletedVersions, addedVersions } = line;
@@ -112,7 +126,7 @@ export class VersionsDatasource extends Datasource {
       }
 
       for (const addedVersion of addedVersions) {
-        const version = VersionsDatasource.copystr(addedVersion);
+        const version = this.copystr(addedVersion);
         versions.push(version);
       }
 
@@ -154,6 +168,7 @@ export class VersionsDatasource extends Datasource {
 
     const lines = Lines.parse(newLines);
     this.updateRegistryCache(regCache, lines);
+    this.isInitialFetch = false;
     regCache.lastSync = new Date();
   }
 
