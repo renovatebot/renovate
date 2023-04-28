@@ -522,7 +522,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
-    description: 'Set this option to display CVEs affecting dependencies.',
+    description: 'Control if the Dependency Dashboard issue shows CVEs.',
     type: 'string',
     allowedValues: ['none', 'all', 'unresolved'],
     default: 'none',
