@@ -9,7 +9,7 @@ export async function prAlreadyExisted(
 ): Promise<Pr | null> {
   logger.trace({ config }, 'prAlreadyExisted');
   if (config.recreateClosed === 'always') {
-    logger.debug('recreateClosed is "always". No need to check for closed PR');
+    logger.debug('recreateClosed is "always". No need to check for closed PR.');
     return null;
   }
   logger.debug('Check for closed PR as recreating closed PRs is disabled.');
