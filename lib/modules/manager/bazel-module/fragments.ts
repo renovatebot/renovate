@@ -1,5 +1,53 @@
 import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { StarlarkBoolean } from './starlark';
+
+// Fragment Schemas
+
+const FragmentTypeSchema = z.enum([
+  'string',
+  'boolean',
+  'array',
+  'record',
+  'attribute',
+]);
+const CommonFragmentSchema = z.object({
+  type: FragmentTypeSchema,
+});
+const CompletableSchema = z.object({
+  isComplete: z.boolean(),
+});
+const ChildFragmentsSchema = z.record(z.string(), CommonFragmentSchema);
+const StringFragmentSchema = CommonFragmentSchema.merge(
+  CompletableSchema
+).extend({
+  type: z.enum(['string']),
+  value: z.string(),
+});
+const BooleanFragmentSchema = CommonFragmentSchema.merge(
+  CompletableSchema
+).extend({
+  type: z.enum(['boolean']),
+  value: z.boolean(),
+});
+const ArrayFragmentSchema = CommonFragmentSchema.merge(
+  CompletableSchema
+).extend({
+  type: z.enum(['array']),
+  items: z.array(CommonFragmentSchema),
+});
+const RecordFragmentSchema = CommonFragmentSchema.merge(
+  CompletableSchema
+).extend({
+  type: z.enum(['record']),
+  children: ChildFragmentsSchema,
+});
+const AttributeFragmentSchema = CommonFragmentSchema.extend({
+  type: z.enum(['attribute']),
+  value: CommonFragmentSchema.optional(),
+});
+
+// Fragment Types
 
 export type FragmentType =
   | 'string'
@@ -13,12 +61,14 @@ export interface FragmentCompatible {
 }
 
 export class StringFragment implements FragmentCompatible {
+  static readonly schema = StringFragmentSchema;
   readonly type: FragmentType = 'string';
   readonly isComplete = true;
   constructor(readonly value: string) {}
 }
 
 export class BooleanFragment implements FragmentCompatible {
+  static readonly schema = BooleanFragmentSchema;
   readonly type: FragmentType = 'boolean';
   readonly isComplete = true;
   readonly value: boolean;
@@ -29,6 +79,7 @@ export class BooleanFragment implements FragmentCompatible {
 }
 
 export class ArrayFragment implements FragmentCompatible {
+  static readonly schema = ArrayFragmentSchema;
   readonly type: FragmentType = 'array';
   isComplete = false;
   items: ValueFragment[] = [];
@@ -44,6 +95,7 @@ export class ArrayFragment implements FragmentCompatible {
 }
 
 export class RecordFragment implements FragmentCompatible {
+  static readonly schema = RecordFragmentSchema;
   readonly type: FragmentType = 'record';
   isComplete = false;
   children: ChildFragments;
@@ -73,6 +125,7 @@ export class RecordFragment implements FragmentCompatible {
 }
 
 export class AttributeFragment implements FragmentCompatible {
+  static readonly schema = AttributeFragmentSchema;
   readonly type: FragmentType = 'attribute';
   readonly name: string;
   value?: ValueFragment;
@@ -99,16 +152,11 @@ export type ValueFragment =
 export type ChildFragments = Record<string, ValueFragment>;
 export type Fragment = ValueFragment | AttributeFragment;
 
+// Fragments Class
+
 export class Fragments {
   private static typeError(expected: string, actual: string): Error {
     return new Error(`Expected type ${expected}, but was ${actual}.`);
-  }
-
-  private static checkType(expected: string, actual: string): void {
-    if (expected === actual) {
-      return;
-    }
-    throw Fragments.typeError(expected, actual);
   }
 
   static safeAsValue(frag: FragmentCompatible): ValueFragment | undefined {
@@ -150,7 +198,8 @@ export class Fragments {
     if (frag instanceof BooleanFragment) {
       return frag;
     }
-    Fragments.checkType('boolean', frag.type);
+    BooleanFragmentSchema.parse(frag);
+    // Fragments.checkType('boolean', frag.type);
     Object.setPrototypeOf(frag, BooleanFragment.prototype);
     return frag as BooleanFragment;
   }
@@ -159,7 +208,7 @@ export class Fragments {
     if (frag instanceof StringFragment) {
       return frag;
     }
-    Fragments.checkType('string', frag.type);
+    StringFragmentSchema.parse(frag);
     Object.setPrototypeOf(frag, StringFragment.prototype);
     return frag as StringFragment;
   }
@@ -168,7 +217,7 @@ export class Fragments {
     if (frag instanceof ArrayFragment) {
       return frag;
     }
-    Fragments.checkType('array', frag.type);
+    ArrayFragmentSchema.parse(frag);
     Object.setPrototypeOf(frag, ArrayFragment.prototype);
     const array = frag as ArrayFragment;
     for (let i = 0; i < array.items.length; i++) {
@@ -181,7 +230,8 @@ export class Fragments {
     if (frag instanceof RecordFragment) {
       return frag;
     }
-    if (frag.type !== 'record') {
+    const parseResult = RecordFragmentSchema.safeParse(frag);
+    if (!parseResult.success) {
       return undefined;
     }
     Object.setPrototypeOf(frag, RecordFragment.prototype);
@@ -207,7 +257,8 @@ export class Fragments {
     if (frag instanceof AttributeFragment) {
       return frag;
     }
-    if (frag.type !== 'attribute') {
+    const parseResult = AttributeFragmentSchema.safeParse(frag);
+    if (!parseResult.success) {
       return undefined;
     }
     Object.setPrototypeOf(frag, AttributeFragment.prototype);
