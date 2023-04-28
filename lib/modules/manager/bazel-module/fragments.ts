@@ -188,7 +188,6 @@ export class Fragments {
       return frag;
     }
     BooleanFragmentSchema.parse(frag);
-    // Fragments.checkType('boolean', frag.type);
     Object.setPrototypeOf(frag, BooleanFragment.prototype);
     return frag as BooleanFragment;
   }
@@ -237,7 +236,7 @@ export class Fragments {
     if (record) {
       return record;
     }
-    throw this.typeError('record', frag.type);
+    throw Fragments.typeError('record', frag.type);
   }
 
   static safeAsAttribute(
@@ -263,6 +262,6 @@ export class Fragments {
     if (attribute) {
       return attribute;
     }
-    throw this.typeError('attribute', frag.type);
+    throw Fragments.typeError('attribute', frag.type);
   }
 }

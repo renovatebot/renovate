@@ -14,6 +14,7 @@ export function extractPackageFile(
   const deps = fragments
     .map((record) => {
       const result = BazelDepRecordToPackageDependency.safeParse(record);
+      // istanbul ignore next: cannot reach undefined without an additional rule
       return result.success ? result.data : undefined;
     })
     .filter(instanceExists);
