@@ -18,7 +18,7 @@ The manager's `index.ts` file supports the following values/functions:
 | ----------------------------- | -------- | ----- |
 | `bumpPackageVersion`          | yes      |       |
 | `extractPackageFile`          |          | yes   |
-| `extractAllPackageFiles`      |          | yes   |
+| `extractAllPackageFiles`      | yes      | yes   |
 | `getRangeStrategy`            | yes      |       |
 | `language`                    | yes      |       |
 | `supportsLockFileMaintenance` | yes      |       |
@@ -29,7 +29,7 @@ The manager's `index.ts` file supports the following values/functions:
 ### `bumpPackageVersion` (optional)
 
 Use this function to allow version bumps of updated packages.
-For example, increase the version of a Maven module if a package has been updated.
+For example, to increase the version of a Maven module if a package has been updated.
 Another example would be to bump the Helm chart version, if a subchart version has been updated.
 
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
@@ -82,10 +82,10 @@ Set to true if this package manager needs to update lock files in addition to pa
 
 ### `updateArtifacts` (async, optional)
 
-This function is used to run binaries which in turn then will update files.
-Mostly the functionality is used to indirectly update lock files.
+Use `updateArtifacts` to run binaries that in turn will update files.
+`updateArtifacts` is often used to indirectly update lock files.
 
-In case of directly updating dependencies in lock files use `updateLockedDependency` instead.
+To _directly_ update dependencies in lock files: use `updateLockedDependency` instead.
 
 `updateArtifacts` gets triggers:
 
@@ -94,8 +94,11 @@ In case of directly updating dependencies in lock files use `updateLockedDepende
 
 ### `updateDependency` (optional)
 
-`updateDependency` is used if the manager can not be updated with the standard replacing mechanisms and a custom replacement has to be provided.
+Use `updateDependency` if _both_ conditions apply:
+
+- the manager can't be updated to use the standard replacing mechanism
+- a custom replacement has to be provided
 
 ### `updateLockedDependency` (optional)
 
-This function should be used if dependencies in lock files are directly updated.
+Use `updateLockedDependency` to directly update dependencies in lock files.
