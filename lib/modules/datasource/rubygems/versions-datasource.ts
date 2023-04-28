@@ -113,10 +113,8 @@ export class VersionsDatasource extends Datasource {
       }
 
       for (const addedVersion of addedVersions) {
-        if (!versions.includes(addedVersion)) {
-          const version = VersionsDatasource.copystr(addedVersion);
-          versions.push(version);
-        }
+        const version = VersionsDatasource.copystr(addedVersion);
+        versions.push(version);
       }
 
       packageReleases[packageName] = versions;
