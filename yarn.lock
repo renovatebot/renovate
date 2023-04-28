@@ -2916,14 +2916,6 @@
   resolved "https://registry.yarnpkg.com/@types/github-url-from-git/-/github-url-from-git-1.5.1.tgz#73b1b6fa0490b903f50e7d7d9897d91769a15d8d"
   integrity sha512-B/SvVZMrLRUI9mOoguNNz58gV8A5PDtcGIaUe5PYmzAUTsIJ+ZAn/ujwBIuGIU3mRHY5SfV9dyWfnhOWtOVh6A==
 
-"@types/glob@8.1.0":
-  version "8.1.0"
-  resolved "https://registry.yarnpkg.com/@types/glob/-/glob-8.1.0.tgz#b63e70155391b0584dce44e7ea25190bbc38f2fc"
-  integrity sha512-IO+MJPVhoqz+28h1qLAcBEH2+xHMK6MTyHJc7MTnnYb6wsoLR29POVGJ7LycmVXIqyy/4/2ShP5sUwTXuOwb/w==
-  dependencies:
-    "@types/minimatch" "^5.1.2"
-    "@types/node" "*"
-
 "@types/global-agent@2.1.1":
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@types/global-agent/-/global-agent-2.1.1.tgz#3f93185e48a3a36e377a52a8301320cd162a831b"
@@ -3051,7 +3043,7 @@
   resolved "https://registry.yarnpkg.com/@types/mdurl/-/mdurl-1.0.2.tgz#e2ce9d83a613bacf284c7be7d491945e39e1f8e9"
   integrity sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==
 
-"@types/minimatch@^5.1.2":
+"@types/minimatch@5.1.2":
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-5.1.2.tgz#07508b45797cb81ec3f273011b054cd0755eddca"
   integrity sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==
