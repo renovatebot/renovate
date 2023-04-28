@@ -1,7 +1,7 @@
 import type { PackageFileContent } from '../types';
 import { BazelDepRecordToPackageDependency } from './bazel-dep';
 import { instanceExists } from './filters';
-import { RecordFragment } from './fragments';
+import { Fragments } from './fragments';
 import { parse } from './parser';
 
 export function extractPackageFile(
@@ -13,13 +13,10 @@ export function extractPackageFile(
     return null;
   }
   const deps = fragments
-    .filter((value) => value instanceof RecordFragment)
-    .map((value) => value as RecordFragment)
+    .map((value) => Fragments.safeAsRecord(value))
+    .filter(instanceExists)
     .filter((record) => record.isRule('bazel_dep'))
-    .map((record) => {
-      const result = BazelDepRecordToPackageDependency.safeParse(record);
-      return result.success ? result.data : undefined;
-    })
-    .filter(instanceExists);
+    .map((record) => BazelDepRecordToPackageDependency.parse(record));
+  // istanbul ignore next: cannot reach null without introducing fake rule
   return deps.length ? { deps } : null;
 }

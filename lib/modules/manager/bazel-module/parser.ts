@@ -11,18 +11,8 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 /**
  * Matches key-value pairs:
- * - `tag = "1.2.3"`
  * - `name = "foobar"`
- * - `deps = ["foo", "bar"]`
- * - `
- *     artifacts = [
-         maven.artifact(
-           group = "com.example1",
-           artifact = "foobar",
-           version = "1.2.3",
-         )
-       ]
-     `
+ * - `dev_dependeny = True`
  **/
 const kwParams = q
   .sym<Ctx>((ctx, token) => {

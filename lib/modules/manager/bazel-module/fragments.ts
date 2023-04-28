@@ -177,11 +177,13 @@ export class Fragments {
     return array;
   }
 
-  static asRecord(frag: FragmentCompatible): RecordFragment {
+  static safeAsRecord(frag: FragmentCompatible): RecordFragment | undefined {
     if (frag instanceof RecordFragment) {
       return frag;
     }
-    Fragments.checkType('record', frag.type);
+    if (frag.type !== 'record') {
+      return undefined;
+    }
     Object.setPrototypeOf(frag, RecordFragment.prototype);
     const record = frag as RecordFragment;
     for (const prop in record.children) {
@@ -189,6 +191,14 @@ export class Fragments {
       record.children[prop] = Fragments.asValue(child);
     }
     return record;
+  }
+
+  static asRecord(frag: FragmentCompatible): RecordFragment {
+    const record = Fragments.safeAsRecord(frag);
+    if (record) {
+      return record;
+    }
+    throw this.typeError('record', frag.type);
   }
 
   static safeAsAttribute(

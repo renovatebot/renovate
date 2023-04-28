@@ -2,9 +2,11 @@ import {
   ArrayFragment,
   AttributeFragment,
   BooleanFragment,
+  FragmentType,
   Fragments,
   RecordFragment,
   StringFragment,
+  ValueFragment,
 } from './fragments';
 
 describe('modules/manager/bazel-module/fragments', () => {
@@ -122,6 +124,40 @@ describe('modules/manager/bazel-module/fragments', () => {
         expect(() => Fragments.asValue(attribute)).toThrow(
           new Error(`Unexpected fragment type: attribute`)
         );
+      });
+    });
+
+    describe('asArray', () => {
+      it('returns an ArrayFragment', () => {
+        const frag: {
+          type: FragmentType;
+          isComplete: boolean;
+          items: ValueFragment[];
+        } = {
+          type: 'array',
+          isComplete: false,
+          items: [new StringFragment('hello')],
+        };
+        const result = Fragments.asArray(frag);
+        expect(result).toEqual(frag);
+        expect(result).toBeInstanceOf(ArrayFragment);
+      });
+    });
+
+    describe('asAttribute', () => {
+      it('returns an AttributeFragment', () => {
+        const frag: {
+          type: FragmentType;
+          isComplete: boolean;
+          value?: ValueFragment;
+        } = {
+          type: 'attribute',
+          isComplete: false,
+          value: new StringFragment('hello'),
+        };
+        const result = Fragments.asAttribute(frag);
+        expect(result).toEqual(frag);
+        expect(result).toBeInstanceOf(AttributeFragment);
       });
     });
 
