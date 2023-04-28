@@ -92,7 +92,7 @@ export class VersionsDatasource extends Datasource {
       }
       if (err.statusCode !== 416) {
         regCache.contentLength = 0;
-        regCache.packageReleases = Object.create(null); // Because we might need a "constructor" key
+        regCache.packageReleases = {};
         logger.debug({ err }, 'Rubygems fetch error');
         throw new ExternalHostError(new Error('Rubygems fetch error'));
       }
