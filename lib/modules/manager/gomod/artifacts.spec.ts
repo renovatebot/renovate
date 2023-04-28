@@ -2039,7 +2039,7 @@ describe('modules/manager/gomod/artifacts', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          goGetDirs: ['&&', '||'],
+          goGetDirs: ['/etc', '../../../'],
         },
       })
     ).toEqual([
