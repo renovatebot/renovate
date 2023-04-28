@@ -8,8 +8,8 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: [
-    '(^|/|\\.)(Docker|Container)file$',
-    '(^|/)(Docker|Container)file[^/]*$',
+    '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
+    '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
   ],
 };
 
