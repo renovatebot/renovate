@@ -1,8 +1,9 @@
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
+import * as memCache from '../../../util/cache/memory';
 import * as rubyVersioning from '../../versioning/ruby';
-import { VersionsDatasource, resetCache } from './versions-datasource';
+import { VersionsDatasource } from './versions-datasource';
 import { RubyGemsDatasource } from '.';
 
 const rubygemsOrgVersions = Fixtures.get('rubygems-org.txt');
@@ -13,8 +14,6 @@ const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
 describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
-    const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
-
     const params = {
       versioning: rubyVersioning.id,
       datasource: RubyGemsDatasource.id,
@@ -26,13 +25,12 @@ describe('modules/datasource/rubygems/index', () => {
     };
 
     beforeEach(() => {
-      resetCache();
-      process.env.RENOVATE_SKIP_CACHE = 'true';
+      memCache.init();
       jest.resetAllMocks();
     });
 
     afterEach(() => {
-      process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
+      memCache.reset();
     });
 
     it('returns null for missing pkg', async () => {
