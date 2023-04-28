@@ -87,9 +87,8 @@ export class VersionsDatasource extends Datasource {
       return null;
     }
 
-    const releases = regCache.packageReleases[packageName].map((version) => ({
-      version,
-    }));
+    const versions = regCache.packageReleases[packageName];
+    const releases = versions.map((version) => ({ version }));
     return { releases };
   }
 
