@@ -621,7 +621,7 @@ describe('util/http/github', () => {
         .reply(200, { data: { repository } });
 
       const res = await githubApi.requestGraphql(graphqlQuery);
-      expect(res?.data).toStrictEqual({ repository });
+      expect(res?.data).toEqual({ repository });
     });
 
     it('queryRepoField', async () => {

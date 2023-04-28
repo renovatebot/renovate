@@ -42,7 +42,10 @@ export async function detectMonorepos(
         .filter(Boolean);
 
       p.deps?.forEach((dep) => {
-        if (internalPackageNames.includes(dep.depName)) {
+        if (
+          is.string(dep.depName) &&
+          internalPackageNames.includes(dep.depName)
+        ) {
           dep.isInternal = true;
         }
       });
@@ -56,7 +59,7 @@ export async function detectMonorepos(
         subPackage.managerData.yarnLock ??= yarnLock;
         subPackage.managerData.npmLock ??= npmLock;
         subPackage.skipInstalls = skipInstalls && subPackage.skipInstalls; // skip if both are true
-        subPackage.managerData.hasWorkspaces = !!workspacesPackages;
+        subPackage.managerData.workspacesPackages = workspacesPackages;
         subPackage.npmrc ??= npmrc;
 
         if (p.extractedConstraints) {

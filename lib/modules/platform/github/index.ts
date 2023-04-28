@@ -393,6 +393,7 @@ export async function initRepo({
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
+      logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
@@ -742,6 +743,29 @@ export async function findPr({
 
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
+async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+
+  let branchExists = false;
+  try {
+    await githubApi.head(refUrl, { useCache: false });
+    branchExists = true;
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
+  }
+
+  if (branchExists) {
+    await githubApi.patchJson(refUrl, { body: { sha, force: true } });
+    return;
+  }
+
+  await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
+    body: { sha, ref: `refs/heads/${branchName}` },
+  });
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<GhPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
@@ -776,9 +800,7 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
     }
     const { sha, number } = autoclosedPr;
     try {
-      await githubApi.postJson(`repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha },
-      });
+      await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
       logger.debug('Could not recreate autoclosed branch - skipping reopen');
@@ -1794,21 +1816,7 @@ async function pushFiles(
       { body: { message, tree: treeSha, parents: [parentCommitSha] } }
     );
     const remoteCommitSha = commitRes.body.sha;
-
-    // Create branch if it didn't already exist, update it otherwise
-    if (git.branchExists(branchName)) {
-      // This is the equivalent of a git force push
-      // We are using this REST API because the GraphQL API doesn't support force push
-      await githubApi.patchJson(
-        `/repos/${config.repository}/git/refs/heads/${branchName}`,
-        { body: { sha: remoteCommitSha, force: true } }
-      );
-    } else {
-      await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
-        body: { ref: `refs/heads/${branchName}`, sha: remoteCommitSha },
-      });
-    }
-
+    await ensureBranchSha(branchName, remoteCommitSha);
     return remoteCommitSha;
   } catch (err) {
     logger.debug({ branchName, err }, 'Platform-native commit: unknown error');
