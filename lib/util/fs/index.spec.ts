@@ -71,7 +71,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getParentDir', () => {
-    test.each`
+    it.each`
       dir            | expected
       ${'/foo/bar/'} | ${'/foo'}
       ${'/foo/bar'}  | ${'/foo'}
@@ -92,7 +92,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getSiblingFileName', () => {
-    test.each`
+    it.each`
       file          | sibling  | expected
       ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
       ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}

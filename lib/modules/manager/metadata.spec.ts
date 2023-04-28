@@ -8,7 +8,7 @@ describe('modules/manager/metadata', () => {
     .filter((name) => !name.startsWith('__'))
     .sort();
 
-  test.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
+  it.each(managerList)('%s has readme with no h1 or h2', async (manager) => {
     let readme: string | undefined;
     try {
       readme = await fs.readFile(`${__dirname}/${manager}/readme.md`, 'utf8');

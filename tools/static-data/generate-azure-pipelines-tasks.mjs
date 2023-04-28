@@ -3,7 +3,6 @@ import { promisify } from 'node:util';
 import fs from 'fs-extra';
 import g from 'glob';
 import JSON5 from 'json5';
-import shell from 'shelljs';
 import Git from 'simple-git';
 import path from 'upath';
 import { updateJsonFile } from './utils.mjs';
@@ -20,7 +19,7 @@ const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
  *  5. After all the `task.json` files have been processed it writes the results to `./data/azure-pipelines-tasks.json`
  */
 await (async () => {
-  shell.echo('Generating azure pipelines tasks');
+  console.log('Generating azure pipelines tasks');
   await fs.ensureDir(localPath);
   const git = Git(localPath);
 
@@ -44,7 +43,7 @@ await (async () => {
   for (const file of files) {
     // Find all commits that have the file
     const revs = (await git.raw(['rev-list', 'HEAD', '--', file])).split('\n');
-    shell.echo(`Parsing ${file}`);
+    console.log(`Parsing ${file}`);
     for (const rev of revs) {
       try {
         // Get the content of the file at the commit
@@ -59,8 +58,8 @@ await (async () => {
           tasks[parsedContent.id.toLowerCase()]?.add(version) ??
           new Set([version]);
       } catch (e) {
-        shell.echo(`Failed to parse ${file} at ${rev}`);
-        shell.echo(e.toString());
+        console.error(`Failed to parse ${file} at ${rev}`);
+        console.error(e.toString());
       }
     }
   }
