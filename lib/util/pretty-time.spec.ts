@@ -1,7 +1,7 @@
 import { toMs } from './pretty-time';
 
 describe('util/pretty-time', () => {
-  test.each`
+  it.each`
     input                | expected
     ${'1h'}              | ${1 * 60 * 60 * 1000}
     ${' 1 h '}           | ${1 * 60 * 60 * 1000}
