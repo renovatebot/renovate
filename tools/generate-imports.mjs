@@ -1,11 +1,8 @@
-import util from 'node:util';
 import fs from 'fs-extra';
-import _glob from 'glob';
+import { glob } from 'glob';
 import hasha from 'hasha';
 import minimatch from 'minimatch';
 import upath from 'upath';
-
-const glob = util.promisify(_glob);
 
 console.log('generating imports');
 const newFiles = new Set();
