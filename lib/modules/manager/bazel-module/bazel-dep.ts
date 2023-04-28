@@ -1,35 +1,22 @@
 import { z } from 'zod';
 import { BazelDatasource } from '../../datasource/bazel';
 import type { PackageDependency } from '../types';
-import { Fragments, RecordFragment } from './fragments';
+import {
+  BooleanFragment,
+  Fragments,
+  RecordFragment,
+  StringFragment,
+} from './fragments';
 
-// TODO: Move schema to static properties on the XXXFragment classes.
-
-const StringFragmentSchema = z.object({
-  type: z.enum(['string']),
-  isComplete: z.boolean(),
-  value: z.string(),
-});
-
-const BooleanFragmentSchema = z.object({
-  type: z.enum(['boolean']),
-  isComplete: z.boolean(),
-  value: z.boolean(),
-});
-
-const BazelDepRecord = z
-  .object({
-    type: z.enum(['record']),
-    isComplete: z.boolean(),
+const BazelDepRecord = RecordFragment.schema
+  .extend({
     children: z.object({
-      rule: z.object({
-        type: z.enum(['string']),
-        isComplete: z.boolean(),
+      rule: StringFragment.schema.extend({
         value: z.enum(['bazel_dep']),
       }),
-      name: StringFragmentSchema,
-      version: StringFragmentSchema,
-      dev_dependency: BooleanFragmentSchema.optional(),
+      name: StringFragment.schema,
+      version: StringFragment.schema,
+      dev_dependency: BooleanFragment.schema.optional(),
     }),
   })
   .transform((frag): RecordFragment => {
