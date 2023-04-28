@@ -36,7 +36,14 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(bool.value).toBe(exp);
     });
 
-    it.todo('Add test for invalid string');
+    it.each`
+      a
+      ${'true'}
+      ${'false'}
+      ${''}
+    `('new BooleanFragment($a)', ({ a }) => {
+      expect(() => new BooleanFragment(a)).toThrow();
+    });
   });
 
   describe('ArrayFragment', () => {
