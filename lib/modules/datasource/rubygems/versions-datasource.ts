@@ -111,9 +111,14 @@ export class VersionsDatasource extends Datasource {
         versions = versions.filter((v) => !deletedVersions.has(v));
       }
 
-      for (const addedVersion of addedVersions) {
-        const version = VersionsDatasource.copystr(addedVersion);
-        versions.push(version);
+      if (addedVersions.length > 0) {
+        const existingVersions = new Set(versions);
+        for (const addedVersion of addedVersions) {
+          if (!existingVersions.has(addedVersion)) {
+            const version = VersionsDatasource.copystr(addedVersion);
+            versions.push(version);
+          }
+        }
       }
 
       packageReleases[packageName] = versions;
