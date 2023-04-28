@@ -2850,7 +2850,7 @@ For example we override it to `always` in the following cases where branch names
 You can select which behavior you want from Renovate bot:
 
 1. `always`: Recreates all closed or blocking PRs
-2. `auto`: The default option. Recreates only immortal PRs
+2. `auto`: The default option. Recreates only immortal PRs (default)
 3. `never`: No PR is recreated, doesn't matter if it is immortal or not
 
 Typically you shouldn't need to modify this setting.
