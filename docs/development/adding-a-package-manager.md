@@ -82,15 +82,15 @@ Set to true if this package manager needs to update lock files in addition to pa
 
 ### `updateArtifacts` (async, optional)
 
-This function triggers:
+This function is used to run binaries which in turn then will update files.
+Mostly the functionality is used to indirectly update lock files.
+
+In case of directly updating dependencies in lock files use `updateLockedDependency` instead.
+
+`updateArtifacts` gets triggers:
 
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
-
-This function is mostly used to directly (or indirectly) update lock files.
-An example of indirectly updating the lock file: running external binaries.
-
-In case of directly updating dependencies in lock files use `updateLockedDependency` instead.
 
 ### `updateDependency` (optional)
 
