@@ -732,7 +732,7 @@ describe('util/exec/index', () => {
     ],
   ];
 
-  test.each(testInputs)('%s', async (_msg, testOpts) => {
+  it.each(testInputs)('%s', async (_msg, testOpts) => {
     const {
       processEnv: procEnv,
       inCmd: cmd,

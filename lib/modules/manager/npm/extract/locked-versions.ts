@@ -3,6 +3,7 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
+import { getConstraints, getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
@@ -19,7 +20,7 @@ export async function getLockedVersions(
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
       if (!lockFileCache[yarnLock]) {
-        logger.trace('Retrieving/parsing ' + yarnLock);
+        logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
@@ -87,8 +88,26 @@ export async function getLockedVersions(
         )!;
       }
     } else if (pnpmShrinkwrap) {
-      logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      logger.debug('Found pnpm lock-file');
       lockFiles.push(pnpmShrinkwrap);
+      if (!lockFileCache[pnpmShrinkwrap]) {
+        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
+        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+      }
+      const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];
+      if (lockfileVersion) {
+        packageFile.extractedConstraints!.pnpm = getConstraints(
+          lockfileVersion,
+          packageFile.extractedConstraints!.pnpm
+        );
+      }
+
+      for (const dep of packageFile.deps) {
+        // TODO: types (#7154)
+        dep.lockedVersion = semver.valid(
+          lockFileCache[pnpmShrinkwrap].lockedVersions[dep.depName!]
+        )!;
+      }
     }
     if (lockFiles.length) {
       packageFile.lockFiles = lockFiles;

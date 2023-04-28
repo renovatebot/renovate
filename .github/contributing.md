@@ -40,12 +40,13 @@ This makes it harder for us to review your work because we don't know what has c
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
-If you are updating your PR branch from within the GitHub PR interface, then only use the default "Update branch" button.
+If you're updating your PR branch from within the GitHub PR interface, use the default "Update branch" button.
+This is the "Update with merge commit" option in the dropdown.
 
-Force pushing a PR is OK when:
+Force pushing a PR, or using the "Update with rebase" button is OK when you:
 
-- you need to make large changes on a PR which require a full review anyway
-- you need to bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
+- make large changes on a PR which require a full review anyway
+- bring the branch up-to-date with the target branch and incorporating the changes is more work than to create a new PR
 
 ## Apply maintainer provided review suggestions
 

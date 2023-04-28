@@ -1845,22 +1845,25 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["+(package.json)"],
+      "matchFiles": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
 }
 ```
 
-Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
+<!-- prettier-ignore -->
+!!! tip
+    Renovate evaluates all `packageRules` and does not stop after the first match.
+    Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
+    This way important rules override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -2150,11 +2153,17 @@ Renovate will compare `matchFiles` for an exact match against the dependency's p
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 
-```
-  "matchFiles": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "matchFiles": ["package.json"]
+    }
+  ]
+}
 ```
 
-Use `matchPaths` instead if you need more flexible matching.
+Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
 
 ### matchDepNames
 
@@ -2216,9 +2225,9 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
+Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
 
-For example the following would match any `package.json`, including files like `backend/package.json`:
+For example the following matches any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
@@ -2232,7 +2241,7 @@ For example the following would match any `package.json`, including files like `
 }
 ```
 
-The following would match any file in directories starting with `app/`:
+The following matches any file in directories starting with `app/`:
 
 ```json
 {
@@ -2245,6 +2254,11 @@ The following would match any file in directories starting with `app/`:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Partial matches for `matchPaths` are deprecated.
+    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
@@ -2278,8 +2292,8 @@ Here's an example of where you use this to group together all packages from the 
 
 ### matchUpdateTypes
 
-Use this field to match rules against types of updates.
-For example to apply a special label for Major updates:
+Use `matchUpdateTypes` to match rules against types of updates.
+For example to apply a special label to `major` updates:
 
 ```json
 {
@@ -2291,6 +2305,13 @@ For example to apply a special label for Major updates:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Packages that follow SemVer are allowed to make breaking changes in _any_ `0.x` version, even `patch` and `minor`.
+    Check if you're using any `0.x` package, and see if you need custom `packageRules` for it.
+    When setting up automerge for dependencies, make sure to stop accidental automerges of `0.x` versions.
+    Read the [automerge non-major updates](./key-concepts/automerge.md#automerge-non-major-updates) docs for a config example that blocks `0.x` updates.
 
 ### matchConfidence
 
@@ -2545,6 +2566,10 @@ A list of commands that are executed after Renovate has updated a dependency but
 
 You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
 
+<!-- prettier-ignore -->
+!!! note
+    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](https://docs.renovatebot.com/self-hosted-configuration/#filefilters) instead.
+
 ### fileFilters
 
 A list of glob-style matchers that determine which files will be included in the final commit made by Renovate.
@@ -2740,6 +2765,14 @@ Here's an example of how you would define PR priority so that devDependencies ar
 ## prTitle
 
 The PR title is important for some of Renovate's matching algorithms (e.g. determining whether to recreate a PR or not) so ideally don't modify it much.
+
+## prTitleStrict
+
+There are certain scenarios where the default behavior appends extra context to the PR title.
+
+These scenarios include if a `baseBranch` or if there is a grouped update and either `separateMajorMinor` or `separateMinorPatch` is true.
+
+Using this option allows you to skip these default behaviors and use other templating methods to control the format of the PR title.
 
 ## printConfig
 
