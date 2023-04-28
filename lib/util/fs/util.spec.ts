@@ -64,14 +64,14 @@ describe('util/fs/util', () => {
     ${'./foo/..../bar'} | ${true}
     ${'./..'}           | ${false}
     ${'\\foo'}          | ${false}
-    ${"foo'"}           | ${false}
-    ${'fo"o'}           | ${false}
-    ${'fo&o'}           | ${false}
+    ${"foo'"}           | ${true}
+    ${'fo"o'}           | ${true}
+    ${'fo&o'}           | ${true}
     ${'f;oo'}           | ${true}
     ${'f o o'}          | ${true}
     ${'/'}              | ${false}
     ${'/foo'}           | ${false}
-    ${'&&'}             | ${false}
+    ${'&&'}             | ${true}
     ${';'}              | ${true}
     ${'./[foo]/bar'}    | ${true}
   `('isValidPath($value) == $expected', ({ value, expected }) => {
