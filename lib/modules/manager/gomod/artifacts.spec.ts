@@ -1973,7 +1973,7 @@ describe('modules/manager/gomod/artifacts', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchObject([
       {
-        cmd: 'go get -d -t . foo .bar/... cat',
+        cmd: "go get -d -t . foo .bar/... '&&' cat",
         options: {
           cwd: '/tmp/github/some/repo',
         },
@@ -2039,7 +2039,7 @@ describe('modules/manager/gomod/artifacts', () => {
         newPackageFileContent: gomod1,
         config: {
           ...config,
-          goGetDirs: ['&&', '||'],
+          goGetDirs: ['/etc', '../../../'],
         },
       })
     ).toEqual([
