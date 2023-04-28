@@ -10,9 +10,11 @@ import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
+type PackageReleases = Record<string, string[]>;
+
 interface RegistryCache {
   lastSync: Date;
-  packageReleases: Record<string, string[]>; // Because we might need a "constructor" key
+  packageReleases: PackageReleases;
   contentLength: number;
   isSupported: boolean;
   registryUrl: string;
@@ -113,8 +115,10 @@ export class VersionsDatasource extends Datasource {
     return buf.toString('utf8');
   }
 
-  private updateRegistryCache(regCache: RegistryCache, lines: Lines): void {
-    const { packageReleases } = regCache;
+  private updatePackageReleases(
+    packageReleases: PackageReleases,
+    lines: Lines
+  ): void {
     for (const line of lines) {
       const packageName = this.copystr(line.packageName);
       let versions = packageReleases[packageName] ?? [];
@@ -125,9 +129,14 @@ export class VersionsDatasource extends Datasource {
         versions = versions.filter((v) => !deletedVersions.has(v));
       }
 
-      for (const addedVersion of addedVersions) {
-        const version = this.copystr(addedVersion);
-        versions.push(version);
+      if (addedVersions.length > 0) {
+        const existingVersions = new Set(versions);
+        for (const addedVersion of addedVersions) {
+          if (!existingVersions.has(addedVersion)) {
+            const version = this.copystr(addedVersion);
+            versions.push(version);
+          }
+        }
       }
 
       packageReleases[packageName] = versions;
@@ -149,27 +158,31 @@ export class VersionsDatasource extends Datasource {
       newLines = (await this.http.get(url, options)).body;
       const durationMs = Math.round(Date.now() - startTime);
       logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
-      regCache.isSupported = true;
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         regCache.isSupported = false;
         return;
       }
-      if (err.statusCode !== 416) {
-        regCache.contentLength = 0;
-        regCache.packageReleases = {};
-        logger.debug({ err }, 'Rubygems fetch error');
-        throw new ExternalHostError(new Error('Rubygems fetch error'));
+
+      if (err.statusCode === 416) {
+        logger.debug('Rubygems: No update');
+        regCache.lastSync = new Date();
+        return;
       }
-      logger.debug('Rubygems: No update');
-      regCache.lastSync = new Date();
-      return;
+
+      regCache.contentLength = 0;
+      regCache.packageReleases = {};
+
+      logger.debug({ err }, 'Rubygems fetch error');
+      throw new ExternalHostError(err);
     }
 
-    const lines = Lines.parse(newLines);
-    this.updateRegistryCache(regCache, lines);
-    this.isInitialFetch = false;
+    regCache.isSupported = true;
     regCache.lastSync = new Date();
+
+    const lines = Lines.parse(newLines);
+    this.updatePackageReleases(regCache.packageReleases, lines);
+    this.isInitialFetch = false;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
