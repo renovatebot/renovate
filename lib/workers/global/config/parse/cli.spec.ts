@@ -121,7 +121,7 @@ describe('workers/global/config/parse/cli', () => {
       });
     });
 
-    test.each`
+    it.each`
       arg                              | config
       ${'--endpoints='}                | ${{ hostRules: [] }}
       ${'--azure-auto-complete=false'} | ${{ platformAutomerge: false }}
