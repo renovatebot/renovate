@@ -185,16 +185,14 @@ export class VersionsDatasource extends Datasource {
         return;
       }
 
-      regCache.lastSync = new Date('2000-01-01');
       regCache.contentLength = 0;
-      regCache.packageReleases = new Map<string, string[]>();
+      regCache.packageReleases.clear();
 
       logger.debug({ err }, 'Rubygems fetch error');
       throw new ExternalHostError(err);
     }
 
     regCache.isSupported = true;
-    regCache.contentLength += Buffer.byteLength(newLines, 'utf8');
     regCache.lastSync = new Date();
 
     const lines = Lines.parse(newLines);
