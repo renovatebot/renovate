@@ -38,6 +38,7 @@ describe('modules/manager/cpanfile/extract', () => {
           codeBlock`
             requires 'Try::Tiny';
             requires 'URI', '1.59';
+            requires 'HTTP::Tiny', 0.034;
             requires "Capture::Tiny" => "0";
           `,
           'cpanfile'
@@ -52,6 +53,11 @@ describe('modules/manager/cpanfile/extract', () => {
             datasource: 'cpan',
             depName: 'URI',
             currentValue: '1.59',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'HTTP::Tiny',
+            currentValue: '0.034',
           },
           {
             datasource: 'cpan',

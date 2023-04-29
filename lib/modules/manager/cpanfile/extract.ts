@@ -23,6 +23,7 @@ export function extractPackageFile(
 
   const { deps } = parsedResult;
 
+  /* istanbul ignore next */
   if (!deps.length) {
     return null;
   }
