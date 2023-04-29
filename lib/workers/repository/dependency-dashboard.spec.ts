@@ -1047,7 +1047,9 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         {}
       );
-      expect(result).toBe(`## Vulnerabilities\n\nNone detected.\n\n`);
+      expect(result).toBe(
+        `## Vulnerabilities\n\nRenovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n`
+      );
     });
 
     it('return all vulnerabilities if set to all', async () => {
@@ -1088,7 +1090,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-1 of a total of 2 CVEs have no fixes in this repository.
+\`1\` of a total of \`2\` CVEs have no fixes in this repository.
 <details><summary>npm</summary>
 <blockquote>
 
@@ -1154,7 +1156,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-1 of a total of 2 CVEs have no fixes in this repository.
+\`1\` of a total of \`2\` CVEs have no fixes in this repository.
 <details><summary>npm</summary>
 <blockquote>
 

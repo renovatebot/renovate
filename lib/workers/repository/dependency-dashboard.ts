@@ -481,7 +481,8 @@ export async function getDashboardMarkdownVulnerabilities(
   );
 
   if (vulnerabilities.length === 0) {
-    result += 'No known CVEs found.\n\n';
+    result +=
+      'Renovate has not found any CVEs on [osv.dev](https://osv.dev).\n\n';
     return result;
   }
 
@@ -489,7 +490,7 @@ export async function getDashboardMarkdownVulnerabilities(
     is.nullOrUndefined(value.fixedVersion)
   );
 
-  result += `${unresolvedVulnerabilities.length} of a total of ${vulnerabilities.length} CVEs have no fixes in this repository.\n`;
+  result += `\`${unresolvedVulnerabilities.length}\` of a total of \`${vulnerabilities.length}\` CVEs have no fixes in this repository.\n`;
 
   let renderedVulnerabilities: Vulnerability[];
   switch (config.dependencyDashboardOSVVulnerabilitySummary) {
