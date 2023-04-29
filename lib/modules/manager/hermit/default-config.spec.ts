@@ -10,7 +10,7 @@ describe('modules/manager/hermit/default-config', () => {
       });
     }
 
-    test.each`
+    it.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}
       ${'gradle/bin/hermit'}        | ${true}
@@ -27,7 +27,7 @@ describe('modules/manager/hermit/default-config', () => {
   });
 
   describe('fileMatch', () => {
-    test.each`
+    it.each`
       path                          | expected
       ${'bin/hermit'}               | ${true}
       ${'gradle/bin/hermit'}        | ${true}

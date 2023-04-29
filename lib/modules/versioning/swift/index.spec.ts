@@ -11,7 +11,7 @@ const {
 } = swift;
 
 describe('modules/versioning/swift/index', () => {
-  test.each`
+  it.each`
     version            | expected
     ${'from: "1.2.3"'} | ${false}
     ${'1.2.3'}         | ${true}
@@ -19,7 +19,7 @@ describe('modules/versioning/swift/index', () => {
     expect(!!isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                    | expected
     ${'from: "1.2.3"'}         | ${true}
     ${'from : "1.2.3"'}        | ${true}
@@ -57,7 +57,7 @@ describe('modules/versioning/swift/index', () => {
     expect(!!isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                          | range           | expected
     ${['1.2.3', '1.2.4', '1.2.5']}    | ${'..<"1.2.4"'} | ${'1.2.3'}
     ${['v1.2.3', 'v1.2.4', 'v1.2.5']} | ${'..<"1.2.4"'} | ${'1.2.3'}
@@ -68,7 +68,7 @@ describe('modules/versioning/swift/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                          | range           | expected
     ${['1.2.3', '1.2.4', '1.2.5']}    | ${'..<"1.2.4"'} | ${'1.2.3'}
     ${['v1.2.3', 'v1.2.4', 'v1.2.5']} | ${'..<"1.2.4"'} | ${'1.2.3'}
@@ -80,7 +80,7 @@ describe('modules/versioning/swift/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version     | range           | expected
     ${'1.2.3'}  | ${'..."1.2.4"'} | ${false}
     ${'v1.2.3'} | ${'..."1.2.4"'} | ${false}
@@ -93,7 +93,7 @@ describe('modules/versioning/swift/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version     | range           | expected
     ${'1.2.4'}  | ${'..."1.2.4"'} | ${true}
     ${'v1.2.4'} | ${'..."1.2.4"'} | ${true}
@@ -106,7 +106,7 @@ describe('modules/versioning/swift/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue           | rangeStrategy | currentVersion | newVersion  | expected
     ${'1.2.3'}             | ${'auto'}     | ${'1.2.3'}     | ${'1.2.4'}  | ${'1.2.3'}
     ${'v1.2.3'}            | ${'auto'}     | ${'v1.2.3'}    | ${'v1.2.4'} | ${'v1.2.3'}
