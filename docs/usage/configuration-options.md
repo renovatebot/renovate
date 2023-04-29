@@ -700,15 +700,15 @@ It is pointless to edit the labels, as Renovate bot restores the labels on each 
 
 ## dependencyDashboardOSVVulnerabilitySummary
 
-Use this option to control if the Dependency Dashboard should have a section that shows the CVEs for your repository.
+Use this option to control if the Dependency Dashboard lists the CVEs for your repository.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
 You can choose from:
 
-- `none` (default) no section will be added
-- `unresolved` show vulnerabilities that have no fixes
-- `all` list all vulnerabilities
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
 
 ## dependencyDashboardTitle
 

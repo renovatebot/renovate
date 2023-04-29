@@ -481,7 +481,7 @@ export async function getDashboardMarkdownVulnerabilities(
   );
 
   if (vulnerabilities.length === 0) {
-    result += 'None detected.\n\n';
+    result += 'No known CVEs found.\n\n';
     return result;
   }
 
