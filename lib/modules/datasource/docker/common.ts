@@ -138,22 +138,25 @@ export async function getAuthHeaders(
 
     const authUrl = new URL(`${authenticateHeader.params.realm}`);
 
-    let scope = `repository:${dockerRepository}:pull`;
     // repo isn't known to server yet, so causing wrong scope `repository:user/image:pull`
     if (
       is.string(authenticateHeader.params.scope) &&
       !apiCheckUrl.endsWith('/v2/')
     ) {
-      scope = authenticateHeader.params.scope;
+      authUrl.searchParams.append('scope', authenticateHeader.params.scope);
+    } else {
+      authUrl.searchParams.append(
+        'scope',
+        `repository:${dockerRepository}:pull`
+      );
     }
-    authUrl.searchParams.append('scope', scope);
 
     if (is.string(authenticateHeader.params.service)) {
       authUrl.searchParams.append('service', authenticateHeader.params.service);
     }
 
     logger.trace(
-      { registryHost, dockerRepository, url: authUrl.href },
+      { registryHost, dockerRepository, authUrl: authUrl.href },
       `Obtaining docker registry token`
     );
     opts.noAuth = true;
