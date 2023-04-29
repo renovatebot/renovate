@@ -110,6 +110,21 @@ export function findVariable(
   ctx: Ctx,
   variables: PackageVariables = ctx.globalVars
 ): VariableData | undefined {
+  if (ctx.tmpNestingDepth.length) {
+    let nestingPrefixes = ctx.tmpNestingDepth.length;
+    while (nestingPrefixes > 0) {
+      const prefix = ctx.tmpNestingDepth
+        .slice(0, nestingPrefixes--)
+        .map((token) => token.value)
+        .join('.');
+      const identifier = `${prefix}.${name}`;
+
+      if (variables[identifier]) {
+        return variables[identifier];
+      }
+    }
+  }
+
   return variables[name];
 }
 

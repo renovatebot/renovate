@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs, logger } from '../../../../test/util';
-import { parseGradle, parseProps } from './parser';
+import { parseGradle, parseKotlinSource, parseProps } from './parser';
 import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
@@ -927,6 +927,109 @@ describe('modules/manager/gradle/parser', () => {
     `('$def | $input', ({ def, input, output }) => {
       const { deps } = parseGradle([def, input].join('\n'));
       expect(deps).toMatchObject([output].filter(is.truthy));
+    });
+  });
+
+  describe('Kotlin object notation', () => {
+    it('simple objects', () => {
+      const input = codeBlock`
+        object Versions {
+          const val baz = "1.2.3"
+        }
+
+        object Libraries {
+          val deps = mapOf("api" to "org.slf4j:slf4j-api:\${Versions.baz}")
+          val dep: String = "foo:bar:" + Versions.baz
+        }
+      `;
+
+      const res = parseKotlinSource(input);
+      expect(res).toMatchObject({
+        vars: {
+          'Versions.baz': {
+            key: 'Versions.baz',
+            value: '1.2.3',
+          },
+        },
+        deps: [
+          {
+            depName: 'org.slf4j:slf4j-api',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+          {
+            depName: 'foo:bar',
+            groupName: 'Versions.baz',
+            currentValue: '1.2.3',
+          },
+        ],
+      });
+    });
+
+    it('nested objects', () => {
+      const input = codeBlock`
+        object Deps {
+          const val kotlinVersion = "1.5.31"
+
+          object Kotlin {
+            val stdlib = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:\${Deps.kotlinVersion}"
+          }
+
+          object Test {
+            private const val version = "1.3.0-rc01"
+            const val core = "androidx.test:core:\${Deps.Test.version}"
+
+            object Espresso {
+              private const val version = "3.3.0-rc01"
+              const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+            }
+
+            object Androidx {
+              const val coreKtx = "androidx.test:core-ktx:$version"
+            }
+          }
+        }
+      `;
+
+      const res = parseKotlinSource(input);
+      expect(res).toMatchObject({
+        vars: {
+          'Deps.kotlinVersion': {
+            key: 'Deps.kotlinVersion',
+            value: '1.5.31',
+          },
+          'Deps.Test.version': {
+            key: 'Deps.Test.version',
+            value: '1.3.0-rc01',
+          },
+          'Deps.Test.Espresso.version': {
+            key: 'Deps.Test.Espresso.version',
+            value: '3.3.0-rc01',
+          },
+        },
+        deps: [
+          {
+            depName: 'org.jetbrains.kotlin:kotlin-stdlib-jdk7',
+            currentValue: '1.5.31',
+            groupName: 'Deps.kotlinVersion',
+          },
+          {
+            depName: 'androidx.test:core',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Deps.Test.version',
+          },
+          {
+            depName: 'androidx.test.espresso:espresso-core',
+            currentValue: '3.3.0-rc01',
+            groupName: 'Deps.Test.Espresso.version',
+          },
+          {
+            depName: 'androidx.test:core-ktx',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Deps.Test.version',
+          },
+        ],
+      });
     });
   });
 });
