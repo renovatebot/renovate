@@ -1,32 +1,40 @@
 import { codeBlock } from 'common-tags';
-import { extractPackageFile } from '.';
+import { extractPackageFile } from './extract';
 
 describe('modules/manager/cpanfile/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for empty', async () => {
-      expect(await extractPackageFile('nothing here', 'cpanfile')).toBeNull();
+    it('returns null for empty', () => {
+      expect(extractPackageFile('nothing here', 'cpanfile')).toBeNull();
     });
 
-    it('parse perl', async () => {
-      expect(
-        await extractPackageFile(`requires 'perl', '5.008001';`, 'cpanfile')
-      ).toEqual({
-        deps: [
-          {
-            versioning: 'perl',
-            depName: 'perl',
-            packageName: 'Perl/perl5',
-            currentValue: '5.008001',
-            datasource: 'github-tags',
-            extractVersion: '^v(?<version>\\S+)',
-          },
-        ],
+    describe('parse perl', () => {
+      test.each`
+        version         | expected
+        ${'5.012005'}   | ${'5.012005'}
+        ${`'5.008001'`} | ${'5.008001'}
+        ${`"5.008001"`} | ${'5.008001'}
+      `('$version', ({ version, expected }) => {
+        expect(
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          extractPackageFile(`requires 'perl', ${version};`, 'cpanfile')
+        ).toEqual({
+          deps: [
+            {
+              versioning: 'perl',
+              depName: 'perl',
+              packageName: 'Perl/perl5',
+              currentValue: expected,
+              datasource: 'github-tags',
+              extractVersion: '^v(?<version>\\S+)',
+            },
+          ],
+        });
       });
     });
 
-    it('parse modules with requires', async () => {
+    it('parse modules with requires', () => {
       expect(
-        await extractPackageFile(
+        extractPackageFile(
           codeBlock`
             requires 'Try::Tiny';
             requires 'URI', '1.59';
@@ -54,9 +62,9 @@ describe('modules/manager/cpanfile/extract', () => {
       });
     });
 
-    it('parse modules with recommends', async () => {
+    it('parse modules with recommends', () => {
       expect(
-        await extractPackageFile(
+        extractPackageFile(
           codeBlock`
             recommends 'Crypt::URandom';
             recommends 'HTTP::XSCookies', '0.000015';
@@ -78,9 +86,9 @@ describe('modules/manager/cpanfile/extract', () => {
       });
     });
 
-    it('parse modules with suggests', async () => {
+    it('parse modules with suggests', () => {
       expect(
-        await extractPackageFile(
+        extractPackageFile(
           codeBlock`
             suggests 'Test::MockTime::HiRes', '0.06';
             suggests 'Authen::Simple::Passwd';
@@ -103,9 +111,9 @@ describe('modules/manager/cpanfile/extract', () => {
     });
 
     describe('parse modules with phases', () => {
-      test('configure phase', async () => {
+      test('configure phase', () => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             codeBlock`
               on 'configure' => sub {
                 requires "ExtUtils::MakeMaker" => "0";
@@ -125,9 +133,9 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('build phase', async () => {
+      test('build phase', () => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             codeBlock`
               on build => sub {
                 requires 'Test::More', '0.98';
@@ -147,9 +155,9 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('test phase', async () => {
+      test('test phase', () => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             codeBlock`
               on test => sub {
                 requires 'Test::More', '0.88';
@@ -175,9 +183,9 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('runtime phase', async () => {
+      test('runtime phase', () => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             codeBlock`
               on runtime => sub {
                 suggests 'FCGI';
@@ -202,9 +210,9 @@ describe('modules/manager/cpanfile/extract', () => {
         });
       });
 
-      test('develop phase', async () => {
+      test('develop phase', () => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             codeBlock`
               on 'develop' => sub {
                 requires "IPC::Open3" => "0";
@@ -239,9 +247,9 @@ describe('modules/manager/cpanfile/extract', () => {
         ${'build_requires'}     | ${'build'}
         ${'test_requires'}      | ${'test'}
         ${'author_requires'}    | ${'develop'}
-      `('$shortcut', async ({ shortcut, phase }) => {
+      `('$shortcut', ({ shortcut, phase }) => {
         expect(
-          await extractPackageFile(
+          extractPackageFile(
             // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             `${shortcut} 'Capture::Tiny', '0.12';`,
             'cpanfile'
