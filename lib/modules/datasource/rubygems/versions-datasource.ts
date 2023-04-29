@@ -1,7 +1,6 @@
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
@@ -16,6 +15,8 @@ interface RegistryCache {
   registryUrl: string;
 }
 
+export const memCache = new Map<string, RegistryCache>();
+
 export class VersionsDatasource extends Datasource {
   constructor(override readonly id: string) {
     super(id);
@@ -23,7 +24,7 @@ export class VersionsDatasource extends Datasource {
 
   getRegistryCache(registryUrl: string): RegistryCache {
     const cacheKey = `rubygems-versions-cache:${registryUrl}`;
-    const regCache = memCache.get<RegistryCache>(cacheKey) ?? {
+    const regCache = memCache.get(cacheKey) ?? {
       lastSync: new Date('2000-01-01'),
       packageReleases: new Map<string, string[]>(),
       contentLength: 0,
