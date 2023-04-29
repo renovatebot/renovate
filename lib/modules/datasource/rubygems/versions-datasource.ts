@@ -73,7 +73,7 @@ export class VersionsDatasource extends Datasource {
     const url = `${regCache.registryUrl}/versions`;
     const options = {
       headers: {
-        'accept-encoding': 'identity',
+        'accept-encoding': 'gzip',
         range: `bytes=${regCache.contentLength}-`,
       },
     };
