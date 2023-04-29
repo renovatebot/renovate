@@ -1,5 +1,11 @@
+import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
-import { getGitlabDep } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
+
+const yamlFileReferenceSingleConfig = Fixtures.get(
+  'gitlab-ci.reference.1.yaml'
+);
+const yamlFileReferenceMultiConfig = Fixtures.get('gitlab-ci.reference.2.yaml');
 
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
@@ -79,6 +85,18 @@ describe('modules/manager/gitlabci/utils', () => {
         depName: 'quay.io/prometheus/node-exporter',
         currentValue: 'v1.3.1',
       });
+    });
+  });
+
+  describe('replaceReferenceTags', () => {
+    it('replaces single-line !reference tags with empty strings', () => {
+      const replaced = replaceReferenceTags(yamlFileReferenceSingleConfig);
+      expect(replaced).not.toContain('!reference');
+    });
+
+    it('replaces multi-line !reference tags with empty strings', () => {
+      const replaced = replaceReferenceTags(yamlFileReferenceMultiConfig);
+      expect(replaced).not.toContain('!reference');
     });
   });
 });
