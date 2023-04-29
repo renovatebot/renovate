@@ -87,7 +87,7 @@ Use `updateArtifacts` to run binaries that in turn will update files.
 
 To _directly_ update dependencies in lock files: use `updateLockedDependency` instead.
 
-`updateArtifacts` gets triggers:
+`updateArtifacts` gets triggered:
 
 - after a dependency update (for a package file), or
 - during `lockfileMaintenance`
