@@ -45,8 +45,22 @@ const Lines = z
             }
           }
           return { packageName, deletedVersions, addedVersions };
-        })
-    )
+        }),
+      {
+        onError: ({ error: err, input }) => {
+          logger.debug(
+            { err, input },
+            'Rubygems: failed to parse some version lines'
+          );
+        },
+      }
+    ).catch(({ error: err, input }) => {
+      logger.debug(
+        { err, input },
+        'Rubygems: failed to parse versions response'
+      );
+      return [];
+    })
   );
 type Lines = z.infer<typeof Lines>;
 
