@@ -48,6 +48,7 @@ export interface RepoParams {
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
 }
 
 export interface PrBodyStruct {
