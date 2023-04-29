@@ -55,24 +55,25 @@ export class Ctx implements CtxCompatible {
     if (!current) {
       return;
     }
+    const parent = this.stack.safeCurrent;
     const value = Fragments.safeAsValue(current);
-    const attribute = AttributeFragment.safeAs(current);
-    const newCurrent = this.stack.safeCurrent;
     if (value) {
-      if (newCurrent && 'addValue' in newCurrent) {
-        newCurrent.addValue(value);
+      if (parent && 'addValue' in parent) {
+        parent.addValue(value);
         return;
       }
-      if (!newCurrent) {
+      if (!parent) {
         this.results.push(value);
         return;
       }
-    } else if (attribute) {
-      if (newCurrent && 'addAttribute' in newCurrent) {
-        newCurrent.addAttribute(attribute);
+    }
+    const attribute = AttributeFragment.safeAs(current);
+    if (attribute) {
+      if (parent && 'addAttribute' in parent) {
+        parent.addAttribute(attribute);
         return;
       }
-      if (!newCurrent) {
+      if (!parent) {
         throw new Error('Processing an attribute but there is no parent.');
       }
     }
