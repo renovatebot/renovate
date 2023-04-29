@@ -27,7 +27,7 @@ describe('util/exec/hermit', () => {
       findUp.mockClear();
     });
 
-    test.each`
+    it.each`
       dir                         | hermitLocation         | expected
       ${'nested/other/directory'} | ${'nested/bin/hermit'} | ${'nested/bin'}
       ${'nested'}                 | ${'nested/bin/hermit'} | ${'nested/bin'}

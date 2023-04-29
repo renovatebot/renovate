@@ -1,7 +1,6 @@
 import { getConfig, mocked } from '../../../../../test/util';
 import type { Release } from '../../../../modules/datasource';
 import * as allVersioning from '../../../../modules/versioning';
-import { clone } from '../../../../util/clone';
 import * as _dateUtil from '../../../../util/date';
 import * as _mergeConfidence from '../../../../util/merge-confidence';
 import { toMs } from '../../../../util/pretty-time';
@@ -43,7 +42,7 @@ describe('workers/repository/process/lookup/filter-checks', () => {
   beforeEach(() => {
     config = getConfig();
     config.currentVersion = '1.0.0';
-    sortedReleases = clone(releases);
+    sortedReleases = structuredClone(releases);
     jest.resetAllMocks();
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('3 days') ?? 0);
     dateUtil.getElapsedMs.mockReturnValueOnce(toMs('5 days') ?? 0);
