@@ -536,9 +536,9 @@ export async function getDashboardMarkdownVulnerabilities(
         for (const vul of cves) {
           const id = vul.vulnerability.id;
           const suffix = is.nonEmptyString(vul.fixedVersion)
-            ? `(fixed in ${vul.fixedVersion})`
+            ? ` (fixed in ${vul.fixedVersion})`
             : '';
-          result += `- [${id}](https://osv.dev/vulnerability/${id}) ${suffix}\n`;
+          result += `- [${id}](https://osv.dev/vulnerability/${id})${suffix}\n`;
         }
         result += `</blockquote>\n</details>\n\n`;
       }

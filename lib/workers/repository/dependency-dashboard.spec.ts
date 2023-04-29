@@ -1,4 +1,5 @@
 import { ERROR, WARN } from 'bunyan';
+import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
 import {
@@ -23,16 +24,18 @@ import type { BranchConfig, BranchUpgradeConfig } from '../types';
 import * as dependencyDashboard from './dependency-dashboard';
 import { getDashboardMarkdownVulnerabilities } from './dependency-dashboard';
 import { PackageFiles } from './package-files';
-// import { Vulnerabilities } from './process/vulnerabilities';
-//
-// jest.mock('./process/vulnerabilities', () => {
-//   return {
-//     Vulnerabilities: {
-//       create: jest.fn(),
-//       fetchVulnerabilities: jest.fn(),
-//     },
-//   };
-// });
+
+const createVulnerabilitiesMock = jest.fn();
+jest.mock('./process/vulnerabilities', () => {
+  return {
+    __esModule: true,
+    Vulnerabilities: class {
+      static create() {
+        return createVulnerabilitiesMock();
+      }
+    },
+  };
+});
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -1031,6 +1034,12 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('return no data section if summary is set to all and no vulnerabilities', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([]);
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1042,6 +1051,34 @@ describe('workers/repository/dependency-dashboard', () => {
     });
 
     it('return all vulnerabilities if set to all', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1049,10 +1086,65 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         packageFiles
       );
-      expect(result).toBe(`## Vulnerabilities\n\n TODO add list`);
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+1 of a total of 2 CVEs have no fixes in this repository.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>express</summary>
+<blockquote>
+
+- [GHSA-29mw-wpgm-hmr9](https://osv.dev/vulnerability/GHSA-29mw-wpgm-hmr9) (fixed in 4.18.1)
+</blockquote>
+</details>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
     });
 
     it('return unresolved vulnerabilities if set to "unresolved"', async () => {
+      const fetchVulnerabilitiesMock = jest.fn();
+      createVulnerabilitiesMock.mockResolvedValueOnce({
+        fetchVulnerabilities: fetchVulnerabilitiesMock,
+      });
+
+      fetchVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          packageName: 'express',
+          depVersion: '4.17.3',
+          fixedVersion: '4.18.1',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-29mw-wpgm-hmr9',
+          },
+        },
+        {
+          packageName: 'cookie-parser',
+          depVersion: '1.4.6',
+          packageFileConfig: {
+            manager: 'npm',
+          },
+          vulnerability: {
+            id: 'GHSA-35jh-r3h4-6jhm',
+          },
+        },
+      ]);
       const result = await getDashboardMarkdownVulnerabilities(
         {
           ...config,
@@ -1060,7 +1152,27 @@ describe('workers/repository/dependency-dashboard', () => {
         },
         packageFiles
       );
-      expect(result).toBe(`## Vulnerabilities\n\n TODO add list`);
+      expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
+
+1 of a total of 2 CVEs have no fixes in this repository.
+<details><summary>npm</summary>
+<blockquote>
+
+<details><summary>undefined</summary>
+<blockquote>
+
+<details><summary>cookie-parser</summary>
+<blockquote>
+
+- [GHSA-35jh-r3h4-6jhm](https://osv.dev/vulnerability/GHSA-35jh-r3h4-6jhm)
+</blockquote>
+</details>
+
+</blockquote>
+</details>
+
+</blockquote>
+</details>`);
     });
   });
 });

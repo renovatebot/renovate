@@ -698,10 +698,6 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
 It is pointless to edit the labels, as Renovate bot restores the labels on each run.
 
-## dependencyDashboardTitle
-
-Configure this option if you prefer a different title for the Dependency Dashboard.
-
 ## dependencyDashboardOSVVulnerabilitySummary
 
 Use this option to control if the Dependency Dashboard should have a section that shows the CVEs for your repository.
@@ -713,6 +709,10 @@ You can choose from:
 - `none` (default) no section will be added
 - `unresolved` show vulnerabilities that have no fixes
 - `all` list all vulnerabilities
+
+## dependencyDashboardTitle
+
+Configure this option if you prefer a different title for the Dependency Dashboard.
 
 ## description
 
