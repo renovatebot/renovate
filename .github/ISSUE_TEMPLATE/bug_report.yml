@@ -12,7 +12,7 @@ body:
       value: |
         **Stop!** Only create a Bug Report if you're a maintainer of Renovate.
         If you're a user of Renovate, please create a GitHub Discussion.
-        Please go back a step and select Discussion instead of Issue.
+        Please go back a step and select _Start a discussion_ instead of Issue.
 
   - type: dropdown
     id: how-are-you-running-renovate
