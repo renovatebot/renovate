@@ -7,6 +7,7 @@ import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { JavaVersionDatasource } from '../../datasource/java-version';
 import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
+import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 
 export { extractPackageFile } from './extract';
@@ -18,14 +19,15 @@ export const defaultConfig = {
 };
 
 export const supportedDatasources = [
-  JavaVersionDatasource.id,
+  DartVersionDatasource.id,
   DockerDatasource.id,
+  FlutterVersionDatasource.id,
   GithubReleasesDatasource.id,
   GithubTagsDatasource.id,
   HexpmBobDatasource.id,
+  JavaVersionDatasource.id,
   NodeVersionDatasource.id,
   NpmDatasource.id,
+  PypiDatasource.id,
   RubyVersionDatasource.id,
-  DartVersionDatasource.id,
-  FlutterVersionDatasource.id,
 ];

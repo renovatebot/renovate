@@ -1,5 +1,13 @@
-import { RenovateConfig, git, mocked, partial } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  git,
+  mocked,
+  partial,
+  platform,
+} from '../../../../../test/util';
+import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import type { Pr } from '../../../../modules/platform/types';
 import * as _cache from '../../../../util/cache/repository';
 import { isOnboarded } from './check';
 
@@ -9,7 +17,10 @@ jest.mock('../../../../util/git');
 const cache = mocked(_cache);
 
 describe('workers/repository/onboarding/branch/check', () => {
-  const config = partial<RenovateConfig>({ requireConfig: 'required' });
+  const config = partial<RenovateConfig>({
+    requireConfig: 'required',
+    suppressNotifications: [],
+  });
 
   it('skips normal onboarding check if onboardingCache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
@@ -37,13 +48,19 @@ describe('workers/repository/onboarding/branch/check', () => {
         onboardingBranchSha: 'onboarding-sha',
       },
     });
-    git.getBranchCommit
-      .mockReturnValueOnce('default-sha-1')
-      .mockReturnValueOnce('onboarding-sha');
     git.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
     expect(logger.debug).not.toHaveBeenCalledWith(
       'Onboarding cache is valid. Repo is not onboarded'
+    );
+  });
+
+  it('continues with normal logic if closedPr exists', async () => {
+    cache.getCache.mockReturnValue({});
+    platform.findPr.mockResolvedValue(partial<Pr>());
+    git.getFileList.mockResolvedValue([]);
+    await expect(isOnboarded(config)).rejects.toThrow(
+      REPOSITORY_CLOSED_ONBOARDING
     );
   });
 });

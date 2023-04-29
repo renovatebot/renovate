@@ -30,6 +30,10 @@ export function trimLeadingSlash(path: string): string {
   return path.replace(/^\/+/, '');
 }
 
+export function trimSlashes(path: string): string {
+  return trimLeadingSlash(trimTrailingSlash(path));
+}
+
 /**
  * Resolves an input path against a base URL
  *
