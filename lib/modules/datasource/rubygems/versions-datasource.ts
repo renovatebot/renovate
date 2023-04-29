@@ -10,7 +10,7 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 
 interface RegistryCache {
   lastSync: Date;
-  packageReleases: Record<string, string[]>; // Because we might need a "constructor" key
+  packageReleases: Map<string, string[]>; // Because we might need a "constructor" key
   contentLength: number;
   isSupported: boolean;
   registryUrl: string;
@@ -25,7 +25,7 @@ export class VersionsDatasource extends Datasource {
     const cacheKey = `rubygems-versions-cache:${registryUrl}`;
     const regCache = memCache.get<RegistryCache>(cacheKey) ?? {
       lastSync: new Date('2000-01-01'),
-      packageReleases: {},
+      packageReleases: new Map<string, string[]>(),
       contentLength: 0,
       isSupported: false,
       registryUrl,
@@ -52,13 +52,12 @@ export class VersionsDatasource extends Datasource {
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
 
-    if (!regCache.packageReleases[packageName]) {
+    const versions = regCache.packageReleases.get(packageName);
+    if (!versions) {
       return null;
     }
 
-    const releases = regCache.packageReleases[packageName].map((version) => ({
-      version,
-    }));
+    const releases = versions.map((version) => ({ version }));
     return { releases };
   }
 
@@ -73,7 +72,7 @@ export class VersionsDatasource extends Datasource {
     const url = `${regCache.registryUrl}/versions`;
     const options = {
       headers: {
-        'accept-encoding': 'identity',
+        'accept-encoding': 'gzip',
         range: `bytes=${regCache.contentLength}-`,
       },
     };
@@ -92,7 +91,7 @@ export class VersionsDatasource extends Datasource {
       }
       if (err.statusCode !== 416) {
         regCache.contentLength = 0;
-        regCache.packageReleases = {};
+        regCache.packageReleases = new Map<string, string[]>();
         logger.debug({ err }, 'Rubygems fetch error');
         throw new ExternalHostError(new Error('Rubygems fetch error'));
       }
@@ -119,21 +118,20 @@ export class VersionsDatasource extends Datasource {
       split = l.split(' ');
       [pkg, versions] = split;
       pkg = VersionsDatasource.copystr(pkg);
-      regCache.packageReleases[pkg] ??= [];
+      let existingVersions = regCache.packageReleases.get(pkg) ?? [];
       const lineVersions = versions.split(',').map((version) => version.trim());
       for (const lineVersion of lineVersions) {
         if (lineVersion.startsWith('-')) {
           const deletedVersion = lineVersion.slice(1);
           logger.trace({ pkg, deletedVersion }, 'Rubygems: Deleting version');
-          regCache.packageReleases[pkg] = regCache.packageReleases[pkg].filter(
+          existingVersions = existingVersions.filter(
             (version) => version !== deletedVersion
           );
         } else {
-          regCache.packageReleases[pkg].push(
-            VersionsDatasource.copystr(lineVersion)
-          );
+          existingVersions.push(VersionsDatasource.copystr(lineVersion));
         }
       }
+      regCache.packageReleases.set(pkg, existingVersions);
     } catch (err) /* istanbul ignore next */ {
       logger.warn(
         { err, line, split, pkg, versions },
