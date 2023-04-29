@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
@@ -10,7 +9,7 @@ import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-type PackageReleases = Record<string, string[]>;
+type PackageReleases = Map<string, string[]>;
 
 interface RegistryCache {
   lastSync: Date;
@@ -19,6 +18,8 @@ interface RegistryCache {
   isSupported: boolean;
   registryUrl: string;
 }
+
+export const memCache = new Map<string, RegistryCache>();
 
 const Lines = z
   .string()
@@ -56,9 +57,9 @@ export class VersionsDatasource extends Datasource {
 
   getRegistryCache(registryUrl: string): RegistryCache {
     const cacheKey = `rubygems-versions-cache:${registryUrl}`;
-    const regCache = memCache.get<RegistryCache>(cacheKey) ?? {
+    const regCache = memCache.get(cacheKey) ?? {
       lastSync: new Date('2000-01-01'),
-      packageReleases: {},
+      packageReleases: new Map<string, string[]>(),
       contentLength: 0,
       isSupported: false,
       registryUrl,
@@ -85,11 +86,11 @@ export class VersionsDatasource extends Datasource {
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
 
-    if (!regCache.packageReleases[packageName]) {
+    const versions = regCache.packageReleases.get(packageName);
+    if (!versions) {
       return null;
     }
 
-    const versions = regCache.packageReleases[packageName];
     const releases = versions.map((version) => ({ version }));
     return { releases };
   }
@@ -107,7 +108,7 @@ export class VersionsDatasource extends Datasource {
   ): void {
     for (const line of lines) {
       const packageName = VersionsDatasource.copystr(line.packageName);
-      let versions = packageReleases[packageName] ?? [];
+      let versions = packageReleases.get(packageName) ?? [];
 
       const { deletedVersions, addedVersions } = line;
 
@@ -125,7 +126,7 @@ export class VersionsDatasource extends Datasource {
         }
       }
 
-      packageReleases[packageName] = versions;
+      packageReleases.set(packageName, versions);
     }
   }
 
@@ -133,7 +134,7 @@ export class VersionsDatasource extends Datasource {
     const url = `${regCache.registryUrl}/versions`;
     const options = {
       headers: {
-        'accept-encoding': 'identity',
+        'accept-encoding': 'gzip',
         range: `bytes=${regCache.contentLength}-`,
       },
     };
@@ -157,7 +158,7 @@ export class VersionsDatasource extends Datasource {
       }
 
       regCache.contentLength = 0;
-      regCache.packageReleases = {};
+      regCache.packageReleases.clear();
 
       logger.debug({ err }, 'Rubygems fetch error');
       throw new ExternalHostError(err);
