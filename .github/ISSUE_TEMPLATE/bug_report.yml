@@ -5,6 +5,10 @@ labels:
 body:
   - type: markdown
     attributes:
+      value: '# This form is for Renovate maintainers only.'
+
+  - type: markdown
+    attributes:
       value: |
         STOP! Only create a Bug Report if you're a maintainer of Renovate.
         If you're a user of Renovate, please create a GitHub Discussion.
