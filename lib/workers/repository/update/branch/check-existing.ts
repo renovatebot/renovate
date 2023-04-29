@@ -12,7 +12,7 @@ export async function prAlreadyExisted(
     logger.debug('recreateClosed is "always". No need to check for closed PR.');
     return null;
   }
-  logger.debug('Check for closed PR as recreating closed PRs is disabled.');
+  logger.debug('Check for closed PR because recreating closed PRs is disabled.');
   // Return if same PR already existed
   let pr = await platform.findPr({
     branchName: config.branchName,
