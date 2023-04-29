@@ -57,8 +57,6 @@ export function parse(
   input: string,
   packageFile?: string
 ): ValueFragment[] | null {
-  // TODO: Add the mem cache.
-
   let result: ValueFragment[] | null = null;
   try {
     const parsedResult = starlark.query(input, query, new Ctx());
@@ -69,6 +67,5 @@ export function parse(
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Bazel module parsing error');
   }
-
   return result;
 }
