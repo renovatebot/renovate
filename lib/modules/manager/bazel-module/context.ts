@@ -24,7 +24,7 @@ export class Ctx implements CtxCompatible {
   // This exists because the good-enough-parser gives a cloned instance of our
   // Ctx. It is missing the Ctx prototype. This function adds the proper prototype
   // to the context and the items referenced by the context.
-  static from(obj: CtxCompatible): Ctx {
+  static as(obj: CtxCompatible): Ctx {
     Object.setPrototypeOf(obj, Ctx.prototype);
     const ctx = obj as Ctx;
     const stackItems = ctx.stack.map((item) => Fragments.asFragment(item));
