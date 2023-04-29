@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as memCache from '../../../util/cache/memory';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
@@ -11,7 +10,7 @@ import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
-type PackageReleases = Record<string, string[]>;
+type PackageReleases = Map<string, string[]>;
 
 interface RegistryCache {
   lastSync: Date;
@@ -20,6 +19,8 @@ interface RegistryCache {
   isSupported: boolean;
   registryUrl: string;
 }
+
+export const memCache = new Map<string, RegistryCache>();
 
 const Lines = z
   .string()
@@ -59,9 +60,9 @@ export class VersionsDatasource extends Datasource {
 
   getRegistryCache(registryUrl: string): RegistryCache {
     const cacheKey = `rubygems-versions-cache:${registryUrl}`;
-    const regCache = memCache.get<RegistryCache>(cacheKey) ?? {
+    const regCache = memCache.get(cacheKey) ?? {
       lastSync: new Date('2000-01-01'),
-      packageReleases: {},
+      packageReleases: new Map<string, string[]>(),
       contentLength: 0,
       isSupported: false,
       registryUrl,
@@ -88,11 +89,11 @@ export class VersionsDatasource extends Datasource {
       throw new Error(PAGE_NOT_FOUND_ERROR);
     }
 
-    if (!regCache.packageReleases[packageName]) {
+    const versions = regCache.packageReleases.get(packageName);
+    if (!versions) {
       return null;
     }
 
-    const versions = regCache.packageReleases[packageName];
     const releases = versions.map((version) => ({ version }));
     return { releases };
   }
@@ -114,34 +115,6 @@ export class VersionsDatasource extends Datasource {
       : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
     buf.write(x, 'utf8');
     return buf.toString('utf8');
-  }
-
-  private updatePackageReleases(
-    packageReleases: PackageReleases,
-    lines: Lines
-  ): void {
-    for (const line of lines) {
-      const packageName = this.copystr(line.packageName);
-      let versions = packageReleases[packageName] ?? [];
-
-      const { deletedVersions, addedVersions } = line;
-
-      if (deletedVersions.size > 0) {
-        versions = versions.filter((v) => !deletedVersions.has(v));
-      }
-
-      if (addedVersions.length > 0) {
-        const existingVersions = new Set(versions);
-        for (const addedVersion of addedVersions) {
-          if (!existingVersions.has(addedVersion)) {
-            const version = this.copystr(addedVersion);
-            versions.push(version);
-          }
-        }
-      }
-
-      packageReleases[packageName] = versions;
-    }
   }
 
   private async fetchFragment({
@@ -168,6 +141,34 @@ export class VersionsDatasource extends Datasource {
     return res.body;
   }
 
+  private updatePackageReleases(
+    packageReleases: PackageReleases,
+    lines: Lines
+  ): void {
+    for (const line of lines) {
+      const packageName = this.copystr(line.packageName);
+      let versions = packageReleases.get(packageName) ?? [];
+
+      const { deletedVersions, addedVersions } = line;
+
+      if (deletedVersions.size > 0) {
+        versions = versions.filter((v) => !deletedVersions.has(v));
+      }
+
+      if (addedVersions.length > 0) {
+        const existingVersions = new Set(versions);
+        for (const addedVersion of addedVersions) {
+          if (!existingVersions.has(addedVersion)) {
+            const version = this.copystr(addedVersion);
+            versions.push(version);
+          }
+        }
+      }
+
+      packageReleases.set(packageName, versions);
+    }
+  }
+
   async updateRubyGemsVersions(regCache: RegistryCache): Promise<void> {
     let newLines: string;
     try {
@@ -186,7 +187,7 @@ export class VersionsDatasource extends Datasource {
 
       regCache.lastSync = new Date('2000-01-01');
       regCache.contentLength = 0;
-      regCache.packageReleases = {};
+      regCache.packageReleases = new Map<string, string[]>();
 
       logger.debug({ err }, 'Rubygems fetch error');
       throw new ExternalHostError(err);
