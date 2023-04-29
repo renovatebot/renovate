@@ -62,6 +62,16 @@ export interface FragmentCompatible {
 
 export class StringFragment implements FragmentCompatible {
   static readonly schema = StringFragmentSchema;
+
+  static as(frag: FragmentCompatible): StringFragment {
+    if (frag instanceof StringFragment) {
+      return frag;
+    }
+    StringFragmentSchema.parse(frag);
+    Object.setPrototypeOf(frag, StringFragment.prototype);
+    return frag as StringFragment;
+  }
+
   readonly type: FragmentType = 'string';
   readonly isComplete = true;
   constructor(readonly value: string) {}
@@ -69,6 +79,16 @@ export class StringFragment implements FragmentCompatible {
 
 export class BooleanFragment implements FragmentCompatible {
   static readonly schema = BooleanFragmentSchema;
+
+  static as(frag: FragmentCompatible): BooleanFragment {
+    if (frag instanceof BooleanFragment) {
+      return frag;
+    }
+    BooleanFragmentSchema.parse(frag);
+    Object.setPrototypeOf(frag, BooleanFragment.prototype);
+    return frag as BooleanFragment;
+  }
+
   readonly type: FragmentType = 'boolean';
   readonly isComplete = true;
   readonly value: boolean;
@@ -80,6 +100,20 @@ export class BooleanFragment implements FragmentCompatible {
 
 export class ArrayFragment implements FragmentCompatible {
   static readonly schema = ArrayFragmentSchema;
+
+  static as(frag: FragmentCompatible): ArrayFragment {
+    if (frag instanceof ArrayFragment) {
+      return frag;
+    }
+    ArrayFragmentSchema.parse(frag);
+    Object.setPrototypeOf(frag, ArrayFragment.prototype);
+    const array = frag as ArrayFragment;
+    for (let i = 0; i < array.items.length; i++) {
+      array.items[i] = Fragments.asValue(array.items[i]);
+    }
+    return array;
+  }
+
   readonly type: FragmentType = 'array';
   isComplete = false;
   items: ValueFragment[] = [];
@@ -96,6 +130,32 @@ export class ArrayFragment implements FragmentCompatible {
 
 export class RecordFragment implements FragmentCompatible {
   static readonly schema = RecordFragmentSchema;
+
+  static safeAs(frag: FragmentCompatible): RecordFragment | undefined {
+    if (frag instanceof RecordFragment) {
+      return frag;
+    }
+    const parseResult = RecordFragmentSchema.safeParse(frag);
+    if (!parseResult.success) {
+      return undefined;
+    }
+    Object.setPrototypeOf(frag, RecordFragment.prototype);
+    const record = frag as RecordFragment;
+    for (const prop in record.children) {
+      const child = record.children[prop];
+      record.children[prop] = Fragments.asValue(child);
+    }
+    return record;
+  }
+
+  static as(frag: FragmentCompatible): RecordFragment {
+    const record = RecordFragment.safeAs(frag);
+    if (record) {
+      return record;
+    }
+    throw Fragments.typeError('record', frag.type);
+  }
+
   readonly type: FragmentType = 'record';
   isComplete = false;
   children: ChildFragments;
@@ -115,6 +175,31 @@ export class RecordFragment implements FragmentCompatible {
 
 export class AttributeFragment implements FragmentCompatible {
   static readonly schema = AttributeFragmentSchema;
+
+  static safeAs(frag: FragmentCompatible): AttributeFragment | undefined {
+    if (frag instanceof AttributeFragment) {
+      return frag;
+    }
+    const parseResult = AttributeFragmentSchema.safeParse(frag);
+    if (!parseResult.success) {
+      return undefined;
+    }
+    Object.setPrototypeOf(frag, AttributeFragment.prototype);
+    const attribute = frag as AttributeFragment;
+    if (attribute.value) {
+      attribute.value = Fragments.asValue(attribute.value);
+    }
+    return attribute;
+  }
+
+  static as(frag: FragmentCompatible): AttributeFragment {
+    const attribute = AttributeFragment.safeAs(frag);
+    if (attribute) {
+      return attribute;
+    }
+    throw Fragments.typeError('attribute', frag.type);
+  }
+
   readonly type: FragmentType = 'attribute';
   readonly name: string;
   value?: ValueFragment;
@@ -144,20 +229,20 @@ export type Fragment = ValueFragment | AttributeFragment;
 // Fragments Class
 
 export class Fragments {
-  private static typeError(expected: string, actual: string): Error {
+  static typeError(expected: string, actual: string): Error {
     return new Error(`Expected type ${expected}, but was ${actual}.`);
   }
 
   static safeAsValue(frag: FragmentCompatible): ValueFragment | undefined {
     switch (frag.type) {
       case 'string':
-        return Fragments.asString(frag);
+        return StringFragment.as(frag);
       case 'boolean':
-        return Fragments.asBoolean(frag);
+        return BooleanFragment.as(frag);
       case 'array':
-        return Fragments.asArray(frag);
+        return ArrayFragment.as(frag);
       case 'record':
-        return Fragments.asRecord(frag);
+        return RecordFragment.as(frag);
       default:
         return undefined;
     }
@@ -177,91 +262,9 @@ export class Fragments {
       return value;
     }
     if (frag.type === 'attribute') {
-      return Fragments.asAttribute(frag);
+      return AttributeFragment.as(frag);
     }
     // istanbul ignore next: can only get here if new type addded, but no impl
     throw new Error(`Unexpected fragment type: ${frag.type}`);
-  }
-
-  static asBoolean(frag: FragmentCompatible): BooleanFragment {
-    if (frag instanceof BooleanFragment) {
-      return frag;
-    }
-    BooleanFragmentSchema.parse(frag);
-    Object.setPrototypeOf(frag, BooleanFragment.prototype);
-    return frag as BooleanFragment;
-  }
-
-  static asString(frag: FragmentCompatible): StringFragment {
-    if (frag instanceof StringFragment) {
-      return frag;
-    }
-    StringFragmentSchema.parse(frag);
-    Object.setPrototypeOf(frag, StringFragment.prototype);
-    return frag as StringFragment;
-  }
-
-  static asArray(frag: FragmentCompatible): ArrayFragment {
-    if (frag instanceof ArrayFragment) {
-      return frag;
-    }
-    ArrayFragmentSchema.parse(frag);
-    Object.setPrototypeOf(frag, ArrayFragment.prototype);
-    const array = frag as ArrayFragment;
-    for (let i = 0; i < array.items.length; i++) {
-      array.items[i] = Fragments.asValue(array.items[i]);
-    }
-    return array;
-  }
-
-  static safeAsRecord(frag: FragmentCompatible): RecordFragment | undefined {
-    if (frag instanceof RecordFragment) {
-      return frag;
-    }
-    const parseResult = RecordFragmentSchema.safeParse(frag);
-    if (!parseResult.success) {
-      return undefined;
-    }
-    Object.setPrototypeOf(frag, RecordFragment.prototype);
-    const record = frag as RecordFragment;
-    for (const prop in record.children) {
-      const child = record.children[prop];
-      record.children[prop] = Fragments.asValue(child);
-    }
-    return record;
-  }
-
-  static asRecord(frag: FragmentCompatible): RecordFragment {
-    const record = Fragments.safeAsRecord(frag);
-    if (record) {
-      return record;
-    }
-    throw Fragments.typeError('record', frag.type);
-  }
-
-  static safeAsAttribute(
-    frag: FragmentCompatible
-  ): AttributeFragment | undefined {
-    if (frag instanceof AttributeFragment) {
-      return frag;
-    }
-    const parseResult = AttributeFragmentSchema.safeParse(frag);
-    if (!parseResult.success) {
-      return undefined;
-    }
-    Object.setPrototypeOf(frag, AttributeFragment.prototype);
-    const attribute = frag as AttributeFragment;
-    if (attribute.value) {
-      attribute.value = Fragments.asValue(attribute.value);
-    }
-    return attribute;
-  }
-
-  static asAttribute(frag: FragmentCompatible): AttributeFragment {
-    const attribute = Fragments.safeAsAttribute(frag);
-    if (attribute) {
-      return attribute;
-    }
-    throw Fragments.typeError('attribute', frag.type);
   }
 }

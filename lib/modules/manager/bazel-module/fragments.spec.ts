@@ -56,6 +56,23 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(array.items).toEqual([new StringFragment('hello')]);
       expect(array.isComplete).toBe(false);
     });
+
+    describe('as', () => {
+      it('returns an ArrayFragment', () => {
+        const frag: {
+          type: FragmentType;
+          isComplete: boolean;
+          items: ValueFragment[];
+        } = {
+          type: 'array',
+          isComplete: false,
+          items: [new StringFragment('hello')],
+        };
+        const result = ArrayFragment.as(frag);
+        expect(result).toEqual(frag);
+        expect(result).toBeInstanceOf(ArrayFragment);
+      });
+    });
   });
 
   describe('RecordFragment', () => {
@@ -93,6 +110,23 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(attribute.value).toEqual(value);
       expect(attribute.isComplete).toBe(true);
     });
+
+    describe('as', () => {
+      it('returns an AttributeFragment', () => {
+        const frag: {
+          type: FragmentType;
+          isComplete: boolean;
+          value?: ValueFragment;
+        } = {
+          type: 'attribute',
+          isComplete: false,
+          value: new StringFragment('hello'),
+        };
+        const result = AttributeFragment.as(frag);
+        expect(result).toEqual(frag);
+        expect(result).toBeInstanceOf(AttributeFragment);
+      });
+    });
   });
 
   describe('Fragments', () => {
@@ -122,40 +156,6 @@ describe('modules/manager/bazel-module/fragments', () => {
       });
     });
 
-    describe('asArray', () => {
-      it('returns an ArrayFragment', () => {
-        const frag: {
-          type: FragmentType;
-          isComplete: boolean;
-          items: ValueFragment[];
-        } = {
-          type: 'array',
-          isComplete: false,
-          items: [new StringFragment('hello')],
-        };
-        const result = Fragments.asArray(frag);
-        expect(result).toEqual(frag);
-        expect(result).toBeInstanceOf(ArrayFragment);
-      });
-    });
-
-    describe('asAttribute', () => {
-      it('returns an AttributeFragment', () => {
-        const frag: {
-          type: FragmentType;
-          isComplete: boolean;
-          value?: ValueFragment;
-        } = {
-          type: 'attribute',
-          isComplete: false,
-          value: new StringFragment('hello'),
-        };
-        const result = Fragments.asAttribute(frag);
-        expect(result).toEqual(frag);
-        expect(result).toBeInstanceOf(AttributeFragment);
-      });
-    });
-
     it.each`
       frag                             | exp
       ${new StringFragment('hello')}   | ${new StringFragment('hello')}
@@ -168,11 +168,11 @@ describe('modules/manager/bazel-module/fragments', () => {
     });
 
     it.each`
-      fn                       | frag
-      ${Fragments.asString}    | ${new ArrayFragment()}
-      ${Fragments.asArray}     | ${new RecordFragment()}
-      ${Fragments.asRecord}    | ${new ArrayFragment()}
-      ${Fragments.asAttribute} | ${new ArrayFragment()}
+      fn                      | frag
+      ${StringFragment.as}    | ${new ArrayFragment()}
+      ${ArrayFragment.as}     | ${new RecordFragment()}
+      ${RecordFragment.as}    | ${new ArrayFragment()}
+      ${AttributeFragment.as} | ${new ArrayFragment()}
     `('$fn throws with $frag', ({ fn, frag }) => {
       expect(() => fn(frag)).toThrow();
     });

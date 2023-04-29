@@ -29,7 +29,7 @@ export class Ctx implements CtxCompatible {
     const ctx = obj as Ctx;
     const stackItems = ctx.stack.map((item) => Fragments.asFragment(item));
     ctx.stack = Stack.create(...stackItems);
-    ctx.results = ctx.results.map((item) => Fragments.asRecord(item));
+    ctx.results = ctx.results.map((item) => RecordFragment.as(item));
     return ctx;
   }
 
@@ -56,7 +56,7 @@ export class Ctx implements CtxCompatible {
       return;
     }
     const value = Fragments.safeAsValue(current);
-    const attribute = Fragments.safeAsAttribute(current);
+    const attribute = AttributeFragment.safeAs(current);
     const newCurrent = this.stack.safeCurrent;
     if (value) {
       if (newCurrent && 'addValue' in newCurrent) {
