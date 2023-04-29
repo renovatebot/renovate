@@ -4,7 +4,6 @@ import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
-import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
@@ -117,30 +116,6 @@ export class VersionsDatasource extends Datasource {
     return buf.toString('utf8');
   }
 
-  private async fetchFragment({
-    registryUrl,
-    contentLength,
-  }: RegistryCache): Promise<string> {
-    const url = `${registryUrl}/versions`;
-
-    const options: HttpOptions = {
-      headers: {
-        'accept-encoding': 'identity',
-        range: `bytes=${contentLength}-`,
-      },
-    };
-
-    logger.debug('Rubygems: Fetching rubygems.org versions');
-    const start = Date.now();
-
-    const res = await this.http.get(url, options);
-
-    const duration = Math.round(Date.now() - start);
-    logger.debug(`Rubygems: Fetched rubygems.org versions in ${duration}ms`);
-
-    return res.body;
-  }
-
   private updatePackageReleases(
     packageReleases: PackageReleases,
     lines: Lines
@@ -170,9 +145,20 @@ export class VersionsDatasource extends Datasource {
   }
 
   async updateRubyGemsVersions(regCache: RegistryCache): Promise<void> {
+    const url = `${regCache.registryUrl}/versions`;
+    const options = {
+      headers: {
+        'accept-encoding': 'gzip',
+        range: `bytes=${regCache.contentLength}-`,
+      },
+    };
     let newLines: string;
     try {
-      newLines = await this.fetchFragment(regCache);
+      logger.debug('Rubygems: Fetching rubygems.org versions');
+      const startTime = Date.now();
+      newLines = (await this.http.get(url, options)).body;
+      const durationMs = Math.round(Date.now() - startTime);
+      logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         regCache.isSupported = false;
