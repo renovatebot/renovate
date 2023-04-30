@@ -2622,6 +2622,7 @@ const options: RenovateOptions[] = [
     type: 'array',
     subType: 'string',
     experimental: true,
+    globalOnly: true,
     default: [],
   },
 ];
