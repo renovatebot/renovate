@@ -86,7 +86,7 @@ describe('modules/manager/gitlabci/utils', () => {
   describe('replaceReferenceTags', () => {
     it('replaces all !reference tags with empty strings', () => {
       const yamlFileReferenceConfig = Fixtures.get('gitlab-ci.reference.yaml');
-      const replaced = replaceReferenceTags(yamlFileReferenceMultiConfig);
+      const replaced = replaceReferenceTags(yamlFileReferenceConfig);
       expect(replaced).not.toContain('!reference');
     });
   });
