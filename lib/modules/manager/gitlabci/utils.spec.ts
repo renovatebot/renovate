@@ -2,11 +2,6 @@ import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
 import { getGitlabDep, replaceReferenceTags } from './utils';
 
-const yamlFileReferenceSingleConfig = Fixtures.get(
-  'gitlab-ci.reference.1.yaml'
-);
-const yamlFileReferenceMultiConfig = Fixtures.get('gitlab-ci.reference.2.yaml');
-
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
     const versionAndDigestTemplate =
@@ -89,12 +84,8 @@ describe('modules/manager/gitlabci/utils', () => {
   });
 
   describe('replaceReferenceTags', () => {
-    it('replaces single-line !reference tags with empty strings', () => {
-      const replaced = replaceReferenceTags(yamlFileReferenceSingleConfig);
-      expect(replaced).not.toContain('!reference');
-    });
-
-    it('replaces multi-line !reference tags with empty strings', () => {
+    it('replaces all !reference tags with empty strings', () => {
+      const yamlFileReferenceConfig = Fixtures.get('gitlab-ci.reference.yaml');
       const replaced = replaceReferenceTags(yamlFileReferenceMultiConfig);
       expect(replaced).not.toContain('!reference');
     });
