@@ -2618,7 +2618,7 @@ const options: RenovateOptions[] = [
   {
     name: 'checkedBranches',
     description:
-      'A list of branch names to mark for creation or rebasing as if it was checked in the dependency dashboard',
+      'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
     type: 'array',
     subType: 'string',
     experimental: true,
