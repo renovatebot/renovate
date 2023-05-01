@@ -2016,9 +2016,9 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues when checked by checkedBranches', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        ...updatedPackageFiles,
-      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        updatedPackageFiles
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [],
