@@ -72,6 +72,7 @@ export interface ResultWithoutPr {
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrDebugData(
+  targetBranch: string,
   debugData: PrDebugData | undefined
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
@@ -79,6 +80,7 @@ export function updatePrDebugData(
   return {
     createdInVer: createdByRenovateVersion,
     updatedInVer: updatedByRenovateVersion,
+    targetBranch,
   };
 }
 
@@ -306,7 +308,10 @@ export async function ensurePr(
   }
 
   const prBody = getPrBody(config, {
-    debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
+    debugData: updatePrDebugData(
+      config.baseBranch,
+      existingPr?.bodyStruct?.debugData
+    ),
   });
 
   try {

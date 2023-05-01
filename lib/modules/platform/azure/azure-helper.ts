@@ -143,7 +143,7 @@ export async function getMergeMethod(
   const policyConfigurations = (
     await (
       await azureApi.policyApi()
-    ).getPolicyConfigurations(project, mergePolicyGuid)
+    ).getPolicyConfigurations(project, undefined, mergePolicyGuid)
   )
     .filter((p) => p.settings.scope.some(isRelevantScope))
     .map((p) => p.settings)[0];
