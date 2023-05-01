@@ -63,7 +63,7 @@ describe('modules/datasource/rubygems/index', () => {
       };
 
       const versionsdataSourceSpy = jest
-        .spyOn(VersionsDatasource.prototype, 'syncVersions')
+        .spyOn(VersionsDatasource.prototype, 'syncCache')
         .mockImplementationOnce(() => {
           throw new Error();
         });
@@ -84,6 +84,8 @@ describe('modules/datasource/rubygems/index', () => {
       };
       httpMock
         .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(200, rubygemsOrgVersions.slice(0, 1024))
         .get('/versions')
         .reply(200, rubygemsOrgVersions);
       const res = await getPkgReleases(newparams);
@@ -112,6 +114,8 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://enterprise.contribsys.com')
         .get('/versions')
+        .reply(200, contribsysComVersions.slice(0, 1024))
+        .get('/versions')
         .reply(200, contribsysComVersions);
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
@@ -138,6 +142,8 @@ describe('modules/datasource/rubygems/index', () => {
     it('uses rubygems.org if no registry urls were provided', async () => {
       httpMock
         .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(200, rubygemsOrgVersions.slice(0, 1024))
         .get('/versions')
         .reply(200, rubygemsOrgVersions);
 

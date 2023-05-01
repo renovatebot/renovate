@@ -1,9 +1,11 @@
+import hasha from 'hasha';
+import { DateTime } from 'luxon';
 import { z } from 'zod';
 import { PAGE_NOT_FOUND_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
+import type { HttpOptions } from '../../../util/http/types';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
 import { Datasource } from '../datasource';
@@ -12,16 +14,16 @@ import type { GetReleasesConfig, ReleaseResult } from '../types';
 type PackageReleases = Map<string, string[]>;
 
 interface RegistryCache {
-  lastSync: Date;
-  packageReleases: PackageReleases;
-  contentLength: number;
+  cacheSyncedAt: number;
+  contentRangeOffset: number;
+  fingerprint: string;
   isSupported: boolean;
-  registryUrl: string;
+  packageReleases: PackageReleases;
 }
 
 export const memCache = new Map<string, RegistryCache>();
 
-const Lines = z
+const VersionLines = z
   .string()
   .transform((x) => x.split(newlineRegex))
   .pipe(
@@ -56,53 +58,25 @@ const Lines = z
       }
     )
   );
-type Lines = z.infer<typeof Lines>;
+type Lines = z.infer<typeof VersionLines>;
 
 export class VersionsDatasource extends Datasource {
-  private isInitialFetch = true;
-
-  constructor(override readonly id: string) {
-    super(id);
-  }
-
-  getRegistryCache(registryUrl: string): RegistryCache {
-    const cacheKey = `rubygems-versions-cache:${registryUrl}`;
-    const regCache = memCache.get(cacheKey) ?? {
-      lastSync: new Date('2000-01-01'),
-      packageReleases: new Map<string, string[]>(),
-      contentLength: 0,
+  private static newCache(cache?: RegistryCache): RegistryCache {
+    return {
+      cacheSyncedAt: 0,
+      contentRangeOffset: 0,
+      fingerprint: '',
       isSupported: false,
-      registryUrl,
+      packageReleases: new Map<string, string[]>(),
     };
-    memCache.set(cacheKey, regCache);
-    return regCache;
   }
 
-  async getReleases({
-    registryUrl,
-    packageName,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    logger.debug(`getRubygemsOrgDependency(${packageName})`);
-
-    // istanbul ignore if
-    if (!registryUrl) {
-      return null;
-    }
-    const regCache = this.getRegistryCache(registryUrl);
-
-    await this.syncVersions(regCache);
-
-    if (!regCache.isSupported) {
-      throw new Error(PAGE_NOT_FOUND_ERROR);
-    }
-
-    const versions = regCache.packageReleases.get(packageName);
-    if (!versions) {
-      return null;
-    }
-
-    const releases = versions.map((version) => ({ version }));
-    return { releases };
+  private static resetCache(cache: RegistryCache): void {
+    cache.cacheSyncedAt = 0;
+    cache.contentRangeOffset = 0;
+    cache.fingerprint = '';
+    cache.isSupported = false;
+    cache.packageReleases.clear();
   }
 
   /**
@@ -115,13 +89,27 @@ export class VersionsDatasource extends Datasource {
    * This method meant to be called for `version` and `packageName`
    * before storing them in the cache.
    */
-  private copystr(x: string): string {
+  private static copystr(x: string): string {
     const len = Buffer.byteLength(x, 'utf8');
-    const buf = this.isInitialFetch
-      ? Buffer.allocUnsafe(len) // allocate from pre-allocated buffer
-      : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
+    const buf = Buffer.allocUnsafeSlow(len);
     buf.write(x, 'utf8');
     return buf.toString('utf8');
+  }
+
+  private static getCache(registryUrl: string): RegistryCache {
+    const cacheKey = `rubygems-versions-cache:${registryUrl}`;
+    const oldCache = memCache.get(cacheKey);
+    if (oldCache) {
+      return oldCache;
+    }
+
+    const newCache: RegistryCache = VersionsDatasource.newCache();
+    memCache.set(cacheKey, newCache);
+    return newCache;
+  }
+
+  constructor(override readonly id: string) {
+    super(id);
   }
 
   private updatePackageReleases(
@@ -129,7 +117,7 @@ export class VersionsDatasource extends Datasource {
     lines: Lines
   ): void {
     for (const line of lines) {
-      const packageName = this.copystr(line.packageName);
+      const packageName = VersionsDatasource.copystr(line.packageName);
       let versions = packageReleases.get(packageName) ?? [];
 
       const { deletedVersions, addedVersions } = line;
@@ -142,7 +130,7 @@ export class VersionsDatasource extends Datasource {
         const existingVersions = new Set(versions);
         for (const addedVersion of addedVersions) {
           if (!existingVersions.has(addedVersion)) {
-            const version = this.copystr(addedVersion);
+            const version = VersionsDatasource.copystr(addedVersion);
             versions.push(version);
           }
         }
@@ -152,21 +140,74 @@ export class VersionsDatasource extends Datasource {
     }
   }
 
-  async updateRubyGemsVersions(regCache: RegistryCache): Promise<void> {
-    const url = `${regCache.registryUrl}/versions`;
-    const options = {
+  /**
+   * Header contains `created_at` field which is enough to determine
+   * if the cache is outdated.
+   *
+   * But instead of parsing date, we hash the first 1024 bytes
+   * of the response for the sake of simplicity.
+   */
+  private async getFingerprint(registryUrl: string): Promise<string> {
+    const url = `${registryUrl}/versions`;
+    const options: HttpOptions = {
+      useCache: false,
       headers: {
-        'accept-encoding': 'gzip',
-        range: `bytes=${regCache.contentLength}-`,
+        ['Accept-Encoding']: 'deflate, compress, br',
+        ['Range']: 'bytes=0-1023',
       },
     };
-    let newLines: string;
+    const { body } = await this.http.get(url, options);
+    const hash = hasha(body, { algorithm: 'sha256' });
+    return hash;
+  }
+
+  private async fetchVersions(
+    registryUrl: string,
+    offset: number
+  ): Promise<string> {
+    const url = `${registryUrl}/versions`;
+    const options: HttpOptions =
+      offset === 0
+        ? { headers: { ['Accept-Encoding']: 'gzip' } }
+        : {
+            headers: {
+              ['Accept-Encoding']: 'deflate, compress, br',
+              ['Range']: `bytes=${offset}-`,
+            },
+          };
+    options.useCache = false;
+
+    logger.debug('Rubygems: Fetching rubygems.org versions');
+    const start = Date.now();
+    const { body } = await this.http.get(url, options);
+    const duration = Math.round(Date.now() - start);
+    logger.debug(`Rubygems: Fetched rubygems.org versions in ${duration}ms`);
+
+    return body;
+  }
+
+  async performSync(
+    registryUrl: string,
+    regCache: RegistryCache
+  ): Promise<void> {
+    const now = DateTime.now().toMillis();
     try {
-      logger.debug('Rubygems: Fetching rubygems.org versions');
-      const startTime = Date.now();
-      newLines = (await this.http.get(url, options)).body;
-      const durationMs = Math.round(Date.now() - startTime);
-      logger.debug(`Rubygems: Fetched rubygems.org versions in ${durationMs}`);
+      const fingerprint = await this.getFingerprint(registryUrl);
+      if (fingerprint !== regCache.fingerprint) {
+        VersionsDatasource.resetCache(regCache);
+      }
+
+      const body = await this.fetchVersions(
+        registryUrl,
+        regCache.contentRangeOffset
+      );
+      const lines = VersionLines.parse(body);
+
+      regCache.cacheSyncedAt = now;
+      regCache.contentRangeOffset += Buffer.byteLength(body, 'utf8');
+      regCache.fingerprint = fingerprint;
+      regCache.isSupported = true;
+      this.updatePackageReleases(regCache.packageReleases, lines);
     } catch (err) /* istanbul ignore next */ {
       if (err instanceof HttpError && err.response?.statusCode === 404) {
         regCache.isSupported = false;
@@ -175,35 +216,58 @@ export class VersionsDatasource extends Datasource {
 
       if (err.statusCode === 416) {
         logger.debug('Rubygems: No update');
-        regCache.lastSync = new Date();
+        regCache.cacheSyncedAt = now;
         return;
       }
 
-      regCache.contentLength = 0;
-      regCache.packageReleases.clear();
+      VersionsDatasource.resetCache(regCache);
 
       logger.debug({ err }, 'Rubygems fetch error');
       throw new ExternalHostError(err);
+    } finally {
+      delete this.pendingSyncs[registryUrl];
     }
-
-    regCache.isSupported = true;
-    regCache.lastSync = new Date();
-
-    const lines = Lines.parse(newLines);
-    this.updatePackageReleases(regCache.packageReleases, lines);
-    this.isInitialFetch = false;
   }
 
-  private updateRubyGemsVersionsPromise: Promise<void> | null = null;
+  private pendingSyncs: Record<string, Promise<void> | null> = {};
 
-  async syncVersions(regCache: RegistryCache): Promise<void> {
-    const isStale = getElapsedMinutes(regCache.lastSync) >= 15;
+  async syncCache(registryUrl: string, regCache: RegistryCache): Promise<void> {
+    const cachedAt = DateTime.fromMillis(regCache.cacheSyncedAt);
+    const now = DateTime.now();
+    const isStale = cachedAt.plus({ minutes: 15 }) < now;
     if (isStale) {
-      this.updateRubyGemsVersionsPromise =
-        this.updateRubyGemsVersionsPromise ??
-        this.updateRubyGemsVersions(regCache);
-      await this.updateRubyGemsVersionsPromise;
-      this.updateRubyGemsVersionsPromise = null;
+      this.pendingSyncs[registryUrl] ??= this.performSync(
+        registryUrl,
+        regCache
+      );
+      await this.pendingSyncs[registryUrl];
     }
+  }
+
+  async getReleases({
+    registryUrl,
+    packageName,
+  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+    logger.debug(`getRubygemsOrgDependency(${packageName})`);
+
+    // istanbul ignore if
+    if (!registryUrl) {
+      return null;
+    }
+
+    const regCache = VersionsDatasource.getCache(registryUrl);
+    await this.syncCache(registryUrl, regCache);
+
+    if (!regCache.isSupported) {
+      throw new Error(PAGE_NOT_FOUND_ERROR);
+    }
+
+    const versions = regCache.packageReleases.get(packageName);
+    if (!versions) {
+      return null;
+    }
+
+    const releases = versions.map((version) => ({ version }));
+    return { releases };
   }
 }
