@@ -21,6 +21,19 @@ const adminConfig = {
 };
 
 describe('modules/manager/terragrunt/artifacts', () => {
+  const updateTypes: UpdateType[] = [
+    'digest',
+    'pin',
+    'rollback',
+    'patch',
+    'minor',
+    'major',
+    'replacement',
+    'pinDigest',
+    'lockfileUpdate',
+    'bump',
+  ];
+
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -42,23 +55,11 @@ describe('modules/manager/terragrunt/artifacts', () => {
     expect(mockTFUpdateArtifacts.mock.calls).toBeArrayOfSize(1);
   });
 
-  it('does not call terraform updateArtifacts if the update type is not lockfileMaintenance', async () => {
-    const updateTypes: UpdateType[] = [
-      'digest',
-      'pin',
-      'rollback',
-      'patch',
-      'minor',
-      'major',
-      'replacement',
-      'pinDigest',
-      'lockfileUpdate',
-      'bump',
-    ];
-
-    for (const t of updateTypes) {
+  it.each(updateTypes)(
+    'does not call terraform updateArtifacts if the update type is %s',
+    async (updateType) => {
       const localConfig: UpdateArtifactsConfig = {
-        updateType: t,
+        updateType,
         ...config,
       };
 
@@ -68,7 +69,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
         newPackageFileContent: '',
         config: localConfig,
       });
+      expect(mockTFUpdateArtifacts.mock.calls).toBeArrayOfSize(0);
     }
-    expect(mockTFUpdateArtifacts.mock.calls).toBeArrayOfSize(0);
-  });
+  );
 });
