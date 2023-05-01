@@ -4,7 +4,7 @@ import { parseDepsEdnFile } from './parser';
 
 describe('modules/manager/deps-edn/parser', () => {
   describe('parseEdnFile', () => {
-    test.each`
+    it.each`
       input                     | output
       ${''}                     | ${undefined}
       ${':foo'}                 | ${undefined}

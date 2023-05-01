@@ -1,8 +1,14 @@
 import { getPkgReleases } from '..';
+import * as httpMock from '../../../../test/http-mock';
 import { AzurePipelinesTasksDatasource } from '.';
+
+const gitHubHost = 'https://raw.githubusercontent.com';
+const marketplaceTasksPath =
+  '/renovatebot/azure-devops-marketplace/main/azure-pipelines-marketplace-tasks.json';
 
 describe('modules/datasource/azure-pipelines-tasks/index', () => {
   it('returns null for unknown task', async () => {
+    httpMock.scope(gitHubHost).get(marketplaceTasksPath).reply(200, {});
     expect(
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,
@@ -21,6 +27,10 @@ describe('modules/datasource/azure-pipelines-tasks/index', () => {
   });
 
   it('supports marketplace tasks', async () => {
+    httpMock
+      .scope(gitHubHost)
+      .get(marketplaceTasksPath)
+      .reply(200, { 'automatedanalysis-marketplace': ['0.171.0', '0.198.0'] });
     expect(
       await getPkgReleases({
         datasource: AzurePipelinesTasksDatasource.id,

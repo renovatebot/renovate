@@ -20,7 +20,12 @@ import type {
   ArtifactError,
   WriteExistingFilesResult,
 } from '../../../../modules/manager/npm/post-update/types';
-import type { EnsureCommentConfig, Pr } from '../../../../modules/platform';
+import type {
+  EnsureCommentConfig,
+  Pr,
+  PrBodyStruct,
+  PrDebugData,
+} from '../../../../modules/platform';
 import { hashBody } from '../../../../modules/platform/pr-body';
 import * as _repoCache from '../../../../util/cache/repository';
 import * as _exec from '../../../../util/exec';
@@ -376,7 +381,10 @@ describe('workers/repository/update/branch/index', () => {
     it('skips branch if tagretBranch of update PR is changed by user', async () => {
       const pr = partial<Pr>({
         state: 'open',
-        targetBranch: 'old_base',
+        targetBranch: 'new_base',
+        bodyStruct: partial<PrBodyStruct>({
+          debugData: partial<PrDebugData>({ targetBranch: 'old_base' }),
+        }),
       });
       const ensureCommentConfig = partial<EnsureCommentConfig>({
         number: pr.number,
@@ -386,7 +394,7 @@ describe('workers/repository/update/branch/index', () => {
       scm.branchExists.mockResolvedValue(true);
       scm.isBranchModified.mockResolvedValueOnce(false);
       platform.getBranchPr.mockResolvedValueOnce(pr);
-      config.baseBranch = 'new_base';
+      config.baseBranch = 'old_base';
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -439,10 +447,13 @@ describe('workers/repository/update/branch/index', () => {
         partial<Pr>({
           state: 'open',
           targetBranch: 'v6',
+          bodyStruct: partial<PrBodyStruct>({
+            debugData: partial<PrDebugData>({ targetBranch: 'master' }),
+          }),
         })
       );
-      scm.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
+      scm.isBranchModified.mockResolvedValueOnce(false);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual({
         branchExists: true,
@@ -1047,6 +1058,38 @@ describe('workers/repository/update/branch/index', () => {
         result: 'pr-created',
         commitSha: '123test',
       });
+    });
+
+    it('rebases branch onto new basebranch if baseBranch changed by user', async () => {
+      const pr = partial<Pr>({
+        state: 'open',
+        targetBranch: 'old_base',
+        bodyStruct: partial<PrBodyStruct>({
+          debugData: partial<PrDebugData>({ targetBranch: 'old_base' }),
+        }),
+      });
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [partial<FileChange>()],
+        })
+      );
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [partial<ArtifactError>()],
+        updatedArtifacts: [partial<FileChange>()],
+      });
+      scm.branchExists.mockResolvedValue(true);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+      platform.getBranchPr.mockResolvedValueOnce(pr);
+      await branchWorker.processBranch({
+        ...config,
+        baseBranch: 'new_base',
+        skipBranchUpdate: true,
+      });
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      expect(commit.commitFilesToBranch).toHaveBeenCalled();
+      expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
     });
 
     it('swallows pr errors', async () => {
