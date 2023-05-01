@@ -223,6 +223,9 @@ Results which are soft expired are reused in the following manner:
 
 This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
 
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
 Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
 
 ## containerbaseDir
