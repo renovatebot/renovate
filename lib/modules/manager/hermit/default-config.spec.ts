@@ -1,4 +1,4 @@
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { regexMatches } from '../../../../test/util';
 import { defaultConfig } from './default-config';
 
