@@ -125,7 +125,7 @@ export const allowedFields = {
   prettyNewMajor: 'The new major value with v prepended to it.',
   prettyNewVersion: 'The new version value with v prepended to it.',
   project: 'ChangeLogProject object',
-  recreateClosed: 'If "always", this PR will be recreated if closed',
+  recreateWhen: 'If "always", this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
   releases: 'An array of releases for an upgrade',
   releaseNotes: 'A ChangeLogNotes object for the release',

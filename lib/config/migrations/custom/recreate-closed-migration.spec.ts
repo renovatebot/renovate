@@ -7,7 +7,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
         recreateClosed: true as never,
       },
       {
-        recreateClosed: 'always',
+        recreateWhen: 'always',
       }
     );
   });
@@ -18,7 +18,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
         recreateClosed: false as never,
       },
       {
-        recreateClosed: 'auto',
+        recreateWhen: 'auto',
       }
     );
   });

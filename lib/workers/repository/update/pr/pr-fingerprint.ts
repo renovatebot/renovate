@@ -2,7 +2,7 @@
 // https://github.com/renovatebot/renovate/blob/3d85b6048d6a8c57887b64ed4929e2e02ea41aa0/lib/workers/repository/update/pr/index.ts#L294-L306
 
 import type {
-  RecreateClosed,
+  RecreateWhen,
   UpdateType,
   ValidationMessage,
 } from '../../../../config/types';
@@ -32,7 +32,7 @@ export interface PrFingerprintConfig {
   prHeader?: string;
   prTitle?: string;
   rebaseWhen?: string;
-  recreateClosed?: RecreateClosed;
+  recreateWhen?: RecreateWhen;
   schedule?: string[];
   stopUpdating?: boolean;
   timezone?: string;
@@ -68,7 +68,7 @@ export function generatePrFingerprintConfig(
     prHeader: config.prHeader,
     prTitle: config.prTitle,
     rebaseWhen: config.rebaseWhen,
-    recreateClosed: config.recreateClosed,
+    recreateWhen: config.recreateWhen,
     schedule: config.schedule,
     stopUpdating: config.stopUpdating,
     timezone: config.timezone,

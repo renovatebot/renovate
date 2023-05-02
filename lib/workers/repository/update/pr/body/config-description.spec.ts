@@ -67,10 +67,10 @@ describe('workers/repository/update/pr/body/config-description', () => {
       expect(res).toContain(`At any time (no schedule defined).`);
     });
 
-    it('renders recreateClosed', () => {
+    it('renders recreateWhen', () => {
       const res = getPrConfigDescription({
         ...config,
-        recreateClosed: 'always',
+        recreateWhen: 'always',
       });
       expect(res).toContain(`**Immortal**`);
     });

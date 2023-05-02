@@ -6,7 +6,7 @@ export class RecreateClosedMigration extends AbstractMigration {
 
   override run(value: unknown): void {
     if (is.boolean(value)) {
-      this.rewrite(value ? 'always' : 'auto');
+      this.setSafely('recreateWhen', value ? 'always' : 'auto');
     }
   }
 }

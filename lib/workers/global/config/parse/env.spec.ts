@@ -86,12 +86,12 @@ describe('workers/global/config/parse/env', () => {
     });
 
     test.each`
-      envArg                                    | config
-      ${{ RENOVATE_RECREATE_CLOSED: 'auto' }}   | ${{ recreateClosed: 'auto' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'always' }} | ${{ recreateClosed: 'always' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'never' }}  | ${{ recreateClosed: 'never' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}   | ${{ recreateClosed: 'always' }}
-      ${{ RENOVATE_RECREATE_CLOSED: 'false' }}  | ${{ recreateClosed: 'auto' }}
+      envArg                                   | config
+      ${{ RENOVATE_RECREATE_CLOSED: 'true' }}  | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_CLOSED: 'false' }} | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'auto' }}    | ${{ recreateWhen: 'auto' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'always' }}  | ${{ recreateWhen: 'always' }}
+      ${{ RENOVATE_RECREATE_WHEN: 'never' }}   | ${{ recreateWhen: 'never' }}
     `('"$envArg" -> $config', ({ envArg, config }) => {
       expect(env.getConfig(envArg)).toMatchObject(config);
     });

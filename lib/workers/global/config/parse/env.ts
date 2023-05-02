@@ -38,6 +38,7 @@ const renameKeys = {
   aliases: 'registryAliases',
   azureAutoComplete: 'platformAutomerge', // migrate: azureAutoComplete
   gitLabAutomerge: 'platformAutomerge', // migrate: gitLabAutomerge
+  recreateClosed: 'recreateWhen',
 };
 
 function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -52,10 +53,9 @@ function renameEnvKeys(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   }
   return result;
 }
-
 const migratedKeysAndValues = [
-  { name: 'recreateClosed', from: 'true', to: 'always' },
-  { name: 'recreateClosed', from: 'false', to: 'auto' },
+  { name: 'recreateWhen', from: 'true', to: 'always' },
+  { name: 'recreateWhen', from: 'false', to: 'auto' },
 ];
 
 function massageEnvKeyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -77,6 +77,7 @@ export function getConfig(inputEnv: NodeJS.ProcessEnv): AllConfig {
   env = renameEnvKeys(env);
   // massage the values of migrated configuration keys
   env = massageEnvKeyValues(env);
+
   const options = getOptions();
 
   let config: AllConfig = {};
