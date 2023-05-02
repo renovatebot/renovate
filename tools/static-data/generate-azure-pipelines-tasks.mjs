@@ -1,13 +1,11 @@
 import os from 'node:os';
-import { promisify } from 'node:util';
 import fs from 'fs-extra';
-import g from 'glob';
+import { glob } from 'glob';
 import JSON5 from 'json5';
 import Git from 'simple-git';
 import path from 'upath';
 import { updateJsonFile } from './utils.mjs';
 
-const glob = promisify(g);
 const localPath = path.join(os.tmpdir(), 'azure-pipelines-tasks');
 
 /**
