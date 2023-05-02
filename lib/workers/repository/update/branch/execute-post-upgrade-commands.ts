@@ -1,6 +1,6 @@
 // TODO #7154
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { mergeChildConfig } from '../../../../config';
 import { GlobalConfig } from '../../../../config/global';
 import { addMeta, logger } from '../../../../logger';

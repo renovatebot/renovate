@@ -2624,6 +2624,16 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     default: false,
   },
+  {
+    name: 'checkedBranches',
+    description:
+      'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
+    type: 'array',
+    subType: 'string',
+    experimental: true,
+    globalOnly: true,
+    default: [],
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
