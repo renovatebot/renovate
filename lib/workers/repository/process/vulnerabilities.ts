@@ -454,12 +454,16 @@ export class Vulnerabilities {
     logger.debug(
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
     );
+
+    const severityLevel = vulnerability.database_specific?.severity as string;
+
     return {
       matchDatasources: [datasource],
       matchPackageNames: [packageName],
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
+      vulnerabilitySeverity: severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,

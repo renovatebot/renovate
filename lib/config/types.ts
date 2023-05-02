@@ -309,6 +309,7 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
+  isVulnerabilityAlert?: boolean;
   matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
@@ -333,6 +334,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {

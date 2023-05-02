@@ -1728,7 +1728,8 @@ const options: RenovateOptions[] = [
       dependencyDashboardApproval: false,
       minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
-      commitMessageSuffix: '[SECURITY]',
+      commitMessageSuffix:
+        '[SECURITY{{#if includeVulnerabilitySeverity}}-{{{vulnerabilitySeverity}}}{{/if}}]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
     },
@@ -1839,6 +1840,14 @@ const options: RenovateOptions[] = [
     advancedUse: true,
   },
   {
+    name: 'includeVulnerabilitySeverity',
+    description:
+      'Whether to include the vulnerability severity in the PR title.',
+    type: 'boolean',
+    default: false,
+    cli: false,
+  },
+  {
     name: 'prBodyTemplate',
     description:
       'Pull Request body template. Controls which sections are rendered in the body of the pull request.',
@@ -1864,6 +1873,7 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
   },
+
   {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',

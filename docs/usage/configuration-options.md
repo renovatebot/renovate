@@ -2762,6 +2762,8 @@ These scenarios include if a `baseBranch` or if there is a grouped update and ei
 
 Using this option allows you to skip these default behaviors and use other templating methods to control the format of the PR title.
 
+## includeVulnerabilitySeverity
+
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets.
