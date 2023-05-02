@@ -119,7 +119,7 @@ function globToRegex(depName: string): RegExp {
     depName
       .replace(/\*/g, '_WC_CHAR_')
       .replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&')
-      .replace('_WC_CHAR_', '.*?')
+      .replace(/_WC_CHAR_/g, '.*?')
   );
 }
 
