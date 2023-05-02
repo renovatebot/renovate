@@ -1,5 +1,5 @@
 await (async () => {
-  console.log('-n', 'Checking re2 ... ');
+  console.log('Checking re2 ... ');
   try {
     const { default: RE2 } = await import('re2');
     new RE2('.*').exec('test');
