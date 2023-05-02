@@ -77,7 +77,10 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        uses: nick-fields/retry@v2.8.3
+        with:
+          max_attempts: 3
+          command: yarn install --frozen-lockfile
 
       # build before tests to for static file check
       - name: Build
