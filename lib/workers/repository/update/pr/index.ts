@@ -15,11 +15,16 @@ import {
   platform,
 } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import { hashBody } from '../../../../modules/platform/pr-body';
+import {
+  getPrBodyStruct,
+  hashBody,
+} from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedHours } from '../../../../util/date';
 import { stripEmojis } from '../../../../util/emoji';
-import { deleteBranch, getBranchLastCommitTime } from '../../../../util/git';
+import { fingerprint } from '../../../../util/fingerprint';
+import { getBranchLastCommitTime } from '../../../../util/git';
 import { memoize } from '../../../../util/memoize';
 import { incLimitedValue, isLimitReached } from '../../../global/limits';
 import type {
@@ -32,6 +37,8 @@ import { resolveBranchStatus } from '../branch/status-checks';
 import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
+import { getPrCache, setPrCache } from './pr-cache';
+import { generatePrFingerprintConfig, validatePrCache } from './pr-fingerprint';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
@@ -43,10 +50,11 @@ export function getPlatformPrOptions(
   );
 
   return {
-    azureAutoApprove: config.azureAutoApprove,
-    azureWorkItemId: config.azureWorkItemId,
-    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-    gitLabIgnoreApprovals: config.gitLabIgnoreApprovals,
+    autoApprove: !!config.autoApprove,
+    azureWorkItemId: config.azureWorkItemId ?? 0,
+    bbUseDefaultReviewers: !!config.bbUseDefaultReviewers,
+    gitLabIgnoreApprovals: !!config.gitLabIgnoreApprovals,
+    forkModeDisallowMaintainerEdits: !!config.forkModeDisallowMaintainerEdits,
     usePlatformAutomerge,
   };
 }
@@ -64,6 +72,7 @@ export interface ResultWithoutPr {
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrDebugData(
+  targetBranch: string,
   debugData: PrDebugData | undefined
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
@@ -71,6 +80,7 @@ export function updatePrDebugData(
   return {
     createdInVer: createdByRenovateVersion,
     updatedInVer: updatedByRenovateVersion,
+    targetBranch,
   };
 }
 
@@ -92,26 +102,49 @@ function hasNotIgnoredReviewers(pr: Pr, config: BranchConfig): boolean {
 export async function ensurePr(
   prConfig: BranchConfig
 ): Promise<EnsurePrResult> {
-  const getBranchStatus = memoize(() =>
-    resolveBranchStatus(branchName, ignoreTests)
-  );
-
   const config: BranchConfig = { ...prConfig };
-
+  const filteredPrConfig = generatePrFingerprintConfig(config);
+  const prFingerprint = fingerprint(filteredPrConfig);
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
-  const { branchName, ignoreTests, prTitle = '', upgrades } = config;
+  const {
+    branchName,
+    ignoreTests,
+    internalChecksAsSuccess,
+    prTitle = '',
+    upgrades,
+  } = config;
+  const getBranchStatus = memoize(() =>
+    resolveBranchStatus(branchName, !!internalChecksAsSuccess, ignoreTests)
+  );
   const dependencyDashboardCheck =
     config.dependencyDashboardChecks?.[config.branchName];
-  // Check if existing PR exists
+  // Check if PR already exists
   const existingPr = await platform.getBranchPr(branchName);
+  const prCache = getPrCache(branchName);
   if (existingPr) {
     logger.debug('Found existing PR');
+    if (existingPr.bodyStruct?.rebaseRequested) {
+      logger.debug('PR rebase requested, so skipping cache check');
+    } else if (prCache) {
+      logger.trace({ prCache }, 'Found existing PR cache');
+      // return if pr cache is valid and pr was not changed in the past 24hrs
+      if (validatePrCache(prCache, prFingerprint)) {
+        return { type: 'with-pr', pr: existingPr };
+      }
+    } else if (config.repositoryCache === 'enabled') {
+      logger.debug('PR cache not found');
+    }
   }
   config.upgrades = [];
 
   if (config.artifactErrors?.length) {
     logger.debug('Forcing PR because of artifact errors');
+    config.forcePr = true;
+  }
+
+  if (dependencyDashboardCheck === 'approvePr') {
+    logger.debug('Forcing PR because of dependency dashboard approval');
     config.forcePr = true;
   }
 
@@ -144,7 +177,7 @@ export async function ensurePr(
         return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
       }
     }
-    if (!existingPr && config.prCreation === 'status-success') {
+    if (config.prCreation === 'status-success') {
       logger.debug('Checking branch combined status');
       if ((await getBranchStatus()) !== 'green') {
         logger.debug(`Branch status isn't green - not creating PR`);
@@ -280,7 +313,10 @@ export async function ensurePr(
   }
 
   const prBody = getPrBody(config, {
-    debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
+    debugData: updatePrDebugData(
+      config.baseBranch,
+      existingPr?.bodyStruct?.debugData
+    ),
   });
 
   try {
@@ -306,6 +342,8 @@ export async function ensurePr(
         existingPrTitle === newPrTitle &&
         existingPrBodyHash === newPrBodyHash
       ) {
+        // adds or-cache for existing PRs
+        setPrCache(branchName, prFingerprint, false);
         logger.debug(
           `Pull Request #${existingPr.number} does not need updating`
         );
@@ -331,6 +369,7 @@ export async function ensurePr(
       }
       if (GlobalConfig.get('dryRun')) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
+        return { type: 'with-pr', pr: existingPr };
       } else {
         await platform.updatePr({
           number: existingPr.number,
@@ -339,8 +378,16 @@ export async function ensurePr(
           platformOptions: getPlatformPrOptions(config),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
+        setPrCache(branchName, prFingerprint, true);
       }
-      return { type: 'with-pr', pr: existingPr };
+      return {
+        type: 'with-pr',
+        pr: {
+          ...existingPr,
+          bodyStruct: getPrBodyStruct(prBody),
+          title: prTitle,
+        },
+      };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     if (config.updateType === 'rollback') {
@@ -367,7 +414,7 @@ export async function ensurePr(
           prBody,
           labels: prepareLabels(config),
           platformOptions: getPlatformPrOptions(config),
-          draftPR: config.draftPR,
+          draftPR: !!config.draftPR,
         });
 
         incLimitedValue('PullRequests');
@@ -389,7 +436,7 @@ export async function ensurePr(
             { branch: branchName },
             'Deleting branch due to server error'
           );
-          await deleteBranch(branchName);
+          await scm.deleteBranch(branchName);
         }
         return { type: 'without-pr', prBlockedBy: 'Error' };
       }
@@ -430,6 +477,7 @@ export async function ensurePr(
       } else {
         await addParticipants(config, pr);
       }
+      setPrCache(branchName, prFingerprint, true);
       logger.debug(`Created Pull Request #${pr.number}`);
       return { type: 'with-pr', pr };
     }

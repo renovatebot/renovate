@@ -6,55 +6,90 @@ import {
   joinUrlParts,
   parseLinkHeader,
   parseUrl,
+  replaceUrlPath,
   resolveBaseUrl,
+  trimSlashes,
   trimTrailingSlash,
   validateUrl,
 } from './url';
 
 describe('util/url', () => {
-  test.each([
-    ['http://foo.io', '', 'http://foo.io'],
-    ['http://foo.io/', '', 'http://foo.io'],
-    ['http://foo.io', '/', 'http://foo.io/'],
-    ['http://foo.io/', '/', 'http://foo.io/'],
-
-    ['http://foo.io', '/aaa', 'http://foo.io/aaa'],
-    ['http://foo.io', 'aaa', 'http://foo.io/aaa'],
-    ['http://foo.io/', '/aaa', 'http://foo.io/aaa'],
-    ['http://foo.io/', 'aaa', 'http://foo.io/aaa'],
-    ['http://foo.io', '/aaa/', 'http://foo.io/aaa/'],
-    ['http://foo.io', 'aaa/', 'http://foo.io/aaa/'],
-    ['http://foo.io/', '/aaa/', 'http://foo.io/aaa/'],
-    ['http://foo.io/', 'aaa/', 'http://foo.io/aaa/'],
-
-    ['http://foo.io/aaa', '/bbb', 'http://foo.io/aaa/bbb'],
-    ['http://foo.io/aaa', 'bbb', 'http://foo.io/aaa/bbb'],
-    ['http://foo.io/aaa/', '/bbb', 'http://foo.io/aaa/bbb'],
-    ['http://foo.io/aaa/', 'bbb', 'http://foo.io/aaa/bbb'],
-
-    ['http://foo.io/aaa', '/bbb/', 'http://foo.io/aaa/bbb/'],
-    ['http://foo.io/aaa', 'bbb/', 'http://foo.io/aaa/bbb/'],
-    ['http://foo.io/aaa/', '/bbb/', 'http://foo.io/aaa/bbb/'],
-    ['http://foo.io/aaa/', 'bbb/', 'http://foo.io/aaa/bbb/'],
-
-    ['http://foo.io', 'http://bar.io/bbb', 'http://bar.io/bbb'],
-    ['http://foo.io/', 'http://bar.io/bbb', 'http://bar.io/bbb'],
-    ['http://foo.io/aaa', 'http://bar.io/bbb', 'http://bar.io/bbb'],
-    ['http://foo.io/aaa/', 'http://bar.io/bbb', 'http://bar.io/bbb'],
-
-    ['http://foo.io', 'http://bar.io/bbb/', 'http://bar.io/bbb/'],
-    ['http://foo.io/', 'http://bar.io/bbb/', 'http://bar.io/bbb/'],
-    ['http://foo.io/aaa', 'http://bar.io/bbb/', 'http://bar.io/bbb/'],
-    ['http://foo.io/aaa/', 'http://bar.io/bbb/', 'http://bar.io/bbb/'],
-
-    ['http://foo.io', 'aaa?bbb=z', 'http://foo.io/aaa?bbb=z'],
-    ['http://foo.io', '/aaa?bbb=z', 'http://foo.io/aaa?bbb=z'],
-    ['http://foo.io/', 'aaa?bbb=z', 'http://foo.io/aaa?bbb=z'],
-    ['http://foo.io/', '/aaa?bbb=z', 'http://foo.io/aaa?bbb=z'],
-
-    ['http://foo.io', 'aaa/?bbb=z', 'http://foo.io/aaa?bbb=z'],
-  ])('%s + %s => %s', (baseUrl, x, result) => {
+  it.each`
+    baseUrl                 | x                       | result
+    ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
+    ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}
+    ${'http://foo.io'}      | ${'/'}                  | ${'http://foo.io/'}
+    ${'http://foo.io/'}     | ${'/'}                  | ${'http://foo.io/'}
+    ${'http://foo.io'}      | ${'/aaa'}               | ${'http://foo.io/aaa'}
+    ${'http://foo.io'}      | ${'aaa'}                | ${'http://foo.io/aaa'}
+    ${'http://foo.io/'}     | ${'/aaa'}               | ${'http://foo.io/aaa'}
+    ${'http://foo.io/'}     | ${'aaa'}                | ${'http://foo.io/aaa'}
+    ${'http://foo.io'}      | ${'/aaa/'}              | ${'http://foo.io/aaa/'}
+    ${'http://foo.io'}      | ${'aaa/'}               | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/'}     | ${'/aaa/'}              | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/'}     | ${'aaa/'}               | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/aaa'}  | ${'/bbb'}               | ${'http://foo.io/aaa/bbb'}
+    ${'http://foo.io/aaa'}  | ${'bbb'}                | ${'http://foo.io/aaa/bbb'}
+    ${'http://foo.io/aaa/'} | ${'/bbb'}               | ${'http://foo.io/aaa/bbb'}
+    ${'http://foo.io/aaa/'} | ${'bbb'}                | ${'http://foo.io/aaa/bbb'}
+    ${'http://foo.io/aaa'}  | ${'/bbb/'}              | ${'http://foo.io/aaa/bbb/'}
+    ${'http://foo.io/aaa'}  | ${'bbb/'}               | ${'http://foo.io/aaa/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'/bbb/'}              | ${'http://foo.io/aaa/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'bbb/'}               | ${'http://foo.io/aaa/bbb/'}
+    ${'http://foo.io'}      | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/'}     | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/aaa'}  | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/aaa/'} | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io'}      | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/'}     | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/aaa'}  | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io'}      | ${'aaa?bbb=z'}          | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io'}      | ${'/aaa?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io/'}     | ${'aaa?bbb=z'}          | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io/'}     | ${'/aaa?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+  `('$baseUrl + $x => $result', ({ baseUrl, x, result }) => {
     expect(resolveBaseUrl(baseUrl, x)).toBe(result);
+  });
+
+  it.each`
+    baseUrl                 | x                       | result
+    ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
+    ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}
+    ${'http://foo.io'}      | ${'/'}                  | ${'http://foo.io/'}
+    ${'http://foo.io/'}     | ${'/'}                  | ${'http://foo.io/'}
+    ${'http://foo.io'}      | ${'/aaa'}               | ${'http://foo.io/aaa'}
+    ${'http://foo.io'}      | ${'aaa'}                | ${'http://foo.io/aaa'}
+    ${'http://foo.io/'}     | ${'/aaa'}               | ${'http://foo.io/aaa'}
+    ${'http://foo.io/'}     | ${'aaa'}                | ${'http://foo.io/aaa'}
+    ${'http://foo.io'}      | ${'/aaa/'}              | ${'http://foo.io/aaa/'}
+    ${'http://foo.io'}      | ${'aaa/'}               | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/'}     | ${'/aaa/'}              | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/'}     | ${'aaa/'}               | ${'http://foo.io/aaa/'}
+    ${'http://foo.io/aaa'}  | ${'/bbb'}               | ${'http://foo.io/bbb'}
+    ${'http://foo.io/aaa'}  | ${'bbb'}                | ${'http://foo.io/bbb'}
+    ${'http://foo.io/aaa/'} | ${'/bbb'}               | ${'http://foo.io/bbb'}
+    ${'http://foo.io/aaa/'} | ${'bbb'}                | ${'http://foo.io/bbb'}
+    ${'http://foo.io/aaa'}  | ${'/bbb/'}              | ${'http://foo.io/bbb/'}
+    ${'http://foo.io/aaa'}  | ${'bbb/'}               | ${'http://foo.io/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'/bbb/'}              | ${'http://foo.io/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'bbb/'}               | ${'http://foo.io/bbb/'}
+    ${'http://foo.io'}      | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/'}     | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/aaa'}  | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io/aaa/'} | ${'http://bar.io/bbb'}  | ${'http://bar.io/bbb'}
+    ${'http://foo.io'}      | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/'}     | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/aaa'}  | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io/aaa/'} | ${'http://bar.io/bbb/'} | ${'http://bar.io/bbb/'}
+    ${'http://foo.io'}      | ${'aaa?bbb=z'}          | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io'}      | ${'/aaa?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io/'}     | ${'aaa?bbb=z'}          | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io/'}     | ${'/aaa?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+    ${'http://foo.io'}      | ${'aaa/?bbb=z'}         | ${'http://foo.io/aaa?bbb=z'}
+  `('replaceUrlPath("$baseUrl", "$x") => $result', ({ baseUrl, x, result }) => {
+    expect(replaceUrlPath(baseUrl, x)).toBe(result);
   });
 
   it('getQueryString', () => {
@@ -86,6 +121,17 @@ describe('util/url', () => {
     expect(trimTrailingSlash('/foo/bar')).toBe('/foo/bar');
     expect(trimTrailingSlash('foo/')).toBe('foo');
     expect(trimTrailingSlash('foo//////')).toBe('foo');
+  });
+
+  it('trimSlashes', () => {
+    expect(trimSlashes('foo')).toBe('foo');
+    expect(trimSlashes('/foo')).toBe('foo');
+    expect(trimSlashes('foo/')).toBe('foo');
+    expect(trimSlashes('//////foo//////')).toBe('foo');
+    expect(trimSlashes('foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar')).toBe('foo/bar');
+    expect(trimSlashes('foo/bar/')).toBe('foo/bar');
+    expect(trimSlashes('/foo/bar/')).toBe('foo/bar');
   });
 
   it('ensureTrailingSlash', () => {

@@ -3,14 +3,18 @@ import * as json5 from 'json5';
 import { coerce, satisfies } from 'semver';
 import { logger } from '../../../logger';
 import { MavenDatasource } from '../../datasource/maven';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { Bundle, FeatureModel } from './types';
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   config?: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   // References:
   // - OSGi compendium release 8 ( https://docs.osgi.org/specification/osgi.cmpn/8.0.0/service.feature.html )
   // - The Sling implementation of the feature model ( https://sling.apache.org/documentation/development/feature-model.html )

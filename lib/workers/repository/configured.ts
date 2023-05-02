@@ -8,7 +8,7 @@ export function checkIfConfigured(config: RenovateConfig): void {
   if (config.enabled === false) {
     throw new Error(REPOSITORY_DISABLED_BY_CONFIG);
   }
-  if (config.isFork && !config.includeForks) {
+  if (config.isFork && config.forkProcessing !== 'enabled') {
     throw new Error(REPOSITORY_FORKED);
   }
 }

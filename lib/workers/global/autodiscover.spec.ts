@@ -6,6 +6,7 @@ import { autodiscoverRepositories } from './autodiscover';
 
 jest.mock('../../modules/platform/github');
 jest.unmock('../../modules/platform');
+jest.unmock('../../modules/platform/scm');
 
 // imports are readonly
 const hostRules = _hostRules;

@@ -97,7 +97,7 @@ describe('workers/repository/update/branch/status-checks', () => {
 
   describe('getBranchStatus', () => {
     it('should return green if ignoreTests=true', async () => {
-      expect(await resolveBranchStatus('somebranch', true)).toBe('green');
+      expect(await resolveBranchStatus('somebranch', true, true)).toBe('green');
     });
   });
 });

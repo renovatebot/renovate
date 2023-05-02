@@ -2,9 +2,9 @@ import type { RequestError, Response } from 'got';
 import {
   RenovateConfig,
   getConfig,
-  git,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
@@ -39,7 +39,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.massageMarkdown = jest.fn((input) => input);
-      platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
+      platform.createPr.mockResolvedValueOnce(partial<Pr>());
       GlobalConfig.reset();
     });
 
@@ -209,8 +209,8 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      git.isBranchConflicted.mockResolvedValueOnce(true);
-      git.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
@@ -224,7 +224,7 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      git.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
@@ -251,8 +251,8 @@ describe('workers/repository/onboarding/pr/index', () => {
           bodyStruct,
         })
       );
-      git.isBranchConflicted.mockResolvedValueOnce(true);
-      git.isBranchModified.mockResolvedValueOnce(true);
+      scm.isBranchConflicted.mockResolvedValueOnce(true);
+      scm.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(logger.info).toHaveBeenCalledWith(
         'DRY-RUN: Would check branch renovate/configure'
@@ -280,7 +280,7 @@ describe('workers/repository/onboarding/pr/index', () => {
       beforeEach(() => {
         jest.resetAllMocks();
         GlobalConfig.reset();
-        git.deleteBranch.mockResolvedValue();
+        scm.deleteBranch.mockResolvedValue();
       });
 
       it('throws when trying to create a new PR', async () => {
@@ -288,7 +288,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         await expect(
           ensureOnboardingPr(config, packageFiles, branches)
         ).toReject();
-        expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(0);
       });
 
       it('deletes branch when PR already exists but cannot find it', async () => {
@@ -302,7 +302,7 @@ describe('workers/repository/onboarding/pr/index', () => {
         expect(logger.warn).toHaveBeenCalledWith(
           'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
         );
-        expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+        expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
       });
     });
   });

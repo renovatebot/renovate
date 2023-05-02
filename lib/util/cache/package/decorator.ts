@@ -1,5 +1,9 @@
 import is from '@sindresorhus/is';
+import { DateTime } from 'luxon';
+import { GlobalConfig } from '../../../config/global';
+import { logger } from '../../../logger';
 import { Decorator, decorate } from '../../decorator';
+import type { DecoratorCachedRecord } from './types';
 import * as packageCache from '.';
 
 type HashFunction<T extends any[] = any[]> = (...args: T) => string;
@@ -42,7 +46,7 @@ export function cache<T>({
   cacheable = () => true,
   ttlMinutes = 30,
 }: CacheParameters): Decorator<T> {
-  return decorate(async ({ args, instance, callback }) => {
+  return decorate(async ({ args, instance, callback, methodName }) => {
     if (!cacheable.apply(instance, args)) {
       return callback();
     }
@@ -66,21 +70,59 @@ export function cache<T>({
       return callback();
     }
 
-    const cachedResult = await packageCache.get<unknown>(
+    finalKey = `cache-decorator:${finalKey}`;
+    const oldRecord = await packageCache.get<DecoratorCachedRecord>(
       finalNamespace,
       finalKey
     );
 
-    if (cachedResult !== undefined) {
-      return cachedResult;
+    const softTtl = ttlMinutes;
+
+    const cacheHardTtlMinutes = GlobalConfig.get().cacheHardTtlMinutes ?? 0;
+    let hardTtl = softTtl;
+    if (methodName === 'getReleases' || methodName === 'getDigest') {
+      hardTtl = Math.max(softTtl, cacheHardTtlMinutes);
     }
 
-    const result = await callback();
+    let oldData: unknown;
+    if (oldRecord) {
+      const now = DateTime.local();
+      const cachedAt = DateTime.fromISO(oldRecord.cachedAt);
 
-    // only cache if we got a valid result
-    if (result !== undefined) {
-      await packageCache.set(finalNamespace, finalKey, result, ttlMinutes);
+      const softDeadline = cachedAt.plus({ minutes: softTtl });
+      if (now < softDeadline) {
+        return oldRecord.value;
+      }
+
+      const hardDeadline = cachedAt.plus({ minutes: hardTtl });
+      if (now < hardDeadline) {
+        oldData = oldRecord.value;
+      }
     }
-    return result;
+
+    let newData: unknown;
+    if (oldData) {
+      try {
+        newData = (await callback()) as T | undefined;
+      } catch (err) {
+        logger.debug(
+          { err },
+          'Package cache decorator: callback error, returning old data'
+        );
+        return oldData;
+      }
+    } else {
+      newData = (await callback()) as T | undefined;
+    }
+
+    if (!is.undefined(newData)) {
+      const newRecord: DecoratorCachedRecord = {
+        cachedAt: DateTime.local().toISO()!,
+        value: newData,
+      };
+      await packageCache.set(finalNamespace, finalKey, newRecord, hardTtl);
+    }
+
+    return newData;
   });
 }

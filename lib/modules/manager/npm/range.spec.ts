@@ -7,22 +7,6 @@ describe('modules/manager/npm/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('replaces devDependencies', () => {
-    const config: RangeConfig = {
-      rangeStrategy: 'auto',
-      depType: 'devDependencies',
-    };
-    expect(getRangeStrategy(config)).toBe('replace');
-  });
-
-  it('replaces app dependencies', () => {
-    const config: RangeConfig = {
-      rangeStrategy: 'auto',
-      depType: 'dependencies',
-    };
-    expect(getRangeStrategy(config)).toBe('replace');
-  });
-
   it('widens peerDependencies', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
@@ -49,11 +33,11 @@ describe('modules/manager/npm/range', () => {
     expect(getRangeStrategy(config)).toBe('widen');
   });
 
-  it('defaults to replace', () => {
+  it('defaults to update-lockfile', () => {
     const config: RangeConfig = {
       rangeStrategy: 'auto',
       depType: 'dependencies',
     };
-    expect(getRangeStrategy(config)).toBe('replace');
+    expect(getRangeStrategy(config)).toBe('update-lockfile');
   });
 });

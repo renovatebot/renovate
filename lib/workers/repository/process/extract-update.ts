@@ -3,11 +3,12 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { hashMap } from '../../../modules/manager';
 import type { PackageFile } from '../../../modules/manager/types';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch, getBranchCommit } from '../../../util/git';
+import { checkoutBranch } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -114,7 +115,7 @@ export async function extract(
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
   const { baseBranch } = config;
-  const baseBranchSha = getBranchCommit(baseBranch!);
+  const baseBranchSha = await scm.getBranchCommit(baseBranch!);
   let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   cache.scan ||= {};
@@ -174,7 +175,10 @@ async function fetchVulnerabilities(
   if (config.osvVulnerabilityAlerts) {
     try {
       const vulnerabilities = await Vulnerabilities.create();
-      await vulnerabilities.fetchVulnerabilities(config, packageFiles);
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
     } catch (err) {
       logger.warn({ err }, 'Unable to read vulnerability information');
     }

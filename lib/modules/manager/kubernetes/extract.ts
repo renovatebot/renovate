@@ -8,14 +8,18 @@ import {
 } from '../../datasource/kubernetes-api';
 import * as kubernetesApiVersioning from '../../versioning/kubernetes-api';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import type { KubernetesConfiguration } from './types';
 
 export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('kubernetes.extractPackageFile()');
 
   const isKubernetesManifest =
@@ -40,7 +44,7 @@ function extractImages(
   const deps: PackageDependency[] = [];
 
   for (const line of content.split(newlineRegex)) {
-    const match = regEx(/^\s*-?\s*image:\s*'?"?([^\s'"]+)'?"?\s*$/).exec(line);
+    const match = regEx(/^\s*-?\s*image:\s*['"]?([^\s'"]+)['"]?\s*/).exec(line);
     if (match) {
       const currentFrom = match[1];
       const dep = getDep(currentFrom, true, config.registryAliases);

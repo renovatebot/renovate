@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { RenovateConfig, getConfig } from '../../../../test/util';
 import { flattenUpdates } from './flatten';
 
@@ -144,6 +145,14 @@ describe('workers/repository/updates/flatten', () => {
       };
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(14);
+      expect(
+        res.every(
+          (upgrade) =>
+            upgrade.isLockFileMaintenance ||
+            upgrade.isRemediation ||
+            is.number(upgrade.depIndex)
+        )
+      ).toBeTrue();
       expect(
         res.filter((update) => update.sourceRepoSlug)[0].sourceRepoSlug
       ).toBe('org-repo');

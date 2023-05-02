@@ -1,4 +1,4 @@
-import { URL } from 'url';
+import { URL } from 'node:url';
 import is from '@sindresorhus/is';
 import { migrateDatasource } from '../../../config/migrations/custom/datasource-migration';
 import type { RegexManagerTemplates } from '../../../config/types';
@@ -17,6 +17,7 @@ export const validMatchFields = [
   'extractVersion',
   'registryUrl',
   'depType',
+  'indentation',
 ] as const;
 
 type ValidMatchFields = (typeof validMatchFields)[number];
@@ -38,6 +39,9 @@ function updateDependency(
       break;
     case 'datasource':
       dependency.datasource = migrateDatasource(value);
+      break;
+    case 'indentation':
+      dependency.indentation = is.emptyStringOrWhitespace(value) ? value : '';
       break;
     default:
       dependency[field] = value;

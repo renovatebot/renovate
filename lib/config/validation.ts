@@ -333,6 +333,7 @@ export async function validateConfig(
               'matchSourceUrlPrefixes',
               'matchSourceUrls',
               'matchUpdateTypes',
+              'matchConfidence',
             ];
             if (key === 'packageRules') {
               for (const [subIndex, packageRule] of val.entries()) {
@@ -518,6 +519,19 @@ export async function validateConfig(
                   errors.push({
                     topic: 'Configuration Error',
                     message: `Invalid regExp for ${currentPath}: \`${fileMatch}\``,
+                  });
+                }
+              }
+            }
+            if (key === 'baseBranches') {
+              for (const baseBranch of val as string[]) {
+                if (
+                  isConfigRegex(baseBranch) &&
+                  !configRegexPredicate(baseBranch)
+                ) {
+                  errors.push({
+                    topic: 'Configuration Error',
+                    message: `Invalid regExp for ${currentPath}: \`${baseBranch}\``,
                   });
                 }
               }

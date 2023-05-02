@@ -21,22 +21,17 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
-import { getElapsedDays } from '../../../../util/date';
+import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import {
-  checkoutBranch,
-  deleteBranch,
-  getBranchCommit,
-  branchExists as gitBranchExists,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
   satisfiesConfidenceLevel,
 } from '../../../../util/merge-confidence';
+import { toMs } from '../../../../util/pretty-time';
 import * as template from '../../../../util/template';
 import { isLimitReached } from '../../../global/limits';
 import type { BranchConfig, BranchResult, PrBlockedBy } from '../../../types';
@@ -64,10 +59,18 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
-    await deleteBranch(branchName);
+    await scm.deleteBranch(branchName);
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
+}
+
+function userChangedTargetBranch(pr: Pr): boolean {
+  const oldTargetBranch = pr.bodyStruct?.debugData?.targetBranch;
+  if (oldTargetBranch && pr.targetBranch) {
+    return pr.targetBranch !== oldTargetBranch;
+  }
+  return false;
 }
 
 export interface ProcessBranchResult {
@@ -85,14 +88,14 @@ export async function processBranch(
   let commitSha: string | null = null;
   let config: BranchConfig = { ...branchConfig };
   logger.trace({ config }, 'processBranch()');
-  let branchExists = gitBranchExists(config.branchName);
+  let branchExists = await scm.branchExists(config.branchName);
   let updatesVerified = false;
   if (!branchExists && config.branchPrefix !== config.branchPrefixOld) {
     const branchName = config.branchName.replace(
       config.branchPrefix!,
       config.branchPrefixOld!
     );
-    branchExists = gitBranchExists(branchName);
+    branchExists = await scm.branchExists(branchName);
     if (branchExists) {
       config.branchName = branchName;
       logger.debug('Found existing branch with branchPrefixOld');
@@ -195,7 +198,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await isBranchModified(config.branchName);
+      const branchIsModified = await scm.isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -204,11 +207,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (
-          branchIsModified ||
-          (branchPr.targetBranch &&
-            branchPr.targetBranch !== branchConfig.baseBranch)
-        ) {
+        if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(dependencyDashboardCheck || config.rebaseRequested)) {
@@ -231,7 +230,7 @@ export async function processBranch(
             result: 'pr-edited',
           };
         }
-        const branchSha = getBranchCommit(config.branchName);
+        const branchSha = await scm.getBranchCommit(config.branchName);
         const oldPrSha = oldPr?.sha;
         if (!oldPrSha || oldPrSha === branchSha) {
           logger.debug(
@@ -286,25 +285,29 @@ export async function processBranch(
     if (
       config.upgrades.some(
         (upgrade) =>
-          (upgrade.stabilityDays && upgrade.releaseTimestamp) ||
+          (is.nonEmptyString(upgrade.minimumReleaseAge) &&
+            upgrade.releaseTimestamp) ||
           isActiveConfidenceLevel(upgrade.minimumConfidence!)
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
-      // both a stabilityDays setting and a releaseTimestamp
+      // both a minimumReleaseAge setting and a releaseTimestamp
       config.stabilityStatus = 'green';
       // Default to 'success' but set 'pending' if any update is pending
       for (const upgrade of config.upgrades) {
-        if (is.number(upgrade.stabilityDays) && upgrade.releaseTimestamp) {
-          const daysElapsed = getElapsedDays(upgrade.releaseTimestamp);
-          if (daysElapsed < upgrade.stabilityDays) {
+        if (
+          is.nonEmptyString(upgrade.minimumReleaseAge) &&
+          upgrade.releaseTimestamp
+        ) {
+          const timeElapsed = getElapsedMs(upgrade.releaseTimestamp);
+          if (timeElapsed < (toMs(upgrade.minimumReleaseAge) ?? 0)) {
             logger.debug(
               {
                 depName: upgrade.depName,
-                daysElapsed,
-                stabilityDays: upgrade.stabilityDays,
+                timeElapsed,
+                minimumReleaseAge: upgrade.minimumReleaseAge,
               },
-              'Update has not passed stability days'
+              'Update has not passed minimum release age'
             );
             config.stabilityStatus = 'yellow';
             continue;
@@ -317,13 +320,14 @@ export async function processBranch(
         const currentVersion = upgrade.currentVersion!;
         const newVersion = upgrade.newVersion!;
         if (isActiveConfidenceLevel(minimumConfidence)) {
-          const confidence = await getMergeConfidenceLevel(
-            datasource,
-            depName,
-            currentVersion,
-            newVersion,
-            updateType
-          );
+          const confidence =
+            (await getMergeConfidenceLevel(
+              datasource,
+              depName,
+              currentVersion,
+              newVersion,
+              updateType
+            )) ?? 'neutral';
           if (satisfiesConfidenceLevel(confidence, minimumConfidence)) {
             config.confidenceStatus = 'green';
           } else {
@@ -363,6 +367,9 @@ export async function processBranch(
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (dependencyDashboardCheck === 'global-config') {
+      logger.debug(`Manual create/rebase requested via checkedBranches`);
+      config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
@@ -382,6 +389,17 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: 'no-work',
       };
+    }
+    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+    else if (
+      branchPr?.targetBranch &&
+      branchPr.targetBranch !== config.baseBranch
+    ) {
+      logger.debug(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
@@ -477,7 +495,7 @@ export async function processBranch(
 
       config.isConflicted ??=
         branchExists &&
-        (await isBranchConflicted(config.baseBranch, config.branchName));
+        (await scm.isBranchConflicted(config.baseBranch, config.branchName));
       config.forceCommit = forcedManually || config.isConflicted;
 
       // compile commit message with body, which maybe needs changelogs
@@ -504,6 +522,9 @@ export async function processBranch(
       }
 
       commitSha = await commitFilesToBranch(config);
+      // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
+      // baseBranch is not checked out at the start of processBranch() due to pull/16246
+      await checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

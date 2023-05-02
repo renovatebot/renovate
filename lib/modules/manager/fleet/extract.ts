@@ -5,7 +5,7 @@ import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { HelmDatasource } from '../../datasource/helm';
 import { checkIfStringIsPath } from '../terraform/util';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { FleetFile, FleetHelmBlock, GitRepo } from './types';
 
 function extractGitRepo(doc: GitRepo): PackageDependency {
@@ -111,7 +111,7 @@ function extractFleetFile(doc: FleetFile): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   packageFile: string
-): PackageFile | null {
+): PackageFileContent | null {
   if (!content) {
     return null;
   }

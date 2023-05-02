@@ -1,5 +1,5 @@
 // TODO #7154
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -82,7 +82,7 @@ export function massageBody(
   body = body.replace(regEx(/^<a name="[^"]*"><\/a>\n/), '');
   body = body.replace(
     regEx(
-      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`,
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*/[^/]*/compare/.*?\\n`,
       undefined,
       false
     ),
@@ -90,7 +90,7 @@ export function massageBody(
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    regEx(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    regEx(`\\n${baseUrl}[^/]+/[^/]+/compare/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
@@ -125,15 +125,15 @@ export async function getReleaseNotes(
   release: ChangeLogRelease,
   config: BranchUpgradeConfig
 ): Promise<ChangeLogNotes | null> {
-  const { depName, repository } = project;
+  const { packageName, repository } = project;
   const { version, gitRef } = release;
   // TODO: types (#7154)
-  logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName!})`);
+  logger.trace(`getReleaseNotes(${repository}, ${version}, ${packageName!})`);
   const releases = await getCachedReleaseList(project, release);
   logger.trace({ releases }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
 
-  let matchedRelease = getExactReleaseMatch(depName!, version, releases);
+  let matchedRelease = getExactReleaseMatch(packageName!, version, releases);
   if (is.undefined(matchedRelease)) {
     // no exact match of a release then check other cases
     matchedRelease = releases.find(
@@ -158,11 +158,11 @@ export async function getReleaseNotes(
 }
 
 function getExactReleaseMatch(
-  depName: string,
+  packageName: string,
   version: string,
   releases: ChangeLogNotes[]
 ): ChangeLogNotes | undefined {
-  const exactReleaseReg = regEx(`${depName}[@_-]v?${version}`);
+  const exactReleaseReg = regEx(`${packageName}[@_-]v?${version}`);
   const candidateReleases = releases.filter((r) => r.tag?.endsWith(version));
   const matchedRelease = candidateReleases.find((r) =>
     exactReleaseReg.test(r.tag!)
@@ -399,14 +399,13 @@ export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
   return 14495; // 5 minutes shy of 10 days
 }
 
-// TODO #7154 allow `null` and `undefined`
 export async function addReleaseNotes(
-  input: ChangeLogResult,
+  input: ChangeLogResult | null | undefined,
   config: BranchUpgradeConfig
-): Promise<ChangeLogResult> {
+): Promise<ChangeLogResult | null> {
   if (!input?.versions || !input.project?.type) {
     logger.debug('Missing project or versions');
-    return input;
+    return input ?? null;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
   const { repository, sourceDirectory } = input.project;

@@ -1,5 +1,6 @@
 import parseGithubUrl from 'github-url-from-git';
 import { z } from 'zod';
+import { logger } from '../../../../logger';
 import { regEx } from '../../../../util/regex';
 import { GithubReleasesDatasource } from '../../../datasource/github-releases';
 import type { PackageDependency } from '../../types';
@@ -9,6 +10,10 @@ const githubUrlRegex = regEx(
 );
 
 function githubPackageName(input: string): string | undefined {
+  // istanbul ignore if
+  if (!input.startsWith('https://')) {
+    logger.once.info({ url: input }, `Bazel: non-https git_repository URL`);
+  }
   return parseGithubUrl(input)?.match(githubUrlRegex)?.groups?.packageName;
 }
 

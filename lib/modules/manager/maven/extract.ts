@@ -245,10 +245,15 @@ function resolveParentFile(packageFile: string, parentPath: string): string {
   return upath.normalize(upath.join(dir, parentDir, parentFile));
 }
 
+interface MavenInterimPackageFile extends PackageFile {
+  mavenProps?: Record<string, any>;
+  parent?: string;
+}
+
 export function extractPackage(
   rawContent: string,
-  packageFile: string | null = null
-): PackageFile<Record<string, any>> | null {
+  packageFile: string
+): PackageFile | null {
   if (!rawContent) {
     return null;
   }
@@ -258,7 +263,7 @@ export function extractPackage(
     return null;
   }
 
-  const result: PackageFile = {
+  const result: MavenInterimPackageFile = {
     datasource: MavenDatasource.id,
     packageFile,
     deps: [],
@@ -366,12 +371,12 @@ export function parseSettings(raw: string): XmlDocument | null {
 
 export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const packageFileNames: string[] = [];
-  const extractedPackages: Record<string, PackageFile> = {};
+  const extractedPackages: Record<string, MavenInterimPackageFile> = {};
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
   packages.forEach((pkg) => {
-    const name = pkg.packageFile!;
+    const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
     extractedDeps[name] = [];
@@ -384,7 +389,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
-    let pkg: PackageFile | null = extractedPackages[name];
+    let pkg: MavenInterimPackageFile | null = extractedPackages[name];
     while (pkg) {
       propsHierarchy.unshift(pkg.mavenProps!);
 
@@ -449,11 +454,10 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   return packageFiles;
 }
 
-function cleanResult(
-  packageFiles: PackageFile<Record<string, any>>[]
-): PackageFile<Record<string, any>>[] {
+function cleanResult(packageFiles: MavenInterimPackageFile[]): PackageFile[] {
   packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps;
+    delete packageFile.parent;
     packageFile.deps.forEach((dep) => {
       delete dep.propSource;
     });

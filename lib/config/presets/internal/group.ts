@@ -207,7 +207,7 @@ const staticGroups = {
       },
     ],
   },
-  jsTestMonMajor: {
+  jsTestNonMajor: {
     description: 'Group non-major JS test package updates together.',
     packageRules: [
       {
@@ -314,7 +314,7 @@ const staticGroups = {
       {
         groupName: 'PHPStan packages',
         matchDatasources: ['packagist'],
-        matchPackagePatterns: ['^phpstan\\/phpstan$', '\\/phpstan-'],
+        matchPackagePatterns: ['^phpstan/phpstan$', '/phpstan-'],
       },
     ],
   },
@@ -333,6 +333,15 @@ const staticGroups = {
       {
         extends: 'packages:postcss',
         groupName: 'postcss packages',
+      },
+    ],
+  },
+  react: {
+    description: 'Group React and corresponding `@types` packages together.',
+    packageRules: [
+      {
+        groupName: 'react monorepo',
+        matchPackageNames: ['@types/react', '@types/react-dom'],
       },
     ],
   },
@@ -359,6 +368,7 @@ const staticGroups = {
       'group:kubernetes',
       'group:phpstan',
       'group:polymer',
+      'group:react',
       'group:resilience4j',
       'group:rubyOnRails',
       'group:rubyOmniauth',
@@ -388,7 +398,7 @@ const staticGroups = {
       'group:springWs',
       'group:symfony',
     ],
-    ignoreDeps: [],
+    ignoreDeps: [], // Hack to improve onboarding PR description
   },
   resilience4j: {
     description: 'Group Java Resilience4j packages.',
@@ -720,7 +730,7 @@ for (const monorepo of Object.keys(monorepos.presets)) {
 config.monorepos = {
   description: 'Group known monorepo packages together.',
   extends: monorepoNames,
-  ignoreDeps: [],
+  ignoreDeps: [], // Hack to improve onboarding PR description
 };
 
 export const presets: Record<string, Preset> = config;

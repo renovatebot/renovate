@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { Graph } from 'graph-data-structure';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { getFileList } from '../../../util/git';

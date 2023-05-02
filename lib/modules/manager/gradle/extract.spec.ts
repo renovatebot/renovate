@@ -41,7 +41,7 @@ describe('modules/manager/gradle/extract', () => {
 
     expect(
       await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       )
     ).toBeNull();
@@ -50,11 +50,15 @@ describe('modules/manager/gradle/extract', () => {
   it('logs a warning in case parseGradle throws an exception', async () => {
     const filename = 'build.gradle';
     const err = new Error('unknown');
+    const fsMock = {
+      'build.gradle': '',
+    };
+    mockFs(fsMock);
 
     jest.spyOn(parser, 'parseGradle').mockImplementationOnce(() => {
       throw err;
     });
-    await extractAllPackageFiles(partial<ExtractConfig>({}), [filename]);
+    await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
     expect(logger.logger.warn).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
@@ -70,7 +74,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      partial<ExtractConfig>({}),
+      partial<ExtractConfig>(),
       Object.keys(fsMock)
     );
 
@@ -97,7 +101,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      partial<ExtractConfig>({}),
+      partial<ExtractConfig>(),
       Object.keys(fsMock)
     );
 
@@ -127,7 +131,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      partial<ExtractConfig>({}),
+      partial<ExtractConfig>(),
       Object.keys(fsMock)
     );
 
@@ -174,7 +178,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      partial<ExtractConfig>({}),
+      partial<ExtractConfig>(),
       Object.keys(fsMock)
     );
 
@@ -199,7 +203,7 @@ describe('modules/manager/gradle/extract', () => {
     mockFs(fsMock);
 
     const res = await extractAllPackageFiles(
-      partial<ExtractConfig>({}),
+      partial<ExtractConfig>(),
       Object.keys(fsMock)
     );
 
@@ -233,7 +237,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -281,7 +285,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -342,7 +346,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -380,7 +384,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
       expect(res).toMatchObject([
@@ -494,7 +498,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -610,7 +614,7 @@ describe('modules/manager/gradle/extract', () => {
 
       expect(
         await extractAllPackageFiles(
-          partial<ExtractConfig>({}),
+          partial<ExtractConfig>(),
           Object.keys(fsMock)
         )
       ).toBeNull();
@@ -632,7 +636,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
       expect(res).toMatchObject([
@@ -675,7 +679,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
       expect(res).toMatchObject([
@@ -745,7 +749,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -825,7 +829,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -847,7 +851,7 @@ describe('modules/manager/gradle/extract', () => {
 
       expect(
         await extractAllPackageFiles(
-          partial<ExtractConfig>({}),
+          partial<ExtractConfig>(),
           Object.keys(fsMock)
         )
       ).toBeNull();
@@ -861,7 +865,7 @@ describe('modules/manager/gradle/extract', () => {
 
       expect(
         await extractAllPackageFiles(
-          partial<ExtractConfig>({}),
+          partial<ExtractConfig>(),
           Object.keys(fsMock)
         )
       ).toBeNull();
@@ -881,7 +885,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -929,7 +933,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
       expect(res).toBeNull();
@@ -943,7 +947,7 @@ describe('modules/manager/gradle/extract', () => {
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
       expect(res).toBeNull();
@@ -956,6 +960,7 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:* = 3
           org.apache.lucene:a.* = 2
           org.apache.lucene:a.b = 1
+          org.apache.foo*:* = 5
         `,
         'versions.lock': stripIndent`
           # Run ./gradlew --write-locks to regenerate this file
@@ -965,12 +970,13 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
           org.apache.lucene:d:1 (10 constraints: 95be0c15)
           org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
         `,
       };
       mockFs(fsMock);
 
       const res = await extractAllPackageFiles(
-        partial<ExtractConfig>({}),
+        partial<ExtractConfig>(),
         Object.keys(fsMock)
       );
 
@@ -1040,6 +1046,18 @@ describe('modules/manager/gradle/extract', () => {
               lockedVersion: '1',
               groupName: 'org.apache.lucene:*',
               fileReplacePosition: 39,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                fileReplacePosition: 113,
+                packageFile: 'versions.props',
+              },
+              depName: 'org.apache.foo-bar:a',
+              currentValue: '5',
+              lockedVersion: '1',
+              groupName: 'org.apache.foo*:*',
+              fileReplacePosition: 113,
               depType: 'dependencies',
             },
           ],

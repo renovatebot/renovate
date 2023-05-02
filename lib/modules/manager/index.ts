@@ -6,6 +6,7 @@ import type {
   GlobalManagerConfig,
   ManagerApi,
   PackageFile,
+  PackageFileContent,
   RangeConfig,
   Result,
 } from './types';
@@ -61,7 +62,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): Result<PackageFile | null> {
+): Result<PackageFileContent | null> {
   if (!managers.has(manager)) {
     return null;
   }
@@ -86,6 +87,9 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy | null {
     return managerRangeStrategy;
   }
   if (rangeStrategy === 'auto') {
+    if (m.updateLockedDependency) {
+      return 'update-lockfile';
+    }
     // default to 'replace' for auto
     return 'replace';
   }

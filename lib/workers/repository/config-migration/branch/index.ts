@@ -3,11 +3,8 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
-import {
-  branchExists,
-  checkoutBranch,
-  deleteBranch,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -90,18 +87,18 @@ async function handlepr(config: RenovateConfig, pr: Pr): Promise<void> {
       );
     } else {
       const content =
-        '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+        '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
       await ensureComment({
         number: pr.number,
         topic: 'Renovate Ignore Notification',
         content,
       });
     }
-    if (branchExists(pr.sourceBranch)) {
+    if (await scm.branchExists(pr.sourceBranch)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + pr.sourceBranch);
       } else {
-        await deleteBranch(pr.sourceBranch);
+        await scm.deleteBranch(pr.sourceBranch);
       }
     }
   }

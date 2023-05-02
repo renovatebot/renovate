@@ -65,15 +65,19 @@ export async function set(
   // Redis requires TTL to be integer, not float
   const redisTTL = Math.floor(ttlMinutes * 60);
 
-  await client?.set(
-    getKey(namespace, key),
-    JSON.stringify({
-      compress: true,
-      value: await compress(JSON.stringify(value)),
-      expiry: DateTime.local().plus({ minutes: ttlMinutes }),
-    }),
-    { EX: redisTTL }
-  );
+  try {
+    await client?.set(
+      getKey(namespace, key),
+      JSON.stringify({
+        compress: true,
+        value: await compress(JSON.stringify(value)),
+        expiry: DateTime.local().plus({ minutes: ttlMinutes }),
+      }),
+      { EX: redisTTL }
+    );
+  } catch (err) {
+    logger.once.debug({ err }, 'Error while setting cache value');
+  }
 }
 
 export async function init(url: string): Promise<void> {

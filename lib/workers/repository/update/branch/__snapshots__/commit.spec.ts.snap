@@ -20,24 +20,3 @@ exports[`workers/repository/update/branch/commit commitFilesToBranch commits fil
   ],
 ]
 `;
-
-exports[`workers/repository/update/branch/commit commitFilesToBranch commits via platform 1`] = `
-[
-  [
-    {
-      "baseBranch": undefined,
-      "branchName": "renovate/some-branch",
-      "files": [
-        {
-          "contents": "some contents",
-          "path": "package.json",
-          "type": "addition",
-        },
-      ],
-      "force": false,
-      "message": "some commit message",
-      "platformCommit": true,
-    },
-  ],
-]
-`;

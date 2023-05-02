@@ -1,7 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import type { PackageFile } from '../../modules/manager/types';
-import { clone } from '../../util/clone';
 
 export class PackageFiles {
   private static data = new Map<string, Record<string, PackageFile[]> | null>();
@@ -45,7 +44,7 @@ export class PackageFiles {
     let removed = false;
     let truncated = false;
 
-    const data = new Map(clone(Array.from(this.data)));
+    const data = new Map(structuredClone(Array.from(this.data)));
 
     // filter all deps with skip reason
     for (const managers of [...data.values()].filter(is.truthy)) {
@@ -105,8 +104,7 @@ export class PackageFiles {
       for (const manager of managers) {
         deps += `<details><summary>${manager}</summary>\n<blockquote>\n\n`;
         for (const packageFile of packageFiles[manager]) {
-          // TODO: types (#7154)
-          deps += `<details><summary>${packageFile.packageFile!}</summary>\n\n`;
+          deps += `<details><summary>${packageFile.packageFile}</summary>\n\n`;
           for (const dep of packageFile.deps) {
             const ver = dep.currentValue;
             const digest = dep.currentDigest;

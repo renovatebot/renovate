@@ -35,13 +35,6 @@ export async function getManagerPackageFiles(
       config,
       fileList
     );
-    if (allPackageFiles) {
-      for (const packageFile of allPackageFiles) {
-        for (let index = 0; index < packageFile.deps.length; index += 1) {
-          packageFile.deps[index].depIndex = index;
-        }
-      }
-    }
     return allPackageFiles;
   }
   const packageFiles: PackageFile[] = [];
@@ -56,12 +49,9 @@ export async function getManagerPackageFiles(
         config
       );
       if (res) {
-        for (let index = 0; index < res.deps.length; index += 1) {
-          res.deps[index].depIndex = index;
-        }
         packageFiles.push({
-          packageFile,
           ...res,
+          packageFile,
         });
       }
     } else {

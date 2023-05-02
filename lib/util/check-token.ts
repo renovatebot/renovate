@@ -1,13 +1,14 @@
 import { GlobalConfig } from '../config/global';
 import { logger } from '../logger';
+import { GithubReleaseAttachmentsDatasource } from '../modules/datasource/github-release-attachments';
 import { GithubReleasesDatasource } from '../modules/datasource/github-releases';
 import { GithubTagsDatasource } from '../modules/datasource/github-tags';
-import type { PackageFile } from '../modules/manager/types';
+import type { PackageFileContent } from '../modules/manager/types';
 import * as memCache from '../util/cache/memory';
 import * as hostRules from './host-rules';
 
 export function checkGithubToken(
-  packageFiles: Record<string, PackageFile[]> | undefined
+  packageFiles: Record<string, PackageFileContent[]> | undefined
 ): void {
   const { token } = hostRules.find({
     hostType: 'github',
@@ -31,7 +32,8 @@ export function checkGithubToken(
         if (
           !dep.skipReason &&
           (dep.datasource === GithubTagsDatasource.id ||
-            dep.datasource === GithubReleasesDatasource.id)
+            dep.datasource === GithubReleasesDatasource.id ||
+            dep.datasource === GithubReleaseAttachmentsDatasource.id)
         ) {
           dep.skipReason = 'github-token-required';
           if (dep.depName) {

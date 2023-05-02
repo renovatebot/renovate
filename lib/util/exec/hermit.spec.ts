@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import _findUp from 'find-up';
 import upath from 'upath';
 import { mockExecAll } from '../../../test/exec-util';
@@ -27,7 +27,7 @@ describe('util/exec/hermit', () => {
       findUp.mockClear();
     });
 
-    test.each`
+    it.each`
       dir                         | hermitLocation         | expected
       ${'nested/other/directory'} | ${'nested/bin/hermit'} | ${'nested/bin'}
       ${'nested'}                 | ${'nested/bin/hermit'} | ${'nested/bin'}

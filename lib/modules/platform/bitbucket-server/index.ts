@@ -7,7 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
@@ -58,6 +58,8 @@ import * as utils from './utils';
  * See following page for uptodate supported versions
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
+
+export const id = 'bitbucket-server';
 
 let config: BbsConfig = {} as any;
 
@@ -148,7 +150,7 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,
@@ -976,9 +978,4 @@ export function massageMarkdown(input: string): string {
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  logger.debug(`getVulnerabilityAlerts()`);
-  return Promise.resolve([]);
 }

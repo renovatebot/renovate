@@ -3,7 +3,7 @@ import { load } from 'js-yaml';
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
-import type { ExtractConfig, PackageFile } from '../types';
+import type { ExtractConfig, PackageFileContent } from '../types';
 import type { DockerComposeConfig } from './types';
 
 class LineMapper {
@@ -32,7 +32,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   extractConfig: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.debug('docker-compose.extractPackageFile()');
   let config: DockerComposeConfig;
   try {

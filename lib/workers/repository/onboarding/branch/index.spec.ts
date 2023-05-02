@@ -6,6 +6,7 @@ import {
   git,
   mocked,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { configFileNames } from '../../../../config/app-strings';
 import { GlobalConfig } from '../../../../config/global';
@@ -20,6 +21,7 @@ import * as _cache from '../../../../util/cache/repository';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
 import * as _config from './config';
+import * as _onboardingCache from './onboarding-branch-cache';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
@@ -31,12 +33,21 @@ jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+jest.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
+const onboardingCache = mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
   describe('checkOnboardingBranch', () => {
     let config: RenovateConfig;
+    const dummyCache = {
+      onboardingBranchCache: {
+        onboardingBranch: 'configure/renovate',
+        defaultBranchSha: 'default-sha',
+        onboardingBranchSha: 'onboarding-sha',
+      },
+    };
 
     beforeEach(() => {
       memCache.init();
@@ -88,7 +99,8 @@ describe('workers/repository/onboarding/branch/index', () => {
         git.getFileList.mockResolvedValue(['package.json']);
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
-        const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+        const file = scm.commitAndPush.mock.calls[0][0]
+          .files[0] as FileAddition;
         const contents = file.contents?.toString();
         expect(contents).toBeJsonString();
         // TODO #7154
@@ -124,7 +136,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         expectConfig,
         configFileNames[0]
       );
-      const file = git.commitFiles.mock.calls[0][0].files[0] as FileAddition;
+      const file = scm.commitAndPush.mock.calls[0][0].files[0] as FileAddition;
       const contents = file.contents?.toString();
       expect(contents).toBeJsonString();
       // TODO #7154
@@ -166,9 +178,11 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via file', async () => {
+      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
+      expect(onboardingCache.deleteOnboardingCache).toHaveBeenCalledTimes(1); // removes onboarding cache when repo is onboarded
     });
 
     it('handles removed cached file name', async () => {
@@ -249,6 +263,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('updates onboarding branch', async () => {
+      cache.getCache.mockReturnValue(dummyCache);
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
@@ -257,7 +272,8 @@ describe('workers/repository/onboarding/branch/index', () => {
       expect(res.repoIsOnboarded).toBeFalse();
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-      expect(git.commitFiles).toHaveBeenCalledTimes(0);
+      expect(onboardingCache.setOnboardingCache).toHaveBeenCalledTimes(1); // update onboarding cache
+      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
     });
 
     describe('tests onboarding rebase/retry checkbox handling', () => {
@@ -282,7 +298,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects missing rebase checkbox', async () => {
@@ -296,7 +312,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('detects manual pr update requested', async () => {
@@ -311,7 +327,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         ``;
         expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
 
       it('handles unchecked rebase checkbox', async () => {
@@ -322,7 +338,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
         expect(OnboardingState.prUpdateRequested).toBeFalse();
         expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
-        expect(git.commitFiles).toHaveBeenCalledTimes(0);
+        expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });
     });
   });

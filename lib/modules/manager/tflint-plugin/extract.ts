@@ -1,6 +1,10 @@
 import { logger } from '../../../logger';
 import { newlineRegex, regEx } from '../../../util/regex';
-import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
+import type {
+  ExtractConfig,
+  PackageDependency,
+  PackageFileContent,
+} from '../types';
 import { extractTFLintPlugin } from './plugins';
 import type { ExtractionResult } from './types';
 import { checkFileContainsPlugins } from './util';
@@ -13,7 +17,7 @@ export function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace({ content }, 'tflint.extractPackageFile()');
   if (!checkFileContainsPlugins(content)) {
     logger.trace(

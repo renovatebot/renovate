@@ -1,5 +1,6 @@
 import type { FileChange } from '../../../../util/git/types';
 import type { PackageFile } from '../../types';
+import type { NpmManagerData } from '../types';
 
 export interface DetermineLockFileDirsResult {
   yarnLockDirs: string[];
@@ -9,7 +10,7 @@ export interface DetermineLockFileDirsResult {
 }
 
 export interface AdditionalPackageFiles {
-  npm?: Partial<PackageFile>[];
+  npm?: Partial<PackageFile<NpmManagerData>>[];
 }
 
 export interface ArtifactError {
@@ -30,7 +31,8 @@ export interface GenerateLockFileResult {
 }
 
 export interface PnpmLockFile {
-  lockfileVersion?: number;
+  lockfileVersion: number | string;
+  packages?: Record<string, unknown>;
 }
 
 export interface YarnRcYmlFile {

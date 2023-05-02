@@ -67,7 +67,6 @@ replace (
             currentValue: '1.18',
             datasource: 'golang-version',
             versioning: 'go-mod-directive',
-            rangeStrategy: 'replace',
           },
           {
             managerData: {

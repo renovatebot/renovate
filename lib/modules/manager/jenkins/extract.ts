@@ -5,7 +5,7 @@ import { isSkipComment } from '../../../util/ignore';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { JenkinsPluginsDatasource } from '../../datasource/jenkins-plugins';
 import * as mavenVersioning from '../../versioning/maven';
-import type { PackageDependency, PackageFile } from '../types';
+import type { PackageDependency, PackageFileContent } from '../types';
 import type { JenkinsPlugin, JenkinsPlugins } from './types';
 
 const YamlExtension = regEx(/\.ya?ml$/);
@@ -98,7 +98,7 @@ function extractText(content: string): PackageDependency[] {
 export function extractPackageFile(
   content: string,
   fileName: string
-): PackageFile | null {
+): PackageFileContent | null {
   logger.trace('jenkins.extractPackageFile()');
   const deps: PackageDependency[] = [];
 

@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { AbstractMigration } from '../base/abstract-migration';
 
 export class BaseBranchMigration extends AbstractMigration {
@@ -5,6 +6,11 @@ export class BaseBranchMigration extends AbstractMigration {
   override readonly propertyName = 'baseBranch';
 
   override run(value: unknown): void {
-    this.setSafely('baseBranches', Array.isArray(value) ? value : [value]);
+    if (is.array<string>(value)) {
+      this.setSafely('baseBranches', value);
+    }
+    if (is.string(value)) {
+      this.setSafely('baseBranches', [value]);
+    }
   }
 }
