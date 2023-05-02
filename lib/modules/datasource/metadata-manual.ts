@@ -55,7 +55,7 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
   },
   maven: {
-    'com.figure.gradle.semver-plugin': 
+    'com.figure.gradle.semver-plugin:com.figure.gradle.semver-plugin.gradle.plugin': 
       'https://github.com/FigureTechnologies/gradle-semver-plugin',
   }
 };
