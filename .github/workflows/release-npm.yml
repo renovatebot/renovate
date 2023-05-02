@@ -58,7 +58,11 @@ jobs:
           yarn config set version-git-tag false
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        uses: nick-fields/retry@v2.8.3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: yarn install --frozen-lockfile
 
       - name: Build ${{ env.NPM_VERSION }}
         run: yarn build
