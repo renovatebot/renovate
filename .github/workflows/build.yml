@@ -77,7 +77,7 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        uses: nick-fields/retry@v2.8.3
+        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
         with:
           timeout_minutes: 10
           max_attempts: 3
