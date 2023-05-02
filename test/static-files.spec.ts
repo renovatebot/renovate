@@ -1,7 +1,4 @@
-import util from 'node:util';
-import _glob from 'glob';
-
-const glob = util.promisify(_glob);
+import { glob } from 'glob';
 
 const ignoredExtensions = [
   'js',
