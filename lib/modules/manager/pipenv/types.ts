@@ -17,4 +17,5 @@ export interface PipRequirement {
   path?: string;
   file?: string;
   git?: string;
+  ref?: string;
 }

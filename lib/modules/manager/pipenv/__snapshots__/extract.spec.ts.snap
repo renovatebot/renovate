@@ -78,10 +78,18 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
       "managerData": {},
     },
     {
+      "currentValue": "1.11.4",
+      "datasource": "git-tags",
       "depName": "django",
       "depType": "packages",
       "managerData": {},
-      "skipReason": "git-dependency",
+      "packageName": "https://github.com/django/django.git",
+    },
+    {
+      "depName": "flask",
+      "depType": "packages",
+      "managerData": {},
+      "skipReason": "any-version",
     },
     {
       "depName": "e682b37",

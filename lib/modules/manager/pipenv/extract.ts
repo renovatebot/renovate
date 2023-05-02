@@ -5,6 +5,7 @@ import { logger } from '../../../logger';
 import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
+import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
@@ -34,8 +35,12 @@ function extractFromSection(
       let currentValue: string | undefined;
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
-      if (requirements.git) {
-        skipReason = 'git-dependency';
+      let packageName: string | undefined;
+      if (requirements.git && !requirements.ref) {
+        skipReason = 'any-version';
+      } else if (requirements.git) {
+        currentValue = requirements.ref;
+        packageName = requirements.git;
       } else if (requirements.file) {
         skipReason = 'file-dependency';
       } else if (requirements.path) {
@@ -51,7 +56,7 @@ function extractFromSection(
       if (currentValue === '*') {
         skipReason = 'any-version';
       }
-      if (!skipReason) {
+      if (!skipReason && !packageName) {
         const packageMatches = packageRegex.exec(depName);
         if (!packageMatches) {
           logger.debug(
@@ -78,6 +83,9 @@ function extractFromSection(
       }
       if (skipReason) {
         dep.skipReason = skipReason;
+      } else if (packageName) {
+        dep.packageName = packageName;
+        dep.datasource = GitTagsDatasource.id;
       } else {
         dep.datasource = PypiDatasource.id;
       }
