@@ -1,9 +1,6 @@
-import { promisify } from 'node:util';
 import fs from 'fs-extra';
-import g from 'glob';
+import { glob } from 'glob';
 import MarkdownIt from 'markdown-it';
-
-const glob = promisify(g);
 
 const errorTitle = 'Invalid JSON in fenced code block';
 const errorBody =

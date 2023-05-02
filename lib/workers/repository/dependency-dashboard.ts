@@ -113,7 +113,22 @@ export async function readDashboardBody(
     const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       config.dependencyDashboardIssue = issue.number;
-      Object.assign(config, parseDashboardIssue(issue.body!));
+      const dashboardChecks = parseDashboardIssue(issue.body!);
+
+      if (config.checkedBranches) {
+        const checkedBranchesRec: Record<string, string> = Object.fromEntries(
+          config.checkedBranches.map((branchName) => [
+            branchName,
+            'global-config',
+          ])
+        );
+        dashboardChecks.dependencyDashboardChecks = {
+          ...dashboardChecks.dependencyDashboardChecks,
+          ...checkedBranchesRec,
+        };
+      }
+
+      Object.assign(config, dashboardChecks);
     }
   }
 }
