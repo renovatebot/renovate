@@ -36,12 +36,16 @@ describe('modules/datasource/rubygems/index', () => {
       httpMock
         .scope('https://firstparty.com')
         .get('/basepath/api/v1/gems/rails.json')
-        .reply(200);
+        .reply(200, { name: 'rails' })
+        .get('/basepath/api/v1/versions/rails.json')
+        .reply(200, []);
       httpMock.scope('https://thirdparty.com').get('/versions').reply(404);
       httpMock
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
-        .reply(200);
+        .reply(200, { name: 'rails' })
+        .get('/api/v1/versions/rails.json')
+        .reply(200, []);
       expect(await getPkgReleases(params)).toBeNull();
     });
 
