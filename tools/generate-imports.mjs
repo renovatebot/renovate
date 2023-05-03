@@ -93,6 +93,9 @@ export async function getManagerHash(managerName) {
     (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
 
+  // sort files in case glob order changes
+  files.sort();
+
   for (const fileAddr of files) {
     const hash = await getFileHash(fileAddr);
     hashes.push(hash);
