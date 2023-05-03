@@ -7,6 +7,7 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
@@ -70,7 +71,6 @@ function extractFromSection(
       const version = currentValue.version;
       const path = currentValue.path;
       const git = currentValue.git;
-      const tag = currentValue.tag;
       if (version) {
         currentValue = version;
         nestedVersion = true;
@@ -81,8 +81,8 @@ function extractFromSection(
         currentValue = '';
         skipReason = 'path-dependency';
       } else if (git) {
-        if (tag) {
-          currentValue = tag;
+        if (currentValue.tag) {
+          currentValue = currentValue.tag;
           datasource = GithubTagsDatasource.id;
           const githubPackageName = extractGithubPackageName(git);
           if (githubPackageName) {
@@ -217,22 +217,9 @@ export async function extractPackageFile(
 }
 
 function extractGithubPackageName(url: string): string | null {
-  const httpRegex = regEx(/^(?:https?:\/\/)?(?:www\.)?github.com\/(.*)$/);
-  const sshRegex = regEx(/^git@github.com:(.*)?$/);
-
-  const httpMatch = httpRegex.exec(url);
-  const sshMatch = sshRegex.exec(url);
-
-  function removeDotGit(packageName: string): string {
-    return packageName.replace('.git', '');
+  const parsedUrl = parseGitUrl(url);
+  if (parsedUrl.source !== 'github.com') {
+    return null;
   }
-
-  if (httpMatch) {
-    return removeDotGit(httpMatch[1]);
-  }
-
-  if (sshMatch) {
-    return removeDotGit(sshMatch[1]);
-  }
-  return null;
+  return `${parsedUrl.owner}/${parsedUrl.name}`;
 }
