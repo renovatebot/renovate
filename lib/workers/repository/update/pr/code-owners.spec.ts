@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { mock } from 'jest-mock-extended';
 import { fs, git } from '../../../../../test/util';
 import type { Pr } from '../../../../modules/platform';
@@ -41,7 +42,7 @@ describe('workers/repository/update/pr/code-owners', () => {
     });
 
     describe('returns more specific code owners in monorepos', () => {
-      const mockCodeOwners = `
+      const mockCodeOwners = codeBlock`
         # By default, assign to @john
         #
         * @john

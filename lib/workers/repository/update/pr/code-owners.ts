@@ -3,7 +3,7 @@ import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
-import { regEx } from '../../../../util/regex';
+import { newlineRegex, regEx } from '../../../../util/regex';
 
 type UserScore = {
   username: string;
@@ -42,8 +42,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
 
     // Convert CODEOWNERS file into list of matching rules
     const fileOwnerRules = codeOwnersFile
-      .toString()
-      .split(/\r\n|\r|\n/)
+      .split(newlineRegex)
       // Remove empty and commented lines
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
