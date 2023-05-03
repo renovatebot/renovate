@@ -4,11 +4,7 @@ import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type {
-  PackageRule,
-  RenovateConfig,
-  VulnerabilitySeverity,
-} from '../../../config/types';
+import type { PackageRule, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultVersioning } from '../../../modules/datasource';
 import type {
@@ -593,7 +589,7 @@ export class Vulnerabilities {
   }
 
   private setHighestSeverity(packageRules: PackageRule[]): void {
-    let mostSevere: VulnerabilitySeverity | undefined;
+    let mostSevere: string | undefined;
 
     for (const rule of packageRules) {
       const severity = rule.vulnerabilitySeverity?.toUpperCase();
