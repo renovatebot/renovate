@@ -4,7 +4,11 @@ import is from '@sindresorhus/is';
 import type { CvssScore } from 'vuln-vects';
 import { parseCvssVector } from 'vuln-vects';
 import { getManagerConfig, mergeChildConfig } from '../../../config';
-import type { PackageRule, RenovateConfig } from '../../../config/types';
+import type {
+  PackageRule,
+  RenovateConfig,
+  VulnerabilitySeverity,
+} from '../../../config/types';
 import { logger } from '../../../logger';
 import { getDefaultVersioning } from '../../../modules/datasource';
 import type {
@@ -74,6 +78,8 @@ export class Vulnerabilities {
         groupPackageRules.push(rule);
       }
       this.sortByFixedVersion(groupPackageRules, versioningApi);
+
+      this.setHighestSeverity(groupPackageRules);
 
       config.packageRules.push(...groupPackageRules);
     }
@@ -463,7 +469,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      vulnerabilitySeverity: severityLevel,
+      vulnerabilitySeverity: severityLevel as VulnerabilitySeverity,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
@@ -561,5 +567,32 @@ export class Vulnerabilities {
     content += `</details>`;
 
     return [sanitizeMarkdown(content)];
+  }
+
+  private setHighestSeverity(packageRules: PackageRule[]): void {
+    let mostSevere: VulnerabilitySeverity | undefined;
+
+    for (const rule of packageRules) {
+      const severity = rule.vulnerabilitySeverity;
+      if (!mostSevere) {
+        mostSevere = severity;
+      }
+
+      if (severity === 'CRITICAL') {
+        mostSevere = 'CRITICAL';
+      } else if (severity === 'HIGH' && mostSevere !== 'CRITICAL') {
+        mostSevere = 'HIGH';
+      } else if (
+        severity === 'MODERATE' &&
+        mostSevere !== 'CRITICAL' &&
+        mostSevere !== 'HIGH'
+      ) {
+        mostSevere = 'MODERATE';
+      }
+    }
+
+    for (const rule of packageRules) {
+      rule.highestVulnerabilitySeverity = mostSevere;
+    }
   }
 }

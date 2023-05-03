@@ -1729,7 +1729,7 @@ const options: RenovateOptions[] = [
       minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix:
-        '[SECURITY{{#if includeVulnerabilitySeverity}}-{{{vulnerabilitySeverity}}}{{/if}}]',
+        '[SECURITY{{#if includeVulnerabilitySeverity}}-{{{highestVulnerabilitySeverity}}}{{/if}}]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
     },

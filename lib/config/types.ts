@@ -338,6 +338,7 @@ export interface PackageRule
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: VulnerabilitySeverity;
+  highestVulnerabilitySeverity?: VulnerabilitySeverity;
 }
 
 export interface ValidationMessage {
