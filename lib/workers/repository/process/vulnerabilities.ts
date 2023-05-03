@@ -461,7 +461,10 @@ export class Vulnerabilities {
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
     );
 
-    const severityLevel = vulnerability.database_specific?.severity as string;
+    const [, , severityLevel] = this.extractSeverityDetails(
+      vulnerability,
+      affected
+    );
 
     return {
       matchDatasources: [datasource],
@@ -469,7 +472,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      vulnerabilitySeverity: severityLevel as VulnerabilitySeverity,
+      vulnerabilitySeverity: severityLevel?.toUpperCase(),
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
@@ -523,24 +526,16 @@ export class Vulnerabilities {
     content += `#### Details\n${details ?? 'No details.'}\n`;
 
     content += '#### Severity\n';
-    const cvssVector =
-      vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
-      vulnerability.severity?.[0]?.score ??
-      (affected.database_specific?.cvss as string); // RUSTSEC
+    const [cvssVector, score, severityLevel] = this.extractSeverityDetails(
+      vulnerability,
+      affected
+    );
+
     if (cvssVector) {
-      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
-      const score = baseScore ? `${baseScore} / 10 (${severity})` : 'Unknown';
       content += `- CVSS Score: ${score}\n`;
       content += `- Vector String: \`${cvssVector}\`\n`;
-    } else if (
-      vulnerability.id.startsWith('GHSA-') &&
-      vulnerability.database_specific?.severity
-    ) {
-      const severity = vulnerability.database_specific.severity as string;
-      content +=
-        severity.charAt(0).toUpperCase() +
-        severity.slice(1).toLowerCase() +
-        '\n';
+    } else if (severityLevel) {
+      content += `${severityLevel}\n`;
     } else {
       content += 'Unknown severity.\n';
     }
@@ -569,13 +564,41 @@ export class Vulnerabilities {
     return [sanitizeMarkdown(content)];
   }
 
+  private extractSeverityDetails(
+    vulnerability: Osv.Vulnerability,
+    affected: Osv.Affected
+  ): [string, string, string | undefined] {
+    let severityLevel: string | undefined;
+    let score = 'Unknown';
+
+    const cvssVector =
+      vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
+      vulnerability.severity?.[0]?.score ??
+      (affected.database_specific?.cvss as string); // RUSTSEC
+
+    if (cvssVector) {
+      const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
+      severityLevel = severity;
+      score = baseScore ? `${baseScore} / 10 (${severityLevel})` : 'Unknown';
+    } else if (
+      vulnerability.id.startsWith('GHSA-') &&
+      vulnerability.database_specific?.severity
+    ) {
+      const severity = vulnerability.database_specific.severity as string;
+      severityLevel =
+        severity.charAt(0).toUpperCase() + severity.slice(1).toLowerCase();
+    }
+
+    return [cvssVector, score, severityLevel];
+  }
+
   private setHighestSeverity(packageRules: PackageRule[]): void {
     let mostSevere: VulnerabilitySeverity | undefined;
 
     for (const rule of packageRules) {
-      const severity = rule.vulnerabilitySeverity;
+      const severity = rule.vulnerabilitySeverity?.toUpperCase();
       if (!mostSevere) {
-        mostSevere = severity;
+        mostSevere = severity?.toUpperCase();
       }
 
       if (severity === 'CRITICAL') {

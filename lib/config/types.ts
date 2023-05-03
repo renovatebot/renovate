@@ -304,8 +304,6 @@ export type MergeStrategy =
   | 'rebase'
   | 'squash';
 
-export type VulnerabilitySeverity = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
-
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
@@ -337,7 +335,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
-  vulnerabilitySeverity?: VulnerabilitySeverity;
+  vulnerabilitySeverity?: string;
   highestVulnerabilitySeverity?: VulnerabilitySeverity;
 }
 
