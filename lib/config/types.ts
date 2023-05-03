@@ -251,6 +251,7 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
+  vulnerabilitySeverity?: VulnerabilitySeverity;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -303,6 +304,8 @@ export type MergeStrategy =
   | 'rebase'
   | 'squash';
 
+export type VulnerabilitySeverity = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
@@ -334,7 +337,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
-  vulnerabilitySeverity?: string;
+  vulnerabilitySeverity?: VulnerabilitySeverity;
 }
 
 export interface ValidationMessage {
