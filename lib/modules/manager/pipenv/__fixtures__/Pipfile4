@@ -11,6 +11,9 @@ requests = { extras = ['socks'] }
 records = '>0.5.0'
 django = { git = 'https://github.com/django/django.git', ref = '1.11.4', editable = true }
 flask = { git = 'https://github.com/pallets/flask.git' }
+python-gitlab = { git = 'https://gitlab.com/python-gitlab/python-gitlab', ref = '1.8.0', editable = true }
+malformed-url = { git = 'https://github.com/malformed', ref = '0.0.1' }
+http-url = { git = 'http://github.com/http/python-http', ref = '0.0.1' }
 "e682b37" = {file = "https://github.com/divio/django-cms/archive/release/3.4.x.zip"}
 "e1839a8" = {path = ".", editable = true}
 pywinusb = { version = "*", os_name = "=='nt'", index="pypi"}

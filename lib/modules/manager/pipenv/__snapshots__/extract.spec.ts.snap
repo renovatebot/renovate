@@ -79,7 +79,7 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
     },
     {
       "currentValue": "1.11.4",
-      "datasource": "git-tags",
+      "datasource": "github-tags",
       "depName": "django",
       "depType": "packages",
       "managerData": {},
@@ -90,6 +90,26 @@ exports[`modules/manager/pipenv/extract extractPackageFile() extracts example pi
       "depType": "packages",
       "managerData": {},
       "skipReason": "any-version",
+    },
+    {
+      "currentValue": "1.8.0",
+      "datasource": "git-tags",
+      "depName": "python-gitlab",
+      "depType": "packages",
+      "managerData": {},
+      "packageName": "https://gitlab.com/python-gitlab/python-gitlab",
+    },
+    {
+      "depName": "malformed-url",
+      "depType": "packages",
+      "managerData": {},
+      "skipReason": "invalid-name",
+    },
+    {
+      "depName": "http-url",
+      "depType": "packages",
+      "managerData": {},
+      "skipReason": "invalid-name",
     },
     {
       "depName": "e682b37",

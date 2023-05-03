@@ -6,6 +6,7 @@ import type { SkipReason } from '../../../types';
 import { localPathExists } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { GitTagsDatasource } from '../../datasource/git-tags';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency, PackageFileContent } from '../types';
 import type { PipFile } from './types';
@@ -13,6 +14,9 @@ import type { PipFile } from './types';
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = regEx(/^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i);
 const rangePattern: string = RANGE_PATTERN;
+const packageGitRegex = regEx(
+  /(?<source>(?<protocol>git|ssh|https):\/\/(?<gitUrl>(?:(?<user>[^@]+)@)?(?<hostname>[\w.-]+)(?<delimiter>\/)(?<scmPath>.*\/(?<depName>[\w/-]+))(\.git)?))/
+);
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
   regEx(/\?<\w+>/g),
@@ -36,11 +40,27 @@ function extractFromSection(
       let nestedVersion = false;
       let skipReason: SkipReason | undefined;
       let packageName: string | undefined;
+      let datasource = PypiDatasource.id;
       if (requirements.git && !requirements.ref) {
         skipReason = 'any-version';
       } else if (requirements.git) {
-        currentValue = requirements.ref;
-        packageName = requirements.git;
+        const gitPackageMatches = packageGitRegex.exec(requirements.git);
+        if (gitPackageMatches?.groups) {
+          if (gitPackageMatches.groups.hostname === 'github.com') {
+            datasource = GithubTagsDatasource.id;
+          } else {
+            datasource = GitTagsDatasource.id;
+          }
+          currentValue = requirements.ref;
+          packageName = requirements.git;
+        } else {
+          logger.debug(
+            `Skipping git dependency with malformed url "${
+              requirements.ref as string
+            }".`
+          );
+          skipReason = 'invalid-name';
+        }
       } else if (requirements.file) {
         skipReason = 'file-dependency';
       } else if (requirements.path) {
@@ -83,11 +103,11 @@ function extractFromSection(
       }
       if (skipReason) {
         dep.skipReason = skipReason;
-      } else if (packageName) {
-        dep.packageName = packageName;
-        dep.datasource = GitTagsDatasource.id;
       } else {
-        dep.datasource = PypiDatasource.id;
+        if (packageName) {
+          dep.packageName = packageName;
+        }
+        dep.datasource = datasource;
       }
       if (nestedVersion) {
         // TODO #7154
