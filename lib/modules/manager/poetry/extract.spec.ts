@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
 import { fs } from '../../../../test/util';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
@@ -142,17 +143,17 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('extracts dependencies from dependency groups', async () => {
-      const content = `
-[tool.poetry.dependencies]
-dep = "^2.0"
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        dep = "^2.0"
 
 
-[tool.poetry.group.dev.dependencies]
-dev_dep = "^3.0"
+        [tool.poetry.group.dev.dependencies]
+        dev_dep = "^3.0"
 
-[tool.poetry.group.typing.dependencies]
-typing_dep = "^4.0"
-`;
+        [tool.poetry.group.typing.dependencies]
+        typing_dep = "^4.0"
+      `;
       const res = await extractPackageFile(content, filename);
       expect(res?.deps).toMatchObject([
         {
@@ -188,11 +189,11 @@ typing_dep = "^4.0"
     });
 
     it('parses github dependencies tags on ssh urls', async () => {
-      const content = `
- [tool.poetry.dependencies]
- fastapi = {git = "git@github.com:tiangolo/fastapi.git", tag="1.2.3"}
- werkzeug = ">=0.14"
- `;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "git@github.com:tiangolo/fastapi.git", tag="1.2.3"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('fastapi');
       expect(res[0].packageName).toBe('tiangolo/fastapi');
@@ -203,11 +204,11 @@ typing_dep = "^4.0"
     });
 
     it('parses github dependencies tags on http urls', async () => {
-      const content = `
- [tool.poetry.dependencies]
- fastapi = {git = "https://github.com/tiangolo/fastapi.git", tag="1.2.3"}
- werkzeug = ">=0.14"
- `;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        fastapi = {git = "https://github.com/tiangolo/fastapi.git", tag="1.2.3"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('fastapi');
       expect(res[0].packageName).toBe('tiangolo/fastapi');
@@ -218,11 +219,11 @@ typing_dep = "^4.0"
     });
 
     it('skips git dependencies', async () => {
-      const content = `
- [tool.poetry.dependencies]
- flask = {git = "https://github.com/pallets/flask.git"}
- werkzeug = ">=0.14"
- `;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        flask = {git = "https://github.com/pallets/flask.git"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBeEmptyString();
@@ -231,11 +232,11 @@ typing_dep = "^4.0"
     });
 
     it('skips git dependencies with version', async () => {
-      const content = `
-[tool.poetry.dependencies]
-flask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}
-werkzeug = ">=0.14"
-`;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        flask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('1.2.3');
@@ -244,10 +245,10 @@ werkzeug = ">=0.14"
     });
 
     it('skips git dependencies on tags that are not in github', async () => {
-      const content = `
-[tool.poetry.dependencies]
-aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
-`;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('aws-sam');
       expect(res[0].currentValue).toBe('1.2.3');
@@ -256,11 +257,11 @@ aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
     });
 
     it('skips path dependencies', async () => {
-      const content = `
-[tool.poetry.dependencies]
-flask = {path = "/some/path/"}
-werkzeug = ">=0.14"
-`;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        flask = {path = "/some/path/"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('');
@@ -269,11 +270,11 @@ werkzeug = ">=0.14"
     });
 
     it('skips path dependencies with version', async () => {
-      const content = `
-[tool.poetry.dependencies]
-flask = {path = "/some/path/", version = "1.2.3"}
-werkzeug = ">=0.14"
-`;
+      const content = codeBlock`
+        [tool.poetry.dependencies]
+        flask = {path = "/some/path/", version = "1.2.3"}
+        werkzeug = ">=0.14"
+      `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('flask');
       expect(res[0].currentValue).toBe('1.2.3');
