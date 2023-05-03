@@ -82,7 +82,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
       });
       expect(res).toEqual({
         homepage: 'https://elixir-lang.org/',
-        registryUrl: 'https://repo.hex.pm',
+        registryUrl: 'https://builds.hex.pm',
         releases: [
           {
             gitRef: '185eeec5ecbc2a0c8d9b8b97cb2d23108615ffdb',
@@ -133,7 +133,7 @@ describe('modules/datasource/hexpm-bob/index', () => {
 
       expect(res).toEqual({
         homepage: 'https://www.erlang.org/',
-        registryUrl: 'https://repo.hex.pm',
+        registryUrl: 'https://builds.hex.pm',
         releases: [
           {
             gitRef: '6efb5e31df6bc512ed6c466584ef15b846dcecab',

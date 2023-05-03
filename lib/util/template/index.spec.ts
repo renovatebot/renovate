@@ -116,22 +116,25 @@ describe('util/template/index', () => {
 
   describe('proxyCompileInput', () => {
     const allowedField = 'body';
+    const allowedArrayField = 'prBodyNotes';
     const forbiddenField = 'foobar';
 
     type TestCompileInput = Record<
-      typeof allowedField | typeof forbiddenField,
+      typeof allowedField | typeof allowedArrayField | typeof forbiddenField,
       unknown
     >;
 
     const compileInput: TestCompileInput = {
       [allowedField]: 'allowed',
+      [allowedArrayField]: ['allowed'],
       [forbiddenField]: 'forbidden',
     };
 
-    it('accessing allowed files', () => {
+    it('accessing allowed fields', () => {
       const p = template.proxyCompileInput(compileInput);
 
       expect(p[allowedField]).toBe('allowed');
+      expect(p[allowedArrayField]).toStrictEqual(['allowed']);
       expect(p[forbiddenField]).toBeUndefined();
     });
 
@@ -153,6 +156,7 @@ describe('util/template/index', () => {
       const arr = proxy[allowedField] as TestCompileInput[];
       const obj = arr[0];
       expect(obj[allowedField]).toBe('allowed');
+      expect(obj[allowedArrayField]).toStrictEqual(['allowed']);
       expect(obj[forbiddenField]).toBeUndefined();
     });
   });

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';

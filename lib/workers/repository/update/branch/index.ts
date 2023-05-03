@@ -65,6 +65,14 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
   }
 }
 
+function userChangedTargetBranch(pr: Pr): boolean {
+  const oldTargetBranch = pr.bodyStruct?.debugData?.targetBranch;
+  if (oldTargetBranch && pr.targetBranch) {
+    return pr.targetBranch !== oldTargetBranch;
+  }
+  return false;
+}
+
 export interface ProcessBranchResult {
   branchExists: boolean;
   updatesVerified?: boolean;
@@ -199,11 +207,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (
-          branchIsModified ||
-          (branchPr.targetBranch &&
-            branchPr.targetBranch !== branchConfig.baseBranch)
-        ) {
+        if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(dependencyDashboardCheck || config.rebaseRequested)) {
@@ -363,6 +367,9 @@ export async function processBranch(
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (dependencyDashboardCheck === 'global-config') {
+      logger.debug(`Manual create/rebase requested via checkedBranches`);
+      config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
@@ -382,6 +389,17 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: 'no-work',
       };
+    }
+    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+    else if (
+      branchPr?.targetBranch &&
+      branchPr.targetBranch !== config.baseBranch
+    ) {
+      logger.debug(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
