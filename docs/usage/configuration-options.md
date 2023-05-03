@@ -1563,8 +1563,6 @@ If you wish for Renovate to process only select paths in the repository, use `in
 Alternatively, if you need to just _exclude_ certain paths in the repository then consider `ignorePaths` instead.
 If you are more interested in including only certain package managers (e.g. `npm`), then consider `enabledManagers` instead.
 
-## includeVulnerabilitySeverity
-
 ## internalChecksAsSuccess
 
 By default, internal Renovate checks such as `renovate/stability-days` are not counted towards a branch being "green" or not.

@@ -92,8 +92,6 @@ export const allowedFields = {
   highestVulnerabilitySeverity:
     'The highest vulnerability severity within the upgrade',
   indentation: 'The indentation of the dependency being updated',
-  includeVulnerabilitySeverity:
-    'true if the upgrade should include the severity',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',

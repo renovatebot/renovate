@@ -1728,8 +1728,7 @@ const options: RenovateOptions[] = [
       dependencyDashboardApproval: false,
       minimumReleaseAge: null,
       rangeStrategy: 'update-lockfile',
-      commitMessageSuffix:
-        '[SECURITY{{#if includeVulnerabilitySeverity}}-{{{highestVulnerabilitySeverity}}}{{/if}}]',
+      commitMessageSuffix: '[SECURITY]',
       branchTopic: `{{{datasource}}}-{{{depName}}}-vulnerability`,
       prCreation: 'immediate',
     },
@@ -1838,14 +1837,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     advancedUse: true,
-  },
-  {
-    name: 'includeVulnerabilitySeverity',
-    description:
-      'Whether to include the vulnerability severity in the PR title.',
-    type: 'boolean',
-    default: false,
-    cli: false,
   },
   {
     name: 'prBodyTemplate',
