@@ -251,7 +251,7 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
-  vulnerabilitySeverity?: VulnerabilitySeverity;
+  vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -336,7 +336,7 @@ export interface PackageRule
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
   vulnerabilitySeverity?: string;
-  highestVulnerabilitySeverity?: VulnerabilitySeverity;
+  highestVulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
