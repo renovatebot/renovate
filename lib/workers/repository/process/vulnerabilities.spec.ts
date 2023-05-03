@@ -1195,5 +1195,307 @@ describe('workers/repository/process/vulnerabilities', () => {
         },
       ]);
     });
+
+    describe('calculate highest severity for multiple vulnerabilities', () => {
+      it('CRITICAL vulnerability is highest', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depName: 'lodash',
+                  currentValue: '4.17.10',
+                  datasource: 'npm',
+                },
+              ],
+              packageFile: 'some-file',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'CRITICAL',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'HIGH',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'MODERATE',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'LOW',
+            },
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles
+        );
+
+        expect(config.packageRules).toHaveLength(4);
+        expect(config.packageRules).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'CRITICAL',
+              highestVulnerabilitySeverity: 'CRITICAL',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'HIGH',
+              highestVulnerabilitySeverity: 'CRITICAL',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'MODERATE',
+              highestVulnerabilitySeverity: 'CRITICAL',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'LOW',
+              highestVulnerabilitySeverity: 'CRITICAL',
+            }),
+          ])
+        );
+      });
+
+      it('HIGH vulnerability is highest', async () => {
+        const packageFiles: Record<string, PackageFile[]> = {
+          npm: [
+            {
+              deps: [
+                {
+                  depName: 'lodash',
+                  currentValue: '4.17.10',
+                  datasource: 'npm',
+                },
+              ],
+              packageFile: 'some-file',
+            },
+          ],
+        };
+
+        getVulnerabilitiesMock.mockResolvedValueOnce([
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'LOW',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'HIGH',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'MODERATE',
+            },
+          },
+          {
+            ...lodashVulnerability,
+            database_specific: {
+              severity: 'LOW',
+            },
+          },
+        ]);
+
+        await vulnerabilities.appendVulnerabilityPackageRules(
+          config,
+          packageFiles
+        );
+
+        expect(config.packageRules).toHaveLength(4);
+        expect(config.packageRules).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'LOW',
+              highestVulnerabilitySeverity: 'HIGH',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'HIGH',
+              highestVulnerabilitySeverity: 'HIGH',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'MODERATE',
+              highestVulnerabilitySeverity: 'HIGH',
+            }),
+            expect.objectContaining({
+              isVulnerabilityAlert: true,
+              vulnerabilitySeverity: 'LOW',
+              highestVulnerabilitySeverity: 'HIGH',
+            }),
+          ])
+        );
+      });
+    });
+
+    it('MODERATE vulnerability is highest', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'MODERATE',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
+
+      expect(config.packageRules).toHaveLength(4);
+      expect(config.packageRules).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'MODERATE',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'MODERATE',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'MODERATE',
+            highestVulnerabilitySeverity: 'MODERATE',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'MODERATE',
+          }),
+        ])
+      );
+    });
+
+    it('LOW vulnerability is highest', async () => {
+      const packageFiles: Record<string, PackageFile[]> = {
+        npm: [
+          {
+            deps: [
+              {
+                depName: 'lodash',
+                currentValue: '4.17.10',
+                datasource: 'npm',
+              },
+            ],
+            packageFile: 'some-file',
+          },
+        ],
+      };
+
+      getVulnerabilitiesMock.mockResolvedValueOnce([
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+        {
+          ...lodashVulnerability,
+          database_specific: {
+            severity: 'LOW',
+          },
+        },
+      ]);
+
+      await vulnerabilities.appendVulnerabilityPackageRules(
+        config,
+        packageFiles
+      );
+
+      expect(config.packageRules).toHaveLength(4);
+      expect(config.packageRules).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'LOW',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'LOW',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'LOW',
+          }),
+          expect.objectContaining({
+            isVulnerabilityAlert: true,
+            vulnerabilitySeverity: 'LOW',
+            highestVulnerabilitySeverity: 'LOW',
+          }),
+        ])
+      );
+    });
   });
 });
