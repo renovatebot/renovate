@@ -43,7 +43,8 @@ describe('modules/manager/asdf/extract', () => {
 
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
-        codeBlock`adr-tools 3.0.0
+        codeBlock`
+adr-tools 3.0.0
 argocd 2.5.4
 awscli 2.8.6
 bun 0.2.2
