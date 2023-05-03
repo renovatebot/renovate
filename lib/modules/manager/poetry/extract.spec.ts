@@ -232,7 +232,6 @@ describe('modules/manager/poetry/extract', () => {
       const content = `
 [tool.poetry.dependencies]
 aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
-nwerkzeug = ">=0.14"
 `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('aws-sam');
