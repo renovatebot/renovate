@@ -237,7 +237,7 @@ aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
       expect(res[0].depName).toBe('aws-sam');
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('git-dependency');
-      expect(res).toHaveLength(2);
+      expect(res).toHaveLength(1);
     });
 
     it('skips path dependencies', async () => {
