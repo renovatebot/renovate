@@ -179,8 +179,11 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('parses github dependencies tags on ssh urls', async () => {
-      const content =
-        '[tool.poetry.dependencies]\r\nfastapi = {git = "git@github.com:tiangolo/fastapi.git", tag="1.2.3"}\r\nwerkzeug = ">=0.14"';
+      const content = `
+ [tool.poetry.dependencies]
+ fastapi = {git = "git@github.com:tiangolo/fastapi.git", tag="1.2.3"}
+ werkzeug = ">=0.14"
+ `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('fastapi');
       expect(res[0].packageName).toBe('tiangolo/fastapi');
@@ -191,8 +194,11 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('parses github dependencies tags on http urls', async () => {
-      const content =
-        '[tool.poetry.dependencies]\r\nfastapi = {git = "https://github.com/tiangolo/fastapi.git", tag="1.2.3"}\r\nwerkzeug = ">=0.14"';
+      const content = `
+ [tool.poetry.dependencies]
+ fastapi = {git = "https://github.com/tiangolo/fastapi.git", tag="1.2.3"}
+ werkzeug = ">=0.14"
+ `;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('fastapi');
       expect(res[0].packageName).toBe('tiangolo/fastapi');
@@ -223,8 +229,11 @@ describe('modules/manager/poetry/extract', () => {
     });
 
     it('skips git dependencies on tags that are not in github', async () => {
-      const content =
-        '[tool.poetry.dependencies]\r\naws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}\r\nwerkzeug = ">=0.14"';
+      const content = `
+[tool.poetry.dependencies]
+aws-sam = {git = "https://gitlab.com/gitlab-examples/aws-sam.git", tag="1.2.3"}
+nwerkzeug = ">=0.14"
+`;
       const res = (await extractPackageFile(content, filename))!.deps;
       expect(res[0].depName).toBe('aws-sam');
       expect(res[0].currentValue).toBe('1.2.3');
