@@ -53,7 +53,7 @@ export const manualChangelogUrls: Record<string, Record<string, string>> = {
     'google/cloud-sdk': 'https://cloud.google.com/sdk/docs/release-notes',
     neo4j: 'https://neo4j.com/release-notes/',
     'whitesource/renovate': 'https://github.com/whitesource/renovate-on-prem',
-  }
+  },
 };
 
 // Use this object to define manual source URLs for packages
