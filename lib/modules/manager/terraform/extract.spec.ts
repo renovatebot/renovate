@@ -7,18 +7,18 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import * as hashicorp from '../../versioning/hashicorp';
 import { extractPackageFile } from '.';
 
-const modules = Fixtures?.get('modules.tf');
-const bitbucketModules = Fixtures?.get('bitbucketModules.tf');
-const azureDevOpsModules = Fixtures?.get('azureDevOpsModules.tf');
-const providers = Fixtures?.get('providers.tf');
-const docker = Fixtures?.get('docker.tf');
-const kubernetes = Fixtures?.get('kubernetes.tf');
+const modules = Fixtures.get('modules.tf');
+const bitbucketModules = Fixtures.get('bitbucketModules.tf');
+const azureDevOpsModules = Fixtures.get('azureDevOpsModules.tf');
+const providers = Fixtures.get('providers.tf');
+const docker = Fixtures.get('docker.tf');
+const kubernetes = Fixtures.get('kubernetes.tf');
 
-const helm = Fixtures?.get('helm.tf');
-const lockedVersion = Fixtures?.get('lockedVersion.tf');
-const lockedVersionLockfile = Fixtures?.get('rangeStrategy.hcl');
-const terraformBlock = Fixtures?.get('terraformBlock.tf');
-const tfeWorkspaceBlock = Fixtures?.get('tfeWorkspace.tf');
+const helm = Fixtures.get('helm.tf');
+const lockedVersion = Fixtures.get('lockedVersion.tf');
+const lockedVersionLockfile = Fixtures.get('rangeStrategy.hcl');
+const terraformBlock = Fixtures.get('terraformBlock.tf');
+const tfeWorkspaceBlock = Fixtures.get('tfeWorkspace.tf');
 
 const adminConfig: RepoGlobalConfig = {
   // `join` fixes Windows CI
@@ -602,7 +602,6 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'helm',
           depName: undefined,
           depType: 'helm_release',
-          registryUrls: ['https://charts.helm.sh/stable'],
           skipReason: 'invalid-name',
         },
         {
@@ -629,7 +628,7 @@ describe('modules/manager/terraform/extract', () => {
           datasource: 'docker',
           depName: 'karpenter',
           depType: 'helm_release',
-          registryUrls: ['https://public.ecr.aws/karpenter'],
+          packageName: 'public.ecr.aws/karpenter/karpenter',
         },
       ]);
     });
