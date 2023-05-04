@@ -51,7 +51,7 @@ describe('workers/repository/update/pr/code-owners', () => {
         # Assigning lockfiles an owner will cause issues as merge requests to be assigned to incorrect users
         yarn.lock
 
-        # Assign each package to it's respective user
+        # Assign each package to its respective user
         #
         packages/a/ @maria
         packages/b/ @jimmy
