@@ -64,7 +64,7 @@ describe('modules/manager/bazel-module/context', () => {
         expect(ctx.currentRecord).toEqual(new RecordFragment());
       });
 
-      it('throws if it the current is not a record fragment', () => {
+      it('throws if the current is not a record fragment', () => {
         const ctx = new Ctx().startArray();
         expect(() => ctx.currentRecord).toThrow(
           new Error('Requested current record, but does not exist.')
@@ -78,7 +78,7 @@ describe('modules/manager/bazel-module/context', () => {
         expect(ctx.currentArray).toEqual(new ArrayFragment());
       });
 
-      it('throws if it the current is not a record fragment', () => {
+      it('throws if the current is not a record fragment', () => {
         const ctx = new Ctx().startRecord();
         expect(() => ctx.currentArray).toThrow(
           new Error('Requested current array, but does not exist.')
