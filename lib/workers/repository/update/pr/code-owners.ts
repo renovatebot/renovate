@@ -95,7 +95,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
           return { file, usernames: usersWithScore };
         })
 
-        // Match file again but this time only with emptyRules, this makes sure that files that have been set as having no owner remain as such
+        // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
         .map((fileMatch) => {
           const matchEmpty = emptyRules.find((rule) =>
             rule.match(fileMatch.file)
