@@ -86,7 +86,7 @@ describe('modules/manager/bazel-module/context', () => {
       });
     });
 
-    it('throws if add an attribute without a record', () => {
+    it('throws if add an attribute without a parent', () => {
       const ctx = new Ctx().startAttribute('name');
       expect(() => ctx.addString('chicken')).toThrow(
         new Error('Processing an attribute but there is no parent.')
