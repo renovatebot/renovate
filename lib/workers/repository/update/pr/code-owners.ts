@@ -67,7 +67,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       (rule) => rule.usernames.length === 0
     );
     const fileOwners =
-      // Map through all prFiles and match said file with all the rules
+      // Map through all prFiles and match said file(s) with all the rules
       prFiles
         .map<{
           file: string;
