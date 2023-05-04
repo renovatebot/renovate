@@ -56,7 +56,7 @@ function isVersionPointer(
 }
 
 function normalizeVersionPointer(versionPointer: string): string {
-  return versionPointer?.replace(regEx(/[._]/g), '-');
+  return versionPointer.replace(regEx(/[._]/g), '-');
 }
 
 interface VersionExtract {
