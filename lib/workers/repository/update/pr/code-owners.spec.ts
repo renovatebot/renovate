@@ -161,6 +161,47 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
+    it('does not require all files to match a single rule #12611', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(
+        [
+          '* @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5',
+          'server/pom.xml @reviewer-1',
+          'client/package.json @reviewer-1',
+          'client/package-lock.json @reviewer-1',
+        ].join('\n')
+      );
+      git.getBranchFiles.mockResolvedValueOnce(['server/pom.xml']);
+      const codeOwners = await codeOwnersForPr(pr);
+      expect(codeOwners).toEqual([
+        '@reviewer-1', // matched by file
+        '@reviewer-2', // matched by wildcard
+        '@reviewer-3',
+        '@reviewer-4',
+        '@reviewer-5',
+      ]);
+
+      fs.readLocalFile.mockResolvedValueOnce(
+        [
+          '* @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5',
+          'server/pom.xml @reviewer-1',
+          'client/package.json @reviewer-1',
+          'client/package-lock.json @reviewer-1',
+        ].join('\n')
+      );
+      git.getBranchFiles.mockResolvedValueOnce([
+        'client/package.json',
+        'client/package-lock.json',
+      ]);
+      const codeOwners2 = await codeOwnersForPr(pr);
+      expect(codeOwners2).toEqual([
+        '@reviewer-1', // matched by file
+        '@reviewer-2', // matched by wildcard
+        '@reviewer-3',
+        '@reviewer-4',
+        '@reviewer-5',
+      ]);
+    });
+
     it('ignores comments and leading/trailing whitespace', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         [
