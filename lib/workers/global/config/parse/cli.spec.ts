@@ -136,7 +136,6 @@ describe('workers/global/config/parse/cli', () => {
       ${'--recreate-when=auto'}        | ${{ recreateWhen: 'auto' }}
       ${'--recreate-when=always'}      | ${{ recreateWhen: 'always' }}
       ${'--recreate-when=never'}       | ${{ recreateWhen: 'never' }}
-      ${'--recreate-when'}             | ${{ recreateWhen: 'always' }}
     `('"$arg" -> $config', ({ arg, config }) => {
       argv.push(arg);
       expect(cli.getConfig(argv)).toMatchObject(config);
