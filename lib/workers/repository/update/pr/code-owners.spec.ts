@@ -161,7 +161,7 @@ describe('workers/repository/update/pr/code-owners', () => {
       });
     });
 
-    it('does not require all files to match a single rule #12611', async () => {
+    it('does not require all files to match a single rule, regression test for #12611', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
         [
           '* @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5',
