@@ -1,10 +1,12 @@
 import { query as q } from 'good-enough-parser';
+import { logger } from '../../../logger';
 import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as perlVersioning from '../../versioning/perl';
 import type { PackageDependency } from '../types';
+import { cpanfile } from './language';
 
-export interface Ctx {
+interface Ctx {
   deps: PackageDependency[];
 
   perlVersion?: string;
@@ -111,8 +113,29 @@ const onMatch = q
     return ctx;
   });
 
-export const query = q.tree<Ctx>({
+const query = q.tree<Ctx>({
   type: 'root-tree',
   maxDepth: 4,
   search: q.alt<Ctx>(perlVersionMatch, moduleMatch, onMatch),
 });
+
+export function parse(
+  content: string,
+  packageFile?: string
+): PackageDependency[] | null {
+  let parsedResult: Ctx | null = null;
+
+  try {
+    parsedResult = cpanfile.query(content, query, {
+      deps: [],
+    });
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err, packageFile }, 'cpanfile parsing error');
+  }
+
+  if (!parsedResult) {
+    return null;
+  }
+
+  return parsedResult.deps;
+}

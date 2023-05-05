@@ -4,6 +4,7 @@ import { extractPackageFile } from './extract';
 describe('modules/manager/cpanfile/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
+      expect(extractPackageFile('', 'cpanfile')).toBeNull();
       expect(extractPackageFile('nothing here', 'cpanfile')).toBeNull();
     });
 
