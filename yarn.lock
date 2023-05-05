@@ -1525,6 +1525,13 @@
   resolved "https://registry.yarnpkg.com/@breejs/later/-/later-4.1.0.tgz#9246907f46cc9e9c9af37d791ab468d98921bcc1"
   integrity sha512-QgGnZ9b7o4k0Ai1ZbTJWwZpZcFK9d+Gb+DyNt4UT9x6IEIs5HVu0iIlmgzGqN+t9MoJSpSPo9S/Mm51UtHr3JA==
 
+"@cdktf/hcl2json@0.16.1":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.16.1.tgz#c5d4c965e150d29579d6b53a9fe6c946fca7e614"
+  integrity sha512-c0AcAzpUYREmkonxai3Jjd7P0c0/TMB+ga3Ir/02MDSdyV8VQ+1CLK2nVMJJqJTsGZkxrZGVj/jlwA6coDYaqg==
+  dependencies:
+    fs-extra "^11.1.1"
+
 "@cheap-glitch/mi-cron@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cheap-glitch/mi-cron/-/mi-cron-1.0.1.tgz#111f4ce746c269aedf74533ac806881763a68f99"
@@ -5808,11 +5815,6 @@ hasha@5.2.2:
   dependencies:
     is-stream "^2.0.0"
     type-fest "^0.8.0"
-
-hcl2-parser@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/hcl2-parser/-/hcl2-parser-1.0.3.tgz#096d0ff5a3c46707ace54fcb7571317f5828ff0e"
-  integrity sha512-NQUm/BFF+2nrBfeqDhhsy4DxxiLHgkeE3FywtjFiXnjSUaio3w4Tz1MQ3vGJBUhyArzOXJ24pO7JwE5LAn7Ncg==
 
 he@1.2.0:
   version "1.2.0"
