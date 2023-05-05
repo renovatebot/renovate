@@ -1,10 +1,10 @@
 import { join } from 'upath';
+import { updateArtifacts } from '..';
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs, mocked } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
-import { updateArtifacts } from '../index';
 import { TerraformProviderHash } from './hash';
 
 // auto-mock fs
@@ -34,7 +34,6 @@ const mockGetPkgReleases = getPkgReleases as jest.MockedFunction<
 describe('modules/manager/terraform/lockfile/index', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 

@@ -9,21 +9,21 @@ const input01PMContent = readFixture('inputs/01-package-manager.json');
 
 describe('modules/manager/npm/update/dependency/index', () => {
   describe('.updateDependency(fileContent, depType, depName, newValue)', () => {
-    it('replaces a dependency value', () => {
+    it('replaces a dependency value', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'cheerio',
         newValue: '0.22.1',
       };
       const outputContent = readFixture('outputs/011.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('replaces a github dependency value', () => {
+    it('replaces a github dependency value', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'gulp',
@@ -36,7 +36,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           gulp: 'gulpjs/gulp#v4.0.0-alpha.2',
         },
       });
-      const res = npmUpdater.updateDependency({
+      const res = await npmUpdater.updateDependency({
         fileContent: input,
         upgrade,
       });
@@ -46,7 +46,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
     });
 
-    it('replaces a npm package alias', () => {
+    it('replaces a npm package alias', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'hapi',
@@ -60,7 +60,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           hapi: 'npm:@hapi/hapi@18.3.0',
         },
       });
-      const res = npmUpdater.updateDependency({
+      const res = await npmUpdater.updateDependency({
         fileContent: input,
         upgrade,
       });
@@ -70,7 +70,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
     });
 
-    it('replaces a github short hash', () => {
+    it('replaces a github short hash', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'gulp',
@@ -83,7 +83,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           gulp: 'gulpjs/gulp#abcdef7',
         },
       });
-      const res = npmUpdater.updateDependency({
+      const res = await npmUpdater.updateDependency({
         fileContent: input,
         upgrade,
       });
@@ -93,7 +93,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
       });
     });
 
-    it('replaces a github fully specified version', () => {
+    it('replaces a github fully specified version', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'n',
@@ -106,7 +106,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
           n: 'git+https://github.com/owner/n#v1.0.0',
         },
       });
-      const res = npmUpdater.updateDependency({
+      const res = await npmUpdater.updateDependency({
         fileContent: input,
         upgrade,
       });
@@ -114,13 +114,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(res).toContain('v1.1.0');
     });
 
-    it('updates resolutions too', () => {
+    it('updates resolutions too', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newValue: '1.22.0',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
@@ -128,13 +128,13 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent!).resolutions.config).toBe('1.22.0');
     });
 
-    it('updates glob resolutions', () => {
+    it('updates glob resolutions', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newValue: '1.22.0',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01GlobContent,
         upgrade,
       });
@@ -142,14 +142,14 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent!).resolutions['**/config']).toBe('1.22.0');
     });
 
-    it('updates glob resolutions without dep', () => {
+    it('updates glob resolutions without dep', async () => {
       const upgrade = {
         depType: 'resolutions',
         depName: '@angular/cli',
         managerData: { key: '**/@angular/cli' },
         newValue: '8.1.0',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
@@ -158,95 +158,95 @@ describe('modules/manager/npm/update/dependency/index', () => {
       );
     });
 
-    it('replaces only the first instance of a value', () => {
+    it('replaces only the first instance of a value', async () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
         newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/012.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('replaces only the second instance of a value', () => {
+    it('replaces only the second instance of a value', async () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-sanitize',
         newValue: '1.6.1',
       };
       const outputContent = readFixture('outputs/013.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('handles the case where the desired version is already supported', () => {
+    it('handles the case where the desired version is already supported', async () => {
       const upgrade = {
         depType: 'devDependencies',
         depName: 'angular-touch',
         newValue: '1.5.8',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
       expect(testContent).toEqual(input01Content);
     });
 
-    it('returns null if throws error', () => {
+    it('returns null if throws error', async () => {
       const upgrade = {
         depType: 'blah',
         depName: 'angular-touch-not',
         newValue: '1.5.8',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
       expect(testContent).toBeNull();
     });
 
-    it('updates packageManager', () => {
+    it('updates packageManager', async () => {
       const upgrade = {
         depType: 'packageManager',
         depName: 'yarn',
         newValue: '3.1.0',
       };
       const outputContent = readFixture('outputs/014.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01PMContent,
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('returns null if empty file', () => {
+    it('returns null if empty file', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'angular-touch-not',
         newValue: '1.5.8',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: null as never,
         upgrade,
       });
       expect(testContent).toBeNull();
     });
 
-    it('replaces package', () => {
+    it('replaces package', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newName: 'abc',
         newValue: '2.0.0',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01Content,
         upgrade,
       });
@@ -254,14 +254,14 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent!).dependencies.abc).toBe('2.0.0');
     });
 
-    it('replaces glob package resolutions', () => {
+    it('replaces glob package resolutions', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'config',
         newName: 'abc',
         newValue: '2.0.0',
       };
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: input01GlobContent,
         upgrade,
       });
@@ -269,35 +269,35 @@ describe('modules/manager/npm/update/dependency/index', () => {
       expect(JSON.parse(testContent!).resolutions['**/abc']).toBe('2.0.0');
     });
 
-    it('pins also the version in patch with npm protocol in resolutions', () => {
+    it('pins also the version in patch with npm protocol in resolutions', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'lodash',
         newValue: '4.17.21',
       };
       const outputContent = readFixture('outputs/patch1o.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch1.json'),
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('replaces also the version in patch with range in resolutions', () => {
+    it('replaces also the version in patch with range in resolutions', async () => {
       const upgrade = {
         depType: 'dependencies',
         depName: 'metro',
         newValue: '^0.60.0',
       };
       const outputContent = readFixture('outputs/patch2o.json');
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: readFixture('inputs/patch2.json'),
         upgrade,
       });
       expect(testContent).toEqual(outputContent);
     });
 
-    it('handles override dependency', () => {
+    it('handles override dependency', async () => {
       const upgrade = {
         depType: 'overrides',
         depName: 'typescript',
@@ -313,14 +313,14 @@ describe('modules/manager/npm/update/dependency/index', () => {
           "typescript": "0.60.0"
         }
       }`;
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         upgrade,
       });
       expect(testContent).toEqual(expected);
     });
 
-    it('handles override dependency object', () => {
+    it('handles override dependency object', async () => {
       const upgrade = {
         depType: 'overrides',
         depName: 'typescript',
@@ -341,7 +341,7 @@ describe('modules/manager/npm/update/dependency/index', () => {
          }
         }
       }`;
-      const testContent = npmUpdater.updateDependency({
+      const testContent = await npmUpdater.updateDependency({
         fileContent: overrideDependencies,
         upgrade,
       });

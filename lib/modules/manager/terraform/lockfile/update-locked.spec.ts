@@ -1,6 +1,6 @@
+import { updateLockedDependency } from '..';
 import { Fixtures } from '../../../../../test/fixtures';
 import type { UpdateLockedConfig } from '../../types';
-import { updateLockedDependency } from './update-locked';
 import * as utilFns from './util';
 
 const lockFile = 'terraform.hcl';
@@ -8,7 +8,7 @@ const lockFile = 'terraform.hcl';
 const lockFileContent = Fixtures.get('validLockfile.hcl');
 
 describe('modules/manager/terraform/lockfile/update-locked', () => {
-  it('detects already updated', () => {
+  it('detects already updated', async () => {
     const config: UpdateLockedConfig = {
       packageFile: 'main.tf',
       lockFile,
@@ -17,10 +17,12 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
       newVersion: '3.0.0',
       currentVersion: '3.0.0',
     };
-    expect(updateLockedDependency(config).status).toBe('already-updated');
+    expect((await updateLockedDependency(config)).status).toBe(
+      'already-updated'
+    );
   });
 
-  it('returns unsupported if dependency is undefined', () => {
+  it('returns unsupported if dependency is undefined', async () => {
     const config: UpdateLockedConfig = {
       packageFile: 'main.tf',
       lockFile,
@@ -29,10 +31,10 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
       newVersion: '3.1.0',
       currentVersion: '3.0.0',
     };
-    expect(updateLockedDependency(config).status).toBe('unsupported');
+    expect((await updateLockedDependency(config)).status).toBe('unsupported');
   });
 
-  it('returns unsupported if lockfileContent is undefined', () => {
+  it('returns unsupported if lockfileContent is undefined', async () => {
     const config: UpdateLockedConfig = {
       packageFile: 'main.tf',
       lockFile,
@@ -40,10 +42,10 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
       newVersion: '3.1.0',
       currentVersion: '3.0.0',
     };
-    expect(updateLockedDependency(config).status).toBe('unsupported');
+    expect((await updateLockedDependency(config)).status).toBe('unsupported');
   });
 
-  it('returns unsupported', () => {
+  it('returns unsupported', async () => {
     const config: UpdateLockedConfig = {
       packageFile: 'main.tf',
       lockFile,
@@ -52,10 +54,10 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
       newVersion: '3.1.0',
       currentVersion: '3.0.0',
     };
-    expect(updateLockedDependency(config).status).toBe('unsupported');
+    expect((await updateLockedDependency(config)).status).toBe('unsupported');
   });
 
-  it('returns update-failed for errors', () => {
+  it('returns update-failed for errors', async () => {
     const config: UpdateLockedConfig = {
       packageFile: 'main.tf',
       lockFile,
@@ -67,6 +69,6 @@ describe('modules/manager/terraform/lockfile/update-locked', () => {
     jest
       .spyOn(utilFns, 'extractLocks')
       .mockReturnValueOnce(new Error() as never);
-    expect(updateLockedDependency(config).status).toBe('update-failed');
+    expect((await updateLockedDependency(config)).status).toBe('update-failed');
   });
 });

@@ -17,7 +17,7 @@ describe('config/options/index', () => {
   it('supportedManagers should have valid names', () => {
     jest.unmock('../../modules/manager');
     const opts = getOptions();
-    const managerList = Array.from(manager.getManagers().keys());
+    const managerList = manager.getManagerList();
 
     opts
       .filter((option) => option.supportedManagers)

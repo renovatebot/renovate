@@ -8,8 +8,8 @@ describe('modules/manager/npm/update/package-version/index', () => {
       dependencies: { chalk: '2.4.2' },
     });
 
-    it('mirrors', () => {
-      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+    it('mirrors', async () => {
+      const { bumpedContent } = await npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
         'mirror:chalk'
@@ -18,8 +18,8 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).not.toEqual(content);
     });
 
-    it('aborts mirror', () => {
-      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+    it('aborts mirror', async () => {
+      const { bumpedContent } = await npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
         'mirror:a'
@@ -27,8 +27,8 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).toEqual(content);
     });
 
-    it('increments', () => {
-      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+    it('increments', async () => {
+      const { bumpedContent } = await npmUpdater.bumpPackageVersion(
         content,
         '0.0.2',
         'patch'
@@ -37,8 +37,8 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).not.toEqual(content);
     });
 
-    it('no ops', () => {
-      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+    it('no ops', async () => {
+      const { bumpedContent } = await npmUpdater.bumpPackageVersion(
         content,
         '0.0.1',
         'patch'
@@ -46,8 +46,8 @@ describe('modules/manager/npm/update/package-version/index', () => {
       expect(bumpedContent).toEqual(content);
     });
 
-    it('updates', () => {
-      const { bumpedContent } = npmUpdater.bumpPackageVersion(
+    it('updates', async () => {
+      const { bumpedContent } = await npmUpdater.bumpPackageVersion(
         content,
         '0.0.1',
         'minor'
