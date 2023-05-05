@@ -3,9 +3,9 @@ import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { ValueFragment } from './fragments';
-import { StarlarkBoolean } from './starlark';
+import * as starlark from './starlark';
 
-const booleanValuesRegex = regEx(`^${StarlarkBoolean.stringValues.join('|')}$`);
+const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
 const supportedRules = ['bazel_dep'];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
@@ -51,7 +51,7 @@ const query = q.tree<Ctx>({
   search: rule,
 });
 
-const starlark = lang.createLang('starlark');
+const starlarkLang = lang.createLang('starlark');
 
 export function parse(
   input: string,
@@ -59,7 +59,7 @@ export function parse(
 ): ValueFragment[] | null {
   let result: ValueFragment[] | null = null;
   try {
-    const parsedResult = starlark.query(input, query, new Ctx());
+    const parsedResult = starlarkLang.query(input, query, new Ctx());
     if (parsedResult) {
       // The parsedResult and its associated objects are missing their types.
       result = Ctx.as(parsedResult).results;

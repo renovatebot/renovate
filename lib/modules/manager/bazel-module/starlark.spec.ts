@@ -1,13 +1,11 @@
-import { StarlarkBoolean } from './starlark';
+import * as starlark from './starlark';
 
 describe('modules/manager/bazel-module/starlark', () => {
-  describe('StarlarkBoolean', () => {
-    it('asBoolean', () => {
-      expect(StarlarkBoolean.asBoolean('True')).toBe(true);
-      expect(StarlarkBoolean.asBoolean('False')).toBe(false);
-      expect(() => StarlarkBoolean.asBoolean('bad')).toThrow(
-        new Error('Invalid Starlark boolean string: bad')
-      );
-    });
+  it('asBoolean', () => {
+    expect(starlark.asBoolean('True')).toBe(true);
+    expect(starlark.asBoolean('False')).toBe(false);
+    expect(() => starlark.asBoolean('bad')).toThrow(
+      new Error('Invalid Starlark boolean string: bad')
+    );
   });
 });

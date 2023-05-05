@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
-import { StarlarkBoolean } from './starlark';
+import * as starlark from './starlark';
 
 // Fragment Schemas
 
@@ -93,8 +93,7 @@ export class BooleanFragment implements FragmentCompatible {
   readonly isComplete = true;
   readonly value: boolean;
   constructor(input: boolean | string) {
-    this.value =
-      typeof input === 'string' ? StarlarkBoolean.asBoolean(input) : input;
+    this.value = typeof input === 'string' ? starlark.asBoolean(input) : input;
   }
 }
 
