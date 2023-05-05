@@ -121,7 +121,7 @@ const query = q.tree<Ctx>({
 export function parse(
   content: string,
   packageFile?: string
-): PackageDependency[] | null {
+): Pick<Ctx, 'deps' | 'perlVersion'> | null {
   const parsedResult = cpanfile.query(content, query, {
     deps: [],
   });
@@ -130,5 +130,5 @@ export function parse(
     return null;
   }
 
-  return parsedResult.deps;
+  return parsedResult;
 }

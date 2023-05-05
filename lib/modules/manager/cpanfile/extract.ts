@@ -5,10 +5,12 @@ export function extractPackageFile(
   content: string,
   packageFile?: string
 ): PackageFileContent | null {
-  const deps = parse(content, packageFile);
-  if (deps?.length) {
-    return { deps };
-  } else {
+  const result = parse(content, packageFile);
+  if (!result?.deps.length) {
     return null;
   }
+
+  const { deps, perlVersion } = result;
+  const extractedConstraints = perlVersion ? { perl: perlVersion } : undefined;
+  return { deps, extractedConstraints };
 }

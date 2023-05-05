@@ -31,6 +31,7 @@ describe('modules/manager/cpanfile/extract', () => {
               extractVersion: '^v(?<version>\\S+)',
             },
           ],
+          extractedConstraints: { perl: expected },
         });
       });
     });
