@@ -1,5 +1,4 @@
 import { query as q } from 'good-enough-parser';
-import { logger } from '../../../logger';
 import { CpanDatasource } from '../../datasource/cpan';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import * as perlVersioning from '../../versioning/perl';
@@ -123,15 +122,9 @@ export function parse(
   content: string,
   packageFile?: string
 ): PackageDependency[] | null {
-  let parsedResult: Ctx | null = null;
-
-  try {
-    parsedResult = cpanfile.query(content, query, {
-      deps: [],
-    });
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err, packageFile }, 'cpanfile parsing error');
-  }
+  const parsedResult = cpanfile.query(content, query, {
+    deps: [],
+  });
 
   if (!parsedResult) {
     return null;
