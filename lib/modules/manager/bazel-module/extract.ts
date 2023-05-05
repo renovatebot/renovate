@@ -1,6 +1,6 @@
 import type { PackageFileContent } from '../types';
 import { BazelDepRecordToPackageDependency } from './bazel-dep';
-import { instanceExists } from './filters';
+import { exists } from './filters';
 import { parse } from './parser';
 
 export function extractPackageFile(
@@ -17,7 +17,7 @@ export function extractPackageFile(
       // istanbul ignore next: cannot reach undefined without an additional rule
       return result.success ? result.data : undefined;
     })
-    .filter(instanceExists);
+    .filter(exists);
   // istanbul ignore next: cannot reach null without introducing fake rule
   return deps.length ? { deps } : null;
 }

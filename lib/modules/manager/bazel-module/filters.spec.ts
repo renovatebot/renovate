@@ -1,13 +1,13 @@
-import { instanceExists } from './filters';
+import { exists } from './filters';
 
 describe('modules/manager/bazel-module/filters', () => {
-  it('instanceExists', () => {
+  it('exists', () => {
     const array: Array<string | null | undefined> = [
       'first',
       null,
       'second',
       undefined,
     ];
-    expect(array.filter(instanceExists)).toEqual(['first', 'second']);
+    expect(array.filter(exists)).toEqual(['first', 'second']);
   });
 });
