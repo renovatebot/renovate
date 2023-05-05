@@ -14,11 +14,23 @@ Common application logic for Renovate, not specific to particular managers, usua
 
 The manager's `index.ts` file supports the following values/functions:
 
-- extractPackageFile
-- extractAllPackageFiles
-- getRangeStrategy (optional)
-- language (optional)
-- supportsLockFileMaintenance (optional)
+| Value/function                | Optional | Async |
+| ----------------------------- | -------- | ----- |
+| `bumpPackageVersion`          | yes      |       |
+| `extractPackageFile`          |          | yes   |
+| `extractAllPackageFiles`      | yes      | yes   |
+| `getRangeStrategy`            | yes      |       |
+| `language`                    | yes      |       |
+| `supportsLockFileMaintenance` | yes      |       |
+| `updateArtifacts`             | yes      | yes   |
+| `updateDependency`            | yes      |       |
+| `updateLockedDependency`      | yes      |       |
+
+### `bumpPackageVersion` (optional)
+
+Use this function to allow version bumps of updated packages.
+For example, to increase the version of a Maven module if a package has been updated.
+Another example would be to bump the Helm chart version, if a subchart version has been updated.
 
 ### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
@@ -67,3 +79,26 @@ This is used when more than one package manager shares settings from a common la
 ### `supportsLockFileMaintenance` (optional)
 
 Set to true if this package manager needs to update lock files in addition to package files.
+
+### `updateArtifacts` (async, optional)
+
+Use `updateArtifacts` to run binaries that in turn will update files.
+`updateArtifacts` is often used to indirectly update lock files.
+
+To _directly_ update dependencies in lock files: use `updateLockedDependency` instead.
+
+`updateArtifacts` gets triggered:
+
+- after a dependency update (for a package file), or
+- during `lockfileMaintenance`
+
+### `updateDependency` (optional)
+
+Use `updateDependency` if _both_ conditions apply:
+
+- the manager can't be updated to use the standard replacing mechanism
+- a custom replacement has to be provided
+
+### `updateLockedDependency` (optional)
+
+Use `updateLockedDependency` to directly update dependencies in lock files.

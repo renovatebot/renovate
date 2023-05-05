@@ -1,4 +1,4 @@
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { logger } from '../../../../logger';
 
 export function matchesAnyPattern(val: string, patterns: string[]): boolean {

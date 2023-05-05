@@ -1,6 +1,6 @@
 // TODO: types (#7154)
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { GlobalConfig } from '../../../../config/global';
 import {

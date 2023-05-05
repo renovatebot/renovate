@@ -20,6 +20,7 @@ describe('workers/repository/onboarding/branch/check', () => {
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
+    onboarding: true,
   });
 
   it('skips normal onboarding check if onboardingCache is valid', async () => {
