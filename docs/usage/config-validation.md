@@ -10,7 +10,6 @@ All [`renovate` distributions](getting-started/running.md#available-distribution
 The validator program checks files passed as CLI arguments.
 If no argument is given, all [default locations](../configuration-options.md) (if files exist) and the `RENOVATE_CONFIG_FILE` environment variable are checked.
 
-
 ```shell-session
 $ npm install --global renovate
 added 750 packages, and audited 751 packages in 51s
