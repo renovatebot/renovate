@@ -119,7 +119,7 @@ describe('workers/repository/update/branch/get-updated', () => {
         packageFile: 'package.json',
         manager: 'npm',
       } as never);
-      npm.updateDependency.mockReturnValue('some new content');
+      npm.updateDependency.mockResolvedValue('some new content');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
@@ -468,8 +468,10 @@ describe('workers/repository/update/branch/get-updated', () => {
         bumpVersion: 'patch',
         manager: 'npm',
       });
-      npm.updateDependency.mockReturnValue('old version');
-      npm.bumpPackageVersion.mockReturnValue({ bumpedContent: 'new version' });
+      npm.updateDependency.mockResolvedValue('old version');
+      npm.bumpPackageVersion.mockResolvedValue({
+        bumpedContent: 'new version',
+      });
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot({
         updatedPackageFiles: [
