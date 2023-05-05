@@ -1525,6 +1525,13 @@
   resolved "https://registry.yarnpkg.com/@breejs/later/-/later-4.1.0.tgz#9246907f46cc9e9c9af37d791ab468d98921bcc1"
   integrity sha512-QgGnZ9b7o4k0Ai1ZbTJWwZpZcFK9d+Gb+DyNt4UT9x6IEIs5HVu0iIlmgzGqN+t9MoJSpSPo9S/Mm51UtHr3JA==
 
+"@cdktf/hcl2json@0.16.1":
+  version "0.16.1"
+  resolved "https://registry.yarnpkg.com/@cdktf/hcl2json/-/hcl2json-0.16.1.tgz#c5d4c965e150d29579d6b53a9fe6c946fca7e614"
+  integrity sha512-c0AcAzpUYREmkonxai3Jjd7P0c0/TMB+ga3Ir/02MDSdyV8VQ+1CLK2nVMJJqJTsGZkxrZGVj/jlwA6coDYaqg==
+  dependencies:
+    fs-extra "^11.1.1"
+
 "@cheap-glitch/mi-cron@1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@cheap-glitch/mi-cron/-/mi-cron-1.0.1.tgz#111f4ce746c269aedf74533ac806881763a68f99"
@@ -2448,10 +2455,10 @@
   resolved "https://registry.yarnpkg.com/@redis/bloom/-/bloom-1.2.0.tgz#d3fd6d3c0af3ef92f26767b56414a370c7b63b71"
   integrity sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==
 
-"@redis/client@1.5.6":
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.6.tgz#869cc65718d7d5493ef655a71dc40f3bc64a1b28"
-  integrity sha512-dFD1S6je+A47Lj22jN/upVU2fj4huR7S9APd7/ziUXsIXDL+11GPYti4Suv5y8FuXaN+0ZG4JF+y1houEJ7ToA==
+"@redis/client@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.7.tgz#92cc5c98c76f189e37d24f0e1e17e104c6af17d4"
+  integrity sha512-gaOBOuJPjK5fGtxSseaKgSvjiZXQCdLlGg9WYQst+/GRUjmXaiB5kVkeQMRtPc7Q2t93XZcJfBMSwzs/XS9UZw==
   dependencies:
     cluster-key-slot "1.1.2"
     generic-pool "3.9.0"
@@ -5809,11 +5816,6 @@ hasha@5.2.2:
     is-stream "^2.0.0"
     type-fest "^0.8.0"
 
-hcl2-parser@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/hcl2-parser/-/hcl2-parser-1.0.3.tgz#096d0ff5a3c46707ace54fcb7571317f5828ff0e"
-  integrity sha512-NQUm/BFF+2nrBfeqDhhsy4DxxiLHgkeE3FywtjFiXnjSUaio3w4Tz1MQ3vGJBUhyArzOXJ24pO7JwE5LAn7Ncg==
-
 he@1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
@@ -8969,13 +8971,13 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@4.6.5:
-  version "4.6.5"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.5.tgz#f32fbde44429e96f562bb0c9b1db0143ab8cfa4f"
-  integrity sha512-O0OWA36gDQbswOdUuAhRL6mTZpHFN525HlgZgDaVNgCJIAZR3ya06NTESb0R+TUZ+BFaDpz6NnnVvoMx9meUFg==
+redis@4.6.6:
+  version "4.6.6"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.6.tgz#46d4f2d149d1634d6ef53db5747412a0ef7974ec"
+  integrity sha512-aLs2fuBFV/VJ28oLBqYykfnhGGkFxvx0HdCEBYdJ99FFbSEMZ7c1nVKwR6ZRv+7bb7JnC0mmCzaqu8frgOYhpA==
   dependencies:
     "@redis/bloom" "1.2.0"
-    "@redis/client" "1.5.6"
+    "@redis/client" "1.5.7"
     "@redis/graph" "1.1.0"
     "@redis/json" "1.0.4"
     "@redis/search" "1.1.2"
