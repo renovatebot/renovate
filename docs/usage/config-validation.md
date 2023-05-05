@@ -1,6 +1,6 @@
 ---
 title: Config Validation
-description: Validation Renovate configuration files
+description: How to validate Renovate's configuration.
 ---
 
 # Config Validation
