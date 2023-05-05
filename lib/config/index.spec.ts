@@ -96,7 +96,6 @@ describe('config/index', () => {
       const config = configParser.getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         ['fileMatch', ['(^|/)package\\.json$']],
-        ['rollbackPrs', true],
       ]);
       expect(
         configParser.getManagerConfig(parentConfig, 'html')
