@@ -2448,10 +2448,10 @@
   resolved "https://registry.yarnpkg.com/@redis/bloom/-/bloom-1.2.0.tgz#d3fd6d3c0af3ef92f26767b56414a370c7b63b71"
   integrity sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg==
 
-"@redis/client@1.5.6":
-  version "1.5.6"
-  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.6.tgz#869cc65718d7d5493ef655a71dc40f3bc64a1b28"
-  integrity sha512-dFD1S6je+A47Lj22jN/upVU2fj4huR7S9APd7/ziUXsIXDL+11GPYti4Suv5y8FuXaN+0ZG4JF+y1houEJ7ToA==
+"@redis/client@1.5.7":
+  version "1.5.7"
+  resolved "https://registry.yarnpkg.com/@redis/client/-/client-1.5.7.tgz#92cc5c98c76f189e37d24f0e1e17e104c6af17d4"
+  integrity sha512-gaOBOuJPjK5fGtxSseaKgSvjiZXQCdLlGg9WYQst+/GRUjmXaiB5kVkeQMRtPc7Q2t93XZcJfBMSwzs/XS9UZw==
   dependencies:
     cluster-key-slot "1.1.2"
     generic-pool "3.9.0"
@@ -3884,21 +3884,20 @@ bunyan@1.8.15:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@17.0.5:
-  version "17.0.5"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.0.5.tgz#6dbec26c11f1f6a2b558bc11ed3316577c339ebc"
-  integrity sha512-Y/PRQevNSsjAPWykl9aeGz8Pr+OI6BYM9fYDNMvOkuUiG9IhG4LEmaYrZZZvioMUEQ+cBCxT0v8wrnCURccyKA==
+cacache@17.1.0:
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.1.0.tgz#b7286ef941dafe55b461cdcdceda71cacc1eb98d"
+  integrity sha512-hXpFU+Z3AfVmNuiLve1qxWHMq0RSIt5gjCKAHi/M6DktwFwDdAXAtunl1i4WSKaaVcU9IsRvXFg42jTHigcC6Q==
   dependencies:
     "@npmcli/fs" "^3.1.0"
     fs-minipass "^3.0.0"
-    glob "^9.3.1"
+    glob "^10.2.2"
     lru-cache "^7.7.1"
-    minipass "^4.0.0"
+    minipass "^5.0.0"
     minipass-collect "^1.0.2"
     minipass-flush "^1.0.5"
     minipass-pipeline "^1.2.4"
     p-map "^4.0.0"
-    promise-inflight "^1.0.1"
     ssri "^10.0.0"
     tar "^6.1.11"
     unique-filename "^3.0.0"
@@ -5601,7 +5600,7 @@ glob@^8.0.1:
     minimatch "^5.0.1"
     once "^1.3.0"
 
-glob@^9.3.1, glob@^9.3.2:
+glob@^9.3.2:
   version "9.3.5"
   resolved "https://registry.yarnpkg.com/glob/-/glob-9.3.5.tgz#ca2ed8ca452781a3009685607fdf025a899dfe21"
   integrity sha512-e1LleDykUz2Iu+MTYdkSsuWX8lvAjAcs0Xef0lNIu0S2wOAzuTxCJtcd9S3cijlwYF18EsU3rzb8jPVobxDh9Q==
@@ -7846,10 +7845,10 @@ nise@^5.1.2:
     just-extend "^4.0.2"
     path-to-regexp "^1.7.0"
 
-nock@13.3.0:
-  version "13.3.0"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-13.3.0.tgz#b13069c1a03f1ad63120f994b04bfd2556925768"
-  integrity sha512-HHqYQ6mBeiMc+N038w8LkMpDCRquCHWeNmN3v6645P3NhN2+qXOBqvPqo7Rt1VyCMzKhJ733wZqw5B7cQVFNPg==
+nock@13.3.1:
+  version "13.3.1"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-13.3.1.tgz#f22d4d661f7a05ebd9368edae1b5dc0a62d758fc"
+  integrity sha512-vHnopocZuI93p2ccivFyGuUfzjq2fxNyNurp7816mlT5V5HF4SzXu8lvLrVzBbNqzs+ODooZ6OksuSUNM7Njkw==
   dependencies:
     debug "^4.1.0"
     json-stringify-safe "^5.0.1"
@@ -8970,13 +8969,13 @@ redeyed@~2.1.0:
   dependencies:
     esprima "~4.0.0"
 
-redis@4.6.5:
-  version "4.6.5"
-  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.5.tgz#f32fbde44429e96f562bb0c9b1db0143ab8cfa4f"
-  integrity sha512-O0OWA36gDQbswOdUuAhRL6mTZpHFN525HlgZgDaVNgCJIAZR3ya06NTESb0R+TUZ+BFaDpz6NnnVvoMx9meUFg==
+redis@4.6.6:
+  version "4.6.6"
+  resolved "https://registry.yarnpkg.com/redis/-/redis-4.6.6.tgz#46d4f2d149d1634d6ef53db5747412a0ef7974ec"
+  integrity sha512-aLs2fuBFV/VJ28oLBqYykfnhGGkFxvx0HdCEBYdJ99FFbSEMZ7c1nVKwR6ZRv+7bb7JnC0mmCzaqu8frgOYhpA==
   dependencies:
     "@redis/bloom" "1.2.0"
-    "@redis/client" "1.5.6"
+    "@redis/client" "1.5.7"
     "@redis/graph" "1.1.0"
     "@redis/json" "1.0.4"
     "@redis/search" "1.1.2"
