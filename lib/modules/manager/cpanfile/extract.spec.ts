@@ -260,8 +260,7 @@ describe('modules/manager/cpanfile/extract', () => {
       `('$shortcut', ({ shortcut, phase }) => {
         expect(
           extractPackageFile(
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            `${shortcut} 'Capture::Tiny', '0.12';`,
+            `${shortcut as string} 'Capture::Tiny', '0.12';`,
             'cpanfile'
           )
         ).toEqual({
