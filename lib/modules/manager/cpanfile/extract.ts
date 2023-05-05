@@ -5,7 +5,7 @@ export function extractPackageFile(
   content: string,
   packageFile?: string
 ): PackageFileContent | null {
-  const result = parse(content, packageFile);
+  const result = parse(content);
   if (!result?.deps.length) {
     return null;
   }
