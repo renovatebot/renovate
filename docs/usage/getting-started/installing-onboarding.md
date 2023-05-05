@@ -136,7 +136,6 @@ If you want to make config edits directly, follow these steps:
 1. [Validate your config](../config-validation.md)
 1. If the improved config passes the validation, merge the branch into your mainline branch
 
-
 ### Nuke config and re-onboard
 
 Perhaps you really liked the interactive onboarding PR and want to use it again.
