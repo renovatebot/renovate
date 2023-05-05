@@ -1709,7 +1709,6 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [],
         })
       );
-
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -2191,7 +2190,6 @@ describe('workers/repository/update/branch/index', () => {
           artifactErrors: [{}],
         })
       );
-
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [],
