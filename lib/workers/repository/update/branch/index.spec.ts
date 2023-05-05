@@ -1709,6 +1709,13 @@ describe('workers/repository/update/branch/index', () => {
           updatedArtifacts: [],
         })
       );
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce(
+        partial<PackageFilesResult>({
+          updatedPackageFiles: [updatedPackageFile],
+          artifactErrors: [],
+          updatedArtifacts: [],
+        })
+      );
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [
@@ -2184,12 +2191,10 @@ describe('workers/repository/update/branch/index', () => {
     });
 
     it('continues branch, skips automerge if there are artifact errors', async () => {
-      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce(
-        partial<PackageFilesResult>({
-          updatedPackageFiles: [partial<FileChange>()],
-          artifactErrors: [{}],
-        })
-      );
+      jest.spyOn(getUpdated, 'getUpdatedPackageFiles').mockResolvedValueOnce({
+        updatedPackageFiles: [partial<FileChange>({})],
+        artifactErrors: [{}],
+      } as PackageFilesResult);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
         updatedArtifacts: [],
