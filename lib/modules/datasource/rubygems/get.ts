@@ -1,4 +1,5 @@
 import { Marshal } from '@qnighy/marshal';
+import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
@@ -48,14 +49,39 @@ const GemVersions = LooseArray(
     .object({
       number: z.string(),
       created_at: z.string(),
+      platform: z.string().nullable().catch(null),
       ruby_version: z.string().nullable().catch(null),
       rubygems_version: z.string().nullable().catch(null),
     })
     .transform(
-      ({ number: version, created_at: releaseTimestamp }): Release => ({
-        version,
-        releaseTimestamp,
-      })
+      ({
+        number: version,
+        created_at: releaseTimestamp,
+        platform: rubyPlatform,
+        ruby_version: rubyVersion,
+        rubygems_version: rubygemsVersion,
+      }): Release => {
+        const result: Release = { version, releaseTimestamp };
+        const constraints: Record<string, string[]> = {};
+
+        if (rubyPlatform) {
+          constraints.rubyPlatform = [rubyPlatform];
+        }
+
+        if (rubyVersion) {
+          constraints.rubyVersion = [rubyVersion];
+        }
+
+        if (rubygemsVersion) {
+          constraints.rubygemsVersion = [rubygemsVersion];
+        }
+
+        if (!is.emptyObject(constraints)) {
+          result.constraints = constraints;
+        }
+
+        return result;
+      }
     )
 );
 type GemVersions = z.infer<typeof GemVersions>;
@@ -114,7 +140,7 @@ export class InternalRubyGemsDatasource extends Datasource {
   async fetchGemVersions(
     registryUrl: string,
     packageName: string
-  ): Promise<GemVersions> {
+  ): Promise<GemVersions | null> {
     try {
       const { body } = await this.http.getJson(
         joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
@@ -127,7 +153,7 @@ export class InternalRubyGemsDatasource extends Datasource {
           { registry: registryUrl },
           'versions endpoint returns error - falling back to info endpoint'
         );
-        return [];
+        return null;
       } else {
         throw err;
       }
@@ -153,7 +179,7 @@ export class InternalRubyGemsDatasource extends Datasource {
 
     let releases: Release[] | null = null;
     const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
-    if (gemVersions.length > 0) {
+    if (gemVersions?.length) {
       releases = gemVersions;
     } else if (info.version) {
       releases = [{ version: info.version }];
