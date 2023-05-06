@@ -1,11 +1,10 @@
 import detectIndent from 'detect-indent';
 import { Fixtures } from '../../../../../test/fixtures';
-import { mockedFunction } from '../../../../../test/util';
+import { mockedFunction, scm } from '../../../../../test/util';
 
 import { migrateConfig } from '../../../../config/migration';
 import { logger } from '../../../../logger';
 import { readLocalFile } from '../../../../util/fs';
-import { getFileList } from '../../../../util/git';
 import { detectRepoFileConfig } from '../../init/merge';
 import { MigratedDataFactory } from './migrated-data';
 
@@ -141,7 +140,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
     });
 
     beforeEach(() => {
-      mockedFunction(getFileList).mockResolvedValue([]);
+      mockedFunction(scm.getFileList).mockResolvedValue([]);
     });
 
     it('does not format when no prettier config is present', async () => {
@@ -173,7 +172,7 @@ describe('workers/repository/config-migration/branch/migrated-data', () => {
 
     it('formats when prettier config file is found', async () => {
       const formatted = formattedMigratedData.content;
-      mockedFunction(getFileList).mockResolvedValue(['.prettierrc']);
+      mockedFunction(scm.getFileList).mockResolvedValue(['.prettierrc']);
       await MigratedDataFactory.getAsync();
       await expect(
         MigratedDataFactory.applyPrettierFormatting(migratedData)
