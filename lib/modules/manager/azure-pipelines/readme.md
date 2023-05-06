@@ -27,7 +27,7 @@ To use the standard convention for Azure Pipelines, add:
 }
 ```
 
-Renovate now updates container and repository resources from the `resources` block, plus tasks from `steps` blocks.    
+Renovate now updates container and repository resources from the `resources` block, plus tasks from `steps` blocks.
 
 For example:
 
