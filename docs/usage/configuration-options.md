@@ -1205,7 +1205,7 @@ To match specific ports you have to add a protocol to `matchHost`:
 
 <!-- prettier-ignore -->
 !!! warning
-    Using `matchHost` without a protocol will lead to a behaviour as there is no `matchHost` configuration at all.
+    Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
 
 <!-- prettier-ignore -->
 !!! note
