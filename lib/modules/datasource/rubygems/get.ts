@@ -57,23 +57,23 @@ const GemVersions = LooseArray(
       ({
         number: version,
         created_at: releaseTimestamp,
-        platform: rubyPlatform,
+        platform,
         ruby_version: rubyVersion,
         rubygems_version: rubygemsVersion,
       }): Release => {
         const result: Release = { version, releaseTimestamp };
         const constraints: Record<string, string[]> = {};
 
-        if (rubyPlatform) {
-          constraints.rubyPlatform = [rubyPlatform];
+        if (platform) {
+          constraints.platform = [platform];
         }
 
         if (rubyVersion) {
-          constraints.rubyVersion = [rubyVersion];
+          constraints.ruby = [rubyVersion];
         }
 
         if (rubygemsVersion) {
-          constraints.rubygemsVersion = [rubygemsVersion];
+          constraints.rubygems = [rubygemsVersion];
         }
 
         if (!is.emptyObject(constraints)) {
