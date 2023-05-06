@@ -77,6 +77,7 @@ ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
+poetry 1.3.2
 pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
@@ -88,6 +89,9 @@ terraform 1.3.3
 terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
+maestro 1.24.0
+detekt 1.21.0
+ktlint 0.48.1
 dummy 1.2.3
 `
       );
@@ -318,6 +322,12 @@ dummy 1.2.3
             versioning: 'semver',
           },
           {
+            currentValue: '1.3.2',
+            datasource: 'pypi',
+            packageName: 'poetry',
+            depName: 'poetry',
+          },
+          {
             currentValue: '3.57.1',
             datasource: 'github-releases',
             packageName: 'pulumi/pulumi',
@@ -390,6 +400,26 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'ziglang/zig',
             depName: 'zig',
+          },
+          {
+            currentValue: '1.24.0',
+            datasource: 'github-releases',
+            packageName: 'mobile-dev-inc/maestro',
+            depName: 'maestro',
+            extractVersion: '^cli-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'github-releases',
+            packageName: 'detekt/detekt',
+            depName: 'detekt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.48.1',
+            datasource: 'github-releases',
+            packageName: 'pinterest/ktlint',
+            depName: 'ktlint',
           },
           {
             depName: 'dummy',

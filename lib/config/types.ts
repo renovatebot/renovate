@@ -260,6 +260,8 @@ export interface RenovateConfig
   skipInstalls?: boolean | null;
 
   constraintsFiltering?: ConstraintsFilter;
+
+  checkedBranches?: string[];
 }
 
 export interface AllConfig

@@ -122,7 +122,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         expect(platform.ensureComment).toHaveBeenCalledTimes(1);
         expect(platform.ensureComment).toHaveBeenCalledWith({
           content:
-            '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.',
+            '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.',
           topic: 'Renovate Ignore Notification',
           number: 1,
         });

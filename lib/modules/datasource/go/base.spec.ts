@@ -13,7 +13,7 @@ const hostRules = mocked(_hostRules);
 
 describe('modules/datasource/go/base', () => {
   describe('simple cases', () => {
-    test.each`
+    it.each`
       module                     | datasource          | packageName
       ${'gopkg.in/foo'}          | ${'github-tags'}    | ${'go-foo/foo'}
       ${'gopkg.in/foo/bar'}      | ${'github-tags'}    | ${'foo/bar'}
