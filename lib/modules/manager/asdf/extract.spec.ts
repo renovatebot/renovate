@@ -89,6 +89,9 @@ terraform 1.3.3
 terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
+maestro 1.24.0
+detekt 1.21.0
+ktlint 0.48.1
 dummy 1.2.3
 `
       );
@@ -397,6 +400,26 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'ziglang/zig',
             depName: 'zig',
+          },
+          {
+            currentValue: '1.24.0',
+            datasource: 'github-releases',
+            packageName: 'mobile-dev-inc/maestro',
+            depName: 'maestro',
+            extractVersion: '^cli-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'github-releases',
+            packageName: 'detekt/detekt',
+            depName: 'detekt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.48.1',
+            datasource: 'github-releases',
+            packageName: 'pinterest/ktlint',
+            depName: 'ktlint',
           },
           {
             depName: 'dummy',
