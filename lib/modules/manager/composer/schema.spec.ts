@@ -78,7 +78,7 @@ describe('modules/manager/composer/schema', () => {
         pathRepos: {
           somePath: { name: 'somePath', type: 'path', url: '/some/path' },
         },
-        registryUrls: ['https://packagist.org', 'https://wpackagist.org'],
+        registryUrls: ['https://wpackagist.org', 'https://packagist.org'],
         gitRepos: {
           someGit: {
             name: 'someGit',
