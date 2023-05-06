@@ -58,8 +58,8 @@ describe('modules/manager/composer/schema', () => {
     it('parses default values', () => {
       expect(Repos.parse(null)).toEqual({
         pathRepos: {},
-        registryUrls: ['https://packagist.org'],
         gitRepos: {},
+        registryUrls: null,
       });
     });
 

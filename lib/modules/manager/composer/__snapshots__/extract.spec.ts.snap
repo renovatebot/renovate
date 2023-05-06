@@ -16,9 +16,6 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "packagist",
       "depName": "ext-intl",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
       "skipReason": "unsupported",
     },
     {
@@ -26,279 +23,186 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.1.*",
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.2.x-dev",
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "1.0.1",
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "1.1.0",
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.3.*",
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "^1.10.0",
       "datasource": "packagist",
       "depName": "composer/composer",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
   ],
   "extractedConstraints": {
@@ -323,9 +227,6 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "packagist",
       "depName": "ext-intl",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
       "skipReason": "unsupported",
     },
     {
@@ -333,279 +234,186 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
       "datasource": "packagist",
       "depName": "symfony/assetic-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/monolog-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "symfony/swiftmailer-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.1.*",
       "datasource": "packagist",
       "depName": "symfony/symfony",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.2.2",
       "datasource": "packagist",
       "depName": "doctrine/common",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "doctrine/doctrine-fixtures-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.2.x-dev",
       "datasource": "packagist",
       "depName": "doctrine/orm",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "exercise/elastica-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "friendsofsymfony/rest-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "friendsofsymfony/user-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "fzaninotto/faker",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "1.0.1",
       "datasource": "packagist",
       "depName": "jms/di-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "jms/payment-core-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "1.1.0",
       "datasource": "packagist",
       "depName": "jms/security-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-menu-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "knplabs/knp-paginator-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "liip/imagine-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "merk/dough-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/distribution-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/framework-extra-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "sensio/generator-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "simplethings/entity-audit-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "stof/doctrine-extensions-bundle",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "dev-master",
       "datasource": "packagist",
       "depName": "twig/extensions",
       "depType": "require",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "2.3.*",
       "datasource": "packagist",
       "depName": "behat/behat",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/behat-bundle",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/mink-bundle",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/sahi-client",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "*",
       "datasource": "packagist",
       "depName": "behat/common-contexts",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
     {
       "currentValue": "^1.10.0",
       "datasource": "packagist",
       "depName": "composer/composer",
       "depType": "require-dev",
-      "registryUrls": [
-        "https://packagist.org",
-      ],
     },
   ],
   "extractedConstraints": {

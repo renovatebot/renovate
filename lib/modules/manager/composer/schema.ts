@@ -108,13 +108,13 @@ export const Repos = z
   })
   .transform((repos) => {
     let packagist = true;
-    const registryUrls: string[] = [];
+    const repoUrls: string[] = [];
     const gitRepos: Record<string, GitRepo> = {};
     const pathRepos: Record<string, PathRepo> = {};
 
     for (const repo of repos) {
       if (repo.type === 'composer') {
-        registryUrls.push(repo.url);
+        repoUrls.push(repo.url);
       } else if (repo.type === 'git') {
         gitRepos[repo.name] = repo;
       } else if (repo.type === 'path') {
@@ -124,9 +124,10 @@ export const Repos = z
       }
     }
 
-    if (packagist) {
-      registryUrls.unshift('https://packagist.org');
+    if (packagist && repoUrls.length) {
+      repoUrls.unshift('https://packagist.org');
     }
+    const registryUrls = repoUrls.length ? repoUrls : null;
 
     return { registryUrls, gitRepos, pathRepos };
   });
@@ -285,7 +286,11 @@ export const ComposerExtract = z
         }
 
         dep.datasource = PackagistDatasource.id;
-        dep.registryUrls = registryUrls;
+
+        if (registryUrls) {
+          dep.registryUrls = registryUrls;
+        }
+
         deps.push(dep);
       }
     }
