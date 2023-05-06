@@ -414,4 +414,27 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'ziglang/zig',
     },
   },
+  maestro: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-maestro',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mobile-dev-inc/maestro',
+      extractVersion: '^cli-(?<version>\\S+)',
+    },
+  },
+  detekt: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-detekt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'detekt/detekt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ktlint: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-ktlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pinterest/ktlint',
+    },
+  },
 };
