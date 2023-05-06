@@ -208,6 +208,9 @@ exports[`modules/manager/composer/extract extractPackageFile() extracts dependen
   "extractedConstraints": {
     "php": ">=5.3.2",
   },
+  "lockFiles": [
+    "composer.lock",
+  ],
 }
 `;
 
