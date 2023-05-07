@@ -56,7 +56,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith(
         'Config Migration PR already exists'
@@ -72,7 +72,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -83,7 +83,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
       expect(logger.debug).toHaveBeenCalledWith('Need to create migration PR');
     });
@@ -98,7 +98,7 @@ describe('workers/repository/config-migration/branch/index', () => {
       const res = await checkConfigMigrationBranch(config, migratedData);
       // TODO: types (#7154)
       expect(res).toBe(`${config.branchPrefix!}migrate-config`);
-      expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+      expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
 
@@ -112,7 +112,7 @@ describe('workers/repository/config-migration/branch/index', () => {
         scm.branchExists.mockResolvedValueOnce(true);
         const res = await checkConfigMigrationBranch(config, migratedData);
         expect(res).toBeNull();
-        expect(git.checkoutBranch).toHaveBeenCalledTimes(0);
+        expect(scm.checkoutBranch).toHaveBeenCalledTimes(0);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
         expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
         expect(logger.debug).toHaveBeenCalledWith(
