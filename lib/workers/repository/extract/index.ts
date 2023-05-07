@@ -3,7 +3,7 @@ import { getManagerConfig, mergeChildConfig } from '../../../config';
 import type { ManagerConfig, RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import { getManagerList, hashMap } from '../../../modules/manager';
-import { getFileList } from '../../../util/git';
+import { scm } from '../../../modules/platform/scm';
 import type { ExtractResult, WorkerExtractConfig } from '../../types';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
@@ -20,7 +20,7 @@ export async function extractAllDependencies(
     );
   }
   const extractList: WorkerExtractConfig[] = [];
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
 
   const tryConfig = (managerConfig: ManagerConfig): void => {
     const matchingFileList = getMatchingFiles(managerConfig, fileList);
