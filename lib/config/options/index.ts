@@ -522,7 +522,8 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'dependencyDashboardOSVVulnerabilitySummary',
-    description: 'Control if the Dependency Dashboard issue lists CVEs.',
+    description:
+      'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev). This feature is independent of the `osvVulnerabilityAlerts` option.',
     type: 'string',
     allowedValues: ['none', 'all', 'unresolved'],
     default: 'none',
