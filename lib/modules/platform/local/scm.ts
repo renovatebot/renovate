@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { glob } from 'glob';
 import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';

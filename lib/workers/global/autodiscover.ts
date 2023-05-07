@@ -15,9 +15,12 @@ export async function autodiscoverRepositories(
 ): Promise<AllConfig> {
   if (config.platform === 'local') {
     if (config.repositories?.length) {
-      logger.warn(
+      logger.debug(
         { repositories: config.repositories },
-        'platform=local supports only cwd'
+        'Found repositories when in local mode'
+      );
+      throw new Error(
+        'Invalid configuration: repositories list not supported when platform=local'
       );
     }
     config.repositories = ['local'];
