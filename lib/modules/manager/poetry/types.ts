@@ -20,6 +20,7 @@ export interface PoetryFile {
 export interface PoetryDependency {
   path?: string;
   git?: string;
+  tag?: string;
   version?: string;
 }
 

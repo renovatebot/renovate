@@ -25,7 +25,6 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -367,6 +366,9 @@ export async function processBranch(
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (dependencyDashboardCheck === 'global-config') {
+      logger.debug(`Manual create/rebase requested via checkedBranches`);
+      config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
@@ -403,7 +405,7 @@ export async function processBranch(
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -521,7 +523,7 @@ export async function processBranch(
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

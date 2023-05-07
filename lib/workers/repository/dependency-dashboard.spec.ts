@@ -104,6 +104,31 @@ describe('workers/repository/dependency-dashboard', () => {
       });
     });
 
+    it('reads dashboard body and apply checkedBranches', async () => {
+      const conf: RenovateConfig = {};
+      conf.prCreation = 'approval';
+      conf.checkedBranches = ['branch1', 'branch2'];
+      platform.findIssue.mockResolvedValueOnce({
+        title: '',
+        number: 1,
+        body: Fixtures.get('dependency-dashboard-with-8-PR.txt'),
+      });
+      await dependencyDashboard.readDashboardBody(conf);
+      expect(conf).toEqual({
+        checkedBranches: ['branch1', 'branch2'],
+        dependencyDashboardAllPending: false,
+        dependencyDashboardAllRateLimited: false,
+        dependencyDashboardChecks: {
+          branch1: 'global-config',
+          branch2: 'global-config',
+        },
+        dependencyDashboardIssue: 1,
+        dependencyDashboardRebaseAllOpen: false,
+        dependencyDashboardTitle: 'Dependency Dashboard',
+        prCreation: 'approval',
+      });
+    });
+
     it('reads dashboard body all pending approval', async () => {
       const conf: RenovateConfig = {};
       conf.prCreation = 'approval';
