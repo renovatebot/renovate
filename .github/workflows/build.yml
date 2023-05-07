@@ -77,7 +77,11 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: yarn install --frozen-lockfile
 
       # build before tests to for static file check
       - name: Build
@@ -131,12 +135,14 @@ jobs:
       - name: Type check
         run: yarn type-check
 
+      - name: markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+
       - name: Lint
         run: |
           yarn ls-lint
           yarn eslint -f gha
           yarn prettier
-          yarn markdown-lint
           yarn git-check
           yarn doc-fence-check
 

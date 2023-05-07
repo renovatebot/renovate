@@ -1,5 +1,6 @@
+import { Fixtures } from '../../../../test/fixtures';
 import type { PackageDependency } from '../types';
-import { getGitlabDep } from './utils';
+import { getGitlabDep, replaceReferenceTags } from './utils';
 
 describe('modules/manager/gitlabci/utils', () => {
   describe('getGitlabDep', () => {
@@ -79,6 +80,14 @@ describe('modules/manager/gitlabci/utils', () => {
         depName: 'quay.io/prometheus/node-exporter',
         currentValue: 'v1.3.1',
       });
+    });
+  });
+
+  describe('replaceReferenceTags', () => {
+    it('replaces all !reference tags with empty strings', () => {
+      const yamlFileReferenceConfig = Fixtures.get('gitlab-ci.reference.yaml');
+      const replaced = replaceReferenceTags(yamlFileReferenceConfig);
+      expect(replaced).not.toContain('!reference');
     });
   });
 });

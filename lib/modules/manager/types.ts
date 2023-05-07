@@ -155,6 +155,7 @@ export interface PackageDependency<T = Record<string, any>>
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+  workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;

@@ -199,6 +199,7 @@ interface VersionRegexResult {
  * It signifies that there is a NonRegistryOverride for a module.
  */
 export class BzlmodVersion {
+  readonly original: string;
   readonly release: VersionPart;
   readonly prerelease: VersionPart;
   readonly build: VersionPart;
@@ -214,6 +215,7 @@ export class BzlmodVersion {
    *     values.
    */
   constructor(version: string) {
+    this.original = version;
     if (version === '') {
       this.release = VersionPart.create();
       this.prerelease = VersionPart.create();

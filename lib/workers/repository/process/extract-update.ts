@@ -8,7 +8,6 @@ import { getCache } from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
 import { checkGithubToken as ensureGithubToken } from '../../../util/check-token';
 import { fingerprint } from '../../../util/fingerprint';
-import { checkoutBranch } from '../../../util/git';
 import type { BranchConfig } from '../../types';
 import { extractAllDependencies } from '../extract';
 import { generateFingerprintConfig } from '../extract/extract-fingerprint-config';
@@ -137,7 +136,7 @@ export async function extract(
       logger.info({ err }, 'Error deleting cached dep updates');
     }
   } else {
-    await checkoutBranch(baseBranch!);
+    await scm.checkoutBranch(baseBranch!);
     const extractResult = (await extractAllDependencies(config)) || {};
     packageFiles = extractResult.packageFiles;
     const { extractionFingerprints } = extractResult;

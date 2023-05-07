@@ -8,7 +8,7 @@ describe('modules/versioning/ubuntu/index', () => {
     jest.resetAllMocks();
   });
 
-  test.each`
+  it.each`
     version        | expected
     ${undefined}   | ${false}
     ${null}        | ${false}
@@ -89,7 +89,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version      | range        | expected
     ${undefined} | ${undefined} | ${false}
     ${null}      | ${undefined} | ${false}
@@ -105,7 +105,7 @@ describe('modules/versioning/ubuntu/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version      | expected
     ${undefined} | ${false}
     ${null}      | ${false}
@@ -116,7 +116,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.isSingleVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version       | expected
     ${undefined}  | ${false}
     ${null}       | ${false}
@@ -197,7 +197,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.isStable(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version      | expected
     ${undefined} | ${false}
     ${null}      | ${false}
@@ -250,7 +250,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version       | major   | minor   | patch
     ${undefined}  | ${null} | ${null} | ${null}
     ${null}       | ${null} | ${null} | ${null}
@@ -272,7 +272,7 @@ describe('modules/versioning/ubuntu/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a           | b            | expected
     ${'20.04'}  | ${'2020.04'} | ${false}
     ${'17.10'}  | ${'artful'}  | ${true}
@@ -287,7 +287,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.equals(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a            | b            | expected
     ${'20.04'}   | ${'20.10'}   | ${false}
     ${'20.10'}   | ${'20.04'}   | ${true}
@@ -314,7 +314,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(ubuntu.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions                                | range        | expected
     ${['18.10', '19.04', '19.10', '20.04']} | ${'2020.04'} | ${null}
     ${['18.10', '19.04', '19.10', '20.04']} | ${'foobar'}  | ${null}
@@ -333,7 +333,7 @@ describe('modules/versioning/ubuntu/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                | range        | expected
     ${['18.10', '19.04', '19.10', '20.04']} | ${'2020.04'} | ${null}
     ${['18.10', '19.04', '19.10', '20.04']} | ${'foobar'}  | ${null}
@@ -352,7 +352,7 @@ describe('modules/versioning/ubuntu/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue | rangeStrategy | currentVersion | newVersion  | expected
     ${undefined} | ${undefined}  | ${undefined}   | ${'foobar'} | ${'foobar'}
     ${'xenial'}  | ${undefined}  | ${undefined}   | ${'20.04'}  | ${'focal'}
@@ -373,7 +373,7 @@ describe('modules/versioning/ubuntu/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                                  | expected
     ${['17.03', '18.04', '18.04', '6.10', '19.10']}           | ${['6.10', '17.03', '18.04', '18.04', '19.10']}
     ${['17.03', 'zesty', 'bionic', 'bionic', 'edgy', 'eoan']} | ${['edgy', '17.03', 'zesty', 'bionic', 'bionic', 'eoan']}
@@ -381,7 +381,7 @@ describe('modules/versioning/ubuntu/index', () => {
     expect(versions.sort(ubuntu.sortVersions)).toEqual(expected);
   });
 
-  test.each`
+  it.each`
     version    | range        | expected
     ${'20.04'} | ${'2020.04'} | ${false}
     ${'20.04'} | ${'20.04'}   | ${true}

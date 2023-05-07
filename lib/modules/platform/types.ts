@@ -48,6 +48,7 @@ export interface RepoParams {
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
 }
 
 export interface PrBodyStruct {
@@ -224,4 +225,6 @@ export interface PlatformScm {
   getBranchCommit(branchName: string): Promise<CommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  getFileList(): Promise<string[]>;
+  checkoutBranch(branchName: string): Promise<CommitSha>;
 }

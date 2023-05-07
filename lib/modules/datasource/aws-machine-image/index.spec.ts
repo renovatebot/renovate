@@ -347,7 +347,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one matching image to return that image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: false,
@@ -366,7 +366,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with one deprecated matching image to return that image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: true,
@@ -385,7 +385,7 @@ describe('modules/datasource/aws-machine-image/index', () => {
         packageName:
           '[{"Name":"owner-id","Values":["602401143452"]},{"Name":"name","Values":["with 3 matching image to return the newest image"]}]',
       });
-      expect(res).toStrictEqual({
+      expect(res).toEqual({
         releases: [
           {
             isDeprecated: false,

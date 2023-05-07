@@ -914,7 +914,7 @@ At other times, the possible files is too vague for Renovate to have any default
 For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them have a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
 Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about.
-For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$']`.
+For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$', '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$']`.
 This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile-suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`.
 Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
@@ -1791,22 +1791,25 @@ For example, if you have an `examples` directory and you want all updates to tho
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with either a partial string match or a minimatch pattern.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["+(package.json)"],
+      "matchFiles": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
 }
 ```
 
-Important to know: Renovate will evaluate all `packageRules` and not stop once it gets a first match.
-You should order your `packageRules` in ascending order of importance so that more important rules come later and can override settings from earlier rules if needed.
+<!-- prettier-ignore -->
+!!! tip
+    Renovate evaluates all `packageRules` and does not stop after the first match.
+    Order your `packageRules` so the least important rules are at the _top_, and the most important rules at the _bottom_.
+    This way important rules override settings from earlier rules if needed.
 
 <!-- prettier-ignore -->
 !!! warning
@@ -2102,11 +2105,17 @@ Renovate will compare `matchFiles` for an exact match against the dependency's p
 
 For example the following would match `package.json` but not `package/frontend/package.json`:
 
-```
-  "matchFiles": ["package.json"],
+```json
+{
+  "packageRules": [
+    {
+      "matchFiles": ["package.json"]
+    }
+  ]
+}
 ```
 
-Use `matchPaths` instead if you need more flexible matching.
+Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
 
 ### matchDepNames
 
@@ -2168,9 +2177,9 @@ Just like the earlier `matchPackagePatterns` example, the above will configure `
 
 ### matchPaths
 
-Renovate finds the file(s) listed in `matchPaths` with a minimatch glob pattern.
+Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
 
-For example the following would match any `package.json`, including files like `backend/package.json`:
+For example the following matches any `package.json`, including files like `backend/package.json`:
 
 ```json
 {
@@ -2184,7 +2193,7 @@ For example the following would match any `package.json`, including files like `
 }
 ```
 
-The following would match any file in directories starting with `app/`:
+The following matches any file in directories starting with `app/`:
 
 ```json
 {
@@ -2197,6 +2206,11 @@ The following would match any file in directories starting with `app/`:
   ]
 }
 ```
+
+<!-- prettier-ignore -->
+!!! warning
+    Partial matches for `matchPaths` are deprecated.
+    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
 
 ### matchSourceUrlPrefixes
 
@@ -2501,6 +2515,10 @@ The `postUpgradeTasks` configuration consists of three fields:
 A list of commands that are executed after Renovate has updated a dependency but before the commit is made.
 
 You can use variable templating in your commands if [`allowPostUpgradeCommandTemplating`](https://docs.renovatebot.com/self-hosted-configuration/#allowpostupgradecommandtemplating) is enabled.
+
+<!-- prettier-ignore -->
+!!! note
+    Do not use `git add` in your commands to add new files to be tracked, add them by including them in your [`fileFilters`](https://docs.renovatebot.com/self-hosted-configuration/#filefilters) instead.
 
 ### fileFilters
 

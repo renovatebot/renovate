@@ -72,6 +72,7 @@ export interface ResultWithoutPr {
 export type EnsurePrResult = ResultWithPr | ResultWithoutPr;
 
 export function updatePrDebugData(
+  targetBranch: string,
   debugData: PrDebugData | undefined
 ): PrDebugData {
   const createdByRenovateVersion = debugData?.createdInVer ?? pkg.version;
@@ -79,6 +80,7 @@ export function updatePrDebugData(
   return {
     createdInVer: createdByRenovateVersion,
     updatedInVer: updatedByRenovateVersion,
+    targetBranch,
   };
 }
 
@@ -141,6 +143,11 @@ export async function ensurePr(
     config.forcePr = true;
   }
 
+  if (dependencyDashboardCheck === 'approvePr') {
+    logger.debug('Forcing PR because of dependency dashboard approval');
+    config.forcePr = true;
+  }
+
   if (!existingPr) {
     // Only create a PR if a branch automerge has failed
     if (
@@ -170,7 +177,7 @@ export async function ensurePr(
         return { type: 'without-pr', prBlockedBy: 'BranchAutomerge' };
       }
     }
-    if (!existingPr && config.prCreation === 'status-success') {
+    if (config.prCreation === 'status-success') {
       logger.debug('Checking branch combined status');
       if ((await getBranchStatus()) !== 'green') {
         logger.debug(`Branch status isn't green - not creating PR`);
@@ -306,7 +313,10 @@ export async function ensurePr(
   }
 
   const prBody = getPrBody(config, {
-    debugData: updatePrDebugData(existingPr?.bodyStruct?.debugData),
+    debugData: updatePrDebugData(
+      config.baseBranch,
+      existingPr?.bodyStruct?.debugData
+    ),
   });
 
   try {

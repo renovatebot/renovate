@@ -25,7 +25,6 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -63,6 +62,14 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
+}
+
+function userChangedTargetBranch(pr: Pr): boolean {
+  const oldTargetBranch = pr.bodyStruct?.debugData?.targetBranch;
+  if (oldTargetBranch && pr.targetBranch) {
+    return pr.targetBranch !== oldTargetBranch;
+  }
+  return false;
 }
 
 export interface ProcessBranchResult {
@@ -199,11 +206,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (
-          branchIsModified ||
-          (branchPr.targetBranch &&
-            branchPr.targetBranch !== branchConfig.baseBranch)
-        ) {
+        if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(dependencyDashboardCheck || config.rebaseRequested)) {
@@ -363,6 +366,9 @@ export async function processBranch(
     if (userRebaseRequested) {
       logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
+    } else if (dependencyDashboardCheck === 'global-config') {
+      logger.debug(`Manual create/rebase requested via checkedBranches`);
+      config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
         'A user manually approved all pending PRs via the Dependency Dashboard.'
@@ -382,13 +388,24 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: 'no-work',
       };
+    }
+    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+    else if (
+      branchPr?.targetBranch &&
+      branchPr.targetBranch !== config.baseBranch
+    ) {
+      logger.debug(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -506,7 +523,7 @@ export async function processBranch(
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

@@ -1,7 +1,7 @@
 import { api as semver } from '.';
 
 describe('modules/versioning/helm/index', () => {
-  test.each`
+  it.each`
     version                                          | isValid
     ${'17.04.0'}                                     | ${false}
     ${'1.2.3'}                                       | ${true}
@@ -19,7 +19,7 @@ describe('modules/versioning/helm/index', () => {
     expect(res).toBe(isValid);
   });
 
-  test.each`
+  it.each`
     version            | isSingle
     ${'1.2.3'}         | ${true}
     ${'1.2.3-alpha.1'} | ${true}
@@ -31,7 +31,7 @@ describe('modules/versioning/helm/index', () => {
     expect(res).toBe(isSingle);
   });
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy | currentVersion | newVersion              | expected
     ${'=1.0.0'}             | ${'bump'}     | ${'1.0.0'}     | ${'1.1.0'}              | ${'=1.1.0'}
     ${'^1.0'}               | ${'bump'}     | ${'1.0.0'}     | ${'1.0.7'}              | ${'^1.0.7'}

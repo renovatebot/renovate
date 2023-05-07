@@ -14,7 +14,6 @@ import type {
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as memCache from '../../../util/cache/memory';
 import type { LookupStats } from '../../../util/cache/memory/types';
-import { clone } from '../../../util/clone';
 import { applyPackageRules } from '../../../util/package-rules';
 import * as p from '../../../util/promises';
 import { PackageFiles } from '../package-files';
@@ -38,7 +37,7 @@ async function fetchDepUpdates(
   packageFileConfig: RenovateConfig & PackageFile,
   indep: PackageDependency
 ): Promise<PackageDependency> {
-  const dep = clone(indep);
+  const dep = structuredClone(indep);
   dep.updates = [];
   if (is.string(dep.depName)) {
     dep.depName = dep.depName.trim();
