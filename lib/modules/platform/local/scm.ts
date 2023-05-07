@@ -34,7 +34,7 @@ export class LocalFs implements PlatformScm {
       dot: true,
       nodir: true,
       ignore: {
-        childrenIgnored: (p) => p.isNamed('.git') || p.isNamed('node_modules'),
+        childrenIgnored: (p) => p.isNamed('.git'),
       },
     });
     return fileList;
