@@ -48,4 +48,16 @@ describe('modules/platform/default-scm', () => {
     await defaultGitScm.isBranchModified('branchName');
     expect(git.isBranchModified).toHaveBeenCalledTimes(1);
   });
+
+  it('delegate getFileList to util/git', async () => {
+    git.getFileList.mockResolvedValueOnce([]);
+    await defaultGitScm.getFileList();
+    expect(git.getFileList).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegate checkoutBranch to util/git', async () => {
+    git.checkoutBranch.mockResolvedValueOnce('');
+    await defaultGitScm.checkoutBranch('branchName');
+    expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
+  });
 });
