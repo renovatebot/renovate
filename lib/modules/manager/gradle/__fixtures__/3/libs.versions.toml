@@ -7,4 +7,4 @@ junit = "1.4.9"
 
 [libraries]
 junit-legacy = { module = "junit:junit", version.ref = "junit" }
-mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha-junit-reporter" }
+mocha-junit = { module = "mocha-junit:mocha-junit", version.ref = "mocha.junit.reporter" }

@@ -147,6 +147,8 @@ const repoGroups = {
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
+  'mutation-testing-elements':
+    'https://github.com/stryker-mutator/mutation-testing-elements',
   nest: [
     'https://github.com/nestjs/nest',
     'https://github.com/nestjs/passport',
