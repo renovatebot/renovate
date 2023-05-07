@@ -13,6 +13,15 @@ function repoName(value: string | { repository: string }): string {
 export async function autodiscoverRepositories(
   config: AllConfig
 ): Promise<AllConfig> {
+  if (config.platform === 'local') {
+    if (config.repositories?.length) {
+      logger.warn(
+        { repositories: config.repositories },
+        'platform=local supports only cwd'
+      );
+    }
+    config.repositories = ['local'];
+  }
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
       logger.warn(
