@@ -94,7 +94,14 @@ describe('modules/manager/gradle/parser/common', () => {
   });
 
   it('stripReservedPrefixFromKeyTokens', () => {
-    const tokenValues = ['rootProject', 'project', 'ext', 'extra', 'foo'];
+    const tokenValues = [
+      'rootProject',
+      'project',
+      'ext',
+      'extra',
+      'properties',
+      'foo',
+    ];
 
     ctx.varTokens.push(
       ...tokenValues.map((value) => partial<lexer.Token>({ value }))
