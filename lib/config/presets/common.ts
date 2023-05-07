@@ -12,6 +12,7 @@ export const removedPresets: Record<string, string | null> = {
   ':masterIssueApproval': ':dependencyDashboardApproval',
   ':switchToGradleLite': null,
   ':unpublishSafe': 'npm:unpublishSafe',
+  'compatibility:additionalBranchPrefix': null,
   'config:application': 'config:js-app',
   'config:base-js': 'config:base',
   'config:library': 'config:js-lib',
