@@ -1,7 +1,8 @@
 import { logger } from '../../../logger';
+import { Json } from '../../../util/schema-utils';
 import { api as composer } from '../../versioning/composer';
 import type { UpdateLockedConfig, UpdateLockedResult } from '../types';
-import type { ComposerLock } from './types';
+import { Lockfile } from './schema';
 
 export function updateLockedDependency(
   config: UpdateLockedConfig
@@ -12,12 +13,11 @@ export function updateLockedDependency(
     `composer.updateLockedDependency: ${depName}@${currentVersion} -> ${newVersion} [${lockFile}]`
   );
   try {
-    const locked = JSON.parse(lockFileContent!) as ComposerLock;
+    const lockfile = Json.pipe(Lockfile).parse(lockFileContent);
     if (
-      locked.packages?.find(
-        (entry) =>
-          entry.name === depName &&
-          composer.equals(entry.version || '', newVersion)
+      lockfile?.packages.find(
+        ({ name, version }) =>
+          name === depName && composer.equals(version, newVersion)
       )
     ) {
       return { status: 'already-updated' };

@@ -1,4 +1,4 @@
-import { getConfig, git, mocked } from '../../../../../test/util';
+import { git, mocked } from '../../../../../test/util';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import * as _batectWrapper from '../../../../modules/manager/batect-wrapper';
 import * as _bundler from '../../../../modules/manager/bundler';
@@ -32,11 +32,12 @@ describe('workers/repository/update/branch/get-updated', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO: incompatible types (#7154)
       config = {
-        ...getConfig(),
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        branchName: 'renovate/pin',
         upgrades: [],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       npm.updateDependency = jest.fn();
       git.getFile.mockResolvedValueOnce('existing content');
     });
