@@ -1,6 +1,6 @@
+import is from '@sindresorhus/is';
 import type { PackageFileContent } from '../types';
 import { BazelDepRecordToPackageDependency } from './bazel-dep';
-import { exists } from './filters';
 import { parse } from './parser';
 
 export function extractPackageFile(
@@ -17,7 +17,7 @@ export function extractPackageFile(
       // istanbul ignore next: cannot reach undefined without an additional rule
       return result.success ? result.data : undefined;
     })
-    .filter(exists);
+    .filter(is.plainObject);
   // istanbul ignore next: cannot reach null without introducing fake rule
   return deps.length ? { deps } : null;
 }
