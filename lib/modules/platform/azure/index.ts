@@ -531,7 +531,8 @@ export async function updatePr({
   if (platformOptions?.autoApprove) {
     const pr: GitPullRequest = await azureApiGit.getPullRequest(
       config.repoId,
-      prNo
+      prNo,
+      config.project
     );
     await azureApiGit.createPullRequestReviewer(
       {
