@@ -700,7 +700,8 @@ It is pointless to edit the labels, as Renovate bot restores the labels on each 
 
 ## dependencyDashboardOSVVulnerabilitySummary
 
-Use this option to control if the Dependency Dashboard lists the CVEs for your repository.
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+This feature is independent of the `osvVulnerabilityAlerts` option.
 
 The source of these CVEs is [OSV.dev](https://osv.dev/).
 
