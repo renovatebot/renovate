@@ -18,7 +18,11 @@ import {
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
-import type { DependencyVulnerabilities, Vulnerability } from './types';
+import type {
+  DependencyVulnerabilities,
+  SeverityDetails,
+  Vulnerability,
+} from './types';
 
 export class Vulnerabilities {
   private osvOffline: OsvOffline | undefined;
@@ -455,7 +459,7 @@ export class Vulnerabilities {
       `Setting allowed version ${fixedVersion} to fix vulnerability ${vulnerability.id} in ${packageName} ${depVersion}`
     );
 
-    const [, , severityLevel] = this.extractSeverityDetails(
+    const severityDetails = this.extractSeverityDetails(
       vulnerability,
       affected
     );
@@ -466,7 +470,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      vulnerabilitySeverity: severityLevel?.toUpperCase(),
+      vulnerabilitySeverity: severityDetails.severityLevel?.toUpperCase(),
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
@@ -520,16 +524,16 @@ export class Vulnerabilities {
     content += `#### Details\n${details ?? 'No details.'}\n`;
 
     content += '#### Severity\n';
-    const [cvssVector, score, severityLevel] = this.extractSeverityDetails(
+    const severityDetails = this.extractSeverityDetails(
       vulnerability,
       affected
     );
 
-    if (cvssVector) {
-      content += `- CVSS Score: ${score}\n`;
-      content += `- Vector String: \`${cvssVector}\`\n`;
-    } else if (severityLevel) {
-      content += `${severityLevel}\n`;
+    if (severityDetails.cvssVector) {
+      content += `- CVSS Score: ${severityDetails.score}\n`;
+      content += `- Vector String: \`${severityDetails.cvssVector}\`\n`;
+    } else if (severityDetails.severityLevel) {
+      content += `${severityDetails.severityLevel}\n`;
     } else {
       content += 'Unknown severity.\n';
     }
@@ -561,7 +565,7 @@ export class Vulnerabilities {
   private extractSeverityDetails(
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected
-  ): [string, string, string | undefined] {
+  ): SeverityDetails {
     let severityLevel: string | undefined;
     let score = 'Unknown';
 
@@ -583,6 +587,10 @@ export class Vulnerabilities {
         severity.charAt(0).toUpperCase() + severity.slice(1).toLowerCase();
     }
 
-    return [cvssVector, score, severityLevel];
+    return {
+      cvssVector,
+      score,
+      severityLevel,
+    };
   }
 }
