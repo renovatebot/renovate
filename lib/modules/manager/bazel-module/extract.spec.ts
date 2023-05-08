@@ -9,6 +9,19 @@ describe('modules/manager/bazel-module/extract', () => {
       expect(result).toBeNull();
     });
 
+    it('returns null if file is empty', () => {
+      const result = extractPackageFile('', 'MODULE.bazel');
+      expect(result).toBeNull();
+    });
+
+    it('returns null if file has not recognized declarations', () => {
+      const input = codeBlock`
+        ignore_me(name = "rules_foo", version = "1.2.3")
+      `;
+      const result = extractPackageFile(input, 'MODULE.bazel');
+      expect(result).toBeNull();
+    });
+
     it('returns dependencies', () => {
       const input = codeBlock`
         bazel_dep(name = "rules_foo", version = "1.2.3")
