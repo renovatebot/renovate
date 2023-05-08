@@ -53,6 +53,7 @@ dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
 dprint 0.32.2
+ecspresso 2.1.0
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
@@ -161,6 +162,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'dprint/dprint',
             depName: 'dprint',
+          },
+          {
+            currentValue: '2.1.0',
+            datasource: 'github-releases',
+            packageName: 'kayac/ecspresso',
+            depName: 'ecspresso',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.14.1',
