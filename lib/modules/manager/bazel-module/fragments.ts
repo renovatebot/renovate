@@ -130,13 +130,13 @@ export class ArrayFragment implements FragmentCompatible {
 export class RecordFragment implements FragmentCompatible {
   static readonly schema = RecordFragmentSchema;
 
-  static safeAs(frag: FragmentCompatible): RecordFragment | undefined {
+  static safeAs(frag: FragmentCompatible): RecordFragment | null {
     if (frag instanceof RecordFragment) {
       return frag;
     }
     const parseResult = RecordFragmentSchema.safeParse(frag);
     if (!parseResult.success) {
-      return undefined;
+      return null;
     }
     Object.setPrototypeOf(frag, RecordFragment.prototype);
     const record = frag as RecordFragment;
@@ -175,13 +175,13 @@ export class RecordFragment implements FragmentCompatible {
 export class AttributeFragment implements FragmentCompatible {
   static readonly schema = AttributeFragmentSchema;
 
-  static safeAs(frag: FragmentCompatible): AttributeFragment | undefined {
+  static safeAs(frag: FragmentCompatible): AttributeFragment | null {
     if (frag instanceof AttributeFragment) {
       return frag;
     }
     const parseResult = AttributeFragmentSchema.safeParse(frag);
     if (!parseResult.success) {
-      return undefined;
+      return null;
     }
     Object.setPrototypeOf(frag, AttributeFragment.prototype);
     const attribute = frag as AttributeFragment;
@@ -232,7 +232,7 @@ export class Fragments {
     return new Error(`Expected type ${expected}, but was ${actual}.`);
   }
 
-  static safeAsValue(frag: FragmentCompatible): ValueFragment | undefined {
+  static safeAsValue(frag: FragmentCompatible): ValueFragment | null {
     switch (frag.type) {
       case 'string':
         return StringFragment.as(frag);
@@ -243,7 +243,7 @@ export class Fragments {
       case 'record':
         return RecordFragment.as(frag);
       default:
-        return undefined;
+        return null;
     }
   }
 

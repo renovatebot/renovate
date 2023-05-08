@@ -135,7 +135,7 @@ describe('modules/manager/bazel-module/fragments', () => {
       ${new StringFragment('hello')}   | ${new StringFragment('hello')}
       ${new ArrayFragment()}           | ${new ArrayFragment()}
       ${new RecordFragment()}          | ${new RecordFragment()}
-      ${new AttributeFragment('name')} | ${undefined}
+      ${new AttributeFragment('name')} | ${null}
     `('Fragments.safeAsValue($frag)', ({ frag, exp }) => {
       const result = Fragments.safeAsValue(frag);
       expect(result).toEqual(exp);
