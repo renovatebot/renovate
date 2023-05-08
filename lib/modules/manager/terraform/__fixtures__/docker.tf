@@ -15,9 +15,9 @@ resource "docker_image" "ignore_variable" {
 
 # docker_container resources
 # https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/container
-resource "docker_container" "foo" {
-  name  = "foo"
-  image = "nginx:1.7.8"
+resource "docker_container" "proxy" {
+  name  = "proxy"
+  image = "hub.proxy.test/bitnami/nginx:1.24.0"
 }
 
 resource "docker_container" "invalid" {

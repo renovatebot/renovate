@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import { joinUrlParts } from '../../../../../util/url';
-import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
+import { getDep } from '../../../dockerfile/extract';
 import { isOCIRegistry } from '../../../helmv3/utils';
-import type { PackageDependency } from '../../../types';
+import type { ExtractConfig, PackageDependency } from '../../../types';
 import { DependencyExtractor } from '../../base';
 import type { TerraformDefinitionFile } from '../../hcl/types';
+import type { ProviderLock } from '../../lockfile/types';
 import { checkIfStringIsPath } from '../../util';
 
 export class HelmReleaseExtractor extends DependencyExtractor {
@@ -14,7 +15,11 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     return [`"helm_release"`];
   }
 
-  override extract(hclMap: TerraformDefinitionFile): PackageDependency[] {
+  override extract(
+    hclMap: TerraformDefinitionFile,
+    _locks: ProviderLock[],
+    config: ExtractConfig
+  ): PackageDependency[] {
     const dependencies = [];
 
     const helmReleases = hclMap?.resource?.helm_release;
@@ -46,19 +51,20 @@ export class HelmReleaseExtractor extends DependencyExtractor {
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
         dep.depName = helmRelease.chart.replace('oci://', '');
-        dep.datasource = DockerDatasource.id;
+        this.processOci(dep.depName, config, dep);
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
       } else if (is.nonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {
-          {
-            // For oci repos, we remove the oci://, join the chart name and use the docker datasource
-            dep.packageName = joinUrlParts(
+          // For oci charts, we remove the oci:// and use the docker datasource
+          this.processOci(
+            joinUrlParts(
               helmRelease.repository.replace('oci://', ''),
               helmRelease.chart
-            );
-            dep.datasource = DockerDatasource.id;
-          }
+            ),
+            config,
+            dep
+          );
         } else {
           dep.registryUrls = [helmRelease.repository];
         }
@@ -66,5 +72,19 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     }
 
     return dependencies;
+  }
+
+  private processOci(
+    depName: string,
+    config: ExtractConfig,
+    dep: PackageDependency
+  ): void {
+    const { depName: packageName, datasource } = getDep(
+      depName,
+      false,
+      config.registryAliases
+    );
+    dep.packageName = packageName;
+    dep.datasource = datasource;
   }
 }
