@@ -109,5 +109,19 @@ describe('config/index', () => {
       const config = configParser.filterConfig(parentConfig, 'pr');
       expect(config).toBeObject();
     });
+
+    it('setHighestVulnerabilitySeverity when config is vulnerability alert', async () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        isVulnerabilityAlert: true,
+        vulnerabilitySeverity: 'HIGH',
+      });
+      const childConfig = {
+        vulnerabilitySeverity: 'CRITICAL',
+      };
+      const configParser = await import('./index');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.vulnerabilitySeverity).toBe('CRITICAL');
+    });
   });
 });

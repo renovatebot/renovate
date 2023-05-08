@@ -75,8 +75,6 @@ export class Vulnerabilities {
       }
       this.sortByFixedVersion(groupPackageRules, versioningApi);
 
-      this.setHighestSeverity(groupPackageRules);
-
       config.packageRules.push(...groupPackageRules);
     }
   }
@@ -586,32 +584,5 @@ export class Vulnerabilities {
     }
 
     return [cvssVector, score, severityLevel];
-  }
-
-  private setHighestSeverity(packageRules: PackageRule[]): void {
-    let mostSevere: string | undefined;
-
-    for (const rule of packageRules) {
-      const severity = rule.vulnerabilitySeverity?.toUpperCase();
-      if (!mostSevere) {
-        mostSevere = severity?.toUpperCase();
-      }
-
-      if (severity === 'CRITICAL') {
-        mostSevere = 'CRITICAL';
-      } else if (severity === 'HIGH' && mostSevere !== 'CRITICAL') {
-        mostSevere = 'HIGH';
-      } else if (
-        severity === 'MODERATE' &&
-        mostSevere !== 'CRITICAL' &&
-        mostSevere !== 'HIGH'
-      ) {
-        mostSevere = 'MODERATE';
-      }
-    }
-
-    for (const rule of packageRules) {
-      rule.highestVulnerabilitySeverity = mostSevere;
-    }
   }
 }

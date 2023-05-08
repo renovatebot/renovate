@@ -89,8 +89,6 @@ export const allowedFields = {
   displayPending: 'Latest pending update, if internalChecksFilter is in use',
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
-  highestVulnerabilitySeverity:
-    'The highest vulnerability severity within the upgrade',
   indentation: 'The indentation of the dependency being updated',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
@@ -146,6 +144,8 @@ export const allowedFields = {
   version: 'The version number of the changelog',
   versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
+  vulnerabilitySeverity:
+    'The vulnerability severity for a vulnerability alert upgrade',
 };
 
 const prBodyFields = [
