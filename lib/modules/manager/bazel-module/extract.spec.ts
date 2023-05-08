@@ -1,5 +1,7 @@
 import { codeBlock } from 'common-tags';
 import { BazelDatasource } from '../../datasource/bazel';
+import { RecordFragment, ValueFragment } from './fragments';
+import * as parser from './parser';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/bazel-module/extract', () => {
@@ -20,6 +22,13 @@ describe('modules/manager/bazel-module/extract', () => {
       `;
       const result = extractPackageFile(input, 'MODULE.bazel');
       expect(result).toBeNull();
+    });
+
+    it('gracefully handles unexpected fragments', () => {
+      const fragments: ValueFragment[] = [new RecordFragment()];
+      const mockParse = jest.spyOn(parser, 'parse');
+      mockParse.mockReturnValueOnce(fragments);
+      expect(extractPackageFile('', 'MODULE.bazel')).toBeNull();
     });
 
     it('returns dependencies', () => {
