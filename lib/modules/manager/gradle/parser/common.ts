@@ -82,7 +82,13 @@ export function cleanupTempVars(ctx: Ctx): Ctx {
 }
 
 export function stripReservedPrefixFromKeyTokens(ctx: Ctx): Ctx {
-  const unwantedPrefixes = ['ext', 'extra', 'project', 'rootProject'];
+  const unwantedPrefixes = [
+    'ext',
+    'extra',
+    'project',
+    'rootProject',
+    'properties',
+  ];
   while (
     ctx.varTokens.length > 1 && // ensures there will be always at least one token
     ctx.varTokens[0] &&

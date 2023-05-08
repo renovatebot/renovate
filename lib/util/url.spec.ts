@@ -14,7 +14,7 @@ import {
 } from './url';
 
 describe('util/url', () => {
-  test.each`
+  it.each`
     baseUrl                 | x                       | result
     ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
     ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}
@@ -53,7 +53,7 @@ describe('util/url', () => {
     expect(resolveBaseUrl(baseUrl, x)).toBe(result);
   });
 
-  test.each`
+  it.each`
     baseUrl                 | x                       | result
     ${'http://foo.io'}      | ${''}                   | ${'http://foo.io'}
     ${'http://foo.io/'}     | ${''}                   | ${'http://foo.io'}

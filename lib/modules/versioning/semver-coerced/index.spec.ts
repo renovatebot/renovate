@@ -49,7 +49,7 @@ describe('modules/versioning/semver-coerced/index', () => {
   });
 
   describe('.getPatch(input)', () => {
-    test.each`
+    it.each`
       version           | expected
       ${'1.0.2'}        | ${2}
       ${'v3.1.2-foo'}   | ${2}
@@ -131,7 +131,7 @@ describe('modules/versioning/semver-coerced/index', () => {
   });
 
   describe('.isStable(input)', () => {
-    test.each`
+    it.each`
       version           | expected
       ${'1.0.0'}        | ${true}
       ${'v1.3.5'}       | ${true}
