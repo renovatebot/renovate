@@ -3331,19 +3331,19 @@
     "@typescript-eslint/types" "5.59.5"
     eslint-visitor-keys "^3.3.0"
 
-"@yarnpkg/core@3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.4.0.tgz#1684dfcbd4e68ff28a11a25154d415f7de2c8224"
-  integrity sha512-EwkRU7TjZrpAPA2cqVBtMD95unti9uSXefGJbhCVANOfuY6tjBoqSt8uSf6BSXUUoJkxBWwewjTn0v0tgoLBkQ==
+"@yarnpkg/core@3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-3.5.1.tgz#bb1f13ffed9828a8b4d22980615bb7f1569daefe"
+  integrity sha512-BkbqhE7Ti/Kk2zl0MF2TPosUSh7yS9iaZWnmcXfzKPcPatY0NTg1wX+OuW/eXMFAHudXXmMMte9Ve2f6Kj7itQ==
   dependencies:
     "@arcanis/slice-ansi" "^1.1.1"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.10.1"
+    "@yarnpkg/fslib" "^2.10.3"
     "@yarnpkg/json-proxy" "^2.1.1"
-    "@yarnpkg/libzip" "^2.2.4"
+    "@yarnpkg/libzip" "^2.3.0"
     "@yarnpkg/parsers" "^2.5.1"
-    "@yarnpkg/pnp" "^3.3.0"
+    "@yarnpkg/pnp" "^3.3.2"
     "@yarnpkg/shell" "^3.2.5"
     camelcase "^5.3.1"
     chalk "^3.0.0"
@@ -3369,7 +3369,15 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.10.1", "@yarnpkg/fslib@^2.10.2", "@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
+"@yarnpkg/fslib@^2.10.3":
+  version "2.10.3"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.10.3.tgz#a8c9893df5d183cf6362680b9f1c6d7504dd5717"
+  integrity sha512-41H+Ga78xT9sHvWLlFOZLIhtU6mTGZ20pZ29EiZa97vnxdohJD2AF42rCoAoWfqUz486xY6fhjMH+DYEM9r14A==
+  dependencies:
+    "@yarnpkg/libzip" "^2.3.0"
+    tslib "^1.13.0"
+
+"@yarnpkg/fslib@^2.5.0", "@yarnpkg/fslib@^2.9.0":
   version "2.10.2"
   resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.10.2.tgz#16e419a1412084f152e8eec16183a7f80bc73684"
   integrity sha512-6WfQrPEV8QVpDPw5kd5s5jsb3QLqwVFSGZy3rEjl3p2FZ3OtIfYcLbFirOxXj2jXiKQDe7XbYsw1WjSf8K94gw==
@@ -3385,7 +3393,7 @@
     "@yarnpkg/fslib" "^2.5.0"
     tslib "^1.13.0"
 
-"@yarnpkg/libzip@^2.2.4", "@yarnpkg/libzip@^2.3.0":
+"@yarnpkg/libzip@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@yarnpkg/libzip/-/libzip-2.3.0.tgz#fe1e762e47669f6e2c960fc118436608d834e3be"
   integrity sha512-6xm38yGVIa6mKm/DUCF2zFFJhERh/QWp1ufm4cNUvxsONBmfPg8uZ9pZBdOmF6qFGr/HlT6ABBkCSx/dlEtvWg==
@@ -3401,13 +3409,13 @@
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^3.3.0":
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.1.tgz#8ce0777f2950cbadc9978ba3bd3407b4b9c2a640"
-  integrity sha512-iA2IKk2hOQqEBBHBZ3j004mCfzsPGx5PNjgGn8kb6/VMXokX4mhZzPNI/q7ipI0+UaIMeDXvIzwdGL2GSmgsTA==
+"@yarnpkg/pnp@^3.3.2":
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-3.3.2.tgz#348e1c4ac3ad4ff60a2ba5f274ec7d6f97fe2727"
+  integrity sha512-3rJbY9/wB7fLrjZtgcYyqtWHK3ihmCbFFqnjghH3MnBYABeh5IgB83BjSfbIT5s/BtVIg583yBHok02OO4ighg==
   dependencies:
     "@types/node" "^13.7.0"
-    "@yarnpkg/fslib" "^2.10.2"
+    "@yarnpkg/fslib" "^2.10.3"
 
 "@yarnpkg/shell@^3.2.5":
   version "3.2.5"
