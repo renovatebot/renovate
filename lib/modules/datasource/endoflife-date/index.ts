@@ -28,7 +28,7 @@ export class EndoflifeDatePackagesource extends Datasource {
     registryUrl,
     packageName,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
-    if (!registryUrl) {
+    if (!is.nonEmptyString(registryUrl)) {
       return null;
     }
 
