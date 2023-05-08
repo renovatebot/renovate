@@ -1,4 +1,3 @@
-/* istanbul ignore file */
 import type { BranchStatus } from '../../../types';
 import type {
   Issue,

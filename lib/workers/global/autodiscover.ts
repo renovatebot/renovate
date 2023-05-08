@@ -24,6 +24,7 @@ export async function autodiscoverRepositories(
       );
     }
     config.repositories = ['local'];
+    return config;
   }
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
