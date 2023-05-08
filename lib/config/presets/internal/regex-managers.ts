@@ -27,7 +27,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in Helm chart Chart.yaml.',
+    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
     regexManagers: [
       {
         datasourceTemplate: 'docker',
