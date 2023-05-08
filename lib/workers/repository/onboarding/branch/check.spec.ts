@@ -4,6 +4,7 @@ import {
   mocked,
   partial,
   platform,
+  scm,
 } from '../../../../../test/util';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
@@ -20,6 +21,7 @@ describe('workers/repository/onboarding/branch/check', () => {
   const config = partial<RenovateConfig>({
     requireConfig: 'required',
     suppressNotifications: [],
+    onboarding: true,
   });
 
   it('skips normal onboarding check if onboardingCache is valid', async () => {
@@ -48,7 +50,7 @@ describe('workers/repository/onboarding/branch/check', () => {
         onboardingBranchSha: 'onboarding-sha',
       },
     });
-    git.getFileList.mockResolvedValue([]);
+    scm.getFileList.mockResolvedValue([]);
     await isOnboarded(config);
     expect(logger.debug).not.toHaveBeenCalledWith(
       'Onboarding cache is valid. Repo is not onboarded'
@@ -58,7 +60,7 @@ describe('workers/repository/onboarding/branch/check', () => {
   it('continues with normal logic if closedPr exists', async () => {
     cache.getCache.mockReturnValue({});
     platform.findPr.mockResolvedValue(partial<Pr>());
-    git.getFileList.mockResolvedValue([]);
+    scm.getFileList.mockResolvedValue([]);
     await expect(isOnboarded(config)).rejects.toThrow(
       REPOSITORY_CLOSED_ONBOARDING
     );
