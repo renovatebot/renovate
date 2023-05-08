@@ -1864,7 +1864,6 @@ const options: RenovateOptions[] = [
     default: false,
     cli: false,
   },
-
   {
     name: 'prHeader',
     description: 'Text added here will be placed first in the PR body.',
