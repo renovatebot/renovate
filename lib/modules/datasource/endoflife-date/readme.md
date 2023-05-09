@@ -1,21 +1,22 @@
 [endoflife.date](https://endoflife.date) provides version and end-of-life information for different packages.
 
-To find the appropriate "package" name for the software you're trying to update, use the endoflife.date "All packages" API endpoint. You can find it in [the API documentation](https://endoflife.date/docs/api).
+To find the appropriate "package" name for the software you're trying to update, use the endoflife.date "All packages" API endpoint.
+You can find it in [the endoflife.date API documentation](https://endoflife.date/docs/api).
 
-This datasource uses `loose` versioning by default. If the software you are upgrading supports a versioning that is more strict, e.g. `semver`, it is recommended to specify that explicitly.
+By default, this datasource uses `loose` versioning.
+If possible, we recommend you use a stricter versioning like `semver` instead of `loose.
 
 **Usage Example**
 
-Imagine using Amazon EKS and wanting to update the versions in a terraform `.tfvars` file.
-
-An example `.tfvars` file would look as follows:
+Say you're using Amazon EKS and want Renovate to update the versions in a Terraform `.tfvars` file.
+For example, you have this `.tfvars` file:
 
 ```hcl
 # renovate: datasource=endoflife-date depName=amazon-eks versioning=loose
 kubernetes_version = "1.26"
 ```
 
-then, add the following configuration to your `renovate.json`:
+Give the above `.tfvars` file, you put this in your `renovate.json`:
 
 ```json
 {
