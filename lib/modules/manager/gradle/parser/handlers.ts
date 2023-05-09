@@ -2,7 +2,9 @@ import URL from 'node:url';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import { getSiblingFileName } from '../../../../util/fs';
+import { executeSynchronousGetRequest } from '../../../../util/http/sync';
 import { regEx } from '../../../../util/regex';
+import { parseUrl } from '../../../../util/url';
 import type { PackageDependency } from '../../types';
 import type { parseGradle as parseGradleCallback } from '../parser';
 import type { Ctx, GradleManagerData } from '../types';
@@ -337,6 +339,15 @@ export function handleLibraryDep(ctx: Ctx): Ctx {
   return ctx;
 }
 
+function getFromRemote(scriptFile: string): string | null {
+  const scriptFileAsUrl = parseUrl(scriptFile);
+  return executeSynchronousGetRequest(scriptFileAsUrl);
+}
+
+function getFromLocalProject(ctx: Ctx, scriptFilePath: string): string | null {
+  return ctx.fileContents[scriptFilePath];
+}
+
 export function handleApplyFrom(ctx: Ctx): Ctx {
   let scriptFile = interpolateString(loadFromTokenMap(ctx, 'scriptFile'), ctx);
   if (!scriptFile) {
@@ -363,17 +374,22 @@ export function handleApplyFrom(ctx: Ctx): Ctx {
     return ctx;
   }
 
-  const scriptFilePath = getSiblingFileName(ctx.packageFile, scriptFile);
-  if (!ctx.fileContents[scriptFilePath]) {
-    logger.debug(`Failed to process included Gradle file ${scriptFilePath}`);
+  const scriptPath = getSiblingFileName(ctx.packageFile, scriptFile);
+  const fileContent =
+    getFromRemote(scriptFile) ?? getFromLocalProject(ctx, scriptPath);
+  if (!fileContent) {
+    logger.debug(
+      { scriptFile },
+      `Failed to process Gradle file (remote files need to be accessible without authorization`
+    );
     return ctx;
   }
 
   const matchResult = parseGradle(
     // TODO #7154
-    ctx.fileContents[scriptFilePath]!,
+    fileContent,
     ctx.globalVars,
-    scriptFilePath,
+    scriptPath,
     ctx.fileContents,
     ctx.recursionDepth + 1
   );

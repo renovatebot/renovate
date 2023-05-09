@@ -11,6 +11,7 @@ import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
 import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
+import * as _sync from '../lib/util/http/sync';
 import { regEx } from '../lib/util/regex';
 
 /**
@@ -44,6 +45,7 @@ export function partial(obj: unknown = {}): unknown {
 
 export const fs = mocked(_fs);
 export const git = mocked(_git);
+export const sync = mocked(_sync);
 
 // TODO: fix types, jest / typescript is using wrong overload (#7154)
 export const platform = mocked(partial<Required<Platform>>(_platform));

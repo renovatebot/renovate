@@ -1,11 +1,12 @@
 import is from '@sindresorhus/is';
 import { codeBlock } from 'common-tags';
 import { Fixtures } from '../../../../test/fixtures';
-import { fs, logger } from '../../../../test/util';
+import { fs, logger, sync } from '../../../../test/util';
 import { parseGradle, parseProps } from './parser';
 import { GRADLE_PLUGINS, REGISTRY_URLS } from './parser/common';
 
 jest.mock('../../../util/fs');
+jest.mock('../../../util/http/sync');
 
 function mockFs(files: Record<string, string>): void {
   fs.getSiblingFileName.mockImplementation(
@@ -15,6 +16,13 @@ function mockFs(files: Record<string, string>): void {
         .concat(otherFileName);
     }
   );
+}
+
+function mockSynchronousGetRequest(remoteFiles: Map<string, string>): void {
+  sync.executeSynchronousGetRequest.mockImplementation(function (url) {
+    const urlAsString = url!.href;
+    return remoteFiles.get(urlAsString) ?? null;
+  });
 }
 
 describe('modules/manager/gradle/parser', () => {
@@ -824,61 +832,71 @@ describe('modules/manager/gradle/parser', () => {
   describe('apply from', () => {
     const key = 'version';
     const value = '1.2.3';
-    const validOutput = {
+    const validOutput = (packageFile: string) => ({
       version: {
         key,
         value,
         fileReplacePosition: 11,
-        packageFile: 'foo/bar.gradle',
+        packageFile,
       },
+    });
+
+    const fileContent = key + ' = "' + value + '"';
+    const localPackageFile = 'foo/bar.gradle';
+    const localFileContents = {
+      [localPackageFile]: fileContent,
     };
 
-    const fileContents = {
-      'foo/bar.gradle': key + ' = "' + value + '"',
-    };
+    const remotePackageFile = 'https://someurl.com/file.gradle';
+    const remoteFileContents = new Map<string, string>([
+      [remotePackageFile, fileContent],
+    ]);
 
     it.each`
-      def                        | input                                                     | output
-      ${''}                      | ${'apply from: ""'}                                       | ${{}}
-      ${''}                      | ${'apply from: "foo/invalid.gradle"'}                     | ${{}}
-      ${''}                      | ${'apply from: "${base}"'}                                | ${{}}
-      ${''}                      | ${'apply from: "foo/invalid.non-gradle"'}                 | ${{}}
-      ${''}                      | ${'apply from: "https://someurl.com/file.gradle"'}        | ${{}}
-      ${''}                      | ${'apply from: "foo/bar.gradle"'}                         | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: "${base}/bar.gradle"'}                     | ${validOutput}
-      ${'path="foo/bar.gradle"'} | ${'apply from: path'}                                     | ${validOutput}
-      ${'path="bar.gradle"'}     | ${'apply from: "foo/" + path'}                            | ${validOutput}
-      ${'path="foo/bar.gradle"'} | ${'apply from: property("path")'}                         | ${validOutput}
-      ${''}                      | ${'apply from: file("foo/bar.gradle")'}                   | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: file("${base}/bar.gradle")'}               | ${validOutput}
-      ${''}                      | ${'apply from: project.file("foo/bar.gradle")'}           | ${validOutput}
-      ${''}                      | ${'apply from: rootProject.file("foo/bar.gradle")'}       | ${validOutput}
-      ${''}                      | ${'apply from: new File("foo/bar.gradle")'}               | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: new File("${base}/bar.gradle")'}           | ${validOutput}
-      ${''}                      | ${'apply from: new File("foo", "bar.gradle")'}            | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: new File(base, "bar.gradle")'}             | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: new File("${base}", "bar.gradle")'}        | ${validOutput}
-      ${'path="bar.gradle"'}     | ${'apply from: new File("foo", "${path}")'}               | ${validOutput}
-      ${'e="o"; b="gradle" '}    | ${'apply from: new File("f" + e + e, "bar." + b)'}        | ${validOutput}
-      ${'a="bar"; b="gradle"'}   | ${'apply from: new File("foo", a + "." + "${b}")'}        | ${validOutput}
-      ${'path="bar.gradle"'}     | ${'apply from: new File("foo", property("path"))'}        | ${validOutput}
-      ${'base="foo"'}            | ${'apply from: new File(property("base"), "bar.gradle")'} | ${validOutput}
-      ${''}                      | ${'apply(from = "foo/bar.gradle"))'}                      | ${validOutput}
-      ${'base="foo"'}            | ${'apply(from = "${base}/bar.gradle"))'}                  | ${validOutput}
-      ${''}                      | ${'apply(from = File("foo/bar.gradle"))'}                 | ${validOutput}
-      ${''}                      | ${'apply(from = File("foo", "bar", "baz"))'}              | ${{}}
-      ${''}                      | ${'apply(from = File(["${somedir}/foo.gradle"]))'}        | ${{}}
-      ${'base="foo"'}            | ${'apply(from = File("${base}/bar.gradle"))'}             | ${validOutput}
-      ${''}                      | ${'apply(from = File("foo", "bar.gradle"))'}              | ${validOutput}
-      ${'base="foo"'}            | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput}
-      ${'base="foo"'}            | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput}
+      def                                         | input                                                     | output
+      ${''}                                       | ${'apply from: ""'}                                       | ${{}}
+      ${''}                                       | ${'apply from: "foo/invalid.gradle"'}                     | ${{}}
+      ${''}                                       | ${'apply from: "${base}"'}                                | ${{}}
+      ${''}                                       | ${'apply from: "foo/invalid.non-gradle"'}                 | ${{}}
+      ${''}                                       | ${'apply from: "foo/bar.gradle"'}                         | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: "${base}/bar.gradle"'}                     | ${validOutput(localPackageFile)}
+      ${'path="foo/bar.gradle"'}                  | ${'apply from: path'}                                     | ${validOutput(localPackageFile)}
+      ${'path="bar.gradle"'}                      | ${'apply from: "foo/" + path'}                            | ${validOutput(localPackageFile)}
+      ${'path="foo/bar.gradle"'}                  | ${'apply from: property("path")'}                         | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: file("foo/bar.gradle")'}                   | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: file("${base}/bar.gradle")'}               | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: project.file("foo/bar.gradle")'}           | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: rootProject.file("foo/bar.gradle")'}       | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: new File("foo/bar.gradle")'}               | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: new File("${base}/bar.gradle")'}           | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: new File("foo", "bar.gradle")'}            | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: new File(base, "bar.gradle")'}             | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: new File("${base}", "bar.gradle")'}        | ${validOutput(localPackageFile)}
+      ${'path="bar.gradle"'}                      | ${'apply from: new File("foo", "${path}")'}               | ${validOutput(localPackageFile)}
+      ${'e="o"; b="gradle" '}                     | ${'apply from: new File("f" + e + e, "bar." + b)'}        | ${validOutput(localPackageFile)}
+      ${'a="bar"; b="gradle"'}                    | ${'apply from: new File("foo", a + "." + "${b}")'}        | ${validOutput(localPackageFile)}
+      ${'path="bar.gradle"'}                      | ${'apply from: new File("foo", property("path"))'}        | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply from: new File(property("base"), "bar.gradle")'} | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply(from = "foo/bar.gradle"))'}                      | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply(from = "${base}/bar.gradle"))'}                  | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply(from = File("foo/bar.gradle"))'}                 | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply(from = File("foo", "bar", "baz"))'}              | ${{}}
+      ${''}                                       | ${'apply(from = File(["${somedir}/foo.gradle"]))'}        | ${{}}
+      ${'base="foo"'}                             | ${'apply(from = File("${base}/bar.gradle"))'}             | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply(from = File("foo", "bar.gradle"))'}              | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply(from = File(base, "bar.gradle"))'}               | ${validOutput(localPackageFile)}
+      ${'base="foo"'}                             | ${'apply(from = File("${base}", "bar.gradle"))'}          | ${validOutput(localPackageFile)}
+      ${''}                                       | ${'apply from: "https://someurl.com/file.gradle"'}        | ${validOutput(remotePackageFile)}
+      ${'path="https://someurl.com/file.gradle"'} | ${'apply from: path'}                                     | ${validOutput(remotePackageFile)}
+      ${''}                                       | ${'apply from: "https://invalidurl.com/file.gradle"'}     | ${{}}
     `('$def | $input', ({ def, input, output }) => {
-      mockFs(fileContents);
+      mockFs(localFileContents);
+      mockSynchronousGetRequest(remoteFileContents);
       const { vars } = parseGradle(
         [def, input].join('\n'),
         {},
         '',
-        fileContents
+        localFileContents
       );
       expect(vars).toMatchObject(output);
     });
@@ -888,7 +906,7 @@ describe('modules/manager/gradle/parser', () => {
         'apply from: "foo/bar.gradle"',
         {},
         '',
-        fileContents,
+        localFileContents,
         3
       );
       expect(logger.logger.debug).toHaveBeenCalledWith(
