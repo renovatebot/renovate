@@ -69,14 +69,13 @@ export type FragmentType =
 
 export class StringFragment {
   static as(data: unknown): StringFragment {
-    if (data instanceof StringFragment) {
-      return data;
-    }
-    const frag = ValueFragmentSchema.parse(data);
-    if (frag.type === 'string') {
-      return StringFragment.from(frag);
-    }
-    throw typeError('string', frag.type);
+    return as(
+      data,
+      StringFragment,
+      (v: ValueFragmentInterface): v is StringFragmentInterface =>
+        v.type === 'string',
+      StringFragment.from
+    );
   }
 
   static from(frag: StringFragmentInterface): StringFragment {
@@ -90,14 +89,13 @@ export class StringFragment {
 
 export class BooleanFragment {
   static as(data: unknown): BooleanFragment {
-    if (data instanceof BooleanFragment) {
-      return data;
-    }
-    const frag = ValueFragmentSchema.parse(data);
-    if (frag.type === 'boolean') {
-      return BooleanFragment.from(frag);
-    }
-    throw typeError('boolean', frag.type);
+    return as(
+      data,
+      BooleanFragment,
+      (v: ValueFragmentInterface): v is BooleanFragmentInterface =>
+        v.type === 'boolean',
+      BooleanFragment.from
+    );
   }
 
   static from(frag: BooleanFragmentInterface): BooleanFragment {
@@ -114,14 +112,13 @@ export class BooleanFragment {
 
 export class ArrayFragment {
   static as(data: unknown): ArrayFragment {
-    if (data instanceof ArrayFragment) {
-      return data;
-    }
-    const frag = ValueFragmentSchema.parse(data);
-    if (frag.type === 'array') {
-      return ArrayFragment.from(frag);
-    }
-    throw typeError('array', frag.type);
+    return as(
+      data,
+      ArrayFragment,
+      (v: ValueFragmentInterface): v is ArrayFragmentInterface =>
+        v.type === 'array',
+      ArrayFragment.from
+    );
   }
 
   static from(frag: ArrayFragmentInterface): ArrayFragment {
@@ -147,14 +144,13 @@ export class ArrayFragment {
 
 export class RecordFragment {
   static as(data: unknown): RecordFragment {
-    if (data instanceof RecordFragment) {
-      return data;
-    }
-    const frag = ValueFragmentSchema.parse(data);
-    if (frag.type !== 'record') {
-      throw typeError('record', frag.type);
-    }
-    return RecordFragment.from(frag);
+    return as(
+      data,
+      RecordFragment,
+      (v: ValueFragmentInterface): v is RecordFragmentInterface =>
+        v.type === 'record',
+      RecordFragment.from
+    );
   }
 
   static from(frag: RecordFragmentInterface): RecordFragment {
@@ -241,8 +237,20 @@ export type Fragment = ValueFragment | AttributeFragment;
 
 // Static Functions
 
-function typeError(expected: string, actual: string): Error {
-  return new Error(`Expected type ${expected}, but was ${actual}.`);
+function as<I extends ValueFragmentInterface, F>(
+  data: unknown,
+  fragCtor: new (...args: any[]) => F,
+  iTypeGuard: (v: ValueFragmentInterface) => v is I,
+  fromFn: (frag: I) => F
+): F {
+  if (data instanceof fragCtor) {
+    return data;
+  }
+  const fragInterface = ValueFragmentSchema.parse(data);
+  if (iTypeGuard(fragInterface)) {
+    return fromFn(fragInterface);
+  }
+  throw new Error(`Incorrect value fragment type: ${fragInterface.type}.`);
 }
 
 export function asValue(data: unknown): ValueFragment {

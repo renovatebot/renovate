@@ -2,10 +2,8 @@ import {
   ArrayFragment,
   AttributeFragment,
   BooleanFragment,
-  FragmentType,
   RecordFragment,
   StringFragment,
-  ValueFragment,
   asFragment,
   asValue,
   safeAsValue,
@@ -61,11 +59,7 @@ describe('modules/manager/bazel-module/fragments', () => {
 
     describe('as', () => {
       it('returns an ArrayFragment', () => {
-        const frag: {
-          type: FragmentType;
-          isComplete: boolean;
-          items: ValueFragment[];
-        } = {
+        const frag = {
           type: 'array',
           isComplete: false,
           items: [new StringFragment('hello')],
@@ -170,6 +164,16 @@ describe('modules/manager/bazel-module/fragments', () => {
       ${AttributeFragment.as} | ${new ArrayFragment()}
     `('$fn throws with $frag', ({ fn, frag }) => {
       expect(() => fn(frag)).toThrow();
+    });
+
+    it.each`
+      fn                    | data                                                   | exp
+      ${StringFragment.as}  | ${{ type: 'string', value: 'hello' }}                  | ${new StringFragment('hello')}
+      ${BooleanFragment.as} | ${{ type: 'boolean', value: true }}                    | ${new BooleanFragment(true)}
+      ${ArrayFragment.as}   | ${{ type: 'array', isComplete: false, items: [] }}     | ${new ArrayFragment()}
+      ${RecordFragment.as}  | ${{ type: 'record', isComplete: false, children: {} }} | ${new RecordFragment()}
+    `('$fn with $data', ({ fn, data, exp }) => {
+      expect(fn(data)).toEqual(exp);
     });
   });
 });
