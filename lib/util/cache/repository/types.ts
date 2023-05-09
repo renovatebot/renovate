@@ -112,6 +112,7 @@ export interface BranchCache {
   dependencyDashboardFooter?: unknown;
   dependencyDashboardHeader?: unknown;
   prBlockedBy?: PrBlockedBy;
+  prTitle?: string;
   repoProblems?: Set<string>;
   result?: string;
   packageFiles?: Record<string, Partial<PackageFile>[]>;

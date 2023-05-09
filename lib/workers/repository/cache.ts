@@ -78,6 +78,7 @@ async function generateBranchCache(
     dependencyDashboardTitle,
     packageFiles,
     prBlockedBy,
+    prTitle,
     repository,
     result,
   } = branch;
@@ -121,9 +122,9 @@ async function generateBranchCache(
     // we minimize to packageFile+warnings because that's what getDepWarningsDashboard needs.
     const packageFilesMinimized: Record<string, Partial<PackageFile>[]> = {};
     if (packageFiles) {
-      for (const key in packageFiles) {
-        const packageFile = packageFiles[key];
-        packageFilesMinimized[key] = packageFile.map((file) => ({
+      for (const manager in packageFiles) {
+        const packageFile = packageFiles[manager];
+        packageFilesMinimized[manager] = packageFile.map((file) => ({
           deps: file.deps.map(({ warnings }) => ({ warnings })),
           packageFile: file.packageFile,
         }));
@@ -162,6 +163,7 @@ async function generateBranchCache(
       pristine,
       prCache,
       prNo,
+      prTitle,
       repoProblems,
       result,
       sha: branchSha,
