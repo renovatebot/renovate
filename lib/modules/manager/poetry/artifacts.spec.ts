@@ -13,8 +13,6 @@ import { updateArtifacts } from '.';
 
 const pyproject1toml = Fixtures.get('pyproject.1.toml');
 const pyproject10toml = Fixtures.get('pyproject.10.toml');
-const poetry12lock = Fixtures.get('poetry12.lock');
-const poetry142lock = Fixtures.get('poetry142.lock');
 
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs');
@@ -36,6 +34,9 @@ const config: UpdateArtifactsConfig = {};
 
 describe('modules/manager/poetry/artifacts', () => {
   describe('getPoetryRequirement', () => {
+    const poetry12lock = Fixtures.get('poetry12.lock');
+    const poetry142lock = Fixtures.get('poetry142.lock');
+
     it('detects poetry from first line of poetry.lock', () => {
       const pyprojectContent = '';
       expect(getPoetryRequirement(pyprojectContent, poetry142lock)).toBe(

@@ -36,6 +36,12 @@ export function getPythonConstraint(
 
 const pkgValRegex = regEx(`^${dependencyPattern}$`);
 
+const poetryConstraint: Record<string, string> = {
+  '1.0': '<1.1.0',
+  '1.1': '<1.3.0',
+  '2.0': '>=1.3.0',
+};
+
 export function getPoetryRequirement(
   pyProjectContent: string,
   existingLockFileContent: string
@@ -51,11 +57,6 @@ export function getPoetryRequirement(
     const data = parse(existingLockFileContent) as PoetryLock;
     const lockVersion = data?.metadata?.['lock-version'];
     if (is.string(lockVersion)) {
-      const poetryConstraint: Record<string, string> = {
-        '1.0': '<1.1.0',
-        '1.1': '<1.3.0',
-        '2.0': '>=1.3.0',
-      };
       if (poetryConstraint[lockVersion]) {
         logger.debug('Using poetry version from poetry.lock metadata');
         return poetryConstraint[lockVersion];
