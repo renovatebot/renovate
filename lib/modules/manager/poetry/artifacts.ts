@@ -52,7 +52,7 @@ export function getPoetryRequirement(
     const lockVersion = data?.metadata?.['lock-version'];
     if (is.string(lockVersion)) {
       const poetryConstraint: Record<string, string> = {
-        '1.0': '<1.10.0',
+        '1.0': '<1.1.0',
         '1.1': '<1.3.0',
         '2.0': '>=1.3.0',
       };
