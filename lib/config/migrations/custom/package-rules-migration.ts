@@ -24,15 +24,6 @@ function renameKeys(packageRule: PackageRule): PackageRule {
   return newPackageRule;
 }
 
-const dockerLanguageManagers = [
-  'ansible',
-  'dockerfile',
-  'docker-compose',
-  'droneci',
-  'kubernetes',
-  'woodpecker',
-];
-
 function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   const newPackageRules: PackageRule[] = [];
   const matchLanguages = packageRule.matchLanguages;
@@ -49,28 +40,13 @@ function removeMatchLanguage(packageRule: PackageRule): PackageRule[] {
   const newRule: PackageRule = structuredClone(packageRule);
   delete newRule.matchLanguages;
 
-  const filteredLanguages = matchLanguages.filter(
-    (language) => language !== 'docker'
-  );
   // are there any 1:1 migrateable languages
-  if (filteredLanguages.length) {
-    newRule.matchCategories = filteredLanguages;
-    newPackageRules.push(newRule);
-  }
-
-  // if there has been no docker tag, then we can skip the migration logic.
-  if (filteredLanguages.length === matchLanguages.length) {
-    return newPackageRules;
-  }
-  // Create a separate rule to mimic OR behaviour
-  const newMatchManagerRule: PackageRule = { ...packageRule };
-  delete newMatchManagerRule.matchLanguages;
-
-  newMatchManagerRule.matchManagers = dockerLanguageManagers;
-  newPackageRules.push(newMatchManagerRule);
+  newRule.matchCategories = matchLanguages;
+  newPackageRules.push(newRule);
 
   return newPackageRules;
 }
+
 export class PackageRulesMigration extends AbstractMigration {
   override readonly propertyName = 'packageRules';
 

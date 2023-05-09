@@ -58,12 +58,12 @@ describe('config/migrations/custom/package-rules-migration', () => {
     );
   });
 
-  it('should migrate single docker language tag', () => {
+  it('should migrate languages to categories', () => {
     expect(PackageRulesMigration).toMigrate(
       {
         packageRules: [
           {
-            matchLanguages: ['docker'],
+            matchLanguages: ['docker', 'js'],
             addLabels: ['docker'],
           },
         ],
@@ -71,47 +71,8 @@ describe('config/migrations/custom/package-rules-migration', () => {
       {
         packageRules: [
           {
-            matchManagers: [
-              'ansible',
-              'dockerfile',
-              'docker-compose',
-              'droneci',
-              'kubernetes',
-              'woodpecker',
-            ],
+            matchCategories: ['docker', 'js'],
             addLabels: ['docker'],
-          },
-        ],
-      }
-    );
-  });
-
-  it('should migrate mixed docker language tag to separate rules', () => {
-    expect(PackageRulesMigration).toMigrate(
-      {
-        packageRules: [
-          {
-            addLabels: ['docker'],
-            matchLanguages: ['docker', 'python'],
-          },
-        ],
-      },
-      {
-        packageRules: [
-          {
-            addLabels: ['docker'],
-            matchCategories: ['python'],
-          },
-          {
-            addLabels: ['docker'],
-            matchManagers: [
-              'ansible',
-              'dockerfile',
-              'docker-compose',
-              'droneci',
-              'kubernetes',
-              'woodpecker',
-            ],
           },
         ],
       }
