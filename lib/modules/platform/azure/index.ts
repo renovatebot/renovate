@@ -529,11 +529,7 @@ export async function updatePr({
     objToUpdate.status = PullRequestStatus.Abandoned;
   }
   if (platformOptions?.autoApprove) {
-    const pr: GitPullRequest = await azureApiGit.getPullRequest(
-      config.repoId,
-      prNo,
-      config.project
-    );
+    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
