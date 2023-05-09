@@ -3,7 +3,7 @@ import { toPackageDependency } from './bazel-dep';
 import { BooleanFragment, RecordFragment, StringFragment } from './fragments';
 
 describe('modules/manager/bazel-module/bazel-dep', () => {
-  describe('BazelDepRecordToPackageDependency', () => {
+  describe('toPackageDependency()', () => {
     it('transforms a record fragment', () => {
       const record = new RecordFragment({
         rule: new StringFragment('bazel_dep'),
@@ -18,6 +18,12 @@ describe('modules/manager/bazel-module/bazel-dep', () => {
         depName: 'rules_foo',
         currentValue: '1.2.3',
       });
+    });
+
+    it('returns null if not a record fragment', () => {
+      const frag = new StringFragment('hello');
+      const result = toPackageDependency(frag);
+      expect(result).toBeNull();
     });
   });
 });

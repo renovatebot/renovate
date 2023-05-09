@@ -92,6 +92,12 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(record.children).toEqual({ name: new StringFragment('chicken') });
       expect(record.isComplete).toBe(false);
     });
+
+    it('.safeAs() returns null with invalid data', () => {
+      expect(
+        RecordFragment.safeAs({ type: 'string', value: 'hello' })
+      ).toBeNull();
+    });
   });
 
   describe('AttributeFragment', () => {
@@ -107,7 +113,7 @@ describe('modules/manager/bazel-module/fragments', () => {
       expect(attribute.isComplete).toBe(true);
     });
 
-    describe('as', () => {
+    describe('.as()', () => {
       it('returns an AttributeFragment', () => {
         const frag = {
           type: 'attribute',
@@ -117,6 +123,12 @@ describe('modules/manager/bazel-module/fragments', () => {
         const result = AttributeFragment.as(frag);
         expect(result).toEqual(frag);
       });
+    });
+
+    it('.safeAs() returns null with invalid data', () => {
+      expect(
+        AttributeFragment.safeAs({ type: 'string', value: 'hello' })
+      ).toBeNull();
     });
   });
 
@@ -159,6 +171,7 @@ describe('modules/manager/bazel-module/fragments', () => {
     it.each`
       fn                      | frag
       ${StringFragment.as}    | ${new ArrayFragment()}
+      ${BooleanFragment.as}   | ${new ArrayFragment()}
       ${ArrayFragment.as}     | ${new RecordFragment()}
       ${RecordFragment.as}    | ${new ArrayFragment()}
       ${AttributeFragment.as} | ${new ArrayFragment()}

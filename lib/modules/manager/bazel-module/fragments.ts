@@ -264,9 +264,9 @@ export function asValue(data: unknown): ValueFragment {
       return ArrayFragment.from(frag);
     case 'record':
       return RecordFragment.from(frag);
-    default:
-      throw new Error('Unexpected fragment type.');
   }
+  // istanbul ignore next: catch new fragment type
+  throw new Error('Unexpected fragment type.');
 }
 
 export function safeAsValue(data: unknown): ValueFragment | null {
