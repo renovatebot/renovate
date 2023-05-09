@@ -191,7 +191,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
-        repositories: { full_name: string; archived: boolean }[];
+        repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
         paginationField: 'repositories',
         paginate: 'all',
@@ -201,9 +201,10 @@ export async function getRepos(): Promise<string[]> {
         .filter((repo) => !repo.archived)
         .map((repo) => repo.full_name);
     } else {
-      const res = await githubApi.getJson<
-        { full_name: string; archived: boolean }[]
-      >(`user/repos?per_page=100`, { paginate: 'all' });
+      const res = await githubApi.getJson<GhRestRepo[]>(
+        `user/repos?per_page=100`,
+        { paginate: 'all' }
+      );
       return res.body
         .filter(is.nonEmptyObject)
         .filter((repo) => !repo.archived)
