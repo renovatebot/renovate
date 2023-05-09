@@ -377,6 +377,10 @@ export function isCloned(): boolean {
 
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
+    // istanbul ignore if
+    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+      await git.raw(['config', 'core.hooksPath', '/dev/null']);
+    }
     return;
   }
   gitInitialized = true;
