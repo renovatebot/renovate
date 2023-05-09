@@ -104,7 +104,7 @@ describe('config/index', () => {
       expect(config).toBeObject();
     });
 
-    it('setHighestVulnerabilitySeverity when config is vulnerability alert', () => {
+    it('highest vulnerabilitySeverity maintained when config is vulnerability alert', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
         isVulnerabilityAlert: true,

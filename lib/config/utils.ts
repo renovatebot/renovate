@@ -1,5 +1,5 @@
 import { logger } from '../logger';
-import { setHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
+import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
@@ -17,7 +17,10 @@ export function mergeChildConfig<
 
   // Ensure highest severity survives parent / child merge
   if (config?.isVulnerabilityAlert) {
-    setHighestVulnerabilitySeverity(config, parent, child);
+    config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
+      parent,
+      child
+    );
   }
 
   for (const option of options.getOptions()) {
