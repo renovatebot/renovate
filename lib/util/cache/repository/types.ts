@@ -2,8 +2,10 @@ import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
 } from '../../../config/types';
+import { UpdateType } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
+import { PrBlockedBy } from '../../../workers/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -17,6 +19,9 @@ export interface BranchUpgradeCache {
   currentValue?: string;
   datasource?: string;
   depName?: string;
+  depNameLinked?: string;
+  depType?: string;
+  displayPending?: string;
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
@@ -24,6 +29,9 @@ export interface BranchUpgradeCache {
   newValue?: string;
   newVersion?: string;
   sourceUrl?: string;
+  packageFile?: string;
+  remediationNotPossible?: boolean;
+  updateType?: UpdateType;
 }
 
 export interface OnboardingBranchCache {
@@ -93,6 +101,19 @@ export interface BranchCache {
    * Object that has PR info
    */
   prCache?: PrCache | null;
+
+  /**
+   * Dependency dashboard information
+   */
+  dependencyDashboard?: boolean;
+  dependencyDashboardApproval?: boolean;
+  dependencyDashboardPrApproval?: boolean;
+  dependencyDashboardTitle?: string;
+  dependencyDashboardFooter?: string;
+  dependencyDashboardHeader?: string;
+  prBlockedBy?: PrBlockedBy;
+  repoProblems?: Set<string>;
+  result?: string;
 }
 
 export interface RepoCacheData {

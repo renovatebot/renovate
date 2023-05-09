@@ -33,7 +33,7 @@ export function getErrors(config: RenovateConfig): string {
 }
 
 function getDepWarnings(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, Partial<PackageFile>[]>
 ): DepWarnings {
   const warnings: string[] = [];
   const warningFiles: string[] = [];
@@ -104,7 +104,7 @@ export function getDepWarningsPR(
 }
 
 export function getDepWarningsDashboard(
-  packageFiles: Record<string, PackageFile[]>
+  packageFiles: Record<string, Partial<PackageFile>[]>
 ): string {
   const { warnings, warningFiles } = getDepWarnings(packageFiles);
   if (!warnings.length) {

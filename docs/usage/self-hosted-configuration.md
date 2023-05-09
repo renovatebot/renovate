@@ -191,6 +191,10 @@ If all projects are managed by Hermit, you can tell Renovate to use the tooling 
 
 Tools not on this list fall back to `binarySource=global`.
 
+## branchSummaryExtended
+
+When enabled, will print extra information about the branches and dependency dashboard.
+
 ## cacheDir
 
 By default Renovate stores cache data in a temporary directory like `/tmp/renovate/cache`.

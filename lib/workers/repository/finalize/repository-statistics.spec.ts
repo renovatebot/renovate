@@ -152,5 +152,28 @@ describe('workers/repository/finalize/repository-statistics', () => {
         `Branch summary`
       );
     });
+
+    it('logs extended branch info if branchSummaryExtended', () => {
+      const defaultBranch = 'main';
+      const config: RenovateConfig = {
+        defaultBranch,
+        branchSummaryExtended: true,
+      };
+      const branchCache = partial<BranchCache>({
+        dependencyDashboard: true,
+        result: 'done',
+      });
+      const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
+      const cache = partial<RepoCacheData>({
+        scan: {},
+        branches,
+      });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      runBranchSummary(config);
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
+    });
   });
 });

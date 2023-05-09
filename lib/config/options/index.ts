@@ -2634,6 +2634,14 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     default: [],
   },
+  {
+    name: 'branchSummaryExtended',
+    description: 'Extends the branch summary by printing all',
+    type: 'boolean',
+    experimental: true,
+    globalOnly: true,
+    default: false,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

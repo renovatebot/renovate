@@ -262,6 +262,7 @@ export interface RenovateConfig
   constraintsFiltering?: ConstraintsFilter;
 
   checkedBranches?: string[];
+  branchSummaryExtended?: boolean;
 }
 
 export interface AllConfig

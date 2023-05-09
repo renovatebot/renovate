@@ -1,7 +1,8 @@
 /* istanbul ignore file */
 
+import { nameFromLevel } from 'bunyan';
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
-import { logger } from '../../logger';
+import { getProblems, logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { scm } from '../../modules/platform/scm';
 import { getCache } from '../../util/cache/repository';
@@ -14,6 +15,7 @@ import { getCachedConflictResult } from '../../util/git/conflicts-cache';
 import { getCachedModifiedResult } from '../../util/git/modified-cache';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
+import { PackageFiles } from './package-files';
 import { getPrCache } from './update/pr/pr-cache';
 
 function generateBranchUpgradeCache(
@@ -22,23 +24,39 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
+    depNameLinked,
+    depType,
+    displayPending,
     packageName,
     fixedVersion,
     currentVersion,
     newVersion,
+    currentValue,
+    newValue,
     currentDigest,
     newDigest,
+    packageFile,
     sourceUrl,
+    remediationNotPossible,
+    updateType,
   } = upgrade;
   const result: BranchUpgradeCache = {
     datasource,
     depName,
+    depNameLinked,
+    depType,
+    displayPending,
     fixedVersion,
     currentVersion,
+    currentValue,
+    newValue,
     newVersion,
     currentDigest,
     newDigest,
+    packageFile,
     sourceUrl,
+    remediationNotPossible,
+    updateType,
   };
   if (packageName) {
     result.packageName = packageName;
@@ -49,7 +67,20 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const { baseBranch, branchName } = branch;
+  const {
+    baseBranch,
+    branchName,
+    dependencyDashboard,
+    dependencyDashboardApproval,
+    dependencyDashboardFooter,
+    dependencyDashboardHeader,
+    dependencyDashboardPrApproval,
+    dependencyDashboardTitle,
+    packageFiles,
+    prBlockedBy,
+    repository,
+    result,
+  } = branch;
   try {
     const branchSha = await scm.getBranchCommit(branchName);
     const baseBranchSha = await scm.getBranchCommit(baseBranch);
@@ -79,24 +110,57 @@ async function generateBranchCache(
           baseBranchSha
         ) ?? undefined;
     }
+
     const automerge = !!branch.automerge;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];
     const branchFingerprint = branch.branchFingerprint;
     const prCache = getPrCache(branchName);
+
+    // we minimize to packageFile+warnings because that's what getDepWarningsDashboard needs.
+    const packageFilesMinimized: Partial<PackageFiles> = {};
+    for (const [fileType, files] of Object.entries(packageFiles)) {
+      packageFilesMinimized[fileType] = files.map((file) => ({
+        deps: file.deps.map(({ warnings }) => ({ warnings })),
+        packageFile: file.packageFile,
+      }));
+    }
+
+    //get repo problems to log into branch summary
+    const repoProblems = new Set(
+      getProblems()
+        .filter(
+          (problem) =>
+            problem.repository === repository && !problem.artifactErrors
+        )
+        .map(
+          (problem) =>
+            `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+        )
+    );
+
     return {
       automerge,
       baseBranchSha,
       baseBranch,
       branchFingerprint,
       branchName,
+      dependencyDashboard,
+      dependencyDashboardApproval,
+      dependencyDashboardFooter,
+      dependencyDashboardHeader,
+      dependencyDashboardPrApproval,
+      dependencyDashboardTitle,
       isBehindBase,
       isConflicted,
       isModified,
+      prBlockedBy,
       pristine,
       prCache,
       prNo,
+      repoProblems,
+      result,
       sha: branchSha,
       upgrades,
     };
