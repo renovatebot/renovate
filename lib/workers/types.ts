@@ -214,5 +214,5 @@ export interface Dashboard {
 
 export interface DashboardBody {
   issueBody: string;
-  dashboarrd: Dashboard;
+  dashboard: Dashboard;
 }
