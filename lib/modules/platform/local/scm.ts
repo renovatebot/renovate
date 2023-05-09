@@ -6,7 +6,6 @@ import type { PlatformScm } from '../types';
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
-  fileList: string[] | undefined;
 
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean> {
     return Promise.resolve(false);
