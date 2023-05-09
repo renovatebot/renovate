@@ -3140,6 +3140,7 @@ This feature works with the following managers:
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
 - [`droneci`](/modules/manager/droneci)
+- [`terraform`](/modules/manager/terraform)
 
 ## registryUrls
 
