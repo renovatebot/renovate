@@ -4,10 +4,11 @@ import {
   BooleanFragment,
   ChildFragments,
   Fragment,
-  Fragments,
   RecordFragment,
   StringFragment,
   ValueFragment,
+  asFragment,
+  safeAsValue,
 } from './fragments';
 import { Stack } from './stack';
 
@@ -27,7 +28,7 @@ export class Ctx implements CtxCompatible {
   static as(obj: CtxCompatible): Ctx {
     Object.setPrototypeOf(obj, Ctx.prototype);
     const ctx = obj as Ctx;
-    const stackItems = ctx.stack.map((item) => Fragments.asFragment(item));
+    const stackItems = ctx.stack.map((item) => asFragment(item));
     ctx.stack = Stack.create(...stackItems);
     ctx.results = ctx.results.map((item) => RecordFragment.as(item));
     return ctx;
@@ -56,7 +57,7 @@ export class Ctx implements CtxCompatible {
       return;
     }
     const parent = this.stack.safeCurrent;
-    const value = Fragments.safeAsValue(current);
+    const value = safeAsValue(current);
     if (value) {
       if (parent && 'addValue' in parent) {
         parent.addValue(value);

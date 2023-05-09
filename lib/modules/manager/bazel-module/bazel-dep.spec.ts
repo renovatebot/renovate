@@ -1,5 +1,5 @@
 import { BazelDatasource } from '../../datasource/bazel';
-import { BazelDepRecordToPackageDependency } from './bazel-dep';
+import { toPackageDependency } from './bazel-dep';
 import { BooleanFragment, RecordFragment, StringFragment } from './fragments';
 
 describe('modules/manager/bazel-module/bazel-dep', () => {
@@ -11,7 +11,7 @@ describe('modules/manager/bazel-module/bazel-dep', () => {
         version: new StringFragment('1.2.3'),
         dev_dependency: new BooleanFragment(true),
       });
-      const result = BazelDepRecordToPackageDependency.parse(record);
+      const result = toPackageDependency(record);
       expect(result).toEqual({
         datasource: BazelDatasource.id,
         depType: 'bazel_dep',

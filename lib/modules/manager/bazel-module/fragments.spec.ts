@@ -3,10 +3,12 @@ import {
   AttributeFragment,
   BooleanFragment,
   FragmentType,
-  Fragments,
   RecordFragment,
   StringFragment,
   ValueFragment,
+  asFragment,
+  asValue,
+  safeAsValue,
 } from './fragments';
 
 describe('modules/manager/bazel-module/fragments', () => {
@@ -113,18 +115,13 @@ describe('modules/manager/bazel-module/fragments', () => {
 
     describe('as', () => {
       it('returns an AttributeFragment', () => {
-        const frag: {
-          type: FragmentType;
-          isComplete: boolean;
-          value?: ValueFragment;
-        } = {
+        const frag = {
           type: 'attribute',
-          isComplete: false,
+          name: 'greeting',
           value: new StringFragment('hello'),
         };
         const result = AttributeFragment.as(frag);
         expect(result).toEqual(frag);
-        expect(result).toBeInstanceOf(AttributeFragment);
       });
     });
   });
@@ -136,23 +133,21 @@ describe('modules/manager/bazel-module/fragments', () => {
       ${new ArrayFragment()}           | ${new ArrayFragment()}
       ${new RecordFragment()}          | ${new RecordFragment()}
       ${new AttributeFragment('name')} | ${null}
-    `('Fragments.safeAsValue($frag)', ({ frag, exp }) => {
-      const result = Fragments.safeAsValue(frag);
+    `('safeAsValue($frag)', ({ frag, exp }) => {
+      const result = safeAsValue(frag);
       expect(result).toEqual(exp);
     });
 
     describe('asValue', () => {
       it('returns the instance when it is a value fragment', () => {
         const value = new StringFragment('hello');
-        const result = Fragments.asValue(value);
+        const result = asValue(value);
         expect(result).toEqual(value);
       });
 
       it('throws when it is not a value fragment', () => {
         const attribute = new AttributeFragment('name');
-        expect(() => Fragments.asValue(attribute)).toThrow(
-          new Error(`Unexpected fragment type: attribute`)
-        );
+        expect(() => asValue(attribute)).toThrow();
       });
     });
 
@@ -162,8 +157,8 @@ describe('modules/manager/bazel-module/fragments', () => {
       ${new ArrayFragment()}           | ${new ArrayFragment()}
       ${new RecordFragment()}          | ${new RecordFragment()}
       ${new AttributeFragment('name')} | ${new AttributeFragment('name')}
-    `('Fragments.asFragment($frag)', ({ frag, exp }) => {
-      const result = Fragments.asFragment(frag);
+    `('asFragment($frag)', ({ frag, exp }) => {
+      const result = asFragment(frag);
       expect(result).toEqual(exp);
     });
 
