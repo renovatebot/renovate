@@ -897,9 +897,7 @@ describe('modules/platform/azure/index', () => {
         isFlagged: false,
         isRequired: false,
       };
-      const updateFn = jest
-        .fn(() => prUpdateResult)
-        .mockName('createPullRequestReviewer');
+      const updateFn = jest.fn(() => prUpdateResult);
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
