@@ -145,7 +145,7 @@ export const allowedFields = {
   versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
   vulnerabilitySeverity:
-    'The vulnerability severity for a vulnerability alert upgrade',
+    'The severity for a vulnerability alert upgrade (eg: LOW, MODERATE, HIGH, CRITICAL)',
 };
 
 const prBodyFields = [
