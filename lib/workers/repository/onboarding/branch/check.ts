@@ -7,13 +7,14 @@ import {
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { readLocalFile } from '../../../../util/fs';
-import { getFileList } from '../../../../util/git';
+import { getBranchCommit } from '../../../../util/git';
 
 async function findFile(fileName: string): Promise<boolean> {
   logger.debug(`findFile(${fileName})`);
-  const fileList = await getFileList();
+  const fileList = await scm.getFileList();
   return fileList.includes(fileName);
 }
 
@@ -61,7 +62,25 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     logger.debug('Config file will be ignored');
     return true;
   }
+
+  const pr = await closedPrExists(config);
   const cache = getCache();
+  const onboardingBranchCache = cache?.onboardingBranchCache;
+  // if onboarding cache is present and base branch has not been updated branch is not onboarded
+  // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
+  if (
+    config.onboarding &&
+    !pr &&
+    onboardingBranchCache &&
+    onboardingBranchCache.defaultBranchSha ===
+      getBranchCommit(config.defaultBranch!) &&
+    onboardingBranchCache.onboardingBranchSha ===
+      getBranchCommit(config.onboardingBranch!)
+  ) {
+    logger.debug('Onboarding cache is valid. Repo is not onboarded');
+    return false;
+  }
+
   if (cache.configFileName) {
     logger.debug('Checking cached config file name');
     try {
@@ -104,7 +123,6 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     throw new Error(REPOSITORY_NO_CONFIG);
   }
 
-  const pr = await closedPrExists(config);
   if (!pr) {
     logger.debug('Found no closed onboarding PR');
     return false;

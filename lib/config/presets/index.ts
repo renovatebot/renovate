@@ -6,7 +6,6 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
-import { clone } from '../../util/clone';
 import { regEx } from '../../util/regex';
 import * as massage from '../massage';
 import * as migration from '../migration';
@@ -274,7 +273,7 @@ export async function resolveConfigPresets(
   _ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<AllConfig> {
-  let ignorePresets = clone(_ignorePresets);
+  let ignorePresets = structuredClone(_ignorePresets);
   if (!ignorePresets || ignorePresets.length === 0) {
     ignorePresets = inputConfig.ignorePresets ?? [];
   }

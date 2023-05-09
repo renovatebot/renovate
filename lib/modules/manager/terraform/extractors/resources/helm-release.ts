@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
+import { joinUrlParts } from '../../../../../util/url';
 import { DockerDatasource } from '../../../../datasource/docker';
 import { HelmDatasource } from '../../../../datasource/helm';
 import { isOCIRegistry } from '../../../helmv3/utils';
@@ -37,18 +38,10 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         depName: helmRelease.chart,
         datasource: HelmDatasource.id,
       };
-      if (is.nonEmptyString(helmRelease.repository)) {
-        if (isOCIRegistry(helmRelease.repository)) {
-          // For oci repos, we remove the oci:// and use the docker datasource
-          dep.registryUrls = [
-            helmRelease.repository.replace('oci://', 'https://'),
-          ];
-          dep.datasource = DockerDatasource.id;
-        } else {
-          dep.registryUrls = [helmRelease.repository];
-        }
-      }
-      if (!helmRelease.chart) {
+
+      dependencies.push(dep);
+
+      if (!is.nonEmptyString(helmRelease.chart)) {
         dep.skipReason = 'invalid-name';
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
@@ -56,9 +49,20 @@ export class HelmReleaseExtractor extends DependencyExtractor {
         dep.datasource = DockerDatasource.id;
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
+      } else if (is.nonEmptyString(helmRelease.repository)) {
+        if (isOCIRegistry(helmRelease.repository)) {
+          {
+            // For oci repos, we remove the oci://, join the chart name and use the docker datasource
+            dep.packageName = joinUrlParts(
+              helmRelease.repository.replace('oci://', ''),
+              helmRelease.chart
+            );
+            dep.datasource = DockerDatasource.id;
+          }
+        } else {
+          dep.registryUrls = [helmRelease.repository];
+        }
       }
-
-      dependencies.push(dep);
     }
 
     return dependencies;

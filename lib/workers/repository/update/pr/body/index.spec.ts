@@ -62,6 +62,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -91,6 +92,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -128,6 +130,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -155,6 +158,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -178,6 +182,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -199,6 +204,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );
@@ -247,6 +253,7 @@ describe('workers/repository/update/pr/body/index', () => {
           debugData: {
             updatedInVer: '1.2.3',
             createdInVer: '1.2.3',
+            targetBranch: 'base',
           },
         }
       );

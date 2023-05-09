@@ -208,7 +208,7 @@ describe('modules/platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should return an array of repos when using GitHub App Installation Token', async () => {
@@ -236,7 +236,7 @@ describe('modules/platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
@@ -2825,6 +2825,28 @@ describe('modules/platform/github/index', () => {
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .reply(405, { message: 'Required status check "build" is expected.' });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle approvers required', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
+        message:
+          'At least 1 approving review is required by reviewers with write access.',
+      });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1234,

@@ -56,6 +56,7 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
@@ -144,9 +145,10 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
+  cacheModified?: boolean;
+  defaultBranch?: string;
   inactiveBranches: string[];
 }
 

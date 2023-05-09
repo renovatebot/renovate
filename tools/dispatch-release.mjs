@@ -1,16 +1,15 @@
 import got from 'got';
-import shell from 'shelljs';
 import { options } from './utils/options.mjs';
 
 const version = options.release;
 const tag = options.tag || 'latest';
 const dry = options.dryRun;
 
-shell.echo(`Dispatching version: ${version}`);
+console.log(`Dispatching version: ${version}`);
 
 (async () => {
   if (dry) {
-    shell.echo('DRY-RUN: done.');
+    console.log('DRY-RUN: done.');
     return;
   }
   await got(
@@ -35,5 +34,5 @@ shell.echo(`Dispatching version: ${version}`);
   );
 })().catch((e) => {
   // Ignore for now
-  shell.echo(e.toString());
+  console.warn(e.toString());
 });

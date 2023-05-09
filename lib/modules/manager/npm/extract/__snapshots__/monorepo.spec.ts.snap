@@ -42,11 +42,11 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
     ],
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "workspacesPackages": undefined,
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
@@ -57,11 +57,11 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() updates inte
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "workspacesPackages": undefined,
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
@@ -114,11 +114,11 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
     ],
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "workspacesPackages": undefined,
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
@@ -129,11 +129,11 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses lerna p
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": false,
       "lernaClient": undefined,
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "workspacesPackages": undefined,
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
@@ -162,11 +162,13 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/a",
+      "workspacesPackages": [
+        "packages/*",
+      ],
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
@@ -177,11 +179,13 @@ exports[`modules/manager/npm/extract/monorepo .extractPackageFile() uses yarn wo
   {
     "managerData": {
       "hasPackageManager": undefined,
-      "hasWorkspaces": true,
       "lernaClient": "yarn",
       "lernaJsonFile": "lerna.json",
       "npmLock": undefined,
       "packageJsonName": "@org/b",
+      "workspacesPackages": [
+        "packages/*",
+      ],
       "yarnLock": undefined,
       "yarnZeroInstall": undefined,
     },
