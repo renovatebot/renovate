@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
