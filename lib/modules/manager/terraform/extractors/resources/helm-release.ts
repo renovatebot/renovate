@@ -51,13 +51,13 @@ export class HelmReleaseExtractor extends DependencyExtractor {
       } else if (isOCIRegistry(helmRelease.chart)) {
         // For oci charts, we remove the oci:// and use the docker datasource
         dep.depName = helmRelease.chart.replace('oci://', '');
-        this.processOci(dep.depName, config, dep);
+        this.processOCI(dep.depName, config, dep);
       } else if (checkIfStringIsPath(helmRelease.chart)) {
         dep.skipReason = 'local-chart';
       } else if (is.nonEmptyString(helmRelease.repository)) {
         if (isOCIRegistry(helmRelease.repository)) {
           // For oci charts, we remove the oci:// and use the docker datasource
-          this.processOci(
+          this.processOCI(
             joinUrlParts(
               helmRelease.repository.replace('oci://', ''),
               helmRelease.chart
