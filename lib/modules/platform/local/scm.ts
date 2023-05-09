@@ -1,13 +1,8 @@
-/* istanbul ignore file */
-
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { execSync } from 'node:child_process';
 import { glob } from 'glob';
 import { logger } from '../../../logger';
 import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
 import type { PlatformScm } from '../types';
-
-const execAsync = promisify(exec);
 
 let fileList: string[] | undefined;
 export class LocalFs implements PlatformScm {
@@ -38,7 +33,7 @@ export class LocalFs implements PlatformScm {
   async getFileList(): Promise<string[]> {
     try {
       // fetch file list using git
-      const { stdout } = await execAsync('git ls-files');
+      const stdout = execSync('git ls-files', { encoding: 'utf-8' });
       logger.debug('Got file list using git');
       fileList = stdout.split('\n');
     } catch (err) {
@@ -46,9 +41,6 @@ export class LocalFs implements PlatformScm {
       fileList ??= await glob('**', {
         dot: true,
         nodir: true,
-        ignore: {
-          childrenIgnored: (p) => p.isNamed('.git'),
-        },
       });
     }
 
