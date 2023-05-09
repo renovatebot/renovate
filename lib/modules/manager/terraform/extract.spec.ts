@@ -429,6 +429,19 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          depType: 'docker_image',
+          skipReason: 'invalid-dependency-specification',
+        },
+        {
+          autoReplaceStringTemplate:
+            '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.7.8',
+          datasource: 'docker',
+          depName: 'nginx',
+          depType: 'docker_image',
+          replaceString: 'nginx:1.7.8',
+        },
+        {
           depType: 'docker_container',
           skipReason: 'invalid-dependency-specification',
         },
