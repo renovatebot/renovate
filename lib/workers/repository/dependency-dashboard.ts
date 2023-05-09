@@ -149,7 +149,7 @@ function getListItem(branch: Partial<BranchConfig>, type: string): string {
   }
   const uniquePackages = [
     // TODO: types (#7154)
-    ...new Set(branch.upgrades.map((upgrade) => `\`${upgrade.depName!}\``)),
+    ...new Set(branch.upgrades!.map((upgrade) => `\`${upgrade.depName!}\``)),
   ];
   if (uniquePackages.length < 2) {
     return item + '\n';
@@ -172,7 +172,7 @@ function extractRepoProblems(config: RenovateConfig): Set<string> {
 }
 
 export function createDashboardBody(
-  header: string,
+  header: string | undefined,
   repoProblems: Set<string>,
   branches: Partial<BranchConfig>[],
   packageFiles: Record<string, Partial<PackageFile>[]>

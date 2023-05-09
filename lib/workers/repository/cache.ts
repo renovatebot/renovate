@@ -3,6 +3,7 @@
 import { nameFromLevel } from 'bunyan';
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { getProblems, logger } from '../../logger';
+import type { PackageFile } from '../../modules/manager/types';
 import { platform } from '../../modules/platform';
 import { scm } from '../../modules/platform/scm';
 import { getCache } from '../../util/cache/repository';
@@ -15,7 +16,6 @@ import { getCachedConflictResult } from '../../util/git/conflicts-cache';
 import { getCachedModifiedResult } from '../../util/git/modified-cache';
 import { getCachedPristineResult } from '../../util/git/pristine';
 import type { BranchConfig, BranchUpgradeConfig } from '../types';
-import { PackageFiles } from './package-files';
 import { getPrCache } from './update/pr/pr-cache';
 
 function generateBranchUpgradeCache(
@@ -119,12 +119,15 @@ async function generateBranchCache(
     const prCache = getPrCache(branchName);
 
     // we minimize to packageFile+warnings because that's what getDepWarningsDashboard needs.
-    const packageFilesMinimized: Partial<PackageFiles> = {};
-    for (const [fileType, files] of Object.entries(packageFiles)) {
-      packageFilesMinimized[fileType] = files.map((file) => ({
-        deps: file.deps.map(({ warnings }) => ({ warnings })),
-        packageFile: file.packageFile,
-      }));
+    const packageFilesMinimized: Record<string, Partial<PackageFile>[]> = {};
+    if (packageFiles) {
+      for (const key in packageFiles) {
+        const packageFile = packageFiles[key];
+        packageFilesMinimized[key] = packageFile.map((file) => ({
+          deps: file.deps.map(({ warnings }) => ({ warnings })),
+          packageFile: file.packageFile,
+        }));
+      }
     }
 
     //get repo problems to log into branch summary
@@ -163,6 +166,7 @@ async function generateBranchCache(
       result,
       sha: branchSha,
       upgrades,
+      packageFiles: packageFilesMinimized,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

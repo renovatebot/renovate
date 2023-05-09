@@ -1,11 +1,11 @@
 import type {
   RepositoryCacheConfig,
   RepositoryCacheType,
+  UpdateType,
 } from '../../../config/types';
-import { UpdateType } from '../../../config/types';
 import type { PackageFile } from '../../../modules/manager/types';
 import type { RepoInitConfig } from '../../../workers/repository/init/types';
-import { PrBlockedBy } from '../../../workers/types';
+import type { PrBlockedBy } from '../../../workers/types';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -19,9 +19,9 @@ export interface BranchUpgradeCache {
   currentValue?: string;
   datasource?: string;
   depName?: string;
-  depNameLinked?: string;
+  depNameLinked?: unknown;
   depType?: string;
-  displayPending?: string;
+  displayPending?: unknown;
   fixedVersion?: string;
   currentVersion?: string;
   packageName?: string;
@@ -30,7 +30,7 @@ export interface BranchUpgradeCache {
   newVersion?: string;
   sourceUrl?: string;
   packageFile?: string;
-  remediationNotPossible?: boolean;
+  remediationNotPossible?: unknown;
   updateType?: UpdateType;
 }
 
@@ -107,13 +107,14 @@ export interface BranchCache {
    */
   dependencyDashboard?: boolean;
   dependencyDashboardApproval?: boolean;
-  dependencyDashboardPrApproval?: boolean;
+  dependencyDashboardPrApproval?: unknown;
   dependencyDashboardTitle?: string;
-  dependencyDashboardFooter?: string;
-  dependencyDashboardHeader?: string;
+  dependencyDashboardFooter?: unknown;
+  dependencyDashboardHeader?: unknown;
   prBlockedBy?: PrBlockedBy;
   repoProblems?: Set<string>;
   result?: string;
+  packageFiles?: Record<string, Partial<PackageFile>[]>;
 }
 
 export interface RepoCacheData {
