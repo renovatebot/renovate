@@ -59,7 +59,7 @@ First, complete the "Beginners" and the "Intermediate" reading list.
 Then read:
 
 - Define your own regex manager with [`regexManagers`](./configuration-options.md#regexmanagers)
-- [Shareable config presets](./config-presets) 
+- [Shareable config presets](./config-presets)
 
 ## Self-hosting Renovate
 
