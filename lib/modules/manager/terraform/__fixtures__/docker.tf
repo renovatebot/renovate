@@ -12,12 +12,16 @@ resource "docker_image" "ignore_variable" {
   pull_triggers = ["${data.docker_registry_image.ubuntu.sha256_digest}"]
 }
 
+resource "docker_image" "proxy" {
+  name = "hub.proxy.test/bitnami/nginx:1.24.0"
+}
+
 
 # docker_container resources
 # https://registry.terraform.io/providers/kreuzwerker/docker/latest/docs/resources/container
-resource "docker_container" "proxy" {
-  name  = "proxy"
-  image = "hub.proxy.test/bitnami/nginx:1.24.0"
+resource "docker_container" "foo" {
+  name  = "foo"
+  image = "nginx:1.7.8"
 }
 
 resource "docker_container" "invalid" {

@@ -404,7 +404,7 @@ describe('modules/manager/terraform/extract', () => {
       const res = await extractPackageFile(docker, 'docker.tf', {
         registryAliases: { 'hub.proxy.test': 'index.docker.io' },
       });
-      expect(res?.deps).toHaveLength(6);
+      expect(res?.deps).toHaveLength(7);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toMatchObject([
         {
@@ -429,8 +429,13 @@ describe('modules/manager/terraform/extract', () => {
           replaceString: 'nginx:1.7.8',
         },
         {
+          autoReplaceStringTemplate:
+            'hub.proxy.test/bitnami/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.24.0',
+          datasource: 'docker',
+          depName: 'index.docker.io/bitnami/nginx',
           depType: 'docker_image',
-          skipReason: 'invalid-dependency-specification',
+          replaceString: 'hub.proxy.test/bitnami/nginx:1.24.0',
         },
         {
           autoReplaceStringTemplate:
@@ -438,21 +443,12 @@ describe('modules/manager/terraform/extract', () => {
           currentValue: '1.7.8',
           datasource: 'docker',
           depName: 'nginx',
-          depType: 'docker_image',
+          depType: 'docker_container',
           replaceString: 'nginx:1.7.8',
         },
         {
           depType: 'docker_container',
           skipReason: 'invalid-dependency-specification',
-        },
-        {
-          autoReplaceStringTemplate:
-            'hub.proxy.test/bitnami/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
-          currentValue: '1.24.0',
-          datasource: 'docker',
-          depName: 'index.docker.io/bitnami/nginx',
-          depType: 'docker_container',
-          replaceString: 'hub.proxy.test/bitnami/nginx:1.24.0',
         },
         {
           autoReplaceStringTemplate:
