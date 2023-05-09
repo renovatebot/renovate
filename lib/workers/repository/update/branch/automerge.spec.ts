@@ -1,4 +1,4 @@
-import { getConfig, git, platform } from '../../../../../test/util';
+import { getConfig, git, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import * as schedule from '../branch/schedule';
@@ -70,7 +70,7 @@ describe('workers/repository/update/branch/automerge', () => {
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('failed');
-      expect(git.checkoutBranch).toHaveBeenCalled();
+      expect(scm.checkoutBranch).toHaveBeenCalled();
     });
 
     it('returns true if automerge succeeds', async () => {
@@ -82,7 +82,7 @@ describe('workers/repository/update/branch/automerge', () => {
       const res = await tryBranchAutomerge(config);
 
       expect(res).toBe('automerged');
-      expect(git.checkoutBranch).toHaveBeenCalledWith('test-branch');
+      expect(scm.checkoutBranch).toHaveBeenCalledWith('test-branch');
     });
 
     it('returns true if automerge succeeds (dry-run)', async () => {

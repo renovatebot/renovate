@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../../test/exec-util';
-import { env, fs, git, mocked } from '../../../../test/util';
+import { env, fs, git, mocked, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
 import * as docker from '../../../util/exec/docker';
@@ -40,7 +40,7 @@ describe('modules/manager/nuget/artifacts', () => {
     getDefaultRegistries.mockReturnValue([]);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.privateCacheDir.mockImplementation(realFs.privateCacheDir);
-    git.getFileList.mockResolvedValueOnce([]);
+    scm.getFileList.mockResolvedValueOnce([]);
     GlobalConfig.set(adminConfig);
     docker.resetPrefetchedImages();
   });

@@ -5,8 +5,9 @@ import { GithubReleasesDatasource } from '../../datasource/github-releases';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { HexpmBobDatasource } from '../../datasource/hexpm-bob';
 import { JavaVersionDatasource } from '../../datasource/java-version';
-import { NodeDatasource } from '../../datasource/node';
+import { NodeVersionDatasource } from '../../datasource/node-version';
 import { NpmDatasource } from '../../datasource/npm';
+import { PypiDatasource } from '../../datasource/pypi';
 import { RubyVersionDatasource } from '../../datasource/ruby-version';
 import * as regexVersioning from '../../versioning/regex';
 import * as semverVersioning from '../../versioning/semver';
@@ -109,6 +110,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'dprint/dprint',
+    },
+  },
+  ecspresso: {
+    asdfPluginUrl: 'https://github.com/kayac/asdf-ecspresso',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kayac/ecspresso',
+      extractVersion: '^v(?<version>\\S+)',
     },
   },
   elixir: {
@@ -266,7 +275,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-nodejs',
     config: {
       depName: 'node',
-      datasource: NodeDatasource.id,
+      datasource: NodeVersionDatasource.id,
     },
   },
   ocaml: {
@@ -298,6 +307,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: NpmDatasource.id,
       packageName: 'pnpm',
       versioning: semverVersioning.id,
+    },
+  },
+  poetry: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-poetry',
+    config: {
+      datasource: PypiDatasource.id,
+      packageName: 'poetry',
     },
   },
   pulumi: {
@@ -404,6 +420,29 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'ziglang/zig',
+    },
+  },
+  maestro: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-maestro',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mobile-dev-inc/maestro',
+      extractVersion: '^cli-(?<version>\\S+)',
+    },
+  },
+  detekt: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-detekt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'detekt/detekt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ktlint: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-ktlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pinterest/ktlint',
     },
   },
 };

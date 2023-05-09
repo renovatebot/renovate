@@ -12,6 +12,7 @@ export class RubyGemsDatasource extends Datasource {
 
   constructor() {
     super(RubyGemsDatasource.id);
+    this.versionsDatasource = new VersionsDatasource(RubyGemsDatasource.id);
     this.internalRubyGemsDatasource = new InternalRubyGemsDatasource(
       RubyGemsDatasource.id
     );
@@ -23,7 +24,7 @@ export class RubyGemsDatasource extends Datasource {
 
   override readonly registryStrategy = 'hunt';
 
-  private readonly versionsDatasources: Record<string, VersionsDatasource> = {};
+  private readonly versionsDatasource: VersionsDatasource;
 
   private readonly internalRubyGemsDatasource: InternalRubyGemsDatasource;
 
@@ -43,15 +44,8 @@ export class RubyGemsDatasource extends Datasource {
       return null;
     }
 
-    if (!this.versionsDatasources[registryUrl]) {
-      this.versionsDatasources[registryUrl] = new VersionsDatasource(
-        RubyGemsDatasource.id,
-        registryUrl
-      );
-    }
-
     try {
-      return await this.versionsDatasources[registryUrl].getReleases({
+      return await this.versionsDatasource.getReleases({
         packageName,
         registryUrl,
       });

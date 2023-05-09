@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import { Graph } from 'graph-data-structure';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
-import { getFileList } from '../../../util/git';
+import { scm } from '../../platform/scm';
 import type { ProjectFile } from './types';
 import { readFileAsXmlDocument } from './util';
 
@@ -129,7 +129,7 @@ function reframeRelativePathToRootOfRepo(
  * Get a list of package files in localDir
  */
 async function getAllPackageFiles(): Promise<string[]> {
-  const allFiles = await getFileList();
+  const allFiles = await scm.getFileList();
   const filteredPackageFiles = allFiles.filter(
     minimatch.filter('*.{cs,vb,fs}proj', { matchBase: true, nocase: true })
   );

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import type { HostRule } from '../../../types';
 import { AbstractMigration } from '../base/abstract-migration';
+import { migrateDatasource } from './datasource-migration';
 
 export class HostRulesMigration extends AbstractMigration {
   override readonly propertyName = 'hostRules';
@@ -21,6 +22,13 @@ export class HostRulesMigration extends AbstractMigration {
         if (key === 'matchHost') {
           if (is.string(value)) {
             newRule.matchHost ??= massageUrl(value);
+          }
+          continue;
+        }
+
+        if (key === 'hostType') {
+          if (is.string(value)) {
+            newRule.hostType ??= migrateDatasource(value);
           }
           continue;
         }

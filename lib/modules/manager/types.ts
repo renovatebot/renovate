@@ -33,6 +33,7 @@ export interface UpdateArtifactsConfig {
   isLockFileMaintenance?: boolean;
   constraints?: Record<string, string>;
   composerIgnorePlatformReqs?: string[];
+  goGetDirs?: string[];
   currentValue?: string;
   postUpdateOptions?: string[];
   ignorePlugins?: boolean;
@@ -154,6 +155,7 @@ export interface PackageDependency<T = Record<string, any>>
 }
 
 export interface Upgrade<T = Record<string, any>> extends PackageDependency<T> {
+  workspace?: string;
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
   depGroup?: string;

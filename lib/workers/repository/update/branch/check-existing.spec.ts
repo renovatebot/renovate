@@ -1,4 +1,4 @@
-import { getConfig, partial, platform } from '../../../../../test/util';
+import { partial, platform } from '../../../../../test/util';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
 import type { BranchConfig } from '../../../types';
@@ -9,12 +9,13 @@ describe('workers/repository/update/branch/check-existing', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO: incompatible types (#7154)
       config = {
-        ...getConfig(),
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
+        upgrades: [],
         branchName: 'some-branch',
         prTitle: 'some-title',
-      } as BranchConfig;
+      } satisfies BranchConfig;
       jest.resetAllMocks();
     });
 

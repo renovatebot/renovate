@@ -2139,13 +2139,6 @@ These updates have all been created already. Click a checkbox below to force a r
     });
   });
 
-  describe('getVulnerabilityAlerts()', () => {
-    it('returns empty', async () => {
-      const res = await gitlab.getVulnerabilityAlerts();
-      expect(res).toHaveLength(0);
-    });
-  });
-
   describe('deleteLabel(issueNo, label)', () => {
     it('should delete the label', async () => {
       httpMock

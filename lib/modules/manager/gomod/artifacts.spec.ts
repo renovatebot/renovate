@@ -15,7 +15,17 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/git');
 jest.mock('../../../util/host-rules');
 jest.mock('../../../util/http');
-jest.mock('../../../util/fs');
+jest.mock('../../../util/fs', () => {
+  // restore
+  return {
+    __esModules: true,
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    ...(jest.createMockFromModule('../../../util/fs') as any),
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    isValidLocalPath: (jest.requireActual('../../../util/fs') as any)
+      .isValidLocalPath,
+  };
+});
 jest.mock('../../datasource');
 
 process.env.BUILDPACK = 'true';
@@ -1352,9 +1362,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1395,9 +1407,11 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     const execSnapshots = mockExecAll();
-    git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum'],
-    } as StatusResult);
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
     fs.readLocalFile
       .mockResolvedValueOnce('New go.sum')
       .mockResolvedValueOnce('New go.mod');
@@ -1938,5 +1952,103 @@ describe('modules/manager/gomod/artifacts', () => {
       },
     ];
     expect(execSnapshots).toMatchObject(expectedResult);
+  });
+
+  it('handles goGetDirs configuration correctly', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: [],
+      })
+    );
+
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['.', 'foo', '.bar/...', '&&', 'cat', '/etc/passwd'],
+        },
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: "go get -d -t . foo .bar/... '&&' cat",
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
+  });
+
+  it('returns updated go.sum when goGetDirs is specified', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['.'],
+        },
+      })
+    ).toEqual([
+      {
+        file: {
+          contents: 'New go.sum',
+          path: 'go.sum',
+          type: 'addition',
+        },
+      },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'go get -d -t .',
+        options: {
+          cwd: '/tmp/github/some/repo',
+        },
+      },
+    ]);
+  });
+
+  it('errors when goGetDirs is specified with all invalid paths', async () => {
+    fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
+    const execSnapshots = mockExecAll();
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
+        modified: ['go.sum'],
+      })
+    );
+    fs.readLocalFile.mockResolvedValueOnce('New go.sum');
+    fs.readLocalFile.mockResolvedValueOnce(gomod1);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          goGetDirs: ['/etc', '../../../'],
+        },
+      })
+    ).toEqual([
+      { artifactError: { lockFile: 'go.sum', stderr: 'Invalid goGetDirs' } },
+    ]);
+    expect(execSnapshots).toMatchObject([]);
   });
 });

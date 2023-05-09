@@ -9,7 +9,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -34,7 +34,7 @@ describe('modules/manager/asdf/extract', () => {
         deps: [
           {
             currentValue: '16.16.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
         ],
@@ -53,6 +53,7 @@ dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
 dprint 0.32.2
+ecspresso 2.1.0
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
@@ -77,6 +78,7 @@ ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
+poetry 1.3.2
 pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
@@ -88,6 +90,9 @@ terraform 1.3.3
 terragrunt 0.43.2
 trivy 0.33.0
 zig 0.9.1
+maestro 1.24.0
+detekt 1.21.0
+ktlint 0.48.1
 dummy 1.2.3
 `
       );
@@ -157,6 +162,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'dprint/dprint',
             depName: 'dprint',
+          },
+          {
+            currentValue: '2.1.0',
+            datasource: 'github-releases',
+            packageName: 'kayac/ecspresso',
+            depName: 'ecspresso',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             currentValue: '1.14.1',
@@ -287,7 +299,7 @@ dummy 1.2.3
           },
           {
             currentValue: '18.12.0',
-            datasource: 'node',
+            datasource: 'node-version',
             depName: 'node',
           },
           {
@@ -316,6 +328,12 @@ dummy 1.2.3
             packageName: 'pnpm',
             depName: 'pnpm',
             versioning: 'semver',
+          },
+          {
+            currentValue: '1.3.2',
+            datasource: 'pypi',
+            packageName: 'poetry',
+            depName: 'poetry',
           },
           {
             currentValue: '3.57.1',
@@ -390,6 +408,26 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'ziglang/zig',
             depName: 'zig',
+          },
+          {
+            currentValue: '1.24.0',
+            datasource: 'github-releases',
+            packageName: 'mobile-dev-inc/maestro',
+            depName: 'maestro',
+            extractVersion: '^cli-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'github-releases',
+            packageName: 'detekt/detekt',
+            depName: 'detekt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.48.1',
+            datasource: 'github-releases',
+            packageName: 'pinterest/ktlint',
+            depName: 'ktlint',
           },
           {
             depName: 'dummy',
@@ -489,7 +527,7 @@ dummy 1.2.3
               deps: [
                 {
                   currentValue: data.expect,
-                  datasource: 'node',
+                  datasource: 'node-version',
                   depName: 'node',
                 },
               ],
@@ -518,7 +556,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
             },
           ],
@@ -531,7 +569,7 @@ dummy 1.2.3
           deps: [
             {
               currentValue: '16.16.0',
-              datasource: 'node',
+              datasource: 'node-version',
               depName: 'node',
               skipReason: 'ignored',
             },

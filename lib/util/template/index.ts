@@ -24,6 +24,8 @@ handlebars.registerHelper('containsString', (str, subStr) =>
   str?.includes(subStr)
 );
 
+handlebars.registerHelper('equals', (arg1, arg2) => arg1 === arg2);
+
 handlebars.registerHelper({
   and(...args) {
     // Need to remove the 'options', as last parameter
@@ -183,9 +185,11 @@ const compileInputProxyHandler: ProxyHandler<CompileInput> = {
     const value = target[prop];
 
     if (is.array(value)) {
-      return value
-        .filter(is.plainObject)
-        .map((element) => proxyCompileInput(element as CompileInput));
+      return value.map((element) =>
+        is.primitive(element)
+          ? element
+          : proxyCompileInput(element as CompileInput)
+      );
     }
 
     if (is.plainObject(value)) {

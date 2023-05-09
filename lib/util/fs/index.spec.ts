@@ -17,6 +17,7 @@ import {
   getLocalFiles,
   getParentDir,
   getSiblingFileName,
+  isValidLocalPath,
   listCacheDir,
   localPathExists,
   localPathIsFile,
@@ -70,7 +71,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getParentDir', () => {
-    test.each`
+    it.each`
       dir            | expected
       ${'/foo/bar/'} | ${'/foo'}
       ${'/foo/bar'}  | ${'/foo'}
@@ -91,7 +92,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getSiblingFileName', () => {
-    test.each`
+    it.each`
       file          | sibling  | expected
       ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
       ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
@@ -205,7 +206,17 @@ describe('util/fs/index', () => {
     });
 
     it('returns false', async () => {
-      expect(await localPathExists('file.txt')).toBe(false);
+      expect(await localPathExists('file.txt')).toBeFalse();
+    });
+  });
+
+  describe('isLocalPath', () => {
+    it('returns true for valid local path', () => {
+      expect(isValidLocalPath('./foo/...')).toBeTrue();
+    });
+
+    it('returns false', () => {
+      expect(isValidLocalPath('/file.txt')).toBeFalse();
     });
   });
 

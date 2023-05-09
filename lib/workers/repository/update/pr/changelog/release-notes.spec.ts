@@ -2,7 +2,6 @@ import { DateTime } from 'luxon';
 import { Fixtures } from '../../../../../../test/fixtures';
 import * as httpMock from '../../../../../../test/http-mock';
 import { mocked, partial } from '../../../../../../test/util';
-import { clone } from '../../../../../util/clone';
 import * as githubGraphql from '../../../../../util/github/graphql';
 import * as _hostRules from '../../../../../util/host-rules';
 import { toBase64 } from '../../../../../util/string';
@@ -74,7 +73,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       [now.minus({ weeks: 2 }), 1435],
       [now.minus({ years: 1 }), 14495],
     ])('works with string date (%s, %i)', (date, minutes) => {
-      expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(minutes);
+      expect(releaseNotesCacheMinutes(date.toISO()!)).toEqual(minutes);
     });
 
     it('handles date object', () => {
@@ -88,9 +87,11 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
   describe('addReleaseNotes()', () => {
     it('returns null if input is null/undefined', async () => {
-      expect(await addReleaseNotes(null, {} as BranchUpgradeConfig)).toBeNull();
       expect(
-        await addReleaseNotes(undefined, {} as BranchUpgradeConfig)
+        await addReleaseNotes(null, partial<BranchUpgradeConfig>())
+      ).toBeNull();
+      expect(
+        await addReleaseNotes(undefined, partial<BranchUpgradeConfig>())
       ).toBeNull();
     });
 
@@ -109,7 +110,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('returns ChangeLogResult', async () => {
       const input = {
-        a: 1,
         project: {
           type: 'github',
           repository: 'https://github.com/nodeca/js-yaml',
@@ -119,7 +119,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
       expect(
         await addReleaseNotes(input as never, partial<BranchUpgradeConfig>())
       ).toEqual({
-        a: 1,
         hasReleaseNotes: false,
         project: {
           repository: 'https://github.com/nodeca/js-yaml',
@@ -139,7 +138,6 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('returns ChangeLogResult without release notes', async () => {
       const input = {
-        a: 1,
         project: partial<ChangeLogProject>({
           type: 'gitlab',
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
@@ -150,11 +148,10 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
             compare: { url: '' },
           }),
         ],
-      } as ChangeLogResult;
+      } satisfies ChangeLogResult;
       expect(
         await addReleaseNotes(input, partial<BranchUpgradeConfig>())
       ).toEqual({
-        a: 1,
         hasReleaseNotes: false,
         project: {
           repository: 'https://gitlab.com/gitlab-org/gitter/webapp/',
@@ -1136,7 +1133,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
     it('handles github sourceDirectory', async () => {
       const sourceDirectory = 'packages/foo';
-      const subdirTree = clone(githubTreeResponse);
+      const subdirTree = structuredClone(githubTreeResponse);
       for (const file of subdirTree.tree) {
         file.path = `${sourceDirectory}/${file.path}`;
       }
@@ -1307,7 +1304,7 @@ describe('workers/repository/update/pr/changelog/release-notes', () => {
 
       it('handles gitlab sourceDirectory', async () => {
         const sourceDirectory = 'packages/foo';
-        const response = clone(gitlabTreeResponse).map((file) => ({
+        const response = structuredClone(gitlabTreeResponse).map((file) => ({
           ...file,
           path: `${sourceDirectory}/${file.path}`,
         }));
