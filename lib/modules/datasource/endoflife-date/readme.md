@@ -4,7 +4,7 @@ To find the appropriate "package" name for the software you're trying to update,
 You can find it in [the endoflife.date API documentation](https://endoflife.date/docs/api).
 
 By default, this datasource uses `loose` versioning.
-If possible, we recommend you use a stricter versioning like `semver` instead of `loose.
+If possible, we recommend you use a stricter versioning like `semver` instead of `loose`.
 
 **Usage Example**
 
