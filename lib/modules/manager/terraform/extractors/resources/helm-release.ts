@@ -74,7 +74,7 @@ export class HelmReleaseExtractor extends DependencyExtractor {
     return dependencies;
   }
 
-  private processOci(
+  private processOCI(
     depName: string,
     config: ExtractConfig,
     dep: PackageDependency
