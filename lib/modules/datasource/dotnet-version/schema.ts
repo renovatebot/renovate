@@ -1,16 +1,16 @@
 import { z } from 'zod';
-import { looseArray } from '../../../util/schema-utils';
+import { LooseArray } from '../../../util/schema-utils';
 import type { Release } from '../types';
 
 export const ReleasesIndex = z
   .object({
-    'releases-index': looseArray(
+    'releases-index': LooseArray(
       z
         .object({
           'releases.json': z.string(),
         })
         .transform(({ 'releases.json': releasesUrl }) => releasesUrl)
-    ),
+    ).catch([]),
   })
   .transform(({ 'releases-index': releasesIndex }) => releasesIndex);
 
@@ -24,11 +24,11 @@ const ReleaseDetails = z.object({
 
 export const DotnetSdkReleases = z
   .object({
-    releases: looseArray(
+    releases: LooseArray(
       ReleaseBase.extend({
         sdk: ReleaseDetails,
       })
-    ),
+    ).catch([]),
   })
   .transform(({ releases }): Release[] =>
     releases.map(
@@ -42,11 +42,11 @@ export const DotnetSdkReleases = z
 
 export const DotnetRuntimeReleases = z
   .object({
-    releases: looseArray(
+    releases: LooseArray(
       ReleaseBase.extend({
         runtime: ReleaseDetails,
       })
-    ),
+    ).catch([]),
   })
   .transform(({ releases }): Release[] =>
     releases.map(

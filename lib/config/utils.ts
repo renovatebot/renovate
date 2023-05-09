@@ -1,5 +1,4 @@
 import { logger } from '../logger';
-import { clone } from '../util/clone';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
@@ -11,9 +10,8 @@ export function mergeChildConfig<
   if (!child) {
     return parent as never;
   }
-  const parentConfig = clone(parent);
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  const childConfig = clone(child!);
+  const parentConfig = structuredClone(parent);
+  const childConfig = structuredClone(child);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
   for (const option of options.getOptions()) {
     if (

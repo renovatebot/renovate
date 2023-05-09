@@ -77,6 +77,8 @@ const repoGroups = {
   ],
   'dotnet-azure-ad-identitymodel-extensions':
     'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
+  'dotnet-azure-ad-microsoft-identity-web':
+    'https://github.com/AzureAD/microsoft-identity-web',
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
@@ -145,6 +147,8 @@ const repoGroups = {
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
+  'mutation-testing-elements':
+    'https://github.com/stryker-mutator/mutation-testing-elements',
   nest: [
     'https://github.com/nestjs/nest',
     'https://github.com/nestjs/passport',

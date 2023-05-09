@@ -1,5 +1,4 @@
 import { lexer, parser, query as q } from 'good-enough-parser';
-import { clone } from '../../../../util/clone';
 import { regEx } from '../../../../util/regex';
 import type {
   Ctx,
@@ -35,19 +34,6 @@ export const GRADLE_PLUGINS = {
   spotbugs: ['toolVersion', 'com.github.spotbugs:spotbugs'],
 };
 
-export const ANNOYING_METHODS: ReadonlySet<string> = new Set([
-  'createXmlValueRemover',
-  'events',
-  'args',
-  'arrayOf',
-  'listOf',
-  'mutableListOf',
-  'setOf',
-  'mutableSetOf',
-  'stages', // https://github.com/ajoberstar/reckon,
-  'mapScalar', // https://github.com/apollographql/apollo-kotlin
-]);
-
 export function storeVarToken(ctx: Ctx, node: lexer.Token): Ctx {
   ctx.varTokens.push(node);
   return ctx;
@@ -65,7 +51,7 @@ export function reduceNestingDepth(ctx: Ctx): Ctx {
 }
 
 export function prependNestingDepth(ctx: Ctx): Ctx {
-  ctx.varTokens = [...clone(ctx.tmpNestingDepth), ...ctx.varTokens];
+  ctx.varTokens = [...structuredClone(ctx.tmpNestingDepth), ...ctx.varTokens];
   return ctx;
 }
 
@@ -96,7 +82,13 @@ export function cleanupTempVars(ctx: Ctx): Ctx {
 }
 
 export function stripReservedPrefixFromKeyTokens(ctx: Ctx): Ctx {
-  const unwantedPrefixes = ['ext', 'extra', 'project', 'rootProject'];
+  const unwantedPrefixes = [
+    'ext',
+    'extra',
+    'project',
+    'rootProject',
+    'properties',
+  ];
   while (
     ctx.varTokens.length > 1 && // ensures there will be always at least one token
     ctx.varTokens[0] &&
