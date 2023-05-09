@@ -21,7 +21,47 @@ describe('modules/datasource/endoflife-date/index', () => {
         datasource,
         packageName,
       });
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        registryUrl: 'https://endoflife.date/api',
+        releases: [
+          {
+            releaseTimestamp: '2020-10-13T00:00:00.000Z',
+            version: '1.18',
+          },
+          {
+            releaseTimestamp: '2021-02-16T00:00:00.000Z',
+            version: '1.19',
+          },
+          {
+            releaseTimestamp: '2021-05-18T00:00:00.000Z',
+            version: '1.20',
+          },
+          {
+            releaseTimestamp: '2021-07-19T00:00:00.000Z',
+            version: '1.21',
+          },
+          {
+            releaseTimestamp: '2022-04-04T00:00:00.000Z',
+            version: '1.22',
+          },
+          {
+            releaseTimestamp: '2022-08-11T00:00:00.000Z',
+            version: '1.23',
+          },
+          {
+            releaseTimestamp: '2022-11-15T00:00:00.000Z',
+            version: '1.24',
+          },
+          {
+            releaseTimestamp: '2023-02-21T00:00:00.000Z',
+            version: '1.25',
+          },
+          {
+            releaseTimestamp: '2023-04-11T00:00:00.000Z',
+            version: '1.26',
+          },
+        ],
+      });
       expect(res?.releases).toHaveLength(9);
     });
 
