@@ -21,12 +21,7 @@ export const presets: Record<string, Preset> = {
       'config:base',
       'docker:pinDigests',
       'helpers:pinGitHubActionDigests',
-    ],
-    packageRules: [
-      {
-        matchDepTypes: ['devDependencies'],
-        rangeStrategy: 'pin',
-      },
+      ':pinDevDependencies',
     ],
   },
   'js-app': {
