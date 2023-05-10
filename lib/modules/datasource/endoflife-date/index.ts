@@ -5,7 +5,7 @@ import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, registryUrl } from './common';
-import { EndoflifeDateVersion } from './types';
+import { EndoflifeHttpResponseScheme } from './schema';
 
 export class EndoflifeDatePackagesource extends Datasource {
   static readonly id = datasource;
@@ -39,16 +39,15 @@ export class EndoflifeDatePackagesource extends Datasource {
       releases: [],
     };
 
-    let response: { body: [] };
-
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 
     try {
-      response = await this.http.getJson(url);
+      const response = await this.http.getJson(
+        url,
+        EndoflifeHttpResponseScheme
+      );
 
-      response.body.forEach((cycle) => {
-        result.releases.push(EndoflifeDateVersion.safeParse(cycle));
-      });
+      result.releases.push(...response.body);
 
       return result.releases.length ? result : null;
     } catch (err) {

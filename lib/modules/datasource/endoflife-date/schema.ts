@@ -1,21 +1,9 @@
 import { z } from 'zod';
 import type { Release } from '../types';
 
-// represents a "cycle" on endoflife.date
-export interface EndoflifeDateVersion {
-  cycle: string | number;
-  releaseDate?: string;
-  eol?: string | boolean;
-  latest?: string;
-  link?: string | null;
-  lts?: string | boolean;
-  support?: string | boolean;
-  discontinued?: string | boolean;
-}
-
-export const EndoflifeDateVersion = z
+const EndoflifeDateVersionScheme = z
   .object({
-    cycle: z.coerce.string(),
+    cycle: z.string(),
     releaseDate: z.optional(z.string()),
     eol: z.optional(z.union([z.string(), z.boolean()])),
     latest: z.optional(z.string()),
@@ -24,9 +12,11 @@ export const EndoflifeDateVersion = z
     support: z.optional(z.union([z.string(), z.boolean()])),
     discontinued: z.optional(z.union([z.string(), z.boolean()])),
   })
-  .transform(({ cycle, releaseDate }): Release[] => [
-    {
+  .transform(({ cycle, releaseDate }): Release => {
+    return {
       version: cycle,
       releaseTimestamp: releaseDate,
-    },
-  ]);
+    };
+  });
+
+export const EndoflifeHttpResponseScheme = z.array(EndoflifeDateVersionScheme);
