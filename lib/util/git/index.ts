@@ -383,6 +383,10 @@ export async function syncGit(): Promise<void> {
     }
     return;
   }
+  // istanbul ignore if: failsafe
+  if (GlobalConfig.get('platform') === 'local') {
+    throw new Error('Cannot sync git when platform=local');
+  }
   gitInitialized = true;
   const localDir = GlobalConfig.get('localDir')!;
   logger.debug(`Initializing git repository into ${localDir}`);

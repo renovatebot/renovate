@@ -14,6 +14,7 @@ export const defaultConfig = {
     '\\.gradle(\\.kts)?$',
     '(^|/)gradle\\.properties$',
     '(^|/)gradle/.+\\.toml$',
+    '(^|/)buildSrc/.+\\.kt$',
     '\\.versions\\.toml$',
     // The two below is for gradle-consistent-versions plugin
     `(^|/)versions.props$`,
