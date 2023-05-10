@@ -24,7 +24,6 @@ function generateBranchUpgradeCache(
   const {
     datasource,
     depName,
-    depNameLinked,
     depType,
     displayPending,
     packageName,
@@ -43,7 +42,6 @@ function generateBranchUpgradeCache(
   const result: BranchUpgradeCache = {
     datasource,
     depName,
-    depNameLinked,
     depType,
     displayPending,
     fixedVersion,

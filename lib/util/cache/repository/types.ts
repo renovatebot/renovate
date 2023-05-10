@@ -19,7 +19,6 @@ export interface BranchUpgradeCache {
   currentValue?: string;
   datasource?: string;
   depName?: string;
-  depNameLinked?: unknown;
   depType?: string;
   displayPending?: unknown;
   fixedVersion?: string;
@@ -52,7 +51,7 @@ export interface BranchCache {
   /**
    * Whether this branch has automerge enabled
    */
-  automerge: boolean;
+  automerge?: boolean;
   /**
    * Name of base branch
    */
@@ -92,7 +91,7 @@ export interface BranchCache {
   /**
    * The branch's most recent commit SHA
    */
-  sha: string | null;
+  sha?: string | null;
   /**
    * Details on the dependency upgrades that have been applied in this branch
    */
