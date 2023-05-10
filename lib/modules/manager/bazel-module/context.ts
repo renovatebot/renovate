@@ -19,19 +19,24 @@ export interface CtxCompatible {
 }
 
 export class Ctx implements CtxCompatible {
-  results: ValueFragment[] = [];
-  stack = Stack.create<Fragment>();
+  results: ValueFragment[];
+  stack: Stack<Fragment>;
+
+  constructor(results: ValueFragment[] = [], stack = Stack.create<Fragment>()) {
+    this.results = results;
+    this.stack = stack;
+  }
 
   // This exists because the good-enough-parser gives a cloned instance of our
   // Ctx. It is missing the Ctx prototype. This function adds the proper prototype
   // to the context and the items referenced by the context.
   static as(obj: CtxCompatible): Ctx {
-    Object.setPrototypeOf(obj, Ctx.prototype);
-    const ctx = obj as Ctx;
-    const stackItems = ctx.stack.map((item) => asFragment(item));
-    ctx.stack = Stack.create(...stackItems);
-    ctx.results = ctx.results.map((item) => RecordFragment.as(item));
-    return ctx;
+    if (obj instanceof Ctx) {
+      return obj;
+    }
+    const results = obj.results.map((frag) => RecordFragment.as(frag));
+    const stackItems = obj.stack.map((frag) => asFragment(frag));
+    return new Ctx(results, Stack.create(...stackItems));
   }
 
   get currentRecord(): RecordFragment {
