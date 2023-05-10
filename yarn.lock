@@ -3130,10 +3130,10 @@
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-2.0.1.tgz#20f18294f797f2209b5f65c8e3b5c8e8261d127c"
   integrity sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==
 
-"@types/tar@6.1.4":
-  version "6.1.4"
-  resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.4.tgz#cf8497e1ebdc09212fd51625cd2eb5ca18365ad1"
-  integrity sha512-Cp4oxpfIzWt7mr2pbhHT2OTXGMAL0szYCzuf8lRWyIMCgsx6/Hfc3ubztuhvzXHXgraTQxyOCmmg7TDGIMIJJQ==
+"@types/tar@6.1.5":
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/@types/tar/-/tar-6.1.5.tgz#90ccb3b6a35430e7427410d50eed564e85feaaff"
+  integrity sha512-qm2I/RlZij5RofuY7vohTpYNaYcrSQlN2MyjucQc7ZweDwaEWkdN/EeNh6e9zjK6uEm6PwjdMXkcj05BxZdX1Q==
   dependencies:
     "@types/node" "*"
     minipass "^4.0.0"
