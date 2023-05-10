@@ -64,3 +64,8 @@ If none of these steps have helped you, then create a new discussion post to get
 Please locate the relevant parts of the logs as described earlier before asking for help or posting a bug report.
 Do not expect the Renovate maintainers to read through the full logs when trying to help you, as that takes a lot of time on our part.
 If later it turns out that the full logs are necessary, you will be asked for them then.
+
+## Validating configuration changes
+
+Sometimes you will have to change your Renovate configuration to solve a problem.
+The [`renovate-config-validator` program](config-validation.md) helps validate such configuration changes without commiting them to your repository.
