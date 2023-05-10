@@ -9,6 +9,7 @@ describe('modules/manager/pep621/utils', () => {
       ${undefined}                                                 | ${false} | ${undefined}           | ${undefined}       | ${undefined}        | ${undefined}
       ${null}                                                      | ${false} | ${undefined}           | ${undefined}       | ${undefined}        | ${undefined}
       ${'blinker'}                                                 | ${true}  | ${'blinker'}           | ${undefined}       | ${undefined}        | ${undefined}
+      ${'packaging==20.0.0'}                                       | ${true}  | ${'packaging'}         | ${'==20.0.0'}      | ${undefined}        | ${undefined}
       ${'packaging>=20.9,!=22.0'}                                  | ${true}  | ${'packaging'}         | ${'>=20.9,!=22.0'} | ${undefined}        | ${undefined}
       ${'cachecontrol[filecache]>=0.12.11'}                        | ${true}  | ${'cachecontrol'}      | ${'>=0.12.11'}     | ${['filecache']}    | ${undefined}
       ${'tomli>=1.1.0; python_version < "3.11"'}                   | ${true}  | ${'tomli'}             | ${'>=1.1.0'}       | ${undefined}        | ${'python_version < "3.11"'}

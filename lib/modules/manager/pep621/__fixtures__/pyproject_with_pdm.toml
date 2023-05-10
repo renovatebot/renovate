@@ -7,7 +7,7 @@ dependencies = [
   "blinker",
   "packaging>=20.9,!=22.0",
   "rich>=12.3.0",
-  "virtualenv>=20",
+  "virtualenv==20.0.0",
   "pyproject-hooks",
   "unearth>=0.9.0",
   "tomlkit>=0.11.1,<1",

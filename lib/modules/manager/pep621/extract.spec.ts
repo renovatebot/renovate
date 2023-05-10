@@ -32,72 +32,84 @@ describe('modules/manager/pep621/extract', () => {
       expect(dependencies).toEqual([
         {
           packageName: 'blinker',
+          depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
         },
         {
           packageName: 'packaging',
+          depName: 'packaging',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=20.9,!=22.0',
         },
         {
           packageName: 'rich',
+          depName: 'rich',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=12.3.0',
         },
         {
           packageName: 'virtualenv',
+          depName: 'virtualenv',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          currentValue: '>=20',
+          currentValue: '==20.0.0',
         },
         {
           packageName: 'pyproject-hooks',
+          depName: 'pyproject-hooks',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
         },
         {
           packageName: 'unearth',
+          depName: 'unearth',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=0.9.0',
         },
         {
           packageName: 'tomlkit',
+          depName: 'tomlkit',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=0.11.1,<1',
         },
         {
           packageName: 'installer',
+          depName: 'installer',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '<0.8,>=0.7',
         },
         {
           packageName: 'cachecontrol',
+          depName: 'cachecontrol',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=0.12.11',
         },
         {
           packageName: 'tomli',
+          depName: 'tomli',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=1.1.0',
         },
         {
           packageName: 'typing-extensions',
+          depName: 'typing-extensions',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
         },
         {
           packageName: 'importlib-metadata',
+          depName: 'importlib-metadata',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=3.6',
@@ -119,7 +131,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
           depName: 'pytest/pytest-mock',
         },
       ]);
@@ -132,7 +144,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
           depName: 'test/pdm',
         },
         {
@@ -146,7 +158,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
           depName: 'tox/tox',
         },
         {
@@ -165,9 +177,10 @@ describe('modules/manager/pep621/extract', () => {
       expect(result?.deps).toEqual([
         {
           packageName: 'blinker',
+          depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'invalid-value',
+          skipReason: 'any-version',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
@@ -175,6 +188,7 @@ describe('modules/manager/pep621/extract', () => {
         },
         {
           packageName: 'packaging',
+          depName: 'packaging',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=20.9,!=22.0',
@@ -238,6 +252,7 @@ describe('modules/manager/pep621/extract', () => {
       expect(result?.deps).toEqual([
         {
           packageName: 'packaging',
+          depName: 'packaging',
           datasource: 'pypi',
           depType: 'project.dependencies',
           currentValue: '>=20.9,!=22.0',
