@@ -324,7 +324,7 @@
     "rimraf": "5.0.0",
     "semantic-release": "21.0.2",
     "strip-ansi": "6.0.1",
-    "tar": "6.1.13",
+    "tar": "6.1.14",
     "tmp-promise": "3.0.3",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
