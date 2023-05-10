@@ -68,9 +68,10 @@ function extractDependencyDashboardData(
     const b = { ...branch };
     delete b.isModified;
     delete b.automerge;
-    delete b.isModified;
     delete b.isBehindBase;
-    delete b.isModified;
+    delete b.isConflicted;
+    delete b.baseBranch;
+    delete b.baseBranchSha;
     delete b.branchFingerprint;
     delete b.pristine;
     delete b.prCache;
@@ -79,7 +80,6 @@ function extractDependencyDashboardData(
       const u = { ...upgrade };
       delete u.sourceUrl;
       delete u.depType;
-      delete u.sourceUrl;
     });
     return b;
   });

@@ -55,11 +55,11 @@ export interface BranchCache {
   /**
    * Name of base branch
    */
-  baseBranch: string;
+  baseBranch?: string;
   /**
    * The base branch's most recent commit SHA
    */
-  baseBranchSha: string | null;
+  baseBranchSha?: string | null;
   /**
    * Hash of the manager fingerprints and the filtered update branch config
    */
