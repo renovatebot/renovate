@@ -71,6 +71,7 @@ export class StringFragment {
   static as(data: unknown): StringFragment {
     return as(
       data,
+      'string',
       StringFragment,
       (v: ValueFragmentInterface): v is StringFragmentInterface =>
         v.type === 'string',
@@ -91,6 +92,7 @@ export class BooleanFragment {
   static as(data: unknown): BooleanFragment {
     return as(
       data,
+      'boolean',
       BooleanFragment,
       (v: ValueFragmentInterface): v is BooleanFragmentInterface =>
         v.type === 'boolean',
@@ -114,6 +116,7 @@ export class ArrayFragment {
   static as(data: unknown): ArrayFragment {
     return as(
       data,
+      'array',
       ArrayFragment,
       (v: ValueFragmentInterface): v is ArrayFragmentInterface =>
         v.type === 'array',
@@ -146,6 +149,7 @@ export class RecordFragment {
   static as(data: unknown): RecordFragment {
     return as(
       data,
+      'record',
       RecordFragment,
       (v: ValueFragmentInterface): v is RecordFragmentInterface =>
         v.type === 'record',
@@ -239,6 +243,7 @@ export type Fragment = ValueFragment | AttributeFragment;
 
 function as<I extends ValueFragmentInterface, F>(
   data: unknown,
+  expected: string,
   fragCtor: new (...args: any[]) => F,
   iTypeGuard: (v: ValueFragmentInterface) => v is I,
   fromFn: (frag: I) => F
@@ -250,7 +255,10 @@ function as<I extends ValueFragmentInterface, F>(
   if (iTypeGuard(fragInterface)) {
     return fromFn(fragInterface);
   }
-  throw new Error(`Incorrect value fragment type: ${fragInterface.type}.`);
+  throw new Error(
+    'The data is a value fragment, but it is not the expected type.' +
+      `expected: ${expected}, actual: ${fragInterface.type}.`
+  );
 }
 
 export function asValue(data: unknown): ValueFragment {
