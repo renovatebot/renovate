@@ -401,8 +401,10 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extracts docker resources', async () => {
-      const res = await extractPackageFile(docker, 'docker.tf', {});
-      expect(res?.deps).toHaveLength(6);
+      const res = await extractPackageFile(docker, 'docker.tf', {
+        registryAliases: { 'hub.proxy.test': 'index.docker.io' },
+      });
+      expect(res?.deps).toHaveLength(7);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
       expect(res?.deps).toMatchObject([
         {
@@ -425,6 +427,15 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'nginx',
           depType: 'docker_image',
           replaceString: 'nginx:1.7.8',
+        },
+        {
+          autoReplaceStringTemplate:
+            'hub.proxy.test/bitnami/nginx:{{#if newValue}}{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
+          currentValue: '1.24.0',
+          datasource: 'docker',
+          depName: 'index.docker.io/bitnami/nginx',
+          depType: 'docker_image',
+          replaceString: 'hub.proxy.test/bitnami/nginx:1.24.0',
         },
         {
           autoReplaceStringTemplate:
@@ -574,8 +585,10 @@ describe('modules/manager/terraform/extract', () => {
     });
 
     it('extract helm releases', async () => {
-      const res = await extractPackageFile(helm, 'helm.tf', {});
-      expect(res?.deps).toHaveLength(8);
+      const res = await extractPackageFile(helm, 'helm.tf', {
+        registryAliases: { 'hub.proxy.test': 'index.docker.io' },
+      });
+      expect(res?.deps).toHaveLength(9);
       expect(res?.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
       expect(res?.deps).toMatchObject([
         {
@@ -616,6 +629,13 @@ describe('modules/manager/terraform/extract', () => {
           depName: './charts/example',
           depType: 'helm_release',
           skipReason: 'local-chart',
+        },
+        {
+          currentValue: '8.9.1',
+          datasource: 'docker',
+          depName: 'kube-prometheus',
+          depType: 'helm_release',
+          packageName: 'index.docker.io/bitnamicharts/kube-prometheus',
         },
         {
           currentValue: '1.0.1',
