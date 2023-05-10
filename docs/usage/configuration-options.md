@@ -2811,14 +2811,14 @@ Typically you shouldn't need to modify this setting.
 
 Use `regexManagers` entries to configure the `regex` manager in Renovate.
 
-You can define custom managers for cases such as:
+You can define custom managers to handle:
 
 - Proprietary file formats or conventions
 - Popular file formats not yet supported as a manager by Renovate
 
 The custom manager concept is based on using Regular Expression named capture groups.
 
-You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure it's corresponding template (e.g. `depNameTemplate`) for these fields:
+You must have a named capture group matching (e.g. `(?<depName>.*)`) _or_ configure its corresponding template (e.g. `depNameTemplate`) for these fields:
 
 - `datasource`
 - `depName`
@@ -2832,6 +2832,10 @@ If the `versioning` field is missing, then Renovate defaults to using `semver` v
 
 For more details and examples, see our [documentation for the `regex` manager](/modules/manager/regex/).
 For template fields, use the triple brace `{{{ }}}` notation to avoid Handlebars escaping any special characters.
+
+<!-- prettier-ignore -->
+!!! tip
+    Look at our [Regex Manager Presets](https://docs.renovatebot.com/presets-regexManagers/), they may have what you need.
 
 ### matchStrings
 
@@ -3094,6 +3098,7 @@ This feature works with the following managers:
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
 - [`droneci`](/modules/manager/droneci)
+- [`terraform`](/modules/manager/terraform)
 
 ## registryUrls
 

@@ -95,6 +95,15 @@ describe('workers/global/index', () => {
     expect(repositoryWorker.renovateRepository).not.toHaveBeenCalled();
   });
 
+  it('handles local', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      platform: 'local',
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
+  });
+
   it('processes repositories', async () => {
     parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',
