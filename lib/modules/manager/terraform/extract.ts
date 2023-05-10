@@ -46,7 +46,7 @@ export async function extractPackageFile(
   const locks = await extractLocksForPackageFile(fileName);
 
   for (const extractor of passedExtractors) {
-    const deps = extractor.extract(hclMap, locks);
+    const deps = extractor.extract(hclMap, locks, config);
     dependencies.push(...deps);
   }
 
