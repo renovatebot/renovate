@@ -903,7 +903,7 @@ describe('modules/platform/azure/index', () => {
           ({
             updatePullRequest: jest.fn(() => prResult),
             createPullRequestReviewer: updateFn,
-            getPullRequest: jest.fn(() => ({
+            getPullRequestById: jest.fn(() => ({
               pullRequestId: prResult.pullRequestId,
               createdBy: prResult.createdBy,
             })),
