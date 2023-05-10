@@ -3,9 +3,9 @@ import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { joinUrlParts } from '../../../util/url';
 import { Datasource } from '../datasource';
-import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
+import type { GetReleasesConfig, ReleaseResult } from '../types';
 import { datasource, registryUrl } from './common';
-import type { EndoflifeDateVersion } from './types';
+import { EndoflifeDateVersion } from './types';
 
 export class EndoflifeDatePackagesource extends Datasource {
   static readonly id = datasource;
@@ -39,7 +39,7 @@ export class EndoflifeDatePackagesource extends Datasource {
       releases: [],
     };
 
-    let response: { body: EndoflifeDateVersion[] };
+    let response: { body: [] };
 
     const url = joinUrlParts(registryUrl, `${packageName}.json`);
 
@@ -47,11 +47,7 @@ export class EndoflifeDatePackagesource extends Datasource {
       response = await this.http.getJson(url);
 
       response.body.forEach((cycle) => {
-        const thisRelease: Release = {
-          version: cycle.cycle as string,
-          releaseTimestamp: cycle.releaseDate,
-        };
-        result.releases.push(thisRelease);
+        result.releases.push(EndoflifeDateVersion.safeParse(cycle));
       });
 
       return result.releases.length ? result : null;
