@@ -23,6 +23,7 @@ export const presets: Record<string, Preset> = {
       'helpers:pinGitHubActionDigests',
       ':pinDevDependencies',
     ],
+    "configMigration": true
   },
   'js-app': {
     description: 'Default configuration for webapps.',
