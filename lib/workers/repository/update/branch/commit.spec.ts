@@ -1,4 +1,4 @@
-import { getConfig, scm } from '../../../../../test/util';
+import { scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import type { BranchConfig } from '../../../types';
 import { commitFilesToBranch } from './commit';
@@ -8,9 +8,9 @@ describe('workers/repository/update/branch/commit', () => {
     let config: BranchConfig;
 
     beforeEach(() => {
-      // TODO: incompatible types (#7154)
       config = {
-        ...getConfig(),
+        baseBranch: 'base-branch',
+        manager: 'some-manager',
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
         semanticCommits: 'disabled',
@@ -19,7 +19,7 @@ describe('workers/repository/update/branch/commit', () => {
         updatedPackageFiles: [],
         updatedArtifacts: [],
         upgrades: [],
-      } as BranchConfig;
+      } satisfies BranchConfig;
       jest.resetAllMocks();
       scm.commitAndPush.mockResolvedValueOnce('123test');
       GlobalConfig.reset();
@@ -38,7 +38,24 @@ describe('workers/repository/update/branch/commit', () => {
       });
       await commitFilesToBranch(config);
       expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
-      expect(scm.commitAndPush.mock.calls).toMatchSnapshot();
+      expect(scm.commitAndPush.mock.calls).toEqual([
+        [
+          {
+            baseBranch: 'base-branch',
+            branchName: 'renovate/some-branch',
+            files: [
+              {
+                contents: 'some contents',
+                path: 'package.json',
+                type: 'addition',
+              },
+            ],
+            force: false,
+            message: 'some commit message',
+            platformCommit: false,
+          },
+        ],
+      ]);
     });
 
     it('dry runs', async () => {

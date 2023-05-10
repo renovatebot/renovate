@@ -1,5 +1,4 @@
 import { ERROR } from 'bunyan';
-import shell from 'shelljs';
 import { getProblems, logger } from '../lib/logger';
 import { generateSchema } from './docs/schema';
 
@@ -22,7 +21,7 @@ process.on('unhandledRejection', (err) => {
   } finally {
     const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
     if (loggerErrors.length) {
-      shell.exit(1);
+      process.exit(1);
     }
   }
 })();

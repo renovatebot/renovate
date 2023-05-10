@@ -393,6 +393,7 @@ export async function initRepo({
     repo = res?.data?.repository;
     // istanbul ignore if
     if (!repo) {
+      logger.debug({ res }, 'No repository returned');
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
@@ -592,15 +593,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
       config.repoForceRebase = false;
       const branchProtection = await getBranchProtection(config.defaultBranch);
       logger.debug('Found branch protection');
-      if (
-        branchProtection.required_pull_request_reviews
-          ?.required_approving_review_count > 0
-      ) {
-        logger.debug(
-          'Branch protection: PR Reviews are required before merging'
-        );
-        config.prReviewsRequired = true;
-      }
       if (branchProtection.required_status_checks) {
         if (branchProtection.required_status_checks.strict) {
           logger.debug(
@@ -1605,28 +1597,6 @@ export async function mergePr({
   id: prNo,
 }: MergePRConfig): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
-  // istanbul ignore if
-  if (config.prReviewsRequired) {
-    logger.debug(
-      { branch: branchName, prNo },
-      'Branch protection: Attempting to merge PR when PR reviews are enabled'
-    );
-    const repository = config.parentRepo ?? config.repository;
-    const reviews = await githubApi.getJson<{ state: string }[]>(
-      `repos/${repository}/pulls/${prNo}/reviews`
-    );
-    const isApproved = reviews.body.some(
-      (review) => review.state === 'APPROVED'
-    );
-    if (!isApproved) {
-      logger.debug(
-        { branch: branchName, prNo },
-        'Branch protection: Cannot automerge PR until there is an approving review'
-      );
-      return false;
-    }
-    logger.debug('Found approving reviews');
-  }
   const url = `repos/${
     config.parentRepo ?? config.repository
   }/pulls/${prNo}/merge`;
@@ -1656,6 +1626,16 @@ export async function mergePr({
           logger.debug(
             { response: body },
             `GitHub blocking PR merge -- Missing required status check(s)`
+          );
+          return false;
+        }
+        if (
+          is.nonEmptyString(body?.message) &&
+          body.message.includes('approving review')
+        ) {
+          logger.debug(
+            { response: body },
+            `GitHub blocking PR merge -- Needs approving review(s)`
           );
           return false;
         }

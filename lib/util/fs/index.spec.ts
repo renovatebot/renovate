@@ -71,7 +71,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getParentDir', () => {
-    test.each`
+    it.each`
       dir            | expected
       ${'/foo/bar/'} | ${'/foo'}
       ${'/foo/bar'}  | ${'/foo'}
@@ -92,7 +92,7 @@ describe('util/fs/index', () => {
   });
 
   describe('getSiblingFileName', () => {
-    test.each`
+    it.each`
       file          | sibling  | expected
       ${'/foo/bar'} | ${'baz'} | ${'/foo/baz'}
       ${'foo/bar'}  | ${'baz'} | ${'foo/baz'}
@@ -134,6 +134,11 @@ describe('util/fs/index', () => {
   });
 
   describe('deleteLocalFile', () => {
+    it('throws if platform is local', async () => {
+      GlobalConfig.set({ platform: 'local' });
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+    });
+
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');

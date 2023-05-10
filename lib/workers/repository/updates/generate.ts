@@ -255,20 +255,22 @@ export function generateBranchConfig(
     } else {
       [upgrade.prTitle] = upgrade.commitMessage.split(newlineRegex);
     }
-    upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
-    if (upgrade.isGroup) {
-      upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
-          ? ' (major)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
-          ? ' (minor)'
-          : '';
-      upgrade.prTitle +=
-        upgrade.updateType === 'patch' && upgrade.separateMinorPatch
-          ? ' (patch)'
-          : '';
+    if (!upgrade.prTitleStrict) {
+      upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
+      if (upgrade.isGroup) {
+        upgrade.prTitle +=
+          upgrade.updateType === 'major' && upgrade.separateMajorMinor
+            ? ' (major)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+            ? ' (minor)'
+            : '';
+        upgrade.prTitle +=
+          upgrade.updateType === 'patch' && upgrade.separateMinorPatch
+            ? ' (patch)'
+            : '';
+      }
     }
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);

@@ -25,6 +25,7 @@ const resolvers = {
   gitea,
   github,
   gitlab,
+  local: null,
 } satisfies Record<PlatformId, Resolver | null>;
 
 export function getPreset({

@@ -4,6 +4,7 @@ import { PLATFORM_NOT_FOUND } from '../../constants/error-messages';
 import { DefaultGitScm } from './default-scm';
 import { GerritScm } from './gerrit/scm';
 import { GithubScm } from './github/scm';
+import { LocalFs } from './local/scm';
 import type { PlatformScm } from './types';
 
 export const platformScmImpls = new Map<PlatformId, Constructor<PlatformScm>>();
@@ -15,6 +16,7 @@ platformScmImpls.set('gerrit', GerritScm);
 platformScmImpls.set('gitea', DefaultGitScm);
 platformScmImpls.set('github', GithubScm);
 platformScmImpls.set('gitlab', DefaultGitScm);
+platformScmImpls.set('local', LocalFs);
 
 let _scm: PlatformScm | undefined;
 

@@ -37,7 +37,7 @@ export async function extractPackageFile(
   );
 
   const dependencies = [];
-  const hclMap = hcl.parseHCL(content);
+  const hclMap = await hcl.parseHCL(content, fileName);
   if (is.nullOrUndefined(hclMap)) {
     logger.trace({ fileName }, 'failed to parse HCL file');
     return null;
@@ -46,7 +46,7 @@ export async function extractPackageFile(
   const locks = await extractLocksForPackageFile(fileName);
 
   for (const extractor of passedExtractors) {
-    const deps = extractor.extract(hclMap, locks);
+    const deps = extractor.extract(hclMap, locks, config);
     dependencies.push(...deps);
   }
 

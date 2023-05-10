@@ -264,7 +264,7 @@ describe('workers/repository/update/branch/schedule', () => {
     });
 
     describe('supports timezone', () => {
-      test.each`
+      it.each`
         sched                     | tz                  | datetime                          | expected
         ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T15:59:00.000+0800'} | ${false}
         ${'after 4pm'}            | ${'Asia/Singapore'} | ${'2017-06-30T16:01:00.000+0800'} | ${true}
