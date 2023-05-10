@@ -52,12 +52,13 @@ export function pep508ToPackageDependency(
 
   const dep: PackageDependency = {
     packageName: parsed.packageName,
+    depName: parsed.packageName,
     datasource: PypiDatasource.id,
     depType,
   };
 
   if (is.nullOrUndefined(parsed.currentValue)) {
-    dep.skipReason = 'invalid-value';
+    dep.skipReason = 'any-version';
   } else {
     dep.currentValue = parsed.currentValue;
   }
