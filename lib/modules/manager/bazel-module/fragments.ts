@@ -52,6 +52,29 @@ export const ValueFragmentSchema: z.ZodType<ValueFragmentInterface> = z.lazy(
     ])
 );
 
+// NOTE: The XXXFragmentSchema definitions must be kept in-sync with the
+// schemas defined in ValueFragmentSchema. Ideally, we would define each schema
+// in one place and reference it elsewhere. Unfortunately, type errors occur
+// if we use the standalone schemas in the the discriminatedUnion declaration.
+
+const StringFragmentSchema = z.object({
+  type: z.literal('string'),
+  value: z.string(),
+});
+const BooleanFragmentSchema = z.object({
+  type: z.literal('boolean'),
+  value: z.boolean(),
+});
+const ArrayFragmentSchema = z.object({
+  type: z.literal('array'),
+  items: ValueFragmentSchema.array(),
+  isComplete: z.boolean(),
+});
+const RecordFragmentSchema = z.object({
+  type: z.literal('record'),
+  children: z.record(z.string(), ValueFragmentSchema),
+  isComplete: z.boolean(),
+});
 const AttributeFragmentSchema = z.object({
   type: z.literal('attribute'),
   name: z.string(),
@@ -68,6 +91,8 @@ export type FragmentType =
   | 'attribute';
 
 export class StringFragment {
+  static readonly schema = StringFragmentSchema;
+
   static as(data: unknown): StringFragment {
     return as(
       data,
@@ -89,6 +114,8 @@ export class StringFragment {
 }
 
 export class BooleanFragment {
+  static readonly schema = BooleanFragmentSchema;
+
   static as(data: unknown): BooleanFragment {
     return as(
       data,
@@ -113,6 +140,8 @@ export class BooleanFragment {
 }
 
 export class ArrayFragment {
+  static readonly schema = ArrayFragmentSchema;
+
   static as(data: unknown): ArrayFragment {
     return as(
       data,
@@ -146,6 +175,8 @@ export class ArrayFragment {
 }
 
 export class RecordFragment {
+  static readonly schema = RecordFragmentSchema;
+
   static as(data: unknown): RecordFragment {
     return as(
       data,
@@ -194,6 +225,8 @@ export class RecordFragment {
 }
 
 export class AttributeFragment {
+  static readonly schema = AttributeFragmentSchema;
+
   static as(data: unknown): AttributeFragment {
     if (data instanceof AttributeFragment) {
       return data;

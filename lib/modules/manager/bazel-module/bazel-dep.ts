@@ -1,7 +1,21 @@
-import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { BazelDatasource } from '../../datasource/bazel';
 import type { PackageDependency } from '../types';
-import { RecordFragment, StringFragment, ValueFragment } from './fragments';
+import {
+  BooleanFragment,
+  RecordFragment,
+  StringFragment,
+  ValueFragment,
+} from './fragments';
+
+const BazelDepChildrenSchema = z.object({
+  rule: StringFragment.schema.extend({
+    value: z.literal('bazel_dep'),
+  }),
+  name: StringFragment.schema,
+  version: StringFragment.schema,
+  dev_dependency: BooleanFragment.schema.optional(),
+});
 
 export function toPackageDependency(
   value: ValueFragment
@@ -10,14 +24,15 @@ export function toPackageDependency(
   if (!record) {
     return null;
   }
-  const { rule, name, version } = record.children;
-  if (is.falsy(rule) || is.falsy(name) || is.falsy(version)) {
+  const parseResult = BazelDepChildrenSchema.safeParse(record.children);
+  if (!parseResult.success) {
     return null;
   }
+  const { rule, name, version } = parseResult.data;
   return {
     datasource: BazelDatasource.id,
-    depType: StringFragment.as(rule).value,
-    depName: StringFragment.as(name).value,
-    currentValue: StringFragment.as(version).value,
+    depType: rule.value,
+    depName: name.value,
+    currentValue: version.value,
   };
 }
