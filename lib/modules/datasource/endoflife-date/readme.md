@@ -16,7 +16,7 @@ For example, you have this `.tfvars` file:
 kubernetes_version = "1.26"
 ```
 
-Give the above `.tfvars` file, you put this in your `renovate.json`:
+Given the above `.tfvars` file, you put this in your `renovate.json`:
 
 ```json
 {
