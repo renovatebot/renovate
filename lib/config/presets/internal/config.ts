@@ -16,6 +16,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   'best-practices': {
+    configMigration: true,
     description: 'Preset with best practices from the Renovate maintainers.',
     extends: [
       'config:base',
@@ -23,7 +24,6 @@ export const presets: Record<string, Preset> = {
       'helpers:pinGitHubActionDigests',
       ':pinDevDependencies',
     ],
-    "configMigration": true
   },
   'js-app': {
     description: 'Default configuration for webapps.',
