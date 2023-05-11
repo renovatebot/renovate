@@ -1,4 +1,4 @@
-import { getConfig, git, mocked } from '../../../../test/util';
+import { getConfig, mocked, scm } from '../../../../test/util';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import * as _managerFiles from './manager-files';
@@ -16,7 +16,7 @@ describe('workers/repository/extract/index', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      git.getFileList.mockResolvedValue(fileList);
+      scm.getFileList.mockResolvedValue(fileList);
       config = getConfig();
     });
 
