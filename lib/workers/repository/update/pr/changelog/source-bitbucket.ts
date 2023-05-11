@@ -50,7 +50,7 @@ export async function getChangeLogJSON(
 
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = protocol.concat('//', host, '/');
-  const apiBaseUrl = protocol.concat('//', '.api', host, '/2.0/repositories/');
+  const apiBaseUrl = protocol.concat('//', 'api.', host, '/2.0/repositories/');
   const repository = pathname
     .slice(1)
     .replace(regEx(/\/$/), '')
