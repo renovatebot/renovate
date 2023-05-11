@@ -181,17 +181,13 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  const platform = detectPlatform(baseUrl);
-  switch (platform) {
-    case 'gitlab':
-      releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
-      break;
-    case 'github':
-      releaseNotes.url = releaseMatch.url
-        ? releaseMatch.url
-        : /* istanbul ignore next */
-          `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
-      break;
+  if (detectPlatform(baseUrl) === 'gitlab') {
+    releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
+  } else {
+    releaseNotes.url = releaseMatch.url
+      ? releaseMatch.url
+      : /* istanbul ignore next */
+        `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
