@@ -1,7 +1,4 @@
 import { logger } from '../../../../../logger';
-import * as bitbucket from '../../../../../modules/platform/bitbucket';
-import * as github from '../../../../../modules/platform/github';
-import * as gitlab from '../../../../../modules/platform/gitlab';
 import * as allVersioning from '../../../../../modules/versioning';
 import { detectPlatform } from '../../../../../util/common';
 import type { BranchUpgradeConfig } from '../../../../types';
@@ -35,13 +32,13 @@ export async function getChangeLogJSON(
     const platform = detectPlatform(sourceUrl);
 
     switch (platform) {
-      case gitlab.id:
+      case 'gitlab':
         res = await sourceGitlab.getChangeLogJSON(config);
         break;
-      case github.id:
+      case 'github':
         res = await sourceGithub.getChangeLogJSON(config);
         break;
-      case bitbucket.id:
+      case 'bitbucket':
         res = await sourceBitbucket.getChangeLogJSON(config);
         break;
 
