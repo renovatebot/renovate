@@ -964,14 +964,13 @@ export async function getReleaseNotesMd(
   const repositorySourceURl = joinUrlParts(
     '/2.0/repositories',
     repository,
-    'src?pagelen=100'
+    'src'
   );
 
-  const rootFiles = (
-    await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(
+  const rootFiles =
+    await bitbucketHttp.getUnpaginatedJson<BitbucketSourceResults>(
       repositorySourceURl
-    )
-  ).body.values;
+    );
 
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
@@ -1011,28 +1010,12 @@ export async function getTags(repository: string): Promise<string[]> {
     const baseRepositoryTagURL = joinUrlParts(
       '/2.0/repositories',
       repository,
-      'refs/tags?pagelen=100'
+      'refs/tags'
     );
 
-    const tags: BitbucketTag[] = [];
-    let hasNextPage = true;
-    let repositoryTagURL = baseRepositoryTagURL;
-
-    while (hasNextPage) {
-      const tagsResponse = (
-        await bitbucketHttp.getJson<PagedResult<BitbucketTag>>(repositoryTagURL)
-      ).body;
-
-      tags.push(...tagsResponse.values);
-      hasNextPage = is.nonEmptyString(tagsResponse.next);
-      repositoryTagURL = tagsResponse.next ?? '';
-    }
-
-    for (const tag of tags) {
-      logger.debug(`Found tag ${tag.name}`);
-    }
-
-    // Bitbucket Tags endpoint is paginated differently to all other endpoints
+    const tags = await bitbucketHttp.getUnpaginatedJson<BitbucketTag>(
+      baseRepositoryTagURL
+    );
 
     // istanbul ignore if
     if (!tags.length) {
