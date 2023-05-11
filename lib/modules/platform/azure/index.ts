@@ -506,6 +506,7 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
+  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -526,6 +527,21 @@ export async function updatePr({
     );
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
+  }
+  if (platformOptions?.autoApprove) {
+    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
+    await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy!.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      // TODO #7154
+      pr.pullRequestId!,
+      pr.createdBy!.id!
+    );
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);

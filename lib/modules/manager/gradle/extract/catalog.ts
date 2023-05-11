@@ -55,6 +55,10 @@ function isVersionPointer(
   return hasKey('ref', obj);
 }
 
+function normalizeVersionPointer(versionPointer: string): string {
+  return versionPointer.replace(regEx(/[._]/g), '-');
+}
+
 interface VersionExtract {
   currentValue?: string;
   fileReplacePosition?: number;
@@ -79,12 +83,13 @@ function extractVersion({
   versionSubContent: string;
 }): VersionExtract {
   if (isVersionPointer(version)) {
+    const parsedVersion = normalizeVersionPointer(version.ref);
     // everything else is ignored
     return extractLiteralVersion({
-      version: versions[version.ref],
+      version: versions[parsedVersion],
       depStartIndex: versionStartIndex,
       depSubContent: versionSubContent,
-      sectionKey: version.ref,
+      sectionKey: parsedVersion,
     });
   } else {
     return extractLiteralVersion({
@@ -205,7 +210,7 @@ function extractDependency({
     };
   }
   const versionRef = isVersionPointer(descriptor.version)
-    ? descriptor.version.ref
+    ? normalizeVersionPointer(descriptor.version.ref)
     : null;
   if (isArtifactDescriptor(descriptor)) {
     const { group, name } = descriptor;
@@ -284,7 +289,7 @@ export function parseCatalog(
       dependency.skipReason = skipReason;
     }
     if (isVersionPointer(version) && dependency.commitMessageTopic) {
-      dependency.groupName = version.ref;
+      dependency.groupName = normalizeVersionPointer(version.ref);
       delete dependency.commitMessageTopic;
     }
 
