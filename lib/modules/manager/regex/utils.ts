@@ -94,6 +94,9 @@ export function regexMatchAll(
     }
     iterations += 1;
   } while (matchResult && iterations < maxIterations);
+  if (iterations === maxIterations) {
+    logger.warn('Max iterations reached for matchStrings');
+  }
   return matches;
 }
 
