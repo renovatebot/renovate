@@ -4,6 +4,7 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
+import * as bitbucketPlatform from '../../../../../modules/platform/bitbucket';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
@@ -35,7 +36,6 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
-
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -179,13 +179,17 @@ async function releaseNotesResult(
   }
   const { baseUrl, repository } = project;
   const releaseNotes: ChangeLogNotes = releaseMatch;
-  if (detectPlatform(baseUrl) === 'gitlab') {
-    releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
-  } else {
-    releaseNotes.url = releaseMatch.url
-      ? releaseMatch.url
-      : /* istanbul ignore next */
-        `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
+  const platform = detectPlatform(baseUrl);
+  switch (platform) {
+    case 'gitlab':
+      releaseNotes.url = `${baseUrl}${repository}/tags/${releaseMatch.tag!}`;
+      break;
+    case 'github':
+      releaseNotes.url = releaseMatch.url
+        ? releaseMatch.url
+        : /* istanbul ignore next */
+          `${baseUrl}${repository}/releases/${releaseMatch.tag!}`;
+      break;
   }
   // set body for release notes
   releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
@@ -248,6 +252,7 @@ export async function getReleaseNotesMdFileInner(
   const { repository, type } = project;
   const apiBaseUrl = project.apiBaseUrl!;
   const sourceDirectory = project.sourceDirectory!;
+
   try {
     switch (type) {
       case 'gitlab':
@@ -262,7 +267,11 @@ export async function getReleaseNotesMdFileInner(
           apiBaseUrl,
           sourceDirectory
         );
-
+      case 'bitbucket':
+        return await bitbucketPlatform.getReleaseNotesMd(
+          repository,
+          sourceDirectory
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
@@ -313,6 +322,7 @@ export async function getReleaseNotesMd(
     return null;
   }
   const changelog = await getReleaseNotesMdFile(project);
+
   if (!changelog) {
     return null;
   }
