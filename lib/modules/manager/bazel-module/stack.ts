@@ -14,7 +14,7 @@ export class Stack<T> extends Array<T> {
 
   get current(): T {
     const c = this.safeCurrent;
-    if (!c) {
+    if (c === undefined) {
       throw new Error('Requested current, but no value.');
     }
     return c;
