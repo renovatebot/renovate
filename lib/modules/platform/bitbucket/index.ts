@@ -964,7 +964,7 @@ export async function getReleaseNotesMd(
   const repositorySourceURl = joinUrlParts(
     '/2.0/repositories',
     repository,
-    'src'
+    'src?pagelen=100'
   );
 
   const rootFiles = (
