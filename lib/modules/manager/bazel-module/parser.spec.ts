@@ -4,6 +4,16 @@ import { parse } from './parser';
 
 describe('modules/manager/bazel-module/parser', () => {
   describe('parse', () => {
+    it('returns empty string if invalid content', () => {
+      const input = codeBlock`
+      // This is invalid
+      a + 1
+      <<<<<<<
+      `;
+      const res = parse(input, 'MODULE.bazel');
+      expect(res).toHaveLength(0);
+    });
+
     it('finds simple bazel_dep', () => {
       const input = codeBlock`
         bazel_dep(name = "rules_foo", version = "1.2.3")

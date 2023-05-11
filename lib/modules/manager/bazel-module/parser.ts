@@ -1,5 +1,4 @@
 import { lang, query as q } from 'good-enough-parser';
-import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { ValueFragment } from './fragments';
@@ -54,13 +53,9 @@ const query = q.tree<Ctx>({
 const starlarkLang = lang.createLang('starlark');
 
 export function parse(input: string, packageFile?: string): ValueFragment[] {
-  try {
-    const parsedResult = starlarkLang.query(input, query, new Ctx());
-    if (parsedResult) {
-      return parsedResult.results;
-    }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err, packageFile }, 'Bazel module parsing error');
+  const parsedResult = starlarkLang.query(input, query, new Ctx());
+  if (parsedResult) {
+    return parsedResult.results;
   }
   return [];
 }
