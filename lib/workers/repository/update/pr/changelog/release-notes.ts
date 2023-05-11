@@ -36,6 +36,8 @@ export async function getReleaseList(
         return await gitlab.getReleaseList(project, release);
       case 'github':
         return await github.getReleaseList(project, release);
+      case 'bitbucket':
+        return [];
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
