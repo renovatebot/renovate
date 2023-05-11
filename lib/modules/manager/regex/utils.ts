@@ -85,12 +85,15 @@ export function regexMatchAll(
 ): RegExpMatchArray[] {
   const matches: RegExpMatchArray[] = [];
   let matchResult: RegExpMatchArray | null;
+  let iterations = 0;
+  const maxIterations = 10000;
   do {
     matchResult = regex.exec(content);
     if (matchResult) {
       matches.push(matchResult);
     }
-  } while (matchResult);
+    iterations += 1;
+  } while (matchResult && iterations < maxIterations);
   return matches;
 }
 
