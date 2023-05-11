@@ -7,13 +7,8 @@ export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFileContent | null {
-  const fragments = parse(content, packageFile);
-  if (!fragments) {
-    return null;
-  }
-  const deps = fragments
+  const deps = parse(content, packageFile)
     .map((frag) => toPackageDependency(frag))
     .filter(isNotNullOrUndefined);
-  // istanbul ignore next: cannot reach null without introducing fake rule
   return deps.length ? { deps } : null;
 }

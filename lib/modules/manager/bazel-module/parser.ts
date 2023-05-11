@@ -53,18 +53,14 @@ const query = q.tree<Ctx>({
 
 const starlarkLang = lang.createLang('starlark');
 
-export function parse(
-  input: string,
-  packageFile?: string
-): ValueFragment[] | null {
-  let result: ValueFragment[] | null = null;
+export function parse(input: string, packageFile?: string): ValueFragment[] {
   try {
     const parsedResult = starlarkLang.query(input, query, new Ctx());
     if (parsedResult) {
-      result = parsedResult.results;
+      return parsedResult.results;
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err, packageFile }, 'Bazel module parsing error');
   }
-  return result;
+  return [];
 }
