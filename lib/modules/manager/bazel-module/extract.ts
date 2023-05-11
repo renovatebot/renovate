@@ -1,6 +1,6 @@
+import { isNotNullOrUndefined } from '../../../util/array';
 import type { PackageFileContent } from '../types';
 import { toPackageDependency } from './bazel-dep';
-import { isNotNullOrUndefined } from './filters';
 import { parse } from './parser';
 
 export function extractPackageFile(
