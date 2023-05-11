@@ -14,7 +14,7 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
  * - `name = "foobar"`
  * - `dev_dependeny = True`
  **/
-const kwParams = q
+const kvParams = q
   .sym<Ctx>((ctx, token) => {
     return Ctx.as(ctx).startAttribute(token.value);
   })
@@ -36,7 +36,7 @@ const moduleRules = q
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
-      search: kwParams,
+      search: kvParams,
       postHandler: (ctx, tree) => {
         return Ctx.as(ctx).endRule();
       },
