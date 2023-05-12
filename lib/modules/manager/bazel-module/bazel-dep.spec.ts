@@ -19,11 +19,5 @@ describe('modules/manager/bazel-module/bazel-dep', () => {
         currentValue: '1.2.3',
       });
     });
-
-    // it('returns null if invalid', () => {
-    //   const frag = fragments.record();
-    //   const result = toPackageDependency(frag);
-    //   expect(result).toBeNull();
-    // });
   });
 });
