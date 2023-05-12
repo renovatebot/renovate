@@ -1,6 +1,7 @@
 import { getPlatformList } from '../../lib/modules/platform';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
 import { getModuleLink, replaceContent } from './utils';
 
 export async function generatePlatforms(

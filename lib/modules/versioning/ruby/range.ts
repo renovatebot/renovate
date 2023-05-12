@@ -1,6 +1,7 @@
 import { satisfies } from '@renovatebot/ruby-semver';
 import { parse as _parse } from '@renovatebot/ruby-semver/dist/ruby/requirement.js';
-import { Version, create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import type { Version } from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';

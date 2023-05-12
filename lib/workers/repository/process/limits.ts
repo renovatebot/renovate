@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
-import { Pr, platform } from '../../../modules/platform';
+import type { Pr } from '../../../modules/platform';
+import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { BranchConfig } from '../../types';

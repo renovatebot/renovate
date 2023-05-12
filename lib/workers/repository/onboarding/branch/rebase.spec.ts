@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, git, scm } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { getConfig, git, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import * as memCache from '../../../../util/cache/memory';
 import { toSha256 } from '../../../../util/hasha';

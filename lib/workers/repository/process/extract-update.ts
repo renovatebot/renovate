@@ -16,7 +16,8 @@ import { raiseDeprecationWarnings } from './deprecated';
 import { fetchUpdates } from './fetch';
 import { sortBranches } from './sort';
 import { Vulnerabilities } from './vulnerabilities';
-import { WriteUpdateResult, writeUpdates } from './write';
+import type { WriteUpdateResult } from './write';
+import { writeUpdates } from './write';
 
 export interface ExtractResult {
   branches: BranchConfig[];

@@ -20,8 +20,8 @@ import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import type { NpmPackage, NpmPackageDependency } from './types';
 import { isZeroInstall } from './yarn';
+import type { YarnConfig } from './yarnrc';
 import {
-  YarnConfig,
   loadConfigFromLegacyYarnrc,
   loadConfigFromYarnrcYml,
   resolveRegistryUrl,

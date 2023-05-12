@@ -1,5 +1,6 @@
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import type { Pr } from '../../modules/platform';

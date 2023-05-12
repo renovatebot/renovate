@@ -1,11 +1,6 @@
 import type { RequestError, Response } from 'got';
-import {
-  RenovateConfig,
-  getConfig,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { getConfig, partial, platform, scm } from '../../../../../test/util';
 import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';

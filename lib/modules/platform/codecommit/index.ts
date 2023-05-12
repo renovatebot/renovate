@@ -1,9 +1,9 @@
 import { Buffer } from 'node:buffer';
-import {
+import type {
   GetCommentsForPullRequestOutput,
   ListRepositoriesOutput,
-  PullRequestStatusEnum,
 } from '@aws-sdk/client-codecommit';
+import { PullRequestStatusEnum } from '@aws-sdk/client-codecommit';
 import JSON5 from 'json5';
 
 import {

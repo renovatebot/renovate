@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { regEx } from '../../../../util/regex';
 import type { PackageDependency } from '../../types';
-import type { Fragment, FragmentData, Target } from '../types';
+import { Target } from '../types';
+import type { Fragment, FragmentData } from '../types';
 import { DockerTarget, dockerRules } from './docker';
 import { GitTarget, gitRules } from './git';
 import { GoTarget, goRules } from './go';

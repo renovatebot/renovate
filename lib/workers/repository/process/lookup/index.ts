@@ -3,9 +3,8 @@ import { mergeChildConfig } from '../../../../config';
 import type { ValidationMessage } from '../../../../config/types';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
+import type { Release, ReleaseResult } from '../../../../modules/datasource';
 import {
-  Release,
-  ReleaseResult,
   getDatasourceList,
   getDefaultVersioning,
   getDigest,

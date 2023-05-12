@@ -1,5 +1,6 @@
 import { createReadStream } from 'node:fs';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getFixturePath, logger } from '../../../../../test/util';

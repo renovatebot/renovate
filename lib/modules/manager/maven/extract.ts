@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import upath from 'upath';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import type { XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';

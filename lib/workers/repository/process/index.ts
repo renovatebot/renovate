@@ -13,7 +13,8 @@ import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
 import { readDashboardBody } from '../dependency-dashboard';
-import { ExtractResult, extract, lookup, update } from './extract-update';
+import type { ExtractResult } from './extract-update';
+import { extract, lookup, update } from './extract-update';
 import type { WriteUpdateResult } from './write';
 
 async function getBaseBranchConfig(

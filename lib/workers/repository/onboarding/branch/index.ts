@@ -7,7 +7,8 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import { Pr, platform } from '../../../../modules/platform';
+import type { Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
 import { getBranchCommit, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';

@@ -1,4 +1,5 @@
-import _simpleGit, { Response, SimpleGit } from 'simple-git';
+import type { Response, SimpleGit } from 'simple-git';
+import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import { GitTagsDatasource } from '.';

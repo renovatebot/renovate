@@ -1,9 +1,6 @@
 import type { Preset } from '../types';
-import {
-  PresetTemplate,
-  Replacement,
-  addPresets,
-} from './auto-generate-replacements';
+import type { PresetTemplate, Replacement } from './auto-generate-replacements';
+import { addPresets } from './auto-generate-replacements';
 
 /* eslint sort-keys: ["error", "asc", {"caseSensitive": false, "natural": true}] */
 export const presets: Record<string, Preset> = {

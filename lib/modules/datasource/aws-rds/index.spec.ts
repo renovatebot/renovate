@@ -1,7 +1,9 @@
-import {
+import type {
   DBEngineVersion,
-  DescribeDBEngineVersionsCommand,
   DescribeDBEngineVersionsCommandOutput,
+} from '@aws-sdk/client-rds';
+import {
+  DescribeDBEngineVersionsCommand,
   RDSClient,
 } from '@aws-sdk/client-rds';
 import { mockClient } from 'aws-sdk-client-mock';

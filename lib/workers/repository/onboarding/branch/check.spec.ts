@@ -1,11 +1,5 @@
-import {
-  RenovateConfig,
-  git,
-  mocked,
-  partial,
-  platform,
-  scm,
-} from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { git, mocked, partial, platform, scm } from '../../../../../test/util';
 import { REPOSITORY_CLOSED_ONBOARDING } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform/types';

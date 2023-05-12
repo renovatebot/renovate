@@ -1,5 +1,7 @@
-import _simpleGit, { Response, SimpleGit } from 'simple-git';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { Response, SimpleGit } from 'simple-git';
+import _simpleGit from 'simple-git';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';

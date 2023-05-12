@@ -1,9 +1,9 @@
-import {
+import type {
   GitPullRequest,
   GitRepository,
   GitStatusContext,
-  PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { PullRequestStatus } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
 import type { HostRule, PrState } from '../../../types';
 import type { GitOptions } from '../../../types/git';

@@ -1,8 +1,5 @@
-import {
-  ECRClient,
-  GetAuthorizationTokenCommand,
-  GetAuthorizationTokenCommandOutput,
-} from '@aws-sdk/client-ecr';
+import type { GetAuthorizationTokenCommandOutput } from '@aws-sdk/client-ecr';
+import { ECRClient, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr';
 import { mockClient } from 'aws-sdk-client-mock';
 import { getDigest, getPkgReleases } from '..';
 import { range } from '../../../../lib/util/range';

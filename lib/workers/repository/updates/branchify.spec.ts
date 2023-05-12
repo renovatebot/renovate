@@ -1,4 +1,5 @@
-import { RenovateConfig, mocked, mockedFunction } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { mocked, mockedFunction } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import * as _changelog from '../changelog';
 import { branchifyUpgrades } from './branchify';

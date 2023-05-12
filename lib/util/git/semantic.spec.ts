@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, git } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { getConfig, git } from '../../../test/util';
 import { initRepoCache } from '../cache/repository/init';
 import { detectSemanticCommits } from './semantic';
 

@@ -1,10 +1,9 @@
 import { Readable } from 'node:stream';
-import {
-  GetObjectCommand,
+import type {
   GetObjectCommandInput,
-  PutObjectCommand,
   PutObjectCommandInput,
 } from '@aws-sdk/client-s3';
+import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 import { logger } from '../../../../logger';
 import { getS3Client, parseS3Url } from '../../../s3';
 import { streamToString } from '../../../streams';

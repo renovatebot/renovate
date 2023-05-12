@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
+import type { ExecSnapshots } from '../../../../../test/exec-util';
 import {
-  ExecSnapshots,
   envMock,
   mockExecAll,
   mockExecSequence,

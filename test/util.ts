@@ -1,11 +1,13 @@
 import crypto from 'node:crypto';
-import { expect, jest } from '@jest/globals';
+import type { jest } from '@jest/globals';
+import { expect } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
 import { getConfig } from '../lib/config/defaults';
 import type { RenovateConfig } from '../lib/config/types';
 import * as _logger from '../lib/logger';
-import { Platform, platform as _platform } from '../lib/modules/platform';
+import type { Platform } from '../lib/modules/platform';
+import { platform as _platform } from '../lib/modules/platform';
 import { scm as _scm } from '../lib/modules/platform/scm';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';

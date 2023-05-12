@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig } from '../../../../../test/util';
+import type { RenovateConfig } from '../../../../../test/util';
+import { getConfig } from '../../../../../test/util';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { getConfigDesc } from './config-description';
 

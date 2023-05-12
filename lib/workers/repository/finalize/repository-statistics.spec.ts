@@ -1,10 +1,6 @@
 import { Fixtures } from '../../../../test/fixtures';
-import {
-  RenovateConfig,
-  getConfig,
-  mockedFunction,
-  partial,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig, mockedFunction, partial } from '../../../../test/util';
 import { logger } from '../../../logger';
 import { platform } from '../../../modules/platform';
 import * as cache from '../../../util/cache/repository';

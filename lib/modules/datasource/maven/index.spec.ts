@@ -1,4 +1,5 @@
-import { ReleaseResult, getPkgReleases } from '..';
+import type { ReleaseResult } from '..';
+import { getPkgReleases } from '..';
 import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';

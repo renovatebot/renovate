@@ -1,4 +1,5 @@
-import { ECR, ECRClientConfig } from '@aws-sdk/client-ecr';
+import type { ECRClientConfig } from '@aws-sdk/client-ecr';
+import { ECR } from '@aws-sdk/client-ecr';
 import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { HttpError } from '../../../util/http';

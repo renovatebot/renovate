@@ -1,5 +1,6 @@
 import type { BranchStatus } from '../../../types';
-import { GiteaHttp, GiteaHttpOptions } from '../../../util/http/gitea';
+import type { GiteaHttpOptions } from '../../../util/http/gitea';
+import { GiteaHttp } from '../../../util/http/gitea';
 import { getQueryString } from '../../../util/url';
 import type {
   Branch,

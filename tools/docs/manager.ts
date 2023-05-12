@@ -1,7 +1,8 @@
 import type { RenovateConfig } from '../../lib/config/types';
 import { getManagers } from '../../lib/modules/manager';
 import { readFile, updateFile } from '../utils';
-import { OpenItems, generateFeatureAndBugMarkdown } from './github-query-items';
+import type { OpenItems } from './github-query-items';
+import { generateFeatureAndBugMarkdown } from './github-query-items';
 import {
   formatUrls,
   getDisplayName,

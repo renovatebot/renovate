@@ -5,7 +5,8 @@ import { logger } from '../../../../logger';
 import { compress, decompress } from '../../../compress';
 import { safeStringify } from '../../../stringify';
 import { CACHE_REVISION } from '../common';
-import { RepoCacheRecord, RepoCacheV13 } from '../schema';
+import type { RepoCacheRecord } from '../schema';
+import { RepoCacheV13 } from '../schema';
 import type { RepoCache, RepoCacheData } from '../types';
 
 export abstract class RepoCacheBase implements RepoCache {

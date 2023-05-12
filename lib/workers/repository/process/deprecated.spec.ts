@@ -1,4 +1,5 @@
-import { RenovateConfig, platform } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { platform } from '../../../../test/util';
 import { raiseDeprecationWarnings } from './deprecated';
 
 describe('workers/repository/process/deprecated', () => {

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import {
+import type {
   ArgumentNode,
   DefinitionNode,
   DocumentNode,
@@ -10,8 +10,8 @@ import {
   TypeNode,
   ValueNode,
   VariableDefinitionNode,
-  parse,
 } from 'graphql/language';
+import { parse } from 'graphql/language';
 
 function isOperationDefinitionNode(
   def: DefinitionNode

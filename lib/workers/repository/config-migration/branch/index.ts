@@ -1,7 +1,8 @@
 import { GlobalConfig } from '../../../../config/global';
 import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
-import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
+import type { FindPRConfig, Pr } from '../../../../modules/platform';
+import { platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
 import { getMigrationBranchName } from '../common';

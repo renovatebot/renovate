@@ -1,10 +1,5 @@
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  platform,
-  scm,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig, git, platform, scm } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import * as cleanup from './prune';
 

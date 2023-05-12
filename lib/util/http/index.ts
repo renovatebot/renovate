@@ -1,7 +1,9 @@
 import merge from 'deepmerge';
-import got, { Options, RequestError } from 'got';
+import type { Options } from 'got';
+import got, { RequestError } from 'got';
 import hasha from 'hasha';
-import { infer as Infer, ZodType } from 'zod';
+import type { infer as Infer } from 'zod';
+import { ZodType } from 'zod';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { pkg } from '../../expose.cjs';
 import { logger } from '../../logger';

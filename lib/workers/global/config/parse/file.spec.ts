@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import fsExtra from 'fs-extra';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import upath from 'upath';
 import { logger } from '../../../../logger';
 import customConfig from './__fixtures__/config';

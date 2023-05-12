@@ -1,4 +1,5 @@
-import { DescribeImagesCommand, EC2Client, Image } from '@aws-sdk/client-ec2';
+import type { Image } from '@aws-sdk/client-ec2';
+import { DescribeImagesCommand, EC2Client } from '@aws-sdk/client-ec2';
 import { cache } from '../../../util/cache/package/decorator';
 import { Lazy } from '../../../util/lazy';
 import * as amazonMachineImageVersioning from '../../versioning/aws-machine-image';

@@ -1,8 +1,6 @@
 import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
-import {
-  SegmentElement,
-  create,
-} from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import type { SegmentElement } from '@renovatebot/ruby-semver/dist/ruby/version.js';
+import { create } from '@renovatebot/ruby-semver/dist/ruby/version.js';
 import { regEx } from '../../../util/regex';
 
 interface RubyVersion {

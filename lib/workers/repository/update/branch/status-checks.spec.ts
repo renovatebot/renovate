@@ -1,7 +1,6 @@
 import { getConfig, platform } from '../../../../../test/util';
+import type { ConfidenceConfig, StabilityConfig } from './status-checks';
 import {
-  ConfidenceConfig,
-  StabilityConfig,
   resolveBranchStatus,
   setConfidence,
   setStability,

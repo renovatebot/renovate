@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig } from '../../../test/util';
+import type { RenovateConfig } from '../../../test/util';
+import { getConfig } from '../../../test/util';
 import { processResult } from './result';
 
 let config: RenovateConfig;

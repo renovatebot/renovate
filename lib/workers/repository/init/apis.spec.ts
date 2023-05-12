@@ -1,4 +1,5 @@
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig, platform } from '../../../../test/util';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_FORKED,

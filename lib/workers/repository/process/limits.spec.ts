@@ -1,10 +1,6 @@
 import { DateTime } from 'luxon';
-import {
-  RenovateConfig,
-  getConfig,
-  platform,
-  scm,
-} from '../../../../test/util';
+import type { RenovateConfig } from '../../../../test/util';
+import { getConfig, platform, scm } from '../../../../test/util';
 import type { BranchConfig } from '../../types';
 import * as limits from './limits';
 

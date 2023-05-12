@@ -28,7 +28,8 @@ import { OnboardingState } from './onboarding/common';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import type { ExtractResult } from './process/extract-update';
-import { ProcessResult, processResult } from './result';
+import type { ProcessResult } from './result';
+import { processResult } from './result';
 import { printLookupStats, printRequestStats } from './stats';
 
 // istanbul ignore next

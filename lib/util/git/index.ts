@@ -3,13 +3,9 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import fs from 'fs-extra';
 // TODO: check if bug is fixed (#7154)
-// eslint-disable-next-line import/no-named-as-default
-import simpleGit, {
-  Options,
-  ResetMode,
-  SimpleGit,
-  TaskOptions,
-} from 'simple-git';
+
+import type { Options, SimpleGit, TaskOptions } from 'simple-git';
+import simpleGit, { ResetMode } from 'simple-git';
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';

@@ -1,8 +1,8 @@
-import {
+import type {
   GitCommit,
-  GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
+import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 import { logger } from '../../../logger';
 import { streamToString } from '../../../util/streams';
 import { getNewBranchName } from '../util';

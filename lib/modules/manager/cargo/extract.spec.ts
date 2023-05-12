@@ -1,5 +1,6 @@
 import { codeBlock } from 'common-tags';
-import { DirectoryResult, dir } from 'tmp-promise';
+import type { DirectoryResult } from 'tmp-promise';
+import { dir } from 'tmp-promise';
 import { join } from 'upath';
 import { Fixtures } from '../../../../test/fixtures';
 import { GlobalConfig } from '../../../config/global';

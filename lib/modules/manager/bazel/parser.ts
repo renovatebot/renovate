@@ -1,4 +1,5 @@
-import { lang, lexer, parser, query as q } from 'good-enough-parser';
+import type { lexer, parser } from 'good-enough-parser';
+import { lang, query as q } from 'good-enough-parser';
 import hasha from 'hasha';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';

@@ -1,8 +1,8 @@
 import { ERROR, WARN } from 'bunyan';
 import { mock } from 'jest-mock-extended';
 import { Fixtures } from '../../../test/fixtures';
+import type { RenovateConfig } from '../../../test/util';
 import {
-  RenovateConfig,
   getConfig,
   logger,
   mockedFunction,
