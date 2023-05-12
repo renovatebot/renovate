@@ -10,7 +10,7 @@ describe('modules/manager/bazel-module/parser', () => {
       a + 1
       <<<<<<<
       `;
-      const res = parse(input, 'MODULE.bazel');
+      const res = parse(input);
       expect(res).toHaveLength(0);
     });
 
@@ -19,7 +19,7 @@ describe('modules/manager/bazel-module/parser', () => {
         bazel_dep(name = "rules_foo", version = "1.2.3")
         bazel_dep(name = "rules_bar", version = "1.0.0", dev_dependency = True)
       `;
-      const res = parse(input, 'MODULE.bazel');
+      const res = parse(input);
       expect(res).toEqual([
         new RecordFragment(
           {
