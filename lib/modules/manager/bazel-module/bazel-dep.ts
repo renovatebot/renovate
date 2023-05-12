@@ -2,37 +2,32 @@ import { z } from 'zod';
 import { BazelDatasource } from '../../datasource/bazel';
 import type { PackageDependency } from '../types';
 import {
-  BooleanFragment,
+  BooleanFragmentSchema,
   RecordFragment,
-  StringFragment,
-  ValueFragment,
+  StringFragmentSchema,
 } from './fragments';
 
 const BazelDepChildrenSchema = z.object({
-  rule: StringFragment.schema.extend({
+  rule: StringFragmentSchema.extend({
     value: z.literal('bazel_dep'),
   }),
-  name: StringFragment.schema,
-  version: StringFragment.schema,
-  dev_dependency: BooleanFragment.schema.optional(),
+  name: StringFragmentSchema,
+  version: StringFragmentSchema,
+  dev_dependency: BooleanFragmentSchema.optional(),
 });
 
-export function toPackageDependency(
-  value: ValueFragment
-): PackageDependency | null {
-  const record = RecordFragment.safeAs(value);
-  if (!record) {
-    return null;
-  }
-  const parseResult = BazelDepChildrenSchema.safeParse(record.children);
-  if (!parseResult.success) {
-    return null;
-  }
-  const { rule, name, version } = parseResult.data;
-  return {
+const ToBazelDep = BazelDepChildrenSchema.transform(
+  ({ rule, name, version }): PackageDependency => ({
     datasource: BazelDatasource.id,
     depType: rule.value,
     depName: name.value,
     currentValue: version.value,
-  };
+  })
+);
+
+export function toPackageDependency(
+  record: RecordFragment
+): PackageDependency | null {
+  const parseResult = ToBazelDep.safeParse(record.children);
+  return parseResult.success ? parseResult.data : null;
 }

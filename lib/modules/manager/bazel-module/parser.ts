@@ -1,7 +1,7 @@
 import { lang, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
-import type { ValueFragment } from './fragments';
+import type { RecordFragment } from './fragments';
 import * as starlark from './starlark';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
@@ -52,7 +52,7 @@ const query = q.tree<Ctx>({
 
 const starlarkLang = lang.createLang('starlark');
 
-export function parse(input: string): ValueFragment[] {
+export function parse(input: string): RecordFragment[] {
   const parsedResult = starlarkLang.query(input, query, new Ctx());
   if (parsedResult) {
     return parsedResult.results;

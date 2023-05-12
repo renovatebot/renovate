@@ -1,5 +1,5 @@
 import { codeBlock } from 'common-tags';
-import { BooleanFragment, RecordFragment, StringFragment } from './fragments';
+import * as fragments from './fragments';
 import { parse } from './parser';
 
 describe('modules/manager/bazel-module/parser', () => {
@@ -21,20 +21,20 @@ describe('modules/manager/bazel-module/parser', () => {
       `;
       const res = parse(input);
       expect(res).toEqual([
-        new RecordFragment(
+        fragments.record(
           {
-            rule: new StringFragment('bazel_dep'),
-            name: new StringFragment('rules_foo'),
-            version: new StringFragment('1.2.3'),
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
           },
           true
         ),
-        new RecordFragment(
+        fragments.record(
           {
-            rule: new StringFragment('bazel_dep'),
-            name: new StringFragment('rules_bar'),
-            version: new StringFragment('1.0.0'),
-            dev_dependency: new BooleanFragment(true),
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_bar'),
+            version: fragments.string('1.0.0'),
+            dev_dependency: fragments.boolean(true),
           },
           true
         ),

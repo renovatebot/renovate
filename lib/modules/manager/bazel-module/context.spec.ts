@@ -1,5 +1,5 @@
-import { Ctx } from './context';
-import { ArrayFragment, RecordFragment, StringFragment } from './fragments';
+import { Ctx, CtxProcessingError } from './context';
+import * as fragments from './fragments';
 
 describe('modules/manager/bazel-module/context', () => {
   describe('Ctx', () => {
@@ -13,11 +13,11 @@ describe('modules/manager/bazel-module/context', () => {
         .endRule();
 
       expect(ctx.results).toEqual([
-        new RecordFragment(
+        fragments.record(
           {
-            rule: new StringFragment('bazel_dep'),
-            name: new StringFragment('rules_foo'),
-            version: new StringFragment('1.2.3'),
+            rule: fragments.string('bazel_dep'),
+            name: fragments.string('rules_foo'),
+            version: fragments.string('1.2.3'),
           },
           true
         ),
@@ -31,25 +31,18 @@ describe('modules/manager/bazel-module/context', () => {
         .addString('my_library')
         .startAttribute('srcs')
         .startArray()
-        .addArrayItem('first')
-        .addArrayItem('second')
+        .addString('first')
+        .addString('second')
         .endArray()
-        .startAttribute('tags')
-        .startRule('get_tags')
-        .endRule()
         .endRule();
 
       expect(ctx.results).toEqual([
-        new RecordFragment(
+        fragments.record(
           {
-            rule: new StringFragment('foo_library'),
-            name: new StringFragment('my_library'),
-            srcs: new ArrayFragment(
-              [new StringFragment('first'), new StringFragment('second')],
-              true
-            ),
-            tags: new RecordFragment(
-              { rule: new StringFragment('get_tags') },
+            rule: fragments.string('foo_library'),
+            name: fragments.string('my_library'),
+            srcs: fragments.array(
+              [fragments.string('first'), fragments.string('second')],
               true
             ),
           },
@@ -61,7 +54,7 @@ describe('modules/manager/bazel-module/context', () => {
     describe('currentRecord', () => {
       it('returns the record fragment if it is current', () => {
         const ctx = new Ctx().startRecord();
-        expect(ctx.currentRecord).toEqual(new RecordFragment());
+        expect(ctx.currentRecord).toEqual(fragments.record());
       });
 
       it('throws if the current is not a record fragment', () => {
@@ -75,7 +68,7 @@ describe('modules/manager/bazel-module/context', () => {
     describe('currentArray', () => {
       it('returns the array fragment if it is current', () => {
         const ctx = new Ctx().startArray();
-        expect(ctx.currentArray).toEqual(new ArrayFragment());
+        expect(ctx.currentArray).toEqual(fragments.array());
       });
 
       it('throws if the current is not a record fragment', () => {
@@ -89,7 +82,9 @@ describe('modules/manager/bazel-module/context', () => {
     it('throws if add an attribute without a parent', () => {
       const ctx = new Ctx().startAttribute('name');
       expect(() => ctx.addString('chicken')).toThrow(
-        new Error('Processing an attribute but there is no parent.')
+        new CtxProcessingError(
+          fragments.attribute('name', fragments.string('chicken'))
+        )
       );
     });
   });

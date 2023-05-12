@@ -1,15 +1,15 @@
 import { BazelDatasource } from '../../datasource/bazel';
 import { toPackageDependency } from './bazel-dep';
-import { BooleanFragment, RecordFragment, StringFragment } from './fragments';
+import * as fragments from './fragments';
 
 describe('modules/manager/bazel-module/bazel-dep', () => {
   describe('toPackageDependency()', () => {
     it('transforms a record fragment', () => {
-      const record = new RecordFragment({
-        rule: new StringFragment('bazel_dep'),
-        name: new StringFragment('rules_foo'),
-        version: new StringFragment('1.2.3'),
-        dev_dependency: new BooleanFragment(true),
+      const record = fragments.record({
+        rule: fragments.string('bazel_dep'),
+        name: fragments.string('rules_foo'),
+        version: fragments.string('1.2.3'),
+        dev_dependency: fragments.boolean(true),
       });
       const result = toPackageDependency(record);
       expect(result).toEqual({
@@ -20,8 +20,8 @@ describe('modules/manager/bazel-module/bazel-dep', () => {
       });
     });
 
-    it('returns null if not a record fragment', () => {
-      const frag = new StringFragment('hello');
+    it('returns null if invalid', () => {
+      const frag = fragments.record();
       const result = toPackageDependency(frag);
       expect(result).toBeNull();
     });
