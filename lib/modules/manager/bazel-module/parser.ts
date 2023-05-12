@@ -52,7 +52,7 @@ const query = q.tree<Ctx>({
 
 const starlarkLang = lang.createLang('starlark');
 
-export function parse(input: string, packageFile?: string): ValueFragment[] {
+export function parse(input: string): ValueFragment[] {
   const parsedResult = starlarkLang.query(input, query, new Ctx());
   if (parsedResult) {
     return parsedResult.results;

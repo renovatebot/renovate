@@ -7,7 +7,7 @@ export function extractPackageFile(
   content: string,
   packageFile: string
 ): PackageFileContent | null {
-  const deps = parse(content, packageFile)
+  const deps = parse(content)
     .map((frag) => toPackageDependency(frag))
     .filter(isNotNullOrUndefined);
   return deps.length ? { deps } : null;
