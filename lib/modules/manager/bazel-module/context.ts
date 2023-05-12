@@ -17,7 +17,10 @@ export class CtxProcessingError extends Error {
   readonly current: AllFragments;
   readonly parent?: AllFragments;
   constructor(current: AllFragments, parent?: AllFragments) {
-    super();
+    const msg = `Invalid context state. current: ${current.type}, parent: ${
+      parent?.type ?? 'none'
+    }`;
+    super(msg);
     this.name = 'CtxProcessingError';
     this.current = current;
     this.parent = parent;
@@ -59,12 +62,14 @@ export class Ctx implements CtxCompatible {
     throw new Error('Requested current array, but does not exist.');
   }
 
-  private popStack(): void {
+  private popStack(): boolean {
     const current = this.stack.pop();
-    // TODO: Try to remove this istanbul comment.
-    // istanbul ignore if: we should never get here
     if (!current) {
-      return;
+      return false;
+    }
+    if (!current.isComplete) {
+      this.stack.push(current);
+      return false;
     }
     const parent = this.stack.safeCurrent;
 
@@ -72,11 +77,11 @@ export class Ctx implements CtxCompatible {
       if (parent.type === 'attribute' && fragments.isValue(current)) {
         parent.value = current;
         parent.isComplete = true;
-        return;
+        return true;
       }
       if (parent.type === 'array' && fragments.isPrimitive(current)) {
         parent.items.push(current);
-        return;
+        return true;
       }
       if (
         parent.type === 'record' &&
@@ -84,21 +89,19 @@ export class Ctx implements CtxCompatible {
         current.value !== undefined
       ) {
         parent.children[current.name] = current.value;
-        return;
+        return true;
       }
     } else if (current.type === 'record') {
       this.results.push(current);
-      return;
+      return true;
     }
 
     throw new CtxProcessingError(current, parent);
   }
 
   private processStack(): Ctx {
-    let current = this.stack.safeCurrent;
-    while (current?.isComplete) {
-      this.popStack();
-      current = this.stack.safeCurrent;
+    while (this.popStack()) {
+      // Nothing to do
     }
     return this;
   }
