@@ -2,8 +2,8 @@ import { Readable } from 'node:stream';
 import { GitPullRequestMergeStrategy } from 'azure-devops-node-api/interfaces/GitInterfaces.js';
 
 describe('modules/platform/azure/azure-helper', () => {
-  let azureHelper: typeof import('./azure-helper');
-  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
+  let azureHelper: typeof import('./azure-helper'); // eslint-disable-line @typescript-eslint/consistent-type-imports
+  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
 
   beforeEach(() => {
     // reset module

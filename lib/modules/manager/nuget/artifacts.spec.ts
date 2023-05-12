@@ -20,7 +20,7 @@ const { getConfiguredRegistries, getDefaultRegistries } = mocked(util);
 const hostRules = mocked(_hostRules);
 
 const realFs =
-  jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs');
+  jest.requireActual<typeof import('../../../util/fs')>('../../../util/fs'); // eslint-disable-line @typescript-eslint/consistent-type-imports
 
 process.env.CONTAINERBASE = 'true';
 

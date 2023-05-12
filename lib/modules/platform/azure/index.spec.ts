@@ -20,8 +20,8 @@ import { AzurePrVote } from './types';
 describe('modules/platform/azure/index', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
-  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
-  let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
+  let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
+  let azureHelper: jest.Mocked<typeof import('./azure-helper')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
 

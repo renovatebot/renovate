@@ -1,7 +1,7 @@
 import type * as _hostRules from '../../../util/host-rules';
 
 describe('modules/platform/azure/azure-got-wrapper', () => {
-  let azure: typeof import('./azure-got-wrapper');
+  let azure: typeof import('./azure-got-wrapper'); // eslint-disable-line @typescript-eslint/consistent-type-imports
   let hostRules: typeof _hostRules;
 
   beforeEach(() => {

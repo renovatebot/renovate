@@ -42,10 +42,10 @@ const GITEA_VERSION = '1.14.0+dev-754-g5d2b7ba63';
 
 describe('modules/platform/gitea/index', () => {
   let gitea: Platform;
-  let helper: jest.Mocked<typeof import('./gitea-helper')>;
+  let helper: jest.Mocked<typeof import('./gitea-helper')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
   let logger: jest.Mocked<typeof _logger>;
   let gitvcs: jest.Mocked<typeof _git>;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 

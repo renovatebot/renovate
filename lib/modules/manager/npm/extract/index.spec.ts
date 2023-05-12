@@ -4,7 +4,7 @@ import type { ExtractConfig } from '../../types';
 import * as npmExtract from '.';
 
 jest.mock('../../../../util/fs');
-const realFs = jest.requireActual<typeof import('../../../../util/fs')>(
+const realFs = jest.requireActual<typeof import('../../../../util/fs')>( // eslint-disable-line @typescript-eslint/consistent-type-imports
   '../../../../util/fs'
 );
 

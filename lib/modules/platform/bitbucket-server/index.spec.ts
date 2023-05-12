@@ -174,7 +174,7 @@ describe('modules/platform/bitbucket-server/index', () => {
 
     describe(scenarioName, () => {
       let bitbucket: Platform;
-      let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+      let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
       let git: jest.Mocked<typeof _git>;
       const username = 'abc';
       const password = '123';

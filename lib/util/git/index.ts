@@ -5,7 +5,7 @@ import fs from 'fs-extra';
 // TODO: check if bug is fixed (#7154)
 
 import type { Options, SimpleGit, TaskOptions } from 'simple-git';
-import simpleGit, { ResetMode } from 'simple-git';
+import simpleGit, { ResetMode } from 'simple-git'; // eslint-disable-line import/no-named-as-default
 import upath from 'upath';
 import { configFileNames } from '../../config/app-strings';
 import { GlobalConfig } from '../../config/global';

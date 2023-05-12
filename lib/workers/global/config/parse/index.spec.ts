@@ -17,7 +17,7 @@ const { hostRulesFromEnv } = mocked(_hostRulesFromEnv);
 
 describe('workers/global/config/parse/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
-    let configParser: typeof import('.');
+    let configParser: typeof import('.'); // eslint-disable-line @typescript-eslint/consistent-type-imports
     let defaultArgv: string[];
     let defaultEnv: NodeJS.ProcessEnv;
 

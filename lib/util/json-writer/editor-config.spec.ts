@@ -9,7 +9,7 @@ jest.mock('fs', () => ({
   ...memfs,
   readFileSync: (file: string, ...args: any[]) => {
     if (file.endsWith('.wasm')) {
-      const realFs = jest.requireActual<typeof import('fs')>('fs');
+      const realFs = jest.requireActual<typeof import('fs')>('fs'); // eslint-disable-line @typescript-eslint/consistent-type-imports
       return realFs.readFileSync(file, ...args);
     }
     return memfs.readFileSync(file, ...args);

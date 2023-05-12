@@ -18,7 +18,7 @@ const pr = {
 
 describe('modules/platform/bitbucket/index', () => {
   let bitbucket: Platform;
-  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>;
+  let hostRules: jest.Mocked<typeof import('../../../util/host-rules')>; // eslint-disable-line @typescript-eslint/consistent-type-imports
   let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
 
