@@ -967,10 +967,14 @@ export async function getReleaseNotesMd(
     'src'
   );
 
-  const rootFiles =
-    await bitbucketHttp.getUnpaginatedJson<BitbucketSourceResults>(
-      repositorySourceURl
-    );
+  const rootFiles = (
+    await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(
+      repositorySourceURl,
+      {
+        paginate: true,
+      }
+    )
+  ).body.values;
 
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
@@ -1013,9 +1017,14 @@ export async function getTags(repository: string): Promise<string[]> {
       'refs/tags'
     );
 
-    const tags = await bitbucketHttp.getUnpaginatedJson<BitbucketTag>(
-      baseRepositoryTagURL
-    );
+    const tags = (
+      await bitbucketHttp.getJson<PagedResult<BitbucketTag>>(
+        baseRepositoryTagURL,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
 
     // istanbul ignore if
     if (!tags.length) {
