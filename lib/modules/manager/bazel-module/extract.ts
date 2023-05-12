@@ -1,3 +1,4 @@
+import { logger } from '../../../logger';
 import { isNotNullOrUndefined } from '../../../util/array';
 import type { PackageFileContent } from '../types';
 import { toPackageDependency } from './bazel-dep';
@@ -10,5 +11,12 @@ export function extractPackageFile(
   const deps = parse(content)
     .map((frag) => toPackageDependency(frag))
     .filter(isNotNullOrUndefined);
-  return deps.length ? { deps } : null;
+  if (deps.length) {
+    return { deps };
+  }
+  logger.debug(
+    { packageFile },
+    'The package file did not contain any package dependencies.'
+  );
+  return null;
 }
