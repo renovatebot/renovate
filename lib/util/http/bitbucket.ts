@@ -35,6 +35,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
       while (is.nonEmptyString(nextPage)) {
         const nextPath = getNextPagePath(path, nextPage);
 
+        // istanbul ignore if
         if (is.nullOrUndefined(nextPath)) {
           break;
         }
@@ -72,6 +73,7 @@ function getPageFromURL(url: string | undefined): string | null {
 function getNextPagePath(path: string, nextPage: string): string | null {
   const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
 
+  // istanbul ignore if
   if (is.nullOrUndefined(resolvedURL)) {
     return null;
   }
