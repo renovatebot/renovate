@@ -3,21 +3,41 @@ import { BazelDatasource } from '../../datasource/bazel';
 import type { PackageDependency } from '../types';
 import {
   BooleanFragmentSchema,
-  RecordFragment,
+  RecordFragmentSchema,
   StringFragmentSchema,
 } from './fragments';
 
-const BazelDepChildrenSchema = z.object({
-  rule: StringFragmentSchema.extend({
-    value: z.literal('bazel_dep'),
+// const BazelDepChildrenSchema = z.object({
+//   rule: StringFragmentSchema.extend({
+//     value: z.literal('bazel_dep'),
+//   }),
+//   name: StringFragmentSchema,
+//   version: StringFragmentSchema,
+//   dev_dependency: BooleanFragmentSchema.optional(),
+// });
+//
+// export const ToBazelDep = BazelDepChildrenSchema.transform(
+//   ({ rule, name, version }): PackageDependency => ({
+//     datasource: BazelDatasource.id,
+//     depType: rule.value,
+//     depName: name.value,
+//     currentValue: version.value,
+//   })
+// );
+
+const BazelDepSchema = RecordFragmentSchema.extend({
+  children: z.object({
+    rule: StringFragmentSchema.extend({
+      value: z.literal('bazel_dep'),
+    }),
+    name: StringFragmentSchema,
+    version: StringFragmentSchema,
+    dev_dependency: BooleanFragmentSchema.optional(),
   }),
-  name: StringFragmentSchema,
-  version: StringFragmentSchema,
-  dev_dependency: BooleanFragmentSchema.optional(),
 });
 
-const ToBazelDep = BazelDepChildrenSchema.transform(
-  ({ rule, name, version }): PackageDependency => ({
+export const ToBazelDep = BazelDepSchema.transform(
+  ({ children: { rule, name, version } }): PackageDependency => ({
     datasource: BazelDatasource.id,
     depType: rule.value,
     depName: name.value,
@@ -25,9 +45,9 @@ const ToBazelDep = BazelDepChildrenSchema.transform(
   })
 );
 
-export function toPackageDependency(
-  record: RecordFragment
-): PackageDependency | null {
-  const parseResult = ToBazelDep.safeParse(record.children);
-  return parseResult.success ? parseResult.data : null;
-}
+// export function toPackageDependency(
+//   record: RecordFragment
+// ): PackageDependency | null {
+//   const parseResult = ToBazelDep.safeParse(record.children);
+//   return parseResult.success ? parseResult.data : null;
+// }
