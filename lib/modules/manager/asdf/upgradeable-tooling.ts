@@ -144,9 +144,11 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   flutter: {
     asdfPluginUrl: 'https://github.com/oae/asdf-flutter',
-    config: {
+    config: (version) => ({
       datasource: FlutterVersionDatasource.id,
-    },
+      // asdf-flutter plugin supports channel on version suffix.
+      currentValue: version.replace(/-(stable|beta|dev)$/, ''),
+    }),
   },
   gauche: {
     asdfPluginUrl: 'https://github.com/sakuro/asdf-gauche',

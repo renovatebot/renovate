@@ -57,7 +57,7 @@ ecspresso 2.1.0
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
-flutter 3.7.6
+flutter 3.7.6-stable
 gauche 0.9.12
 gohugo extended_0.104.3
 golang 1.19.2
@@ -432,6 +432,29 @@ dummy 1.2.3
           {
             depName: 'dummy',
             skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('can handle flutter version channel', () => {
+      const withChannel = extractPackageFile('flutter 3.10.0-stable');
+      expect(withChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
+          },
+        ],
+      });
+      const withoutChannel = extractPackageFile('flutter 3.10.0');
+      expect(withoutChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
           },
         ],
       });
