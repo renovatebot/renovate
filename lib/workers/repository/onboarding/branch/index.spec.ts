@@ -3,7 +3,6 @@ import {
   RenovateConfig,
   fs,
   getConfig,
-  git,
   mocked,
   platform,
   scm,
@@ -46,7 +45,7 @@ describe('workers/repository/onboarding/branch/index', () => {
       config = getConfig();
       config.repository = 'some/repo';
       OnboardingState.prUpdateRequested = false;
-      git.getFileList.mockResolvedValue([]);
+      scm.getFileList.mockResolvedValue([]);
       cache.getCache.mockReturnValue({});
     });
 
@@ -87,7 +86,7 @@ describe('workers/repository/onboarding/branch/index', () => {
             '  "$schema": "https://docs.renovatebot.com/renovate-schema.json"\n' +
             '}\n'
         );
-        git.getFileList.mockResolvedValue(['package.json']);
+        scm.getFileList.mockResolvedValue(['package.json']);
         fs.readLocalFile.mockResolvedValue('{}');
         await checkOnboardingBranch(config);
         const file = scm.commitAndPush.mock.calls[0][0]
@@ -112,7 +111,7 @@ describe('workers/repository/onboarding/branch/index', () => {
           '  "extends": ["some/renovate-config"]\n' +
           '}\n'
       );
-      git.getFileList.mockResolvedValue(['package.json']);
+      scm.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       const expectConfig = {
@@ -147,7 +146,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding, requireConfig=required, and a config file', async () => {
       config.requireConfig = 'required';
       config.onboarding = false;
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -162,7 +161,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     it('handles skipped onboarding, requireConfig=required, and no config file', async () => {
       config.requireConfig = 'required';
       config.onboarding = false;
-      git.getFileList.mockResolvedValueOnce(['package.json']);
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
       await expect(onboardingResult).rejects.toThrow('disabled');
@@ -177,7 +176,7 @@ describe('workers/repository/onboarding/branch/index', () => {
 
     it('handles removed cached file name', async () => {
       cache.getCache.mockReturnValue({ configFileName: '.renovaterc' });
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
     });
@@ -226,7 +225,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via package.json config', async () => {
-      git.getFileList.mockResolvedValueOnce(['package.json']);
+      scm.getFileList.mockResolvedValueOnce(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
@@ -341,7 +340,7 @@ describe('workers/repository/onboarding/branch/index', () => {
         GlobalConfig.set({ platform: 'github' });
         config.onboardingRebaseCheckbox = true;
         OnboardingState.prUpdateRequested = false;
-        git.getFileList.mockResolvedValueOnce(['package.json']);
+        scm.getFileList.mockResolvedValueOnce(['package.json']);
         platform.findPr.mockResolvedValueOnce(null);
       });
 
@@ -384,7 +383,6 @@ describe('workers/repository/onboarding/branch/index', () => {
           `Manual onboarding PR update requested`
         );
         expect(OnboardingState.prUpdateRequested).toBeTrue();
-        ``;
         expect(git.mergeBranch).toHaveBeenCalledTimes(1);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
       });

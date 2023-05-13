@@ -4,7 +4,6 @@ import { logger } from '../../../../logger';
 import { FindPRConfig, Pr, platform } from '../../../../modules/platform';
 import { ensureComment } from '../../../../modules/platform/comment';
 import { scm } from '../../../../modules/platform/scm';
-import { checkoutBranch } from '../../../../util/git';
 import { getMigrationBranchName } from '../common';
 import { ConfigMigrationCommitMessageFactory } from './commit-message';
 import { createConfigMigrationBranch } from './create';
@@ -67,7 +66,7 @@ export async function checkConfigMigrationBranch(
     await createConfigMigrationBranch(config, migratedConfigData);
   }
   if (!GlobalConfig.get('dryRun')) {
-    await checkoutBranch(configMigrationBranch);
+    await scm.checkoutBranch(configMigrationBranch);
   }
   return configMigrationBranch;
 }

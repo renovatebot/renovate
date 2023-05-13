@@ -377,7 +377,15 @@ export function isCloned(): boolean {
 
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
+    // istanbul ignore if
+    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+      await git.raw(['config', 'core.hooksPath', '/dev/null']);
+    }
     return;
+  }
+  // istanbul ignore if: failsafe
+  if (GlobalConfig.get('platform') === 'local') {
+    throw new Error('Cannot sync git when platform=local');
   }
   gitInitialized = true;
   const localDir = GlobalConfig.get('localDir')!;
