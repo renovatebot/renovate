@@ -293,7 +293,7 @@ export async function findPr({
   const pr = prList.find(
     (p) =>
       p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
       matchesState(p.state, state)
   );
   if (pr) {
