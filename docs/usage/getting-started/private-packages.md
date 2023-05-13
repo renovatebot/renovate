@@ -155,7 +155,7 @@ It can be confusing for people who host their own source code privately to be as
 
 Currently the preferred way to configure `github.com` credentials for self-hosted Renovate is:
 
-- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create an "empty" account just for this purpose.
+- Create a read-only Personal Access Token (PAT) for a `github.com` account. This can be any GitHub account, it might be better to create an "empty" account for this purpose.
 - Add the PAT to Renovate using the environment variable `GITHUB_COM_TOKEN`
 
 ## Package Manager Credentials for Artifact Updating
@@ -286,7 +286,7 @@ This merge approach is similar to how `npm` itself behaves if `.npmrc` is found 
 
 #### Add npmToken to Renovate config
 
-If you are using the main npmjs registry then you can configure just the `npmToken` instead:
+If you are using the main npmjs registry then you can configure only the `npmToken` instead:
 
 ```json
 {
