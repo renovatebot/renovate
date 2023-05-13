@@ -55,4 +55,34 @@ describe('util/http/bitbucket', () => {
       statusCode: 200,
     });
   });
+
+  it('paginates', async () => {
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url')
+      .reply(200, {
+        values: ['a'],
+        page: '1',
+        next: `${baseUrl}/some-url?page=2`,
+      })
+      .get('/some-url?page=2')
+      .reply(200, {
+        values: ['b', 'c'],
+        page: '2',
+        next: `${baseUrl}/some-url?page=3`,
+      })
+      .get('/some-url?page=3')
+      .reply(200, {
+        values: ['d'],
+        page: '3',
+      });
+    const res = await api.getJson('some-url', { paginate: true });
+    expect(res.body).toEqual({
+      page: '1',
+      pagelen: 4,
+      size: 4,
+      values: ['a', 'b', 'c', 'd'],
+      next: undefined,
+    });
+  });
 });
