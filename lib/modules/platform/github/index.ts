@@ -716,7 +716,7 @@ export async function findPr({
       return false;
     }
 
-    if (prTitle && prTitle !== p.title) {
+    if (prTitle && prTitle.toUpperCase() !== p.title.toUpperCase()) {
       return false;
     }
 
