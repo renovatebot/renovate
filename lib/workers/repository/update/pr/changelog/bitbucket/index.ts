@@ -46,12 +46,12 @@ export async function getReleaseNotesMd(
 
   const files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
 
-  if (!files.length) {
+  const changelogFile = files.shift();
+  if (is.nullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
     return null;
   }
 
-  const changelogFile = files.shift()!;
 
   if (files.length !== 0) {
     logger.debug(
@@ -67,7 +67,7 @@ export async function getReleaseNotesMd(
     )
   );
 
-  const changelogMd = fileRes.body + '\n#\n##';
+  const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
 }
 
@@ -80,7 +80,6 @@ export async function getTags(repository: string): Promise<string[]> {
       })
     )?.releases;
 
-    // istanbul ignore if
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
       logger.debug(`No Bitbucket tags found for repository:${repository}`);
 
