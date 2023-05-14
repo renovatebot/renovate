@@ -7,11 +7,21 @@ on:
 jobs:
   devcontainer-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [arm64, amd64]
     steps:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2.1.0
 
       - name: Build and run dev container task
         uses: devcontainers/ci@57eaf0c9b518a76872bc429cdceefd65a912309b # v0.3.1900000329
         with:
           runCmd: yarn build
+          platform: linux/amd64,linux/arm64
+          imageName: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+          cacheFrom: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}
+          push: always
