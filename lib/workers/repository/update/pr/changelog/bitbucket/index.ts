@@ -87,7 +87,7 @@ export async function getTags(repository: string): Promise<string[]> {
       return [];
     }
 
-    return [];
+    return tags.map(({ version }) => version);
   } catch (err) {
     logger.debug(
       { sourceRepo: repository, err },
