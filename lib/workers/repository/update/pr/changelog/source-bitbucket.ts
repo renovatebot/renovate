@@ -85,7 +85,7 @@ export async function getChangeLogJSON(
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));
-    if (tagName) {
+    if (is.nonEmptyString(tagName)) {
       return tagName;
     }
     if (release.gitRef) {
