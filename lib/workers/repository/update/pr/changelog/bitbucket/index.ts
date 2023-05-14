@@ -28,7 +28,7 @@ export async function getReleaseNotesMd(
 
   const repositorySourceURl = joinUrlParts(
     apiBaseUrl,
-    `/2.0/repositories`,
+    `2.0/repositories`,
     repository,
     'src'
   );
