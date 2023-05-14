@@ -2635,9 +2635,8 @@ const options: RenovateOptions[] = [
     default: [],
   },
   {
-    name: 'logDependencyDashboardInfo',
-    description:
-      'logs dependency dashboard information before transforming into dependency dashboard issue',
+    name: 'branchSummaryExtended',
+    description: 'logs extra branch metadata',
     type: 'boolean',
     experimental: true,
     globalOnly: true,

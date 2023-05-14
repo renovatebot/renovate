@@ -104,17 +104,9 @@ export interface BranchCache {
   /**
    * Dependency dashboard information
    */
-  dependencyDashboard?: boolean;
-  dependencyDashboardApproval?: boolean;
-  dependencyDashboardPrApproval?: unknown;
-  dependencyDashboardTitle?: string;
-  dependencyDashboardFooter?: unknown;
-  dependencyDashboardHeader?: unknown;
   prBlockedBy?: PrBlockedBy;
   prTitle?: string;
-  repoProblems?: Set<string>;
   result?: string;
-  packageFiles?: Record<string, Partial<PackageFile>[]>;
 }
 
 export interface RepoCacheData {

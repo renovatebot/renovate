@@ -6,7 +6,6 @@ import {
   partial,
 } from '../../../../test/util';
 import { logger } from '../../../logger';
-import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import * as cache from '../../../util/cache/repository';
 import type {
@@ -68,9 +67,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
-      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config, packageFiles);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -130,9 +128,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
-      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config, packageFiles);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -158,14 +155,13 @@ describe('workers/repository/finalize/repository-statistics', () => {
       );
     });
 
-    it('logs extended branch info if logDependencyDashboardInfo', () => {
+    it('logs extended branch info if branchSummaryExtended', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
-        logDependencyDashboardInfo: true,
+        branchSummaryExtended: true,
       };
       const branchCache = partial<BranchCache>({
-        dependencyDashboard: true,
         result: 'done',
         upgrades: partial<BranchUpgradeCache[]>([
           {
@@ -185,9 +181,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
-      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config, packageFiles);
+      runBranchSummary(config);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
     });

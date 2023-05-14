@@ -457,6 +457,7 @@ export async function ensureDependencyDashboard(
     header = template.compile(config.dependencyDashboardHeader, config);
   }
   const repoProblems = extractRepoProblems(config);
+  logger.debug({ repoProblems }, 'repository problems');
 
   let { issueBody } = createDashboardBody(
     header,

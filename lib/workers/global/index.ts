@@ -209,6 +209,7 @@ export async function start(): Promise<number> {
     await globalFinalize(config!);
     logger.debug(`Renovate exiting`);
   }
+
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {
     logger.info(
