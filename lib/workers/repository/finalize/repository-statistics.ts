@@ -60,7 +60,7 @@ function branchCacheToMetadata({
   };
 }
 
-function extractDependencyDashboardData(
+function filterDependencyDashboardData(
   branches: BranchCache[]
 ): Partial<BranchCache>[] {
   let dependencyDashboardData = [...branches];
@@ -76,10 +76,11 @@ function extractDependencyDashboardData(
     delete b.pristine;
     delete b.prCache;
     delete b.sha;
-    b.upgrades.map((upgrade) => {
+    b.upgrades = b.upgrades?.map((upgrade) => {
       const u = { ...upgrade };
       delete u.sourceUrl;
       delete u.depType;
+      return u;
     });
     return b;
   });
@@ -116,7 +117,7 @@ export function runBranchSummary(config: RenovateConfig): void {
 
   logger.debug(res, 'Branch summary');
   if (branches) {
-    const branchesInformation = extractDependencyDashboardData(branches);
+    const branchesInformation = filterDependencyDashboardData(branches);
     if (config.branchSummaryExtended) {
       logger.debug({ branchesInformation }, 'Branches info extended');
     }

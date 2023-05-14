@@ -11,6 +11,7 @@ import * as cache from '../../../util/cache/repository';
 import type {
   BaseBranchCache,
   BranchCache,
+  BranchUpgradeCache,
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import {
@@ -103,6 +104,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
         isModified: false,
         automerge: false,
         pristine: false,
+        upgrades: [],
       });
       const expectedMeta = {
         automerge: branchCache.automerge,
@@ -162,7 +164,17 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const branchCache = partial<BranchCache>({
         dependencyDashboard: true,
         result: 'done',
+        upgrades: partial<BranchUpgradeCache[]>([
+          {
+            datasource: 'npm',
+            depName: 'minimist',
+            currentValue: '1.2.3',
+            sourceUrl: 'someUrl',
+            depType: 'dependencies',
+          },
+        ]),
       });
+
       const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
       const cache = partial<RepoCacheData>({
         scan: {},
