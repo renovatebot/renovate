@@ -112,6 +112,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'dprint/dprint',
     },
   },
+  ecspresso: {
+    asdfPluginUrl: 'https://github.com/kayac/asdf-ecspresso',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kayac/ecspresso',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   elixir: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-elixir',
     config: {
@@ -412,6 +420,29 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'ziglang/zig',
+    },
+  },
+  maestro: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-maestro',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'mobile-dev-inc/maestro',
+      extractVersion: '^cli-(?<version>\\S+)',
+    },
+  },
+  detekt: {
+    asdfPluginUrl: 'https://github.com/dotanuki-labs/asdf-detekt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'detekt/detekt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  ktlint: {
+    asdfPluginUrl: 'https://github.com/asdf-community/asdf-ktlint',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'pinterest/ktlint',
     },
   },
 };

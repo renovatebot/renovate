@@ -78,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
+  commitMessageLowerCase?: 'auto' | 'never';
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -251,6 +252,7 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
+  vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
@@ -309,6 +311,7 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
+  isVulnerabilityAlert?: boolean;
   matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
@@ -333,6 +336,7 @@ export interface PackageRule
   matchUpdateTypes?: UpdateType[];
   matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
