@@ -26,7 +26,12 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile | null> {
   logger.trace('bitbucket.getReleaseNotesMd()');
 
-  const repositorySourceURl = joinUrlParts(apiBaseUrl, repository, 'src');
+  const repositorySourceURl = joinUrlParts(
+    apiBaseUrl,
+    `/2.0/repositories`,
+    repository,
+    'src'
+  );
 
   const rootFiles = (
     await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(

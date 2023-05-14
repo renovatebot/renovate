@@ -83,7 +83,7 @@ describe('workers/repository/update/pr/changelog/bitbucket', () => {
       ).toEqual({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://api.bitbucket.org/2.0/repositories/',
+          apiBaseUrl: 'https://api.bitbucket.org/',
           baseUrl: 'https://bitbucket.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
@@ -125,7 +125,7 @@ describe('workers/repository/update/pr/changelog/bitbucket', () => {
       ).toEqual({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://api.bitbucket.org/2.0/repositories/',
+          apiBaseUrl: 'https://api.bitbucket.org/',
           baseUrl: 'https://bitbucket.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
@@ -160,7 +160,7 @@ describe('workers/repository/update/pr/changelog/bitbucket', () => {
       ).toEqual({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://api.bitbucket.org/2.0/repositories/',
+          apiBaseUrl: 'https://api.bitbucket.org/',
           baseUrl: 'https://bitbucket.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
@@ -195,7 +195,7 @@ describe('workers/repository/update/pr/changelog/bitbucket', () => {
       ).toEqual({
         hasReleaseNotes: false,
         project: {
-          apiBaseUrl: 'https://api.bitbucket.org/2.0/repositories/',
+          apiBaseUrl: 'https://api.bitbucket.org/',
           baseUrl: 'https://bitbucket.org/',
           packageName: 'renovate',
           repository: 'meno/dropzone',
