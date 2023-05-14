@@ -44,11 +44,8 @@ export async function getReleaseNotesMd(
 
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
-  let files: BitbucketSourceResults[] = [];
+  const files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
 
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
-  }
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
