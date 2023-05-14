@@ -12,5 +12,5 @@ export function extractPackageFile(
 
   const { deps, perlVersion } = result;
   const extractedConstraints = perlVersion ? { perl: perlVersion } : undefined;
-  return { deps, extractedConstraints };
+  return { deps, ...(extractedConstraints && { extractedConstraints }) };
 }
