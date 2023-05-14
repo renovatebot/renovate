@@ -6,6 +6,7 @@ import {
   partial,
 } from '../../../../test/util';
 import { logger } from '../../../logger';
+import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import * as cache from '../../../util/cache/repository';
 import type {
@@ -67,8 +68,9 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
+      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config);
+      runBranchSummary(config, packageFiles);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -128,8 +130,9 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
+      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config);
+      runBranchSummary(config, packageFiles);
 
       expect(logger.debug).toHaveBeenCalledWith(
         {
@@ -155,11 +158,11 @@ describe('workers/repository/finalize/repository-statistics', () => {
       );
     });
 
-    it('logs extended branch info if branchSummaryExtended', () => {
+    it('logs extended branch info if logDependencyDashboardInfo', () => {
       const defaultBranch = 'main';
       const config: RenovateConfig = {
         defaultBranch,
-        branchSummaryExtended: true,
+        logDependencyDashboardInfo: true,
       };
       const branchCache = partial<BranchCache>({
         dependencyDashboard: true,
@@ -182,8 +185,9 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
+      const packageFiles: Record<string, PackageFile[]> = {};
 
-      runBranchSummary(config);
+      runBranchSummary(config, packageFiles);
 
       expect(logger.debug).toHaveBeenCalledTimes(2);
     });

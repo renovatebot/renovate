@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import type { PackageFile } from '../../../modules/manager/types';
 import type { Pr } from '../../../modules/platform';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
 import type { BranchCache } from '../../../util/cache/repository/types';
@@ -8,6 +9,7 @@ import type {
   BranchMetadata,
   BranchSummary,
 } from '../../types';
+import { extractRepoProblems } from '../dependency-dashboard';
 
 export function runRenovateRepoStats(
   config: RenovateConfig,
@@ -76,18 +78,43 @@ function filterDependencyDashboardData(
     delete b.pristine;
     delete b.prCache;
     delete b.sha;
-    b.upgrades = b.upgrades?.map((upgrade) => {
-      const u = { ...upgrade };
-      delete u.sourceUrl;
-      delete u.depType;
-      return u;
-    });
+    delete b.dependencyDashboard,
+      delete b.dependencyDashboardApproval,
+      delete b.dependencyDashboardFooter,
+      delete b.dependencyDashboardHeader,
+      delete b.dependencyDashboardPrApproval,
+      delete b.dependencyDashboardTitle,
+      (b.upgrades = b.upgrades?.map((upgrade) => {
+        const u = { ...upgrade };
+        delete u.sourceUrl;
+        delete u.depType;
+        return u;
+      }));
     return b;
   });
   return dependencyDashboardData;
 }
 
-export function runBranchSummary(config: RenovateConfig): void {
+function minimizePackageFiles(
+  packageFiles: Record<string, PackageFile[]>
+): Record<string, Partial<PackageFile>[]> {
+  const packageFilesMinimized: Record<string, Partial<PackageFile>[]> = {};
+  if (packageFiles) {
+    for (const manager in packageFiles) {
+      const packageFile = packageFiles[manager];
+      packageFilesMinimized[manager] = packageFile.map((file) => ({
+        deps: file.deps.map(({ warnings }) => ({ warnings })),
+        packageFile: file.packageFile,
+      }));
+    }
+  }
+  return packageFilesMinimized;
+}
+
+export function runBranchSummary(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): void {
   const defaultBranch = config.defaultBranch;
   const { scan, branches } = getCache();
 
@@ -116,10 +143,19 @@ export function runBranchSummary(config: RenovateConfig): void {
   };
 
   logger.debug(res, 'Branch summary');
-  if (branches) {
+
+  if (config.logDependencyDashboardInfo && branches?.length) {
     const branchesInformation = filterDependencyDashboardData(branches);
-    if (config.branchSummaryExtended) {
-      logger.debug({ branchesInformation }, 'Branches info extended');
-    }
+
+    // log repo problems for dependency dashboard
+    const repoProblems = extractRepoProblems(config);
+
+    // log minimized packageFiles necessary for dependency dashboard
+    const packageFilesToPrint = minimizePackageFiles(packageFiles);
+
+    logger.debug(
+      { branchesInformation, repoProblems, packageFilesToPrint },
+      'branches info extended'
+    );
   }
 }

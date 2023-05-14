@@ -1,5 +1,6 @@
 import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
+import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clearRenovateRefs } from '../../../util/git';
@@ -14,7 +15,8 @@ import {
 // istanbul ignore next
 export async function finalizeRepo(
   config: RenovateConfig,
-  branchList: string[]
+  branchList: string[],
+  packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   await configMigration(config, branchList);
   await repositoryCache.saveCache();
@@ -36,6 +38,6 @@ export async function finalizeRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  runBranchSummary(config);
+  runBranchSummary(config, packageFiles);
   runRenovateRepoStats(config, prList);
 }

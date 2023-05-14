@@ -1,9 +1,7 @@
 /* istanbul ignore file */
 
-import { nameFromLevel } from 'bunyan';
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
-import { getProblems, logger } from '../../logger';
-import type { PackageFile } from '../../modules/manager/types';
+import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
 import { scm } from '../../modules/platform/scm';
 import { getCache } from '../../util/cache/repository';
@@ -65,21 +63,7 @@ function generateBranchUpgradeCache(
 async function generateBranchCache(
   branch: BranchConfig
 ): Promise<BranchCache | null> {
-  const {
-    baseBranch,
-    branchName,
-    dependencyDashboard,
-    dependencyDashboardApproval,
-    dependencyDashboardFooter,
-    dependencyDashboardHeader,
-    dependencyDashboardPrApproval,
-    dependencyDashboardTitle,
-    packageFiles,
-    prBlockedBy,
-    prTitle,
-    repository,
-    result,
-  } = branch;
+  const { baseBranch, branchName, prBlockedBy, prTitle, result } = branch;
   try {
     const branchSha = await scm.getBranchCommit(branchName);
     const baseBranchSha = await scm.getBranchCommit(baseBranch);
@@ -117,43 +101,12 @@ async function generateBranchCache(
     const branchFingerprint = branch.branchFingerprint;
     const prCache = getPrCache(branchName);
 
-    // we minimize to packageFile+warnings because that's what getDepWarningsDashboard needs.
-    const packageFilesMinimized: Record<string, Partial<PackageFile>[]> = {};
-    if (packageFiles) {
-      for (const manager in packageFiles) {
-        const packageFile = packageFiles[manager];
-        packageFilesMinimized[manager] = packageFile.map((file) => ({
-          deps: file.deps.map(({ warnings }) => ({ warnings })),
-          packageFile: file.packageFile,
-        }));
-      }
-    }
-
-    //get repo problems to log into branch summary
-    const repoProblems = new Set(
-      getProblems()
-        .filter(
-          (problem) =>
-            problem.repository === repository && !problem.artifactErrors
-        )
-        .map(
-          (problem) =>
-            `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
-        )
-    );
-
     return {
       automerge,
       baseBranchSha,
       baseBranch,
       branchFingerprint,
       branchName,
-      dependencyDashboard,
-      dependencyDashboardApproval,
-      dependencyDashboardFooter,
-      dependencyDashboardHeader,
-      dependencyDashboardPrApproval,
-      dependencyDashboardTitle,
       isBehindBase,
       isConflicted,
       isModified,
@@ -162,11 +115,9 @@ async function generateBranchCache(
       prCache,
       prNo,
       prTitle,
-      repoProblems,
       result,
       sha: branchSha,
       upgrades,
-      packageFiles: packageFilesMinimized,
     };
   } catch (error) {
     const err = error.err || error; // external host error nests err

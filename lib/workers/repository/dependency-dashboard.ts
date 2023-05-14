@@ -157,7 +157,7 @@ function getListItem(branch: Partial<BranchConfig>, type: string): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
-function extractRepoProblems(config: RenovateConfig): Set<string> {
+export function extractRepoProblems(config: RenovateConfig): Set<string> {
   return new Set(
     getProblems()
       .filter(

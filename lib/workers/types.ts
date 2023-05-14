@@ -131,10 +131,10 @@ export interface BranchConfig
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null | undefined;
+  branchSha?: string | null;
   baseBranch?: string;
   baseBranchSha?: string | null;
-  automerge: boolean | undefined;
+  automerge?: boolean;
   isModified?: boolean;
   isPristine?: boolean;
 }

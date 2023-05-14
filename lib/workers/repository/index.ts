@@ -90,7 +90,7 @@ export async function renovateRepository(
       } else {
         await ensureDependencyDashboard(config, branches, packageFiles);
       }
-      await finalizeRepo(config, branchList);
+      await finalizeRepo(config, branchList, packageFiles);
       // TODO #7154
       repoResult = processResult(config, res!);
     }
