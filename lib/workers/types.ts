@@ -141,7 +141,7 @@ export interface BranchMetadata {
 
 export interface BaseBranchMetadata {
   branchName: string;
-  sha: string | undefined;
+  sha?: string;
 }
 
 export interface BranchSummary {
