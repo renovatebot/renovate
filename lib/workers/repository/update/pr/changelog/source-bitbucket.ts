@@ -123,7 +123,7 @@ export async function getChangeLogJSON(
         };
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
-        if (prevHead && nextHead) {
+        if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
           release.compare.url = `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
         }
         const cacheMinutes = 55;
