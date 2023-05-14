@@ -111,15 +111,3 @@ export interface BitbucketSourceResults {
 }
 
 export type BitbucketSourceType = 'commit_directory' | 'commit_file';
-
-export interface BitbucketTag {
-  name: string;
-  message: string;
-  date: string;
-  target: {
-    hash: string;
-    date: string;
-    message: string;
-  };
-  next?: string;
-}
