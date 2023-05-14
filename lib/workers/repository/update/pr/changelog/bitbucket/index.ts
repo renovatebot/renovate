@@ -80,7 +80,6 @@ export async function getTags(repository: string): Promise<string[]> {
       })
     )?.releases;
 
-    // istanbul ignore if
     if (is.nullOrUndefined(tags) || is.emptyArray(tags)) {
       logger.debug(`No Bitbucket tags found for repository:${repository}`);
 
