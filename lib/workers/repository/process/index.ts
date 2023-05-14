@@ -108,7 +108,7 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: null!,
   };
-  if (config.baseBranches?.length) {
+  if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(config.baseBranches);
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
