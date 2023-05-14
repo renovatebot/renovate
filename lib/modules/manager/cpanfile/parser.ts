@@ -17,6 +17,8 @@ interface Ctx {
   currentValue?: string;
 }
 
+// requires perl, '5.36.1';
+// requires 'perl' => 5.036001;
 const perlVersionMatch = q
   .sym<Ctx>('requires')
   .alt(q.sym('perl'), q.str('perl'))
@@ -50,6 +52,16 @@ const phasedRequiresMatch = q.sym<Ctx>(
   }
 );
 
+// requires 'Foo::Bar';
+//
+// requires 'Foo::Bar', '1.23';
+// recommends 'Foo::Bar', '1.23';
+// suggests 'Foo::Bar', '1.23';
+//
+// configure_requires 'Foo::Bar' => 1.023;
+// build_requires 'Foo::Bar' => 1.023;
+// test_requires 'Foo::Bar' => 1.023;
+// author_requires 'Foo::Bar' => 1.023;
 const moduleMatch = q
   .alt(requirementMatch, phasedRequiresMatch)
   .str((ctx, { value: depName }) => ({ ...ctx, depName }))
@@ -99,6 +111,11 @@ const phaseMatch = q.alt<Ctx>(
   q.str(phaseRegex, (ctx, { value: phase }) => ({ ...ctx, phase }))
 );
 
+// on 'configure' => sub {
+// on build => sub {
+// on 'test' => sub {
+// on runtime => sub {
+// on 'develop' => sub {
 const onMatch = q
   .sym<Ctx>('on')
   .join(phaseMatch)
