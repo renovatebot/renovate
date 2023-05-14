@@ -67,7 +67,7 @@ export async function getReleaseNotesMd(
     )
   );
 
-  const changelogMd = fileRes.body + '\n#\n##';
+  const changelogMd = `${fileRes.body}\n#\n##`;
   return { changelogFile: changelogFile.path, changelogMd };
 }
 
