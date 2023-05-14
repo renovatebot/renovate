@@ -1,12 +1,12 @@
 import URL from 'node:url';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
-import * as bitbucketHttp from '../../../../../modules/platform/bitbucket';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import { getTags } from './bitbucket';
 import { slugifyUrl } from './common';
 import { addReleaseNotes } from './release-notes';
 import { getInRangeReleases } from './releases';
@@ -25,7 +25,7 @@ function getCachedTags(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = bitbucketHttp.getTags(repository);
+  const promisedRes = getTags(repository);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }

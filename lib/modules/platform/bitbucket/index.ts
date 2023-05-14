@@ -1,6 +1,5 @@
 import URL from 'node:url';
 import is from '@sindresorhus/is';
-import changelogFilenameRegex from 'changelog-filename-regex';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -11,8 +10,6 @@ import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
 import type { HttpOptions } from '../../../util/http/types';
 import { isUUID, regEx } from '../../../util/regex';
 import { sanitize } from '../../../util/sanitize';
-import { joinUrlParts } from '../../../util/url';
-import type { ChangeLogFile } from '../../../workers/repository/update/pr/changelog/types';
 import type {
   BranchStatusConfig,
   CreatePRConfig,
@@ -36,9 +33,7 @@ import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import type {
   Account,
-  BitbucketSourceResults,
   BitbucketStatus,
-  BitbucketTag,
   BranchResponse,
   Config,
   EffectiveReviewer,
@@ -957,91 +952,4 @@ export async function mergePr({
     return false;
   }
   return true;
-}
-
-export async function getReleaseNotesMd(
-  repository: string,
-  sourceDirectory?: string
-): Promise<ChangeLogFile | null> {
-  logger.trace('bitbucket.getReleaseNotesMd()');
-
-  const repositorySourceURl = joinUrlParts(
-    '/2.0/repositories',
-    repository,
-    'src'
-  );
-
-  const rootFiles = (
-    await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(
-      repositorySourceURl,
-      {
-        paginate: true,
-      }
-    )
-  ).body.values;
-
-  const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
-
-  let files: BitbucketSourceResults[] = [];
-
-  if (!files.length) {
-    files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
-  }
-  if (!files.length) {
-    logger.trace('no changelog file found');
-    return null;
-  }
-
-  const changelogFile = files.shift()!;
-
-  if (files.length !== 0) {
-    logger.debug(
-      `Multiple candidates for changelog file, using ${changelogFile.path}`
-    );
-  }
-
-  const fileRes = await bitbucketHttp.get(
-    joinUrlParts(
-      repositorySourceURl,
-      changelogFile.commit.hash,
-      changelogFile.path
-    )
-  );
-
-  const changelogMd = fileRes.body + '\n#\n##';
-  return { changelogFile: changelogFile.path, changelogMd };
-}
-
-export async function getTags(repository: string): Promise<string[]> {
-  logger.trace('bitbucket.getTags()');
-  try {
-    const baseRepositoryTagURL = joinUrlParts(
-      '/2.0/repositories',
-      repository,
-      'refs/tags'
-    );
-
-    const tags = (
-      await bitbucketHttp.getJson<PagedResult<BitbucketTag>>(
-        baseRepositoryTagURL,
-        {
-          paginate: true,
-        }
-      )
-    ).body.values;
-
-    // istanbul ignore if
-    if (!tags.length) {
-      logger.debug(`No Bitbucket tags found for repository:${repository}`);
-    }
-
-    return tags.map(({ name }) => name);
-  } catch (err) {
-    logger.debug(
-      { sourceRepo: repository, err },
-      'Failed to fetch Bitbucket tags'
-    );
-
-    return [];
-  }
 }

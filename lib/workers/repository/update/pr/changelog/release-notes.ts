@@ -4,13 +4,13 @@ import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 import { logger } from '../../../../../logger';
-import * as bitbucketPlatform from '../../../../../modules/platform/bitbucket';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { detectPlatform } from '../../../../../util/common';
 import { linkify } from '../../../../../util/markdown';
 import { newlineRegex, regEx } from '../../../../../util/regex';
 import type { BranchUpgradeConfig } from '../../../../types';
+import * as bitbucket from './bitbucket';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import type {
@@ -37,7 +37,7 @@ export async function getReleaseList(
       case 'github':
         return await github.getReleaseList(project, release);
       case 'bitbucket':
-        return [];
+        return bitbucket.getReleaseList(project, release);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return [];
@@ -266,10 +266,7 @@ export async function getReleaseNotesMdFileInner(
           sourceDirectory
         );
       case 'bitbucket':
-        return await bitbucketPlatform.getReleaseNotesMd(
-          repository,
-          sourceDirectory
-        );
+        return await bitbucket.getReleaseNotesMd(repository, sourceDirectory);
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
