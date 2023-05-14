@@ -15,29 +15,27 @@ import type {
   ChangeLogRelease,
 } from '../types';
 
-export const id = 'bitbucket-changelog';
-const bitbucketHttp = new BitbucketHttp(id);
+const bitbucketHttp = new BitbucketHttp();
 const bitbucketTags = new BitbucketTagsDatasource();
 
 export async function getReleaseNotesMd(
   repository: string,
+  apiBaseUrl: string,
   sourceDirectory?: string
 ): Promise<ChangeLogFile | null> {
   logger.trace('bitbucket.getReleaseNotesMd()');
 
-  const repositorySourceURl = joinUrlParts(
-    '/2.0/repositories',
-    repository,
-    'src'
-  );
+  const repositorySourceURl = joinUrlParts(apiBaseUrl, repository, 'src');
 
-  const response = await bitbucketHttp.getJson<
-    PagedResult<BitbucketSourceResults>
-  >(repositorySourceURl, {
-    paginate: true,
-  });
+  const rootFiles = (
+    await bitbucketHttp.getJson<PagedResult<BitbucketSourceResults>>(
+      repositorySourceURl,
+      {
+        paginate: true,
+      }
+    )
+  ).body.values;
 
-  const rootFiles = response.body.values;
   const allFiles = rootFiles.filter((f) => f.type === 'commit_file');
 
   let files: BitbucketSourceResults[] = [];

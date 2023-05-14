@@ -266,7 +266,11 @@ export async function getReleaseNotesMdFileInner(
           sourceDirectory
         );
       case 'bitbucket':
-        return await bitbucket.getReleaseNotesMd(repository, sourceDirectory);
+        return await bitbucket.getReleaseNotesMd(
+          repository,
+          apiBaseUrl,
+          sourceDirectory
+        );
       default:
         logger.warn({ apiBaseUrl, repository, type }, 'Invalid project type');
         return null;
