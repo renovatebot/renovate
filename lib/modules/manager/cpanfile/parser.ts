@@ -76,6 +76,8 @@ const moduleMatch = q
       };
       if (currentValue) {
         dep.currentValue = currentValue;
+      } else {
+        dep.skipReason = 'no-version';
       }
       if (phase) {
         dep.depType = phase;

@@ -52,6 +52,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Try::Tiny',
+            skipReason: 'no-version',
           },
           {
             datasource: 'cpan',
@@ -86,6 +87,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Crypt::URandom',
+            skipReason: 'no-version',
           },
           {
             datasource: 'cpan',
@@ -115,6 +117,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Authen::Simple::Passwd',
+            skipReason: 'no-version',
           },
         ],
       });
@@ -188,6 +191,7 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'Test::Requires',
               depType: 'test',
+              skipReason: 'no-version',
             },
           ],
         });
@@ -210,11 +214,13 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'FCGI',
               depType: 'runtime',
+              skipReason: 'no-version',
             },
             {
               datasource: 'cpan',
               depName: 'FCGI::ProcManager',
               depType: 'runtime',
+              skipReason: 'no-version',
             },
           ],
         });
