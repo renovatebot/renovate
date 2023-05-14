@@ -49,11 +49,9 @@ export async function getChangeLogJSON(
   const pathname = parsedUrl.pathname!;
 
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
-  const baseUrl = protocol.concat('//', host, '/');
-  const apiBaseUrl = protocol.concat('//', 'api.', host, '/');
-  const repository = pathname
-    .slice(1)
-    .replace(regEx(/\/$/), '')
+  const baseUrl = `${protocol}//${host}/`;
+  const apiBaseUrl = `${protocol}//api.${host}/`;
+  const repository = trimSlashes(pathname)
     .replace(regEx(/\.git$/), '');
 
   if (repository.split('/').length < 2) {
