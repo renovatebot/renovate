@@ -42,10 +42,10 @@ const perlVersionMatch = q
     return ctx;
   });
 
-const requirementMatch = q.sym<Ctx>(/^(?:requires|recommends|suggests)/);
+const requirementMatch = q.sym<Ctx>(/^(?:requires|recommends|suggests)$/);
 
 const phasedRequiresMatch = q.sym<Ctx>(
-  /^(?:configure|build|test|author)_requires/,
+  /^(?:configure|build|test|author)_requires$/,
   (ctx, { value: phase }) => {
     ctx.tempPhase = phase.replace(/_requires/, '').replace(/author/, 'develop');
     return ctx;
