@@ -15,7 +15,8 @@ import type {
   ChangeLogRelease,
 } from '../types';
 
-const bitbucketHttp = new BitbucketHttp();
+export const id = 'bitbucket-changelog';
+const bitbucketHttp = new BitbucketHttp(id);
 const bitbucketTags = new BitbucketTagsDatasource();
 
 export async function getReleaseNotesMd(
