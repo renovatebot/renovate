@@ -1,14 +1,14 @@
 import { join } from 'upath';
-import { mockExecAll } from '../../../../test/exec-util';
-import { fs, mockedFunction } from '../../../../test/util';
-import { GlobalConfig } from '../../../config/global';
-import type { RepoGlobalConfig } from '../../../config/types';
-import { getPkgReleases as _getPkgReleases } from '../../datasource';
-import type { UpdateArtifactsConfig } from '../types';
-import { updateArtifacts } from './artifacts';
+import { mockExecAll } from '../../../../../test/exec-util';
+import { fs, mockedFunction } from '../../../../../test/util';
+import { GlobalConfig } from '../../../../config/global';
+import type { RepoGlobalConfig } from '../../../../config/types';
+import { getPkgReleases as _getPkgReleases } from '../../../datasource';
+import type { UpdateArtifactsConfig } from '../../types';
+import { PdmProcessor } from './pdm';
 
-jest.mock('../../../util/fs');
-jest.mock('../../datasource');
+jest.mock('../../../../util/fs');
+jest.mock('../../../datasource');
 
 const getPkgReleases = mockedFunction(_getPkgReleases);
 
@@ -19,11 +19,14 @@ const adminConfig: RepoGlobalConfig = {
   containerbaseDir: join('/tmp/cache/containerbase'),
 };
 
-describe('modules/manager/pep621/artifacts', () => {
+const processor = new PdmProcessor();
+
+describe('modules/manager/pep621/processors/pdm', () => {
   describe('updateArtifacts()', () => {
-    it('return null if all processors returns are empty', async () => {
+    it('return null if there is no lock file', async () => {
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ depName: 'dep1' }];
-      const result = await updateArtifacts({
+      const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
         config,
@@ -32,33 +35,25 @@ describe('modules/manager/pep621/artifacts', () => {
       expect(result).toBeNull();
     });
 
-    it('return processor result', async () => {
+    it('return null if the lock file is unchanged', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
-      fs.readLocalFile.mockResolvedValueOnce('old test content');
-      fs.readLocalFile.mockResolvedValueOnce('new test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
+      fs.readLocalFile.mockResolvedValueOnce('test content');
       // pdm
       getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
       const updatedDeps = [{ depName: 'dep1' }];
-      const result = await updateArtifacts({
+      const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
         config: {},
         updatedDeps,
       });
-      expect(result).toEqual([
-        {
-          file: {
-            contents: 'new test content',
-            path: 'pdm.lock',
-            type: 'addition',
-          },
-        },
-      ]);
+      expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'docker pull containerbase/sidecar',
@@ -81,9 +76,32 @@ describe('modules/manager/pep621/artifacts', () => {
               BUILDPACK_CACHE_DIR: '/tmp/cache/containerbase',
               CONTAINERBASE_CACHE_DIR: '/tmp/cache/containerbase',
             },
+            maxBuffer: 10485760,
+            timeout: 900000,
           },
         },
       ]);
+    });
+
+    it('rethrow error', async () => {
+      const execSnapshots = mockExecAll();
+      GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
+      fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
+      fs.readLocalFile.mockImplementationOnce(() => {
+        throw new Error('test error');
+      });
+
+      const updatedDeps = [{ depName: 'dep1' }];
+      const result = await processor.updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        newPackageFileContent: '',
+        config: {},
+        updatedDeps,
+      });
+      expect(result).toEqual([
+        { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
+      ]);
+      expect(execSnapshots).toEqual([]);
     });
   });
 });

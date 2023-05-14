@@ -60,7 +60,7 @@ export class PdmProcessor implements PyProjectProcessor {
     const lockFileName = getSiblingFileName(packageFileName, 'pdm.lock');
     try {
       const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-      if (!existingLockFileContent) {
+      if (is.nullOrUndefined(existingLockFileContent)) {
         logger.debug('No pdm.lock found');
         return null;
       }
@@ -80,7 +80,7 @@ export class PdmProcessor implements PyProjectProcessor {
       let packageList = '';
       if (!isLockFileMaintenance) {
         packageList = updatedDeps
-          .map((value) => value.packageName ?? value.depName ?? '')
+          .map((value) => value.packageName ?? value.depName)
           .join(' ');
       }
       const cmd = `pdm update ${packageList}`;
