@@ -46,12 +46,12 @@ export async function getReleaseNotesMd(
 
   const files = allFiles.filter((f) => changelogFilenameRegex.test(f.path));
 
-  if (!files.length) {
+  const changelogFile = files.shift();
+  if (is.nullOrUndefined(changelogFile)) {
     logger.trace('no changelog file found');
     return null;
   }
 
-  const changelogFile = files.shift()!;
 
   if (files.length !== 0) {
     logger.debug(
