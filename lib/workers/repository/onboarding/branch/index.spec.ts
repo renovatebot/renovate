@@ -3,6 +3,7 @@ import {
   RenovateConfig,
   fs,
   getConfig,
+  git,
   mocked,
   platform,
   scm,
@@ -168,7 +169,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('detects repo is onboarded via file', async () => {
-      git.getFileList.mockResolvedValueOnce(['renovate.json']);
+      scm.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBeTrue();
       expect(onboardingCache.deleteOnboardingCache).toHaveBeenCalledTimes(1); // removes onboarding cache when repo is onboarded
@@ -252,7 +253,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('processes onboarding branch', async () => {
-      git.getFileList.mockResolvedValue(['package.json']);
+      scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       const res = await checkOnboardingBranch(config);
@@ -297,7 +298,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('skips processing conflicted onboarding branch', async () => {
-      git.getFileList.mockResolvedValue(['package.json']);
+      scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
@@ -318,7 +319,7 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('sets onboarding cache for existing onboarding branch', async () => {
-      git.getFileList.mockResolvedValue(['package.json']);
+      scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       git.getBranchCommit
