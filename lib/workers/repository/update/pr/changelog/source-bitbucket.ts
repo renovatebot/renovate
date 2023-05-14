@@ -88,7 +88,7 @@ export async function getChangeLogJSON(
     if (is.nonEmptyString(tagName)) {
       return tagName;
     }
-    if (release.gitRef) {
+    if (is.nonEmptyString(release.gitRef)) {
       return release.gitRef;
     }
     return null;
