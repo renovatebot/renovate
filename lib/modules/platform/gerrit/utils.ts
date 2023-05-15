@@ -9,7 +9,6 @@ import type { Pr } from '../types';
 import type {
   GerritChange,
   GerritChangeStatus,
-  GerritFindPRConfig,
   GerritLabelTypeInfo,
 } from './types';
 
@@ -145,22 +144,4 @@ export function mapBranchStateContextToLabel(
     };
   }
   return {};
-}
-
-export function buildSearchFilters(
-  repository: string,
-  searchConfig: GerritFindPRConfig
-): string[] {
-  const filterState = mapPrStateToGerritFilter(searchConfig.state);
-  const filters = ['owner:self', 'project:' + repository, filterState];
-  if (searchConfig.branchName !== '') {
-    filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
-  }
-  if (searchConfig.targetBranch) {
-    filters.push(`branch:${searchConfig.targetBranch}`);
-  }
-  if (searchConfig.label) {
-    filters.push(`label:Code-Review=${searchConfig.label}`);
-  }
-  return filters;
 }

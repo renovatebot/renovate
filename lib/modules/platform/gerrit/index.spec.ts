@@ -129,13 +129,8 @@ describe('modules/platform/gerrit/index', () => {
       await gerrit.initRepo({ repository: 'test/repo' });
 
       expect(clientMock.findChanges.mock.calls[0]).toEqual([
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'label:Code-Review=-2',
-        ],
-        undefined,
+        'test/repo',
+        { branchName: '', label: '-2', state: 'open' },
       ]);
       expect(clientMock.abandonChange.mock.calls).toEqual([[1], [2]]);
     });
@@ -148,12 +143,8 @@ describe('modules/platform/gerrit/index', () => {
         gerrit.findPr({ branchName: 'branch', state: 'open' })
       ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-branch',
-        ],
+        'test/repo',
+        { branchName: 'branch', state: 'open' },
         undefined
       );
     });
@@ -355,15 +346,10 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x')
       ).resolves.toBeNull();
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-renovate/dependency-1.x',
-        ],
-        undefined
-      );
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: 'renovate/dependency-1.x',
+        state: 'open',
+      });
     });
 
     it('getBranchPr() - found', async () => {
@@ -374,9 +360,9 @@ describe('modules/platform/gerrit/index', () => {
       await expect(
         gerrit.getBranchPr('renovate/dependency-1.x')
       ).resolves.toHaveProperty('number', 123456);
-      expect(clientMock.findChanges.mock.lastCall![0]).toContainAnyValues([
-        'status:open',
-        'hashtag:sourceBranch-renovate/dependency-1.x',
+      expect(clientMock.findChanges.mock.lastCall).toEqual([
+        'test/repo',
+        { state: 'open', branchName: 'renovate/dependency-1.x' },
       ]);
     });
   });
@@ -385,10 +371,9 @@ describe('modules/platform/gerrit/index', () => {
     it('getPrList() - empty list', async () => {
       clientMock.findChanges.mockResolvedValue([]);
       await expect(gerrit.getPrList()).resolves.toEqual([]);
-      expect(clientMock.findChanges).toHaveBeenCalledWith(
-        ['owner:self', 'project:test/repo', '-is:wip'],
-        undefined
-      );
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: '',
+      });
     });
 
     it('getPrList() - multiple results', async () => {

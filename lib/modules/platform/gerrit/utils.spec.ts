@@ -5,21 +5,15 @@ import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
-import type { FindPRConfig } from '../types';
 import type {
   GerritAccountInfo,
   GerritChange,
   GerritChangeMessageInfo,
   GerritChangeStatus,
-  GerritFindPRConfig,
   GerritLabelTypeInfo,
 } from './types';
 import * as utils from './utils';
-import {
-  buildSearchFilters,
-  mapBranchStateContextToLabel,
-  mapBranchStatusToLabel,
-} from './utils';
+import { mapBranchStateContextToLabel, mapBranchStatusToLabel } from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -309,58 +303,6 @@ describe('modules/platform/gerrit/utils', () => {
         expect(
           mapBranchStateContextToLabel(context, labelConfig, gerritLabels)
         ).toEqual(expectedRes);
-      }
-    );
-  });
-
-  describe('buildSearchFilters()', () => {
-    it.each([
-      [
-        'myRepo',
-        { branchName: 'myBranch' },
-        [
-          'owner:self',
-          'project:myRepo',
-          '-is:wip',
-          'hashtag:sourceBranch-myBranch',
-        ],
-      ],
-      [
-        'myRepo',
-        { branchName: 'myBranch', targetBranch: 'other' },
-        [
-          'owner:self',
-          'project:myRepo',
-          '-is:wip',
-          'hashtag:sourceBranch-myBranch',
-          'branch:other',
-        ],
-      ],
-      [
-        'myRepo',
-        { branchName: 'myBranch', label: '+2' },
-        [
-          'owner:self',
-          'project:myRepo',
-          '-is:wip',
-          'hashtag:sourceBranch-myBranch',
-          'label:Code-Review=+2',
-        ],
-      ],
-      [
-        'myRepo',
-        { branchName: 'myBranch', state: 'closed' as FindPRConfig['state'] },
-        [
-          'owner:self',
-          'project:myRepo',
-          'status:closed',
-          'hashtag:sourceBranch-myBranch',
-        ],
-      ],
-    ])(
-      'build Filter %p %p',
-      (repo: string, searchConfig: GerritFindPRConfig, expected: string[]) => {
-        expect(buildSearchFilters(repo, searchConfig)).toEqual(expected);
       }
     );
   });

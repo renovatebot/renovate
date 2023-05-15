@@ -2,10 +2,12 @@ import * as httpMock from '../../../../test/http-mock';
 import { partial } from '../../../../test/util';
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
 import { setBaseUrl } from '../../../util/http/gerrit';
+import type { FindPRConfig } from '../types';
 import { client } from './client';
 import type {
   GerritChange,
   GerritChangeMessageInfo,
+  GerritFindPRConfig,
   GerritMergeableInfo,
 } from './types';
 
@@ -92,21 +94,41 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('findChanges()', () => {
-    it('by-label', async () => {
-      httpMock
-        .scope(gerritEndpointUrl)
-        .get('/a/changes/')
-        .query((query) => query?.q?.includes('label:Code-Review=-2') ?? false)
-        .reply(
-          200,
-          gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
-          jsonResultHeader
-        );
-
-      await expect(
-        client.findChanges(['label:Code-Review=-2'])
-      ).resolves.toEqual([{ _number: 1 }, { _number: 2 }]);
-    });
+    it.each([
+      ['owner:self', { branchName: 'dependency-xyz' }],
+      ['project:repo', { branchName: 'dependency-xyz' }],
+      ['-is:wip', { branchName: 'dependency-xyz' }],
+      ['hashtag:sourceBranch-dependency-xyz', { branchName: 'dependency-xyz' }],
+      ['label:Code-Review=-2', { branchName: 'dependency-xyz', label: '-2' }],
+      [
+        'branch:otherTarget',
+        { branchName: 'dependency-xyz', targetBranch: 'otherTarget' },
+      ],
+      [
+        'status:closed',
+        {
+          branchName: 'dependency-xyz',
+          state: 'closed' as FindPRConfig['state'],
+        },
+      ],
+    ])(
+      'query contains %p',
+      async (expectedQueryPart: string, config: GerritFindPRConfig) => {
+        httpMock
+          .scope(gerritEndpointUrl)
+          .get('/a/changes/')
+          .query((query) => query?.q?.includes(expectedQueryPart) ?? false)
+          .reply(
+            200,
+            gerritRestResponse([{ _number: 1 }, { _number: 2 }]),
+            jsonResultHeader
+          );
+        await expect(client.findChanges('repo', config)).resolves.toEqual([
+          { _number: 1 },
+          { _number: 2 },
+        ]);
+      }
+    );
   });
 
   describe('getChange()', () => {

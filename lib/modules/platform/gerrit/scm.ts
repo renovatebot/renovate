@@ -1,12 +1,11 @@
 import { randomUUID } from 'crypto';
 import { logger } from '../../../logger';
-import type { PrState } from '../../../types';
 import * as git from '../../../util/git';
 import type { CommitFilesConfig, CommitSha } from '../../../util/git/types';
 import { toSha256 } from '../../../util/hasha';
 import { DefaultGitScm } from '../default-scm';
 import { client } from './client';
-import { mapPrStateToGerritFilter } from './utils';
+import type { GerritFindPRConfig } from './types';
 
 let repository: string;
 let username: string;
@@ -16,23 +15,11 @@ export function configureScm(repo: string, login: string): void {
 }
 
 export class GerritScm extends DefaultGitScm {
-  private createFilter(
-    state: PrState,
-    branchName: string,
-    baseBranch?: string
-  ): string[] {
-    const filterState = mapPrStateToGerritFilter(state);
-    const filter = ['owner:self', 'project:' + repository, filterState];
-    filter.push(`hashtag:sourceBranch-${branchName}`);
-    if (baseBranch) {
-      filter.push(`branch:${baseBranch}`);
-    }
-    return filter;
-  }
-
   override async branchExists(branchName: string): Promise<boolean> {
-    const filter = this.createFilter('open', branchName);
-    const change = await client.findChanges(filter).then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
+    const change = await client
+      .findChanges(repository, searchConfig)
+      .then((res) => res.pop());
     if (change) {
       return true;
     }
@@ -42,8 +29,10 @@ export class GerritScm extends DefaultGitScm {
   override async getBranchCommit(
     branchName: string
   ): Promise<CommitSha | null> {
-    const filter = this.createFilter('open', branchName);
-    const change = await client.findChanges(filter).then((res) => res.pop());
+    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
+    const change = await client
+      .findChanges(repository, searchConfig)
+      .then((res) => res.pop());
     if (change) {
       return change.current_revision!;
     }
@@ -54,9 +43,13 @@ export class GerritScm extends DefaultGitScm {
     branchName: string,
     baseBranch: string
   ): Promise<boolean> {
-    const filter = this.createFilter('open', branchName, baseBranch);
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName,
+      targetBranch: baseBranch,
+    };
     const change = await client
-      .findChanges(filter, true)
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions![change.current_revision!];
@@ -69,8 +62,12 @@ export class GerritScm extends DefaultGitScm {
     baseBranch: string,
     branch: string
   ): Promise<boolean> {
-    const filter = this.createFilter('open', branch, baseBranch);
-    const change = (await client.findChanges(filter)).pop();
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName: branch,
+      targetBranch: baseBranch,
+    };
+    const change = (await client.findChanges(repository, searchConfig)).pop();
     if (change) {
       const mergeInfo = await client.getMergeableInfo(change);
       return !mergeInfo.mergeable;
@@ -83,9 +80,9 @@ export class GerritScm extends DefaultGitScm {
   }
 
   override async isBranchModified(branchName: string): Promise<boolean> {
-    const filter = this.createFilter('open', branchName);
+    const searchConfig: GerritFindPRConfig = { state: 'open', branchName };
     const change = await client
-      .findChanges(filter, true)
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
     if (change) {
       const currentGerritPatchset = change.revisions![change.current_revision!];
@@ -98,13 +95,13 @@ export class GerritScm extends DefaultGitScm {
     commit: CommitFilesConfig
   ): Promise<CommitSha | null> {
     logger.debug(`commitAndPush(${commit.branchName})`);
-    const filter = this.createFilter(
-      'open',
-      commit.branchName,
-      commit.baseBranch
-    );
+    const searchConfig: GerritFindPRConfig = {
+      state: 'open',
+      branchName: commit.branchName,
+      targetBranch: commit.baseBranch,
+    };
     const existingChange = await client
-      .findChanges(filter, true)
+      .findChanges(repository, searchConfig, true)
       .then((res) => res.pop());
 
     let hasChanges = true;

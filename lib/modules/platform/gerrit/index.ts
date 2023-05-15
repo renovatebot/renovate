@@ -30,15 +30,9 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import { client } from './client';
 import { configureScm } from './scm';
-import type {
-  GerritChange,
-  GerritFindPRConfig,
-  GerritLabelTypeInfo,
-  GerritProjectInfo,
-} from './types';
+import type { GerritLabelTypeInfo, GerritProjectInfo } from './types';
 import {
   TAG_PULL_REQUEST_BODY,
-  buildSearchFilters,
   getGerritRepoUrl,
   mapBranchStateContextToLabel,
   mapBranchStatusToLabel,
@@ -128,7 +122,7 @@ export async function initRepo({
   await git.initRepo({ url });
 
   //abandon "open" and "rejected" changes at startup
-  const rejectedChanges = await findOwnPr({
+  const rejectedChanges = await client.findChanges(config.repository!, {
     branchName: '',
     state: 'open',
     label: '-2',
@@ -144,21 +138,13 @@ export async function initRepo({
   return repoConfig;
 }
 
-async function findOwnPr(
-  findPRConfig: GerritFindPRConfig,
-  refreshCache?: boolean
-): Promise<GerritChange[]> {
-  const filters = buildSearchFilters(config.repository!, findPRConfig);
-  const changes = await client.findChanges(filters, refreshCache);
-  logger.trace(`findOwnPr(${filters.join(', ')}) => ${changes.length}`);
-  return changes;
-}
-
 export async function findPr(
   findPRConfig: FindPRConfig,
   refreshCache?: boolean
 ): Promise<Pr | null> {
-  const change = (await findOwnPr(findPRConfig, refreshCache)).pop();
+  const change = (
+    await client.findChanges(config.repository!, findPRConfig, refreshCache)
+  ).pop();
   return change ? mapGerritChangeToPr(change) : null;
 }
 
@@ -206,7 +192,8 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
     })`
   );
   const pr = (
-    await findOwnPr(
+    await client.findChanges(
+      config.repository!,
       {
         branchName: prConfig.sourceBranch,
         targetBranch: prConfig.targetBranch,
@@ -240,14 +227,16 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
-  const change = (await findOwnPr({ branchName, state: 'open' })).pop();
+  const change = (
+    await client.findChanges(config.repository!, { branchName, state: 'open' })
+  ).pop();
   return change ? mapGerritChangeToPr(change) : null;
 }
 
 export function getPrList(): Promise<Pr[]> {
-  return findOwnPr({ branchName: '' }).then((res) =>
-    res.map((change) => mapGerritChangeToPr(change))
-  );
+  return client
+    .findChanges(config.repository!, { branchName: '' })
+    .then((res) => res.map((change) => mapGerritChangeToPr(change)));
 }
 
 export async function mergePr(config: MergePRConfig): Promise<boolean> {
@@ -277,7 +266,11 @@ export async function getBranchStatus(
   branchName: string
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
-  const changes = await findOwnPr({ state: 'open', branchName }, true);
+  const changes = await client.findChanges(
+    config.repository!,
+    { state: 'open', branchName },
+    true
+  );
   if (changes.length > 0) {
     const allSubmittable =
       changes.filter((change) => change.submittable === true).length ===
@@ -310,7 +303,13 @@ export async function getBranchStatusCheck(
     config.labels
   );
   if (labelName) {
-    const change = (await findOwnPr({ branchName, state: 'open' }, true)).pop();
+    const change = (
+      await client.findChanges(
+        config.repository!,
+        { branchName, state: 'open' },
+        true
+      )
+    ).pop();
     if (change) {
       const labelRes = change.labels?.[labelName];
       if (labelRes) {

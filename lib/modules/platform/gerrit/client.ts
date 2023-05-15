@@ -1,13 +1,16 @@
 import { REPOSITORY_ARCHIVED } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import { GerritHttp } from '../../../util/http/gerrit';
 import type {
   GerritAccountInfo,
   GerritBranchInfo,
   GerritChange,
   GerritChangeMessageInfo,
+  GerritFindPRConfig,
   GerritMergeableInfo,
   GerritProjectInfo,
 } from './types';
+import { mapPrStateToGerritFilter } from './utils';
 
 class GerritClient {
   private requestDetails = [
@@ -48,14 +51,19 @@ class GerritClient {
   }
 
   async findChanges(
-    filter: string[],
+    repository: string,
+    findPRConfig: GerritFindPRConfig,
     refreshCache?: boolean
   ): Promise<GerritChange[]> {
+    const filters = GerritClient.buildSearchFilters(repository, findPRConfig);
     const changes = await this.gerritHttp.getJson<GerritChange[]>(
       `a/changes/?q=` +
-        filter.join('+') +
+        filters.join('+') +
         this.requestDetails.map((det) => '&o=' + det).join(''),
       { useCache: !refreshCache }
+    );
+    logger.trace(
+      `findChanges(${filters.join(', ')}) => ${changes.body.length}`
     );
     return changes.body;
   }
@@ -203,6 +211,24 @@ class GerritClient {
       change.labels?.['Code-Review'].approved &&
       change.labels['Code-Review'].approved.username === username
     );
+  }
+
+  private static buildSearchFilters(
+    repository: string,
+    searchConfig: GerritFindPRConfig
+  ): string[] {
+    const filterState = mapPrStateToGerritFilter(searchConfig.state);
+    const filters = ['owner:self', 'project:' + repository, filterState];
+    if (searchConfig.branchName !== '') {
+      filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
+    }
+    if (searchConfig.targetBranch) {
+      filters.push(`branch:${searchConfig.targetBranch}`);
+    }
+    if (searchConfig.label) {
+      filters.push(`label:Code-Review=${searchConfig.label}`);
+    }
+    return filters;
   }
 }
 

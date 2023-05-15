@@ -25,13 +25,12 @@ describe('modules/platform/gerrit/scm', () => {
         gerritScm.isBranchBehindBase('myBranchName', 'baseBranch')
       ).resolves.toBeTrue();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-          'branch:baseBranch',
-        ],
+        'test/repo',
+        {
+          branchName: 'myBranchName',
+          state: 'open',
+          targetBranch: 'baseBranch',
+        },
         true
       );
     });
@@ -80,12 +79,8 @@ describe('modules/platform/gerrit/scm', () => {
         gerritScm.isBranchModified('myBranchName')
       ).resolves.toBeFalse();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-myBranchName',
-        ],
+        'test/repo',
+        { branchName: 'myBranchName', state: 'open' },
         true
       );
     });
@@ -127,13 +122,11 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(
         gerritScm.isBranchConflicted('target', 'myBranchName')
       ).resolves.toBe(true);
-      expect(clientMock.findChanges).toHaveBeenCalledWith([
-        'owner:self',
-        'project:test/repo',
-        'status:open',
-        'hashtag:sourceBranch-myBranchName',
-        'branch:target',
-      ]);
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: 'myBranchName',
+        state: 'open',
+        targetBranch: 'target',
+      });
     });
 
     it('open change found for branch name/baseBranch and its mergeable', async () => {
@@ -168,12 +161,10 @@ describe('modules/platform/gerrit/scm', () => {
       clientMock.findChanges.mockResolvedValueOnce([]);
       git.branchExists.mockReturnValueOnce(true);
       await expect(gerritScm.branchExists('myBranchName')).resolves.toBeTrue();
-      expect(clientMock.findChanges).toHaveBeenCalledWith([
-        'owner:self',
-        'project:test/repo',
-        'status:open',
-        'hashtag:sourceBranch-myBranchName',
-      ]);
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: 'myBranchName',
+        state: 'open',
+      });
       expect(git.branchExists).toHaveBeenCalledWith('myBranchName');
     });
 
@@ -192,12 +183,10 @@ describe('modules/platform/gerrit/scm', () => {
       await expect(gerritScm.getBranchCommit('myBranchName')).resolves.toBe(
         'shaHashValue'
       );
-      expect(clientMock.findChanges).toHaveBeenCalledWith([
-        'owner:self',
-        'project:test/repo',
-        'status:open',
-        'hashtag:sourceBranch-myBranchName',
-      ]);
+      expect(clientMock.findChanges).toHaveBeenCalledWith('test/repo', {
+        branchName: 'myBranchName',
+        state: 'open',
+      });
     });
 
     it('open change found for branchname -> return true', async () => {
@@ -227,13 +216,12 @@ describe('modules/platform/gerrit/scm', () => {
         })
       ).resolves.toBeNull();
       expect(clientMock.findChanges).toHaveBeenCalledWith(
-        [
-          'owner:self',
-          'project:test/repo',
-          'status:open',
-          'hashtag:sourceBranch-renovate/dependency-1.x',
-          'branch:main',
-        ],
+        'test/repo',
+        {
+          branchName: 'renovate/dependency-1.x',
+          state: 'open',
+          targetBranch: 'main',
+        },
         true
       );
     });
