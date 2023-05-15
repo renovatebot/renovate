@@ -26,6 +26,7 @@ export interface GhRestRepo {
   owner: {
     login: string;
   };
+  archived: boolean;
 }
 
 export interface GhRestPr {

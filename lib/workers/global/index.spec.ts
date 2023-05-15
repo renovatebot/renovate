@@ -1,11 +1,11 @@
 import { expect } from '@jest/globals';
 import { ERROR, WARN } from 'bunyan';
-import * as _fs from 'fs-extra';
+import fs from 'fs-extra';
 import { logger, mocked } from '../../../test/util';
 import * as _presets from '../../config/presets';
 import { CONFIG_PRESETS_INVALID } from '../../constants/error-messages';
 import { DockerDatasource } from '../../modules/datasource/docker';
-import * as _platform from '../../modules/platform';
+import * as platform from '../../modules/platform';
 import * as secrets from '../../util/sanitize';
 import * as repositoryWorker from '../repository';
 import * as configParser from './config/parse';
@@ -16,20 +16,33 @@ jest.mock('../repository');
 jest.mock('../../util/fs');
 jest.mock('../../config/presets');
 
-jest.mock('fs-extra');
-const fs = mocked(_fs);
-const platform = mocked(_platform);
+jest.mock('fs-extra', () => {
+  const realFs = jest.requireActual<typeof fs>('fs-extra');
+  return {
+    ensureDir: jest.fn(),
+    remove: jest.fn(),
+    readFile: jest.fn((file: string, options: any) => {
+      if (file.endsWith('.wasm.gz')) {
+        return realFs.readFile(file, options);
+      }
+      return undefined;
+    }),
+    writeFile: jest.fn(),
+    outputFile: jest.fn(),
+  };
+});
 
 // imports are readonly
 const presets = mocked(_presets);
 
 const addSecretForSanitizing = jest.spyOn(secrets, 'addSecretForSanitizing');
 const parseConfigs = jest.spyOn(configParser, 'parseConfigs');
+const initPlatform = jest.spyOn(platform, 'initPlatform');
 
 describe('workers/global/index', () => {
   beforeEach(() => {
     logger.getProblems.mockImplementationOnce(() => []);
-    platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
+    initPlatform.mockImplementation((input) => Promise.resolve(input));
     delete process.env.AWS_SECRET_ACCESS_KEY;
     delete process.env.AWS_SESSION_TOKEN;
   });
@@ -80,6 +93,15 @@ describe('workers/global/index', () => {
     await expect(globalWorker.start()).resolves.toBe(0);
     expect(parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).not.toHaveBeenCalled();
+  });
+
+  it('handles local', async () => {
+    parseConfigs.mockResolvedValueOnce({
+      platform: 'local',
+    });
+    await expect(globalWorker.start()).resolves.toBe(0);
+    expect(parseConfigs).toHaveBeenCalledTimes(1);
+    expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(1);
   });
 
   it('processes repositories', async () => {

@@ -30,4 +30,12 @@ export class DefaultGitScm implements PlatformScm {
   isBranchModified(branchName: string): Promise<boolean> {
     return git.isBranchModified(branchName);
   }
+
+  getFileList(): Promise<string[]> {
+    return git.getFileList();
+  }
+
+  checkoutBranch(branchName: string): Promise<CommitSha> {
+    return git.checkoutBranch(branchName);
+  }
 }
