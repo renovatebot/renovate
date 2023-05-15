@@ -16,7 +16,6 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)package\\.json$'],
-  rollbackPrs: true,
   versioning: npmVersioning.id,
   digest: {
     prBodyDefinitions: {

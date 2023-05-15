@@ -23,9 +23,9 @@ const options: RenovateOptions[] = [
   {
     name: 'allowPostUpgradeCommandTemplating',
     description:
-      'Set this to `true` to allow templating for post-upgrade commands.',
+      'Set this to `false` to disable template compilation for post-upgrade commands.',
     type: 'boolean',
-    default: false,
+    default: true,
     globalOnly: true,
   },
   {
@@ -2497,7 +2497,7 @@ const options: RenovateOptions[] = [
     description: `Controls if platform-native auto-merge is used.`,
     type: 'boolean',
     supportedPlatforms: ['azure', 'gitea', 'github', 'gitlab'],
-    default: false,
+    default: true,
   },
   {
     name: 'userStrings',
