@@ -41,18 +41,6 @@ describe('modules/manager/npm/update/locked-dependency/yarn-lock/get-locked', ()
               "version": "1.2.6",
             },
           },
-          {
-            "constraint": "^1.2.6",
-            "depName": "@actions/core",
-            "depNameConstraint": "@actions/core@npm:^1.2.6",
-            "entry": {
-              "checksum": "034e57fcb5f944d5fb0ef55be1b212dd88e23d1a50aaffda874cb94e8f4bfa633a66f108f26e81a7cce287cd2b349aa88c97d2023135c8879495326db37a7feb",
-              "languageName": "node",
-              "linkType": "hard",
-              "resolution": "@actions/core@npm:1.2.6",
-              "version": "1.2.6",
-            },
-          },
         ]
       `);
     });
