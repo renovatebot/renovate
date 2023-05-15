@@ -35,7 +35,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     // Get list of modified files in PR
     const prFiles = await getBranchFiles(pr.sourceBranch);
 
-    if (!prFiles) {
+    if (!prFiles?.length) {
       logger.debug('PR includes no files');
       return [];
     }
