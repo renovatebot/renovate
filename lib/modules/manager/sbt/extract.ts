@@ -350,7 +350,6 @@ export function extractDependency(
         currentValue: sbtVersion,
         replaceString: matchString,
         extractVersion: '^v(?<version>\\S+)',
-        editFile: packageFile,
       };
 
       return {
@@ -456,8 +455,6 @@ export async function extractAllPackageFiles(
   const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};
   // Start extract all package files
   for (const packageFileContents of Object.values(groupPackageFileContent)) {
-    // Extract package file by its group
-    // local variable is share within its group
     for (const { packageFile, content } of packageFileContents) {
       const res = extractDependency(content, {
         registryUrls,
@@ -471,29 +468,21 @@ export async function extractAllPackageFiles(
         const variableSourceFile = dep?.editFile ?? packageFile;
         dep.registryUrls = [...new Set(dep.registryUrls)];
         mapDepsToPackageFile[variableSourceFile] ??= [];
-        mapDepsToPackageFile[variableSourceFile].push(dep);
+        const notFound = !mapDepsToPackageFile[variableSourceFile].find(
+          (d) =>
+            d.packageName === dep.packageName &&
+            d.currentValue === dep.currentValue
+        );
+        if (notFound) {
+          mapDepsToPackageFile[variableSourceFile].push(dep);
+        }
       }
     }
   }
 
-  // Filter unique package
-  // As we merge all package to single package file
-  // Packages are counted in submodule but it's the same one
-  // by packageName and currentValue
   const finalPackages: PackageFile[] = [];
   for (const [packageFile, deps] of Object.entries(mapDepsToPackageFile)) {
-    finalPackages.push({
-      packageFile,
-      deps: deps.filter(
-        (val, idx, self) =>
-          idx ===
-          self.findIndex(
-            (dep) =>
-              dep.packageName === val.packageName &&
-              dep.currentValue === val.currentValue
-          )
-      ),
-    });
+    finalPackages.push({ packageFile, deps });
   }
 
   return finalPackages.length > 0 ? finalPackages : null;
