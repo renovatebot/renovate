@@ -2494,10 +2494,10 @@
   dependencies:
     "@seald-io/nedb" "^4.0.2"
 
-"@renovatebot/osv-offline@1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.5.tgz#40bdb5c22eb1cd66ec3a79d3a25de40fbdce6bb4"
-  integrity sha512-PRzSyAhel/coD68Z8WK5nFw9UJ8vLCvQQb+aRzwwmMEuSzAbe1FnVbvEZ/wae3sDy57nvMuVhk358InMYHYyVQ==
+"@renovatebot/osv-offline@1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.6.tgz#66a4ff071c52e38c7fb9837cf9b9efe8b4f6025e"
+  integrity sha512-0FXihAGhDRAXfqtnEWsz8EH+3vEJpH5zB6FZD48tsK+puz43e6tI4obQGcylhMBToV7ex9M7tU4ukChkHwOGcg==
   dependencies:
     "@octokit/rest" "^19.0.7"
     "@renovatebot/osv-offline-db" "1.3.3"
@@ -2505,7 +2505,7 @@
     fs-extra "^11.1.1"
     got "^11.8.6"
     luxon "^3.3.0"
-    node-fetch "^2.6.9"
+    node-fetch "^2.6.10"
 
 "@renovatebot/pep440@2.1.15":
   version "2.1.15"
@@ -3113,7 +3113,12 @@
   resolved "https://registry.yarnpkg.com/@types/semver-utils/-/semver-utils-1.1.1.tgz#4260b9ce13344725069a1ff86bd2f4d6c70a443e"
   integrity sha512-WLZZQdwo5P+H6R+bDDCFqFSlP5Jtk6gyXpE0R0KAVQbcMGmxpVsNX8dah640hY4+PpRG2+Ph3dcwDHzrOAOZ7A==
 
-"@types/semver@7.3.13", "@types/semver@^7.1.0", "@types/semver@^7.3.12":
+"@types/semver@7.5.0":
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.5.0.tgz#591c1ce3a702c45ee15f47a42ade72c2fd78978a"
+  integrity sha512-G8hZ6XJiHnuhQKR7ZmysCeJWE08o8T0AXtk5darsCaTVsYZhhgUrq53jizaR2FvsoeCwJhlmwTjkXBY5Pn/ZHw==
+
+"@types/semver@^7.1.0", "@types/semver@^7.3.12":
   version "7.3.13"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.13.tgz#da4bfd73f49bd541d28920ab0e2bf0ee80f71c91"
   integrity sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==
@@ -7928,7 +7933,14 @@ node-emoji@^1.11.0:
   dependencies:
     lodash "^4.17.21"
 
-node-fetch@^2.6.7, node-fetch@^2.6.9:
+node-fetch@^2.6.10:
+  version "2.6.11"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.11.tgz#cde7fc71deef3131ef80a738919f999e6edfff25"
+  integrity sha512-4I6pdBY1EthSqDmJkiNk3JIT8cswwR9nfeW/cPdUagJYEQG7R95WRH74wpz7ma8Gh/9dI9FP+OU+0E4FvtA55w==
+  dependencies:
+    whatwg-url "^5.0.0"
+
+node-fetch@^2.6.7:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
   integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
