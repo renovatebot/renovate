@@ -50,10 +50,11 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       // Extract pattern & usernames
       .map((line) => {
         const [pattern, ...usernames] = line.split(regEx(/\s+/));
+        const matchPattern = ignore().add(pattern);
         return {
           usernames,
           pattern,
-          match: (path: string) => ignore().add(pattern).ignores(path),
+          match: (path: string) => matchPattern.ignores(path),
         };
       });
 
