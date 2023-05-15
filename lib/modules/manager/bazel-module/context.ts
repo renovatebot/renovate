@@ -42,14 +42,11 @@ export class Ctx implements CtxCompatible {
     return new Ctx(obj.results, Array.from(obj.stack));
   }
 
-  get safeCurrent(): AllFragments | undefined {
-    if (!this.stack.length) {
-      return undefined;
-    }
-    return this.stack[this.stack.length - 1];
+  private get safeCurrent(): AllFragments | undefined {
+    return this.stack.at(-1);
   }
 
-  get current(): AllFragments {
+  private get current(): AllFragments {
     const c = this.safeCurrent;
     if (c === undefined) {
       throw new Error('Requested current, but no value.');

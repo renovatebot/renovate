@@ -51,25 +51,17 @@ describe('modules/manager/bazel-module/context', () => {
       ]);
     });
 
-    describe('.current', () => {
-      it('returns the last fragment in the stack if it exists', () => {
-        const ctx = new Ctx().startRecord();
-        const current = ctx.current;
-        expect(current.type).toBe('record');
-      });
-
-      it('throws if the stack is empty', () => {
-        const ctx = new Ctx();
-        expect(() => ctx.current).toThrow(
-          new Error('Requested current, but no value.')
-        );
-      });
-    });
-
     describe('.currentRecord', () => {
       it('returns the record fragment if it is current', () => {
         const ctx = new Ctx().startRecord();
         expect(ctx.currentRecord).toEqual(fragments.record());
+      });
+
+      it('throws if there is no current', () => {
+        const ctx = new Ctx();
+        expect(() => ctx.currentRecord).toThrow(
+          new Error('Requested current, but no value.')
+        );
       });
 
       it('throws if the current is not a record fragment', () => {
