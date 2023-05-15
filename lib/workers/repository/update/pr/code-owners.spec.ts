@@ -25,7 +25,10 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     it('respects orphan files', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
-        ['* @jimmy', 'yarn.lock'].join('\n')
+        codeBlock`
+          * @jimmy
+          yarn.lock
+        `
       );
       git.getBranchFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -163,12 +166,13 @@ describe('workers/repository/update/pr/code-owners', () => {
 
     it('does not require all files to match a single rule, regression test for #12611', async () => {
       fs.readLocalFile.mockResolvedValueOnce(
-        [
-          '* @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5',
-          'server/pom.xml @reviewer-1',
-          'client/package.json @reviewer-1',
-          'client/package-lock.json @reviewer-1',
-        ].join('\n')
+        codeBlock`
+          * @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5
+
+          server/pom.xml @reviewer-1
+          client/package.json @reviewer-1
+          client/package-lock.json @reviewer-1
+        `
       );
       git.getBranchFiles.mockResolvedValueOnce(['server/pom.xml']);
       const codeOwners = await codeOwnersForPr(pr);
@@ -181,12 +185,13 @@ describe('workers/repository/update/pr/code-owners', () => {
       ]);
 
       fs.readLocalFile.mockResolvedValueOnce(
-        [
-          '* @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5',
-          'server/pom.xml @reviewer-1',
-          'client/package.json @reviewer-1',
-          'client/package-lock.json @reviewer-1',
-        ].join('\n')
+        codeBlock`
+          * @reviewer-1 @reviewer-2 @reviewer-3 @reviewer-4 @reviewer-5
+
+          server/pom.xml @reviewer-1
+          client/package.json @reviewer-1
+          client/package-lock.json @reviewer-1
+        `
       );
       git.getBranchFiles.mockResolvedValueOnce([
         'client/package.json',
