@@ -448,6 +448,11 @@ Check out the default value for `commitMessage` to understand how this field is 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
 
+## commitMessageLowerCase
+
+With `semanticCommits` pr- and commit-titles will by default (`"auto"`) be converted to all-lowercase.
+Set this to `"never"` to leave the titles untouched, allowing uppercase characters in semantic commit titles.
+
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
