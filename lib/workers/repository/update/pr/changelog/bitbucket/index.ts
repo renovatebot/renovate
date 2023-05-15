@@ -52,7 +52,6 @@ export async function getReleaseNotesMd(
     return null;
   }
 
-
   if (files.length !== 0) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile.path}`
