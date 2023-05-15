@@ -117,9 +117,8 @@ export function runBranchSummary(config: RenovateConfig): void {
 
   logger.debug(res, 'Branch summary');
 
-  if (config.branchSummaryExtended && branches?.length) {
+  if (branches?.length) {
     const branchesInformation = filterDependencyDashboardData(branches);
-
     logger.debug({ branchesInformation }, 'branches info extended');
   }
 }

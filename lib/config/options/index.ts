@@ -2634,14 +2634,6 @@ const options: RenovateOptions[] = [
     globalOnly: true,
     default: [],
   },
-  {
-    name: 'branchSummaryExtended',
-    description: 'logs extra branch metadata',
-    type: 'boolean',
-    experimental: true,
-    globalOnly: true,
-    default: false,
-  },
 ];
 
 export function getOptions(): RenovateOptions[] {

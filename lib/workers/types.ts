@@ -141,7 +141,7 @@ export interface BranchMetadata {
 
 export interface BaseBranchMetadata {
   branchName: string;
-  sha?: string;
+  sha: string;
 }
 
 export interface BranchSummary {
@@ -193,26 +193,4 @@ export interface UpgradeFingerprintConfig {
 export interface ExtractResult {
   extractionFingerprints: Record<string, string | undefined>;
   packageFiles: Record<string, PackageFile[]>;
-}
-
-export interface Dashboard {
-  awaitingSchedule: Partial<BranchConfig>[];
-  prCreationApprovalRequired: Partial<BranchConfig>[];
-  editedOrBlocked: Partial<BranchConfig>[];
-  errored: Partial<BranchConfig>[];
-  ignoredOrBlocked: Partial<BranchConfig>[];
-  open: Partial<BranchConfig>[];
-  otherBranches: Partial<BranchConfig>[];
-  pendingApprovals: Partial<BranchConfig>[];
-  pendingAutomerge: Partial<BranchConfig>[];
-  pendingStatusChecks: Partial<BranchConfig>[];
-  rateLimited: Partial<BranchConfig>[];
-  repositoryProblems?: Set<string>;
-  header: string;
-  warn?: string;
-}
-
-export interface DashboardBody {
-  issueBody: string;
-  dashboard: Dashboard;
 }
