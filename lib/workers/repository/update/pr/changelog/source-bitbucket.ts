@@ -66,7 +66,6 @@ export async function getChangeLogJSON(
     return null;
   }
 
-  // This extra filter/sort should not be necessary, but better safe than sorry
   const validReleases = [...releases]
     .filter((release) => version.isVersion(release.version))
     .sort((a, b) => version.sortVersions(a.version, b.version));
@@ -108,35 +107,36 @@ export async function getChangeLogJSON(
   for (let i = 1; i < validReleases.length; i += 1) {
     const prev = validReleases[i - 1];
     const next = validReleases[i];
-    if (include(next.version)) {
-      let release = await packageCache.get(
-        cacheNamespace,
-        getCacheKey(prev.version, next.version)
-      );
-      if (!release) {
-        release = {
-          version: next.version,
-          date: next.releaseTimestamp,
-          gitRef: next.gitRef,
-          // put empty changes so that existing templates won't break
-          changes: [],
-          compare: {},
-        };
-        const prevHead = await getRef(prev);
-        const nextHead = await getRef(next);
-        if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
-          release.compare.url = `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
-        }
-        const cacheMinutes = 55;
-        await packageCache.set(
-          cacheNamespace,
-          getCacheKey(prev.version, next.version),
-          release,
-          cacheMinutes
-        );
-      }
-      changelogReleases.unshift(release);
+    if (!include(next.version)) {
+      continue;
     }
+    let release = await packageCache.get(
+      cacheNamespace,
+      getCacheKey(prev.version, next.version)
+    );
+    if (!release) {
+      release = {
+        version: next.version,
+        date: next.releaseTimestamp,
+        gitRef: next.gitRef,
+        // put empty changes so that existing templates won't break
+        changes: [],
+        compare: {},
+      };
+      const prevHead = await getRef(prev);
+      const nextHead = await getRef(next);
+      if (is.nonEmptyString(prevHead) && is.nonEmptyString(nextHead)) {
+        release.compare.url = `${baseUrl}${repository}/branches/compare/${prevHead}%0D${nextHead}`;
+      }
+      const cacheMinutes = 55;
+      await packageCache.set(
+        cacheNamespace,
+        getCacheKey(prev.version, next.version),
+        release,
+        cacheMinutes
+      );
+    }
+    changelogReleases.unshift(release);
   }
 
   let res: ChangeLogResult | null = {
