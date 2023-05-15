@@ -1,3 +1,4 @@
+import { codeBlock } from 'common-tags';
 import * as sbtUpdater from '.';
 
 describe('modules/manager/sbt/update', () => {
@@ -49,13 +50,13 @@ describe('modules/manager/sbt/update', () => {
     });
 
     it('update project/Versions.scala', () => {
-      const versionFile = `object Versions {
+      const versionFile = codeBlock`object Versions {
         object Company {
           val testlib    = "0.2.1"
         }
       }
       `;
-      const updatedVersionFile = `object Versions {
+      const updatedVersionFile = codeBlock`object Versions {
         object Company {
           val testlib    = "0.2.2"
         }
@@ -75,7 +76,7 @@ describe('modules/manager/sbt/update', () => {
     });
 
     it('update build.sbt', () => {
-      const versionFile = `
+      const versionFile = codeBlock`
       lazy val root = project.in(file("."))
         .settings(noPublishSettings ++ Seq(
           libraryDependencies ++= Seq(
@@ -83,7 +84,7 @@ describe('modules/manager/sbt/update', () => {
           )
         ))
       `;
-      const updatedVersionFile = `
+      const updatedVersionFile = codeBlock`
       lazy val root = project.in(file("."))
         .settings(noPublishSettings ++ Seq(
           libraryDependencies ++= Seq(
