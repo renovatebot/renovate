@@ -62,9 +62,7 @@ let config: {
   gerritUsername?: string;
 } = {
   labels: {},
-  labelMappings: {
-    stabilityDaysLabel: 'Renovate-Stability',
-  },
+  labelMappings: {},
 };
 
 export function writeToConfig(newConfig: typeof config): void {
@@ -161,7 +159,7 @@ async function findOwnPr(
     filter.push(`label:Code-Review=${findPRConfig.label}`);
   }
   const changes = await client.findChanges(filter, refreshCache);
-  logger.debug(`findOwnPr(${filter.join(', ')}) => ${changes.length}`);
+  logger.trace(`findOwnPr(${filter.join(', ')}) => ${changes.length}`);
   return changes;
 }
 
@@ -176,10 +174,10 @@ export async function findPr(
 export async function getPr(number: number): Promise<Pr | null> {
   try {
     const change = await client.getChange(number);
-    return Promise.resolve(mapGerritChangeToPr(change));
+    return mapGerritChangeToPr(change);
   } catch (err) {
     if (err.statusCode === 404) {
-      return Promise.resolve(null);
+      return null;
     }
     throw err;
   }
@@ -222,21 +220,20 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
       true
     )
   ).pop();
-  if (pr) {
-    //Workaround for "Known Problems.1"
-    if (pr.subject !== prConfig.prTitle) {
-      await updatePullRequestTitle(pr._number, pr.change_id, prConfig.prTitle);
-    }
-    await updatePullRequestBody(pr._number, prConfig.prBody);
-    if (prConfig.platformOptions?.autoApprove) {
-      await client.approveChange(pr._number);
-    }
-    return getPr(pr._number);
-  } else {
+  if (pr === undefined) {
     throw new Error(
       `the change should be created automatically from previous push to refs/for/${prConfig.sourceBranch}`
     );
   }
+  //Workaround for "Known Problems.1"
+  if (pr.subject !== prConfig.prTitle) {
+    await updatePullRequestTitle(pr._number, pr.change_id, prConfig.prTitle);
+  }
+  await updatePullRequestBody(pr._number, prConfig.prBody);
+  if (prConfig.platformOptions?.autoApprove) {
+    await client.approveChange(pr._number);
+  }
+  return getPr(pr._number);
 }
 
 async function updatePullRequestTitle(
@@ -289,10 +286,7 @@ async function checkForExistingMessage(
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
   const change = (await findOwnPr({ branchName, state: 'open' })).pop();
-  if (change) {
-    return mapGerritChangeToPr(change);
-  }
-  return null;
+  return change ? mapGerritChangeToPr(change) : null;
 }
 
 export function getPrList(): Promise<Pr[]> {
@@ -389,11 +383,10 @@ export async function setBranchStatus(
   if (labelName && labelValue) {
     const pr = await getBranchPr(branchStatusConfig.branchName);
     if (pr === null) {
-      return Promise.resolve();
+      return;
     }
     await client.setLabel(pr.number, labelName, labelValue);
   }
-  return Promise.resolve();
 }
 
 function mapBranchStateContextToLabel(context: string | null | undefined): {
@@ -459,6 +452,11 @@ export async function addAssignees(
   assignees: string[]
 ): Promise<void> {
   if (assignees.length) {
+    if (assignees.length > 1) {
+      logger.debug(
+        `addAssignees(${number}, ${assignees.toString()}) called with more then one assignee! Gerrit only supports one assignee! Using the first from list.`
+      );
+    }
     await client.addAssignee(number, assignees[0]);
   }
 }
