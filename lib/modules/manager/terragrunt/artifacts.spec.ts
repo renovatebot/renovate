@@ -1,13 +1,11 @@
 import { join } from 'upath';
-import { mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { UpdateType } from '../../../config/types';
-import * as TerraformLockfile from '../terraform/lockfile';
+import * as terraformLockfile from '../terraform/lockfile';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from './artifacts';
 
 jest.mock('../terraform/lockfile');
-const mockTFUpdateArtifacts = mocked(TerraformLockfile).updateArtifacts;
 
 const config = {
   constraints: {},
@@ -50,7 +48,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
       newPackageFileContent: '',
       config: localConfig,
     });
-    expect(mockTFUpdateArtifacts.mock.calls).toBeArrayOfSize(1);
+    expect(terraformLockfile.updateArtifacts).toHaveBeenCalledOnce();
   });
 
   it.each(updateTypes)(
@@ -67,7 +65,7 @@ describe('modules/manager/terragrunt/artifacts', () => {
         newPackageFileContent: '',
         config: localConfig,
       });
-      expect(mockTFUpdateArtifacts.mock.calls).toBeArrayOfSize(0);
+      expect(terraformLockfile.updateArtifacts).not.toHaveBeenCalled();
     }
   );
 });
