@@ -202,20 +202,11 @@ describe('modules/platform/gerrit/index', () => {
       });
       clientMock.getChange.mockResolvedValueOnce(change);
       await gerrit.updatePr({ number: 123456, prTitle: 'new title' });
-      expect(clientMock.setCommitMessage).toHaveBeenCalledWith(
+      expect(clientMock.updateCommitMessage).toHaveBeenCalledWith(
         123456,
-        'new title\n\nChange-Id: ...\n'
+        '...',
+        'new title'
       );
-    });
-
-    it('updatePr() - new prTitle => ignore copy to commit msg error', async () => {
-      const change = partial<GerritChange>({
-        subject: 'old title',
-      });
-      clientMock.getChange.mockResolvedValueOnce(change);
-      clientMock.setCommitMessage.mockRejectedValueOnce({ statusCode: 409 });
-      await gerrit.updatePr({ number: 123456, prTitle: 'new title' });
-      expect(clientMock.setCommitMessage).toHaveBeenCalled();
     });
 
     it('updatePr() - auto approve enabled', async () => {
@@ -268,7 +259,7 @@ describe('modules/platform/gerrit/index', () => {
         prTitle: change.subject,
         prBody: 'NEW PR-Body',
       });
-      expect(clientMock.addMessage).toHaveBeenCalledWith(
+      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'NEW PR-Body',
         TAG_PULL_REQUEST_BODY
@@ -324,15 +315,16 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessage).toHaveBeenCalledWith(
+      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY
       );
       expect(clientMock.approveChange).not.toHaveBeenCalled();
-      expect(clientMock.setCommitMessage).toHaveBeenCalledWith(
+      expect(clientMock.updateCommitMessage).toHaveBeenCalledWith(
         123456,
-        'title\n\nChange-Id: ...\n'
+        '...',
+        'title'
       );
     });
 
@@ -347,7 +339,7 @@ describe('modules/platform/gerrit/index', () => {
         },
       });
       expect(pr).toHaveProperty('number', 123456);
-      expect(clientMock.addMessage).toHaveBeenCalledWith(
+      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'body',
         TAG_PULL_REQUEST_BODY
@@ -698,8 +690,7 @@ describe('modules/platform/gerrit/index', () => {
   });
 
   describe('ensureComment()', () => {
-    it('ensureComment() - not exists => create new', async () => {
-      clientMock.getMessages.mockResolvedValueOnce([]);
+    it('ensureComment() - without tag', async () => {
       await expect(
         gerrit.ensureComment({
           number: 123456,
@@ -707,28 +698,26 @@ describe('modules/platform/gerrit/index', () => {
           content: 'My-Comment-Msg',
         })
       ).resolves.toBeTrue();
-      expect(clientMock.addMessage).toHaveBeenCalledWith(
+      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
         123456,
         'My-Comment-Msg',
         undefined
       );
     });
 
-    it('ensureComment() - already exists => dont create new', async () => {
-      clientMock.getMessages.mockResolvedValueOnce([
-        partial<GerritChangeMessageInfo>({
-          tag: 'myTopic',
-          message: 'My-Comment-Msg',
-        }),
-      ]);
+    it('ensureComment() - with tag', async () => {
       await expect(
         gerrit.ensureComment({
           number: 123456,
           topic: 'myTopic',
-          content: ' My-Comment-Msg ',
+          content: 'My-Comment-Msg',
         })
       ).resolves.toBeTrue();
-      expect(clientMock.addMessage).not.toHaveBeenCalled();
+      expect(clientMock.addMessageIfNotAlreadyExists).toHaveBeenCalledWith(
+        123456,
+        'My-Comment-Msg',
+        'myTopic'
+      );
     });
   });
 

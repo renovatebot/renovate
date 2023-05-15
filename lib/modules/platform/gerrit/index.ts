@@ -38,10 +38,11 @@ import type {
 } from './types';
 import {
   TAG_PULL_REQUEST_BODY,
+  buildSearchFilters,
   getGerritRepoUrl,
+  mapBranchStateContextToLabel,
   mapBranchStatusToLabel,
   mapGerritChangeToPr,
-  mapPrStateToGerritFilter,
 } from './utils';
 
 export const id = 'gerrit';
@@ -147,19 +148,9 @@ async function findOwnPr(
   findPRConfig: GerritFindPRConfig,
   refreshCache?: boolean
 ): Promise<GerritChange[]> {
-  const filterState = mapPrStateToGerritFilter(findPRConfig.state);
-  const filter = ['owner:self', 'project:' + config.repository!, filterState];
-  if (findPRConfig.branchName !== '') {
-    filter.push(`hashtag:sourceBranch-${findPRConfig.branchName}`);
-  }
-  if (findPRConfig.targetBranch) {
-    filter.push(`branch:${findPRConfig.targetBranch}`);
-  }
-  if (findPRConfig.label) {
-    filter.push(`label:Code-Review=${findPRConfig.label}`);
-  }
-  const changes = await client.findChanges(filter, refreshCache);
-  logger.trace(`findOwnPr(${filter.join(', ')}) => ${changes.length}`);
+  const filters = buildSearchFilters(config.repository!, findPRConfig);
+  const changes = await client.findChanges(filters, refreshCache);
+  logger.trace(`findOwnPr(${filters.join(', ')}) => ${changes.length}`);
   return changes;
 }
 
@@ -187,14 +178,18 @@ export async function updatePr(prConfig: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prConfig.number}, ${prConfig.prTitle})`);
   const change = await client.getChange(prConfig.number);
   if (change.subject !== prConfig.prTitle) {
-    await updatePullRequestTitle(
+    await client.updateCommitMessage(
       prConfig.number,
       change.change_id,
       prConfig.prTitle
     );
   }
   if (prConfig.prBody) {
-    await updatePullRequestBody(prConfig.number, prConfig.prBody);
+    await client.addMessageIfNotAlreadyExists(
+      prConfig.number,
+      prConfig.prBody,
+      TAG_PULL_REQUEST_BODY
+    );
   }
   if (prConfig.platformOptions?.autoApprove) {
     await client.approveChange(prConfig.number);
@@ -227,61 +222,21 @@ export async function createPr(prConfig: CreatePRConfig): Promise<Pr | null> {
   }
   //Workaround for "Known Problems.1"
   if (pr.subject !== prConfig.prTitle) {
-    await updatePullRequestTitle(pr._number, pr.change_id, prConfig.prTitle);
+    await client.updateCommitMessage(
+      pr._number,
+      pr.change_id,
+      prConfig.prTitle
+    );
   }
-  await updatePullRequestBody(pr._number, prConfig.prBody);
+  await client.addMessageIfNotAlreadyExists(
+    pr._number,
+    prConfig.prBody,
+    TAG_PULL_REQUEST_BODY
+  );
   if (prConfig.platformOptions?.autoApprove) {
     await client.approveChange(pr._number);
   }
   return getPr(pr._number);
-}
-
-async function updatePullRequestTitle(
-  number: number,
-  gerritChangeID: string,
-  prTitle: string
-): Promise<void> {
-  try {
-    await client.setCommitMessage(
-      number,
-      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`
-    );
-  } catch (err) {
-    logger.error(
-      { err },
-      `Can't set pull-request-title ${prTitle} as commit-msg for change ${gerritChangeID}/${number}`
-    );
-  }
-}
-
-async function updatePullRequestBody(
-  changeId: number,
-  prBody: string
-): Promise<void> {
-  const prBodyExists = await checkForExistingMessage(
-    changeId,
-    prBody,
-    TAG_PULL_REQUEST_BODY
-  );
-  if (!prBodyExists) {
-    await client.addMessage(changeId, prBody, TAG_PULL_REQUEST_BODY);
-  }
-}
-
-async function checkForExistingMessage(
-  changeId: number,
-  newMessage: string,
-  msgType: string | null
-): Promise<boolean> {
-  const newMsg = newMessage.trim(); //the last \n was removed from gerrit after the comment was added...
-  const messages = await client.getMessages(changeId);
-  return (
-    messages.find(
-      (existingMsg) =>
-        (msgType === null || msgType === existingMsg.tag) &&
-        existingMsg.message.includes(newMsg)
-    ) !== undefined
-  );
 }
 
 export async function getBranchPr(branchName: string): Promise<Pr | null> {
@@ -349,7 +304,11 @@ export async function getBranchStatusCheck(
   branchName: string,
   context: string | null | undefined
 ): Promise<BranchStatus | null> {
-  const { labelName } = mapBranchStateContextToLabel(context);
+  const { labelName } = mapBranchStateContextToLabel(
+    context,
+    config.labelMappings,
+    config.labels
+  );
   if (labelName) {
     const change = (await findOwnPr({ branchName, state: 'open' }, true)).pop();
     if (change) {
@@ -376,7 +335,9 @@ export async function setBranchStatus(
   branchStatusConfig: BranchStatusConfig
 ): Promise<void> {
   const { labelName, label } = mapBranchStateContextToLabel(
-    branchStatusConfig.context
+    branchStatusConfig.context,
+    config.labelMappings,
+    config.labels
   );
   const labelValue =
     label && mapBranchStatusToLabel(branchStatusConfig.state, label);
@@ -387,28 +348,6 @@ export async function setBranchStatus(
     }
     await client.setLabel(pr.number, labelName, labelValue);
   }
-}
-
-function mapBranchStateContextToLabel(context: string | null | undefined): {
-  labelName?: string;
-  label?: GerritLabelTypeInfo;
-} {
-  let labelName;
-  switch (context) {
-    case 'renovate/stability-days':
-      labelName = config.labelMappings?.stabilityDaysLabel;
-      break;
-    case 'renovate/merge-confidence':
-      labelName = config.labelMappings?.mergeConfidenceLabel;
-      break;
-  }
-  if (labelName && config.labels[labelName]) {
-    return {
-      labelName,
-      label: config.labels[labelName],
-    };
-  }
-  return {};
 }
 
 export function getRawFile(
@@ -427,8 +366,8 @@ export async function getJsonFile(
   repoName?: string,
   branchOrTag?: string
 ): Promise<any | null> {
-  const raw = await getRawFile(fileName, repoName, branchOrTag);
-  return raw ? JSON5.parse(raw) : null;
+  const raw = (await getRawFile(fileName, repoName, branchOrTag))!;
+  return JSON5.parse(raw);
 }
 
 export function getRepoForceRebase(): Promise<boolean> {
@@ -469,15 +408,7 @@ export async function ensureComment(
       ensureComment.content
     })`
   );
-  const commentExists = await checkForExistingMessage(
-    ensureComment.number,
-    ensureComment.content,
-    ensureComment.topic
-  );
-  if (commentExists) {
-    return true;
-  }
-  await client.addMessage(
+  await client.addMessageIfNotAlreadyExists(
     ensureComment.number,
     ensureComment.content,
     ensureComment.topic ?? undefined

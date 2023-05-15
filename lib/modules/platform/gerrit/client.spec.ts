@@ -160,13 +160,28 @@ describe('modules/platform/gerrit/client', () => {
   });
 
   describe('setCommitMessage()', () => {
-    it('submit', async () => {
+    it('setCommitMessage', async () => {
       const change = partial<GerritChange>({});
       httpMock
         .scope(gerritEndpointUrl)
         .put('/a/changes/123456/message', { message: 'new message' })
         .reply(200, gerritRestResponse(change), jsonResultHeader);
       await expect(client.setCommitMessage(123456, 'new message')).toResolve();
+    });
+  });
+
+  describe('updateCommitMessage', () => {
+    it('updateCommitMessage - success', async () => {
+      const change = partial<GerritChange>({});
+      httpMock
+        .scope(gerritEndpointUrl)
+        .put('/a/changes/123456/message', {
+          message: `new message\n\nChange-Id: changeID\n`,
+        })
+        .reply(200, gerritRestResponse(change), jsonResultHeader);
+      await expect(
+        client.updateCommitMessage(123456, 'changeID', 'new message')
+      ).toResolve();
     });
   });
 
@@ -218,6 +233,76 @@ describe('modules/platform/gerrit/client', () => {
         })
         .reply(200, gerritRestResponse([]), jsonResultHeader);
       await expect(client.addMessage(123456, 'message')).toResolve();
+    });
+  });
+
+  describe('checkForExistingMessage()', () => {
+    it('msg not found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      await expect(
+        client.checkForExistingMessage(123456, ' the message ')
+      ).resolves.toBeFalse();
+    });
+
+    it('msg found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(
+          200,
+          gerritRestResponse([
+            partial<GerritChangeMessageInfo>({ message: 'msg1' }),
+            partial<GerritChangeMessageInfo>({ message: 'the message' }),
+          ]),
+          jsonResultHeader
+        );
+      await expect(
+        client.checkForExistingMessage(123456, 'the message')
+      ).resolves.toBeTrue();
+    });
+  });
+
+  describe('addMessageIfNotAlreadyExists()', () => {
+    it('msg not found', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+      httpMock
+        .scope(gerritEndpointUrl)
+        .post('/a/changes/123456/revisions/current/review', {
+          message: 'new trimmed message',
+          tag: 'TAG',
+        })
+        .reply(200, gerritRestResponse([]), jsonResultHeader);
+
+      await expect(
+        client.addMessageIfNotAlreadyExists(
+          123456,
+          ' new trimmed message\n',
+          'TAG'
+        )
+      ).toResolve();
+    });
+
+    it('msg already exists', async () => {
+      httpMock
+        .scope(gerritEndpointUrl)
+        .get('/a/changes/123456/messages')
+        .reply(
+          200,
+          gerritRestResponse([
+            partial<GerritChangeMessageInfo>({ message: 'msg1', tag: 'TAG' }),
+          ]),
+          jsonResultHeader
+        );
+
+      await expect(
+        client.addMessageIfNotAlreadyExists(123456, 'msg1\n', 'TAG')
+      ).toResolve();
     });
   });
 

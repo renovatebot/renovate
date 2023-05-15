@@ -1,18 +1,25 @@
 import { mocked, partial } from '../../../../test/util';
+import type { RepoGlobalConfig } from '../../../config/types';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import type { BranchStatus } from '../../../types';
 import * as _hostRules from '../../../util/host-rules';
 import { setBaseUrl } from '../../../util/http/gerrit';
 import { hashBody } from '../pr-body';
+import type { FindPRConfig } from '../types';
 import type {
   GerritAccountInfo,
   GerritChange,
   GerritChangeMessageInfo,
   GerritChangeStatus,
+  GerritFindPRConfig,
   GerritLabelTypeInfo,
 } from './types';
 import * as utils from './utils';
-import { mapBranchStatusToLabel } from './utils';
+import {
+  buildSearchFilters,
+  mapBranchStateContextToLabel,
+  mapBranchStatusToLabel,
+} from './utils';
 
 jest.mock('../../../util/host-rules');
 
@@ -248,6 +255,112 @@ describe('modules/platform/gerrit/utils', () => {
         expect(mapBranchStatusToLabel(branchState, labelWithTwo)).toEqual(
           expectedValue
         );
+      }
+    );
+  });
+
+  describe('mapBranchStateContextToLabel()', () => {
+    const labelConfig: RepoGlobalConfig['gerritLabelMapping'] = {
+      stabilityDaysLabel: 'Stability',
+      mergeConfidenceLabel: 'Confidence',
+    };
+    const gerritLabels: Record<string, GerritLabelTypeInfo> = {
+      Stability: { values: {}, default_value: 0 },
+      Confidence: { values: {}, default_value: 1 },
+    };
+
+    it.each([
+      [undefined, labelConfig, {}, {}],
+      [null, labelConfig, {}, {}],
+      ['renovate/artifacts', labelConfig, {}, {}],
+      [
+        'renovate/stability-days',
+        labelConfig,
+        gerritLabels,
+        {
+          labelName: 'Stability',
+          label: {
+            values: {},
+            default_value: 0,
+          },
+        },
+      ],
+      [
+        'renovate/merge-confidence',
+        labelConfig,
+        gerritLabels,
+        {
+          labelName: 'Confidence',
+          label: {
+            values: {},
+            default_value: 1,
+          },
+        },
+      ],
+      ['renovate/merge-confidence', labelConfig, {}, {}],
+    ])(
+      'map context %p',
+      (
+        context: string | undefined | null,
+        labelConfig: RepoGlobalConfig['gerritLabelMapping'],
+        gerritLabels: Record<string, GerritLabelTypeInfo>,
+        expectedRes: any
+      ) => {
+        expect(
+          mapBranchStateContextToLabel(context, labelConfig, gerritLabels)
+        ).toEqual(expectedRes);
+      }
+    );
+  });
+
+  describe('buildSearchFilters()', () => {
+    it.each([
+      [
+        'myRepo',
+        { branchName: 'myBranch' },
+        [
+          'owner:self',
+          'project:myRepo',
+          '-is:wip',
+          'hashtag:sourceBranch-myBranch',
+        ],
+      ],
+      [
+        'myRepo',
+        { branchName: 'myBranch', targetBranch: 'other' },
+        [
+          'owner:self',
+          'project:myRepo',
+          '-is:wip',
+          'hashtag:sourceBranch-myBranch',
+          'branch:other',
+        ],
+      ],
+      [
+        'myRepo',
+        { branchName: 'myBranch', label: '+2' },
+        [
+          'owner:self',
+          'project:myRepo',
+          '-is:wip',
+          'hashtag:sourceBranch-myBranch',
+          'label:Code-Review=+2',
+        ],
+      ],
+      [
+        'myRepo',
+        { branchName: 'myBranch', state: 'closed' as FindPRConfig['state'] },
+        [
+          'owner:self',
+          'project:myRepo',
+          'status:closed',
+          'hashtag:sourceBranch-myBranch',
+        ],
+      ],
+    ])(
+      'build Filter %p %p',
+      (repo: string, searchConfig: GerritFindPRConfig, expected: string[]) => {
+        expect(buildSearchFilters(repo, searchConfig)).toEqual(expected);
       }
     );
   });

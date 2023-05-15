@@ -92,6 +92,17 @@ class GerritClient {
     });
   }
 
+  async updateCommitMessage(
+    number: number,
+    gerritChangeID: string,
+    prTitle: string
+  ): Promise<void> {
+    await this.setCommitMessage(
+      number,
+      `${prTitle}\n\nChange-Id: ${gerritChangeID}\n`
+    );
+  }
+
   async getMessages(changeNumber: number): Promise<GerritChangeMessageInfo[]> {
     const messages = await this.gerritHttp.getJson<GerritChangeMessageInfo[]>(
       `a/changes/${changeNumber}/messages`,
@@ -109,6 +120,30 @@ class GerritClient {
       `a/changes/${changeNumber}/revisions/current/review`,
       { body: { message, tag } }
     );
+  }
+
+  async checkForExistingMessage(
+    changeNumber: number,
+    newMessage: string,
+    msgType?: string
+  ): Promise<boolean> {
+    const messages = await this.getMessages(changeNumber);
+    return messages.some(
+      (existingMsg) =>
+        (msgType === undefined || msgType === existingMsg.tag) &&
+        existingMsg.message.includes(newMessage)
+    );
+  }
+
+  async addMessageIfNotAlreadyExists(
+    changeNumber: number,
+    message: string,
+    tag?: string
+  ): Promise<void> {
+    const newMsg = message.trim(); //the last \n was removed from gerrit after the comment was added...
+    if (!(await this.checkForExistingMessage(changeNumber, newMsg, tag))) {
+      await this.addMessage(changeNumber, newMsg, tag);
+    }
   }
 
   async setLabel(

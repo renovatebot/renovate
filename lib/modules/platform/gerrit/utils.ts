@@ -1,3 +1,4 @@
+import type { RepoGlobalConfig } from '../../../config/types';
 import { CONFIG_GIT_URL_UNAVAILABLE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import type { BranchStatus, PrState } from '../../../types';
@@ -8,6 +9,7 @@ import type { Pr } from '../types';
 import type {
   GerritChange,
   GerritChangeStatus,
+  GerritFindPRConfig,
   GerritLabelTypeInfo,
 } from './types';
 
@@ -117,4 +119,48 @@ export function mapBranchStatusToLabel(
   }
   // istanbul ignore next
   return label.default_value;
+}
+
+export function mapBranchStateContextToLabel(
+  context: string | null | undefined,
+  labelMapping: RepoGlobalConfig['gerritLabelMapping'],
+  gerritLabels: Record<string, GerritLabelTypeInfo>
+): {
+  labelName?: string;
+  label?: GerritLabelTypeInfo;
+} {
+  let labelName;
+  switch (context) {
+    case 'renovate/stability-days':
+      labelName = labelMapping?.stabilityDaysLabel;
+      break;
+    case 'renovate/merge-confidence':
+      labelName = labelMapping?.mergeConfidenceLabel;
+      break;
+  }
+  if (labelName && gerritLabels[labelName]) {
+    return {
+      labelName,
+      label: gerritLabels[labelName],
+    };
+  }
+  return {};
+}
+
+export function buildSearchFilters(
+  repository: string,
+  searchConfig: GerritFindPRConfig
+): string[] {
+  const filterState = mapPrStateToGerritFilter(searchConfig.state);
+  const filters = ['owner:self', 'project:' + repository, filterState];
+  if (searchConfig.branchName !== '') {
+    filters.push(`hashtag:sourceBranch-${searchConfig.branchName}`);
+  }
+  if (searchConfig.targetBranch) {
+    filters.push(`branch:${searchConfig.targetBranch}`);
+  }
+  if (searchConfig.label) {
+    filters.push(`label:Code-Review=${searchConfig.label}`);
+  }
+  return filters;
 }
