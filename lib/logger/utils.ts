@@ -79,12 +79,18 @@ export function prepareZodIssues(input: unknown): ZodShortenedIssue {
   }
 
   const output: Record<string, ZodShortenedIssue> = {};
-  for (const [key, value] of Object.entries(input)) {
+  const entries = Object.entries(input);
+  for (const [key, value] of entries.slice(0, 3)) {
     const child = prepareZodIssues(value);
     if (child !== null) {
       output[key] = child;
     }
   }
+
+  if (entries.length > 3) {
+    output['___'] = `... ${entries.length - 3} more`;
+  }
+
   return output;
 }
 

@@ -84,9 +84,30 @@ describe('logger/utils', () => {
         'Expected array, received number'
       );
 
-      expect(prepareIssues(z.string().array(), [42, 'foo', 42])).toEqual({
-        '0': 'Expected string, received number',
+      expect(
+        prepareIssues(z.string().array(), ['foo', 'bar', 42, 42, 42, 42, 42])
+      ).toEqual({
         '2': 'Expected string, received number',
+        '3': 'Expected string, received number',
+        '4': 'Expected string, received number',
+        ___: '... 2 more',
+      });
+
+      expect(
+        prepareIssues(z.record(z.string()), {
+          foo: 'foo',
+          bar: 'bar',
+          key1: 42,
+          key2: 42,
+          key3: 42,
+          key4: 42,
+          key5: 42,
+        })
+      ).toEqual({
+        key1: 'Expected string, received number',
+        key2: 'Expected string, received number',
+        key3: 'Expected string, received number',
+        ___: '... 2 more',
       });
 
       expect(
