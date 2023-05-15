@@ -569,10 +569,8 @@ async function tryPrAutomerge(
   platformOptions: PlatformPrOptions | undefined
 ): Promise<void> {
   if (platformOptions?.usePlatformAutomerge) {
-    logger.warn('TRYING AUTOMERGE');
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
-        logger.warn('IGNOREING APPROVALS');
         await ignoreApprovals(pr);
       }
 
