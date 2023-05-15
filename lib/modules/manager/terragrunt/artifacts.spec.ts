@@ -35,7 +35,6 @@ describe('modules/manager/terragrunt/artifacts', () => {
   ];
 
   beforeEach(() => {
-    jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
 
