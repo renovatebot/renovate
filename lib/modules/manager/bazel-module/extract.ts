@@ -14,7 +14,7 @@ export function extractPackageFile(
       .transform((deps) => (deps.length ? { deps } : null))
       .parse(records);
   } catch (err) {
-    logger.error({ err, filename }, 'Failed to parse bazel module file.');
+    logger.debug({ err, filename }, 'Failed to parse bazel module file.');
     return null;
   }
 }
