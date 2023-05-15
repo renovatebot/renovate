@@ -5,15 +5,15 @@ import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
-type UserScore = {
+interface UserScore {
   username: string;
   score: number;
-};
+}
 
-type FileScore = {
+interface FileScore {
   file: string;
   score: number;
-};
+}
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
