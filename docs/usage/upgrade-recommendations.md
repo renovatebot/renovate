@@ -21,22 +21,32 @@ If you think Renovate is too noisy, please read our [noise reduction docs](INSER
 ### Why updating often is easier, faster and safer
 
 You may think that updating often is too noisy, and takes too much time.
-But updating often actually _saves_ you time overall.
+But updating regulary actually _saves_ you time, because:
 
-Firstly, when you update often updates tend to be small.
+- Regular updates tend to be small
+- Applying `major` updates is easier
+- You'll be ready for CVE patches
+
+#### Regular updates tend to be small
+
+Firstly, when you update regularly updates tend to be small.
 The update's changelogs are small, quick to read, and easy to understand.
 You probably only need to make changes in a few places (if at all) to merge the PR and get going again.
-Because you're reading the changelogs often, you'll get a feel for the direction of the upstream project.
+Because you're reading the changelogs regularly, you'll get a feel for the direction of the upstream project.
 
-Secondly, when you're current with upstream, `major` updates are generally easier.
+#### Applying `major` updates is easier
+
+Secondly, when you're current with upstream, `major` updates are easier.
 This is because you already:
 
 - follow the latest best practices of upstream
 - use the latest names for features/variables
 - read the previous changelogs
 
-Thirdly, when a upstream package releases an emergency patch for a critical CVE you'll be in a much better place.
-If you're current, you can just review and merge Renovate's PR and be done.
+#### You'll be ready for CVE patches
+
+Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
+If you're current, you can review and merge Renovate's PR and be done.
 If you're badly behind on updates you'll have a bad time because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
 To summarize: be kind to future you, and update your dependencies often.
@@ -70,7 +80,7 @@ To make life easier for you the next time, make sure to regulary update your dep
 
 ## Project with five year old dependencies
 
-Let's assume you the Dependency Dashboard shows 50+ updates and you have multiple `major` versions pending.
+Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
 
 We recommend that you first update any dependencies that have critical updates for CVEs or other security related improvements.
 Then update your framework tooling so you're current again.
