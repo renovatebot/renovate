@@ -54,6 +54,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         return {
           usernames,
           pattern,
+          score: pattern.length,
           match: (path: string) => matchPattern.ignores(path),
         };
       });
@@ -77,7 +78,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
           const usersWithScore = fileOwnerRules
             .map((rule) =>
               rule.match(file)
-                ? { score: rule.pattern.length, usernames: rule.usernames }
+                ? { score: rule.score, usernames: rule.usernames }
                 : null
             )
             .reduce<UserScore[]>((acc, match) => {
