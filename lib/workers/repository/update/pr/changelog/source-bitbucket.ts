@@ -1,10 +1,12 @@
 import URL from 'node:url';
+import is from '@sindresorhus/is';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
 import * as allVersioning from '../../../../../modules/versioning';
 import * as memCache from '../../../../../util/cache/memory';
 import * as packageCache from '../../../../../util/cache/package';
 import { regEx } from '../../../../../util/regex';
+import { trimSlashes } from '../../../../../util/url';
 import type { BranchUpgradeConfig } from '../../../../types';
 import { getTags } from './bitbucket';
 import { slugifyUrl } from './common';
@@ -51,8 +53,7 @@ export async function getChangeLogJSON(
   logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = `${protocol}//${host}/`;
   const apiBaseUrl = `${protocol}//api.${host}/`;
-  const repository = trimSlashes(pathname)
-    .replace(regEx(/\.git$/), '');
+  const repository = trimSlashes(pathname).replace(regEx(/\.git$/), '');
 
   if (repository.split('/').length < 2) {
     logger.info({ sourceUrl }, 'Invalid bitbucket URL found');
