@@ -323,8 +323,7 @@ const query = q.tree<Ctx>({
   postHandler: registryUrlHandler,
 });
 
-// Extract 1 file
-export function extractPackageFile(
+export function extractDependency(
   content: string,
   {
     packageFile,
@@ -373,9 +372,7 @@ export function extractPackageFile(
       globalVars,
       localVars,
       deps: [],
-      registryUrls: [
-        ...new Set([REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])]),
-      ],
+      registryUrls: [REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])],
       packageFile,
       scalaVersion,
     });
@@ -410,12 +407,12 @@ function prepareLoadPackageFiles(
       globalVars: {},
       packageFile,
     };
-    const res = extractPackageFile(content, acc);
+    const res = extractDependency(content, acc);
 
     if (res) {
       globalVars = { ...globalVars, ...res.localVars };
       if (res.registryUrls) {
-        registryUrls = [...registryUrls, ...new Set(res.registryUrls)];
+        registryUrls = [...registryUrls, ...res.registryUrls];
       }
       if (res.scalaVersion) {
         scalaVersion = res.scalaVersion;
@@ -462,7 +459,7 @@ export async function extractAllPackageFiles(
     // Extract package file by its group
     // local variable is share within its group
     for (const { packageFile, content } of packageFileContents) {
-      const res = extractPackageFile(content, {
+      const res = extractDependency(content, {
         registryUrls,
         deps: [],
         packageFile,
@@ -483,8 +480,9 @@ export async function extractAllPackageFiles(
   // As we merge all package to single package file
   // Packages are counted in submodule but it's the same one
   // by packageName and currentValue
-  const finalPackages = Object.entries(mapDepsToPackageFile).map(
-    ([packageFile, deps]) => ({
+  const finalPackages: PackageFile[] = [];
+  for (const [packageFile, deps] of Object.entries(mapDepsToPackageFile)) {
+    finalPackages.push({
       packageFile,
       deps: deps.filter(
         (val, idx, self) =>
@@ -495,9 +493,8 @@ export async function extractAllPackageFiles(
               dep.currentValue === val.currentValue
           )
       ),
-    })
-  );
-  logger.debug('finalPackages ' + JSON.stringify(finalPackages));
+    });
+  }
 
   return finalPackages.length > 0 ? finalPackages : null;
 }

@@ -5,7 +5,7 @@ import type { RepoGlobalConfig } from '../../../config/types';
 import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { ExtractConfig, PackageFile } from '../types';
 import {
-  extractPackageFile as extract,
+  extractDependency as extract,
   extractAllPackageFiles,
 } from './extract';
 
