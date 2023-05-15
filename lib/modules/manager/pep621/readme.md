@@ -1,6 +1,6 @@
-This manager supports updating dependencies inside of `pyproject.toml` files.
+This manager supports updating dependencies inside `pyproject.toml` files.
 
-Outside standard dependencies, following toolsets are supported:
+In addition to standard dependencies, these toolsets are also supported:
 
 - `pdm`
 
