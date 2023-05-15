@@ -5,7 +5,8 @@ export type PlatformId =
   | 'bitbucket-server'
   | 'gitea'
   | 'github'
-  | 'gitlab';
+  | 'gitlab'
+  | 'local';
 
 export const GITHUB_API_USING_HOST_TYPES = [
   'github',

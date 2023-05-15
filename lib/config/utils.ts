@@ -1,4 +1,5 @@
 import { logger } from '../logger';
+import { getHighestVulnerabilitySeverity } from '../util/vulnerability/utils';
 import * as options from './options';
 import type { RenovateConfig } from './types';
 
@@ -13,6 +14,15 @@ export function mergeChildConfig<
   const parentConfig = structuredClone(parent);
   const childConfig = structuredClone(child);
   const config: Record<string, any> = { ...parentConfig, ...childConfig };
+
+  // Ensure highest severity survives parent / child merge
+  if (config?.isVulnerabilityAlert) {
+    config.vulnerabilitySeverity = getHighestVulnerabilitySeverity(
+      parent,
+      child
+    );
+  }
+
   for (const option of options.getOptions()) {
     if (
       option.mergeable &&
@@ -20,6 +30,7 @@ export function mergeChildConfig<
       parentConfig[option.name]
     ) {
       logger.trace(`mergeable option: ${option.name}`);
+
       if (option.name === 'constraints') {
         config[option.name] = {
           ...parentConfig[option.name],

@@ -25,6 +25,19 @@ describe('workers/global/autodiscover', () => {
     });
   });
 
+  it('throws if local and repositories defined', async () => {
+    config.platform = 'local';
+    config.repositories = ['a'];
+    await expect(autodiscoverRepositories(config)).rejects.toThrow();
+  });
+
+  it('returns local', async () => {
+    config.platform = 'local';
+    expect((await autodiscoverRepositories(config)).repositories).toEqual([
+      'local',
+    ]);
+  });
+
   it('returns if not autodiscovering', async () => {
     expect(await autodiscoverRepositories(config)).toEqual(config);
   });
