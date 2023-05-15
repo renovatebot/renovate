@@ -67,9 +67,6 @@ export function getYarn2LockedDependencies(
         if (entryName === depName && entry?.version === currentVersion) {
           res.push({ entry, depNameConstraint, depName, constraint });
         }
-        if (entryName === depName && entry?.version === currentVersion) {
-          res.push({ entry, depNameConstraint, depName, constraint });
-        }
       }
     }
   } catch (err) /* istanbul ignore next */ {
