@@ -23,7 +23,6 @@ import { updateArtifacts } from '.';
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
-jest.mock('fs-extra');
 jest.mock('../../../util/exec/env');
 jest.mock('../../datasource');
 jest.mock('../../../util/fs');

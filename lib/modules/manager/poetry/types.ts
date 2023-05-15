@@ -40,6 +40,7 @@ export interface PoetryLockSection {
 
 export interface PoetryLock {
   metadata?: {
+    'lock-version'?: string;
     'python-versions'?: string;
   };
   package?: PoetryLockSection[];

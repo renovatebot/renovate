@@ -134,6 +134,11 @@ describe('util/fs/index', () => {
   });
 
   describe('deleteLocalFile', () => {
+    it('throws if platform is local', async () => {
+      GlobalConfig.set({ platform: 'local' });
+      await expect(deleteLocalFile('foo/bar/file.txt')).rejects.toThrow();
+    });
+
     it('deletes file', async () => {
       const filePath = `${localDir}/foo/bar/file.txt`;
       await fs.outputFile(filePath, 'foobar');
