@@ -46,10 +46,9 @@ This is because you already:
 #### You'll be ready for CVE patches
 
 Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
-If you're current, you can review and merge Renovate's PR and be done.
-If you're badly behind on updates you'll have a bad time because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
+If you're current, you can review and merge Renovate's PR quickly.
 
-To summarize: be kind to future you, and update your dependencies often.
+If you're badly behind on updates you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
 ## Starting from a new project
 
@@ -64,32 +63,78 @@ Now you'll have to stay on the "update often" train.
 If you have a project that's a year behind on dependencies, you'll need to do some work.
 Let's assume that most dependencies need some `minor` or `patch` level updates, and at _least_ one dependency needs a `major` update.
 
-Here we recommend that you start with the easy stuff first, to get back in the groove.
+We recommend that you start with the easy stuff first, to get back in the groove.
 So update your dependencies to the latest `minor` or `patch` versions, and read their changelogs.
-You'll probably need to make some tiny changes before merging some updates, but it's easy if you do it one at a time.
+You may need to make minor changes before merging some updates.
 
 Once you've updated your old `major` versions, it's time to tackle the new `major` updates.
-Again, start with the easy `major` version updates.
+Again, start with the easy `major` version updates, like a Prettier or ESLint major update.
 
-Finally it's time to tackle the `major` update for your framework or critical library.
+Now it's time to work on the `major` update for your framework or library.
 Take your time, carefully read the changelogs, and make the necessary changes.
 Let multiple team members review your work before you merge it, it's easy to miss something.
 
-At the end you'll be fully up to date.
-To make life easier for you the next time, make sure to regulary update your dependencies.
+Finally, update your development tools.
+
+Now that you're up to date, it's important to start thinking about how to make updating a regular thing.
 
 ## Project with five year old dependencies
 
 Let's assume your Dependency Dashboard lists more than 50 updates, and you have a few `major` version updates pending.
+If a project becomes this badly behind on updates, you have a bigger problem than just the updates.
+Let's deal with the easier stuff first: getting back up to date, and deal with the big problem after that.
 
-We recommend that you first update any dependencies that have critical updates for CVEs or other security related improvements.
-Then update your framework tooling so you're current again.
+First update any dependencies that have critical updates for CVEs or other security related improvements.
 
-...
+Next, update any dependency that's blocking another update.
+You may need to update dependency `A` before you can take an update for dependency `B` or `C`.
+In that case, update dependency `A` first.
 
-## Getting your team to update dependencies
+Then update all dependencies to their latest `minor` or `patch` version to prepare for dealing with `major` updates.
+
+We recommend you take `major` updates in sequence.
+Say you're on version `1` of dependency `A`, and the latest `major` version is at `4`.
+You should update to `2`, then `3` and finally `4`.
+Avoid updating from `1` directly to `4`.
+Taking `major` updates in sequence allows you to read the changelogs/blogs for each `major` version, and learn why upstream made certain breaking changes.
+
+Finally update your development tools.
+
+You're done with the _technical_ side of things, but you still need to work on the _human_ side.
+If you don't fix the human side, you'll end up with outdated dependencies again.
+Keep reading to learn how to deal with the human side of things.
+
+## Why developers avoid updating
+
+Let's assume that most developers _want_ a project that's up to date.
+So why are developers not updating their project?
+Some reasons why developers may avoid updating the project:
+
+- Developers get blamed when things break in production
+- There are no tests, so merging updates is scary
+- Slow tests
+- Releasing a new version of the project must be done by hand
+- Updating is a manual process
+- The company doesn't allow developer time for updates
+- The company has complex rules about when to update
+
+In short, if updating is painful, developers will avoid it.
+The solution is to make it easy and fast to update dependencies.
+Focus on the proces, not on the people.
+
+### Make updating easy and fast
 
 Insert recommendations from Renovate maintainers here on how to deal with a team that doesn't want to apply updates, arguments to convince people to update often, dealing with team dynamics, and so on.
+
+Here's my short list:
+
+- Run Renovate bot on all projects
+- Make sure building the project is as fast as it can be
+- Run automated tests on each PR
+- Have automated tests for the critical path of your project
+- Avoid long lived branches that diverge from `main` over time
+- Ensure company policy allows frequent updates
+- Dig beyond "developer error" when things go wrong, focus on the process
 
 ## How we use Renovate ourselves
 
