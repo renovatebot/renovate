@@ -5,12 +5,11 @@ import type {
   RecordFragment,
 } from './fragments';
 import * as fragments from './fragments';
-import { Stack } from './stack';
 
 // Represents the fields that the context must have.
 export interface CtxCompatible {
   results: RecordFragment[];
-  stack: Stack<AllFragments>;
+  stack: AllFragments[];
 }
 
 export class CtxProcessingError extends Error {
@@ -29,12 +28,9 @@ export class CtxProcessingError extends Error {
 
 export class Ctx implements CtxCompatible {
   results: RecordFragment[];
-  stack: Stack<AllFragments>;
+  stack: AllFragments[];
 
-  constructor(
-    results: RecordFragment[] = [],
-    stack = Stack.create<AllFragments>()
-  ) {
+  constructor(results: RecordFragment[] = [], stack: AllFragments[] = []) {
     this.results = results;
     this.stack = stack;
   }
@@ -43,11 +39,25 @@ export class Ctx implements CtxCompatible {
     if (obj instanceof Ctx) {
       return obj;
     }
-    return new Ctx(obj.results, Stack.create(...obj.stack));
+    return new Ctx(obj.results, Array.from(obj.stack));
   }
 
+  get safeCurrent(): AllFragments | undefined {
+    if (!this.stack.length) {
+      return undefined;
+    }
+    return this.stack[this.stack.length - 1];
+  }
+
+  get current(): AllFragments {
+    const c = this.safeCurrent;
+    if (c === undefined) {
+      throw new Error('Requested current, but no value.');
+    }
+    return c;
+  }
   get currentRecord(): RecordFragment {
-    const current = this.stack.current;
+    const current = this.current;
     if (current.type === 'record') {
       return current;
     }
@@ -55,7 +65,7 @@ export class Ctx implements CtxCompatible {
   }
 
   get currentArray(): ArrayFragment {
-    const current = this.stack.current;
+    const current = this.current;
     if (current.type === 'array') {
       return current;
     }
@@ -71,7 +81,7 @@ export class Ctx implements CtxCompatible {
       this.stack.push(current);
       return false;
     }
-    const parent = this.stack.safeCurrent;
+    const parent = this.safeCurrent;
 
     if (parent) {
       if (parent.type === 'attribute' && fragments.isValue(current)) {
