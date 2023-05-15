@@ -62,7 +62,6 @@ describe('modules/datasource/endoflife-date/index', () => {
           },
         ],
       });
-      expect(res?.releases).toHaveLength(9);
     });
 
     it('returns null without registryUrl', async () => {
