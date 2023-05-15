@@ -1,11 +1,20 @@
 import { codeBlock } from 'common-tags';
 import { BazelDatasource } from '../../datasource/bazel';
+import * as parser from './parser';
 import { extractPackageFile } from '.';
 
 describe('modules/manager/bazel-module/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null if fails to parse', () => {
       const result = extractPackageFile('blahhhhh:foo:@what\n', 'MODULE.bazel');
+      expect(result).toBeNull();
+    });
+
+    it('returns null if something throws an error', () => {
+      jest.spyOn(parser, 'parse').mockImplementationOnce((input) => {
+        throw new Error('Test error');
+      });
+      const result = extractPackageFile('content', 'MODULE.bazel');
       expect(result).toBeNull();
     });
 
