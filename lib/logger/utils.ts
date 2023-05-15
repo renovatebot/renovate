@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
+import { ZodError } from 'zod';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -46,7 +47,68 @@ const contentFields = [
   'yarnLockParsed',
 ];
 
+type ZodShortenedIssue =
+  | null
+  | string
+  | string[]
+  | {
+      [key: string]: ZodShortenedIssue;
+    };
+
+export function prepareZodIssues(input: unknown): ZodShortenedIssue {
+  // istanbul ignore if
+  if (!is.plainObject(input)) {
+    return null;
+  }
+
+  let err: null | string | string[] = null;
+  if (is.array(input._errors, is.string)) {
+    // istanbul ignore else
+    if (input._errors.length === 1) {
+      err = input._errors[0];
+    } else if (input._errors.length > 1) {
+      err = input._errors;
+    } else {
+      err = null;
+    }
+  }
+  delete input._errors;
+
+  if (is.emptyObject(input)) {
+    return err;
+  }
+
+  const output: Record<string, ZodShortenedIssue> = {};
+  for (const [key, value] of Object.entries(input)) {
+    const child = prepareZodIssues(value);
+    if (child !== null) {
+      output[key] = child;
+    }
+  }
+  return output;
+}
+
+export function prepareZodError(err: ZodError): Record<string, unknown> {
+  // istanbul ignore next
+  Object.defineProperty(err, 'message', {
+    get: () => 'Schema error',
+    set: (_) => {
+      _;
+    },
+  });
+
+  return {
+    message: err.message,
+    stack: err.stack,
+    issues: prepareZodIssues(err.format()),
+  };
+}
+
 export default function prepareError(err: Error): Record<string, unknown> {
+  if (err instanceof ZodError) {
+    return prepareZodError(err);
+  }
+
   const response: Record<string, unknown> = {
     ...err,
   };

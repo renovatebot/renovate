@@ -1,4 +1,9 @@
-import { sanitizeValue, validateLogLevel } from './utils';
+import { z } from 'zod';
+import prepareError, {
+  prepareZodIssues,
+  sanitizeValue,
+  validateLogLevel,
+} from './utils';
 
 describe('logger/utils', () => {
   afterEach(() => {
@@ -45,5 +50,118 @@ describe('logger/utils', () => {
     ${'user@domain.com'}                                                  | ${'user@domain.com'}
   `('sanitizeValue("$input") == "$output"', ({ input, output }) => {
     expect(sanitizeValue(input)).toBe(output);
+  });
+
+  describe('prepareError', () => {
+    function getError<T extends z.ZodType>(
+      schema: T,
+      input: unknown
+    ): z.ZodError | null {
+      try {
+        schema.parse(input);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          return error;
+        }
+      }
+      throw new Error('Expected error');
+    }
+
+    function prepareIssues<T extends z.ZodType>(
+      schema: T,
+      input: unknown
+    ): unknown | null {
+      const error = getError(schema, input);
+      return error ? prepareZodIssues(error.format()) : null;
+    }
+
+    it('prepareZodIssues', () => {
+      expect(prepareIssues(z.string(), 42)).toBe(
+        'Expected string, received number'
+      );
+
+      expect(prepareIssues(z.string().array(), 42)).toBe(
+        'Expected array, received number'
+      );
+
+      expect(prepareIssues(z.string().array(), [42, 'foo', 42])).toEqual({
+        '0': 'Expected string, received number',
+        '2': 'Expected string, received number',
+      });
+
+      expect(
+        prepareIssues(
+          z.object({
+            foo: z.object({
+              bar: z.string(),
+            }),
+          }),
+          { foo: { bar: [], baz: 42 } }
+        )
+      ).toEqual({
+        foo: {
+          bar: 'Expected string, received array',
+        },
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          { type: 'baz' }
+        )
+      ).toEqual({
+        type: "Invalid discriminator value. Expected 'foo' | 'bar'",
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          {}
+        )
+      ).toEqual({
+        type: "Invalid discriminator value. Expected 'foo' | 'bar'",
+      });
+
+      expect(
+        prepareIssues(
+          z.discriminatedUnion('type', [
+            z.object({ type: z.literal('foo') }),
+            z.object({ type: z.literal('bar') }),
+          ]),
+          42
+        )
+      ).toBe('Expected object, received number');
+    });
+
+    it('prepareError', () => {
+      const err = getError(
+        z.object({
+          foo: z.object({
+            bar: z.object({
+              baz: z.string(),
+            }),
+          }),
+        }),
+        { foo: { bar: { baz: 42 } } }
+      );
+
+      expect(prepareError(err!)).toEqual({
+        issues: {
+          foo: {
+            bar: {
+              baz: 'Expected string, received number',
+            },
+          },
+        },
+        message: 'Schema error',
+        stack: expect.stringMatching(/^ZodError: Schema error/),
+      });
+    });
   });
 });
