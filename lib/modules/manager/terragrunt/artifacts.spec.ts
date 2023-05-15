@@ -35,7 +35,6 @@ describe('modules/manager/terragrunt/artifacts', () => {
   ];
 
   beforeEach(() => {
-    jest.resetAllMocks();
     jest.resetModules();
     GlobalConfig.set(adminConfig);
   });
