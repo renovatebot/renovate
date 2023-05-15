@@ -95,20 +95,4 @@ describe('modules/manager/bazel-module/context', () => {
       );
     });
   });
-
-  describe('Ctx.as', () => {
-    it('adds the appropriate prototype to the context and referenced fragments', () => {
-      // Ensure that we have values in results (bazel_dep) and the stack (foo_library).
-      const ctx = new Ctx()
-        .startRule('bazel_dep')
-        .startAttribute('name')
-        .addString('rules_foo')
-        .startAttribute('version')
-        .addString('1.2.3')
-        .endRule()
-        .startRule('foo_library');
-      const result = Ctx.as(ctx);
-      expect(result).toEqual(ctx);
-    });
-  });
 });

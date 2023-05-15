@@ -35,13 +35,6 @@ export class Ctx implements CtxCompatible {
     this.stack = stack;
   }
 
-  static as(obj: CtxCompatible): Ctx {
-    if (obj instanceof Ctx) {
-      return obj;
-    }
-    return new Ctx(obj.results, Array.from(obj.stack));
-  }
-
   private get safeCurrent(): AllFragments | undefined {
     return this.stack.at(-1);
   }

@@ -15,21 +15,21 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => {
-    return Ctx.as(ctx).startAttribute(token.value);
+    return ctx.startAttribute(token.value);
   })
   .op('=')
   .alt(
     q.str((ctx, token) => {
-      return Ctx.as(ctx).addString(token.value);
+      return ctx.addString(token.value);
     }),
     q.sym<Ctx>(booleanValuesRegex, (ctx, token) => {
-      return Ctx.as(ctx).addBoolean(token.value);
+      return ctx.addBoolean(token.value);
     })
   );
 
 const moduleRules = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) => {
-    return Ctx.as(ctx).startRule(token.value);
+    return ctx.startRule(token.value);
   })
   .join(
     q.tree({
@@ -37,7 +37,7 @@ const moduleRules = q
       maxDepth: 1,
       search: kvParams,
       postHandler: (ctx, tree) => {
-        return Ctx.as(ctx).endRule();
+        return ctx.endRule();
       },
     })
   );
