@@ -1761,15 +1761,13 @@ describe('modules/platform/gitlab/index', () => {
             gitLabIgnoreApprovals: true,
           },
         })
-      ).toMatchInlineSnapshot(`
-        {
-          "id": 1,
-          "iid": 12345,
-          "number": 12345,
-          "sourceBranch": "some-branch",
-          "title": "some title",
-        }
-      `);
+      ).toStrictEqual({
+        id: 1,
+        iid: 12345,
+        number: 12345,
+        sourceBranch: 'some-branch',
+        title: 'some title',
+      });
     });
 
     it('does not try to create already existing approval rule', async () => {
