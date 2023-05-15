@@ -5750,14 +5750,14 @@ globrex@^0.1.2:
   resolved "https://registry.yarnpkg.com/globrex/-/globrex-0.1.2.tgz#dd5d9ec826232730cd6793a5e33a9302985e6098"
   integrity sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==
 
-good-enough-parser@1.1.22:
-  version "1.1.22"
-  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.22.tgz#1fcab50b385ead49cb89a847868631d588bc5716"
-  integrity sha512-fI4qWIeyqjleGazMcXnqgtvG8qBJGUoj5CtraqaUpZmk94ztMab6irx3Yz+EsJKKgIrwkSBM69WHLngfhAe7hg==
+good-enough-parser@1.1.23:
+  version "1.1.23"
+  resolved "https://registry.yarnpkg.com/good-enough-parser/-/good-enough-parser-1.1.23.tgz#f80441698261d6d1722ca52cf1184bb504ac5d76"
+  integrity sha512-QUcQZutczESpdo2w9BMG6VpLFoq9ix7ER5HLM1mAdZdri2F3eISkCb8ep84W6YOo0grYWJdyT/8JkYqGjQfSSQ==
   dependencies:
     "@thi.ng/zipper" "1.0.3"
     "@types/moo" "0.5.5"
-    klona "2.0.5"
+    klona "2.0.6"
     moo "0.5.2"
 
 gopd@^1.0.1:
@@ -7013,10 +7013,10 @@ kleur@^3.0.3:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"
   integrity sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==
 
-klona@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/klona/-/klona-2.0.5.tgz#d166574d90076395d9963aa7a928fabb8d76afbc"
-  integrity sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==
+klona@2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/klona/-/klona-2.0.6.tgz#85bffbf819c03b2f53270412420a4555ef882e22"
+  integrity sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA==
 
 leven@^3.1.0:
   version "3.1.0"
