@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
