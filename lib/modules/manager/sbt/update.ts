@@ -1,6 +1,6 @@
 import semver, { ReleaseType } from 'semver';
 import { logger } from '../../../logger';
-import { regEx } from '../../../util/regex';
+import { newlineRegex, regEx } from '../../../util/regex';
 import type {
   BumpPackageVersionResult,
   UpdateDependencyConfig,
@@ -43,9 +43,9 @@ export function updateDependency({
   if (currentValue && newValue) {
     if (fileReplacePosition) {
       const lineNumber = upgrade.fileReplacePosition!;
-      const offset = fileContent.split('\n', lineNumber).join('\n').length;
+      const offset = fileContent.split(newlineRegex, lineNumber).join('\n').length;
       const offsetEndOfLine = fileContent
-        .split('\n', lineNumber + 1)
+        .split(newlineRegex, lineNumber + 1)
         .join('\n').length;
 
       const [header, updateLine, footer] = [
