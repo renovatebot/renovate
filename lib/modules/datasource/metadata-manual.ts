@@ -95,7 +95,7 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
     node: 'https://github.com/nodejs/node',
   },
   maven: {
-    'com.figure.gradle.semver-plugin:com.figure.gradle.semver-plugin.gradle.plugin': 
+    'com.figure.gradle.semver-plugin:com.figure.gradle.semver-plugin.gradle.plugin':
       'https://github.com/FigureTechnologies/gradle-semver-plugin',
   },
   npm: {
