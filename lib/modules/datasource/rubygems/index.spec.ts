@@ -13,16 +13,6 @@ const emptyMarshalArray = Buffer.from([4, 8, 91, 0]);
 
 describe('modules/datasource/rubygems/index', () => {
   describe('getReleases', () => {
-    const params = {
-      versioning: rubyVersioning.id,
-      datasource: RubyGemsDatasource.id,
-      packageName: 'rails',
-      registryUrls: [
-        'https://thirdparty.com',
-        'https://firstparty.com/basepath/',
-      ],
-    };
-
     beforeEach(() => {
       memCache.clear();
       jest.resetAllMocks();
@@ -42,26 +32,34 @@ describe('modules/datasource/rubygems/index', () => {
         .scope('https://thirdparty.com')
         .get('/api/v1/gems/rails.json')
         .reply(200);
-      expect(await getPkgReleases(params)).toBeNull();
+      expect(
+        await getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
+          registryUrls: [
+            'https://thirdparty.com',
+            'https://firstparty.com/basepath/',
+          ],
+        })
+      ).toBeNull();
     });
 
     it('returns null for rubygems.org package miss', async () => {
-      const newparams = { ...params };
-      newparams.registryUrls = [];
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
         .reply(404, rubygemsOrgVersions);
-      const res = await getPkgReleases(newparams);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: [],
+      });
       expect(res).toBeNull();
     });
 
     it('returns null for an error without "not_supported" reason', async () => {
-      const newparams = {
-        ...params,
-        registryUrls: [],
-      };
-
       const versionsdataSourceSpy = jest
         .spyOn(VersionsDatasource.prototype, 'syncVersions')
         .mockImplementationOnce(() => {
@@ -69,7 +67,12 @@ describe('modules/datasource/rubygems/index', () => {
         });
 
       try {
-        const res = await getPkgReleases(newparams);
+        const res = await getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
+          registryUrls: [],
+        });
         expect(res).toBeNull();
       } finally {
         versionsdataSourceSpy.mockRestore();
@@ -77,16 +80,16 @@ describe('modules/datasource/rubygems/index', () => {
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
-      const newparams = {
-        ...params,
-        packageName: '1pass',
-        registryUrls: [],
-      };
       httpMock
         .scope('https://rubygems.org')
         .get('/versions')
         .reply(200, rubygemsOrgVersions);
-      const res = await getPkgReleases(newparams);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: '1pass',
+        registryUrls: [],
+      });
       expect(res).not.toBeNull();
       expect(res?.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
@@ -104,16 +107,16 @@ describe('modules/datasource/rubygems/index', () => {
         ---
         sidekiq-ent 0.7.10,1.0.0,1.0.1,1.2.4,2.0.0,2.1.2 4c0f62a49b15b4775b7fb6824ec34d45
       `;
-      const newparams = {
-        ...params,
-        packageName: 'sidekiq-ent',
-        registryUrls: ['https://enterprise.contribsys.com'],
-      };
       httpMock
         .scope('https://enterprise.contribsys.com')
         .get('/versions')
         .reply(200, contribsysComVersions);
-      const res = await getPkgReleases(newparams);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'sidekiq-ent',
+        registryUrls: ['https://enterprise.contribsys.com'],
+      });
       expect(res).not.toBeNull();
       expect(res?.releases).toHaveLength(6);
       expect(res).toMatchObject({
@@ -143,13 +146,16 @@ describe('modules/datasource/rubygems/index', () => {
 
       expect(
         await getPkgReleases({
-          ...params,
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
           registryUrls: [],
         })
       ).toBeNull();
 
       const res = await getPkgReleases({
-        ...params,
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
         packageName: '1pass',
         registryUrls: [],
       });
@@ -168,7 +174,15 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/api/v1/versions/rails.json')
         .reply(200, railsVersions);
 
-      const res = await getPkgReleases(params);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: [
+          'https://thirdparty.com',
+          'https://firstparty.com/basepath/',
+        ],
+      });
       expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
@@ -189,7 +203,15 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/basepath/api/v1/versions/rails.json')
         .reply(200, railsVersions);
 
-      const res = await getPkgReleases(params);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: [
+          'https://thirdparty.com',
+          'https://firstparty.com/basepath/',
+        ],
+      });
       expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
@@ -207,7 +229,17 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(404)
         .get('/basepath/api/v1/gems/rails.json')
         .reply(200);
-      expect(await getPkgReleases(params)).toBeNull();
+      expect(
+        await getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
+          registryUrls: [
+            'https://thirdparty.com',
+            'https://firstparty.com/basepath/',
+          ],
+        })
+      ).toBeNull();
     });
 
     it('falls back to info when version request fails', async () => {
@@ -219,7 +251,15 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(200, railsInfo)
         .get('/api/v1/versions/rails.json')
         .reply(400, {});
-      const res = await getPkgReleases(params);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: [
+          'https://thirdparty.com',
+          'https://firstparty.com/basepath/',
+        ],
+      });
       expect(res?.releases).toHaveLength(1);
       expect(res?.releases[0].version).toBe(railsInfo.version);
     });
@@ -239,7 +279,17 @@ describe('modules/datasource/rubygems/index', () => {
         .reply(404)
         .get('/api/v1/gems/rails.json')
         .reply(500);
-      expect(await getPkgReleases(params)).toBeNull();
+      expect(
+        await getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
+          registryUrls: [
+            'https://thirdparty.com',
+            'https://firstparty.com/basepath/',
+          ],
+        })
+      ).toBeNull();
     });
 
     it('falls back to dependencies api', async () => {
@@ -252,32 +302,48 @@ describe('modules/datasource/rubygems/index', () => {
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, railsDependencies);
 
-      const res = await getPkgReleases(params);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: [
+          'https://thirdparty.com',
+          'https://firstparty.com/basepath/',
+        ],
+      });
       expect(res?.releases).toHaveLength(339);
     });
 
     it('returns null for GitHub Packages package miss', async () => {
-      const newparams = { ...params };
-      newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
         .get('/versions')
         .reply(404)
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, emptyMarshalArray);
-      expect(await getPkgReleases(newparams)).toBeNull();
+      expect(
+        await getPkgReleases({
+          versioning: rubyVersioning.id,
+          datasource: RubyGemsDatasource.id,
+          packageName: 'rails',
+          registryUrls: ['https://rubygems.pkg.github.com/example'],
+        })
+      ).toBeNull();
     });
 
     it('returns a dep for GitHub Packages package hit', async () => {
-      const newparams = { ...params };
-      newparams.registryUrls = ['https://rubygems.pkg.github.com/example'];
       httpMock
         .scope('https://rubygems.pkg.github.com/example')
         .get('/versions')
         .reply(404)
         .get('/api/v1/dependencies?gems=rails')
         .reply(200, railsDependencies);
-      const res = await getPkgReleases(newparams);
+      const res = await getPkgReleases({
+        versioning: rubyVersioning.id,
+        datasource: RubyGemsDatasource.id,
+        packageName: 'rails',
+        registryUrls: ['https://rubygems.pkg.github.com/example'],
+      });
       expect(res?.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
     });
