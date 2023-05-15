@@ -223,7 +223,7 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'fluxcd/flux2',
             depName: 'flux2',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.9.12',
@@ -250,14 +250,14 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'golangci/golangci-lint',
             depName: 'golangci-lint',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '2.12.0',
             datasource: 'github-tags',
             packageName: 'hadolint/hadolint',
             depName: 'hadolint',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '9.4.2',
@@ -325,7 +325,7 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'kubernetes/kubernetes',
             depName: 'kubectl',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '4.5.7',
@@ -391,7 +391,7 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'pre-commit/pre-commit',
             depName: 'pre-commit',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '3.57.1',
@@ -452,7 +452,7 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'terraform-docs/terraform-docs',
             depName: 'terraform-docs',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.43.2',
@@ -466,14 +466,14 @@ dummy 1.2.3
             datasource: 'github-tags',
             packageName: 'terraform-linters/tflint',
             depName: 'tflint',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '1.28.1',
             datasource: 'github-tags',
             packageName: 'aquasecurity/tfsec',
             depName: 'tfsec',
-            extractVersion: '^v(?<version>\\S+)',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.33.0',

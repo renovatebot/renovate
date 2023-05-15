@@ -167,7 +167,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'fluxcd/flux2',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   gauche: {
@@ -191,7 +191,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'golangci/golangci-lint',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   hadolint: {
@@ -199,7 +199,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'hadolint/hadolint',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   haskell: {
@@ -290,7 +290,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'kubernetes/kubernetes',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   kustomize: {
@@ -367,7 +367,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'pre-commit/pre-commit',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   pulumi: {
@@ -458,7 +458,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'terraform-docs/terraform-docs',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   terragrunt: {
@@ -474,7 +474,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'terraform-linters/tflint',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   tfsec: {
@@ -482,7 +482,7 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubTagsDatasource.id,
       packageName: 'aquasecurity/tfsec',
-      extractVersion: '^v(?<version>\\S+)',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   trivy: {
