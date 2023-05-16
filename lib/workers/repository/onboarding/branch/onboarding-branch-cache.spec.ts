@@ -129,7 +129,9 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       cache.getCache.mockReturnValueOnce({});
       git.getBranchCommit.mockReturnValueOnce('onboarding-sha');
       scm.isBranchModified.mockResolvedValueOnce(false);
-      expect(await isOnboardingBranchModified('configure/renovate')).toBeFalse();
+      expect(
+        await isOnboardingBranchModified('configure/renovate')
+      ).toBeFalse();
     });
 
     it('falls back to git if onboarding branch is updated', async () => {
