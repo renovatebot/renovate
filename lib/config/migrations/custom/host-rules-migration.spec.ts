@@ -12,6 +12,12 @@ describe('config/migrations/custom/host-rules-migration', () => {
             token: '123test',
           },
           {
+            hostType: 'dotnet',
+            baseUrl: 'https://some.domain.com',
+            matchHost: 'https://some.domain.com',
+            token: '123test',
+          },
+          {
             hostType: 'adoptium-java',
             domainName: 'domain.com',
             token: '123test',
@@ -25,6 +31,11 @@ describe('config/migrations/custom/host-rules-migration', () => {
       } as any,
       {
         hostRules: [
+          {
+            hostType: 'dotnet-version',
+            matchHost: 'https://some.domain.com',
+            token: '123test',
+          },
           {
             hostType: 'dotnet-version',
             matchHost: 'https://some.domain.com',
@@ -58,7 +69,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
         {
           hostRules: [
             {
-              matchHost: 'https://some.domain.com',
+              matchHost: 'https://some-diff.domain.com',
               baseUrl: 'https://some.domain.com',
               token: '123test',
             },
@@ -67,7 +78,7 @@ describe('config/migrations/custom/host-rules-migration', () => {
         {}
       ).run([
         {
-          matchHost: 'https://some.domain.com',
+          matchHost: 'https://some-diff.domain.com',
           baseUrl: 'https://some.domain.com',
           token: '123test',
         },

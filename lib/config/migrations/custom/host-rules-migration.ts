@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
 import type { HostRule } from '../../../types';
 import type { LegacyHostRule } from '../../../util/host-rules';
 import { AbstractMigration } from '../base/abstract-migration';
@@ -12,7 +13,6 @@ export class HostRulesMigration extends AbstractMigration {
     const newHostRules: HostRule[] = [];
     for (const hostRule of value) {
       validateHostRule(hostRule);
-
       const newRule: any = {};
 
       for (const [key, value] of Object.entries(hostRule)) {
@@ -72,12 +72,20 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     host,
   ].filter(is.string);
   if (hostValues.length > 1) {
-    const error = new Error(CONFIG_VALIDATION);
-    error.validationSource = 'config';
-    error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
-    error.validationError =
-      'The renovate configuration file contains some invalid settings';
-    throw error;
+    const distinctHostValues = new Set(hostValues);
+    // check if the host values are duplicated
+    if (distinctHostValues.size > 1) {
+      const error = new Error(CONFIG_VALIDATION);
+      error.validationSource = 'config';
+      error.validationMessage = `hostRules cannot contain more than one host-matching field - use "matchHost" only.`;
+      error.validationError =
+        'The renovate configuration file contains some invalid settings';
+      throw error;
+    } else {
+      logger.warn(
+        'Duplicate host values found, please only use `matchHost` to specify the host'
+      );
+    }
   }
 }
 
