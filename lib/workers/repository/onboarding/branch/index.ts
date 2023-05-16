@@ -133,7 +133,7 @@ function invalidateExtractCache(baseBranch: string): void {
   const cache = getCache();
   cache.scan ||= {};
 
-  if (cache.scan[baseBranch]) {
+  if (cache.scan?.[baseBranch]) {
     delete cache.scan[baseBranch];
   }
 }
