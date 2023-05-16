@@ -2487,20 +2487,20 @@
 "@renovate/eslint-plugin@file:./tools/eslint":
   version "0.0.0"
 
-"@renovatebot/osv-offline-db@1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.3.3.tgz#371d0a22ece6b2f1012c525dfd4005ee4e6580f1"
-  integrity sha512-Q7PNdRbMio2GYFqanuHByln20viVpyNhE4CmcY6ly2TVx42YbuRBrZ57JY5RVid0icArVagkW4mjrDh9CawOgA==
+"@renovatebot/osv-offline-db@1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline-db/-/osv-offline-db-1.4.0.tgz#45f4b580dd80012d78beac1188bece21d02b910a"
+  integrity sha512-VqR66WlewMLnDOVmnEAHIFZuATG46LwvNu6ZPjH0sEaH6bCqNxfJ6kBMFEiJOWWjGOxI1u2F+nr1vtdixC9UwA==
   dependencies:
     "@seald-io/nedb" "^4.0.2"
 
-"@renovatebot/osv-offline@1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.6.tgz#66a4ff071c52e38c7fb9837cf9b9efe8b4f6025e"
-  integrity sha512-0FXihAGhDRAXfqtnEWsz8EH+3vEJpH5zB6FZD48tsK+puz43e6tI4obQGcylhMBToV7ex9M7tU4ukChkHwOGcg==
+"@renovatebot/osv-offline@1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.7.tgz#88e6d7cd29c51fd60587b39344604116dec019fb"
+  integrity sha512-1ibPY7iqEsVSnM5Z0G+vWTGj+haPYfYwBB8XgTPPcMYdeUYSYYrFK4cVXxuJxjQ6fWDA/boNhHjy1OEYE4IyZg==
   dependencies:
     "@octokit/rest" "^19.0.7"
-    "@renovatebot/osv-offline-db" "1.3.3"
+    "@renovatebot/osv-offline-db" "1.4.0"
     adm-zip "~0.5.10"
     fs-extra "^11.1.1"
     got "^11.8.6"
