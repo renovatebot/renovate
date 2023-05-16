@@ -18,6 +18,7 @@ import {
 import { sanitizeMarkdown } from '../../../util/markdown';
 import * as p from '../../../util/promises';
 import { regEx } from '../../../util/regex';
+import { titleCase } from '../../../util/string';
 import type {
   DependencyVulnerabilities,
   SeverityDetails,
@@ -470,7 +471,7 @@ export class Vulnerabilities {
       matchCurrentVersion: depVersion,
       allowedVersions: fixedVersion,
       isVulnerabilityAlert: true,
-      vulnerabilitySeverity: severityDetails.severityLevel?.toUpperCase(),
+      vulnerabilitySeverity: severityDetails.severityLevel,
       prBodyNotes: this.generatePrBodyNotes(vulnerability, affected),
       force: {
         ...packageFileConfig.vulnerabilityAlerts,
@@ -481,9 +482,7 @@ export class Vulnerabilities {
   private evaluateCvssVector(vector: string): [string, string] {
     try {
       const parsedCvss: CvssScore = parseCvssVector(vector);
-      const severityLevel =
-        parsedCvss.cvss3OverallSeverityText.charAt(0).toUpperCase() +
-        parsedCvss.cvss3OverallSeverityText.slice(1);
+      const severityLevel = parsedCvss.cvss3OverallSeverityText;
 
       return [parsedCvss.baseScore.toFixed(1), severityLevel];
     } catch (err) {
@@ -533,7 +532,7 @@ export class Vulnerabilities {
       content += `- CVSS Score: ${severityDetails.score}\n`;
       content += `- Vector String: \`${severityDetails.cvssVector}\`\n`;
     } else {
-      content += `${severityDetails.severityLevel}\n`;
+      content += `${titleCase(severityDetails.severityLevel)}\n`;
     }
 
     content += `\n#### References\n${
@@ -564,7 +563,7 @@ export class Vulnerabilities {
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected
   ): SeverityDetails {
-    let severityLevel = 'Unknown';
+    let severityLevel = 'UNKNOWN';
     let score = 'Unknown';
 
     const cvssVector =
@@ -574,15 +573,16 @@ export class Vulnerabilities {
 
     if (cvssVector) {
       const [baseScore, severity] = this.evaluateCvssVector(cvssVector);
-      severityLevel = severity;
-      score = baseScore ? `${baseScore} / 10 (${severityLevel})` : 'Unknown';
+      severityLevel = severity.toUpperCase();
+      score = baseScore
+        ? `${baseScore} / 10 (${titleCase(severityLevel)})`
+        : 'Unknown';
     } else if (
       vulnerability.id.startsWith('GHSA-') &&
       vulnerability.database_specific?.severity
     ) {
       const severity = vulnerability.database_specific.severity as string;
-      severityLevel =
-        severity.charAt(0).toUpperCase() + severity.slice(1).toLowerCase();
+      severityLevel = severity.toUpperCase();
     }
 
     return {
