@@ -289,7 +289,7 @@ const isRelevantPr =
   (branchName: string, prTitle: string | null | undefined, state: string) =>
   (p: Pr): boolean =>
     p.sourceBranch === branchName &&
-    (!prTitle || p.title === prTitle) &&
+    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)
@@ -973,6 +973,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
