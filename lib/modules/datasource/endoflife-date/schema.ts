@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { z } from 'zod';
 import type { Release } from '../types';
 
@@ -12,10 +13,26 @@ const EndoflifeDateVersionScheme = z
     support: z.optional(z.union([z.string(), z.boolean()])),
     discontinued: z.optional(z.union([z.string(), z.boolean()])),
   })
-  .transform(({ cycle, releaseDate }): Release => {
+  .transform(({ cycle, releaseDate, eol, discontinued }): Release => {
+    let isDeprecated = false;
+
+    // If "eol" date or "discontinued" date has passed or any of the values is explicitly true, set to deprecated
+    // "support" is not checked because support periods sometimes end before the EOL.
+    if (
+      eol === true ||
+      discontinued === true ||
+      (typeof eol === 'string' &&
+        DateTime.fromISO(eol, { zone: 'UTC' }) <= DateTime.now()) ||
+      (typeof discontinued === 'string' &&
+        DateTime.fromISO(discontinued, { zone: 'UTC' }) <= DateTime.now())
+    ) {
+      isDeprecated = true;
+    }
+
     return {
       version: cycle,
       releaseTimestamp: releaseDate,
+      isDeprecated,
     };
   });
 

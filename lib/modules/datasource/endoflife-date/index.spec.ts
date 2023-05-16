@@ -25,38 +25,47 @@ describe('modules/datasource/endoflife-date/index', () => {
         registryUrl: 'https://endoflife.date/api',
         releases: [
           {
+            isDeprecated: true,
             releaseTimestamp: '2020-10-13T00:00:00.000Z',
             version: '1.18',
           },
           {
+            isDeprecated: true,
             releaseTimestamp: '2021-02-16T00:00:00.000Z',
             version: '1.19',
           },
           {
+            isDeprecated: true,
             releaseTimestamp: '2021-05-18T00:00:00.000Z',
             version: '1.20',
           },
           {
+            isDeprecated: true,
             releaseTimestamp: '2021-07-19T00:00:00.000Z',
             version: '1.21',
           },
           {
+            isDeprecated: false,
             releaseTimestamp: '2022-04-04T00:00:00.000Z',
             version: '1.22',
           },
           {
+            isDeprecated: false,
             releaseTimestamp: '2022-08-11T00:00:00.000Z',
             version: '1.23',
           },
           {
+            isDeprecated: false,
             releaseTimestamp: '2022-11-15T00:00:00.000Z',
             version: '1.24',
           },
           {
+            isDeprecated: false,
             releaseTimestamp: '2023-02-21T00:00:00.000Z',
             version: '1.25',
           },
           {
+            isDeprecated: false,
             releaseTimestamp: '2023-04-11T00:00:00.000Z',
             version: '1.26',
           },
