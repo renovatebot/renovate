@@ -208,6 +208,7 @@ module.exports = {
           'error',
           { devDependencies: true },
         ],
+        'no-console': 'off',
       },
     },
     {

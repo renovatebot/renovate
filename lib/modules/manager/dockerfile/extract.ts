@@ -182,7 +182,7 @@ export function getDep(
         ...getDep(`${value}/${groups.depName}`),
         replaceString: currentFrom,
       };
-      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep)!;
+      dep.autoReplaceStringTemplate = getAutoReplaceTemplate(dep);
       return dep;
     }
   }
