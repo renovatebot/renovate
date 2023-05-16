@@ -2,7 +2,10 @@ import type { RenovateConfig } from '../../../config/types';
 import { logger } from '../../../logger';
 import type { Pr } from '../../../modules/platform';
 import { getCache, isCacheModified } from '../../../util/cache/repository';
-import type { BranchCache } from '../../../util/cache/repository/types';
+import type {
+  BranchCache,
+  BranchUpgradeCache,
+} from '../../../util/cache/repository/types';
 import type {
   BaseBranchMetadata,
   BranchMetadata,
@@ -63,28 +66,53 @@ function branchCacheToMetadata({
 function filterDependencyDashboardData(
   branches: BranchCache[]
 ): Partial<BranchCache>[] {
-  let dependencyDashboardData = [...branches];
-  dependencyDashboardData = dependencyDashboardData.map((branch) => {
-    const b = { ...branch };
-    delete b.isModified;
-    delete b.automerge;
-    delete b.isBehindBase;
-    delete b.isConflicted;
-    delete b.baseBranch;
-    delete b.baseBranchSha;
-    delete b.branchFingerprint;
-    delete b.pristine;
-    delete b.prCache;
-    delete b.sha;
-    b.upgrades = b.upgrades?.map((upgrade) => {
-      const u = { ...upgrade };
-      delete u.sourceUrl;
-      delete u.depType;
-      return u;
-    });
-    return b;
-  });
-  return dependencyDashboardData;
+  const branchesFiltered: Partial<BranchCache>[] = [];
+  for (const branch of branches) {
+    const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
+    const { branchName, prNo, prTitle, result, upgrades } = branch;
+
+    for (const upgrade of upgrades ?? []) {
+      const {
+        datasource,
+        depName,
+        displayPending,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      } = upgrade;
+
+      const filteredUpgrade: Partial<BranchUpgradeCache> = {
+        datasource,
+        depName,
+        displayPending,
+        fixedVersion,
+        currentVersion,
+        currentValue,
+        newValue,
+        newVersion,
+        packageFile,
+        updateType,
+        packageName,
+      };
+      upgradesFiltered.push(filteredUpgrade);
+    }
+
+    const filteredBranch: Partial<BranchCache> = {
+      branchName,
+      prNo,
+      prTitle,
+      result,
+      upgrades: upgradesFiltered,
+    };
+    branchesFiltered.push(filteredBranch);
+  }
+
+  return branchesFiltered;
 }
 
 export function runBranchSummary(config: RenovateConfig): void {
