@@ -38,6 +38,13 @@ const hugoDefinition: ToolingDefinition = {
 };
 
 export const upgradeableTooling: Record<string, ToolingDefinition> = {
+  'adr-tools': {
+    asdfPluginUrl: 'https://gitlab.com/td7x/asdf/adr-tools.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'npryce/adr-tools',
+    },
+  },
   argocd: {
     asdfPluginUrl: 'https://github.com/beardix/asdf-argocd',
     config: {
@@ -66,6 +73,13 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'sagiegurari/cargo-make',
+    },
+  },
+  checkov: {
+    asdfPluginUrl: 'https://github.com/bosmak/asdf-checkov.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'bridgecrewio/checkov',
     },
   },
   clojure: {
@@ -112,6 +126,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'dprint/dprint',
     },
   },
+  ecspresso: {
+    asdfPluginUrl: 'https://github.com/kayac/asdf-ecspresso',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'kayac/ecspresso',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
   elixir: {
     asdfPluginUrl: 'https://github.com/asdf-vm/asdf-elixir',
     config: {
@@ -140,6 +162,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: FlutterVersionDatasource.id,
     },
   },
+  flux2: {
+    asdfPluginUrl: 'https://github.com/tablexi/asdf-flux2.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'fluxcd/flux2',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   gauche: {
     asdfPluginUrl: 'https://github.com/sakuro/asdf-gauche',
     config: {
@@ -154,6 +184,22 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       datasource: GithubTagsDatasource.id,
       packageName: 'golang/go',
       extractVersion: '^go(?<version>\\S+)',
+    },
+  },
+  'golangci-lint': {
+    asdfPluginUrl: 'https://github.com/hypnoglow/asdf-golangci-lint.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'golangci/golangci-lint',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
+  hadolint: {
+    asdfPluginUrl: 'https://github.com/looztra/asdf-hadolint.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'hadolint/hadolint',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   haskell: {
@@ -239,6 +285,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^(Kotlin |v)(?<version>\\S+)',
     },
   },
+  kubectl: {
+    asdfPluginUrl: 'https://github.com/Banno/asdf-kubectl.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'kubernetes/kubernetes',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   kustomize: {
     asdfPluginUrl: 'https://github.com/Banno/asdf-kustomize',
     config: {
@@ -306,6 +360,14 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
     config: {
       datasource: PypiDatasource.id,
       packageName: 'poetry',
+    },
+  },
+  'pre-commit': {
+    asdfPluginUrl: 'https://github.com/jonathanmorley/asdf-pre-commit.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'pre-commit/pre-commit',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   pulumi: {
@@ -391,12 +453,36 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       extractVersion: '^v(?<version>\\S+)',
     },
   },
+  'terraform-docs': {
+    asdfPluginUrl: 'https://github.com/looztra/asdf-terraform-docs.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'terraform-docs/terraform-docs',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
   terragrunt: {
     asdfPluginUrl: 'https://github.com/ohmer/asdf-terragrunt',
     config: {
       datasource: GithubReleasesDatasource.id,
       packageName: 'gruntwork-io/terragrunt',
       extractVersion: '^v(?<version>\\S+)',
+    },
+  },
+  tflint: {
+    asdfPluginUrl: 'https://github.com/skyzyx/asdf-tflint.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'terraform-linters/tflint',
+      extractVersion: '^v(?<version>.+)',
+    },
+  },
+  tfsec: {
+    asdfPluginUrl: 'https://github.com/woneill/asdf-tfsec.git',
+    config: {
+      datasource: GithubTagsDatasource.id,
+      packageName: 'aquasecurity/tfsec',
+      extractVersion: '^v(?<version>.+)',
     },
   },
   trivy: {

@@ -8,11 +8,8 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { Pr, platform } from '../../../../modules/platform';
-import {
-  checkoutBranch,
-  getBranchCommit,
-  setGitAuthor,
-} from '../../../../util/git';
+import { scm } from '../../../../modules/platform/scm';
+import { getBranchCommit, setGitAuthor } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { mergeRenovateConfig } from '../../init/merge';
 import { OnboardingState } from '../common';
@@ -108,7 +105,7 @@ export async function checkOnboardingBranch(
   if (!GlobalConfig.get('dryRun')) {
     logger.debug('Checkout onboarding branch.');
     // TODO #7154
-    await checkoutBranch(onboardingBranch!);
+    await scm.checkoutBranch(onboardingBranch!);
   }
   // TODO #7154
   const branchList = [onboardingBranch!];
