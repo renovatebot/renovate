@@ -16,7 +16,7 @@ In general, we recommend that you:
 - Update to new `major` versions in good time
 - Talk with your team about the update stategy
 
-If you think Renovate is too noisy, please read our [noise reduction docs](https://docs.renovatebot.com/noise-reduction).
+If you think Renovate is too noisy, please read our [noise reduction docs](./noise-reduction.md).
 
 ### Why updating often is easier, faster and safer
 
