@@ -16,7 +16,7 @@ In general, we recommend that you:
 - Update to new `major` versions in good time
 - Talk with your team about the update stategy
 
-If you think Renovate is too noisy, please read our [noise reduction docs](INSERT LINK HERE).
+If you think Renovate is too noisy, please read our [noise reduction docs](https://docs.renovatebot.com/noise-reduction).
 
 ### Why updating often is easier, faster and safer
 
@@ -120,7 +120,7 @@ Some reasons why developers may avoid updating the project:
 
 In short, if updating is painful, developers will avoid it.
 The solution is to make it easy and fast to update dependencies.
-Focus on the proces, not on the people.
+Focus on the process, not on the people.
 
 ### Make updating easy and fast
 
