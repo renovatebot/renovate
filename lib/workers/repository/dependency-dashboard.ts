@@ -489,8 +489,16 @@ export async function getDashboardMarkdownVulnerabilities(
   const unresolvedVulnerabilities = vulnerabilities.filter((value) =>
     is.nullOrUndefined(value.fixedVersion)
   );
+  const resolvedVulnerabilitiesLength =
+    vulnerabilities.length - unresolvedVulnerabilities.length;
 
-  result += `\`${unresolvedVulnerabilities.length}\` of a total of \`${vulnerabilities.length}\` CVEs have no fixes in this repository.\n`;
+  result += `\`${resolvedVulnerabilitiesLength}\`/\`${vulnerabilities.length}\``;
+  if (is.truthy(config.osvVulnerabilityAlerts)) {
+    result += ' CVEs have Renovate fixes.\n';
+  } else {
+    result +=
+      ' CVEs have possible Renovate fixes.\nSee [`osvVulnerabilityAlerts`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.\n';
+  }
 
   let renderedVulnerabilities: Vulnerability[];
   switch (config.dependencyDashboardOSVVulnerabilitySummary) {

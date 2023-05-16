@@ -1052,7 +1052,7 @@ describe('workers/repository/dependency-dashboard', () => {
       );
     });
 
-    it('return all vulnerabilities if set to all', async () => {
+    it('return all vulnerabilities if set to all and disabled osvVulnerabilities', async () => {
       const fetchVulnerabilitiesMock = jest.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
         fetchVulnerabilities: fetchVulnerabilitiesMock,
@@ -1085,12 +1085,13 @@ describe('workers/repository/dependency-dashboard', () => {
         {
           ...config,
           dependencyDashboardOSVVulnerabilitySummary: 'all',
+          osvVulnerabilityAlerts: true,
         },
         packageFiles
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-\`1\` of a total of \`2\` CVEs have no fixes in this repository.
+\`1\`/\`2\` CVEs have Renovate fixes.
 <details><summary>npm</summary>
 <blockquote>
 
@@ -1156,7 +1157,8 @@ describe('workers/repository/dependency-dashboard', () => {
       );
       expect(result.trimEnd()).toBe(codeBlock`## Vulnerabilities
 
-\`1\` of a total of \`2\` CVEs have no fixes in this repository.
+\`1\`/\`2\` CVEs have possible Renovate fixes.
+See [\`osvVulnerabilityAlerts\`](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to allow Renovate to supply fixes.
 <details><summary>npm</summary>
 <blockquote>
 
