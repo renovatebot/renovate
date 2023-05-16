@@ -116,7 +116,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const repos = (
       await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
-        `/2.0/repositories/?role=contributor`,
+        `/2.0/repositories/?role=contributor&pagelen=100`,
         {
           paginate: true,
         }
