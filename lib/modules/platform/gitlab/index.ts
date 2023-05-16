@@ -530,7 +530,25 @@ export async function getPrList(): Promise<Pr[]> {
 async function ignoreApprovals(pr: number): Promise<void> {
   try {
     const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
-    const { body: rules } = await gitlabApi.getJson<{ name: string }[]>(url);
+    const { body: rules } = await gitlabApi.getJson<
+      {
+        name: string;
+        rule_type: string;
+        id: number;
+      }[]
+    >(url);
+
+    const existingAnyApproverRule = rules?.find(
+      ({ rule_type }) => rule_type === 'any_approver'
+    );
+
+    if (existingAnyApproverRule) {
+      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
+        body: { ...existingAnyApproverRule, approvals_required: 0 },
+      });
+      return;
+    }
+
     const ruleName = 'renovateIgnoreApprovals';
     const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
     if (!zeroApproversRule) {

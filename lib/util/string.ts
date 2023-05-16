@@ -56,3 +56,14 @@ export function looseEquals(
 export function isDockerDigest(input: string): boolean {
   return /^sha256:[a-f0-9]{64}$/i.test(input);
 }
+
+export function titleCase(input: string): string {
+  const words = input.toLowerCase().split(' ');
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    words[i] = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+  }
+
+  return words.join(' ');
+}
