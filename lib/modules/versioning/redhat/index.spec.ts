@@ -1,7 +1,7 @@
 import redhat from '.';
 
 describe('modules/versioning/redhat/index', () => {
-  test.each`
+  it.each`
     input                     | expected
     ${'1'}                    | ${true}
     ${'17.04'}                | ${true}
@@ -25,7 +25,7 @@ describe('modules/versioning/redhat/index', () => {
     expect(redhat.isValid(input)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     a                          | b                       | expected
     ${'3-57'}                  | ${'3-2'}                | ${true}
     ${'8.6'}                   | ${'8.4'}                | ${true}

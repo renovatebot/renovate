@@ -60,7 +60,7 @@ function branchCacheToMetadata({
   };
 }
 
-export function runBranchSummary(): void {
+export function runBranchSummary({ defaultBranch }: RenovateConfig): void {
   const { scan, branches } = getCache();
 
   const baseMetadata: BaseBranchMetadata[] = [];
@@ -83,6 +83,7 @@ export function runBranchSummary(): void {
     cacheModified: isCacheModified(),
     baseBranches: baseMetadata,
     branches: branchMetadata,
+    defaultBranch,
     inactiveBranches,
   };
 

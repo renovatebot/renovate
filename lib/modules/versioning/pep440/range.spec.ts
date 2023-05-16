@@ -1,6 +1,6 @@
 import { checkRangeAndRemoveUnnecessaryRangeLimit } from './range';
 
-test.each`
+it.each`
   rangeInput           | newVersion | expected
   ${'==4.1.*,>=3.2.2'} | ${'4.1.1'} | ${'==4.1.*'}
   ${'==4.0.*,>=3.2.2'} | ${'4.0.0'} | ${'==4.0.*'}

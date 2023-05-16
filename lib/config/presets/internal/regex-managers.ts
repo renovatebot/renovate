@@ -7,7 +7,10 @@ export const presets: Record<string, Preset> = {
     description: 'Update `_VERSION` variables in Dockerfiles.',
     regexManagers: [
       {
-        fileMatch: ['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile[^/]*$'],
+        fileMatch: [
+          '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
+          '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
+        ],
         matchStrings: [
           '# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?<depName>[^\\s]+?)(?: (lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: registryUrl=(?<registryUrl>[^\\s]+?))?\\s(?:ENV|ARG) .+?_VERSION[ =]"?(?<currentValue>.+?)"?\\s',
         ],
@@ -27,7 +30,7 @@ export const presets: Record<string, Preset> = {
     ],
   },
   helmChartYamlAppVersions: {
-    description: 'Update `appVersion` value in Helm chart Chart.yaml.',
+    description: 'Update `appVersion` value in Helm chart `Chart.yaml`.',
     regexManagers: [
       {
         datasourceTemplate: 'docker',

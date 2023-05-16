@@ -9,7 +9,7 @@ import {
   parseGcv,
   usesGcv,
 } from './extract/consistent-versions-plugin';
-import { parseGradle, parseProps } from './parser';
+import { parseGradle, parseKotlinSource, parseProps } from './parser';
 import { REGISTRY_URLS } from './parser/common';
 import type {
   GradleManagerData,
@@ -19,6 +19,7 @@ import type {
 import {
   getVars,
   isGradleScriptFile,
+  isKotlinSourceFile,
   isPropsFile,
   isTOMLFile,
   reorderFiles,
@@ -94,6 +95,15 @@ async function parsePackageFiles(
       ) {
         const deps = parseGcv(packageFile, fileContents);
         extractedDeps.push(...deps);
+      } else if (isKotlinSourceFile(packageFile)) {
+        const vars = getVars(varRegistry, packageFileDir);
+        const { vars: gradleVars, deps } = parseKotlinSource(
+          content,
+          vars,
+          packageFile
+        );
+        updateVars(varRegistry, '/', gradleVars);
+        extractedDeps.push(...deps);
       } else if (isGradleScriptFile(packageFile)) {
         const vars = getVars(varRegistry, packageFileDir);
         const {
@@ -123,11 +133,14 @@ export async function extractAllPackageFiles(
   const packageFilesByName: Record<string, PackageFile> = {};
   const packageRegistries: PackageRegistry[] = [];
   const extractedDeps: PackageDependency<GradleManagerData>[] = [];
-  const gradleFiles = reorderFiles(packageFiles);
+  const kotlinSourceFiles = packageFiles.filter(isKotlinSourceFile);
+  const gradleFiles = reorderFiles(
+    packageFiles.filter((e) => !kotlinSourceFiles.includes(e))
+  );
 
   await parsePackageFiles(
     config,
-    gradleFiles,
+    [...kotlinSourceFiles, ...kotlinSourceFiles, ...gradleFiles],
     extractedDeps,
     packageFilesByName,
     packageRegistries
@@ -161,9 +174,10 @@ export async function extractAllPackageFiles(
         dep.registryUrls = getRegistryUrlsForDep(packageRegistries, dep);
 
         if (!dep.depType) {
-          dep.depType = key.startsWith('buildSrc')
-            ? 'devDependencies'
-            : 'dependencies';
+          dep.depType =
+            key.startsWith('buildSrc') && !kotlinSourceFiles.length
+              ? 'devDependencies'
+              : 'dependencies';
         }
       }
 

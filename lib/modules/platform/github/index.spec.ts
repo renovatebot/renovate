@@ -174,9 +174,15 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             full_name: 'a/b',
+            archived: false,
           },
           {
             full_name: 'c/d',
+            archived: false,
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
           },
           null,
         ]);
@@ -227,9 +233,15 @@ describe('modules/platform/github/index', () => {
           repositories: [
             {
               full_name: 'a/b',
+              archived: false,
             },
             {
               full_name: 'c/d',
+              archived: false,
+            },
+            {
+              full_name: 'e/f',
+              archived: true,
             },
             null,
           ],
@@ -2825,6 +2837,28 @@ describe('modules/platform/github/index', () => {
       scope
         .put('/repos/some/repo/pulls/1234/merge')
         .reply(405, { message: 'Required status check "build" is expected.' });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle approvers required', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
+        message:
+          'At least 1 approving review is required by reviewers with write access.',
+      });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
         number: 1234,
