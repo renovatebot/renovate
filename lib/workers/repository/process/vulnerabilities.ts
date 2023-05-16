@@ -533,7 +533,7 @@ export class Vulnerabilities {
       content += `- CVSS Score: ${severityDetails.score}\n`;
       content += `- Vector String: \`${severityDetails.cvssVector}\`\n`;
     } else {
-      content += `${severityDetails.severityLevel}\n`;
+      content += `${severityDetails.score}\n`;
     }
 
     content += `\n#### References\n${
