@@ -944,7 +944,7 @@ describe('workers/repository/process/vulnerabilities', () => {
               No details.
 
               #### Severity
-              Unknown severity
+              Unknown
 
               #### References
               No references.

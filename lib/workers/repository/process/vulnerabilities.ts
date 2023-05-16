@@ -533,7 +533,7 @@ export class Vulnerabilities {
       content += `- CVSS Score: ${severityDetails.score}\n`;
       content += `- Vector String: \`${severityDetails.cvssVector}\`\n`;
     } else {
-      content += `${severityDetails.score}\n`;
+      content += `${severityDetails.severityLevel}\n`;
     }
 
     content += `\n#### References\n${
@@ -564,8 +564,8 @@ export class Vulnerabilities {
     vulnerability: Osv.Vulnerability,
     affected: Osv.Affected
   ): SeverityDetails {
-    let severityLevel = 'UNKNOWN';
-    let score = 'Unknown severity';
+    let severityLevel = 'Unknown';
+    let score = 'Unknown';
 
     const cvssVector =
       vulnerability.severity?.find((e) => e.type === 'CVSS_V3')?.score ??
@@ -583,7 +583,6 @@ export class Vulnerabilities {
       const severity = vulnerability.database_specific.severity as string;
       severityLevel =
         severity.charAt(0).toUpperCase() + severity.slice(1).toLowerCase();
-      score = severityLevel;
     }
 
     return {
