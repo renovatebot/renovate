@@ -137,6 +137,10 @@ Here's my short list:
 - Ensure company policy allows frequent updates
 - Dig beyond "developer error" when things go wrong, focus on the process
 
-## How we use Renovate ourselves
+## How we use Renovate
 
 ...
+
+## How others use Renovate
+
+Read the [Swissquote user story](https://docs.renovatebot.com/user-stories/swissquote/) to learn how they use Renovate to update their dependencies.
