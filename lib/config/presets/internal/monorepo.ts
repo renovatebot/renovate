@@ -73,6 +73,7 @@ const repoGroups = {
     'https://github.com/dotnet/aspnetcore',
     'https://github.com/dotnet/efcore',
     'https://github.com/dotnet/extensions',
+    'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
