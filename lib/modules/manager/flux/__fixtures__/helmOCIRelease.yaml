@@ -1,0 +1,35 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: arc-assets
+  namespace: dev
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: actions-runner-controller-charts/gha-runner-scale-set
+      version: 0.4.0
+      sourceRef:
+        kind: HelmRepository
+        name: actions-runner-controller
+        namespace: flux-system
+      interval: 30m
+
+  values:
+    runnerScaleSetName: arc-runner-set-assets
+
+    githubConfigUrl: https://github.com/bjw-s/assets
+
+    minRunners: 0
+    maxRunners: 2
+
+    containerMode:
+      type: "dind"
+
+    template:
+      spec:
+        containers:
+          - name: runner
+            image: ghcr.io/bjw-s/github-actions-runner:2.304.0@sha256:85690088155072a95c429a1f150f80a7d7ebf35107221cb25c01c56b62866c1b
+            command:
+              - /home/runner/run.sh

@@ -728,6 +728,30 @@ describe('modules/manager/flux/extract', () => {
       ]);
     });
 
+    it('extract oci helm', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '0.4.0',
+              datasource: DockerDatasource.id,
+              depName:
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              registryUrls: [
+                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
+              ],
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
     it('ignores files that do not exist', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/bogus.yaml',
