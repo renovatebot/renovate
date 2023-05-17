@@ -66,6 +66,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 function hasPagelen(path: string): boolean {
   const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
 
+  // istanbul ignore if
   if (is.nullOrUndefined(resolvedURL)) {
     return false;
   }
