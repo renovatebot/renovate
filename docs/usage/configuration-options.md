@@ -239,7 +239,7 @@ You may choose from these values:
 Platforms may only support _some_ of these merge strategies.
 
 If the chosen automerge strategy is not supported on your platform then Renovate stops automerging.
-In that case set a supported automerge strategy.
+In that case you'll have to set a supported automerge strategy.
 
 ## automergeType
 
