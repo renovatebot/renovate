@@ -33,7 +33,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { raiseConfigWarningIssue } from './error-config';
+import { raiseConfigWarningIssue } from './error-issue';
 
 export default async function handleError(
   config: RenovateConfig,

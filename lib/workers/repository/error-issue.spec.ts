@@ -3,7 +3,7 @@ import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import type { Pr } from '../../modules/platform';
-import { raiseConfigWarningIssue } from './error-config';
+import { raiseConfigWarningIssue } from './error-issue';
 
 jest.mock('../../modules/platform');
 
@@ -14,7 +14,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/error-config', () => {
+describe('workers/repository/error-issue', () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
