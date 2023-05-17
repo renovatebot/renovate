@@ -43,7 +43,9 @@ export function updateDependency({
   if (currentValue && newValue) {
     if (fileReplacePosition) {
       const lineNumber = upgrade.fileReplacePosition!;
-      const offset = fileContent.split(newlineRegex, lineNumber).join('\n').length;
+      const offset = fileContent
+        .split(newlineRegex, lineNumber)
+        .join('\n').length;
       const offsetEndOfLine = fileContent
         .split(newlineRegex, lineNumber + 1)
         .join('\n').length;
