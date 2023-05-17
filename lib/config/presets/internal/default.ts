@@ -5,7 +5,7 @@ export const presets: Record<string, Preset> = {
   approveMajorUpdates: {
     description: 'Approve `major` updates from the Dependency Dashboard first.',
     major: {
-      "dependencyDashboardApproval": true
+      dependencyDashboardApproval: true,
     },
   },
   assignAndReview: {
