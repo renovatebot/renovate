@@ -26,6 +26,7 @@ But updating regulary actually _saves_ you time, because:
 - Regular updates tend to be small
 - Applying `major` updates is easier
 - You'll be ready for CVE patches
+- You'll look for ways to automate the update process
 
 #### Regular updates tend to be small
 
