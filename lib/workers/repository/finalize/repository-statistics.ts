@@ -69,7 +69,7 @@ function filterDependencyDashboardData(
   const branchesFiltered: Partial<BranchCache>[] = [];
   for (const branch of branches) {
     const upgradesFiltered: Partial<BranchUpgradeCache>[] = [];
-    const { branchName, prNo, prTitle, result, upgrades } = branch;
+    const { branchName, prNo, prTitle, result, upgrades, prBlockedBy } = branch;
 
     for (const upgrade of upgrades ?? []) {
       const {
@@ -107,6 +107,7 @@ function filterDependencyDashboardData(
       prNo,
       prTitle,
       result,
+      prBlockedBy,
       upgrades: upgradesFiltered,
     };
     branchesFiltered.push(filteredBranch);
