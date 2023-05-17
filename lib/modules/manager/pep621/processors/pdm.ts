@@ -79,9 +79,8 @@ export class PdmProcessor implements PyProjectProcessor {
       // else only update specific packages
       let packageList = '';
       if (!isLockFileMaintenance) {
-        packageList = ' ' + updatedDeps
-          .map((value) => value.packageName)
-          .join(' ');
+        packageList = ' ';
+        packageList += updatedDeps.map((value) => value.packageName).join(' ');
       }
       const cmd = `pdm update${packageList}`;
       await exec(cmd, execOptions);

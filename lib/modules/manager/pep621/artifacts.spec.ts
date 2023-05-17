@@ -22,7 +22,11 @@ const adminConfig: RepoGlobalConfig = {
 describe('modules/manager/pep621/artifacts', () => {
   describe('updateArtifacts()', () => {
     it('return null if all processors returns are empty', async () => {
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+        },
+      ];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -43,7 +47,7 @@ describe('modules/manager/pep621/artifacts', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -73,7 +77,19 @@ describe('modules/manager/pep621/artifacts', () => {
           },
         },
         {
-          cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool pdm v2.5.0 && pdm update dep1"',
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e BUILDPACK_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'containerbase/sidecar ' +
+            'bash -l -c "' +
+            'install-tool pdm v2.5.0 ' +
+            '&& ' +
+            'pdm update dep1' +
+            '"',
           options: {
             cwd: '/tmp/github/some/repo',
             encoding: 'utf-8',

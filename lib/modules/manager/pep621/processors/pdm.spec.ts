@@ -25,7 +25,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
   describe('updateArtifacts()', () => {
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -46,7 +46,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -62,7 +62,19 @@ describe('modules/manager/pep621/processors/pdm', () => {
           cmd: 'docker ps --filter name=renovate_sidecar -aq',
         },
         {
-          cmd: 'docker run --rm --name=renovate_sidecar --label=renovate_child -v "/tmp/github/some/repo":"/tmp/github/some/repo" -v "/tmp/cache":"/tmp/cache" -e BUILDPACK_CACHE_DIR -e CONTAINERBASE_CACHE_DIR -w "/tmp/github/some/repo" containerbase/sidecar bash -l -c "install-tool pdm v2.5.0 && pdm update dep1"',
+          cmd:
+            'docker run --rm --name=renovate_sidecar --label=renovate_child ' +
+            '-v "/tmp/github/some/repo":"/tmp/github/some/repo" ' +
+            '-v "/tmp/cache":"/tmp/cache" ' +
+            '-e BUILDPACK_CACHE_DIR ' +
+            '-e CONTAINERBASE_CACHE_DIR ' +
+            '-w "/tmp/github/some/repo" ' +
+            'containerbase/sidecar ' +
+            'bash -l -c "' +
+            'install-tool pdm v2.5.0 ' +
+            '&& ' +
+            'pdm update dep1' +
+            '"',
         },
       ]);
     });
@@ -75,7 +87,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         throw new Error('test error');
       });
 
-      const updatedDeps = [{ depName: 'dep1' }];
+      const updatedDeps = [{ packageName: 'dep1' }];
       const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -99,7 +111,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ depName: 'dep1' }, { depName: 'dep2' }];
+      const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
       const result = await processor.updateArtifacts({
         packageFileName: 'pyproject.toml',
         newPackageFileContent: '',
@@ -152,7 +164,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
       expect(execSnapshots).toMatchObject([
         {
-          cmd: 'pdm update ',
+          cmd: 'pdm update',
         },
       ]);
     });
