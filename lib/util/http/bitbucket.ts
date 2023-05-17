@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../logger';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { parseUrl, resolveBaseUrl } from '../url';
 import type { HttpOptions, HttpResponse } from './types';
@@ -28,14 +29,20 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
-    let pathWithPagelen = path;
+    let resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
 
-    if (opts.paginate && !hasPagelen(pathWithPagelen)) {
-      const pagelen = opts.pagelen ?? MAX_PAGELEN;
-      pathWithPagelen = addPagelenToPath(pathWithPagelen, pagelen);
+    // istanbul ignore if: this should never happen
+    if (is.nullOrUndefined(resolvedURL)) {
+      logger.error(`Bitbucket: cannot parse path ${path}`);
+      throw new Error(`Bitbucket: cannot parse path ${path}`);
     }
 
-    const result = await super.request<T>(pathWithPagelen, opts);
+    if (opts.paginate && !hasPagelen(resolvedURL)) {
+      const pagelen = opts.pagelen ?? MAX_PAGELEN;
+      resolvedURL = addPagelenToPath(resolvedURL, pagelen);
+    }
+
+    const result = await super.request<T>(resolvedURL.toString(), opts);
 
     if (opts.paginate && isPagedResult(result.body)) {
       const resultBody = result.body as PagedResult<T>;
@@ -63,28 +70,13 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
   }
 }
 
-function hasPagelen(path: string): boolean {
-  const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
-
-  // istanbul ignore if
-  if (is.nullOrUndefined(resolvedURL)) {
-    return false;
-  }
-
-  return !is.nullOrUndefined(resolvedURL.searchParams.get('pagelen'));
+function hasPagelen(url: URL): boolean {
+  return !is.nullOrUndefined(url.searchParams.get('pagelen'));
 }
 
-function addPagelenToPath(path: string, pagelen: number): string {
-  const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
-
-  // istanbul ignore if
-  if (is.nullOrUndefined(resolvedURL)) {
-    return path;
-  }
-
-  resolvedURL.searchParams.set('pagelen', pagelen.toString());
-
-  return resolvedURL.toString();
+function addPagelenToPath(url: URL, pagelen: number): URL {
+  url.searchParams.set('pagelen', pagelen.toString());
+  return url;
 }
 
 function isPagedResult(obj: any): obj is PagedResult {
