@@ -34,6 +34,7 @@ export interface HelmRepository extends KubernetesResource {
   kind: 'HelmRepository';
   spec: {
     url: string;
+    type: string;
   };
 }
 

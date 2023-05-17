@@ -3,6 +3,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -181,7 +182,22 @@ function resolveResourceManifest(
                 resource.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          dep.registryUrls = matchingRepositories.map((repo) => {
+            if (repo.spec.type === 'oci') {
+              // Change datasource to Docker
+              dep.datasource = DockerDatasource.id;
+              // Ensure the URL is a valid OCI path
+              dep.depName = `${repo.spec.url.replace(
+                'oci://',
+                ''
+              )}/${dep.depName!}`;
+              return dep.depName;
+            } else if (repo.spec.url.startsWith('oci://')) {
+              return repo.spec.url.replace('oci://', '');
+            } else {
+              return repo.spec.url;
+            }
+          });
         } else {
           dep.skipReason = 'unknown-registry';
         }
