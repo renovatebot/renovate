@@ -30,7 +30,7 @@ import {
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import handleError from './error';
 
-jest.mock('./error-issue');
+jest.mock('./error-config');
 
 let config: RenovateConfig;
 

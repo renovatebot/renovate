@@ -9,7 +9,7 @@ import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { Pr } from '../../modules/platform';
-import { raiseConfigWarningIssue } from './error-issue';
+import { raiseConfigWarningIssue } from './error-config';
 
 jest.mock('../../modules/platform');
 
@@ -20,7 +20,7 @@ beforeEach(() => {
   config = getConfig();
 });
 
-describe('workers/repository/error-issue', () => {
+describe('workers/repository/error-config', () => {
   describe('raiseConfigWarningIssue()', () => {
     beforeEach(() => {
       GlobalConfig.reset();
