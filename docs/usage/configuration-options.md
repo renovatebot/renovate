@@ -703,6 +703,19 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
 It is pointless to edit the labels, as Renovate bot restores the labels on each run.
 
+## dependencyDashboardOSVVulnerabilitySummary
+
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+You can choose from:
+
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
+
+This feature is independent of the `osvVulnerabilityAlerts` option.
+
+The source of these CVEs is [OSV.dev](https://osv.dev/).
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
