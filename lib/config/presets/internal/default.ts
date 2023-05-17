@@ -2,6 +2,12 @@ import type { Preset } from '../types';
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */
 export const presets: Record<string, Preset> = {
+  approveMajorUpdates: {
+    description: 'Approve `major` updates from the Dependency Dashboard first.',
+    major: {
+      "dependencyDashboardApproval": true
+    },
+  },
   assignAndReview: {
     description: 'Set `{{arg0}}` as assignee and reviewer of PRs.',
     extends: [':assignee({{arg0}})', ':reviewer({{arg0}})'],
@@ -111,12 +117,6 @@ export const presets: Record<string, Preset> = {
   dependencyDashboardApproval: {
     dependencyDashboardApproval: true,
     description: 'Enable Renovate Dependency Dashboard approval workflow.',
-  },
-  dependencyDashboardApprovalForMajor: {
-    description: 'Enable Renovate Dependency Dashboard approval workflow for `major` updates.',
-    major: {
-      "dependencyDashboardApproval": true
-    },
   },
   disableDependencyDashboard: {
     dependencyDashboard: false,
