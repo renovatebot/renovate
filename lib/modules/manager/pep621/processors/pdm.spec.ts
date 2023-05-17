@@ -67,7 +67,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       ]);
     });
 
-    it('rethrow error', async () => {
+    it('returns artifact error', async () => {
       const execSnapshots = mockExecAll();
       GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');

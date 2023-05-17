@@ -79,12 +79,12 @@ export class PdmProcessor implements PyProjectProcessor {
       // else only update specific packages
       let packageList = '';
       if (!isLockFileMaintenance) {
-        packageList = updatedDeps
-          .map((value) => value.packageName ?? value.depName)
+        packageList = ' ' + updatedDeps
+          .map((value) => value.packageName)
           .join(' ');
       }
-      const cmd = `pdm update ${packageList}`;
-      await exec([cmd], execOptions);
+      const cmd = `pdm update${packageList}`;
+      await exec(cmd, execOptions);
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
@@ -102,7 +102,7 @@ export class PdmProcessor implements PyProjectProcessor {
         logger.debug('pdm.lock is unchanged');
       }
 
-      return fileChanges.length > 0 ? fileChanges : null;
+      return fileChanges.length ? fileChanges : null;
     } catch (err) {
       // istanbul ignore if
       if (err.message === TEMPORARY_ERROR) {
