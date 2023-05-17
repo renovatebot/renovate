@@ -73,7 +73,7 @@ function hasPagelen(path: string): boolean {
   return !is.nullOrUndefined(resolvedURL.searchParams.get('pagelen'));
 }
 
-function addPagelenToPath(path: string, pagenlen: number): string {
+function addPagelenToPath(path: string, pagelen: number): string {
   const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
 
   // istanbul ignore if
@@ -81,7 +81,7 @@ function addPagelenToPath(path: string, pagenlen: number): string {
     return path;
   }
 
-  resolvedURL.searchParams.set('pagelen', pagenlen.toString());
+  resolvedURL.searchParams.set('pagelen', pagelen.toString());
 
   return resolvedURL.toString();
 }
