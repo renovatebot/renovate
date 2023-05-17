@@ -195,7 +195,7 @@ function findTagOfRelease(
   tags: string[]
 ): string | undefined {
   const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
-  const excactReleaseRegex = regEx(`${packageName}[@-_]v?${depNewVersion}`);
+  const excactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
   const exactTagsList = tags.filter((tag) => {
     return excactReleaseRegex.test(tag);
   });

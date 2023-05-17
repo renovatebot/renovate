@@ -307,7 +307,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
@@ -774,6 +776,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');

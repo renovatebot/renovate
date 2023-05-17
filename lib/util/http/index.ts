@@ -221,21 +221,14 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     return this.request<string>(url, { ...options, method: 'head' });
   }
 
-  protected requestBuffer(
-    url: string | URL,
-    httpOptions?: InternalHttpOptions
-  ): Promise<HttpResponse<Buffer> | null> {
-    return this.request<Buffer>(url, {
-      ...httpOptions,
-      responseType: 'buffer',
-    });
-  }
-
   getBuffer(
     url: string,
     options: HttpOptions = {}
-  ): Promise<HttpResponse<Buffer> | null> {
-    return this.requestBuffer(url, options);
+  ): Promise<HttpResponse<Buffer>> {
+    return this.request<Buffer>(url, {
+      ...options,
+      responseType: 'buffer',
+    });
   }
 
   private async requestJson<ResT = unknown>(
