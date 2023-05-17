@@ -490,6 +490,52 @@ describe('modules/manager/npm/extract/locked-versions', () => {
     });
   });
 
+  it('uses pnpm-lock', async () => {
+    pnpm.getPnpmLock.mockReturnValue({
+      lockedVersions: {
+        a: '1.0.0',
+        b: '2.0.0',
+        c: '3.0.0',
+      },
+      lockfileVersion: 6.0,
+    });
+    const packageFiles = [
+      {
+        managerData: {
+          pnpmShrinkwrap: 'pnpm-lock.yaml',
+        },
+        extractedConstraints: {
+          pnpm: '>=6.0.0',
+        },
+        deps: [
+          {
+            depName: 'a',
+            currentValue: '1.0.0',
+          },
+          {
+            depName: 'b',
+            currentValue: '2.0.0',
+          },
+        ],
+        packageFile: 'some-file',
+      },
+    ];
+    pnpm.getConstraints.mockReturnValue('>=6.0.0 >=8');
+    await getLockedVersions(packageFiles);
+    expect(packageFiles).toEqual([
+      {
+        extractedConstraints: { pnpm: '>=6.0.0 >=8' },
+        deps: [
+          { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
+          { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+        ],
+        lockFiles: ['pnpm-lock.yaml'],
+        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
+        packageFile: 'some-file',
+      },
+    ]);
+  });
+
   describe('lockfileVersion 3', () => {
     it('uses package-lock.json with npm v9.0.0', async () => {
       npm.getNpmLock.mockReturnValue({
@@ -571,79 +617,6 @@ describe('modules/manager/npm/extract/locked-versions', () => {
           managerData: {
             npmLock: 'package-lock.json',
           },
-        },
-      ]);
-    });
-  });
-
-  it('ignores pnpm', async () => {
-    const packageFiles = [
-      {
-        managerData: {
-          pnpmShrinkwrap: 'pnpm-lock.yaml',
-        },
-        deps: [
-          { depName: 'a', currentValue: '1.0.0' },
-          { depName: 'b', currentValue: '2.0.0' },
-        ],
-        packageFile: 'some-file',
-      },
-    ];
-    await getLockedVersions(packageFiles);
-    expect(packageFiles).toEqual([
-      {
-        deps: [
-          { currentValue: '1.0.0', depName: 'a' },
-          { currentValue: '2.0.0', depName: 'b' },
-        ],
-        lockFiles: ['pnpm-lock.yaml'],
-        managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-        packageFile: 'some-file',
-      },
-    ]);
-
-    it('uses pnpm-lock', async () => {
-      pnpm.getPnpmLock.mockReturnValue({
-        lockedVersions: {
-          a: '1.0.0',
-          b: '2.0.0',
-          c: '3.0.0',
-        },
-        lockfileVersion: 6.0,
-      });
-      const packageFiles = [
-        {
-          managerData: {
-            pnpmShrinkwrap: 'pnpm-lock.yaml',
-          },
-          extractedConstraints: {
-            pnpm: '>=6.0.0',
-          },
-          deps: [
-            {
-              depName: 'a',
-              currentValue: '1.0.0',
-            },
-            {
-              depName: 'b',
-              currentValue: '2.0.0',
-            },
-          ],
-          packageFile: 'some-file',
-        },
-      ];
-      pnpm.getConstraints.mockReturnValue('>=6.0.0 >=8');
-      await getLockedVersions(packageFiles);
-      expect(packageFiles).toEqual([
-        {
-          extractedConstraints: { pnpm: '>=6.0.0 >=8' },
-          deps: [
-            { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
-            { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
-          ],
-          lockFiles: ['pnpm-lock.yaml'],
-          managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-          packageFile: 'some-file',
         },
       ]);
     });

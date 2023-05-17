@@ -16,7 +16,18 @@ describe('modules/manager/npm/extract/npm', () => {
       const plocktest1Lock = Fixtures.get('plocktest1/package-lock.json', '..');
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock as never);
       const res = await getNpmLock('package.json');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        lockedVersions: {
+          'ansi-styles': '3.2.1',
+          chalk: '2.4.1',
+          'color-convert': '1.9.1',
+          'color-name': '1.1.3',
+          'escape-string-regexp': '1.0.5',
+          'has-flag': '3.0.0',
+          'supports-color': '5.4.0',
+        },
+        lockfileVersion: 1,
+      });
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
       expect(res.lockfileVersion).toBe(1);
     });
@@ -25,7 +36,18 @@ describe('modules/manager/npm/extract/npm', () => {
       const npm7Lock = Fixtures.get('npm7/package-lock.json', '..');
       fs.readLocalFile.mockResolvedValueOnce(npm7Lock as never);
       const res = await getNpmLock('package.json');
-      expect(res).toMatchSnapshot();
+      expect(res).toEqual({
+        lockedVersions: {
+          'ansi-styles': '3.2.1',
+          chalk: '2.4.1',
+          'color-convert': '1.9.1',
+          'color-name': '1.1.3',
+          'escape-string-regexp': '1.0.5',
+          'has-flag': '3.0.0',
+          'supports-color': '5.4.0',
+        },
+        lockfileVersion: 2,
+      });
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
       expect(res.lockfileVersion).toBe(2);
     });
@@ -34,10 +56,18 @@ describe('modules/manager/npm/extract/npm', () => {
       const npm9Lock = Fixtures.get('npm9/package-lock.json', '..');
       fs.readLocalFile.mockResolvedValueOnce(npm9Lock as never);
       const res = await getNpmLock('package.json');
-      expect(res).toMatchSnapshot();
-
-      expect(Object.keys(res.lockedVersions)).toHaveLength(7);
-      expect(res.lockfileVersion).toBe(3);
+      expect(res).toEqual({
+        lockedVersions: {
+          'ansi-styles': '3.2.1',
+          chalk: '2.4.2',
+          'color-convert': '1.9.3',
+          'color-name': '1.1.3',
+          'escape-string-regexp': '1.0.5',
+          'has-flag': '3.0.0',
+          'supports-color': '5.5.0',
+        },
+        lockfileVersion: 3,
+      });
     });
 
     it('returns empty if no deps', async () => {
