@@ -29,7 +29,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
-    let resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
+    const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
 
     // istanbul ignore if: this should never happen
     if (is.nullOrUndefined(resolvedURL)) {
@@ -39,7 +39,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
     if (opts.paginate && !hasPagelen(resolvedURL)) {
       const pagelen = opts.pagelen ?? MAX_PAGELEN;
-      resolvedURL = addPagelenToPath(resolvedURL, pagelen);
+      resolvedURL.searchParams.set('pagelen', pagelen.toString());
     }
 
     const result = await super.request<T>(resolvedURL.toString(), opts);
@@ -72,11 +72,6 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
 function hasPagelen(url: URL): boolean {
   return !is.nullOrUndefined(url.searchParams.get('pagelen'));
-}
-
-function addPagelenToPath(url: URL, pagelen: number): URL {
-  url.searchParams.set('pagelen', pagelen.toString());
-  return url;
 }
 
 function isPagedResult(obj: any): obj is PagedResult {
