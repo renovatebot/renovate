@@ -73,6 +73,7 @@ const repoGroups = {
     'https://github.com/dotnet/aspnetcore',
     'https://github.com/dotnet/efcore',
     'https://github.com/dotnet/extensions',
+    'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
@@ -206,6 +207,7 @@ const repoGroups = {
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
+  rjsf: 'https://github.com/rjsf-team/react-jsonschema-form',
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',

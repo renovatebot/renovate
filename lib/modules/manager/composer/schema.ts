@@ -26,19 +26,26 @@ export type ComposerRepo = z.infer<typeof ComposerRepo>;
 export const GitRepo = z.object({
   type: z.enum(['vcs', 'git']).transform(() => 'git' as const),
   url: z.string(),
+  name: z.string().optional(),
 });
 export type GitRepo = z.infer<typeof GitRepo>;
 
 export const PathRepo = z.object({
   type: z.literal('path'),
   url: z.string(),
+  name: z.string().optional(),
 });
 export type PathRepo = z.infer<typeof PathRepo>;
+
+export const PackageRepo = z.object({
+  type: z.literal('package'),
+});
 
 export const Repo = z.discriminatedUnion('type', [
   ComposerRepo,
   GitRepo,
   PathRepo,
+  PackageRepo,
 ]);
 export type Repo = z.infer<typeof ComposerRepo>;
 
@@ -46,6 +53,7 @@ export const NamedRepo = z.discriminatedUnion('type', [
   ComposerRepo,
   GitRepo.extend({ name: z.string() }),
   PathRepo.extend({ name: z.string() }),
+  PackageRepo,
 ]);
 export type NamedRepo = z.infer<typeof NamedRepo>;
 
@@ -54,7 +62,7 @@ export type DisablePackagist = z.infer<typeof DisablePackagist>;
 
 export const ReposRecord = LooseRecord(z.union([Repo, z.literal(false)]), {
   onError: ({ error: err }) => {
-    logger.warn({ err }, 'Composer: error parsing repositories object');
+    logger.debug({ err }, 'Composer: error parsing repositories object');
   },
 }).transform((repos) => {
   const result: (NamedRepo | DisablePackagist)[] = [];
@@ -83,7 +91,7 @@ export type ReposRecord = z.infer<typeof ReposRecord>;
 
 export const ReposArray = LooseArray(
   z.union([
-    NamedRepo,
+    Repo,
     z
       .union([
         z.object({ packagist: z.literal(false) }),
@@ -93,17 +101,28 @@ export const ReposArray = LooseArray(
   ]),
   {
     onError: ({ error: err }) => {
-      logger.warn({ err }, 'Composer: error parsing repositories array');
+      logger.debug({ err }, 'Composer: error parsing repositories array');
     },
   }
-).transform((repos) => repos.filter((x): x is NamedRepo => x !== null));
+).transform((repos) => {
+  const result: (NamedRepo | DisablePackagist)[] = [];
+  for (let idx = 0; idx < repos.length; idx++) {
+    const repo = repos[idx];
+    if (repo.type === 'path' || repo.type === 'git') {
+      result.push({ name: `__${idx}`, ...repo });
+    } else {
+      result.push(repo);
+    }
+  }
+  return result;
+});
 export type ReposArray = z.infer<typeof ReposArray>;
 
 export const Repos = z
   .union([ReposRecord, ReposArray])
   .default([]) // Prevents warnings for packages without repositories field
   .catch(({ error: err }) => {
-    logger.warn({ err }, 'Composer: repositories parsing error');
+    logger.debug({ err }, 'Composer: invalid "repositories" field');
     return [];
   })
   .transform((repos) => {
@@ -210,13 +229,20 @@ export const ComposerExtract = z
       lockfile: z
         .string()
         .transform((lockfileName) => readLocalFile(lockfileName, 'utf8'))
-        .pipe(Json)
-        .pipe(Lockfile)
-        .nullable()
-        .catch(({ error: err }) => {
-          logger.warn({ err }, 'Composer: lockfile parsing error');
-          return null;
-        }),
+        .pipe(
+          z.union([
+            z.null(),
+            z
+              .string()
+              .pipe(Json)
+              .pipe(Lockfile)
+              .nullable()
+              .catch(({ error: err }) => {
+                logger.debug({ err }, 'Composer: lockfile parsing error');
+                return null;
+              }),
+          ])
+        ),
     })
   )
   .transform(({ file, lockfile, lockfileName }) => {
