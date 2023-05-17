@@ -91,7 +91,8 @@ function addChildrenArrayInParents(): void {
             properties: {
               description: {
                 type: 'string',
-                description: 'A custom description for this configuration object',
+                description:
+                  'A custom description for this configuration object',
               },
             },
           },
