@@ -8,9 +8,7 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
   try {
     const lockParsed = JSON.parse(lockRaw);
     const lockedVersions: Record<string, string> = {};
-    for (const [entry, val] of Object.entries(
-      (lockParsed.dependencies || lockParsed.packages || {}) as LockFileEntry
-    )) {
+    for (const [entry, val] of Object.entries(getPackages(lockParsed))) {
       logger.trace({ entry, version: val.version });
       lockedVersions[entry] = val.version;
     }
@@ -19,4 +17,21 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
     logger.debug({ filePath, err }, 'Warning: Exception parsing npm lock file');
     return { lockedVersions: {} };
   }
+}
+function getPackages(lockParsed: any): LockFileEntry {
+  let packages: LockFileEntry = {};
+
+  if (
+    (lockParsed.lockfileVersion === 1 || lockParsed.lockfileVersion === 2) &&
+    lockParsed.dependencies
+  ) {
+    packages = lockParsed.dependencies;
+  } else if (lockParsed.lockfileVersion === 3 && lockParsed.packages) {
+    packages = Object.fromEntries(
+      Object.entries(lockParsed.packages)
+        .filter(([key]) => !!key) // filter out root entry
+        .map(([key, val]) => [key.replace(`node_modules/`, ''), val])
+    ) as LockFileEntry;
+  }
+  return packages;
 }
