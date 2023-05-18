@@ -155,7 +155,6 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     // use sha512: https://www.npmjs.com/package/hasha#algorithm
     const memCacheKey =
       options.memCache !== false &&
-      !etagCache &&
       (options.method === 'get' || options.method === 'head')
         ? hasha([
             'got-',
