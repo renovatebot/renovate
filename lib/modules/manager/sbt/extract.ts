@@ -239,7 +239,6 @@ function depHandler(ctx: Ctx): Ctx {
 
   if (variableName) {
     dep.groupName = variableName;
-    dep.variableName = variableName;
     if (currentValueInfo) {
       dep.fileReplacePosition = currentValueInfo.lineIndex;
       dep.editFile = currentValueInfo.sourceFile;
@@ -382,7 +381,6 @@ export function extractDependency(
   if (!parsedResult) {
     return null;
   }
-
   return parsedResult;
 }
 
@@ -466,6 +464,10 @@ export async function extractAllPackageFiles(
       });
       for (const dep of res?.deps ?? []) {
         const variableSourceFile = dep?.editFile ?? packageFile;
+        delete res?.localVars;
+        delete res?.globalVars;
+        delete res?.scalaVersion;
+        delete dep.editFile;
         dep.registryUrls = [...new Set(dep.registryUrls)];
         mapDepsToPackageFile[variableSourceFile] ??= [];
         const notFound = !mapDepsToPackageFile[variableSourceFile].find(

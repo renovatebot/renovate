@@ -33,7 +33,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
-      "variableName": "abcVersion",
     },
   ],
   "globalVars": {},
@@ -85,7 +84,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
-      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -98,7 +96,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
-      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -111,7 +108,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
-      "variableName": "abcVersion",
     },
     {
       "currentValue": "1.2.3",
@@ -124,7 +120,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
       ],
-      "variableName": "abcVersion",
     },
   ],
   "globalVars": {},
@@ -308,7 +303,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
-      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
@@ -508,7 +502,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
         "https://example.com/repos/4/",
         "https://example.com/repos/5/",
       ],
-      "variableName": "versionExample",
     },
     {
       "currentValue": "0.0.9",
