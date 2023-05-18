@@ -63,5 +63,5 @@ export const INVALID_PATH = 'invalid-path';
 // PAGE NOT FOUND
 export const PAGE_NOT_FOUND_ERROR = 'page-not-found';
 
-// Missing api required credentials
+// Missing API required credentials
 export const MISSING_API_CREDENTIALS = 'missing-api-credentials';
