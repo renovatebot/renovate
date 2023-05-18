@@ -427,18 +427,8 @@ describe('util/http/index', () => {
   });
 
   describe('Etag caching', () => {
-    beforeEach(() => {
-      jest.resetAllMocks();
-      memCache.init();
-    });
-
-    afterEach(() => {
-      memCache.reset();
-    });
-
-    type FooBar = { foo: string; bar: string };
-
     it('returns cached data for status=304', async () => {
+      type FooBar = { foo: string; bar: string };
       const data: FooBar = { foo: 'foo', bar: 'bar' };
       httpMock
         .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
@@ -458,7 +448,37 @@ describe('util/http/index', () => {
       expect(res.body).not.toBe(data);
     });
 
+    it('bypasses schema parsing', async () => {
+      const FooBar = z
+        .object({ foo: z.string(), bar: z.string() })
+        .transform(({ foo, bar }) => ({
+          foobar: `${foo}${bar}`.toUpperCase(),
+        }));
+      const data = FooBar.parse({ foo: 'foo', bar: 'bar' });
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson(
+        `/foo`,
+        {
+          baseUrl,
+          etagCache: {
+            etag: 'foobar',
+            data,
+          },
+        },
+        FooBar
+      );
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
     it('returns new data for status=200', async () => {
+      type FooBar = { foo: string; bar: string };
       const oldData: FooBar = { foo: 'foo', bar: 'bar' };
       const newData: FooBar = { foo: 'FOO', bar: 'BAR' };
       httpMock
@@ -477,29 +497,6 @@ describe('util/http/index', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual(newData);
       expect(res.body).not.toBe(newData);
-    });
-
-    it('throws if old data does not match the schema', async () => {
-      const FooBar = z.object({ foo: z.string(), bar: z.string() });
-      const data = { foo: 'foo' };
-      httpMock
-        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
-        .get('/foo')
-        .reply(304);
-
-      await expect(
-        http.getJson(
-          `/foo`,
-          {
-            baseUrl,
-            etagCache: {
-              etag: 'foobar',
-              data: data as never,
-            },
-          },
-          FooBar
-        )
-      ).rejects.toThrow(z.ZodError);
     });
   });
 });

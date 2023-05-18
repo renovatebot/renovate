@@ -40,18 +40,26 @@ type JsonArgs<
 
 type Task<T> = () => Promise<HttpResponse<T>>;
 
-function cloneResponse<T extends Buffer | string | any>(
-  response: HttpResponse<T>
+// Copying will help to avoid circular structure
+// and mutation of the cached response.
+function copyResponse<T extends Buffer | string | any>(
+  response: HttpResponse<T>,
+  deep: boolean
 ): HttpResponse<T> {
   const { body, statusCode, headers } = response;
-  // clone body and headers so that the cached result doesn't get accidentally mutated
-  // Don't use json clone for buffers
-  return {
-    statusCode,
-    body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
-    headers: clone(headers),
-    authorization: !!response.authorization,
-  };
+  return deep
+    ? {
+        statusCode,
+        body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
+        headers: clone(headers),
+        authorization: !!response.authorization,
+      }
+    : {
+        statusCode,
+        body,
+        headers,
+        authorization: !!response.authorization,
+      };
 }
 
 function applyDefaultHeaders(options: Options): void {
@@ -215,13 +223,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     try {
-      const res = memCacheKey
-        ? cloneResponse(await resPromise)
-        : await resPromise;
+      const res = copyResponse(await resPromise, !!memCacheKey);
       res.authorization = !!options?.headers?.authorization;
-      if (etagCache && res.statusCode === 304) {
-        res.body = clone(etagCache.data);
-      }
       return res;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
@@ -255,7 +258,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
   private async requestJson<ResT = unknown>(
     method: InternalHttpOptions['method'],
-    { url, httpOptions: requestOptions, schema }: JsonArgs<Opts, ResT>
+    {
+      url,
+      httpOptions: requestOptions,
+      schema,
+    }: JsonArgs<Opts & HttpRequestOptions<ResT>, ResT>
   ): Promise<HttpResponse<ResT>> {
     const { body, ...httpOptions } = { ...requestOptions };
     const opts: InternalHttpOptions = {
@@ -273,11 +280,23 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
     const res = await this.request<ResT>(url, opts);
 
+    const etagCacheHit =
+      httpOptions.etagCache && res.statusCode === 304
+        ? clone(httpOptions.etagCache.data)
+        : null;
+
     if (!schema) {
+      if (etagCacheHit) {
+        res.body = etagCacheHit;
+      }
       return res;
     }
 
-    res.body = await schema.parseAsync(res.body);
+    if (etagCacheHit) {
+      res.body = etagCacheHit;
+    } else {
+      res.body = await schema.parseAsync(res.body);
+    }
     return res;
   }
 
