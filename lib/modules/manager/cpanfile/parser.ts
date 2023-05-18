@@ -69,7 +69,7 @@ const moduleMatch = q
     q.alt<Ctx>(q.op(','), q.op('=>')).alt(
       q.num<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })),
       q.str<Ctx>((ctx, { value }) => {
-        const currentValue = value.replace(/^(?:\s*(?:==|>=|>))?\s*v/, '');
+        const currentValue = value.replace(/^(?:\s*(?:==|>=|>))?\s*v?/, '');
         return { ...ctx, currentValue };
       })
     )
