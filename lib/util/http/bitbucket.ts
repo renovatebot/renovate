@@ -5,6 +5,7 @@ import { parseUrl, resolveBaseUrl } from '../url';
 import type { HttpOptions, HttpResponse } from './types';
 import { Http } from '.';
 
+const MAX_PAGES = 100;
 const MAX_PAGELEN = 100;
 
 let baseUrl = 'https://api.bitbucket.org/';
@@ -46,10 +47,10 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
     if (opts.paginate && isPagedResult(result.body)) {
       const resultBody = result.body as PagedResult<T>;
-
+      let page = 1;
       let nextURL = resultBody.next;
 
-      while (is.nonEmptyString(nextURL)) {
+      while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
           nextURL,
           options
@@ -58,12 +59,13 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
         resultBody.values.push(...nextResult.body.values);
 
         nextURL = nextResult.body?.next;
+        page += 1;
       }
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      resultBody.size = resultBody.values.length;
-      resultBody.next = undefined;
+      resultBody.size = page > MAX_PAGES ? undefined : resultBody.values.length;
+      resultBody.next = page > MAX_PAGES ? undefined : nextURL;
     }
 
     return result;
