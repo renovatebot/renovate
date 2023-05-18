@@ -163,11 +163,12 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     ]);
     let resPromise: Promise<HttpResponse<T>> | null = null;
 
-    // Cache GET requests unless useCache=false
-    if (
-      (options.method === 'get' || options.method === 'head') &&
-      options.useCache !== false
-    ) {
+    // Cache GET requests unless memCache=false
+    const useMemCache =
+      options.memCache !== false &&
+      (options.method === 'get' || options.method === 'head');
+
+    if (useMemCache) {
       resPromise = memCache.get(cacheKey);
     }
 
@@ -195,8 +196,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
       resPromise = queuedTask();
 
-      if (options.method === 'get' || options.method === 'head') {
-        memCache.set(cacheKey, resPromise); // always set if it's a get or a head
+      if (useMemCache) {
+        memCache.set(cacheKey, resPromise);
       }
     }
 
