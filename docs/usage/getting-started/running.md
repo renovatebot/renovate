@@ -26,8 +26,7 @@ If you're self-hosting Renovate on Windows, read [Self-hosting on Windows](./ins
 Renovate's Open Source CLI is built and distributed as the npm package `renovate`.
 You can run this package in any Node.js environment - even via `npx` - and it will process all the repositories it is configured with, before exiting.
 
-Renovate's npm package does not bundle any third-party tools or languages like Ruby, Python, Composer, Bundler, Poetry, etc.
-If you need Renovate to support any non-npm lock files like Bundler then you'll need to make sure all required third-party tools are pre-installed in the same environment alongside Renovate before you run it.
+When installing Renovate via npm you are responsible for installing any third-party tools or languages like Ruby, Python, Composer, Bundler, Poetry, etc.
 
 The `renovate` npm package is compatible with all of Renovate's supported platforms.
 
