@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { parseUrl, resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse } from './types';
+import type { HttpOptions, HttpRequestOptions, HttpResponse } from './types';
 import { Http } from '.';
 
 let baseUrl = 'https://api.bitbucket.org/';
@@ -21,13 +21,15 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: BitbucketHttpOptions
+    options?: BitbucketHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
     const result = await super.request<T>(path, opts);
 
     if (opts.paginate && isPagedResult(result.body)) {
+      delete opts.etagCache;
+
       const resultBody = result.body as PagedResult<T>;
 
       let nextPage = getPageFromURL(resultBody.next);
@@ -42,7 +44,7 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
         const nextResult = await super.request<PagedResult<T>>(
           nextPath,
-          options
+          options as BitbucketHttpOptions
         );
 
         resultBody.values.push(...nextResult.body.values);

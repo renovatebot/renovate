@@ -425,4 +425,58 @@ describe('util/http/index', () => {
       expect(t2 - t1).toBeGreaterThanOrEqual(4000);
     });
   });
+
+  describe('Etag caching', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+      memCache.init();
+    });
+
+    afterEach(() => {
+      memCache.reset();
+    });
+
+    type FooBar = { foo: string; bar: string };
+
+    it('returns cached data for status=304', async () => {
+      const data: FooBar = { foo: 'foo', bar: 'bar' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data,
+        },
+      });
+
+      expect(res.statusCode).toBe(304);
+      expect(res.body).toEqual(data);
+      expect(res.body).not.toBe(data);
+    });
+
+    it('returns new data for status=200', async () => {
+      const oldData: FooBar = { foo: 'foo', bar: 'bar' };
+      const newData: FooBar = { foo: 'FOO', bar: 'BAR' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(200, newData);
+
+      const res = await http.getJson<FooBar>(`/foo`, {
+        baseUrl,
+        etagCache: {
+          etag: 'foobar',
+          data: oldData,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual(newData);
+      expect(res.body).not.toBe(newData);
+    });
+  });
 });
