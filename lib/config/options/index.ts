@@ -2434,6 +2434,12 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'gitLabResetApprovals',
+    description: `Reset the required approval count to zero for the any_approver rule, which is useful for automerge.`,
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'regexManagers',
     description: 'Custom managers using regex matching.',
     type: 'array',

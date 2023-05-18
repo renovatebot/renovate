@@ -561,6 +561,43 @@ async function ignoreApprovals(pr: number): Promise<void> {
   }
 }
 
+async function resetApprovals(pr: number): Promise<void> {
+  try {
+    const url = `projects/${config.repository}/merge_requests/${pr}/approval_rules`;
+    const { body: rules } = await gitlabApi.getJson<
+      {
+        name: string;
+        rule_type: string;
+        id: number;
+      }[]
+    >(url);
+    const ruleName = 'renovateIgnoreApprovals';
+
+    const existingAnyApproverRule = rules?.find(
+      ({ rule_type }) => rule_type === 'any_approver'
+    );
+
+    if (existingAnyApproverRule) {
+      await gitlabApi.putJson(`${url}/${existingAnyApproverRule.id}`, {
+        body: { ...existingAnyApproverRule, approvals_required: 0 },
+      });
+      return;
+    }
+
+    const zeroApproversRule = rules?.find(({ name }) => name === ruleName);
+    if (!zeroApproversRule) {
+      await gitlabApi.postJson(url, {
+        body: {
+          name: ruleName,
+          approvals_required: 0,
+        },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err }, 'GitLab: Error resetting approval rule');
+  }
+}
+
 async function tryPrAutomerge(
   pr: number,
   platformOptions: PlatformPrOptions | undefined
@@ -569,6 +606,10 @@ async function tryPrAutomerge(
     try {
       if (platformOptions?.gitLabIgnoreApprovals) {
         await ignoreApprovals(pr);
+      }
+
+      if (platformOptions?.gitLabResetApprovers) {
+        await resetApprovals(pr);
       }
 
       const desiredStatus = 'can_be_merged';
