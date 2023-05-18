@@ -123,7 +123,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let result: Token[] = [];
   let leadingZero = true;
   iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
-    if (token.prefix === PREFIX_HYPHEN) {
+    if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
     buf.push(token);
@@ -154,10 +154,7 @@ function nullFor(token: Token): Token {
 }
 
 function commonOrder(token: Token): number {
-  if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
-    return 0;
-  }
-  if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_QUALIFIER) {
+  if (token.type === TYPE_QUALIFIER) {
     return 1;
   }
   if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_NUMBER) {

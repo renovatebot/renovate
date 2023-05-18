@@ -87,5 +87,15 @@ describe('workers/repository/update/pr/body/config-description', () => {
       const res = getPrConfigDescription({ ...config, automerge: true });
       expect(res).toContain(`**Automerge**: Enabled.`);
     });
+
+    it('renders blocked automerge', () => {
+      const res = getPrConfigDescription({
+        ...config,
+        automergedPreviously: true,
+      });
+      expect(res).toContain(
+        `**Automerge**: Disabled because a matching PR was automerged previously.`
+      );
+    });
   });
 });

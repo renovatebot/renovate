@@ -521,6 +521,15 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'dependencyDashboardOSVVulnerabilitySummary',
+    description:
+      'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
+    type: 'string',
+    allowedValues: ['none', 'all', 'unresolved'],
+    default: 'none',
+    experimental: true,
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',

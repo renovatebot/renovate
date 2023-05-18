@@ -74,7 +74,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
@@ -99,7 +99,7 @@ export async function extractPackageFile(
       return null;
     }
 
-    for (const depName of Object.keys(manifest.tools)) {
+    for (const depName of Object.keys(manifest.tools ?? {})) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
       const dep: PackageDependency = {
@@ -115,7 +115,7 @@ export async function extractPackageFile(
       deps.push(dep);
     }
 
-    return { deps };
+    return deps.length ? { deps } : null;
   }
 
   if (packageFile.endsWith('global.json')) {
@@ -134,6 +134,11 @@ export async function extractPackageFile(
   } catch (err) {
     logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
+
+  if (!deps.length) {
+    return null;
+  }
+
   const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if

@@ -113,8 +113,19 @@ export async function processBranch(
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
-    const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
-    if (existingPr && !dependencyDashboardCheck) {
+    const existingPr =
+      !branchPr || config.automerge
+        ? await prAlreadyExisted(config)
+        : undefined;
+    if (existingPr?.state === 'merged') {
+      logger.debug(`Matching PR #${existingPr.number} was merged previously`);
+      if (config.automerge) {
+        logger.debug('Disabling automerge because PR was merged previously');
+        config.automerge = false;
+        config.automergedPreviously = true;
+      }
+    }
+    if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
