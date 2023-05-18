@@ -311,7 +311,7 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
   ): Promise<HttpResponse<Infer<Schema>>>;
   getJson<ResT, Schema extends ZodType<ResT> = ZodType<ResT>>(
     url: string,
-    options: Opts & HttpRequestOptions<ResT>,
+    options: Opts & HttpRequestOptions<Infer<Schema>>,
     schema: Schema
   ): Promise<HttpResponse<Infer<Schema>>>;
   getJson<ResT = unknown, Schema extends ZodType<ResT> = ZodType<ResT>>(

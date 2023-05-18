@@ -478,5 +478,28 @@ describe('util/http/index', () => {
       expect(res.body).toEqual(newData);
       expect(res.body).not.toBe(newData);
     });
+
+    it('throws if old data does not match the schema', async () => {
+      const FooBar = z.object({ foo: z.string(), bar: z.string() });
+      const data = { foo: 'foo' };
+      httpMock
+        .scope(baseUrl, { reqheaders: { 'If-None-Match': 'foobar' } })
+        .get('/foo')
+        .reply(304);
+
+      await expect(
+        http.getJson(
+          `/foo`,
+          {
+            baseUrl,
+            etagCache: {
+              etag: 'foobar',
+              data: data as never,
+            },
+          },
+          FooBar
+        )
+      ).rejects.toThrow(z.ZodError);
+    });
   });
 });
