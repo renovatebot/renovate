@@ -11,6 +11,7 @@ import * as cache from '../../../util/cache/repository';
 import type {
   BaseBranchCache,
   BranchCache,
+  BranchUpgradeCache,
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import {
@@ -103,6 +104,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
         isModified: false,
         automerge: false,
         pristine: false,
+        upgrades: [],
       });
       const expectedMeta = {
         automerge: branchCache.automerge,
@@ -151,6 +153,38 @@ describe('workers/repository/finalize/repository-statistics', () => {
         },
         `Branch summary`
       );
+    });
+
+    it('logs extended branch info if branchSummaryExtended', () => {
+      const defaultBranch = 'main';
+      const config: RenovateConfig = {
+        defaultBranch,
+        branchSummaryExtended: true,
+      };
+      const branchCache = partial<BranchCache>({
+        result: 'done',
+        upgrades: partial<BranchUpgradeCache[]>([
+          {
+            datasource: 'npm',
+            depName: 'minimist',
+            currentValue: '1.2.3',
+            sourceUrl: 'someUrl',
+            depType: 'dependencies',
+          },
+        ]),
+      });
+
+      const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
+      const cache = partial<RepoCacheData>({
+        scan: {},
+        branches,
+      });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      runBranchSummary(config);
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
     });
   });
 });

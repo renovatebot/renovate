@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { glob } from 'glob';
 import hasha from 'hasha';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 
 console.log('generating imports');
@@ -92,6 +92,9 @@ export async function getManagerHash(managerName) {
   const files = (await glob(`lib/modules/manager/${managerName}/**`)).filter(
     (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
+
+  // sort files in case glob order changes
+  files.sort();
 
   for (const fileAddr of files) {
     const hash = await getFileHash(fileAddr);

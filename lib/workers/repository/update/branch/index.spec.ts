@@ -289,6 +289,21 @@ describe('workers/repository/update/branch/index', () => {
       expect(scm.deleteBranch).toHaveBeenCalledTimes(1);
     });
 
+    it('allows branch but disables automerge if merged PR found', async () => {
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      scm.branchExists.mockResolvedValue(true);
+      config.automerge = true;
+      config.updateType = 'digest';
+      checkExisting.prAlreadyExisted.mockResolvedValueOnce(
+        partial<Pr>({
+          number: 13,
+          state: 'merged',
+        })
+      );
+      await branchWorker.processBranch(config);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
+    });
+
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       scm.branchExists.mockResolvedValue(true);
@@ -2253,13 +2268,13 @@ describe('workers/repository/update/branch/index', () => {
       });
       config.baseBranch = 'main';
       await branchWorker.processBranch(config);
-      expect(git.checkoutBranch).toHaveBeenLastCalledWith('main');
+      expect(scm.checkoutBranch).toHaveBeenLastCalledWith('main');
       // Check that the last checkoutBranch call is after the only commitFilesToBranch call
-      const checkoutBranchCalledTimes = git.checkoutBranch.mock.calls.length;
+      const checkoutBranchCalledTimes = scm.checkoutBranch.mock.calls.length;
       expect(
         commit.commitFilesToBranch.mock.invocationCallOrder[0]
       ).toBeLessThan(
-        git.checkoutBranch.mock.invocationCallOrder[
+        scm.checkoutBranch.mock.invocationCallOrder[
           checkoutBranchCalledTimes - 1
         ]
       );
