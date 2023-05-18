@@ -2406,6 +2406,7 @@ const options: RenovateOptions[] = [
       'configErrorIssue',
       'deprecationWarningIssues',
       'lockFileErrors',
+      'missingCredentialsError',
       'onboardingClose',
       'prEditedNotification',
       'prIgnoreNotification',
