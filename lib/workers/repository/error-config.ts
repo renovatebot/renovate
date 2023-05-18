@@ -16,6 +16,17 @@ export function raiseConfigWarningIssue(
   return raiseWarningIssue(config, notificationName, title, body, error);
 }
 
+export function raiseCredentialsWarningIssue(
+  config: RenovateConfig,
+  error: Error
+): Promise<void> {
+  logger.debug('raiseCredentialsWarningIssue()');
+  const title = `Action Required: Add missing credentials`;
+  const body = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.\n\n`;
+  const notificationName = 'missingCredentialsError';
+  return raiseWarningIssue(config, notificationName, title, body, error);
+}
+
 async function raiseWarningIssue(
   config: RenovateConfig,
   notificationName: string,
