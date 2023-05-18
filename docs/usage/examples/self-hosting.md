@@ -314,7 +314,7 @@ metadata:
   namespace: <namespace>
 ```
 
-Then you need to add Git author, and mount volumes.
+Then you need to add a Git author, and configure the mount volumes.
 The final configuration should look something like this:
 
 ```yml

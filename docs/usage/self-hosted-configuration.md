@@ -659,7 +659,9 @@ Instead, with scoped secrets it means that Renovate ensures that the organizatio
 
 <!-- prettier-ignore -->
 !!! note
-    Public key encryption was previously used to encrypt secrets, but this approach has been deprecated and is no longer documented.
+    You could use public key encryption with earlier versions of Renovate.
+    We deprecated this approach and removed the documentation for it.
+    If you're _still_ using public key encryption then we recommend that you use private keys instead.
 
 ## privateKeyOld
 

@@ -85,4 +85,4 @@ After a while, issues without a reproduction may be closed unfixed.
 ### "I already described what you need in the issue"
 
 Thank you for describing your issue in detail.
-But we still need a minimal reproduction to see the current and expected behavior.
+But we still need a minimal reproduction in a repository, and we'd like you to be the one to make sure it matches both your description as well as expected behavior.

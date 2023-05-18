@@ -88,7 +88,7 @@ By replacing Docker tags with Docker digests as the image's primary identifier y
 Working with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e` is hard.
 Luckily Renovate can update the digests for you.
 
-When updating (OR SHOULD IT BE PINNING???) a digest, Renovate keeps the Docker tag in the `FROM` line, like this: `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+When pinning a digest, Renovate retains the Docker tag in the `FROM` line for readability, like this: `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 
 ## Digest Updating
 

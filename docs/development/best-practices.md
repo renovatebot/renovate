@@ -75,7 +75,8 @@ Source: [Google TypeScript Style Guide, function declarations](https://google.gi
 Write code that is easier to read, review and maintain.
 Avoid "clever" code that's hard to understand.
 
-Prefer verbose code over optimized hard to understand code.
+Prefer verbose code which is easier for others to read and maintain than concise code which may be hard or slower for others to understand.
+For example, Array `reduce()` functions are often hard to understand first time, and can be replaced with simpler `for` loops which run just as fast but are simpler to understand and maintain.
 
 #### Write single purpose functions
 
