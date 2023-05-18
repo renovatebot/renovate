@@ -23,7 +23,7 @@ If you're new to Renovate, you should:
 
 - Use the Mend-hosted GitHub App, or let somebody else host Renovate for you
 - Stick with the `config:base` preset
-- Use the Dependency Dashboard (`config:base` or `config:best-practices` enables it automatically)
+- Use the Dependency Dashboard (`config:base` enables it automatically)
 - Read the pages in the "Beginners" list
 - Only create custom Renovate configuration when really needed
 
