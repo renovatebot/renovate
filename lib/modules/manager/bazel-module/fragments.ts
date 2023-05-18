@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils';
 import * as starlark from './starlark';
 
 export const StringFragmentSchema = z.object({
@@ -17,7 +18,7 @@ const PrimitiveFragmentsSchema = z.discriminatedUnion('type', [
 ]);
 export const ArrayFragmentSchema = z.object({
   type: z.literal('array'),
-  items: PrimitiveFragmentsSchema.array(),
+  items: LooseArray(PrimitiveFragmentsSchema),
   isComplete: z.boolean(),
 });
 const ValueFragmentsSchema = z.discriminatedUnion('type', [
@@ -27,7 +28,7 @@ const ValueFragmentsSchema = z.discriminatedUnion('type', [
 ]);
 export const RecordFragmentSchema = z.object({
   type: z.literal('record'),
-  children: z.record(z.string(), ValueFragmentsSchema),
+  children: LooseRecord(ValueFragmentsSchema),
   isComplete: z.boolean(),
 });
 export const AttributeFragmentSchema = z.object({
