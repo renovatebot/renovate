@@ -146,7 +146,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     );
 
     const etagCache =
-      httpOptions.etagCache && options.method === 'get'
+      httpOptions.etagCache &&
+      (options.method === 'get' || options.method === 'head')
         ? httpOptions.etagCache
         : null;
     if (etagCache) {
