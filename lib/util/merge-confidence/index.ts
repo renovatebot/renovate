@@ -191,12 +191,6 @@ export async function initMergeConfidence(): Promise<void> {
   return;
 }
 
-export function getApiToken(): string | undefined {
-  return hostRules.find({
-    hostType,
-  })?.token;
-}
-
 function getApiBaseUrl(): string {
   const defaultBaseUrl = 'https://badges.renovateapi.com/';
   const baseFromEnv = process.env.RENOVATE_X_MERGE_CONFIDENCE_API_BASE_URL;
@@ -220,6 +214,12 @@ function getApiBaseUrl(): string {
     );
     return defaultBaseUrl;
   }
+}
+
+export function getApiToken(): string | undefined {
+  return hostRules.find({
+    hostType,
+  })?.token;
 }
 
 /**
