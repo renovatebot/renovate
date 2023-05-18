@@ -10,7 +10,6 @@ import {
   getSiblingFileName,
   outputCacheFile,
   privateCacheDir,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getFiles } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -171,8 +170,6 @@ export async function updateArtifacts({
       );
       return null;
     }
-
-    await writeLocalFile(packageFileName, newPackageFileContent);
 
     await runDotnetRestore(packageFileName, packageFiles, config);
 

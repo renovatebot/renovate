@@ -1,4 +1,5 @@
 import { quote } from 'shlex';
+import type { StatusResult } from 'simple-git';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -8,7 +9,6 @@ import {
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
@@ -44,20 +44,6 @@ export async function updateArtifacts({
 
   const lockFileName = getSiblingFileName(packageFileName, 'Podfile.lock');
 
-  try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-  } catch (err) {
-    logger.warn({ err }, 'Podfile could not be written');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
-  }
-
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug(`Lockfile not found: ${lockFileName}`);
@@ -87,8 +73,14 @@ export async function updateArtifacts({
     ],
   };
 
+  let status: StatusResult;
   try {
     await exec(cmd, execOptions);
+
+    status = await getRepoStatus();
+    if (!status.modified.includes(lockFileName)) {
+      return null;
+    }
   } catch (err) {
     // istanbul ignore if
     if (err.message === TEMPORARY_ERROR) {
@@ -104,10 +96,6 @@ export async function updateArtifacts({
     ];
   }
 
-  const status = await getRepoStatus();
-  if (!status.modified.includes(lockFileName)) {
-    return null;
-  }
   logger.debug(`Returning updated lockfile: ${lockFileName}`);
   const lockFileContent = await readLocalFile(lockFileName);
   const res: UpdateArtifactsResult[] = [

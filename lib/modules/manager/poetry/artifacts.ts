@@ -11,7 +11,6 @@ import {
   ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { find } from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -175,7 +174,6 @@ export async function updateArtifacts({
   }
   logger.debug(`Updating ${lockFileName}`);
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
     if (isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);

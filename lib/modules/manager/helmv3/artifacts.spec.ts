@@ -189,10 +189,7 @@ describe('modules/manager/helmv3/artifacts', () => {
   it('catches errors', async () => {
     fs.getSiblingFileName.mockReturnValueOnce('Chart.lock');
     fs.readLocalFile.mockResolvedValueOnce(ociLockFile1 as any);
-    fs.privateCacheDir.mockReturnValue(
-      '/tmp/renovate/cache/__renovate-private-cache'
-    );
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.privateCacheDir.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     const updatedDeps = [{ depName: 'dep1' }];

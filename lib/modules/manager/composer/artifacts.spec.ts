@@ -918,7 +918,7 @@ describe('modules/manager/composer/artifacts', () => {
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    git.getRepoStatus.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -936,7 +936,11 @@ describe('modules/manager/composer/artifacts', () => {
         },
       },
     ]);
-    expect(execSnapshots).toBeEmptyArray();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      },
+    ]);
   });
 
   it('catches unmet requirements errors', async () => {
@@ -944,7 +948,7 @@ describe('modules/manager/composer/artifacts', () => {
     const stderr =
       'fooYour requirements could not be resolved to an installable set of packages.bar';
     fs.readLocalFile.mockResolvedValueOnce('{}');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    git.getRepoStatus.mockImplementationOnce(() => {
       throw new Error(stderr);
     });
     expect(
@@ -955,26 +959,11 @@ describe('modules/manager/composer/artifacts', () => {
         config,
       })
     ).toEqual([{ artifactError: { lockFile: 'composer.lock', stderr } }]);
-    expect(execSnapshots).toBeEmptyArray();
-  });
-
-  it('throws for disk space', async () => {
-    const execSnapshots = mockExecAll();
-    fs.readLocalFile.mockResolvedValueOnce('{}');
-    fs.writeLocalFile.mockImplementationOnce(() => {
-      throw new Error(
-        'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
-      );
-    });
-    await expect(
-      composer.updateArtifacts({
-        packageFileName: 'composer.json',
-        updatedDeps: [],
-        newPackageFileContent: '{}',
-        config,
-      })
-    ).rejects.toThrow();
-    expect(execSnapshots).toBeEmptyArray();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader --no-plugins',
+      },
+    ]);
   });
 
   it('disables ignorePlatformReqs', async () => {

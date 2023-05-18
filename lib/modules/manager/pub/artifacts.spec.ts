@@ -213,11 +213,11 @@ describe('modules/manager/pub/artifacts', () => {
     });
 
     it(`catches errors for ${params.sdk}`, async () => {
+      const execSnapshot = mockExecAll();
       const stderr = 'not found';
       fs.getSiblingFileName.mockReturnValueOnce(lockFile);
       fs.readLocalFile.mockResolvedValueOnce(oldLockFileContent);
-      fs.readLocalFile.mockResolvedValueOnce(newLockFileContent);
-      fs.writeLocalFile.mockImplementationOnce(() => {
+      fs.readLocalFile.mockImplementationOnce(() => {
         throw new Error(stderr);
       });
       expect(
@@ -226,6 +226,9 @@ describe('modules/manager/pub/artifacts', () => {
           newPackageFileContent: params.packageFileContent,
         })
       ).toEqual([{ artifactError: { lockFile, stderr } }]);
+      expect(execSnapshot).toMatchObject([
+        { cmd: `${params.sdk} pub upgrade depName` },
+      ]);
     });
   });
 });

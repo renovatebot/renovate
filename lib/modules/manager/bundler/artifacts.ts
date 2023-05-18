@@ -10,11 +10,7 @@ import type { HostRule } from '../../../types';
 import * as memCache from '../../../util/cache/memory';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  ensureCacheDir,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
+import { ensureCacheDir, readLocalFile } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { newlineRegex, regEx } from '../../../util/regex';
 import { isValid } from '../../versioning/ruby';
@@ -111,8 +107,6 @@ export async function updateArtifacts(
     .filter(is.nonEmptyStringAndNotWhitespace);
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
     let cmd: string;
 
     if (config.isLockFileMaintenance) {

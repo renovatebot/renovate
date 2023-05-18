@@ -194,7 +194,7 @@ describe('modules/manager/pipenv/artifacts', () => {
       '/tmp/renovate/cache/others/pipenv'
     );
     fs.readLocalFile.mockResolvedValueOnce('Current Pipfile.lock');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.deleteLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -202,7 +202,10 @@ describe('modules/manager/pipenv/artifacts', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config,
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+        },
       })
     ).toEqual([
       { artifactError: { lockFile: 'Pipfile.lock', stderr: 'not found' } },

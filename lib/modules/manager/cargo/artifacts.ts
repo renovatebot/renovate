@@ -3,11 +3,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  findLocalSiblingOrParent,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
 async function cargoUpdate(
@@ -62,7 +58,6 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating ' + lockFileName);
     await cargoUpdate(
       packageFileName,

@@ -7,7 +7,6 @@ import {
   deleteLocalFile,
   ensureCacheDir,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import type {
@@ -85,7 +84,6 @@ export function getPipenvConstraint(
 
 export async function updateArtifacts({
   packageFileName: pipfileName,
-  newPackageFileContent: newPipfileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
@@ -97,7 +95,6 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    await writeLocalFile(pipfileName, newPipfileContent);
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }

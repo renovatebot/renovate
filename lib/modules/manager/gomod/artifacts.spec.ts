@@ -1222,7 +1222,7 @@ describe('modules/manager/gomod/artifacts', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current go.sum');
     fs.readLocalFile.mockResolvedValueOnce(null); // vendor modules filename
     fs.readLocalFile.mockResolvedValueOnce('go.mod file');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.ensureCacheDir.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
     expect(

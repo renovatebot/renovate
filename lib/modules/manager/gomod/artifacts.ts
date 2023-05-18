@@ -13,7 +13,6 @@ import {
   ensureCacheDir,
   isValidLocalPath,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { getGitAuthenticatedEnvironmentVariables } from '../../../util/git/auth';
@@ -270,8 +269,6 @@ export async function updateArtifacts({
     config.constraints?.go ?? (await getGoConstraints(goModFileName));
 
   try {
-    await writeLocalFile(goModFileName, massagedGoMod);
-
     const cmd = 'go';
     const execOptions: ExecOptions = {
       cwdFile: goModFileName,

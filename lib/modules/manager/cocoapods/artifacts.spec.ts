@@ -192,7 +192,7 @@ describe('modules/manager/cocoapods/artifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('Podfile.lock');
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Podfile.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Podfile');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    git.getRepoStatus.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -205,7 +205,11 @@ describe('modules/manager/cocoapods/artifacts', () => {
     ).toEqual([
       { artifactError: { lockFile: 'Podfile.lock', stderr: 'not found' } },
     ]);
-    expect(execSnapshots).toBeEmpty();
+    expect(execSnapshots).toMatchObject([
+      {
+        cmd: 'pod install',
+      },
+    ]);
   });
 
   it('returns pod exec error', async () => {

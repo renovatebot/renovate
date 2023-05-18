@@ -4,11 +4,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  findLocalSiblingOrParent,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
@@ -28,19 +24,6 @@ export async function updateArtifacts({
 
   const lockFileName =
     (await findLocalSiblingOrParent(packageFileName, 'mix.lock')) ?? 'mix.lock';
-  try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-  } catch (err) {
-    logger.warn({ err }, 'mix.exs could not be written');
-    return [
-      {
-        artifactError: {
-          lockFile: lockFileName,
-          stderr: err.message,
-        },
-      },
-    ];
-  }
 
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {

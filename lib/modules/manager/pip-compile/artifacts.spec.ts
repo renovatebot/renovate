@@ -168,7 +168,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
   it('catches errors', async () => {
     const execSnapshots = mockExecAll();
     fs.readLocalFile.mockResolvedValueOnce('Current requirements.txt');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.deleteLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(
@@ -176,7 +176,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
         packageFileName: 'requirements.in',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config,
+        config: {
+          ...config,
+          isLockFileMaintenance: true,
+        },
       })
     ).toEqual([
       {

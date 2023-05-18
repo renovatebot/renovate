@@ -386,7 +386,7 @@ describe('modules/manager/nuget/artifacts', () => {
     git.getFiles.mockResolvedValueOnce({
       'packages.lock.json': 'Current packages.lock.json',
     });
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.privateCacheDir.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     expect(

@@ -5,7 +5,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import { findUpLocal, readLocalFile, writeLocalFile } from '../../../util/fs';
+import { findUpLocal, readLocalFile } from '../../../util/fs';
 import { getFiles, getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 import { scm } from '../../platform/scm';
@@ -167,7 +167,6 @@ export async function updateArtifacts({
     const nullRedirection = nullRedirectionCommand();
     cmd += nullRedirection;
 
-    await writeLocalFile(packageFileName, newPackageFileContent);
     await exec(cmd, execOptions);
 
     const res = await getUpdatedLockfiles(oldLockFileContentMap);

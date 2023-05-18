@@ -237,12 +237,13 @@ describe('modules/manager/helmfile/artifacts', () => {
     'not found',
     "Error: cannot load Chart.lock: error converting YAML to JSON: yaml: line 1: did not find expected ',' or '}'",
   ])('catches error: %s', async (errorMessage) => {
+    const execSnapshots = mockExecAll();
     fs.getSiblingFileName.mockReturnValueOnce('helmfile.lock');
     git.getFile.mockResolvedValueOnce(lockFile);
     fs.privateCacheDir.mockReturnValue(
       '/tmp/renovate/cache/__renovate-private-cache'
     );
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.readLocalFile.mockImplementationOnce(() => {
       throw new Error(errorMessage);
     });
     const updatedDeps = [{ depName: 'dep1' }];
@@ -260,6 +261,9 @@ describe('modules/manager/helmfile/artifacts', () => {
           stderr: errorMessage,
         },
       },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
   });
 });

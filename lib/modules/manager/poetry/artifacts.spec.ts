@@ -424,7 +424,7 @@ describe('modules/manager/poetry/artifacts', () => {
       // poetry.lock
       fs.getSiblingFileName.mockReturnValueOnce('poetry.lock');
       fs.readLocalFile.mockResolvedValueOnce('Current poetry.lock');
-      fs.writeLocalFile.mockImplementationOnce(() => {
+      fs.deleteLocalFile.mockImplementationOnce(() => {
         throw new Error('not found');
       });
       const updatedDeps = [{ depName: 'dep1' }];
@@ -433,7 +433,10 @@ describe('modules/manager/poetry/artifacts', () => {
           packageFileName: 'pyproject.toml',
           updatedDeps,
           newPackageFileContent: '{}',
-          config,
+          config: {
+            ...config,
+            updateType: 'lockFileMaintenance',
+          },
         })
       ).toMatchObject([{ artifactError: { lockFile: 'poetry.lock' } }]);
       expect(execSnapshots).toMatchObject([]);

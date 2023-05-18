@@ -291,10 +291,11 @@ describe('modules/manager/cargo/artifacts', () => {
   });
 
   it('catches errors', async () => {
+    const execSnapshots = mockExecAll();
     fs.statLocalFile.mockResolvedValueOnce({ name: 'Cargo.lock' } as any);
     fs.findLocalSiblingOrParent.mockResolvedValueOnce('Cargo.lock');
     fs.readLocalFile.mockResolvedValueOnce('Current Cargo.lock');
-    fs.writeLocalFile.mockImplementationOnce(() => {
+    fs.readLocalFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
     const updatedDeps = [
@@ -311,6 +312,9 @@ describe('modules/manager/cargo/artifacts', () => {
       })
     ).toEqual([
       { artifactError: { lockFile: 'Cargo.lock', stderr: 'not found' } },
+    ]);
+    expect(execSnapshots).toMatchObject([
+      { cmd: 'cargo update --manifest-path Cargo.toml --workspace' },
     ]);
   });
 });

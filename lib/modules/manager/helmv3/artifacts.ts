@@ -11,7 +11,6 @@ import {
   getSiblingFileName,
   privateCacheDir,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -149,7 +148,6 @@ export async function updateArtifacts({
 
     const repositories = getRepositories(chartDefinitions);
 
-    await writeLocalFile(packageFileName, newPackageFileContent);
     logger.debug('Updating Helm artifacts');
     const helmToolConstraint: ToolConstraint = {
       toolName: 'helm',

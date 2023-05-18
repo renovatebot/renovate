@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import { z } from 'zod';
-import {
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
-  TEMPORARY_ERROR,
-} from '../../../constants/error-messages';
+import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions, ToolConstraint } from '../../../util/exec/types';
@@ -14,7 +11,6 @@ import {
   getSiblingFileName,
   localPathExists,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
@@ -128,8 +124,6 @@ export async function updateArtifacts({
   const commitVendorFiles = await localPathExists(vendorDir);
   await ensureLocalDir(vendorDir);
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
     const constraints = {
       ...extractConstraints(file, lockfile),
       ...config.constraints,
@@ -240,8 +234,6 @@ export async function updateArtifacts({
       )
     ) {
       logger.info('Composer requirements cannot be resolved');
-    } else if (err.message?.includes('write error (disk full?)')) {
-      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');
     }

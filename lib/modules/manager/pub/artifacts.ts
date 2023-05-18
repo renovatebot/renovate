@@ -4,11 +4,7 @@ import { TEMPORARY_ERROR } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import type { ExecOptions } from '../../../util/exec/types';
-import {
-  getSiblingFileName,
-  readLocalFile,
-  writeLocalFile,
-} from '../../../util/fs';
+import { getSiblingFileName, readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 
@@ -45,8 +41,6 @@ export async function updateArtifacts({
   }
 
   try {
-    await writeLocalFile(packageFileName, newPackageFileContent);
-
     const isFlutter = newPackageFileContent.includes('sdk: flutter');
     const toolName = isFlutter ? 'flutter' : 'dart';
     const cmd: string[] = [];

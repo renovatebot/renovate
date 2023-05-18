@@ -9,7 +9,6 @@ import {
   deleteLocalFile,
   ensureCacheDir,
   readLocalFile,
-  writeLocalFile,
 } from '../../../util/fs';
 import { getRepoStatus } from '../../../util/git';
 import { regEx } from '../../../util/regex';
@@ -99,7 +98,6 @@ export function constructPipCompileCmd(
 
 export async function updateArtifacts({
   packageFileName: inputFileName,
-  newPackageFileContent: newInputContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   const outputFileName = inputFileName.replace(regEx(/(\.in)?$/), '.txt');
@@ -112,7 +110,6 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    await writeLocalFile(inputFileName, newInputContent);
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(outputFileName);
     }
