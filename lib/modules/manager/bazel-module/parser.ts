@@ -14,31 +14,21 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
  * - `dev_dependeny = True`
  **/
 const kvParams = q
-  .sym<Ctx>((ctx, token) => {
-    return ctx.startAttribute(token.value);
-  })
+  .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
   .op('=')
   .alt(
-    q.str((ctx, token) => {
-      return ctx.addString(token.value);
-    }),
-    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => {
-      return ctx.addBoolean(token.value);
-    })
+    q.str((ctx, token) => ctx.addString(token.value)),
+    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => ctx.addBoolean(token.value))
   );
 
 const moduleRules = q
-  .sym<Ctx>(supportedRulesRegex, (ctx, token) => {
-    return ctx.startRule(token.value);
-  })
+  .sym<Ctx>(supportedRulesRegex, (ctx, token) => ctx.startRule(token.value))
   .join(
     q.tree({
       type: 'wrapped-tree',
       maxDepth: 1,
       search: kvParams,
-      postHandler: (ctx, tree) => {
-        return ctx.endRule();
-      },
+      postHandler: (ctx, tree) => ctx.endRule(),
     })
   );
 
@@ -54,8 +44,5 @@ const starlarkLang = lang.createLang('starlark');
 
 export function parse(input: string): RecordFragment[] {
   const parsedResult = starlarkLang.query(input, query, new Ctx());
-  if (parsedResult) {
-    return parsedResult.results;
-  }
-  return [];
+  return parsedResult?.results ?? [];
 }
