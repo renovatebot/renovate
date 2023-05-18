@@ -166,7 +166,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
-  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
+  getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
   getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,

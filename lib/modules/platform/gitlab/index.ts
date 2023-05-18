@@ -371,7 +371,7 @@ async function getStatus(
     return (
       await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
         paginate: true,
-        useCache,
+        memCache: useCache,
       })
     ).body;
   } catch (err) /* istanbul ignore next */ {
@@ -902,7 +902,7 @@ export async function getIssueList(): Promise<GitlabIssue[]> {
     const res = await gitlabApi.getJson<
       { iid: number; title: string; labels: string[] }[]
     >(`projects/${config.repository}/issues?${query}`, {
-      useCache: false,
+      memCache: false,
       paginate: true,
     });
     // istanbul ignore if
@@ -927,7 +927,7 @@ export async function getIssue(
     const issueBody = (
       await gitlabApi.getJson<{ description: string }>(
         `projects/${config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.description;
     return {
