@@ -38,6 +38,7 @@ export async function finalizeRepo(
   runRenovateRepoStats(config, prList);
 }
 
+// istanbul ignore next
 function ensureIssuesClosing(): Promise<Awaited<void>[]> {
   return Promise.all([
     platform.ensureIssueClosing(`Action Required: Fix Renovate Configuration`),
