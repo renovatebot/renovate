@@ -18,9 +18,9 @@ export class MergeConfidenceMatcher extends Matcher {
      */
     if (is.undefined(getApiToken())) {
       const error = new Error(MISSING_API_CREDENTIALS);
-      error.validationError = 'Missing credentials';
-      error.validationMessage =
-        "The 'matchConfidence' matcher in 'packageRules' requires authentication. Please refer to the documentation and add the required host rule.";
+      error.validationMessage = 'Missing credentials';
+      error.validationError =
+        'The `matchConfidence` matcher in `packageRules` requires authentication. Please refer to the [documentation](https://docs.renovatebot.com/configuration-options/#matchconfidence) and add the required host rule.';
       throw error;
     }
 
