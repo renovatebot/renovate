@@ -448,6 +448,11 @@ Check out the default value for `commitMessage` to understand how this field is 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
 The "extra" is usually an identifier of the new version, e.g. "to v1.3.2" or "to tag 9.2".
 
+## commitMessageLowerCase
+
+With `semanticCommits` pr- and commit-titles will by default (`"auto"`) be converted to all-lowercase.
+Set this to `"never"` to leave the titles untouched, allowing uppercase characters in semantic commit titles.
+
 ## commitMessagePrefix
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string.
@@ -697,6 +702,19 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
 It is pointless to edit the labels, as Renovate bot restores the labels on each run.
+
+## dependencyDashboardOSVVulnerabilitySummary
+
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+You can choose from:
+
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
+
+This feature is independent of the `osvVulnerabilityAlerts` option.
+
+The source of these CVEs is [OSV.dev](https://osv.dev/).
 
 ## dependencyDashboardTitle
 
@@ -1189,6 +1207,23 @@ A preset alternative to the above is:
   "extends": [":disableHost(registry.npmjs.org)"]
 }
 ```
+
+To match specific ports you have to add a protocol to `matchHost`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com:9118",
+      "enabled": false
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! warning
+    Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
 
 <!-- prettier-ignore -->
 !!! note
@@ -3140,6 +3175,7 @@ This feature works with the following managers:
 - [`kubernetes`](/modules/manager/kubernetes)
 - [`ansible`](/modules/manager/ansible)
 - [`droneci`](/modules/manager/droneci)
+- [`terraform`](/modules/manager/terraform)
 
 ## registryUrls
 

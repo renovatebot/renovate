@@ -130,6 +130,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     hash: true,
     versioning: npmVersioningId,
   },
+  pdm: {
+    datasource: 'github-releases',
+    packageName: 'pdm-project/pdm',
+    versioning: semverVersioningId,
+  },
   php: {
     datasource: 'github-releases',
     packageName: 'containerbase/php-prebuild',
