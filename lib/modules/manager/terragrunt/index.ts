@@ -2,6 +2,7 @@ import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { TerraformModuleDatasource } from '../../datasource/terraform-module';
 
+export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 
 export const supportedDatasources = [
@@ -10,6 +11,7 @@ export const supportedDatasources = [
   TerraformModuleDatasource.id,
 ];
 
+export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   commitMessageTopic: 'Terragrunt dependency {{depName}}',
   fileMatch: ['(^|/)terragrunt\\.hcl$'],
