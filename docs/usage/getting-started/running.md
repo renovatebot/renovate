@@ -206,7 +206,7 @@ Read the platform-specific docs to learn how to setup authentication on your pla
 ### GitHub.com token for release notes
 
 If you are running on any platform except github.com, you should also set the environment variable `GITHUB_COM_TOKEN` and put the Personal Access Token for github.com in it.
-This account can actually be _any_ account on GitHub, and needs only `read-only` access.
+This account can be _any_ account on GitHub, and needs only `read-only` access.
 It's used when fetching release notes for repositories in order to increase the hourly API limit.
 It's also OK to configure the same as a host rule instead, if you prefer that.
 
