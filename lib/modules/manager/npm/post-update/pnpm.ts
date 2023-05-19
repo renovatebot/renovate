@@ -12,6 +12,7 @@ import type {
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
+import type { NpmPackage } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
@@ -41,8 +42,9 @@ export async function generateLockFile(
       toolName: 'pnpm',
       constraint:
         getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
-        config.constraints?.pnpm ?? // usual path, extracted from package.json > engines
-        (await getConstraintsFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
+        config.constraints?.pnpm ?? // from user config or extraction
+        (await getPnpmConstraintFromPackageFile(lockFileDir)) ?? // look in package.json > packageManager or engines
+        (await getConstraintFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
     const extraEnv: ExtraEnv = {
@@ -112,13 +114,38 @@ export async function generateLockFile(
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
-  return { lockFile: lockFile };
+  return { lockFile };
 }
 
-export async function getConstraintsFromLockFile(
+export async function getPnpmConstraintFromPackageFile(
+  lockFileDir: string
+): Promise<string | undefined> {
+  let constraint: string | undefined;
+  const rootPackageJson = upath.join(lockFileDir, 'package.json');
+  const content = await readLocalFile(rootPackageJson, 'utf8');
+  if (content) {
+    const packageJson: NpmPackage = JSON.parse(content);
+    const packageManager = packageJson?.packageManager;
+    if (packageManager?.includes('@')) {
+      const nameAndVersion = packageManager.split('@');
+      const name = nameAndVersion[0];
+      if (name === 'pnpm') {
+        constraint = nameAndVersion[1];
+      }
+    } else {
+      const engines = packageJson?.engines;
+      if (engines) {
+        constraint = engines['pnpm'];
+      }
+    }
+  }
+  return constraint;
+}
+
+export async function getConstraintFromLockFile(
   lockFileName: string
 ): Promise<string | null> {
-  let constraints: string | null = null;
+  let constraint: string | null = null;
   try {
     const lockfileContent = await readLocalFile(lockFileName, 'utf8');
     if (!lockfileContent) {
@@ -138,13 +165,14 @@ export async function getConstraintsFromLockFile(
       lowerConstraint: '>=3',
       upperConstraint: '<3.5.0',
     };
-    constraints = `${lowerConstraint}${
-      upperConstraint ? ` ${upperConstraint}` : ''
-    }`;
+    constraint = lowerConstraint;
+    if (upperConstraint) {
+      constraint += ` ${upperConstraint}`;
+    }
   } catch (err) {
     logger.warn({ err }, 'Error getting pnpm constraints from lock file');
   }
-  return constraints;
+  return constraint;
 }
 
 /**

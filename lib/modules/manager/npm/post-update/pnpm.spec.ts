@@ -1,4 +1,3 @@
-import { async } from 'hasha';
 import { envMock, mockExecAll } from '../../../../../test/exec-util';
 import { Fixtures } from '../../../../../test/fixtures';
 import { env, fs, mockedFunction, partial } from '../../../../../test/util';
@@ -204,7 +203,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       configTemp,
       []
     );
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(3);
     expect(res.lockFile).toBe('lockfileVersion: 5.3\n');
   });
 
@@ -271,37 +270,37 @@ describe('modules/manager/npm/post-update/pnpm', () => {
   describe('getConstraintsFromLockFile()', () => {
     it('returns null if no lock file', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
     });
 
     it('returns null when error reading lock file', async () => {
       fs.readLocalFile.mockRejectedValueOnce(new Error('foo'));
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
     });
 
     it('returns null if no lockfileVersion', async () => {
       fs.readLocalFile.mockResolvedValueOnce('foo: bar\n');
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
     });
 
     it('returns null if lockfileVersion is not a number', async () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: foo\n');
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBeNull();
     });
 
     it('returns default if lockfileVersion is 1', async () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 1\n');
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBe('>=3 <3.5.0');
     });
 
     it('maps supported versions', async () => {
       fs.readLocalFile.mockResolvedValueOnce('lockfileVersion: 5.3\n');
-      const res = await pnpmHelper.getConstraintsFromLockFile('some-file-name');
+      const res = await pnpmHelper.getConstraintFromLockFile('some-file-name');
       expect(res).toBe('>=6 <7');
     });
   });
