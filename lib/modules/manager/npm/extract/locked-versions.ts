@@ -85,6 +85,12 @@ export async function getLockedVersions(
         !packageFile.extractedConstraints?.npm
       ) {
         packageFile.extractedConstraints!.npm = '>=7';
+      } else {
+        logger.warn(
+          { lockfileVersion },
+          'Found unsupported npm lockfile version'
+        );
+        return;
       }
       for (const dep of packageFile.deps) {
         // TODO: types (#7154)
