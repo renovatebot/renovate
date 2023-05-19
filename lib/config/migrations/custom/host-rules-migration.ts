@@ -74,13 +74,13 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
   function removeUndefinedFields(
     obj: Record<string, any>
   ): Record<string, string> {
-    const keys = Object.keys(obj);
-    for (const key of keys) {
-      if (obj[key] === undefined) {
-        delete obj[key];
+    const result: Record<string, string> = {};
+    for (const key in obj) {
+      if (is.string(obj[key])) {
+        result[key] = obj[key];
       }
     }
-    return obj;
+    return result;
   }
 
   if (Object.keys(hosts).length > 1) {
