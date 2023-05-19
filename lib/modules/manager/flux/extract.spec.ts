@@ -742,7 +742,6 @@ describe('modules/manager/flux/extract', () => {
               depName: 'actions-runner-controller-charts/gha-runner-scale-set',
               packageName:
                 'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
-              registryUrls: [],
             },
           ],
           packageFile:
@@ -764,7 +763,6 @@ describe('modules/manager/flux/extract', () => {
               datasource: DockerDatasource.id,
               depName: 'kyverno',
               packageName: 'ghcr.io/kyverno/charts/kyverno',
-              registryUrls: [],
             },
           ],
           packageFile:
