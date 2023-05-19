@@ -52,13 +52,11 @@ function copyResponse<T extends Buffer | string | any>(
         statusCode,
         body: body instanceof Buffer ? (body.slice() as T) : clone<T>(body),
         headers: clone(headers),
-        authorization: !!response.authorization,
       }
     : {
         statusCode,
         body,
         headers,
-        authorization: !!response.authorization,
       };
 }
 
