@@ -30,11 +30,13 @@ export interface HelmRelease extends KubernetesResource {
   };
 }
 
+export type HelmRepositoryType = 'oci' | 'default';
+
 export interface HelmRepository extends KubernetesResource {
   kind: 'HelmRepository';
   spec: {
     url: string;
-    type: string;
+    type: HelmRepositoryType;
   };
 }
 
