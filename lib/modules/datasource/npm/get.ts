@@ -25,8 +25,8 @@ const platformMapping: Record<string, string> = {
 };
 
 interface PackageSource {
-  sourceUrl?: string;
-  sourceDirectory?: string;
+  sourceUrl: string | null;
+  sourceDirectory: string | null;
 }
 
 const PackageSource = z
@@ -35,13 +35,16 @@ const PackageSource = z
       .string()
       .nonempty()
       .transform((repository): PackageSource => {
+        let sourceUrl: string | null = null;
+        const sourceDirectory = null;
         const shortMatch = repository.match(SHORT_REPO_REGEX);
         if (shortMatch?.groups) {
           const { platform = 'github', shortRepo } = shortMatch.groups;
-          return { sourceUrl: platformMapping[platform] + shortRepo };
+          sourceUrl = platformMapping[platform] + shortRepo;
         } else {
-          return { sourceUrl: repository };
+          sourceUrl = repository;
         }
+        return { sourceUrl, sourceDirectory };
       }),
     z
       .object({
@@ -49,17 +52,20 @@ const PackageSource = z
         directory: z.string().nonempty().nullish(),
       })
       .transform(({ url, directory }) => {
-        const res: PackageSource = {};
+        const res: PackageSource = { sourceUrl: null, sourceDirectory: null };
+
         if (url) {
           res.sourceUrl = url;
         }
+
         if (directory) {
           res.sourceDirectory = directory;
         }
+
         return res;
       }),
   ])
-  .catch({});
+  .catch({ sourceUrl: null, sourceDirectory: null });
 
 export async function getDependency(
   http: Http,
@@ -141,12 +147,18 @@ export async function getDependency(
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
       homepage: res.homepage,
-      sourceUrl,
-      sourceDirectory,
       releases: [],
       tags: res['dist-tags'],
       registryUrl,
     };
+
+    if (sourceUrl) {
+      dep.sourceUrl = sourceUrl;
+    }
+
+    if (sourceDirectory) {
+      dep.sourceDirectory = sourceDirectory;
+    }
 
     if (latestVersion?.deprecated) {
       dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
