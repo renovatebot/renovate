@@ -91,6 +91,11 @@ function composer2npm(input: string): string {
         '>=$1 <1'
       );
 
+      // add extra digits to <8-DEV and <8.0-DEV
+      output = output
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0')
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0');
+
       return output + stability;
     })
     .map((part) => part.replace(/([a-z])([0-9])/gi, '$1.$2'))
@@ -171,7 +176,12 @@ function minSatisfyingVersion(
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
-  return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  try {
+    return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.subset error');
+    return false;
+  }
 }
 
 function getNewValue({
