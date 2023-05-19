@@ -71,6 +71,7 @@ Any tokens that do not start with `ghs_` (for example tokens from GitHub Enterpr
 !!! note
     The installation tokens expire after 1 hour and need to be regenerated regularly.
     Alternatively as environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
+    There are tools to regenerate the installation token. If you run your self-hosted Renovate Bot in a GitHub Actions workflow, you can use the actions [`jnwng/github-app-installation-token-action`](https://github.com/jnwng/github-app-installation-token-action) or [`tibdex/github-app-token`](https://github.com/tibdex/github-app-token). Other tools are [github-app-installation-token](https://github.com/gagoar/github-app-installation-token) (Node.js libary / CLI) or the [`mshekow/github-app-installation-token`](https://github.com/MShekow/github-app-installation-token) Docker image.
 
 **`repositories: ["orgname/repo-1","orgname/repo-2"]`**
 
