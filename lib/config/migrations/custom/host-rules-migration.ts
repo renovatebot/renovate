@@ -71,18 +71,6 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     host,
   });
 
-  function removeUndefinedFields(
-    obj: Record<string, any>
-  ): Record<string, string> {
-    const result: Record<string, string> = {};
-    for (const key of Object.keys(obj)) {
-      if (is.string(obj[key])) {
-        result[key] = obj[key];
-      }
-    }
-    return result;
-  }
-
   if (Object.keys(hosts).length > 1) {
     const distinctHostValues = new Set(Object.values(hosts));
     // check if the host values are duplicated
@@ -108,4 +96,16 @@ function massageUrl(url: string): string {
   } else {
     return url;
   }
+}
+
+function removeUndefinedFields(
+  obj: Record<string, any>
+): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const key of Object.keys(obj)) {
+    if (is.string(obj[key])) {
+      result[key] = obj[key];
+    }
+  }
+  return result;
 }
