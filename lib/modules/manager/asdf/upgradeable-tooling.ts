@@ -1,3 +1,4 @@
+import { regEx } from '../../../util/regex';
 import { DartVersionDatasource } from '../../datasource/dart-version';
 import { DockerDatasource } from '../../datasource/docker';
 import { FlutterVersionDatasource } from '../../datasource/flutter-version';
@@ -158,9 +159,11 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
   },
   flutter: {
     asdfPluginUrl: 'https://github.com/oae/asdf-flutter',
-    config: {
+    config: (version) => ({
       datasource: FlutterVersionDatasource.id,
-    },
+      // asdf-flutter plugin supports channel on version suffix.
+      currentValue: version.replace(regEx(/-(stable|beta|dev)$/), ''),
+    }),
   },
   flux2: {
     asdfPluginUrl: 'https://github.com/tablexi/asdf-flux2.git',

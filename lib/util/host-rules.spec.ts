@@ -235,6 +235,26 @@ describe('util/host-rules', () => {
       expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
     });
 
+    it('matches on matchHost with port', () => {
+      add({
+        matchHost: 'https://domain.com:9118',
+        token: 'def',
+      });
+      expect(find({ url: 'https://domain.com:9118' }).token).toBe('def');
+      expect(find({ url: 'https://domain.com' }).token).toBeUndefined();
+      expect(find({ url: 'httpsdomain.com' }).token).toBeUndefined();
+    });
+
+    it('host with port is interpreted as empty', () => {
+      add({
+        matchHost: 'domain.com:9118',
+        token: 'def',
+      });
+      expect(find({ url: 'https://domain.com:9118' }).token).toBe('def');
+      expect(find({ url: 'https://domain.com' }).token).toBe('def');
+      expect(find({ url: 'httpsdomain.com' }).token).toBe('def');
+    });
+
     it('matches on hostType and endpoint', () => {
       add({
         hostType: NugetDatasource.id,

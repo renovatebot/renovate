@@ -27,9 +27,10 @@ describe('workers/repository/onboarding/branch/check', () => {
   it('skips normal onboarding check if onboardingCache is valid', async () => {
     cache.getCache.mockReturnValueOnce({
       onboardingBranchCache: {
-        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
+        isConflicted: false,
+        isModified: false,
       },
     });
     git.getBranchCommit
@@ -45,9 +46,10 @@ describe('workers/repository/onboarding/branch/check', () => {
   it('continues with normal logic if onboardingCache is invalid', async () => {
     cache.getCache.mockReturnValueOnce({
       onboardingBranchCache: {
-        onboardingBranch: 'configure/renovate',
         defaultBranchSha: 'default-sha',
         onboardingBranchSha: 'onboarding-sha',
+        isConflicted: false,
+        isModified: false,
       },
     });
     scm.getFileList.mockResolvedValue([]);
