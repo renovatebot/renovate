@@ -74,7 +74,7 @@ const DepResponse = z
       z.object({
         repository: PackageSource,
         homepage: z.string().nullish().catch(null),
-        deprecated: z.union([z.boolean(), z.string()]).nullish().catch(null),
+        deprecated: z.string().nullish().catch('Unknown deprecation reason'),
         gitHead: z.string().nullish().catch(null),
         dependencies: LooseRecord(z.string()).nullish().catch(null),
         devDependencies: LooseRecord(z.string()).nullish().catch(null),
@@ -98,13 +98,7 @@ const DepResponse = z
     const sourceDirectory =
       repository.sourceDirectory ?? latestVersionRepository.sourceDirectory;
 
-    const deprecated = latestVersion?.deprecated;
-    let deprecationMessage: string | null = null;
-    if (is.boolean(deprecated)) {
-      deprecationMessage = 'deprecated by setting deprecated="true"';
-    } else if (is.string(deprecated)) {
-      deprecationMessage = deprecated;
-    }
+    const deprecationMessage = latestVersion?.deprecated;
 
     return {
       time,
