@@ -12,7 +12,6 @@ import type {
 } from '../../../../util/exec/types';
 import { deleteLocalFile, readLocalFile } from '../../../../util/fs';
 import type { PostUpdateConfig, Upgrade } from '../../types';
-import type { NpmPackage } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
@@ -41,9 +40,9 @@ export async function generateLockFile(
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
-        getPnpmConstraintFromUpgrades(upgrades) ??
-        config.constraints?.pnpm ??
-        (await getPnpmConstraint(lockFileDir)),
+        getPnpmConstraintFromUpgrades(upgrades) ?? // if pnpm is being upgraded, it comes first
+        config.constraints?.pnpm ?? // usual path, extracted from package.json > engines
+        (await getConstraintsFromLockFile(lockFileName)), // use lockfileVersion to find pnpm version range
     };
 
     const extraEnv: ExtraEnv = {
@@ -113,63 +112,39 @@ export async function generateLockFile(
     );
     return { error: true, stderr: err.stderr, stdout: err.stdout };
   }
-  return { lockFile };
+  return { lockFile: lockFile };
 }
 
-async function getPnpmConstraint(
-  lockFileDir: string
-): Promise<string | undefined> {
-  let result: string | undefined;
-  const rootPackageJson = upath.join(lockFileDir, 'package.json');
-  const content = await readLocalFile(rootPackageJson, 'utf8');
-  if (content) {
-    const packageJson: NpmPackage = JSON.parse(content);
-    const packageManager = packageJson?.packageManager;
-    if (packageManager?.includes('@')) {
-      const nameAndVersion = packageManager.split('@');
-      const name = nameAndVersion[0];
-      if (name === 'pnpm') {
-        result = nameAndVersion[1];
-      }
-    } else {
-      const engines = packageJson?.engines;
-      if (engines) {
-        result = engines['pnpm'];
-      }
+export async function getConstraintsFromLockFile(
+  lockFileName: string
+): Promise<string | null> {
+  let constraints: string | null = null;
+  try {
+    const lockfileContent = await readLocalFile(lockFileName, 'utf8');
+    if (!lockfileContent) {
+      return null;
     }
-  }
-  if (!result) {
-    const lockFileName = upath.join(lockFileDir, 'pnpm-lock.yaml');
-    const content = await readLocalFile(lockFileName, 'utf8');
-    if (content) {
-      const pnpmLock = load(content) as PnpmLockFile;
-      if (
-        is.number(pnpmLock.lockfileVersion) &&
-        pnpmLock.lockfileVersion < 5.4
-      ) {
-        result = '<7';
-      }
+    const pnpmLock = load(lockfileContent) as PnpmLockFile;
+    if (!is.number(pnpmLock?.lockfileVersion)) {
+      return null;
     }
+    // find matching lockfileVersion and use its constraints
+    // if no match found use lockfileVersion 5
+    // lockfileVersion 5 is the minimum version required to generate the pnpm-lock.yaml file
+    const { lowerConstraint, upperConstraint } = lockToPnpmVersionMapping.find(
+      (m) => m.lockfileVersion === pnpmLock.lockfileVersion
+    ) ?? {
+      lockfileVersion: 5.0,
+      lowerConstraint: '>=3',
+      upperConstraint: '<3.5.0',
+    };
+    constraints = `${lowerConstraint}${
+      upperConstraint ? ` ${upperConstraint}` : ''
+    }`;
+  } catch (err) {
+    logger.warn({ err }, 'Error getting pnpm constraints from lock file');
   }
-  return result;
-}
-
-export function getConstraintsFromLockFile(lockfileVersion: number): string {
-  // find matching lockfileVersion and use its constraints
-  // if no match found use lockfileVersion 5
-  // lockfileVersion 5 is the minimum version required to generate the pnpm-lock.yaml file
-  const { lowerConstraint, upperConstraint } = lockToPnpmVersionMapping.find(
-    (m) => m.lockfileVersion === lockfileVersion
-  ) ?? {
-    lockfileVersion: 5.0,
-    lowerConstraint: '>=3',
-    upperConstraint: '<3.5.0',
-  };
-  const newConstraints = `${lowerConstraint}${
-    upperConstraint ? ` ${upperConstraint}` : ''
-  }`;
-
-  return newConstraints;
+  return constraints;
 }
 
 /**
