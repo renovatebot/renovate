@@ -35,7 +35,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "abcVersion": {
       "lineIndex": 7,
@@ -122,7 +121,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "abcVersion": {
       "lineIndex": 7,
@@ -335,7 +333,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "artifactIdExample": {
       "lineIndex": 16,
@@ -520,7 +517,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "ScalaVersion": {
       "lineIndex": 0,
@@ -580,7 +576,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "ScalaVersion": {
       "lineIndex": 1,
@@ -619,7 +614,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {
     "ScalaVersion": {
       "lineIndex": 1,
@@ -658,7 +652,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {},
   "packageFile": "build.sbt",
   "registryUrls": [
@@ -691,7 +684,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       ],
     },
   ],
-  "globalVars": {},
   "localVars": {},
   "packageFile": "build.sbt",
   "registryUrls": [
@@ -704,7 +696,6 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
 exports[`modules/manager/sbt/extract extractPackageFile() returns null for empty 1`] = `
 {
   "deps": [],
-  "globalVars": {},
   "localVars": {},
   "packageFile": "build.sbt",
   "packageFileVersion": "1.2.3",

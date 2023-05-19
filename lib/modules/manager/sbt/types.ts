@@ -12,6 +12,6 @@ export type GroupFilenameContent = Record<
 
 export interface ParseOptions {
   scalaVersion?: string;
-  localVars: Variables;
-  readonly globalVars: Variables;
+  localVars?: Variables;
+  globalVars?: Variables;
 }

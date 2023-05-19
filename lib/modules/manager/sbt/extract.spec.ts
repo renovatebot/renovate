@@ -12,8 +12,6 @@ import {
 const extractPackageFile = (content: string) =>
   extract(content, {
     packageFile: 'build.sbt',
-    localVars: {},
-    globalVars: {},
     deps: [],
   });
 
@@ -34,7 +32,6 @@ describe('modules/manager/sbt/extract', () => {
       expect(extractPackageFile('non-sense')).toBeNull();
       expect(extractPackageFile('version := "1.2.3"')).toMatchSnapshot({
         deps: [],
-        globalVars: {},
         localVars: {},
         packageFile: 'build.sbt',
         packageFileVersion: '1.2.3',
@@ -164,7 +161,6 @@ describe('modules/manager/sbt/extract', () => {
             ],
           },
         ],
-        globalVars: {},
         localVars: {
           sbtReleaseVersion: {
             lineIndex: 6,
@@ -417,7 +413,6 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageFile: 'project/build.properties',
             localVars: {},
-            globalVars: {},
             deps: [],
           }
         )
@@ -446,7 +441,6 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageFile: 'project/build.properties',
             localVars: {},
-            globalVars: {},
             deps: [],
           }
         )
@@ -474,7 +468,6 @@ describe('modules/manager/sbt/extract', () => {
           {
             packageFile: 'project/build.properties',
             localVars: {},
-            globalVars: {},
             deps: [],
           }
         )

@@ -25,9 +25,7 @@ import type {
 } from './types';
 import { normalizeScalaVersion } from './util';
 
-interface Ctx {
-  globalVars: Variables;
-  localVars: Variables;
+interface Ctx extends ParseOptions {
   deps: PackageDependency[];
   registryUrls: string[];
 
@@ -65,7 +63,8 @@ const scalaVersionMatch = q
   .alt(
     q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
     nestedVariableLiteral((ctx, { value: varName }) => {
-      const scalaVersion = ctx.localVars[varName] ?? ctx.globalVars[varName];
+      const scalaVersion =
+        ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
       if (scalaVersion) {
         ctx.scalaVersion = scalaVersion.val;
       }
@@ -104,7 +103,7 @@ const packageFileVersionMatch = q
     })),
     nestedVariableLiteral((ctx, { value: varName }) => {
       const packageFileVersion =
-        ctx.localVars[varName] ?? ctx.globalVars[varName];
+        ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
       if (packageFileVersion) {
         ctx.packageFileVersion = packageFileVersion.val;
       }
@@ -120,11 +119,13 @@ const variableNameMatch = q
   .opt(q.op<Ctx>(':').sym('String'));
 
 const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
-  ctx.localVars[ctx.currentVarName!] = {
-    val: value,
-    sourceFile: ctx.packageFile,
-    lineIndex: line - 1,
-  };
+  if (ctx.localVars) {
+    ctx.localVars[ctx.currentVarName!] = {
+      val: value,
+      sourceFile: ctx.packageFile,
+      lineIndex: line - 1,
+    };
+  }
   delete ctx.currentVarName;
   return ctx;
 });
@@ -144,7 +145,8 @@ const variableDefinitionMatch = q
 
 const groupIdMatch = q.alt<Ctx>(
   nestedVariableLiteral((ctx, { value: varName }) => {
-    const currentGroupId = ctx.localVars[varName] ?? ctx.globalVars[varName];
+    const currentGroupId =
+      ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
     if (currentGroupId) {
       ctx.groupId = currentGroupId.val;
     }
@@ -155,7 +157,7 @@ const groupIdMatch = q.alt<Ctx>(
 
 const artifactIdMatch = q.alt<Ctx>(
   nestedVariableLiteral((ctx, { value: varName }) => {
-    const artifactId = ctx.localVars[varName] ?? ctx.globalVars[varName];
+    const artifactId = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
     if (artifactId) {
       ctx.artifactId = artifactId.val;
     }
@@ -165,7 +167,7 @@ const artifactIdMatch = q.alt<Ctx>(
 );
 
 const resolveVariable: q.SymMatcherHandler<Ctx> = (ctx, { value: varName }) => {
-  const currentValue = ctx.localVars[varName] ?? ctx.globalVars[varName];
+  const currentValue = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
   if (currentValue) {
     ctx.currentValue = currentValue.val;
     ctx.currentValueInfo = currentValue;
@@ -327,15 +329,14 @@ export function extractDependency(
   {
     packageFile,
     registryUrls,
-    localVars,
-    globalVars,
+    localVars = {},
+    globalVars = {},
     scalaVersion,
   }: PackageFile & ParseOptions
 ): Ctx | null {
   if (
-    packageFile &&
-    (packageFile === 'project/build.properties' ||
-      packageFile.endsWith('/project/build.properties'))
+    packageFile === 'project/build.properties' ||
+    packageFile.endsWith('/project/build.properties')
   ) {
     const regexResult = sbtVersionRegex.exec(content);
     const sbtVersion = regexResult?.groups?.version;
@@ -353,8 +354,6 @@ export function extractDependency(
 
       return {
         deps: [sbtDependency],
-        globalVars: {},
-        localVars: {},
         packageFile,
         registryUrls: [REGISTRY_URLS.mavenCentral],
       };
@@ -381,6 +380,8 @@ export function extractDependency(
   if (!parsedResult) {
     return null;
   }
+
+  delete parsedResult?.globalVars;
   return parsedResult;
 }
 
@@ -397,14 +398,12 @@ function prepareLoadPackageFiles(
   let scalaVersion: string | undefined = undefined;
 
   for (const { packageFile, content } of packageFilesContent) {
-    const acc: PackageFile & ParseOptions = {
+    const res = extractDependency(content, {
       deps: [],
       registryUrls,
       localVars: globalVars,
-      globalVars: {},
       packageFile,
-    };
-    const res = extractDependency(content, acc);
+    });
 
     if (res) {
       globalVars = { ...globalVars, ...res.localVars };
@@ -459,13 +458,11 @@ export async function extractAllPackageFiles(
         deps: [],
         packageFile,
         scalaVersion,
-        localVars: {},
         globalVars,
       });
       for (const dep of res?.deps ?? []) {
         const variableSourceFile = dep?.editFile ?? packageFile;
         delete res?.localVars;
-        delete res?.globalVars;
         delete res?.scalaVersion;
         delete dep.editFile;
         dep.registryUrls = [...new Set(dep.registryUrls)];
