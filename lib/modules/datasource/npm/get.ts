@@ -45,8 +45,8 @@ const PackageSource = z
       }),
     z
       .object({
-        url: z.string().nonempty().optional(),
-        directory: z.string().nonempty().optional(),
+        url: z.string().nonempty().nullish(),
+        directory: z.string().nonempty().nullish(),
       })
       .transform(({ url, directory }) => {
         const res: PackageSource = {};
