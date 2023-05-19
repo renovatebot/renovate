@@ -10,9 +10,10 @@ import * as packageCache from '../../../util/cache/package';
 import type { Http } from '../../../util/http';
 import type { HttpOptions } from '../../../util/http/types';
 import { regEx } from '../../../util/regex';
+import { LooseRecord } from '../../../util/schema-utils';
 import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
-import type { CachedReleaseResult, NpmResponse } from './types';
+import type { CachedReleaseResult } from './types';
 
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
@@ -67,6 +68,140 @@ const PackageSource = z
   ])
   .catch({ sourceUrl: null, sourceDirectory: null });
 
+const DepResponse = z
+  .object({
+    versions: LooseRecord(
+      z.object({
+        repository: PackageSource,
+        homepage: z.string().nullish().catch(null),
+        deprecated: z.union([z.boolean(), z.string()]).nullish().catch(null),
+        gitHead: z.string().nullish().catch(null),
+        dependencies: LooseRecord(z.string()).nullish().catch(null),
+        devDependencies: LooseRecord(z.string()).nullish().catch(null),
+      })
+    ).catch({}),
+    repository: PackageSource,
+    homepage: z.string().nullish().catch(null),
+    time: LooseRecord(z.string()).catch({}),
+    'dist-tags': LooseRecord(z.string()).nullish().catch(null),
+  })
+  .transform((body) => {
+    const { time, versions, 'dist-tags': tags, repository } = body;
+
+    const latestTag = tags?.latest;
+    const latestVersion = latestTag ? versions[latestTag] : undefined;
+
+    const homepage = body.homepage ?? latestVersion?.homepage;
+
+    const latestVersionRepository = latestVersion?.repository ?? repository;
+    const sourceUrl = repository.sourceUrl ?? latestVersionRepository.sourceUrl;
+    const sourceDirectory =
+      repository.sourceDirectory ?? latestVersionRepository.sourceDirectory;
+
+    const deprecated = latestVersion?.deprecated;
+    let deprecationMessage: string | null = null;
+    if (is.boolean(deprecated)) {
+      deprecationMessage = 'deprecated by setting deprecated="true"';
+    } else if (is.string(deprecated)) {
+      deprecationMessage = deprecated;
+    }
+
+    return {
+      time,
+      versions,
+      tags,
+      latestTag,
+      latestVersion,
+      homepage,
+      sourceUrl,
+      sourceDirectory,
+      deprecationMessage,
+    };
+  })
+  .transform(
+    ({
+      homepage,
+      sourceUrl,
+      sourceDirectory,
+      tags,
+      versions,
+      time,
+      deprecationMessage,
+    }): ReleaseResult | null => {
+      if (is.emptyObject(versions)) {
+        return null;
+      }
+
+      const result: ReleaseResult = { releases: [] };
+
+      if (homepage) {
+        result.homepage = homepage;
+      }
+
+      if (sourceUrl) {
+        result.sourceUrl = sourceUrl;
+      }
+
+      if (sourceDirectory) {
+        result.sourceDirectory = sourceDirectory;
+      }
+
+      if (tags) {
+        result.tags = tags;
+      }
+
+      if (deprecationMessage) {
+        result.deprecationMessage = deprecationMessage;
+      }
+
+      for (const [version, versionInfo] of Object.entries(versions)) {
+        const {
+          gitHead: gitRef,
+          dependencies,
+          devDependencies,
+          deprecated,
+          repository: src,
+        } = versionInfo;
+
+        const release: Release = { version };
+
+        if (gitRef) {
+          release.gitRef = gitRef;
+        }
+
+        if (dependencies) {
+          release.dependencies = dependencies;
+        }
+
+        if (devDependencies) {
+          release.devDependencies = devDependencies;
+        }
+
+        if (deprecated) {
+          release.isDeprecated = true;
+        }
+
+        const releaseTimestamp = time[version];
+        if (releaseTimestamp) {
+          release.releaseTimestamp = releaseTimestamp;
+        }
+
+        if (src.sourceUrl && src.sourceUrl !== sourceUrl) {
+          release.sourceUrl = src.sourceUrl;
+        }
+
+        if (src.sourceDirectory && src.sourceDirectory !== sourceDirectory) {
+          release.sourceDirectory = src.sourceDirectory;
+        }
+
+        result.releases.push(release);
+      }
+
+      return result;
+    }
+  )
+  .catch(null);
+
 export async function getDependency(
   http: Http,
   registryUrl: string,
@@ -109,16 +244,14 @@ export async function getDependency(
     cacheHardTtlMinutes = cacheMinutes;
   }
 
-  const uri = url.parse(packageUrl);
-
   try {
     const options: HttpOptions = {};
     if (cachedResult?.cacheData?.etag) {
       logger.trace({ packageName }, 'Using cached etag');
       options.headers = { 'If-None-Match': cachedResult.cacheData.etag };
     }
-    const raw = await http.getJson<NpmResponse>(packageUrl, options);
-    if (cachedResult?.cacheData && raw.statusCode === 304) {
+    const res = await http.getJson(packageUrl, options, DepResponse);
+    if (cachedResult?.cacheData && res.statusCode === 304) {
       logger.trace(`Cached npm result for ${packageName} is revalidated`);
       cachedResult.cacheData.softExpireAt = softExpireAt;
       await packageCache.set(
@@ -130,66 +263,20 @@ export async function getDependency(
       delete cachedResult.cacheData;
       return cachedResult;
     }
-    const etag = raw.headers.etag;
-    const res = raw.body;
-    if (!res.versions || !Object.keys(res.versions).length) {
+    const etag = res.headers.etag;
+    const dep = res.body;
+    if (!dep) {
       // Registry returned a 200 OK but with no versions
       logger.debug(`No versions returned for npm dependency ${packageName}`);
       return null;
     }
 
-    const latestVersion = res.versions[res['dist-tags']?.latest ?? ''];
-    res.repository ??= latestVersion?.repository;
-    res.homepage ??= latestVersion?.homepage;
-
-    const { sourceUrl, sourceDirectory } = PackageSource.parse(res.repository);
-
-    // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      homepage: res.homepage,
-      releases: [],
-      tags: res['dist-tags'],
-      registryUrl,
-    };
-
-    if (sourceUrl) {
-      dep.sourceUrl = sourceUrl;
+    dep.registryUrl = registryUrl;
+    if (dep.deprecationMessage) {
+      dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${dep.deprecationMessage}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
     }
-
-    if (sourceDirectory) {
-      dep.sourceDirectory = sourceDirectory;
-    }
-
-    if (latestVersion?.deprecated) {
-      dep.deprecationMessage = `On registry \`${registryUrl}\`, the "latest" version of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
-    }
-    dep.releases = Object.keys(res.versions).map((version) => {
-      const release: Release = {
-        version,
-        gitRef: res.versions?.[version].gitHead,
-        dependencies: res.versions?.[version].dependencies,
-        devDependencies: res.versions?.[version].devDependencies,
-      };
-      if (res.time?.[version]) {
-        release.releaseTimestamp = res.time[version];
-      }
-      if (res.versions?.[version].deprecated) {
-        release.isDeprecated = true;
-      }
-      const source = PackageSource.parse(res.versions?.[version].repository);
-      if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
-        release.sourceUrl = source.sourceUrl;
-      }
-      if (
-        source.sourceDirectory &&
-        source.sourceDirectory !== dep.sourceDirectory
-      ) {
-        release.sourceDirectory = source.sourceDirectory;
-      }
-      return release;
-    });
     logger.trace({ dep }, 'dep');
-    const cacheControl = raw.headers?.['cache-control'];
+    const cacheControl = res.headers?.['cache-control'];
     if (
       is.nonEmptyString(cacheControl) &&
       regEx(/(^|,)\s*public\s*(,|$)/).test(cacheControl)
@@ -216,6 +303,7 @@ export async function getDependency(
     ) {
       return null;
     }
+    const uri = url.parse(packageUrl);
     if (uri.host === 'registry.npmjs.org') {
       if (cachedResult) {
         logger.warn(
