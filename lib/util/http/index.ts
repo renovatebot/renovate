@@ -222,9 +222,11 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     }
 
     try {
-      const res = copyResponse(await resPromise, !!memCacheKey);
-      res.authorization = !!options?.headers?.authorization;
-      return res;
+      const res = await resPromise;
+      const deepCopyNeeded = !!memCacheKey && res.statusCode !== 304;
+      const resCopy = copyResponse(res, deepCopyNeeded);
+      resCopy.authorization = !!options?.headers?.authorization;
+      return resCopy;
     } catch (err) {
       const { abortOnError, abortIgnoreStatusCodes } = options;
       if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
