@@ -520,15 +520,16 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         packageFile: 'some-file',
       },
     ];
-    pnpm.getConstraints.mockReturnValue('>=6.0.0 >=8');
     await getLockedVersions(packageFiles);
     expect(packageFiles).toEqual([
       {
-        extractedConstraints: { pnpm: '>=6.0.0 >=8' },
         deps: [
           { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
           { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
         ],
+        extractedConstraints: {
+          pnpm: '>=6.0.0',
+        },
         lockFiles: ['pnpm-lock.yaml'],
         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
         packageFile: 'some-file',

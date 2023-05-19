@@ -266,4 +266,8 @@ describe('modules/manager/npm/post-update/pnpm', () => {
       },
     ]);
   });
+
+  it('returns constraints from lock file', () => {
+    expect(pnpmHelper.getConstraintsFromLockFile(6)).toBe('>=8');
+  });
 });
