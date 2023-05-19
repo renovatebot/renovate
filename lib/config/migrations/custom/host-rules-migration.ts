@@ -61,18 +61,30 @@ export class HostRulesMigration extends AbstractMigration {
 }
 
 function validateHostRule(rule: LegacyHostRule & HostRule): void {
-  const { matchHost } = rule;
-  const { hostName, domainName, baseUrl, endpoint, host } = rule;
-  const hostValues = [
+  const { matchHost, hostName, domainName, baseUrl, endpoint, host } = rule;
+  const hosts: Record<string, string> = removeUndefinedFields({
     matchHost,
     hostName,
     domainName,
     baseUrl,
     endpoint,
     host,
-  ].filter(is.string);
-  if (hostValues.length > 1) {
-    const distinctHostValues = new Set(hostValues);
+  });
+
+  function removeUndefinedFields(
+    obj: Record<string, any>
+  ): Record<string, string> {
+    const keys = Object.keys(obj);
+    for (const key of keys) {
+      if (obj[key] === undefined) {
+        delete obj[key];
+      }
+    }
+    return obj;
+  }
+
+  if (Object.keys(hosts).length > 1) {
+    const distinctHostValues = new Set(Object.values(hosts));
     // check if the host values are duplicated
     if (distinctHostValues.size > 1) {
       const error = new Error(CONFIG_VALIDATION);
@@ -83,6 +95,7 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
       throw error;
     } else {
       logger.warn(
+        { hosts },
         'Duplicate host values found, please only use `matchHost` to specify the host'
       );
     }
