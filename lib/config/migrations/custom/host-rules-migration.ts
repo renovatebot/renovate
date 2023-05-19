@@ -75,7 +75,7 @@ function validateHostRule(rule: LegacyHostRule & HostRule): void {
     obj: Record<string, any>
   ): Record<string, string> {
     const result: Record<string, string> = {};
-    for (const key in obj) {
+    for (const key of Object.keys(obj)) {
       if (is.string(obj[key])) {
         result[key] = obj[key];
       }
