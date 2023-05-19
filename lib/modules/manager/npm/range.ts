@@ -19,7 +19,7 @@ export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   }
   if (depType === 'peerDependencies') {
     // Widen peer dependencies
-    logger.trace({ currentValue }, 'Widening peer dependencies');
+    logger.debug('Widening peer dependencies');
     return 'widen';
   }
   if (isComplexRange) {
