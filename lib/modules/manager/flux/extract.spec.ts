@@ -739,11 +739,10 @@ describe('modules/manager/flux/extract', () => {
             {
               currentValue: '0.4.0',
               datasource: DockerDatasource.id,
-              depName:
+              depName: 'actions-runner-controller-charts/gha-runner-scale-set',
+              packageName:
                 'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
-              registryUrls: [
-                'ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set',
-              ],
+              registryUrls: [],
             },
           ],
           packageFile:

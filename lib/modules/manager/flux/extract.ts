@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -182,22 +183,24 @@ function resolveResourceManifest(
                 resource.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => {
-            if (repo.spec.type === 'oci') {
-              // Change datasource to Docker
-              dep.datasource = DockerDatasource.id;
-              // Ensure the URL is a valid OCI path
-              dep.depName = `${repo.spec.url.replace(
-                'oci://',
-                ''
-              )}/${dep.depName!}`;
-              return dep.depName;
-            } else if (repo.spec.url.startsWith('oci://')) {
-              return repo.spec.url.replace('oci://', '');
-            } else {
-              return repo.spec.url;
-            }
-          });
+          dep.registryUrls = matchingRepositories
+            .map((repo) => {
+              if (repo.spec.type === 'oci') {
+                // Change datasource to Docker
+                dep.datasource = DockerDatasource.id;
+                // Ensure the URL is a valid OCI path
+                dep.packageName = `${repo.spec.url.replace(
+                  'oci://',
+                  ''
+                )}/${dep.depName!}`;
+                return null;
+              } else if (repo.spec.url.startsWith('oci://')) {
+                return repo.spec.url.replace('oci://', '');
+              } else {
+                return repo.spec.url;
+              }
+            })
+            .filter(is.string);
         } else {
           dep.skipReason = 'unknown-registry';
         }
