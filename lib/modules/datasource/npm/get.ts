@@ -1,6 +1,7 @@
 import url from 'node:url';
 import is from '@sindresorhus/is';
 import { DateTime } from 'luxon';
+import { z } from 'zod';
 import { GlobalConfig } from '../../../config/global';
 import { HOST_DISABLED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -13,11 +14,6 @@ import { joinUrlParts } from '../../../util/url';
 import type { Release, ReleaseResult } from '../types';
 import type { CachedReleaseResult, NpmResponse } from './types';
 
-interface PackageSource {
-  sourceUrl?: string;
-  sourceDirectory?: string;
-}
-
 const SHORT_REPO_REGEX = regEx(
   /^((?<platform>bitbucket|github|gitlab):)?(?<shortRepo>[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+)$/
 );
@@ -28,26 +24,42 @@ const platformMapping: Record<string, string> = {
   gitlab: 'https://gitlab.com/',
 };
 
-function getPackageSource(repository: any): PackageSource {
-  const res: PackageSource = {};
-  if (repository) {
-    if (is.nonEmptyString(repository)) {
-      const shortMatch = repository.match(SHORT_REPO_REGEX);
-      if (shortMatch?.groups) {
-        const { platform = 'github', shortRepo } = shortMatch.groups;
-        res.sourceUrl = platformMapping[platform] + shortRepo;
-      } else {
-        res.sourceUrl = repository;
-      }
-    } else if (is.nonEmptyString(repository.url)) {
-      res.sourceUrl = repository.url;
-    }
-    if (is.nonEmptyString(repository.directory)) {
-      res.sourceDirectory = repository.directory;
-    }
-  }
-  return res;
+interface PackageSource {
+  sourceUrl?: string;
+  sourceDirectory?: string;
 }
+
+const PackageSource = z
+  .union([
+    z
+      .string()
+      .nonempty()
+      .transform((repository): PackageSource => {
+        const shortMatch = repository.match(SHORT_REPO_REGEX);
+        if (shortMatch?.groups) {
+          const { platform = 'github', shortRepo } = shortMatch.groups;
+          return { sourceUrl: platformMapping[platform] + shortRepo };
+        } else {
+          return { sourceUrl: repository };
+        }
+      }),
+    z
+      .object({
+        url: z.string().nonempty().optional(),
+        directory: z.string().nonempty().optional(),
+      })
+      .transform(({ url, directory }) => {
+        const res: PackageSource = {};
+        if (url) {
+          res.sourceUrl = url;
+        }
+        if (directory) {
+          res.sourceDirectory = directory;
+        }
+        return res;
+      }),
+  ])
+  .catch({});
 
 export async function getDependency(
   http: Http,
@@ -124,7 +136,7 @@ export async function getDependency(
     res.repository ??= latestVersion?.repository;
     res.homepage ??= latestVersion?.homepage;
 
-    const { sourceUrl, sourceDirectory } = getPackageSource(res.repository);
+    const { sourceUrl, sourceDirectory } = PackageSource.parse(res.repository);
 
     // Simplify response before caching and returning
     const dep: ReleaseResult = {
@@ -152,7 +164,7 @@ export async function getDependency(
       if (res.versions?.[version].deprecated) {
         release.isDeprecated = true;
       }
-      const source = getPackageSource(res.versions?.[version].repository);
+      const source = PackageSource.parse(res.versions?.[version].repository);
       if (source.sourceUrl && source.sourceUrl !== dep.sourceUrl) {
         release.sourceUrl = source.sourceUrl;
       }
