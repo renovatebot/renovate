@@ -153,22 +153,24 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
     options = applyAuthorization(options);
 
     // use sha512: https://www.npmjs.com/package/hasha#algorithm
-    const cacheKey = hasha([
-      'got-',
-      JSON.stringify({
-        url,
-        headers: options.headers,
-        method: options.method,
-      }),
-    ]);
+    const memCacheKey =
+      options.memCache !== false &&
+      (options.method === 'get' || options.method === 'head')
+        ? hasha([
+            'got-',
+            JSON.stringify({
+              url,
+              headers: options.headers,
+              method: options.method,
+            }),
+          ])
+        : null;
+
     let resPromise: Promise<HttpResponse<T>> | null = null;
 
-    // Cache GET requests unless useCache=false
-    if (
-      (options.method === 'get' || options.method === 'head') &&
-      options.useCache !== false
-    ) {
-      resPromise = memCache.get(cacheKey);
+    // Cache GET requests unless memCache=false
+    if (memCacheKey) {
+      resPromise = memCache.get(memCacheKey);
     }
 
     // istanbul ignore else: no cache tests
@@ -195,8 +197,8 @@ export class Http<Opts extends HttpOptions = HttpOptions> {
 
       resPromise = queuedTask();
 
-      if (options.method === 'get' || options.method === 'head') {
-        memCache.set(cacheKey, resPromise); // always set if it's a get or a head
+      if (memCacheKey) {
+        memCache.set(memCacheKey, resPromise);
       }
     }
 
