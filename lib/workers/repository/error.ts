@@ -5,6 +5,7 @@ import {
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
+  MISSING_API_CREDENTIALS,
   NO_VULNERABILITY_ALERTS,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
@@ -33,7 +34,10 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { raiseConfigWarningIssue } from './error-config';
+import {
+  raiseConfigWarningIssue,
+  raiseCredentialsWarningIssue,
+} from './error-config';
 
 export default async function handleError(
   config: RenovateConfig,
@@ -114,6 +118,12 @@ export default async function handleError(
     delete config.branchList;
     logger.info({ error: err }, 'Repository has invalid config');
     await raiseConfigWarningIssue(config, err);
+    return err.message;
+  }
+  if (err.message === MISSING_API_CREDENTIALS) {
+    delete config.branchList;
+    logger.info({ error: err }, MISSING_API_CREDENTIALS);
+    await raiseCredentialsWarningIssue(config, err);
     return err.message;
   }
   if (err.message === CONFIG_SECRETS_EXPOSED) {

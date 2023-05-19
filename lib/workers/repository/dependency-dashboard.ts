@@ -168,6 +168,7 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
       )
   );
   if (repoProblems.size) {
+    logger.debug({ repoProblems }, 'repository problems');
     newIssueBody += '## Repository problems\n\n';
     newIssueBody +=
       'These problems occurred while renovating this repository.\n\n';
