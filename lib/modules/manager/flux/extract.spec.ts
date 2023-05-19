@@ -728,7 +728,7 @@ describe('modules/manager/flux/extract', () => {
       ]);
     });
 
-    it('extract oci helm', async () => {
+    it('should handle HelmRepository with type OCI', async () => {
       const result = await extractAllPackageFiles(config, [
         'lib/modules/manager/flux/__fixtures__/helmOCISource.yaml',
         'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
@@ -747,6 +747,28 @@ describe('modules/manager/flux/extract', () => {
           ],
           packageFile:
             'lib/modules/manager/flux/__fixtures__/helmOCIRelease.yaml',
+        },
+      ]);
+    });
+
+    it('should handle HelmRepository w/o type oci and url starts with oci', async () => {
+      const result = await extractAllPackageFiles(config, [
+        'lib/modules/manager/flux/__fixtures__/helmOCISource2.yaml',
+        'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
+      ]);
+      expect(result).toEqual([
+        {
+          deps: [
+            {
+              currentValue: '2.6.0',
+              datasource: DockerDatasource.id,
+              depName: 'kyverno',
+              packageName: 'ghcr.io/kyverno/charts/kyverno',
+              registryUrls: [],
+            },
+          ],
+          packageFile:
+            'lib/modules/manager/flux/__fixtures__/helmOCIRelease2.yaml',
         },
       ]);
     });

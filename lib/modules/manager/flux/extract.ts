@@ -185,7 +185,10 @@ function resolveResourceManifest(
         if (matchingRepositories.length) {
           dep.registryUrls = matchingRepositories
             .map((repo) => {
-              if (repo.spec.type === 'oci') {
+              if (
+                repo.spec.type === 'oci' ||
+                repo.spec.url.startsWith('oci://')
+              ) {
                 // Change datasource to Docker
                 dep.datasource = DockerDatasource.id;
                 // Ensure the URL is a valid OCI path
@@ -194,8 +197,6 @@ function resolveResourceManifest(
                   ''
                 )}/${dep.depName!}`;
                 return null;
-              } else if (repo.spec.url.startsWith('oci://')) {
-                return repo.spec.url.replace('oci://', '');
               } else {
                 return repo.spec.url;
               }
