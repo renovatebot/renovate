@@ -75,6 +75,7 @@ const repoGroups = {
     'https://github.com/dotnet/extensions',
     'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
+    'https://github.com/dotnet/sdk',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
     'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',

@@ -111,6 +111,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
+  automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
@@ -131,10 +132,10 @@ export interface BranchConfig
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null;
+  branchSha?: string | null;
   baseBranch?: string;
   baseBranchSha?: string | null;
-  automerge: boolean;
+  automerge?: boolean;
   isModified?: boolean;
   isPristine?: boolean;
 }
