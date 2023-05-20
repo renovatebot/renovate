@@ -2,7 +2,7 @@ This manager supports updating dependencies inside `pyproject.toml` files.
 
 In addition to standard dependencies, these toolsets are also supported:
 
-- `pdm`
+- `pdm` ( including `pdm.lock` files )
 
 Available `depType`s:
 
