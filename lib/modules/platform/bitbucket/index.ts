@@ -80,7 +80,7 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   const options: HttpOptions = {
-    useCache: false,
+    memCache: false,
   };
   if (token) {
     options.token = token;
@@ -293,7 +293,7 @@ export async function findPr({
   const pr = prList.find(
     (p) =>
       p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
       matchesState(p.state, state)
   );
   if (pr) {
@@ -362,7 +362,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<BitbucketStatus>(
@@ -370,7 +370,7 @@ async function getStatus(
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
-    { useCache }
+    { memCache }
   );
 }
 // Returns the combined status for a branch.
@@ -518,6 +518,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
@@ -798,7 +802,10 @@ export async function createPr({
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
-        `/2.0/repositories/${config.repository}/effective-default-reviewers`
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`,
+        {
+          paginate: true,
+        }
       )
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({

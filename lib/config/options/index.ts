@@ -521,6 +521,15 @@ const options: RenovateOptions[] = [
     default: null,
   },
   {
+    name: 'dependencyDashboardOSVVulnerabilitySummary',
+    description:
+      'Control if the Dependency Dashboard issue lists CVEs supplied by [osv.dev](https://osv.dev).',
+    type: 'string',
+    allowedValues: ['none', 'all', 'unresolved'],
+    default: 'none',
+    experimental: true,
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to `false` to make Renovate create a new issue for each config warning, instead of reopening or reusing an existing issue.',
@@ -1549,6 +1558,13 @@ const options: RenovateOptions[] = [
     type: 'string',
     default: 'deps',
   },
+  {
+    name: 'commitMessageLowerCase',
+    description: 'Lowercase PR- and commit titles.',
+    type: 'string',
+    allowedValues: ['auto', 'never'],
+    default: 'auto',
+  },
   // PR Behaviour
   {
     name: 'rollbackPrs',
@@ -2390,6 +2406,7 @@ const options: RenovateOptions[] = [
       'configErrorIssue',
       'deprecationWarningIssues',
       'lockFileErrors',
+      'missingCredentialsError',
       'onboardingClose',
       'prEditedNotification',
       'prIgnoreNotification',
@@ -2623,6 +2640,16 @@ const options: RenovateOptions[] = [
     description: `Whether to be strict about the use of special characters within the branch name.`,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'checkedBranches',
+    description:
+      'A list of branch names to mark for creation or rebasing as if it was selected in the Dependency Dashboard issue.',
+    type: 'array',
+    subType: 'string',
+    experimental: true,
+    globalOnly: true,
+    default: [],
   },
 ];
 

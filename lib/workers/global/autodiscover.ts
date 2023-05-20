@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import type { AllConfig } from '../../config/types';
 import { logger } from '../../logger';
 import { platform } from '../../modules/platform';
@@ -13,6 +13,19 @@ function repoName(value: string | { repository: string }): string {
 export async function autodiscoverRepositories(
   config: AllConfig
 ): Promise<AllConfig> {
+  if (config.platform === 'local') {
+    if (config.repositories?.length) {
+      logger.debug(
+        { repositories: config.repositories },
+        'Found repositories when in local mode'
+      );
+      throw new Error(
+        'Invalid configuration: repositories list not supported when platform=local'
+      );
+    }
+    config.repositories = ['local'];
+    return config;
+  }
   if (!config.autodiscover) {
     if (!config.repositories?.length) {
       logger.warn(

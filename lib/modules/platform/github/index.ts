@@ -191,20 +191,24 @@ export async function getRepos(): Promise<string[]> {
   try {
     if (platformConfig.isGHApp) {
       const res = await githubApi.getJson<{
-        repositories: { full_name: string }[];
+        repositories: GhRestRepo[];
       }>(`installation/repositories?per_page=100`, {
         paginationField: 'repositories',
         paginate: 'all',
       });
       return res.body.repositories
         .filter(is.nonEmptyObject)
+        .filter((repo) => !repo.archived)
         .map((repo) => repo.full_name);
     } else {
-      const res = await githubApi.getJson<{ full_name: string }[]>(
+      const res = await githubApi.getJson<GhRestRepo[]>(
         `user/repos?per_page=100`,
         { paginate: 'all' }
       );
-      return res.body.filter(is.nonEmptyObject).map((repo) => repo.full_name);
+      return res.body
+        .filter(is.nonEmptyObject)
+        .filter((repo) => !repo.archived)
+        .map((repo) => repo.full_name);
     }
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
@@ -712,7 +716,7 @@ export async function findPr({
       return false;
     }
 
-    if (prTitle && prTitle !== p.title) {
+    if (prTitle && prTitle.toUpperCase() !== p.title.toUpperCase()) {
       return false;
     }
 
@@ -739,7 +743,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
 
   let branchExists = false;
   try {
-    await githubApi.head(refUrl, { useCache: false });
+    await githubApi.head(refUrl, { memCache: false });
     branchExists = true;
   } catch (err) {
     if (err.statusCode !== 404) {
@@ -832,7 +836,9 @@ async function getStatus(
   )}/status`;
 
   return (
-    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, { useCache })
+    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, {
+      memCache: useCache,
+    })
   ).body;
 }
 
@@ -947,7 +953,9 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (await githubApi.getJson<GhBranchStatus[]>(url, { useCache })).body;
+  return (
+    await githubApi.getJson<GhBranchStatus[]>(url, { memCache: useCache })
+  ).body;
 }
 
 interface GithubToRenovateStatusMapping {
@@ -1073,7 +1081,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.body;
     return {
