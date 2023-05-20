@@ -332,7 +332,7 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "aws-sdk-client-mock/sinon/@sinonjs/fake-timers": "10.0.2"
+    "aws-sdk-client-mock/sinon/@sinonjs/fake-timers": "10.1.0"
   },
   "files": [
     "dist",
