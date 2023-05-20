@@ -51,8 +51,6 @@ const Lines = z
 type Lines = z.infer<typeof Lines>;
 
 export class VersionsDatasource extends Datasource {
-  private isInitialFetch = true;
-
   constructor(override readonly id: string) {
     super(id);
   }
@@ -98,9 +96,9 @@ export class VersionsDatasource extends Datasource {
   }
 
   /**
-   * Since each `/versions` reponse exceed 10MB,
-   * there is potential for a memory leak if we construct slices
-   * of the response body and cache them long-term:
+   * Since each `/versions` response exceeds 10MB,
+   * there is potential for a memory leak if we extract slices
+   * of the response body (i.e. versions) and store them in memory.
    *
    *   https://bugs.chromium.org/p/v8/issues/detail?id=2869
    *
@@ -109,9 +107,7 @@ export class VersionsDatasource extends Datasource {
    */
   private copystr(x: string): string {
     const len = Buffer.byteLength(x, 'utf8');
-    const buf = this.isInitialFetch
-      ? Buffer.allocUnsafe(len) // allocate from pre-allocated buffer
-      : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
+    const buf = Buffer.allocUnsafeSlow(len); // allocate standalone buffer
     buf.write(x, 'utf8');
     return buf.toString('utf8');
   }
@@ -183,7 +179,6 @@ export class VersionsDatasource extends Datasource {
 
     const lines = Lines.parse(newLines);
     this.updatePackageReleases(regCache.packageReleases, lines);
-    this.isInitialFetch = false;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
