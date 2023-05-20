@@ -365,13 +365,15 @@ async function getStatus(
   memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<BitbucketStatus>(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
-    'get',
-    { memCache }
-  );
+  return (
+    await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
+      `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
+      {
+        paginate: true,
+        memCache,
+      }
+    )
+  ).body.values;
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
