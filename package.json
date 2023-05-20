@@ -279,7 +279,7 @@
     "@types/marshal": "0.5.1",
     "@types/moo": "0.5.5",
     "@types/nock": "10.0.3",
-    "@types/node": "18.16.8",
+    "@types/node": "18.16.13",
     "@types/parse-link-header": "2.0.1",
     "@types/semver": "7.5.0",
     "@types/semver-stable": "3.0.0",
@@ -332,7 +332,7 @@
     "unified": "9.2.2"
   },
   "resolutions": {
-    "aws-sdk-client-mock/sinon/@sinonjs/fake-timers": "10.0.2"
+    "aws-sdk-client-mock/sinon/@sinonjs/fake-timers": "10.2.0"
   },
   "files": [
     "dist",
