@@ -142,7 +142,7 @@ export class VersionsDatasource extends Datasource {
   private async getFingerprint(registryUrl: string): Promise<string> {
     const url = `${registryUrl}/versions`;
     const options: HttpOptions = {
-      useCache: false,
+      memCache: false,
       headers: {
         ['Accept-Encoding']: 'deflate, compress, br',
         ['Range']: 'bytes=0-1023',
@@ -167,7 +167,7 @@ export class VersionsDatasource extends Datasource {
               ['Range']: `bytes=${offset}-`,
             },
           };
-    options.useCache = false;
+    options.memCache = false;
 
     logger.debug('Rubygems: Fetching rubygems.org versions');
     const start = Date.now();
