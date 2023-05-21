@@ -24,7 +24,7 @@ describe('modules/manager/bazel-module/context', () => {
       ]);
     });
 
-    it('construct a rule with array arg', () => {
+    it('construct a rule with different attribute types', () => {
       const ctx = new Ctx()
         .startRule('foo_library')
         .startAttribute('name')

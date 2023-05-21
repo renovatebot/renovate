@@ -2,7 +2,6 @@ import { lang, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { RecordFragment } from './fragments';
-import * as starlark from './starlark';
 
 const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
 const supportedRules = [
