@@ -204,7 +204,7 @@ function resolveResourceManifest(
             .filter(is.string);
 
           // if registryUrls is empty, delete it from dep
-          if (dep.registryUrls && dep.registryUrls.length === 0) {
+          if (!dep.registryUrls?.length) {
             delete dep.registryUrls;
           }
         } else {
