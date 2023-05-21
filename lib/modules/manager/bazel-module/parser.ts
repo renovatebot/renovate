@@ -9,9 +9,6 @@ const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 /**
  * Matches key-value pairs:
  * - `name = "foobar"`
- * - `dev_dependeny = True`
- * - `patch_strip = 1`
- * - `patches = ["//:rules_foo.patch"]`
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
