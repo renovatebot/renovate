@@ -79,7 +79,7 @@ export class Ctx implements CtxCompatible {
         parent.isComplete = true;
         return true;
       }
-      if (parent.type === 'array' && fragments.isPrimitive(current)) {
+      if (parent.type === 'array' && fragments.isString(current)) {
         parent.items.push(current);
         return true;
       }
@@ -108,11 +108,6 @@ export class Ctx implements CtxCompatible {
 
   addString(value: string): Ctx {
     this.stack.push(fragments.string(value));
-    return this.processStack();
-  }
-
-  addBoolean(value: string | boolean): Ctx {
-    this.stack.push(fragments.boolean(value));
     return this.processStack();
   }
 

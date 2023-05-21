@@ -1,30 +1,19 @@
 import { z } from 'zod';
 import { LooseArray, LooseRecord } from '../../../util/schema-utils';
-import * as starlark from './starlark';
 
 export const StringFragmentSchema = z.object({
   type: z.literal('string'),
   value: z.string(),
   isComplete: z.literal(true),
 });
-export const BooleanFragmentSchema = z.object({
-  type: z.literal('boolean'),
-  value: z.boolean(),
-  isComplete: z.literal(true),
-});
-const PrimitiveFragmentsSchema = z.discriminatedUnion('type', [
-  StringFragmentSchema,
-  BooleanFragmentSchema,
-]);
 export const ArrayFragmentSchema = z.object({
   type: z.literal('array'),
-  items: LooseArray(PrimitiveFragmentsSchema),
+  items: LooseArray(StringFragmentSchema),
   isComplete: z.boolean(),
 });
 const ValueFragmentsSchema = z.discriminatedUnion('type', [
-  StringFragmentSchema,
-  BooleanFragmentSchema,
   ArrayFragmentSchema,
+  StringFragmentSchema,
 ]);
 export const RecordFragmentSchema = z.object({
   type: z.literal('record'),
@@ -40,7 +29,6 @@ export const AttributeFragmentSchema = z.object({
 const AllFragmentsSchema = z.discriminatedUnion('type', [
   ArrayFragmentSchema,
   AttributeFragmentSchema,
-  BooleanFragmentSchema,
   RecordFragmentSchema,
   StringFragmentSchema,
 ]);
@@ -48,9 +36,7 @@ const AllFragmentsSchema = z.discriminatedUnion('type', [
 export type AllFragments = z.infer<typeof AllFragmentsSchema>;
 export type ArrayFragment = z.infer<typeof ArrayFragmentSchema>;
 export type AttributeFragment = z.infer<typeof AttributeFragmentSchema>;
-export type BooleanFragment = z.infer<typeof BooleanFragmentSchema>;
 export type ChildFragments = Record<string, ValueFragments>;
-export type PrimitiveFragments = z.infer<typeof PrimitiveFragmentsSchema>;
 export type RecordFragment = z.infer<typeof RecordFragmentSchema>;
 export type StringFragment = z.infer<typeof StringFragmentSchema>;
 export type ValueFragments = z.infer<typeof ValueFragmentsSchema>;
@@ -60,14 +46,6 @@ export function string(value: string): StringFragment {
     type: 'string',
     isComplete: true,
     value,
-  };
-}
-
-export function boolean(value: string | boolean): BooleanFragment {
-  return {
-    type: 'boolean',
-    isComplete: true,
-    value: typeof value === 'string' ? starlark.asBoolean(value) : value,
   };
 }
 
@@ -96,7 +74,7 @@ export function attribute(
 }
 
 export function array(
-  items: PrimitiveFragments[] = [],
+  items: StringFragment[] = [],
   isComplete = false
 ): ArrayFragment {
   return {
@@ -111,7 +89,7 @@ export function isValue(data: unknown): data is ValueFragments {
   return result.success;
 }
 
-export function isPrimitive(data: unknown): data is PrimitiveFragments {
-  const result = PrimitiveFragmentsSchema.safeParse(data);
+export function isString(data: unknown): data is StringFragment {
+  const result = StringFragmentSchema.safeParse(data);
   return result.success;
 }

@@ -2,24 +2,21 @@ import { lang, query as q } from 'good-enough-parser';
 import { regEx } from '../../../util/regex';
 import { Ctx } from './context';
 import type { RecordFragment } from './fragments';
-import * as starlark from './starlark';
 
-const booleanValuesRegex = regEx(`^${starlark.booleanStringValues.join('|')}$`);
-const supportedRules = ['bazel_dep'];
+const supportedRules = ['bazel_dep', 'git_override'];
 const supportedRulesRegex = regEx(`^${supportedRules.join('|')}$`);
 
 /**
  * Matches key-value pairs:
  * - `name = "foobar"`
  * - `dev_dependeny = True`
+ * - `patch_strip = 1`
+ * - `patches = ["//:rules_foo.patch"]`
  **/
 const kvParams = q
   .sym<Ctx>((ctx, token) => ctx.startAttribute(token.value))
   .op('=')
-  .alt(
-    q.str((ctx, token) => ctx.addString(token.value)),
-    q.sym<Ctx>(booleanValuesRegex, (ctx, token) => ctx.addBoolean(token.value))
-  );
+  .str((ctx, token) => ctx.addString(token.value));
 
 const moduleRules = q
   .sym<Ctx>(supportedRulesRegex, (ctx, token) => ctx.startRule(token.value))
