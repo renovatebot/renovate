@@ -114,9 +114,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
-    );
+    const repos = (
+      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
+        `/2.0/repositories/?role=contributor`,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
