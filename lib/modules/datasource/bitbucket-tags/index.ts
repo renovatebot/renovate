@@ -55,9 +55,11 @@ export class BitbucketTagsDatasource extends Datasource {
     packageName: repo,
   }: GetReleasesConfig): Promise<ReleaseResult | null> {
     const url = `/2.0/repositories/${repo}/refs/tags`;
-    const bitbucketTags = (await this.bitbucketHttp.getJson<PagedResult<BitbucketTag>>(url, {
-      paginate: true,
-    })).body.values;
+    const bitbucketTags = (
+      await this.bitbucketHttp.getJson<PagedResult<BitbucketTag>>(url, {
+        paginate: true,
+      })
+    ).body.values;
 
     const dependency: ReleaseResult = {
       sourceUrl: BitbucketTagsDatasource.getSourceUrl(repo, registryUrl),
