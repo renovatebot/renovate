@@ -56,6 +56,7 @@ export interface UpdateResult {
   dependencyUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
+  groupName?: string;
   sourceUrl?: string | null;
   currentVersion?: string;
   isSingleVersion?: boolean;

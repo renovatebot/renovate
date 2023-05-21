@@ -99,6 +99,7 @@ export class CpanDatasource extends Datasource {
       if (releases.length > 0 && latestDistribution) {
         result = {
           releases,
+          groupName: latestDistribution,
           changelogUrl: `https://metacpan.org/dist/${latestDistribution}/changes`,
           homepage: `https://metacpan.org/pod/${packageName}`,
         };

@@ -73,6 +73,7 @@ describe('modules/datasource/cpan/index', () => {
         homepage: 'https://metacpan.org/pod/Plack',
         registryUrl: 'https://fastapi.metacpan.org/',
         releases: expect.toBeArrayOfSize(10),
+        groupName: 'Plack',
       });
       expect(res?.releases[1]).toMatchObject({
         isDeprecated: false,

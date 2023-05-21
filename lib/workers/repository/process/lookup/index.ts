@@ -99,6 +99,13 @@ export async function lookupUpdates(
         res.deprecationMessage = dependency.deprecationMessage;
       }
 
+      if (dependency.groupName) {
+        logger.debug(
+          `Found groupName for ${datasource} package ${packageName}`
+        );
+        res.groupName = dependency.groupName;
+      }
+
       res.sourceUrl = dependency?.sourceUrl;
       res.registryUrl = dependency?.registryUrl; // undefined when we fetched releases from multiple registries
       if (dependency.sourceDirectory) {

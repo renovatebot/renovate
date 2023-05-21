@@ -3,6 +3,7 @@ import { Fixtures } from '../../../../../test/fixtures';
 import * as httpMock from '../../../../../test/http-mock';
 import { getConfig, partial } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { CpanDatasource } from '../../../../modules/datasource/cpan';
 import { DockerDatasource } from '../../../../modules/datasource/docker';
 import { GitRefsDatasource } from '../../../../modules/datasource/git-refs';
 import { GithubReleasesDatasource } from '../../../../modules/datasource/github-releases';
@@ -50,6 +51,8 @@ describe('workers/repository/process/lookup/index', () => {
   );
 
   const getDockerDigest = jest.spyOn(DockerDatasource.prototype, 'getDigest');
+
+  const getCpanReleases = jest.spyOn(CpanDatasource.prototype, 'getReleases');
 
   beforeEach(() => {
     // TODO: fix wrong tests
@@ -2110,6 +2113,23 @@ describe('workers/repository/process/lookup/index', () => {
           updateType: `rollback`,
         },
       ]);
+    });
+
+    it('handles groupName', async () => {
+      config.currentValue = '2.106';
+      config.packageName = 'IO::Compress::Gzip';
+      config.datasource = CpanDatasource.id;
+      getCpanReleases.mockResolvedValueOnce({
+        releases: [
+          { version: '2.106' },
+          { version: '2.201' },
+          { version: '2.204' },
+        ],
+        groupName: 'IO-Compress',
+      });
+
+      const res = await lookup.lookupUpdates(config);
+      expect(res.groupName).toBe('IO-Compress');
     });
 
     describe('handles merge confidence', () => {

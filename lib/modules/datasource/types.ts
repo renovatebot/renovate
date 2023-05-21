@@ -59,6 +59,7 @@ export interface Release {
 
 export interface ReleaseResult {
   deprecationMessage?: string;
+  groupName?: string;
   isPrivate?: boolean;
   releases: Release[];
   tags?: Record<string, string> | undefined;
