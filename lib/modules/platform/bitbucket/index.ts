@@ -367,7 +367,9 @@ async function getStatus(
   const sha = await getBranchCommit(branchName);
   return (
     await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
-      `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
+      // TODO: types (#7154)
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
       {
         paginate: true,
         memCache,
