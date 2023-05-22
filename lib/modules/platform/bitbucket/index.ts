@@ -279,7 +279,12 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    const prs = (
+      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
+        paginate: true,
+        pagelen: 50,
+      })
+    ).body.values;
     config.prList = prs.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
