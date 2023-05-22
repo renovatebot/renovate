@@ -20,11 +20,14 @@ async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
-  const comments = (await bitbucketHttp.getJson<PagedResult<Comment>>(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`, {
-      paginate: true
-    }
-  )).body.values;
+  const comments = (
+    await bitbucketHttp.getJson<PagedResult<Comment>>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
+      {
+        paginate: true,
+      }
+    )
+  ).body.values;
 
   logger.debug(`Found ${comments.length} comments`);
   return comments;
