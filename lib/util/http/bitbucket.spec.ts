@@ -58,7 +58,6 @@ describe('util/http/bitbucket', () => {
   });
 
   it('paginates: adds default pagelen if non is present', async () => {
-
     const valuesPageOne = [...range(1, 100)];
     const valuesPageTwo = [...range(101, 200)];
     const valuesPageThree = [...range(201, 210)];
@@ -130,7 +129,6 @@ describe('util/http/bitbucket', () => {
     const valuesPageOne = [...range(1, 20)];
     const valuesPageTwo = [...range(21, 40)];
     const valuesPageThree = [...range(41, 44)];
-
 
     httpMock
       .scope(baseUrl)
