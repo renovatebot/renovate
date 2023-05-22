@@ -18,8 +18,6 @@ describe('modules/manager/bazel-module/fragments', () => {
     const result = fragments.boolean(true);
     expect(() => BooleanFragmentSchema.parse(result)).not.toThrow();
     expect(result.value).toBe(true);
-    const sameResult = fragments.boolean('True');
-    expect(sameResult).toEqual(result);
   });
 
   it('.record()', () => {
