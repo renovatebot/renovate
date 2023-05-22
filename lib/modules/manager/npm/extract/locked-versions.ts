@@ -80,14 +80,13 @@ export async function getLockedVersions(
         } else {
           packageFile.extractedConstraints!.npm = '<9';
         }
-      } else if (
-        lockfileVersion === 3 &&
-        !packageFile.extractedConstraints?.npm
-      ) {
-        packageFile.extractedConstraints!.npm = '>=7';
+      } else if (lockfileVersion === 3) {
+        if (!packageFile.extractedConstraints?.npm) {
+          packageFile.extractedConstraints!.npm = '>=7';
+        }
       } else {
         logger.warn(
-          { lockfileVersion },
+          { lockfileVersion, npmLock },
           'Found unsupported npm lockfile version'
         );
         return;

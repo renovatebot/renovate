@@ -88,16 +88,16 @@ describe('modules/manager/npm/extract/npm', () => {
     });
 
     it('should not throw if additional property exists', () => {
-      const npm9Lock = Fixtures.get('npm9/package-lock.json', '..');
+      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
       expect(() =>
-        extractPackages({ ...JSON.parse(npm9Lock), additionalProperty: 'test' })
+        extractPackages({ ...npm9Lock, additionalProperty: 'test' })
       ).not.toThrow();
     });
 
     it('should throw if lockfileVersion is invalid', () => {
-      const npm9Lock = Fixtures.get('npm9/package-lock.json', '..');
+      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
       expect(() => {
-        extractPackages({ ...JSON.parse(npm9Lock), lockfileVersion: 4 });
+        extractPackages({ ...npm9Lock, lockfileVersion: 4 });
       }).toThrow(
         'Invalid package-lock file. Neither v1, v2 nor v3 schema matched'
       );
@@ -112,10 +112,10 @@ describe('modules/manager/npm/extract/npm', () => {
     });
 
     it('should throw if lockfileVersion 3 without packages property', () => {
-      const npm9Lock = Fixtures.get('npm9/package-lock.json', '..');
+      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
       expect(() => {
         extractPackages({
-          ...JSON.parse(npm9Lock),
+          ...npm9Lock,
           packages: undefined,
           lockfileVersion: 3,
         });
