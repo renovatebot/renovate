@@ -6,6 +6,7 @@ import type { Platform } from './types';
 import * as platform from '.';
 
 jest.unmock('.');
+jest.unmock('./scm');
 
 describe('modules/platform/index', () => {
   beforeEach(() => {

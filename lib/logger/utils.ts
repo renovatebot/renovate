@@ -1,9 +1,9 @@
-import { Stream } from 'stream';
+import { Stream } from 'node:stream';
 import is from '@sindresorhus/is';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { RequestError as HttpError } from 'got';
-import { clone } from '../util/clone';
+import { ZodError } from 'zod';
 import { redactedFields, sanitize } from '../util/sanitize';
 import type { BunyanRecord, BunyanStream } from './types';
 
@@ -47,7 +47,74 @@ const contentFields = [
   'yarnLockParsed',
 ];
 
+type ZodShortenedIssue =
+  | null
+  | string
+  | string[]
+  | {
+      [key: string]: ZodShortenedIssue;
+    };
+
+export function prepareZodIssues(input: unknown): ZodShortenedIssue {
+  // istanbul ignore if
+  if (!is.plainObject(input)) {
+    return null;
+  }
+
+  let err: null | string | string[] = null;
+  if (is.array(input._errors, is.string)) {
+    // istanbul ignore else
+    if (input._errors.length === 1) {
+      err = input._errors[0];
+    } else if (input._errors.length > 1) {
+      err = input._errors;
+    } else {
+      err = null;
+    }
+  }
+  delete input._errors;
+
+  if (is.emptyObject(input)) {
+    return err;
+  }
+
+  const output: Record<string, ZodShortenedIssue> = {};
+  const entries = Object.entries(input);
+  for (const [key, value] of entries.slice(0, 3)) {
+    const child = prepareZodIssues(value);
+    if (child !== null) {
+      output[key] = child;
+    }
+  }
+
+  if (entries.length > 3) {
+    output['___'] = `... ${entries.length - 3} more`;
+  }
+
+  return output;
+}
+
+export function prepareZodError(err: ZodError): Record<string, unknown> {
+  // istanbul ignore next
+  Object.defineProperty(err, 'message', {
+    get: () => 'Schema error',
+    set: (_) => {
+      _;
+    },
+  });
+
+  return {
+    message: err.message,
+    stack: err.stack,
+    issues: prepareZodIssues(err.format()),
+  };
+}
+
 export default function prepareError(err: Error): Record<string, unknown> {
+  if (err instanceof ZodError) {
+    return prepareZodError(err);
+  }
+
   const response: Record<string, unknown> = {
     ...err,
   };
@@ -65,7 +132,7 @@ export default function prepareError(err: Error): Record<string, unknown> {
   // handle got error
   if (err instanceof HttpError) {
     const options: Record<string, unknown> = {
-      headers: clone(err.options.headers),
+      headers: structuredClone(err.options.headers),
       url: err.options.url?.toString(),
       hostType: err.options.context.hostType,
     };
@@ -82,8 +149,11 @@ export default function prepareError(err: Error): Record<string, unknown> {
         statusCode: err.response?.statusCode,
         statusMessage: err.response?.statusMessage,
         body:
-          err.name === 'TimeoutError' ? undefined : clone(err.response.body),
-        headers: clone(err.response.headers),
+          // istanbul ignore if: not easily testable
+          err.name === 'TimeoutError'
+            ? undefined
+            : structuredClone(err.response.body),
+        headers: structuredClone(err.response.headers),
         httpVersion: err.response.httpVersion,
         retryCount: err.response.retryCount,
       };
@@ -244,7 +314,7 @@ export function validateLogLevel(logLevelToCheck: string | undefined): void {
 }
 
 // Can't use `util/regex` because of circular reference to logger
-const urlRe = /[a-z]{3,9}:\/\/[-;:&=+$,\w]+@[a-z0-9.-]+/gi;
+const urlRe = /[a-z]{3,9}:\/\/[^@/]+@[a-z0-9.-]+/gi;
 const urlCredRe = /\/\/[^@]+@/g;
 
 export function sanitizeUrls(text: string): string {

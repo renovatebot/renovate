@@ -233,6 +233,7 @@ export async function extractPackageFile(
       } else if (depName === 'pnpm') {
         dep.datasource = NpmDatasource.id;
         dep.commitMessageTopic = 'pnpm';
+        extractedConstraints.pnpm = dep.currentValue;
       } else if (depName === 'vscode') {
         dep.datasource = GithubTagsDatasource.id;
         dep.packageName = 'microsoft/vscode';

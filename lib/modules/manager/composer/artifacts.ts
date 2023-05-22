@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
+import { z } from 'zod';
 import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   TEMPORARY_ERROR,
@@ -18,15 +19,18 @@ import {
 import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
+import { Json } from '../../../util/schema-utils';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { PackagistDatasource } from '../../datasource/packagist';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { AuthJson, ComposerLock } from './types';
+import { Lockfile, PackageFile } from './schema';
+import type { AuthJson } from './types';
 import {
   extractConstraints,
   findGithubToken,
   getComposerArguments,
   getPhpConstraint,
+  isArtifactAuthEnabled,
   requireComposerDependencyInstallation,
   takePersonalAccessTokenIfPossible,
 } from './utils';
@@ -34,27 +38,36 @@ import {
 function getAuthJson(): string | null {
   const authJson: AuthJson = {};
 
-  const githubToken = findGithubToken({
+  const githubHostRule = hostRules.find({
     hostType: 'github',
     url: 'https://api.github.com/',
   });
 
-  const gitTagsGithubToken = findGithubToken({
+  const gitTagsHostRule = hostRules.find({
     hostType: GitTagsDatasource.id,
     url: 'https://github.com',
   });
 
   const selectedGithubToken = takePersonalAccessTokenIfPossible(
-    githubToken,
-    gitTagsGithubToken
+    isArtifactAuthEnabled(githubHostRule)
+      ? findGithubToken(githubHostRule)
+      : undefined,
+    isArtifactAuthEnabled(gitTagsHostRule)
+      ? findGithubToken(gitTagsHostRule)
+      : undefined
   );
+
   if (selectedGithubToken) {
     authJson['github-oauth'] = {
       'github.com': selectedGithubToken,
     };
   }
 
-  hostRules.findAll({ hostType: 'gitlab' })?.forEach((gitlabHostRule) => {
+  for (const gitlabHostRule of hostRules.findAll({ hostType: 'gitlab' })) {
+    if (!isArtifactAuthEnabled(gitlabHostRule)) {
+      continue;
+    }
+
     if (gitlabHostRule?.token) {
       const host = gitlabHostRule.resolvedHost ?? 'gitlab.com';
       authJson['gitlab-token'] = authJson['gitlab-token'] ?? {};
@@ -65,20 +78,24 @@ function getAuthJson(): string | null {
         ...(authJson['gitlab-domains'] ?? []),
       ];
     }
-  });
+  }
 
-  hostRules
-    .findAll({ hostType: PackagistDatasource.id })
-    ?.forEach((hostRule) => {
-      const { resolvedHost, username, password, token } = hostRule;
-      if (resolvedHost && username && password) {
-        authJson['http-basic'] = authJson['http-basic'] ?? {};
-        authJson['http-basic'][resolvedHost] = { username, password };
-      } else if (resolvedHost && token) {
-        authJson.bearer = authJson.bearer ?? {};
-        authJson.bearer[resolvedHost] = token;
-      }
-    });
+  for (const packagistHostRule of hostRules.findAll({
+    hostType: PackagistDatasource.id,
+  })) {
+    if (!isArtifactAuthEnabled(packagistHostRule)) {
+      continue;
+    }
+
+    const { resolvedHost, username, password, token } = packagistHostRule;
+    if (resolvedHost && username && password) {
+      authJson['http-basic'] = authJson['http-basic'] ?? {};
+      authJson['http-basic'][resolvedHost] = { username, password };
+    } else if (resolvedHost && token) {
+      authJson.bearer = authJson.bearer ?? {};
+      authJson.bearer[resolvedHost] = token;
+    }
+  }
 
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
@@ -91,10 +108,19 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
+  const file = Json.pipe(PackageFile).parse(newPackageFileContent);
+
   const lockFileName = packageFileName.replace(regEx(/\.json$/), '.lock');
-  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
-  if (!existingLockFileContent) {
-    logger.debug('No composer.lock found');
+  const lockfile = await z
+    .string()
+    .transform((f) => readLocalFile(f, 'utf8'))
+    .pipe(Json)
+    .pipe(Lockfile)
+    .nullable()
+    .catch(null)
+    .parseAsync(lockFileName);
+  if (!lockfile) {
+    logger.debug('Composer: unable to read lockfile');
     return null;
   }
 
@@ -104,12 +130,8 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const existingLockFile: ComposerLock = JSON.parse(existingLockFileContent);
     const constraints = {
-      ...extractConstraints(
-        JSON.parse(newPackageFileContent),
-        existingLockFile
-      ),
+      ...extractConstraints(file, lockfile),
       ...config.constraints,
     };
 
@@ -136,7 +158,7 @@ export async function updateArtifacts({
     const commands: string[] = [];
 
     // Determine whether install is required before update
-    if (requireComposerDependencyInstallation(existingLockFile)) {
+    if (requireComposerDependencyInstallation(lockfile)) {
       const preCmd = 'composer';
       const preArgs =
         'install' + getComposerArguments(config, composerToolConstraint);

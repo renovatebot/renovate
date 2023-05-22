@@ -1,5 +1,4 @@
 import semver from 'semver';
-import shell from 'shelljs';
 import { simpleGit } from 'simple-git';
 
 const GIT_MINIMUM_VERSION = '2.33.0';
@@ -11,7 +10,7 @@ await (async () => {
     const gitVersion = `${major}.${minor}.${patch}`;
     if (!installed || semver.lt(gitVersion, GIT_MINIMUM_VERSION)) {
       if (process.env.CI) {
-        shell.echo(
+        console.log(
           `::error ::Minimum Git version ${GIT_MINIMUM_VERSION} is required, found version '${gitVersion}'.`
         );
       } else {
@@ -20,10 +19,10 @@ await (async () => {
         );
       }
     }
-    shell.echo('Found git version: ', gitVersion);
+    console.log('Found git version: ', gitVersion);
     process.exit(0);
   } catch (err) {
-    shell.echo('ERROR:', err.message);
+    console.log('ERROR:', err.message);
     process.exit(1);
   }
 })();

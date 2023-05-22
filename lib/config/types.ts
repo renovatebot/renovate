@@ -1,8 +1,8 @@
 import type { LogLevel } from 'bunyan';
-import type { Range } from 'semver';
 import type { PlatformId } from '../constants';
 import type { HostRule } from '../types';
 import type { GitNoVerifyOption } from '../util/git/types';
+import type { MergeConfidence } from '../util/merge-confidence/types';
 
 export type RenovateConfigStage =
   | 'global'
@@ -26,6 +26,7 @@ export interface RenovateSharedConfig {
   $schema?: string;
   automerge?: boolean;
   automergeStrategy?: MergeStrategy;
+  autoReplaceGlobalMatch?: boolean;
   pruneBranchAfterAutomerge?: boolean;
   branchPrefix?: string;
   branchPrefixOld?: string;
@@ -34,6 +35,9 @@ export interface RenovateSharedConfig {
   manager?: string;
   commitMessage?: string;
   commitMessagePrefix?: string;
+  commitMessageTopic?: string;
+  commitMessageAction?: string;
+  commitMessageExtra?: string;
   confidential?: boolean;
   customChangelogUrl?: string;
   draftPR?: boolean;
@@ -49,6 +53,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   ignoreTests?: boolean;
+  internalChecksAsSuccess?: boolean;
   labels?: string[];
   addLabels?: string[];
   dependencyDashboardApproval?: boolean;
@@ -73,6 +78,7 @@ export interface RenovateSharedConfig {
   automergeSchedule?: string[];
   semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string | null;
+  commitMessageLowerCase?: 'auto' | 'never';
   semanticCommitType?: string;
   suppressNotifications?: string[];
   timezone?: string;
@@ -188,6 +194,7 @@ export interface RegExManager extends RegexManagerTemplates {
 }
 
 export type UseBaseBranchConfigType = 'merge' | 'none';
+export type ConstraintsFilter = 'strict' | 'none';
 
 // TODO: Proper typings
 export interface RenovateConfig
@@ -212,7 +219,7 @@ export interface RenovateConfig
   hostRules?: HostRule[];
 
   ignorePresets?: string[];
-  includeForks?: boolean;
+  forkProcessing?: 'auto' | 'enabled' | 'disabled';
   isFork?: boolean;
 
   fileList?: string[];
@@ -225,11 +232,13 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
+  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+  forkModeDisallowMaintainerEdits?: boolean;
 
   defaultRegistryUrls?: string[];
   registryUrls?: string[] | null;
@@ -244,13 +253,18 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   osvVulnerabilityAlerts?: boolean;
+  vulnerabilitySeverity?: string;
   regexManagers?: RegExManager[];
 
   fetchReleaseNotes?: boolean;
   secrets?: Record<string, string>;
 
   constraints?: Record<string, string>;
-  skipInstalls?: boolean;
+  skipInstalls?: boolean | null;
+
+  constraintsFiltering?: ConstraintsFilter;
+
+  checkedBranches?: string[];
 }
 
 export interface AllConfig
@@ -298,6 +312,7 @@ export interface PackageRule
     UpdateConfig,
     Record<string, unknown> {
   description?: string | string[];
+  isVulnerabilityAlert?: boolean;
   matchFiles?: string[];
   matchPaths?: string[];
   matchLanguages?: string[];
@@ -316,11 +331,13 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   excludePackagePrefixes?: string[];
   matchCurrentValue?: string;
-  matchCurrentVersion?: string | Range;
+  matchCurrentVersion?: string;
   matchSourceUrlPrefixes?: string[];
   matchSourceUrls?: string[];
   matchUpdateTypes?: UpdateType[];
+  matchConfidence?: MergeConfidence[];
   registryUrls?: string[] | null;
+  vulnerabilitySeverity?: string;
 }
 
 export interface ValidationMessage {
@@ -450,6 +467,7 @@ export interface PackageRuleInputConfig extends Record<string, unknown> {
   currentVersion?: string;
   lockedVersion?: string;
   updateType?: UpdateType;
+  mergeConfidenceLevel?: MergeConfidence | undefined;
   isBump?: boolean;
   sourceUrl?: string | null;
   language?: string;

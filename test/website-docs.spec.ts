@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
-import fs from 'fs';
+import fs from 'node:fs';
 import is from '@sindresorhus/is';
 import { getOptions } from '../lib/config/options';
 

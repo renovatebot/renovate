@@ -8,7 +8,7 @@ import {
   storeInTokenMap,
   storeVarToken,
 } from './common';
-import { handleLibraryDep } from './handlers';
+import { handleLibraryDep, handlePlugin } from './handlers';
 
 const qGroupId = qValueMatcher.handler((ctx) =>
   storeInTokenMap(ctx, 'groupId')
@@ -61,6 +61,28 @@ const qVersionCatalogDependencies = q
   .handler(handleLibraryDep)
   .handler(cleanupTempVars);
 
+// plugin("foo.bar", "foo:bar")
+const qVersionCatalogPlugins = q
+  .sym<Ctx>('plugin', storeVarToken)
+  .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
+  .tree({
+    type: 'wrapped-tree',
+    maxDepth: 1,
+    startsWith: '(',
+    endsWith: ')',
+    search: q
+      .begin<Ctx>()
+      .join(qStringValue)
+      .handler((ctx) => storeInTokenMap(ctx, 'alias'))
+      .op(',')
+      .alt(qStringValue)
+      .handler((ctx) => storeInTokenMap(ctx, 'pluginName'))
+      .end(),
+  })
+  .opt(qVersionCatalogVersion)
+  .handler(handlePlugin)
+  .handler(cleanupTempVars);
+
 // alias("foo.bar").to("foo", "bar").version("1.2.3")
 const qVersionCatalogAliasDependencies = q
   .sym<Ctx>('alias')
@@ -90,5 +112,6 @@ const qVersionCatalogAliasDependencies = q
 
 export const qVersionCatalogs = q.alt(
   qVersionCatalogDependencies,
+  qVersionCatalogPlugins,
   qVersionCatalogAliasDependencies
 );

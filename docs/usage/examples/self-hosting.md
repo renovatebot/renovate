@@ -25,9 +25,9 @@ For example, all the following are valid tags:
 
 ```sh
 docker run --rm renovate/renovate
-docker run --rm renovate/renovate:34
-docker run --rm renovate/renovate:34.24
-docker run --rm renovate/renovate:34.24.0
+docker run --rm renovate/renovate:35
+docker run --rm renovate/renovate:35.14
+docker run --rm renovate/renovate:35.14.4
 ```
 
 <!-- prettier-ignore -->
@@ -64,7 +64,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:34.24.0
+              image: renovate/renovate:35.14.4
               args:
                 - user/repo
               # Environment Variables
@@ -123,7 +123,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:34.24.0
+            - image: renovate/renovate:35.14.4
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -368,7 +368,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:34.24.0
+              image: renovate/renovate:35.14.4
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -437,6 +437,14 @@ RUN update-ca-certificates
 # Change back to the Ubuntu user
 USER 1000
 
-# Node comes with an own certificate authority store and thus needs to trust the self-signed certificate explicitly
+# Some tools come with their own certificate authority stores and thus need to trust the self-signed certificate or the entire OS store explicitly.
+# This list is _not_ comprehensive and other tools may require further configuration.
+#
+# Node
 ENV NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/self-signed-certificate.crt
+# Python
+RUN pip config set global.cert /etc/ssl/certs/ca-certificates.crt
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+# OpenSSL
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ```

@@ -6,9 +6,9 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
+import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
-import { branchExists, getBranchList } from '../../../util/git';
+import { getBranchList } from '../../../util/git';
 import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
 import type { BranchConfig } from '../../types';
@@ -22,7 +22,7 @@ async function getBaseBranchConfig(
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
-  let baseBranchConfig: RenovateConfig = clone(config);
+  let baseBranchConfig: RenovateConfig = structuredClone(config);
 
   if (
     config.useBaseBranchConfig === 'merge' &&
@@ -108,13 +108,13 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: null!,
   };
-  if (config.baseBranches?.length) {
+  if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(config.baseBranches);
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       addMeta({ baseBranch });
-      if (branchExists(baseBranch)) {
+      if (await scm.branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
@@ -123,7 +123,7 @@ export async function extractDependencies(
     }
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
-      if (branchExists(baseBranch)) {
+      if (await scm.branchExists(baseBranch)) {
         addMeta({ baseBranch });
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];

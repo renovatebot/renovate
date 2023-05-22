@@ -1,8 +1,10 @@
-import type fs from 'fs';
-import type { PathLike, Stats } from 'fs';
+import fs from 'node:fs';
+import type { PathLike, Stats } from 'node:fs';
 import { jest } from '@jest/globals';
 import callsite from 'callsite';
 import { DirectoryJSON, fs as memfs, vol } from 'memfs';
+import type { TDataOut } from 'memfs/lib/encoding';
+import type { IOptions } from 'memfs/lib/volume';
 import upath from 'upath';
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
@@ -93,7 +95,7 @@ export class Fixtures {
       ...memfs,
       pathExists: jest.fn(pathExists),
       remove: jest.fn(memfs.promises.rm),
-      readFile: jest.fn(memfs.promises.readFile),
+      readFile: jest.fn(readFile),
       writeFile: jest.fn(memfs.promises.writeFile),
       outputFile: jest.fn(outputFile),
       stat: jest.fn(stat),
@@ -105,6 +107,17 @@ export class Fixtures {
     const callerDir = upath.dirname(stack[2].getFileName());
     return upath.resolve(callerDir, fixturesRoot, '__fixtures__');
   }
+}
+
+export function readFile(
+  fileName: string,
+  options: IOptions
+): Promise<TDataOut> {
+  if (fileName.endsWith('.wasm') || fileName.endsWith('.wasm.gz')) {
+    return fs.promises.readFile(fileName, options as any);
+  }
+
+  return memfs.promises.readFile(fileName, options);
 }
 
 export async function outputFile(

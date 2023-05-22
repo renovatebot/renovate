@@ -20,7 +20,7 @@ describe('modules/datasource/cpan/index', () => {
       expect(
         await getPkgReleases({
           datasource: CpanDatasource.id,
-          depName: 'FooBar',
+          packageName: 'FooBar',
         })
       ).toBeNull();
     });
@@ -30,7 +30,7 @@ describe('modules/datasource/cpan/index', () => {
       expect(
         await getPkgReleases({
           datasource: CpanDatasource.id,
-          depName: 'Plack',
+          packageName: 'Plack',
         })
       ).toBeNull();
     });
@@ -40,7 +40,7 @@ describe('modules/datasource/cpan/index', () => {
       await expect(
         getPkgReleases({
           datasource: CpanDatasource.id,
-          depName: 'Plack',
+          packageName: 'Plack',
         })
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
@@ -50,7 +50,7 @@ describe('modules/datasource/cpan/index', () => {
       expect(
         await getPkgReleases({
           datasource: CpanDatasource.id,
-          depName: 'Plack',
+          packageName: 'Plack',
         })
       ).toBeNull();
     });
@@ -66,7 +66,7 @@ describe('modules/datasource/cpan/index', () => {
         .reply(200, Fixtures.get('Plack.json'));
       const res = await getPkgReleases({
         datasource: CpanDatasource.id,
-        depName: 'Plack',
+        packageName: 'Plack',
       });
       expect(res).toMatchObject({
         changelogUrl: 'https://metacpan.org/dist/Plack/changes',

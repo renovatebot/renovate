@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import { Config, accumulateValues } from './utils';
+import type { Config, PagedResult } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -12,7 +12,7 @@ interface Comment {
 
 export type CommentsConfig = Pick<Config, 'repository'>;
 
-interface EnsureBitBucketCommentConfig extends EnsureCommentConfig {
+interface EnsureBitbucketCommentConfig extends EnsureCommentConfig {
   config: CommentsConfig;
 }
 
@@ -20,9 +20,14 @@ async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
-  const comments = await accumulateValues<Comment>(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`
-  );
+  const comments = (
+    await bitbucketHttp.getJson<PagedResult<Comment>>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
+      {
+        paginate: true,
+      }
+    )
+  ).body.values;
 
   logger.debug(`Found ${comments.length} comments`);
   return comments;
@@ -70,7 +75,7 @@ export async function ensureComment({
   number: prNo,
   topic,
   content,
-}: EnsureBitBucketCommentConfig): Promise<boolean> {
+}: EnsureBitbucketCommentConfig): Promise<boolean> {
   try {
     const comments = await getComments(config, prNo);
     let body: string;

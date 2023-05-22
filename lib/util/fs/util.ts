@@ -4,7 +4,7 @@ import { FILE_ACCESS_VIOLATION_ERROR } from '../../constants/error-messages';
 import { logger } from '../../logger';
 
 function assertBaseDir(path: string, baseDir: string): void {
-  if (!path.startsWith(upath.resolve(baseDir))) {
+  if (!path.startsWith(baseDir)) {
     logger.debug(
       { path, baseDir },
       'Preventing access to file outside the base directory'
@@ -28,4 +28,16 @@ export function ensureLocalPath(path: string): string {
 
 export function ensureCachePath(path: string): string {
   return ensurePath(path, 'cacheDir');
+}
+
+export function isValidPath(
+  path: string,
+  key: 'localDir' | 'cacheDir'
+): boolean {
+  const baseDir = upath.resolve(GlobalConfig.get(key)!);
+  const fullPath = upath.resolve(
+    upath.isAbsolute(path) ? path : upath.join(baseDir, path)
+  );
+
+  return fullPath.startsWith(baseDir);
 }

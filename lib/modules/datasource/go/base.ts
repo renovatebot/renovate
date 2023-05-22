@@ -1,13 +1,13 @@
 // TODO: types (#7154)
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import URL from 'url';
+import URL from 'node:url';
 import { logger } from '../../../logger';
 import { detectPlatform } from '../../../util/common';
 import * as hostRules from '../../../util/host-rules';
 import { Http } from '../../../util/http';
 import { regEx } from '../../../util/regex';
 import { trimLeadingSlash, trimTrailingSlash } from '../../../util/url';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
 import { GitlabTagsDatasource } from '../gitlab-tags';
@@ -53,7 +53,7 @@ export class BaseGoDatasource {
       const split = goModule.split('/');
       const packageName = split[1] + '/' + split[2];
       return {
-        datasource: BitBucketTagsDatasource.id,
+        datasource: BitbucketTagsDatasource.id,
         packageName,
         registryUrl: 'https://bitbucket.org',
       };

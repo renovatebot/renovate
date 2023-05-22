@@ -5,8 +5,8 @@ import {
   ensureComment,
   ensureCommentRemoval,
 } from '../../../../modules/platform/comment';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import { branchExists, deleteBranch } from '../../../../util/git';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
 
@@ -26,7 +26,7 @@ export async function handleClosedPr(
       content = template.compile(userStrings.ignoreOther, config);
     }
     content +=
-      '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
+      '\n\nIf you accidentally closed this PR, or if you changed your mind: rename this PR to get a fresh replacement PR.';
     if (!config.suppressNotifications!.includes('prIgnoreNotification')) {
       if (GlobalConfig.get('dryRun')) {
         logger.info(
@@ -40,11 +40,11 @@ export async function handleClosedPr(
         });
       }
     }
-    if (branchExists(config.branchName)) {
+    if (await scm.branchExists(config.branchName)) {
       if (GlobalConfig.get('dryRun')) {
         logger.info('DRY-RUN: Would delete branch ' + config.branchName);
       } else {
-        await deleteBranch(config.branchName);
+        await scm.deleteBranch(config.branchName);
       }
     }
   } else if (pr.state === 'merged') {

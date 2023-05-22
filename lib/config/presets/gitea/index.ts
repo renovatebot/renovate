@@ -37,7 +37,7 @@ export function getPresetFromEndpoint(
   filePreset: string,
   presetPath?: string,
   endpoint = Endpoint,
-  tag?: string
+  tag?: string | undefined
 ): Promise<Preset | undefined> {
   return fetchPreset({
     repo,

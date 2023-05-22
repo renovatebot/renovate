@@ -98,6 +98,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         depType: 'packageManager',
         depName: 'pnpm',
         newValue: '6.16.1',
+        newVersion: '6.16.1',
       },
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
@@ -108,7 +109,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses constraint version if parent json has constraints', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('parent/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -150,7 +151,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses packageManager version and puts it into constraint', async () => {
     const execSnapshots = mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     const fileContent = Fixtures.get('manager-field/package.json');
     fs.readLocalFile
       .mockResolvedValueOnce(fileContent)
@@ -192,7 +193,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
 
   it('uses skips pnpm v7 if lockfileVersion indicates <7', async () => {
     mockExecAll();
-    const configTemp = partial<PostUpdateConfig>({});
+    const configTemp = partial<PostUpdateConfig>();
     fs.readLocalFile
       .mockResolvedValueOnce('{}') // package.json
       .mockResolvedValue('lockfileVersion: 5.3\n'); // pnpm-lock.yaml
@@ -223,7 +224,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toBe('package-lock-contents');
     expect(execSnapshots).toMatchObject([
-      { cmd: 'docker pull renovate/sidecar' },
+      { cmd: 'docker pull containerbase/sidecar' },
       { cmd: 'docker ps --filter name=renovate_sidecar -aq' },
       {
         cmd:
@@ -232,7 +233,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
           '-e BUILDPACK_CACHE_DIR ' +
           '-e CONTAINERBASE_CACHE_DIR ' +
           '-w "some-dir" ' +
-          'renovate/sidecar ' +
+          'containerbase/sidecar ' +
           'bash -l -c "' +
           'install-tool node 16.16.0 ' +
           '&& install-tool pnpm 6.0.0 ' +

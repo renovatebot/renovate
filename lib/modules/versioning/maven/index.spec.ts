@@ -8,16 +8,17 @@ describe('modules/versioning/maven/index', () => {
     expect(isValid).toBe(_isValid);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${'1.0.0'}           | ${true}
+    ${'17.0.5+8'}        | ${true}
     ${'[1.12.6,1.18.6]'} | ${true}
     ${undefined}         | ${false}
   `('isValid("$version") === $expected', ({ version, expected }) => {
     expect(!!isValid(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version              | expected
     ${''}                | ${false}
     ${'1.0.0'}           | ${true}
@@ -45,7 +46,7 @@ describe('modules/versioning/maven/index', () => {
     expect(!!isVersion(version)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version                 | expected
     ${''}                   | ${false}
     ${'foobar'}             | ${true}
@@ -74,7 +75,7 @@ describe('modules/versioning/maven/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     input         | major   | minor   | patch
     ${''}         | ${null} | ${null} | ${null}
     ${'1'}        | ${1}    | ${0}    | ${0}
@@ -96,7 +97,7 @@ describe('modules/versioning/maven/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     version          | range                              | expected
     ${'0'}           | ${'[0,1]'}                         | ${true}
     ${'1'}           | ${'[0,1]'}                         | ${true}
@@ -111,12 +112,13 @@ describe('modules/versioning/maven/index', () => {
     ${'1'}           | ${'(,1),(1,)'}                     | ${false}
     ${'1'}           | ${'(0,1),(1,2)'}                   | ${false}
     ${'1.0.0.RC9.2'} | ${'(,1.0.0.RC9.2),(1.0.0.RC9.2,)'} | ${false}
-    ${'1.0.0-RC14'}  | ${'(,1.0.0.RC9.2),(1.0.0.RC9.2,)'} | ${true}
+    ${'1.0.0.RC14'}  | ${'(,1.0.0.RC9.2),(1.0.0.RC9.2,)'} | ${true}
     ${'0'}           | ${''}                              | ${false}
     ${'1'}           | ${'1'}                             | ${true}
     ${'1'}           | ${'(1'}                            | ${false}
     ${'2.4.2'}       | ${'2.4.2'}                         | ${true}
     ${'2.4.2'}       | ${'= 2.4.2'}                       | ${false}
+    ${'1.2.3'}       | ${'[1,2],[3,4]'}                   | ${true}
   `(
     'matches("$version", "$range") === $expected',
     ({ version, range, expected }) => {
@@ -124,14 +126,14 @@ describe('modules/versioning/maven/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     a        | b      | expected
     ${'1.1'} | ${'1'} | ${true}
   `('isGreaterThan("$a", "$b") === $expected', ({ a, b, expected }) => {
     expect(maven.isGreaterThan(a, b)).toBe(expected);
   });
 
-  test.each`
+  it.each`
     versions | range  | expected
     ${['1']} | ${'1'} | ${'1'}
   `(
@@ -141,7 +143,7 @@ describe('modules/versioning/maven/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions | range  | expected
     ${['1']} | ${'1'} | ${'1'}
   `(
@@ -151,7 +153,7 @@ describe('modules/versioning/maven/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue             | rangeStrategy | currentVersion | newVersion  | expected
     ${'1'}                   | ${null}       | ${null}        | ${'1.1'}    | ${'1.1'}
     ${'[1.2.3,]'}            | ${null}       | ${null}        | ${'1.2.4'}  | ${'[1.2.3,]'}

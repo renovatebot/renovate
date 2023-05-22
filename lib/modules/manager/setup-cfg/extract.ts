@@ -11,7 +11,7 @@ function getSectionName(str: string): string {
 }
 
 function getSectionRecord(str: string): string {
-  const [, sectionRecord] = regEx(/^([^\s]+)\s+=/).exec(str) ?? [];
+  const [, sectionRecord] = regEx(/^([^\s]+)\s*=/).exec(str) ?? [];
   return sectionRecord;
 }
 

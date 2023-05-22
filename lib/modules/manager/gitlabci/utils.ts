@@ -2,7 +2,7 @@ import { regEx } from '../../../util/regex';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency } from '../types';
 
-const re = /!reference \[(.*?)\]/g;
+const re = /!reference \[[^\]]+\]/g;
 
 /**
  * Replaces GitLab reference tags before parsing, because our yaml parser cannot process them anyway.
@@ -16,7 +16,7 @@ export function replaceReferenceTags(content: string): string {
 }
 
 const depProxyRe = regEx(
-  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?\\/)(?<depName>.+)`
+  `(?<prefix>\\$\\{?CI_DEPENDENCY_PROXY_(?:DIRECT_)?GROUP_IMAGE_PREFIX\\}?/)(?<depName>.+)`
 );
 
 /**

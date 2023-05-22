@@ -4,14 +4,11 @@ import type { RenovateConfig } from '../../../../config/types';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../../../modules/manager/types';
 import { platform } from '../../../../modules/platform';
+import { ensureComment } from '../../../../modules/platform/comment';
 import { hashBody } from '../../../../modules/platform/pr-body';
+import { scm } from '../../../../modules/platform/scm';
 import { emojify } from '../../../../util/emoji';
-import {
-  deleteBranch,
-  getFile,
-  isBranchConflicted,
-  isBranchModified,
-} from '../../../../util/git';
+import { getFile } from '../../../../util/git';
 import { toSha256 } from '../../../../util/hasha';
 import * as template from '../../../../util/template';
 import type { BranchConfig } from '../../../types';
@@ -23,6 +20,7 @@ import {
 import { getPlatformPrOptions } from '../../update/pr';
 import { prepareLabels } from '../../update/pr/labels';
 import { addParticipants } from '../../update/pr/participants';
+import { isOnboardingBranchConflicted } from '../branch/onboarding-branch-cache';
 import { OnboardingState, defaultConfigFile } from '../common';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
@@ -43,6 +41,24 @@ export async function ensureOnboardingPr(
   logger.trace({ config });
   // TODO #7154
   const existingPr = await platform.getBranchPr(config.onboardingBranch!);
+  if (existingPr) {
+    // skip pr-update if branch is conflicted
+    if (
+      await isOnboardingBranchConflicted(
+        config.defaultBranch!,
+        config.onboardingBranch!
+      )
+    ) {
+      await ensureComment({
+        number: existingPr.number,
+        topic: 'Branch Conflicted',
+        content: emojify(
+          `:warning: This PR has a merge conflict which Renovate is unable to automatically resolve, so updates to this PR description are now paused. Please resolve the merge conflict manually.\n\n`
+        ),
+      });
+      return;
+    }
+  }
   const { rebaseCheckBox, renovateConfigHashComment } =
     await getRebaseCheckboxComponents(config);
   logger.debug('Filling in onboarding PR template');
@@ -100,23 +116,6 @@ If you need any further assistance then you can also [request help here](${
   if (GlobalConfig.get('dryRun')) {
     // TODO: types (#7154)
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch!}`);
-  } else if (await isBranchModified(config.onboardingBranch!)) {
-    configDesc = emojify(
-      `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${
-        config.productLinks!.help
-      }) if you have any doubts and would like it reviewed.\n\n`
-    );
-    const isConflicted = await isBranchConflicted(
-      config.baseBranch!,
-      config.onboardingBranch!
-    );
-    if (isConflicted) {
-      configDesc += emojify(
-        `:warning: This PR has a merge conflict. However, Renovate is unable to automatically fix that due to edits in this branch. Please resolve the merge conflict manually.\n\n`
-      );
-    } else {
-      configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
-    }
   } else {
     configDesc = getConfigDesc(config, packageFiles!);
   }
@@ -175,7 +174,10 @@ If you need any further assistance then you can also [request help here](${
         prTitle: config.onboardingPrTitle!,
         prBody,
         labels,
-        platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
+        platformOptions: getPlatformPrOptions({
+          ...config,
+          automerge: false,
+        }),
       });
       logger.info(
         { pr: `Pull Request #${pr!.number}` },
@@ -193,7 +195,7 @@ If you need any further assistance then you can also [request help here](${
       logger.warn(
         'Onboarding PR already exists but cannot find it. It was probably created by a different user.'
       );
-      await deleteBranch(config.onboardingBranch!);
+      await scm.deleteBranch(config.onboardingBranch!);
       return;
     }
     throw err;

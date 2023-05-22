@@ -84,6 +84,12 @@ exports[`modules/manager/setup-cfg/extract extractPackageFile() extracts depende
       "depType": "install",
     },
     {
+      "currentValue": ">=2.27.0",
+      "datasource": "pypi",
+      "depName": "responses",
+      "depType": "install",
+    },
+    {
       "currentValue": "~=1.4",
       "datasource": "pypi",
       "depName": "six",

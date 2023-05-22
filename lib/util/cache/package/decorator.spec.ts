@@ -1,6 +1,5 @@
-import os from 'os';
-import { mock } from 'jest-mock-extended';
-import type { GetReleasesConfig } from '../../../modules/datasource';
+import os from 'node:os';
+import { GlobalConfig } from '../../../config/global';
 import * as memCache from '../memory';
 import { cache } from './decorator';
 import * as packageCache from '.';
@@ -8,116 +7,243 @@ import * as packageCache from '.';
 jest.mock('./file');
 
 describe('util/cache/package/decorator', () => {
-  const spy = jest.fn(() => Promise.resolve());
+  const setCache = jest.spyOn(packageCache, 'set');
 
-  beforeAll(async () => {
+  let count = 1;
+  const getValue = jest.fn();
+
+  beforeEach(async () => {
     memCache.init();
     await packageCache.init({ cacheDir: os.tmpdir() });
+    count = 1;
+    getValue.mockImplementation(() => {
+      const res = String(100 * count + 10 * count + count);
+      count += 1;
+      return Promise.resolve(res);
+    });
   });
 
   it('should cache string', async () => {
-    class MyClass {
-      @cache({ namespace: 'namespace', key: 'key' })
-      public async getNumber(): Promise<number> {
-        await spy();
-        return Math.random();
+    class Class {
+      @cache({ namespace: 'some-namespace', key: 'some-key' })
+      public fn(): Promise<string> {
+        return getValue();
       }
     }
-    const myClass = new MyClass();
-    expect(await myClass.getNumber()).toEqual(await myClass.getNumber());
-    expect(await myClass.getNumber()).toBeDefined();
-    expect(spy).toHaveBeenCalledTimes(1);
+    const obj = new Class();
+
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('111');
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'some-namespace',
+      'cache-decorator:some-key',
+      { cachedAt: expect.any(String), value: '111' },
+      30
+    );
   });
 
-  it('Do not cache', async () => {
-    class MyClass {
+  it('disables cache if cacheability check is false', async () => {
+    class Class {
       @cache({ namespace: 'namespace', key: 'key', cacheable: () => false })
-      public async getString(
-        cacheKey: string,
-        test: string | null
-      ): Promise<string | null> {
-        await spy();
-        return test;
+      public fn(): Promise<string | null> {
+        return getValue();
       }
     }
-    const myClass = new MyClass();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('test', 'test')).toBe('test');
-    expect(await myClass.getString('test', 'test')).toBe('test');
-    expect(spy).toHaveBeenCalledTimes(4);
+    const obj = new Class();
+
+    expect(await obj.fn()).toBe('111');
+    expect(await obj.fn()).toBe('222');
+    expect(await obj.fn()).toBe('333');
+
+    expect(getValue).toHaveBeenCalledTimes(3);
+    expect(setCache).not.toHaveBeenCalled();
   });
 
-  it('Do cache null', async () => {
-    class MyClass {
-      @cache({ namespace: 'namespace', key: (cacheKey, test) => cacheKey })
-      public async getString(
-        cacheKey: string,
-        test: string | null
-      ): Promise<string | null> {
-        await spy();
-        return test;
+  it('caches null values', async () => {
+    class Class {
+      @cache({ namespace: 'namespace', key: 'key' })
+      public async fn(val: string | null): Promise<string | null> {
+        await getValue();
+        return val;
       }
     }
-    const myClass = new MyClass();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('null', null)).toBeNull();
-    expect(await myClass.getString('test', 'test')).toBe('test');
-    expect(await myClass.getString('test', 'test')).toBeDefined();
-    expect(spy).toHaveBeenCalledTimes(2);
+    const obj = new Class();
+
+    expect(await obj.fn(null)).toBeNull();
+    expect(await obj.fn(null)).toBeNull();
+    expect(await obj.fn(null)).toBeNull();
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), value: null },
+      30
+    );
   });
 
-  it('Do not cache undefined', async () => {
-    class MyClass {
-      @cache({ namespace: 'namespace', key: 'undefined' })
-      public async getString(): Promise<string | undefined> {
-        await spy();
+  it('does not cache undefined', async () => {
+    class Class {
+      @cache({ namespace: 'namespace', key: 'key' })
+      public async fn(): Promise<string | undefined> {
+        await getValue();
         return undefined;
       }
     }
-    const myClass = new MyClass();
-    expect(await myClass.getString()).toBeUndefined();
-    expect(await myClass.getString()).toEqual(await myClass.getString());
-    expect(spy).toHaveBeenCalledTimes(3);
+    const obj = new Class();
+
+    expect(await obj.fn()).toBeUndefined();
+    expect(await obj.fn()).toBeUndefined();
+    expect(await obj.fn()).toBeUndefined();
+
+    expect(getValue).toHaveBeenCalledTimes(3);
+    expect(setCache).not.toHaveBeenCalled();
   });
 
-  it('should cache function', async () => {
-    class MyClass {
+  it('computes cache namespace and key from arguments', async () => {
+    type Arg = {
+      foo: 'namespace';
+      bar: 'key';
+    };
+
+    class Class {
       @cache({
-        namespace: (arg: GetReleasesConfig) => arg.registryUrl ?? 'default',
-        key: () => 'key',
+        namespace: (prefix: string, arg: Arg) => `${prefix}-${arg.foo}`,
+        key: (prefix: string, arg: Arg) => `${prefix}-${arg.bar}`,
       })
-      public async getNumber(_: GetReleasesConfig): Promise<number> {
-        await spy();
-        return Math.random();
+      public fn(_prefix: string, _arg: Arg): Promise<string> {
+        return getValue();
       }
     }
-    const myClass = new MyClass();
-    const getReleasesConfig: GetReleasesConfig = {
-      registryUrl: 'registry',
-      ...mock<GetReleasesConfig>(),
-    };
-    expect(await myClass.getNumber(getReleasesConfig)).toEqual(
-      await myClass.getNumber(getReleasesConfig)
+    const obj = new Class();
+    const arg: Arg = { foo: 'namespace', bar: 'key' };
+
+    expect(await obj.fn('some', arg)).toBe('111');
+    expect(await obj.fn('some', arg)).toBe('111');
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'some-namespace',
+      'cache-decorator:some-key',
+      { cachedAt: expect.any(String), value: '111' },
+      30
     );
-    expect(await myClass.getNumber(getReleasesConfig)).toBeDefined();
-    expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('works', async () => {
-    class MyClass {
-      public async getNumber(): Promise<number> {
-        await spy();
-        return Math.random();
+  it('wraps class methods', async () => {
+    class Class {
+      public fn(): Promise<string> {
+        return getValue();
       }
     }
     const decorator = cache({ namespace: 'namespace', key: 'key' });
-    const getNumber = decorator(
-      MyClass.prototype,
-      'getNumber',
-      undefined as never
-    );
+    const fn = decorator(Class.prototype, 'fn', undefined as never);
 
-    expect(await getNumber.value?.()).toBeNumber();
+    expect(await fn.value?.()).toBe('111');
+    expect(await fn.value?.()).toBe('111');
+    expect(await fn.value?.()).toBe('111');
+
+    expect(getValue).toHaveBeenCalledTimes(1);
+    expect(setCache).toHaveBeenCalledOnceWith(
+      'namespace',
+      'cache-decorator:key',
+      { cachedAt: expect.any(String), value: '111' },
+      30
+    );
+  });
+
+  describe('Fallbacks with hard TTL', () => {
+    class Class {
+      @cache({
+        namespace: 'namespace',
+        key: 'key',
+        ttlMinutes: 1,
+      })
+
+      // Hard TTL is enabled only for `getReleases` and `getDigest` methods
+      public getReleases(): Promise<string> {
+        return getValue();
+      }
+    }
+
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false });
+      GlobalConfig.set({ cacheHardTtlMinutes: 2 });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+      GlobalConfig.reset();
+    });
+
+    it('updates cached result', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(60 * 1000 - 1);
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(1);
+      expect(await obj.getReleases()).toBe('222');
+      expect(getValue).toHaveBeenCalledTimes(2);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '222' },
+        2
+      );
+    });
+
+    it('returns obsolete result on error', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(60 * 1000);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(2);
+      expect(setCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('drops obsolete value after hard TTL is out', async () => {
+      const obj = new Class();
+
+      expect(await obj.getReleases()).toBe('111');
+      expect(getValue).toHaveBeenCalledTimes(1);
+      expect(setCache).toHaveBeenLastCalledWith(
+        'namespace',
+        'cache-decorator:key',
+        { cachedAt: expect.any(String), value: '111' },
+        2
+      );
+
+      jest.advanceTimersByTime(2 * 60 * 1000 - 1);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      expect(await obj.getReleases()).toBe('111');
+
+      jest.advanceTimersByTime(1);
+      getValue.mockRejectedValueOnce(new Error('test'));
+      await expect(obj.getReleases()).rejects.toThrow('test');
+    });
   });
 });

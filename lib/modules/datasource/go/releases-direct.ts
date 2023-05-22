@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { cache } from '../../../util/cache/package/decorator';
 import { regEx } from '../../../util/regex';
-import { BitBucketTagsDatasource } from '../bitbucket-tags';
+import { BitbucketTagsDatasource } from '../bitbucket-tags';
 import { Datasource } from '../datasource';
 import { GitTagsDatasource } from '../git-tags';
 import { GithubTagsDatasource } from '../github-tags';
@@ -16,14 +16,14 @@ export class GoDirectDatasource extends Datasource {
   git: GitTagsDatasource;
   github: GithubTagsDatasource;
   gitlab: GitlabTagsDatasource;
-  bitbucket: BitBucketTagsDatasource;
+  bitbucket: BitbucketTagsDatasource;
 
   constructor() {
     super(GoDirectDatasource.id);
     this.git = new GitTagsDatasource();
     this.github = new GithubTagsDatasource();
     this.gitlab = new GitlabTagsDatasource();
-    this.bitbucket = new BitBucketTagsDatasource();
+    this.bitbucket = new BitbucketTagsDatasource();
   }
 
   /**
@@ -70,7 +70,7 @@ export class GoDirectDatasource extends Datasource {
         res = await this.gitlab.getReleases(source);
         break;
       }
-      case BitBucketTagsDatasource.id: {
+      case BitbucketTagsDatasource.id: {
         res = await this.bitbucket.getReleases(source);
         break;
       }
@@ -85,7 +85,7 @@ export class GoDirectDatasource extends Datasource {
       return null;
     }
 
-    const sourceUrl = getSourceUrl(source);
+    const sourceUrl = getSourceUrl(source) ?? null;
 
     /**
      * github.com/org/mod/submodule should be tagged as submodule/va.b.c

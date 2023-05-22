@@ -7,7 +7,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import type { FileData } from '../../../types/platform/bitbucket-server';
 import * as git from '../../../util/git';
 import { deleteBranch } from '../../../util/git';
@@ -58,6 +58,8 @@ import * as utils from './utils';
  * See following page for uptodate supported versions
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
+
+export const id = 'bitbucket-server';
 
 let config: BbsConfig = {} as any;
 
@@ -148,7 +150,7 @@ export async function getJsonFile(
   return JSON5.parse(raw);
 }
 
-// Initialize BitBucket Server by getting base branch
+// Initialize Bitbucket Server by getting base branch
 export async function initRepo({
   repository,
   cloneSubmodules,
@@ -256,7 +258,7 @@ export async function getPr(
 
   const res = await bitbucketServerHttp.getJson<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { useCache: !refreshCache }
+    { memCache: !refreshCache }
   );
 
   const pr: BbsPr = {
@@ -287,7 +289,7 @@ const isRelevantPr =
   (branchName: string, prTitle: string | null | undefined, state: string) =>
   (p: Pr): boolean =>
     p.sourceBranch === branchName &&
-    (!prTitle || p.title === prTitle) &&
+    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)
@@ -354,7 +356,7 @@ export async function refreshPr(number: number): Promise<void> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
@@ -362,9 +364,7 @@ async function getStatus(
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
       // TODO: types (#7154)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
-      {
-        useCache,
-      }
+      { memCache }
     )
   ).body;
 }
@@ -402,7 +402,7 @@ export async function getBranchStatus(
 
 function getStatusCheck(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
@@ -410,7 +410,7 @@ function getStatusCheck(
     // TODO: types (#7154)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
-    { useCache }
+    { memCache }
   );
 }
 
@@ -972,13 +972,12 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
+    )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?details>/g), '')
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(regEx('<!--.*?-->', 'g'), '');
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  logger.debug(`getVulnerabilityAlerts()`);
-  return Promise.resolve([]);
 }

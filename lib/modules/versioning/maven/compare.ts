@@ -44,7 +44,7 @@ function isDigit(char: string): boolean {
 }
 
 function isLetter(char: string): boolean {
-  return regEx(/^[a-z_]$/i).test(char);
+  return regEx(/^[a-z_+]$/i).test(char);
 }
 
 function isTransition(prevChar: string, nextChar: string): boolean {
@@ -123,7 +123,7 @@ function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let result: Token[] = [];
   let leadingZero = true;
   iterateTokens(versionStr.toLowerCase().replace(regEx(/^v/i), ''), (token) => {
-    if (token.prefix === PREFIX_HYPHEN) {
+    if (token.prefix === PREFIX_HYPHEN || token.type === TYPE_QUALIFIER) {
       buf = [];
     }
     buf.push(token);
@@ -154,10 +154,7 @@ function nullFor(token: Token): Token {
 }
 
 function commonOrder(token: Token): number {
-  if (token.prefix === PREFIX_DOT && token.type === TYPE_QUALIFIER) {
-    return 0;
-  }
-  if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_QUALIFIER) {
+  if (token.type === TYPE_QUALIFIER) {
     return 1;
   }
   if (token.prefix === PREFIX_HYPHEN && token.type === TYPE_NUMBER) {
@@ -281,7 +278,7 @@ function isVersion(version: unknown): version is string {
   if (!version || typeof version !== 'string') {
     return false;
   }
-  if (!regEx(/^[a-z_0-9.-]+$/i).test(version)) {
+  if (!regEx(/^[-.a-z_+0-9]+$/i).test(version)) {
     return false;
   }
   if (regEx(/^[.-]/).test(version)) {

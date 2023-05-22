@@ -5,6 +5,7 @@ import {
   logger,
   mocked,
   platform,
+  scm,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
@@ -36,10 +37,10 @@ describe('workers/repository/process/index', () => {
     it('processes baseBranches', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
-      git.branchExists.mockReturnValueOnce(false);
-      git.branchExists.mockReturnValueOnce(true);
-      git.branchExists.mockReturnValueOnce(false);
-      git.branchExists.mockReturnValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(false);
+      scm.branchExists.mockResolvedValueOnce(true);
+      scm.branchExists.mockResolvedValueOnce(false);
+      scm.branchExists.mockResolvedValueOnce(true);
       const res = await extractDependencies(config);
       await updateRepo(config, res.branches);
       expect(res).toEqual({
@@ -50,7 +51,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('reads config from default branch if useBaseBranchConfig not specified', async () => {
-      git.branchExists.mockReturnValue(true);
+      scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile.mockResolvedValueOnce({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'none';
@@ -69,7 +70,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('reads config from branches in baseBranches if useBaseBranchConfig specified', async () => {
-      git.branchExists.mockReturnValue(true);
+      scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = jest.fn().mockResolvedValue({});
       config.baseBranches = ['master', 'dev'];
       config.useBaseBranchConfig = 'merge';
@@ -90,7 +91,7 @@ describe('workers/repository/process/index', () => {
     });
 
     it('handles config name mismatch between baseBranches if useBaseBranchConfig specified', async () => {
-      git.branchExists.mockReturnValue(true);
+      scm.branchExists.mockResolvedValue(true);
       platform.getJsonFile = jest
         .fn()
         .mockImplementation((fileName, repoName, branchName) => {
@@ -132,7 +133,7 @@ describe('workers/repository/process/index', () => {
         'release/v2',
         'some-other',
       ]);
-      git.branchExists.mockReturnValue(true);
+      scm.branchExists.mockResolvedValue(true);
       const res = await extractDependencies(config);
       expect(res).toStrictEqual({
         branchList: [undefined, undefined, undefined, undefined],

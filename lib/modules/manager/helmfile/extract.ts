@@ -10,6 +10,10 @@ import type {
   PackageFileContent,
 } from '../types';
 import type { Doc } from './types';
+import {
+  kustomizationsKeysUsed,
+  localChartHasKustomizationsYaml,
+} from './utils';
 
 const isValidChartName = (name: string | undefined): boolean =>
   !!name && !regEx(/[!@#$%^&*(),.?":{}/|<>A-Z]/).test(name);
@@ -21,14 +25,22 @@ function extractYaml(content: string): string {
     .replace(regEx(/{{.+?}}/g), '');
 }
 
-export function extractPackageFile(
+function isLocalPath(possiblePath: string): boolean {
+  return ['./', '../', '/'].some((localPrefix) =>
+    possiblePath.startsWith(localPrefix)
+  );
+}
+
+export async function extractPackageFile(
   content: string,
   fileName: string,
   config: ExtractConfig
-): PackageFileContent | null {
-  let deps: PackageDependency[] = [];
+): Promise<PackageFileContent | null> {
+  const deps: PackageDependency[] = [];
   let docs: Doc[];
   const registryAliases: Record<string, string> = {};
+  // Record kustomization usage for all deps, since updating artifacts is run on the helmfile.yaml as a whole.
+  let needKustomize = false;
   try {
     docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
@@ -47,23 +59,31 @@ export function extractPackageFile(
     }
     logger.debug({ registryAliases }, 'repositories discovered.');
 
-    deps = doc.releases.map((dep) => {
+    for (const dep of doc.releases) {
       let depName = dep.chart;
       let repoName: string | null = null;
 
       if (!is.string(dep.chart)) {
-        return {
+        deps.push({
           depName: dep.name,
           skipReason: 'invalid-name',
-        };
+        });
+        continue;
       }
 
-      // If starts with ./ is for sure a local path
-      if (dep.chart.startsWith('./')) {
-        return {
+      // If it starts with ./ ../ or / then it's a local path
+      if (isLocalPath(dep.chart)) {
+        if (
+          kustomizationsKeysUsed(dep) ||
+          (await localChartHasKustomizationsYaml(dep, fileName))
+        ) {
+          needKustomize = true;
+        }
+        deps.push({
           depName: dep.name,
           skipReason: 'local-chart',
-        };
+        });
+        continue;
       }
 
       if (is.number(dep.version)) {
@@ -79,10 +99,11 @@ export function extractPackageFile(
       }
 
       if (!is.string(dep.version)) {
-        return {
+        deps.push({
           depName,
           skipReason: 'invalid-version',
-        };
+        });
+        continue;
       }
 
       const res: PackageDependency = {
@@ -92,7 +113,9 @@ export function extractPackageFile(
           .concat([config.registryAliases?.[repoName]] as string[])
           .filter(is.string),
       };
-
+      if (kustomizationsKeysUsed(dep)) {
+        needKustomize = true;
+      }
       // in case of OCI repository, we need a PackageDependency with a DockerDatasource and a packageName
       const repository = doc.repositories?.find(
         (repo) => repo.name === repoName
@@ -113,9 +136,15 @@ export function extractPackageFile(
         res.skipReason = 'unknown-registry';
       }
 
-      return res;
-    });
+      deps.push(res);
+    }
   }
 
-  return deps.length ? { deps, datasource: HelmDatasource.id } : null;
+  return deps.length
+    ? {
+        deps,
+        datasource: HelmDatasource.id,
+        ...(needKustomize && { managerData: { needKustomize } }),
+      }
+    : null;
 }

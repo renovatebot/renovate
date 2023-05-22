@@ -82,6 +82,7 @@ export interface Ctx {
   registryUrls: PackageRegistry[];
 
   varTokens: lexer.Token[];
+  tmpNestingDepth: lexer.Token[];
   tmpTokenStore: Record<string, lexer.Token[]>;
   tokenMap: Record<string, lexer.Token[]>;
 }
