@@ -63,6 +63,7 @@ export interface RepoInfoBody {
   mainbranch: { name: string };
   has_issues: boolean;
   uuid: string;
+  full_name: string;
 }
 
 export interface PrResponse {

@@ -45,6 +45,9 @@ export function generatePrFingerprintConfig(
   const filteredUpgrades = config.upgrades.map((upgrade) => {
     return {
       depName: upgrade.depName,
+      displayFrom: upgrade.displayFrom,
+      displayTo: upgrade.displayTo,
+      displayPending: upgrade.displayPending,
       gitRef: upgrade.gitRef,
       hasReleaseNotes: upgrade.hasReleaseNotes,
       prBodyDefinitions: upgrade.prBodyDefinitions,
