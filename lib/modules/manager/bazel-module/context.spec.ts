@@ -34,8 +34,6 @@ describe('modules/manager/bazel-module/context', () => {
         .addString('first')
         .addString('second')
         .endArray()
-        .startAttribute('my_bool')
-        .addBoolean(true)
         .endRule();
 
       expect(ctx.results).toEqual([
@@ -47,7 +45,6 @@ describe('modules/manager/bazel-module/context', () => {
               [fragments.string('first'), fragments.string('second')],
               true
             ),
-            my_bool: fragments.boolean(true),
           },
           true
         ),
