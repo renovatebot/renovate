@@ -34,6 +34,7 @@ describe('modules/manager/bazel-module/parser', () => {
             rule: fragments.string('bazel_dep'),
             name: fragments.string('rules_bar'),
             version: fragments.string('1.0.0'),
+            dev_dependency: fragments.boolean(true),
           },
           true
         ),
