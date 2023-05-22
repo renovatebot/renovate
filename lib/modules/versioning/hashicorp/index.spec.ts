@@ -1,7 +1,7 @@
 import { api as semver } from '.';
 
 describe('modules/versioning/hashicorp/index', () => {
-  test.each`
+  it.each`
     version    | range         | expected
     ${'4.2.0'} | ${'~> 4.0'}   | ${true}
     ${'4.2.0'} | ${'~> 4.0.0'} | ${false}
@@ -12,7 +12,7 @@ describe('modules/versioning/hashicorp/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                         | range         | expected
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${'4.0.0'}
@@ -23,7 +23,7 @@ describe('modules/versioning/hashicorp/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     input                   | expected
     ${'>= 1.0.0, <= 2.0.0'} | ${true}
     ${'~> 4'}               | ${true}
@@ -42,7 +42,7 @@ describe('modules/versioning/hashicorp/index', () => {
     expect(res).toBe(expected);
   });
 
-  test.each`
+  it.each`
     version    | range                   | expected
     ${'0.9.0'} | ${'>= 1.0.0, <= 2.0.0'} | ${true}
     ${'1.9.0'} | ${'>= 1.0.0, <= 2.0.0'} | ${false}
@@ -53,7 +53,7 @@ describe('modules/versioning/hashicorp/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     versions                                | range         | expected
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0'}   | ${'4.2.0'}
     ${['0.4.0', '0.5.0', '4.2.0', '5.0.0']} | ${'~> 4.0.0'} | ${null}
@@ -64,7 +64,7 @@ describe('modules/versioning/hashicorp/index', () => {
     }
   );
 
-  test.each`
+  it.each`
     currentValue            | rangeStrategy        | currentVersion | newVersion   | expected
     ${'~> 1.2'}             | ${'replace'}         | ${'1.2.3'}     | ${'2.0.7'}   | ${'~> 2.0'}
     ${'~> 1.2.0'}           | ${'replace'}         | ${'1.2.3'}     | ${'2.0.7'}   | ${'~> 2.0.0'}

@@ -1,4 +1,4 @@
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { readLocalDirectory } from '../../../util/fs';

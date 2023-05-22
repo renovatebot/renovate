@@ -56,6 +56,7 @@ export interface BranchUpgradeConfig
   prBodyTemplate?: string;
   prPriority?: number;
   prTitle?: string;
+  prTitleStrict?: boolean;
   prettyNewMajor?: string;
   prettyNewVersion?: string;
   releases?: ReleaseWithNotes[];
@@ -110,6 +111,7 @@ export interface BranchConfig
     PlatformPrOptions {
   automergeComment?: string;
   automergeType?: string;
+  automergedPreviously?: boolean;
   baseBranch: string;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
@@ -130,10 +132,10 @@ export interface BranchConfig
 
 export interface BranchMetadata {
   branchName: string;
-  branchSha: string | null;
+  branchSha?: string | null;
   baseBranch?: string;
   baseBranchSha?: string | null;
-  automerge: boolean;
+  automerge?: boolean;
   isModified?: boolean;
   isPristine?: boolean;
 }
@@ -144,9 +146,10 @@ export interface BaseBranchMetadata {
 }
 
 export interface BranchSummary {
-  cacheModified?: boolean;
   baseBranches: BaseBranchMetadata[];
   branches: BranchMetadata[];
+  cacheModified?: boolean;
+  defaultBranch?: string;
   inactiveBranches: string[];
 }
 

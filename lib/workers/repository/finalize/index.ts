@@ -19,9 +19,7 @@ export async function finalizeRepo(
   await configMigration(config, branchList);
   await repositoryCache.saveCache();
   await pruneStaleBranches(config, branchList);
-  await platform.ensureIssueClosing(
-    `Action Required: Fix Renovate Configuration`
-  );
+  await ensureIssuesClosing();
   await clearRenovateRefs();
   PackageFiles.clear();
   const prList = await platform.getPrList();
@@ -36,6 +34,14 @@ export async function finalizeRepo(
     logger.debug('Repo is activated');
     config.repoIsActivated = true;
   }
-  runBranchSummary();
+  runBranchSummary(config);
   runRenovateRepoStats(config, prList);
+}
+
+// istanbul ignore next
+function ensureIssuesClosing(): Promise<Awaited<void>[]> {
+  return Promise.all([
+    platform.ensureIssueClosing(`Action Required: Fix Renovate Configuration`),
+    platform.ensureIssueClosing(`Action Required: Add missing credentials`),
+  ]);
 }

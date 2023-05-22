@@ -59,7 +59,7 @@ describe('modules/manager/gradle/parser/common', () => {
   it('prependNestingDepth', () => {
     ctx.tmpNestingDepth = ctx.varTokens = [token];
     prependNestingDepth(ctx);
-    expect(ctx.varTokens).toStrictEqual([token, token]);
+    expect(ctx.varTokens).toEqual([token, token]);
 
     coalesceVariable(ctx);
     expect(ctx).toMatchObject({
@@ -94,7 +94,14 @@ describe('modules/manager/gradle/parser/common', () => {
   });
 
   it('stripReservedPrefixFromKeyTokens', () => {
-    const tokenValues = ['rootProject', 'project', 'ext', 'extra', 'foo'];
+    const tokenValues = [
+      'rootProject',
+      'project',
+      'ext',
+      'extra',
+      'properties',
+      'foo',
+    ];
 
     ctx.varTokens.push(
       ...tokenValues.map((value) => partial<lexer.Token>({ value }))
@@ -114,11 +121,23 @@ describe('modules/manager/gradle/parser/common', () => {
   });
 
   it('findVariable', () => {
+    ctx.tmpNestingDepth = [token, token];
     ctx.globalVars = {
       foo: { key: 'foo', value: 'bar' },
+      'test.foo': { key: 'test.foo', value: 'bar2' },
+      'test.test.foo3': { key: 'test.test.foo3', value: 'bar3' },
     };
 
     expect(findVariable('unknown-global-var', ctx)).toBeUndefined();
+    expect(findVariable('foo3', ctx)).toStrictEqual(
+      ctx.globalVars['test.test.foo3']
+    );
+    expect(findVariable('test.foo', ctx)).toStrictEqual(
+      ctx.globalVars['test.foo']
+    );
+    expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['test.foo']);
+
+    ctx.tmpNestingDepth = [];
     expect(findVariable('foo', ctx)).toStrictEqual(ctx.globalVars['foo']);
   });
 

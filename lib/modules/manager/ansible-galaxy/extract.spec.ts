@@ -38,6 +38,21 @@ describe('modules/manager/ansible-galaxy/extract', () => {
       expect(res?.deps[0].currentValue).toBe('1.1.3');
     });
 
+    it('extracts git@ dependencies', () => {
+      const yamlFile = codeBlock`collections:
+      - name: community.docker
+        source: git@github.com:ansible-collections/community.docker
+        type: git
+        version: 2.7.5`;
+      const res = extractPackageFile(yamlFile, 'requirements.yml');
+      expect(res?.deps).toHaveLength(1);
+      expect(res?.deps[0].currentValue).toBe('2.7.5');
+      expect(res?.deps[0].registryUrls).toBeUndefined();
+      expect(res?.deps[0].packageName).toBe(
+        'git@github.com:ansible-collections/community.docker'
+      );
+    });
+
     it('check if an empty file returns null', () => {
       const res = extractPackageFile('\n', 'requirements.yml');
       expect(res).toBeNull();

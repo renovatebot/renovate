@@ -43,23 +43,30 @@ describe('modules/manager/asdf/extract', () => {
 
     it('can handle multiple tools in one file', () => {
       const res = extractPackageFile(
-        codeBlock`argocd 2.5.4
+        codeBlock`
+adr-tools 3.0.0
+argocd 2.5.4
 awscli 2.8.6
 bun 0.2.2
 cargo-make 0.36.2
+checkov 2.3.3
 clojure 1.11.1.1182
 crystal 1.6.1
 dart 2.19.3
 deno 1.26.2
 direnv 2.32.1
 dprint 0.32.2
+ecspresso 2.1.0
 elixir 1.14.1
 elm 0.19.1
 erlang 25.1.2
-flutter 3.7.6
+flutter 3.7.6-stable
+flux2 0.41.2
 gauche 0.9.12
 gohugo extended_0.104.3
 golang 1.19.2
+golangci-lint 1.52.2
+hadolint 2.12.0
 haskell 9.4.2
 helm 3.10.1
 helmfile 0.147.0
@@ -69,6 +76,7 @@ java adoptopenjdk-16.0.0+36
 julia 1.8.2
 just 1.7.0
 kotlin 1.7.20
+kubectl 1.26.3
 kustomize 4.5.7
 lua 5.4.4
 nim 1.6.8
@@ -77,6 +85,8 @@ ocaml 4.14.0
 perl 5.37.5
 php 8.1.12
 pnpm 7.26.2
+poetry 1.3.2
+pre-commit 3.3.1
 pulumi 3.57.1
 python 3.11.0
 ruby 3.1.2
@@ -85,14 +95,26 @@ scala 3.2.1
 shellcheck 0.8.0
 shfmt 3.5.1
 terraform 1.3.3
+terraform-docs 0.16.0
 terragrunt 0.43.2
+tflint 0.44.1
+tfsec 1.28.1
 trivy 0.33.0
 zig 0.9.1
+maestro 1.24.0
+detekt 1.21.0
+ktlint 0.48.1
 dummy 1.2.3
 `
       );
       expect(res).toEqual({
         deps: [
+          {
+            currentValue: '3.0.0',
+            datasource: 'github-tags',
+            packageName: 'npryce/adr-tools',
+            depName: 'adr-tools',
+          },
           {
             currentValue: '2.5.4',
             datasource: 'github-releases',
@@ -118,6 +140,12 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'sagiegurari/cargo-make',
             depName: 'cargo-make',
+          },
+          {
+            currentValue: '2.3.3',
+            datasource: 'github-tags',
+            packageName: 'bridgecrewio/checkov',
+            depName: 'checkov',
           },
           {
             currentValue: '1.11.1.1182',
@@ -159,6 +187,13 @@ dummy 1.2.3
             depName: 'dprint',
           },
           {
+            currentValue: '2.1.0',
+            datasource: 'github-releases',
+            packageName: 'kayac/ecspresso',
+            depName: 'ecspresso',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
             currentValue: '1.14.1',
             datasource: 'hexpm-bob',
             depName: 'elixir',
@@ -184,6 +219,13 @@ dummy 1.2.3
             depName: 'flutter',
           },
           {
+            currentValue: '0.41.2',
+            datasource: 'github-tags',
+            packageName: 'fluxcd/flux2',
+            depName: 'flux2',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '0.9.12',
             datasource: 'docker',
             packageName: 'practicalscheme/gauche',
@@ -202,6 +244,20 @@ dummy 1.2.3
             packageName: 'golang/go',
             depName: 'golang',
             extractVersion: '^go(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.52.2',
+            datasource: 'github-tags',
+            packageName: 'golangci/golangci-lint',
+            depName: 'golangci-lint',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '2.12.0',
+            datasource: 'github-tags',
+            packageName: 'hadolint/hadolint',
+            depName: 'hadolint',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '9.4.2',
@@ -265,6 +321,13 @@ dummy 1.2.3
             extractVersion: '^(Kotlin |v)(?<version>\\S+)',
           },
           {
+            currentValue: '1.26.3',
+            datasource: 'github-tags',
+            packageName: 'kubernetes/kubernetes',
+            depName: 'kubectl',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '4.5.7',
             datasource: 'github-releases',
             packageName: 'kubernetes-sigs/kustomize',
@@ -316,6 +379,19 @@ dummy 1.2.3
             packageName: 'pnpm',
             depName: 'pnpm',
             versioning: 'semver',
+          },
+          {
+            currentValue: '1.3.2',
+            datasource: 'pypi',
+            packageName: 'poetry',
+            depName: 'poetry',
+          },
+          {
+            currentValue: '3.3.1',
+            datasource: 'github-tags',
+            packageName: 'pre-commit/pre-commit',
+            depName: 'pre-commit',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '3.57.1',
@@ -372,11 +448,32 @@ dummy 1.2.3
             extractVersion: '^v(?<version>\\S+)',
           },
           {
+            currentValue: '0.16.0',
+            datasource: 'github-tags',
+            packageName: 'terraform-docs/terraform-docs',
+            depName: 'terraform-docs',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
             currentValue: '0.43.2',
             datasource: 'github-releases',
             packageName: 'gruntwork-io/terragrunt',
             depName: 'terragrunt',
             extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.44.1',
+            datasource: 'github-tags',
+            packageName: 'terraform-linters/tflint',
+            depName: 'tflint',
+            extractVersion: '^v(?<version>.+)',
+          },
+          {
+            currentValue: '1.28.1',
+            datasource: 'github-tags',
+            packageName: 'aquasecurity/tfsec',
+            depName: 'tfsec',
+            extractVersion: '^v(?<version>.+)',
           },
           {
             currentValue: '0.33.0',
@@ -392,8 +489,51 @@ dummy 1.2.3
             depName: 'zig',
           },
           {
+            currentValue: '1.24.0',
+            datasource: 'github-releases',
+            packageName: 'mobile-dev-inc/maestro',
+            depName: 'maestro',
+            extractVersion: '^cli-(?<version>\\S+)',
+          },
+          {
+            currentValue: '1.21.0',
+            datasource: 'github-releases',
+            packageName: 'detekt/detekt',
+            depName: 'detekt',
+            extractVersion: '^v(?<version>\\S+)',
+          },
+          {
+            currentValue: '0.48.1',
+            datasource: 'github-releases',
+            packageName: 'pinterest/ktlint',
+            depName: 'ktlint',
+          },
+          {
             depName: 'dummy',
             skipReason: 'unsupported-datasource',
+          },
+        ],
+      });
+    });
+
+    it('can handle flutter version channel', () => {
+      const withChannel = extractPackageFile('flutter 3.10.0-stable');
+      expect(withChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
+          },
+        ],
+      });
+      const withoutChannel = extractPackageFile('flutter 3.10.0');
+      expect(withoutChannel).toEqual({
+        deps: [
+          {
+            currentValue: '3.10.0',
+            datasource: 'flutter-version',
+            depName: 'flutter',
           },
         ],
       });

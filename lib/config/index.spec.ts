@@ -1,4 +1,5 @@
 import { getConfig } from './defaults';
+import { filterConfig, getManagerConfig, mergeChildConfig } from './index';
 
 jest.mock('../modules/datasource/npm');
 try {
@@ -11,7 +12,7 @@ const defaultConfig = getConfig();
 
 describe('config/index', () => {
   describe('mergeChildConfig(parentConfig, childConfig)', () => {
-    it('merges', async () => {
+    it('merges', () => {
       const parentConfig = { ...defaultConfig };
       const childConfig = {
         foo: 'bar',
@@ -20,15 +21,14 @@ describe('config/index', () => {
           schedule: ['on monday'],
         },
       };
-      const configParser = await import('./index');
-      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.foo).toBe('bar');
       expect(config.rangeStrategy).toBe('replace');
       expect(config.lockFileMaintenance.schedule).toEqual(['on monday']);
       expect(config.lockFileMaintenance).toMatchSnapshot();
     });
 
-    it('merges packageRules', async () => {
+    it('merges packageRules', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
         packageRules: [{ a: 1 }, { a: 2 }],
@@ -36,14 +36,13 @@ describe('config/index', () => {
       const childConfig = {
         packageRules: [{ a: 3 }, { a: 4 }],
       };
-      const configParser = await import('./index');
-      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.packageRules.map((rule) => rule.a)).toMatchObject([
         1, 2, 3, 4,
       ]);
     });
 
-    it('merges constraints', async () => {
+    it('merges constraints', () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
         constraints: {
@@ -56,8 +55,7 @@ describe('config/index', () => {
           node: '<15',
         },
       };
-      const configParser = await import('./index');
-      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      const config = mergeChildConfig(parentConfig, childConfig);
       expect(config.constraints).toMatchSnapshot();
       expect(config.constraints.node).toBe('<15');
     });
@@ -75,39 +73,48 @@ describe('config/index', () => {
       expect(config.packageRules).toHaveLength(2);
     });
 
-    it('handles null child packageRules', async () => {
+    it('handles null child packageRules', () => {
       const parentConfig = { ...defaultConfig };
       parentConfig.packageRules = [{ a: 3 }, { a: 4 }];
-      const configParser = await import('./index');
-      const config = configParser.mergeChildConfig(parentConfig, {});
+      const config = mergeChildConfig(parentConfig, {});
       expect(config.packageRules).toHaveLength(2);
     });
 
-    it('handles undefined childConfig', async () => {
+    it('handles undefined childConfig', () => {
       const parentConfig = { ...defaultConfig };
-      const configParser = await import('./index');
-      const config = configParser.mergeChildConfig(parentConfig, undefined);
+      const config = mergeChildConfig(parentConfig, undefined);
       expect(config).toMatchObject(parentConfig);
     });
 
-    it('getManagerConfig()', async () => {
+    it('getManagerConfig()', () => {
       const parentConfig = { ...defaultConfig };
-      const configParser = await import('./index');
-      const config = configParser.getManagerConfig(parentConfig, 'npm');
+      const config = getManagerConfig(parentConfig, 'npm');
       expect(config).toContainEntries([
         ['fileMatch', ['(^|/)package\\.json$']],
         ['rollbackPrs', true],
       ]);
-      expect(
-        configParser.getManagerConfig(parentConfig, 'html')
-      ).toContainEntries([['fileMatch', ['\\.html?$']]]);
+      expect(getManagerConfig(parentConfig, 'html')).toContainEntries([
+        ['fileMatch', ['\\.html?$']],
+      ]);
     });
 
-    it('filterConfig()', async () => {
+    it('filterConfig()', () => {
       const parentConfig = { ...defaultConfig };
-      const configParser = await import('./index');
-      const config = configParser.filterConfig(parentConfig, 'pr');
+      const config = filterConfig(parentConfig, 'pr');
       expect(config).toBeObject();
+    });
+
+    it('highest vulnerabilitySeverity maintained when config is vulnerability alert', () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        isVulnerabilityAlert: true,
+        vulnerabilitySeverity: 'HIGH',
+      });
+      const childConfig = {
+        vulnerabilitySeverity: 'CRITICAL',
+      };
+      const config = mergeChildConfig(parentConfig, childConfig);
+      expect(config.vulnerabilitySeverity).toBe('CRITICAL');
     });
   });
 });

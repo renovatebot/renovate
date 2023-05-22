@@ -33,7 +33,7 @@ export class JenkinsPluginsDatasource extends Datasource {
       return null;
     }
 
-    const result = clone(plugin);
+    const result = structuredClone(plugin);
     const versions = await this.getJenkinsPluginVersions();
     const releases = versions[packageName];
     result.releases = releases ? clone(releases) : [];

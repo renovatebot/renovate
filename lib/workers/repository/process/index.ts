@@ -8,7 +8,6 @@ import type { PackageFile } from '../../../modules/manager/types';
 import { platform } from '../../../modules/platform';
 import { scm } from '../../../modules/platform/scm';
 import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
 import { getBranchList } from '../../../util/git';
 import { configRegexPredicate } from '../../../util/regex';
 import { addSplit } from '../../../util/split';
@@ -23,7 +22,7 @@ async function getBaseBranchConfig(
 ): Promise<RenovateConfig> {
   logger.debug(`baseBranch: ${baseBranch}`);
 
-  let baseBranchConfig: RenovateConfig = clone(config);
+  let baseBranchConfig: RenovateConfig = structuredClone(config);
 
   if (
     config.useBaseBranchConfig === 'merge' &&
@@ -109,7 +108,7 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: null!,
   };
-  if (config.baseBranches?.length) {
+  if (GlobalConfig.get('platform') !== 'local' && config.baseBranches?.length) {
     config.baseBranches = unfoldBaseBranches(config.baseBranches);
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};

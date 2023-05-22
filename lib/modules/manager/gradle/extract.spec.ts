@@ -120,6 +120,126 @@ describe('modules/manager/gradle/extract', () => {
     ]);
   });
 
+  it('resolves cross-file Kotlin objects', async () => {
+    const fsMock = {
+      'buildSrc/src/main/kotlin/Deps.kt': codeBlock`
+        object Libraries {
+          const val jacksonAnnotations = "com.fasterxml.jackson.core:jackson-annotations:\${Versions.jackson}"
+          const val rxjava: String = "io.reactivex.rxjava2:rxjava:" + Versions.rxjava
+          const val jCache = "javax.cache:cache-api:1.1.0"
+          private const val shadowVersion = "7.1.2"
+
+          object Kotlin {
+            const val version = GradleDeps.Kotlin.version
+            const val stdlibJdk = "org.jetbrains.kotlin:kotlin-stdlib:$version"
+          }
+
+          object Android {
+            object Tools {
+              private const val version = "4.1.2"
+              const val buildGradle = "com.android.tools.build:gradle:$version"
+            }
+          }
+
+          val modulePlugins = mapOf(
+            "shadow" to shadowVersion
+          )
+
+          object Test {
+            private const val version = "1.3.0-rc01"
+            const val core = "androidx.test:core:\${Test.version}"
+
+            object Espresso {
+              private const val version = "3.3.0-rc01"
+              const val espressoCore = "androidx.test.espresso:espresso-core:$version"
+            }
+
+            object Androidx {
+              const val coreKtx = "androidx.test:core-ktx:$version"
+            }
+          }
+        }
+      `,
+      'buildSrc/src/main/kotlin/GradleDeps.kt': codeBlock`
+        object GradleDeps {
+          object Kotlin {
+            const val version = "1.8.10"
+          }
+        }
+      `,
+      'buildSrc/src/main/kotlin/Versions.kt': codeBlock`
+        object Versions {
+          const val jackson = "2.9.10"
+          const val rxjava: String = "1.2.3"
+        }
+      `,
+    };
+    mockFs(fsMock);
+
+    const res = await extractAllPackageFiles(
+      partial<ExtractConfig>(),
+      Object.keys(fsMock)
+    );
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'buildSrc/src/main/kotlin/Deps.kt',
+        deps: [
+          {
+            depName: 'javax.cache:cache-api',
+            currentValue: '1.1.0',
+            groupName: 'Libraries.jCache',
+          },
+          {
+            depName: 'com.android.tools.build:gradle',
+            currentValue: '4.1.2',
+            groupName: 'Libraries.Android.Tools.version',
+          },
+          {
+            depName: 'androidx.test:core',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Libraries.Test.version',
+          },
+          {
+            depName: 'androidx.test.espresso:espresso-core',
+            currentValue: '3.3.0-rc01',
+            groupName: 'Libraries.Test.Espresso.version',
+          },
+          {
+            depName: 'androidx.test:core-ktx',
+            currentValue: '1.3.0-rc01',
+            groupName: 'Libraries.Test.version',
+          },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/src/main/kotlin/GradleDeps.kt',
+        deps: [
+          {
+            depName: 'org.jetbrains.kotlin:kotlin-stdlib',
+            currentValue: '1.8.10',
+            groupName: 'GradleDeps.Kotlin.version',
+          },
+        ],
+      },
+      {
+        packageFile: 'buildSrc/src/main/kotlin/Versions.kt',
+        deps: [
+          {
+            depName: 'com.fasterxml.jackson.core:jackson-annotations',
+            currentValue: '2.9.10',
+            groupName: 'Versions.jackson',
+          },
+          {
+            depName: 'io.reactivex.rxjava2:rxjava',
+            currentValue: '1.2.3',
+            groupName: 'Versions.rxjava',
+          },
+        ],
+      },
+    ]);
+  });
+
   it('inherits gradle variables', async () => {
     const fsMock = {
       'gradle.properties': 'foo=1.0.0',
@@ -960,6 +1080,7 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:* = 3
           org.apache.lucene:a.* = 2
           org.apache.lucene:a.b = 1
+          org.apache.foo*:* = 5
         `,
         'versions.lock': stripIndent`
           # Run ./gradlew --write-locks to regenerate this file
@@ -969,6 +1090,7 @@ describe('modules/manager/gradle/extract', () => {
           org.apache.lucene:a.d:1 (10 constraints: 95be0c15)
           org.apache.lucene:d:1 (10 constraints: 95be0c15)
           org.apache.lucene:e.f:1 (10 constraints: 95be0c15)
+          org.apache.foo-bar:a:1 (10 constraints: 95be0c15)
         `,
       };
       mockFs(fsMock);
@@ -1044,6 +1166,18 @@ describe('modules/manager/gradle/extract', () => {
               lockedVersion: '1',
               groupName: 'org.apache.lucene:*',
               fileReplacePosition: 39,
+              depType: 'dependencies',
+            },
+            {
+              managerData: {
+                fileReplacePosition: 113,
+                packageFile: 'versions.props',
+              },
+              depName: 'org.apache.foo-bar:a',
+              currentValue: '5',
+              lockedVersion: '1',
+              groupName: 'org.apache.foo*:*',
+              fileReplacePosition: 113,
               depType: 'dependencies',
             },
           ],

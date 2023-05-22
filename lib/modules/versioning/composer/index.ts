@@ -91,8 +91,14 @@ function composer2npm(input: string): string {
         '>=$1 <1'
       );
 
+      // add extra digits to <8-DEV and <8.0-DEV
+      output = output
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0')
+        .replace(regEx(/^(<\d+(\.\d+)?)$/g), '$1.0');
+
       return output + stability;
     })
+    .map((part) => part.replace(/([a-z])([0-9])/gi, '$1.$2'))
     .join(' || ');
 }
 
@@ -147,24 +153,35 @@ function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.getSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  const npmVersions = versions.map(composer2npm);
+  const npmVersion = npm.getSatisfyingVersion(npmVersions, composer2npm(range));
+  if (!npmVersion) {
+    return null;
+  }
+  // get index of npmVersion in npmVersions
+  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
 }
 
 function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return npm.minSatisfyingVersion(
-    versions.map(composer2npm),
-    composer2npm(range)
-  );
+  const npmVersions = versions.map(composer2npm);
+  const npmVersion = npm.minSatisfyingVersion(npmVersions, composer2npm(range));
+  if (!npmVersion) {
+    return null;
+  }
+  // get index of npmVersion in npmVersions
+  return versions[npmVersions.indexOf(npmVersion)] ?? npmVersion;
 }
 
 function subset(subRange: string, superRange: string): boolean | undefined {
-  return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  try {
+    return npm.subset!(composer2npm(subRange), composer2npm(superRange));
+  } catch (err) {
+    logger.trace({ err }, 'composer.subset error');
+    return false;
+  }
 }
 
 function getNewValue({

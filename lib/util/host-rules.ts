@@ -2,21 +2,22 @@ import is from '@sindresorhus/is';
 import merge from 'deepmerge';
 import { logger } from '../logger';
 import type { HostRule, HostRuleSearchResult } from '../types';
-import { clone } from './clone';
 import * as sanitize from './sanitize';
 import { toBase64 } from './string';
 import { parseUrl, validateUrl } from './url';
 
 let hostRules: HostRule[] = [];
 
-interface LegacyHostRule {
+export interface LegacyHostRule {
   hostName?: string;
   domainName?: string;
   baseUrl?: string;
+  host?: string;
+  endpoint?: string;
 }
 
-function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
-  const cloned: LegacyHostRule & HostRule = clone(rule);
+export function migrateRule(rule: LegacyHostRule & HostRule): HostRule {
+  const cloned: LegacyHostRule & HostRule = structuredClone(rule);
   delete cloned.hostName;
   delete cloned.domainName;
   delete cloned.baseUrl;
@@ -187,7 +188,7 @@ export function findAll({ hostType }: { hostType: string }): HostRule[] {
  * @returns a deep copy of all known host rules without any filtering
  */
 export function getAll(): HostRule[] {
-  return clone(hostRules);
+  return structuredClone(hostRules);
 }
 
 export function clear(): void {
