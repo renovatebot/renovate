@@ -5,6 +5,7 @@ import {
   getConfig,
   git,
   mocked,
+  partial,
   platform,
   scm,
 } from '../../../../../test/util';
@@ -400,11 +401,10 @@ describe('workers/repository/onboarding/branch/index', () => {
       });
 
       it('processes branch if rebase-checkbox in checked', async () => {
-        const pr = { bodyStruct: { rebaseRequested: true } };
-        platform.getBranchPr.mockResolvedValueOnce(partial<Pr>(pr));
-
+        platform.getBranchPr.mockResolvedValueOnce(
+          partial<Pr>({ bodyStruct: { hash: 'hash', rebaseRequested: true } })
+        );
         await checkOnboardingBranch(config);
-
         expect(OnboardingState.prUpdateRequested).toBeTrue();
         expect(git.mergeBranch).toHaveBeenCalledOnce();
         expect(scm.commitAndPush).toHaveBeenCalledTimes(0);

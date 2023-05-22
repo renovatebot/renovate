@@ -116,8 +116,6 @@ export async function checkOnboardingBranch(
     isModified
   );
 
-  // TODO #7154
-  const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }
 
