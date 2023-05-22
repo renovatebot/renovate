@@ -3,6 +3,7 @@ import * as hostRules from '../host-rules';
 import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
 const baseUrl = 'https://api.bitbucket.org';
+const range = (count: number) => [...Array(count).keys()];
 
 describe('util/http/bitbucket', () => {
   let api: BitbucketHttp;
@@ -61,27 +62,27 @@ describe('util/http/bitbucket', () => {
       .scope(baseUrl)
       .get('/some-url?foo=bar&pagelen=100')
       .reply(200, {
-        values: ['a'],
+        values: range(100),
         page: '1',
         next: `${baseUrl}/some-url?foo=bar&pagelen=100&page=2`,
       })
       .get('/some-url?foo=bar&pagelen=100&page=2')
       .reply(200, {
-        values: ['b', 'c'],
+        values: range(100),
         page: '2',
         next: `${baseUrl}/some-url?foo=bar&pagelen=100&page=3`,
       })
       .get('/some-url?foo=bar&pagelen=100&page=3')
       .reply(200, {
-        values: ['d'],
+        values: range(10),
         page: '3',
       });
     const res = await api.getJson('/some-url?foo=bar', { paginate: true });
     expect(res.body).toEqual({
       page: '1',
-      pagelen: 4,
-      size: 4,
-      values: ['a', 'b', 'c', 'd'],
+      pagelen: 210,
+      size: 210,
+      values: expect.arrayContaining(Array(210)),
       next: undefined,
     });
   });
@@ -91,27 +92,27 @@ describe('util/http/bitbucket', () => {
       .scope(baseUrl)
       .get('/some-url?pagelen=10')
       .reply(200, {
-        values: ['a'],
+        values: range(10),
         page: '1',
         next: `${baseUrl}/some-url?pagelen=10&page=2`,
       })
       .get('/some-url?pagelen=10&page=2')
       .reply(200, {
-        values: ['b', 'c'],
+        values: range(10),
         page: '2',
         next: `${baseUrl}/some-url?pagelen=10&page=3`,
       })
       .get('/some-url?pagelen=10&page=3')
       .reply(200, {
-        values: ['d'],
+        values: range(1),
         page: '3',
       });
     const res = await api.getJson('some-url?pagelen=10', { paginate: true });
     expect(res.body).toEqual({
       page: '1',
-      pagelen: 4,
-      size: 4,
-      values: ['a', 'b', 'c', 'd'],
+      pagelen: 21,
+      size: 21,
+      values: expect.arrayContaining(Array(21)),
       next: undefined,
     });
   });
@@ -121,19 +122,19 @@ describe('util/http/bitbucket', () => {
       .scope(baseUrl)
       .get('/some-url?pagelen=20')
       .reply(200, {
-        values: ['a'],
+        values: range(20),
         page: '1',
         next: `${baseUrl}/some-url?pagelen=20&page=2`,
       })
       .get('/some-url?pagelen=20&page=2')
       .reply(200, {
-        values: ['b', 'c'],
+        values: range(20),
         page: '2',
         next: `${baseUrl}/some-url?pagelen=20&page=3`,
       })
       .get('/some-url?pagelen=20&page=3')
       .reply(200, {
-        values: ['d'],
+        values: range(4),
         page: '3',
       });
     const res = await api.getJson('some-url', {
@@ -142,9 +143,9 @@ describe('util/http/bitbucket', () => {
     });
     expect(res.body).toEqual({
       page: '1',
-      pagelen: 4,
-      size: 4,
-      values: ['a', 'b', 'c', 'd'],
+      pagelen: 44,
+      size: 44,
+      values: expect.arrayContaining(Array(44)),
       next: undefined,
     });
   });
