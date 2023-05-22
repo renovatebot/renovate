@@ -71,26 +71,30 @@ describe('modules/manager/bazel-module/extract', () => {
         throw new Error('Expected a result.');
       }
       expect(result.deps).toHaveLength(3);
-      expect(result.deps).toContainEqual({
-        datasource: BazelDatasource.id,
-        depType: 'bazel_dep',
-        depName: 'rules_bar',
-        currentValue: '1.0.0',
-      });
-      expect(result.deps).toContainEqual({
-        datasource: BazelDatasource.id,
-        depType: 'bazel_dep',
-        depName: 'rules_foo',
-        currentValue: '1.2.3',
-        skipReason: 'git-dependency',
-      });
-      expect(result.deps).toContainEqual({
-        datasource: GithubTagsDatasource.id,
-        depType: 'git_override',
-        depName: 'rules_foo',
-        currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
-        packageName: 'example/rules_foo',
-      });
+      expect(result.deps).toEqual(
+        expect.arrayContaining([
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_bar',
+            currentValue: '1.0.0',
+          },
+          {
+            datasource: BazelDatasource.id,
+            depType: 'bazel_dep',
+            depName: 'rules_foo',
+            currentValue: '1.2.3',
+            skipReason: 'git-dependency',
+          },
+          {
+            datasource: GithubTagsDatasource.id,
+            depType: 'git_override',
+            depName: 'rules_foo',
+            currentDigest: '850cb49c8649e463b80ef7984e7c744279746170',
+            packageName: 'example/rules_foo',
+          },
+        ])
+      );
     });
   });
 });
