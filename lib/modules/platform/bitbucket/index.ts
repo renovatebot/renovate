@@ -80,7 +80,7 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   const options: HttpOptions = {
-    useCache: false,
+    memCache: false,
   };
   if (token) {
     options.token = token;
@@ -114,9 +114,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
-    );
+    const repos = (
+      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
+        `/2.0/repositories/?role=contributor`,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
@@ -362,7 +367,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
   return utils.accumulateValues<BitbucketStatus>(
@@ -370,7 +375,7 @@ async function getStatus(
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
     'get',
-    { useCache }
+    { memCache }
   );
 }
 // Returns the combined status for a branch.
