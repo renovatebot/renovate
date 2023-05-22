@@ -1,8 +1,7 @@
 import { logger } from '../../../logger';
 import { BitbucketHttp } from '../../../util/http/bitbucket';
 import type { EnsureCommentConfig, EnsureCommentRemovalConfig } from '../types';
-import type { Config } from './types';
-import { accumulateValues } from './utils';
+import type { Config, PagedResult } from './types';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -21,9 +20,11 @@ async function getComments(
   config: CommentsConfig,
   prNo: number
 ): Promise<Comment[]> {
-  const comments = await accumulateValues<Comment>(
-    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`
-  );
+  const comments = (await bitbucketHttp.getJson<PagedResult<Comment>>(
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`, {
+      paginate: true
+    }
+  )).body.values;
 
   logger.debug(`Found ${comments.length} comments`);
   return comments;
