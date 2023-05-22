@@ -8334,10 +8334,10 @@ open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openpgp@5.8.0:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.8.0.tgz#5e3033e8df59d1626ce65aa01b3cf5abee7ff26b"
-  integrity sha512-hq4+4s/vpjuwGgZSjplGp4j5FzSz+KwiFRiqMx+ZXr7VCK3CvTkktYilMTZMrf2vHsFH8aQ0596Lmn07HeKRmQ==
+openpgp@5.9.0:
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/openpgp/-/openpgp-5.9.0.tgz#f7ebe7b1e228aebc494835509ec9239853faed61"
+  integrity sha512-wEI6TAinCAq8ZLZA4oZ3ZtJ2BhhHj+CiPCd8TzE7zCicr0V8tvG5UF76OtddLLOJcK63w3Aj3KiRd+VLMScirQ==
   dependencies:
     asn1.js "^5.0.0"
 
