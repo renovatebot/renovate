@@ -1,0 +1,3 @@
+# This comment should be ignored
+build --show_timestamps --keep_going --jobs 600
+build --color=yes

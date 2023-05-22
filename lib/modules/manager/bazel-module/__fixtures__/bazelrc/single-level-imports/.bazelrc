@@ -1,0 +1,2 @@
+import %workspace%/shared.bazelrc
+try-import %workspace%/local.bazelrc
