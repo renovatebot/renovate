@@ -1,6 +1,7 @@
 import {
   ArrayFragmentSchema,
   AttributeFragmentSchema,
+  BooleanFragmentSchema,
   RecordFragmentSchema,
   StringFragmentSchema,
 } from './fragments';
@@ -11,6 +12,14 @@ describe('modules/manager/bazel-module/fragments', () => {
     const result = fragments.string('hello');
     expect(() => StringFragmentSchema.parse(result)).not.toThrow();
     expect(result.value).toBe('hello');
+  });
+
+  it('.boolean()', () => {
+    const result = fragments.boolean(true);
+    expect(() => BooleanFragmentSchema.parse(result)).not.toThrow();
+    expect(result.value).toBe(true);
+    const sameResult = fragments.boolean('True');
+    expect(sameResult).toEqual(result);
   });
 
   it('.record()', () => {
@@ -38,6 +47,7 @@ describe('modules/manager/bazel-module/fragments', () => {
   it.each`
     a                            | exp
     ${fragments.string('hello')} | ${true}
+    ${fragments.boolean(true)}   | ${true}
     ${fragments.array()}         | ${true}
     ${fragments.record()}        | ${false}
   `('.isValue($a)', ({ a, exp }) => {
@@ -47,9 +57,10 @@ describe('modules/manager/bazel-module/fragments', () => {
   it.each`
     a                            | exp
     ${fragments.string('hello')} | ${true}
+    ${fragments.boolean(true)}   | ${true}
     ${fragments.array()}         | ${false}
     ${fragments.record()}        | ${false}
-  `('.isString($a)', ({ a, exp }) => {
-    expect(fragments.isString(a)).toBe(exp);
+  `('.isValue($a)', ({ a, exp }) => {
+    expect(fragments.isPrimitive(a)).toBe(exp);
   });
 });
