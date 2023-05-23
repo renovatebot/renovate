@@ -65,7 +65,8 @@ build:ci --registry=https://internal.server/custom_registry
 build --registry=https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
 ```
 
-In this case the `https://internal.server/custom_registry` will be ignored. The resulting registry list is:
+In this case the `https://internal.server/custom_registry` will be ignored. 
+The resulting registry list is:
 
 1. https://raw.githubusercontent.com/bazelbuild/bazel-central-registry/main
 
@@ -73,11 +74,82 @@ In this case the `https://internal.server/custom_registry` will be ignored. The 
 
 #### `bazel_dep`
 
-The `version` value for a `bazel_dep` declaration will be updated for a 
+Renovate will update the `version` value for a [bazel_dep](https://bazel.build/rules/lib/globals/module#bazel_dep) declaration. 
 
 ```python
 bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
 ```
+
+In the example above, the `0.15.0` will be evaluated against a repository's registries. 
+If a new version is found, the value will be replaced with the new version.
+
+#### `git_override`
+
+If Renovate finds a [git_override](https://bazel.build/rules/lib/globals/module#git_override), it will ignore the related `bazel_dep` and evaluate the `commit` value at the specified `remote`.
+
+```python
+bazel_dep(name = "cgrindel_bazel_starlib", version = "0.15.0")
+
+git_override(
+    module_name = "cgrindel_bazel_starlib",
+    commit = "fb47f0e9f7c376a7700fc9fe3319231ae57880df",
+    remote = "https://github.com/cgrindel/bazel-starlib.git",
+)
+```
+
+If there is a more recent commit on the primary branch than the one listed, the `commit` value will be updated.
+
+#### `single_version_override`
+
+The [single_version_override](https://bazel.build/rules/lib/globals/module#single_version_override) is a declaration with many purposes.
+Renovate evaluates two attributes from this declaration: `version` and `registry`.
+
+If a `version` is specified, it overrides the version specified in the `bazel_dep` pinning it to the specified value.
+In the following example, Renovate will note that the version has been pinned to `1.2.3`.
+This will result in `rules_foo` being ignored for update evaluation.
+
+```python
+bazel_dep(name = "rules_foo", version = "1.2.4")
+
+single_version_override(
+  module_name = "rules_foo",
+  version = "1.2.3",
+)
+```
+
+If a `registry` is specified, Renovate will use the specified registry URL to check for a new version. 
+In the following example, Renovate will only use the `https://example.com/custom_registry` registry to look for versions for `rules_foo`.
+Any registry values specified in the repository's bazlerc files will be ignored for the `rules_foo` module.
+
+```python
+bazel_dep(name = "rules_foo", version = "1.2.3")
+
+single_version_override(
+  module_name = "rules_foo",
+  registry = "https://example.com/custom_registry",
+)
+```
+
+#### `archive_override` and `local_path_override`
+
+If Renovate finds an [archive_override](https://bazel.build/rules/lib/globals/module#archive_override) or a [local_path_override](https://bazel.build/rules/lib/globals/module#local_path_override), it will ignore the related `bazel_dep`.
+Since there are no versionable attributes on these declarations, no updates will occur.
+
+```python
+bazel_dep(name = "rules_foo", version = "1.2.3")
+
+archive_override(
+  module_name = "rules_foo",
+  urls = [
+    "https://example.com/archive.tar.gz",
+  ],
+)
+```
+
+#### `multiple_version_override`
+
+Renovate ignores [multiple_version_override](https://bazel.build/rules/lib/globals/module#multiple_version_override).
+It does not affect the processing of version updates for a module.
 
 ## Legacy `WORKSPACE` File Support
 
