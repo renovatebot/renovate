@@ -4043,10 +4043,10 @@ bunyan@1.8.15:
     mv "~2"
     safe-json-stringify "~1"
 
-cacache@17.1.0:
-  version "17.1.0"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.1.0.tgz#b7286ef941dafe55b461cdcdceda71cacc1eb98d"
-  integrity sha512-hXpFU+Z3AfVmNuiLve1qxWHMq0RSIt5gjCKAHi/M6DktwFwDdAXAtunl1i4WSKaaVcU9IsRvXFg42jTHigcC6Q==
+cacache@17.1.1:
+  version "17.1.1"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-17.1.1.tgz#f088b8cb6c10cfd3cb9e5f52e9b8fcdec315c412"
+  integrity sha512-PfSvLwoYQT04wGpsivFhKyVG1i4mpA0LoxF9WdE7C46E7K170GvvXgVNiTgxmagNcXItPjzGrOBc7CBQ7HgPvg==
   dependencies:
     "@npmcli/fs" "^3.1.0"
     fs-minipass "^3.0.0"
