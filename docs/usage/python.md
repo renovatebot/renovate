@@ -47,6 +47,7 @@ There are three ways to do this:
 
 - index-url in `requirements.txt`
 - sources in `Pipfile`
+- sources in `pyproject.toml`
 - set URL in Renovate configuration
 
 ### index-url in `requirements.txt`
