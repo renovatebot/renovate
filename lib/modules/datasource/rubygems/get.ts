@@ -1,185 +1,208 @@
 import { Marshal } from '@qnighy/marshal';
+import is from '@sindresorhus/is';
+import { z } from 'zod';
 import { logger } from '../../../logger';
 import { HttpError } from '../../../util/http';
+import { LooseArray } from '../../../util/schema-utils';
 import { getQueryString, joinUrlParts, parseUrl } from '../../../util/url';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, Release, ReleaseResult } from '../types';
-import type {
-  JsonGemVersions,
-  JsonGemsInfo,
-  MarshalledVersionInfo,
-} from './types';
 
-const INFO_PATH = '/api/v1/gems';
-const VERSIONS_PATH = '/api/v1/versions';
-const DEPENDENCIES_PATH = '/api/v1/dependencies';
+const MarshalledVersionInfo = LooseArray(
+  z
+    .object({
+      number: z.string(),
+    })
+    .transform(({ number: version }) => ({ version }))
+)
+  .transform((releases) => (releases.length === 0 ? null : { releases }))
+  .nullable()
+  .catch(null);
+
+const GemsInfo = z
+  .object({
+    name: z.string().transform((x) => x.toLowerCase()),
+    version: z.string().nullish().catch(null),
+    changelog_uri: z.string().nullish().catch(null),
+    homepage_uri: z.string().nullish().catch(null),
+    source_code_uri: z.string().nullish().catch(null),
+  })
+  .transform(
+    ({
+      name: packageName,
+      version,
+      changelog_uri: changelogUrl,
+      homepage_uri: homepage,
+      source_code_uri: sourceUrl,
+    }) => ({
+      packageName,
+      version,
+      changelogUrl,
+      homepage,
+      sourceUrl,
+    })
+  );
+type GemsInfo = z.infer<typeof GemsInfo>;
+
+const GemVersions = LooseArray(
+  z
+    .object({
+      number: z.string(),
+      created_at: z.string(),
+      platform: z.string().nullable().catch(null),
+      ruby_version: z.string().nullable().catch(null),
+      rubygems_version: z.string().nullable().catch(null),
+    })
+    .transform(
+      ({
+        number: version,
+        created_at: releaseTimestamp,
+        platform,
+        ruby_version: rubyVersion,
+        rubygems_version: rubygemsVersion,
+      }): Release => {
+        const result: Release = { version, releaseTimestamp };
+        const constraints: Record<string, string[]> = {};
+
+        if (platform) {
+          constraints.platform = [platform];
+        }
+
+        if (rubyVersion) {
+          constraints.ruby = [rubyVersion];
+        }
+
+        if (rubygemsVersion) {
+          constraints.rubygems = [rubygemsVersion];
+        }
+
+        if (!is.emptyObject(constraints)) {
+          result.constraints = constraints;
+        }
+
+        return result;
+      }
+    )
+);
+type GemVersions = z.infer<typeof GemVersions>;
 
 export class InternalRubyGemsDatasource extends Datasource {
   constructor(override readonly id: string) {
     super(id);
   }
 
-  private knownFallbackHosts = ['rubygems.pkg.github.com', 'gitlab.com'];
-
-  override getReleases({
-    packageName,
-    registryUrl,
-  }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  async getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null> {
+    const registryUrl = config.registryUrl;
     // istanbul ignore if
     if (!registryUrl) {
-      return Promise.resolve(null);
+      return null;
     }
+
+    const packageName = config.packageName.toLowerCase();
+
     const hostname = parseUrl(registryUrl)?.hostname;
-    if (hostname && this.knownFallbackHosts.includes(hostname)) {
-      return this.getDependencyFallback(packageName, registryUrl);
-    }
-    return this.getDependency(packageName, registryUrl);
+    return hostname === 'rubygems.pkg.github.com' || hostname === 'gitlab.com'
+      ? await this.getDependencyFallback(registryUrl, packageName)
+      : await this.getDependency(registryUrl, packageName);
   }
 
   async getDependencyFallback(
-    dependency: string,
-    registry: string
+    registryUrl: string,
+    packageName: string
   ): Promise<ReleaseResult | null> {
-    logger.debug(
-      { dependency, api: DEPENDENCIES_PATH },
-      'RubyGems lookup for dependency'
-    );
-    const info = await this.fetchBuffer<MarshalledVersionInfo[]>(
-      dependency,
-      registry,
-      DEPENDENCIES_PATH
-    );
-    if (!info || info.length === 0) {
-      return null;
-    }
-    const releases = info.map(
-      ({ number: version, platform: rubyPlatform }) => ({
-        version,
-        rubyPlatform,
-      })
-    );
-    return {
-      releases,
-      sourceUrl: null,
-    };
+    const path = joinUrlParts(registryUrl, `/api/v1/dependencies`);
+    const query = getQueryString({ gems: packageName });
+    const url = `${path}?${query}`;
+    const { body: buffer } = await this.http.getBuffer(url);
+    const data = Marshal.parse(buffer);
+    return MarshalledVersionInfo.parse(data);
   }
 
-  async getDependency(
-    dependency: string,
-    registry: string
-  ): Promise<ReleaseResult | null> {
-    logger.debug(
-      { dependency, api: INFO_PATH },
-      'RubyGems lookup for dependency'
-    );
-    let info: JsonGemsInfo;
-
+  async fetchGemsInfo(
+    registryUrl: string,
+    packageName: string
+  ): Promise<GemsInfo | null> {
     try {
-      info = await this.fetchJson(dependency, registry, INFO_PATH);
-    } catch (error) {
-      // fallback to deps api on 404
-      if (error instanceof HttpError && error.response?.statusCode === 404) {
-        return await this.getDependencyFallback(dependency, registry);
-      }
-      throw error;
-    }
-
-    if (!info) {
-      logger.debug(`RubyGems package not found packageName: ${dependency} `);
-      return null;
-    }
-
-    if (dependency.toLowerCase() !== info.name.toLowerCase()) {
-      logger.warn(
-        { lookup: dependency, returned: info.name },
-        'Lookup name does not match with returned.'
+      const { body } = await this.http.getJson(
+        joinUrlParts(registryUrl, '/api/v1/gems', `${packageName}.json`),
+        GemsInfo
       );
-      return null;
+      return body;
+    } catch (err) {
+      // fallback to deps api on 404
+      if (err instanceof HttpError && err.response?.statusCode === 404) {
+        return null;
+      }
+      throw err;
     }
+  }
 
-    let versions: JsonGemVersions[] = [];
-    let releases: Release[] = [];
+  async fetchGemVersions(
+    registryUrl: string,
+    packageName: string
+  ): Promise<GemVersions | null> {
     try {
-      versions = await this.fetchJson(dependency, registry, VERSIONS_PATH);
+      const { body } = await this.http.getJson(
+        joinUrlParts(registryUrl, '/api/v1/versions', `${packageName}.json`),
+        GemVersions
+      );
+      return body;
     } catch (err) {
       if (err.statusCode === 400 || err.statusCode === 404) {
         logger.debug(
-          { registry },
+          { registry: registryUrl },
           'versions endpoint returns error - falling back to info endpoint'
         );
+        return null;
       } else {
         throw err;
       }
     }
+  }
 
-    // TODO: invalid properties for `Release` see #11312
-
-    if (versions.length === 0 && info.version) {
-      logger.warn('falling back to the version from the info endpoint');
-      releases = [
-        {
-          version: info.version,
-          rubyPlatform: info.platform,
-        } as Release,
-      ];
-    } else {
-      releases = versions.map(
-        ({
-          number: version,
-          platform: rubyPlatform,
-          created_at: releaseTimestamp,
-          rubygems_version: rubygemsVersion,
-          ruby_version: rubyVersion,
-        }) => ({
-          version,
-          rubyPlatform,
-          releaseTimestamp,
-          rubygemsVersion,
-          rubyVersion,
-        })
-      );
+  async getDependency(
+    registryUrl: string,
+    packageName: string
+  ): Promise<ReleaseResult | null> {
+    const info = await this.fetchGemsInfo(registryUrl, packageName);
+    if (!info) {
+      return await this.getDependencyFallback(registryUrl, packageName);
     }
 
-    return {
-      releases,
-      homepage: info.homepage_uri,
-      sourceUrl: info.source_code_uri,
-      changelogUrl: info.changelog_uri,
-    };
-  }
-
-  private async fetchJson<T>(
-    dependency: string,
-    registry: string,
-    path: string
-  ): Promise<T> {
-    const url = joinUrlParts(registry, path, `${dependency}.json`);
-
-    logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
-    const response = (await this.http.getJson<T>(url)) || {
-      body: undefined,
-    };
-
-    return response.body;
-  }
-
-  private async fetchBuffer<T>(
-    dependency: string,
-    registry: string,
-    path: string
-  ): Promise<T | null> {
-    const url = `${joinUrlParts(registry, path)}?${getQueryString({
-      gems: dependency,
-    })}`;
-
-    logger.trace({ registry, dependency, url }, `RubyGems lookup request`);
-    const response = await this.http.getBuffer(url);
-
-    // istanbul ignore if: needs tests
-    if (!response) {
+    if (info.packageName !== packageName) {
+      logger.warn(
+        { lookup: packageName, returned: info.packageName },
+        'Lookup name does not match the returned name.'
+      );
       return null;
     }
 
-    return Marshal.parse(response.body) as T;
+    let releases: Release[] | null = null;
+    const gemVersions = await this.fetchGemVersions(registryUrl, packageName);
+    if (gemVersions?.length) {
+      releases = gemVersions;
+    } else if (info.version) {
+      releases = [{ version: info.version }];
+    }
+
+    if (!releases) {
+      return null;
+    }
+
+    const result: ReleaseResult = { releases };
+
+    if (info.changelogUrl) {
+      result.changelogUrl = info.changelogUrl;
+    }
+
+    if (info.homepage) {
+      result.homepage = info.homepage;
+    }
+
+    if (info.sourceUrl) {
+      result.sourceUrl = info.sourceUrl;
+    }
+
+    return result;
   }
 }

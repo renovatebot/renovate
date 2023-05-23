@@ -216,7 +216,7 @@ function getApiBaseUrl(): string {
   }
 }
 
-function getApiToken(): string | undefined {
+export function getApiToken(): string | undefined {
   return hostRules.find({
     hostType,
   })?.token;

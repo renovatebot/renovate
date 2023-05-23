@@ -228,7 +228,7 @@ export function generateBranchConfig(
       regEx(/to vv(\d)/),
       'to v$1'
     );
-    if (upgrade.toLowerCase) {
+    if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
       // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split(newlineRegex);
       splitMessage[0] = splitMessage[0].toLowerCase();
@@ -251,7 +251,7 @@ export function generateBranchConfig(
         );
         throw new Error(CONFIG_SECRETS_EXPOSED);
       }
-      if (upgrade.toLowerCase) {
+      if (upgrade.toLowerCase && upgrade.commitMessageLowerCase !== 'never') {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
     } else {

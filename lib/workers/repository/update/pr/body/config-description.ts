@@ -15,6 +15,8 @@ export function getPrConfigDescription(config: BranchConfig): string {
   prBody += emojify(':vertical_traffic_light: **Automerge**: ');
   if (config.automerge) {
     prBody += 'Enabled.';
+  } else if (config.automergedPreviously) {
+    prBody += 'Disabled because a matching PR was automerged previously.';
   } else {
     prBody +=
       'Disabled by config. Please merge this manually once you are satisfied.';
