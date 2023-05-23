@@ -55,7 +55,7 @@ The resulting registry list is:
 
 #### Example: Registry Entries Using Bazel Configuration
 
-In this example, a `.bazelrc` file contains registry value with and without a configuration.
+In this example, a `.bazelrc` file contains registry values with and without a configuration.
 
 ```
 # -------------
