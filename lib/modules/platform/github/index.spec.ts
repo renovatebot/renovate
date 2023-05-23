@@ -3350,9 +3350,7 @@ describe('modules/platform/github/index', () => {
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(422, {
-          response: { body: { message: 'Reference does not exist' } },
-        })
+        .reply(422)
         .post('/repos/some/repo/git/refs')
         .reply(200);
 
@@ -3382,9 +3380,7 @@ describe('modules/platform/github/index', () => {
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
-        .reply(404, {
-          response: { body: { message: 'Reference does not exist' } },
-        });
+        .reply(404);
 
       const res = await github.commitFiles({
         branchName: 'foo/bar',
