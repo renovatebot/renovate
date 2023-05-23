@@ -11,6 +11,12 @@ export const defaultConfig = {
     '(^|/|\\.)([Dd]ocker|[Cc]ontainer)file$',
     '(^|/)([Dd]ocker|[Cc]ontainer)file[^/]*$',
   ],
+  filePatterns: [
+    '**/[Dd]ockerfile*',
+    '**/.[Dd]ockerfile*',
+    '**/[Cc]ontainerfile*',
+    '**/.[Cc]ontainerfile*',
+  ], // not used yet
 };
 
 export const supportedDatasources = [DockerDatasource.id];

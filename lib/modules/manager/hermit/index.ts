@@ -7,6 +7,7 @@ export { updateDependency } from './update';
 
 export const defaultConfig = {
   fileMatch: partialDefaultConfig.fileMatch,
+  filePatterns: partialDefaultConfig.filePatterns,
   excludeCommitPaths: partialDefaultConfig.excludeCommitPaths,
   versioning: versionId,
 };

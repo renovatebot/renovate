@@ -4,6 +4,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['azure.*pipelines?.*\\.ya?ml$'],
+  filePatterns: ['**/azure-pipelines.{yml,yaml}'], // not used yet
   enabled: false,
 };
 

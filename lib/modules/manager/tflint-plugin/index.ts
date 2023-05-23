@@ -8,5 +8,11 @@ export const supportedDatasources = [GithubReleasesDatasource.id];
 export const defaultConfig = {
   commitMessageTopic: 'TFLint plugin {{depName}}',
   fileMatch: ['\\.tflint\\.hcl$'],
+  filePatterns: [
+    '**/tflint.hcl',
+    '**/.tflint.hcl',
+    '**/*.tflint.hcl',
+    '**/*_tflint.hcl',
+  ], // not used yet
   extractVersion: '^v(?<version>.*)$',
 };

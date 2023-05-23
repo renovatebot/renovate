@@ -5,6 +5,7 @@ import * as conan from '../../versioning/conan';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)conanfile\\.(txt|py)$'],
+  filePatterns: ['**/conanfile.{txt,py}'], // not used yet
   datasource: ConanDatasource.id,
   versioning: conan.id,
   enabled: false, // See https://github.com/renovatebot/renovate/issues/14170

@@ -8,6 +8,7 @@ export const language: ProgrammingLanguage = 'dotnet';
 
 export const defaultConfig = {
   fileMatch: ['\\.cake$'],
+  filePatterns: ['**/*.cake'], // not used yet
 };
 
 const lexer = moo.states({

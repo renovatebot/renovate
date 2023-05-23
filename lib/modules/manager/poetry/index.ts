@@ -16,4 +16,5 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)pyproject\\.toml$'],
+  filePatterns: ['**/pyproject.toml'], // not used yet
 };

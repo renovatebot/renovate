@@ -9,6 +9,7 @@ export const url = 'https://argo-cd.readthedocs.io/';
 
 export const defaultConfig = {
   fileMatch: [],
+  filePatterns: [], // not used yet
 };
 
 export const supportedDatasources = [

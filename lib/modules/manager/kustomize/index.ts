@@ -6,6 +6,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)kustomization\\.ya?ml$'],
+  filePatterns: ['**/kustomization.{yml,yaml}'], // not used yet
   pinDigests: false,
 };
 

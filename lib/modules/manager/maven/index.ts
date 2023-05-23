@@ -9,6 +9,13 @@ export const language: ProgrammingLanguage = 'java';
 
 export const defaultConfig = {
   fileMatch: ['(^|/|\\.)pom\\.xml$', '^(((\\.mvn)|(\\.m2))/)?settings\\.xml$'],
+  filePatterns: [
+    '**/pom.xml',
+    '**/*.pom.xml',
+    'settings.xml',
+    '**/.mvn/settings.xml',
+    '**/.m2/settings.xml',
+  ], // not used yet
   versioning: mavenVersioning.id,
 };
 

@@ -8,6 +8,7 @@ export const language: ProgrammingLanguage = 'docker';
 
 export const defaultConfig = {
   fileMatch: [],
+  filePatterns: [], // not used yet
 };
 
 export const supportedDatasources = [

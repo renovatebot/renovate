@@ -11,4 +11,5 @@ export const supportedDatasources = [PypiDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Pipfile$'],
+  filePatterns: ['**/Pipfile'], // not used yet
 };

@@ -20,5 +20,6 @@ export const defaultConfig = {
     'project/[^/]*\\.scala$',
     'project/build\\.properties$',
   ],
+  filePatterns: ['**/*.sbt', 'project/**/*.scala', 'project/build.properties'], // not used yet
   versioning: ivyVersioning.id,
 };

@@ -15,4 +15,5 @@ export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   commitMessageTopic: 'Terragrunt dependency {{depName}}',
   fileMatch: ['(^|/)terragrunt\\.hcl$'],
+  filePatterns: ['**/terragrunt.hcl'], // not used yet
 };

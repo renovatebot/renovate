@@ -6,6 +6,7 @@ export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   fileMatch: ['(^|\\/).mvn/wrapper/maven-wrapper.properties$'],
+  filePatterns: ['**/.mvn/wrapper/maven-wrapper.properties'], // not used yet
   versioning,
 };
 

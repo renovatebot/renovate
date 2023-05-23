@@ -6,6 +6,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: [],
+  filePatterns: [], // not used yet
   versioning: semverVersioning.id,
 };
 

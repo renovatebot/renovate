@@ -6,6 +6,7 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)jsonnetfile\\.json$'],
+  filePatterns: ['**/jsonnetfile.json'], // not used yet
   datasource: GitTagsDatasource.id,
 };
 

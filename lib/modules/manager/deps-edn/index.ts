@@ -6,6 +6,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)(?:deps|bb)\\.edn$'],
+  filePatterns: ['**/deps.edn', '**/bb.edn'], // not used yet
   versioning: mavenVersioning.id,
 };
 

@@ -5,6 +5,10 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.?bitbucket-pipelines\\.ya?ml$'],
+  filePatterns: [
+    '**/bitbucket-pipelines.{yml,yaml}',
+    '**/.bitbucket-pipelines.{yml,yaml}',
+  ], // not used yet
 };
 
 export const supportedDatasources = [DockerDatasource.id];

@@ -5,6 +5,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)project\\.clj$'],
+  filePatterns: ['**/project.clj'], // not used yet
   versioning: mavenVersioning.id,
 };
 

@@ -6,6 +6,7 @@ export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)batect$'],
+  filePatterns: ['**/batect'], // not used yet
   versioning,
 };
 

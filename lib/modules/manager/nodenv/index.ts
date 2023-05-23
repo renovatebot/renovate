@@ -11,6 +11,7 @@ export const language: ProgrammingLanguage = 'node';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.node-version$'],
+  filePatterns: ['**/.node-version'], // not used yet
   versioning: nodeVersioning.id,
 };
 

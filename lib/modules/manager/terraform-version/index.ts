@@ -7,6 +7,7 @@ export const supportedDatasources = [GithubReleasesDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.terraform-version$'],
+  filePatterns: ['**/.terraform-version'], // not used yet
   versioning: hashicorpVersioning.id,
   extractVersion: '^v(?<version>.*)$',
 };

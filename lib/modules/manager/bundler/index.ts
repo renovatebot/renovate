@@ -22,6 +22,7 @@ export {
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Gemfile$'],
+  filePatterns: ['**/Gemfile'], // not used yet
   versioning: rubyVersioning.id,
 };
 

@@ -9,6 +9,7 @@ export const language: ProgrammingLanguage = 'ruby';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Puppetfile$'],
+  filePatterns: ['**/Puppetfile'], // not used yet
 };
 
 export const supportedDatasources = [

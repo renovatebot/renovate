@@ -9,6 +9,7 @@ export { extractPackageFile, updateArtifacts };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)WORKSPACE(|\\.bazel)$', '\\.bzl$'],
+  filePatterns: ['**/WORKSPACE', '**/WORKSPACE.bazel', '**/*.bzl'], // not used yet
 };
 
 export const supportedDatasources = [

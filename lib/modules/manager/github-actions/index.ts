@@ -7,6 +7,11 @@ export const defaultConfig = {
     '^(workflow-templates|\\.github/workflows)/[^/]+\\.ya?ml$',
     '(^|/)action\\.ya?ml$',
   ],
+  filePatterns: [
+    '.github/workflows/*.{yml,yaml}',
+    'workflow-templates/*.{yml,yaml}',
+    '**/action.{yml,yaml}',
+  ], // not used yet
 };
 
 export const supportedDatasources = [GithubTagsDatasource.id];

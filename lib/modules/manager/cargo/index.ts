@@ -13,6 +13,7 @@ export { extractPackageFile, updateArtifacts };
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
   fileMatch: ['(^|/)Cargo\\.toml$'],
+  filePatterns: ['**/Cargo.toml'], // not used yet
   versioning: cargoVersioning.id,
 };
 

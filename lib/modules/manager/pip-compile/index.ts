@@ -11,6 +11,7 @@ export const supportedDatasources = [PypiDatasource.id];
 
 export const defaultConfig = {
   fileMatch: [],
+  filePatterns: [], // not used yet
   lockFileMaintenance: {
     enabled: true,
     branchTopic: 'pip-compile-refresh',

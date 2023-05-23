@@ -10,5 +10,6 @@ export const language: ProgrammingLanguage = 'ruby';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.ruby-version$'],
+  filePatterns: ['**/.ruby-version'], // not used yet
   versioning: rubyVersioning.id,
 };

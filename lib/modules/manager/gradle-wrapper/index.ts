@@ -6,6 +6,7 @@ export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)gradle/wrapper/gradle-wrapper\\.properties$'],
+  filePatterns: ['**/gradle/wrapper/gradle-wrapper.properties'], // not used yet
   versioning,
 };
 

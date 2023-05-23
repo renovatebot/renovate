@@ -9,5 +9,6 @@ export const supportsLockFileMaintenance = true;
 
 export const defaultConfig = {
   fileMatch: ['(^|/)pubspec\\.ya?ml$'],
+  filePatterns: ['**/pubspec.{yml,yaml}'], // not used yet
   versioning: npmVersioning.id,
 };

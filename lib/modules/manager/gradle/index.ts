@@ -20,6 +20,17 @@ export const defaultConfig = {
     `(^|/)versions.props$`,
     `(^|/)versions.lock$`,
   ],
+  filePatterns: [
+    '**/*.gradle',
+    '**/*.gradle.kts',
+    '**/gradle.properties',
+    '**/gradle/**/*.toml',
+    '**/buildSrc/**/*.kt',
+    '**/*.versions.toml',
+    // The two below is for gradle-consistent-versions plugin
+    '**/versions.props',
+    '**/versions.lock',
+  ],
   timeout: 600,
   versioning: gradleVersioning.id,
 };

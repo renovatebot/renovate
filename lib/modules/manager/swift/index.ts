@@ -11,6 +11,7 @@ export const supportedDatasources = [GitTagsDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Package\\.swift'],
+  filePatterns: ['**/Package.swift'], // not used yet
   versioning: swiftVersioning.id,
   pinDigests: false,
 };

@@ -12,6 +12,7 @@ export const url = 'https://cocoapods.org';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Podfile$'],
+  filePatterns: ['**/Podfile'], // not used yet
   versioning: rubyVersioning.id,
 };
 

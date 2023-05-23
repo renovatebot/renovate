@@ -8,6 +8,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.drone\\.yml$'],
+  filePatterns: ['**/.drone.{yml,yaml}'], // not used yet
 };
 
 export const supportedDatasources = [DockerDatasource.id];

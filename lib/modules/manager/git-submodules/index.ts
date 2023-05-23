@@ -9,6 +9,7 @@ export const defaultConfig = {
   enabled: false,
   versioning: gitVersioning.id,
   fileMatch: ['(^|/)\\.gitmodules$'],
+  filePatterns: ['**/.gitmodules'], // not used yet
 };
 
 export const supportedDatasources = [GitRefsDatasource.id];

@@ -5,6 +5,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['(^|/)MODULE\\.bazel$'],
+  filePatterns: ['**/MODULE.bazel'], // not used yet
   // The bazel-module manager is still under development. The milestone
   // tracking the release of this manager is at
   // https://github.com/renovatebot/renovate/issues/13658.

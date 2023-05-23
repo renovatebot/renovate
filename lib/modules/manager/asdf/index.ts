@@ -16,6 +16,7 @@ export const displayName = 'asdf';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.tool-versions$'],
+  filePatterns: ['**/.tool-versions'], // not used yet
 };
 
 export const supportedDatasources = [

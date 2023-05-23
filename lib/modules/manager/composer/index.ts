@@ -19,6 +19,12 @@ export {
 
 export const defaultConfig = {
   fileMatch: ['(^|/)([\\w-]*)composer\\.json$'],
+  filePatterns: [
+    '**/composer.json',
+    '**/*.composer.json',
+    '**/*-composer.json',
+    '**/*_composer.json',
+  ], // not used yet
   versioning: composerVersioningId,
 };
 

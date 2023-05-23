@@ -10,5 +10,6 @@ export const language: ProgrammingLanguage = 'python';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)setup\\.cfg$'],
+  filePatterns: ['**/setup.cfg'], // not used yet
   versioning,
 };

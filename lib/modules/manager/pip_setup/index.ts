@@ -7,6 +7,7 @@ export const language: ProgrammingLanguage = 'python';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)setup\\.py$'],
+  filePatterns: ['**/setup.py'], // not used yet
 };
 
 export const supportedDatasources = [PypiDatasource.id];

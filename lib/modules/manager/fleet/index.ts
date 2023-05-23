@@ -5,6 +5,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)fleet\\.ya?ml'],
+  filePatterns: ['**/fleet.{yml,yaml}'], // not used yet
 };
 
 export const supportedDatasources = [GitTagsDatasource.id, HelmDatasource.id];

@@ -15,6 +15,15 @@ export const defaultConfig = {
     '(^|/)dotnet-tools\\.json$',
     '(^|/)global\\.json$',
   ],
+  filePatterns: [
+    '**/*.csproj',
+    '**/*.fsproj',
+    '**/*.vbproj',
+    '**/*.props',
+    '**/*.targets',
+    '**/dotnet-tools.json',
+    '**/global.json',
+  ], // not used yet
 };
 
 export const supportedDatasources = [

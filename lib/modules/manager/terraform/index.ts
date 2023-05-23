@@ -26,5 +26,6 @@ export const supportsLockFileMaintenance = true;
 export const defaultConfig = {
   commitMessageTopic: 'Terraform {{depName}}',
   fileMatch: ['\\.tf$'],
+  filePatterns: ['**/*.tf'], // not used yet
   pinDigests: false,
 };

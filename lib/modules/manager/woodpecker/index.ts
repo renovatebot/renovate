@@ -8,6 +8,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['^\\.woodpecker(?:/[^/]+)?\\.ya?ml$'],
+  filePatterns: ['.woodpecker/*.{yml,yaml}'], // not used yet
 };
 
 export const supportedDatasources = [DockerDatasource.id];

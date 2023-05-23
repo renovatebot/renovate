@@ -11,6 +11,7 @@ export const language: ProgrammingLanguage = 'node';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.nvmrc$'],
+  filePatterns: ['**/.nvmrc'], // not used yet
   versioning: nodeVersioning.id,
   pinDigests: false,
 };

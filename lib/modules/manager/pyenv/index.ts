@@ -10,5 +10,6 @@ export const supportedDatasources = [DockerDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.python-version$'],
+  filePatterns: ['**/.python-version'], // not used yet
   versioning: dockerVersioning.id,
 };

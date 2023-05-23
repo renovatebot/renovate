@@ -9,4 +9,5 @@ export const supportedDatasources = [GitTagsDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)Mintfile$'],
+  filePatterns: ['**/Mintfile'], // not used yet
 };

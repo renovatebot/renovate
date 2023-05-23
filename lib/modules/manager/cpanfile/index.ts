@@ -9,6 +9,7 @@ export const url =
 
 export const defaultConfig = {
   fileMatch: ['(^|/)cpanfile$'],
+  filePatterns: ['**/cpanfile'], // not used yet
 };
 
 export const supportedDatasources = [

@@ -13,6 +13,8 @@ export { updateArtifacts } from './artifacts';
 
 export const defaultConfig = {
   fileMatch: [systemManifestRegex],
+  // (^|/)flux-system/(?:.+/)?gotk-components\\.yaml$
+  filePatterns: ['**/flux-system/**/gotk-components.{yml,yaml}'], // not used yet
 };
 
 export const supportedDatasources = [

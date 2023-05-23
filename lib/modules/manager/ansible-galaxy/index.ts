@@ -6,6 +6,7 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)requirements\\.ya?ml$', '(^|/)galaxy\\.ya?ml$'],
+  filePatterns: ['**/requirements.{yml,yaml}', '**/galaxy.{yml,yaml}'],
 };
 
 export const supportedDatasources = [

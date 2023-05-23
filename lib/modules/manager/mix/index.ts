@@ -11,6 +11,7 @@ export const language: ProgrammingLanguage = 'elixir';
 
 export const defaultConfig = {
   fileMatch: ['(^|/)mix\\.exs$'],
+  filePatterns: ['**/mix.exs'], // not used yet
   versioning: hexVersioning.id,
 };
 

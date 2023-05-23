@@ -6,6 +6,7 @@ export { extractPackageFile };
 
 export const defaultConfig = {
   fileMatch: ['\\.html?$'],
+  filePatterns: ['**/*.html', '**/*.htm'], // not used yet
   versioning: semverVersioning.id,
   digest: {
     enabled: false,

@@ -7,5 +7,6 @@ export const supportedDatasources = [FlutterVersionDatasource.id];
 
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.fvm/fvm_config\\.json$'],
+  filePatterns: ['**/.fvm/fvm_config.json'], // not used yet
   versioning: semverVersioning.id,
 };
