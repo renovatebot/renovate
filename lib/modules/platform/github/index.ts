@@ -739,8 +739,10 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+  await githubApi.head(commitUrl, { memCache: false });
 
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
   let branchExists = false;
   try {
     await githubApi.head(refUrl, { memCache: false });
@@ -752,6 +754,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   if (branchExists) {
+    // Curl command for PATCH request:
     await githubApi.patchJson(refUrl, { body: { sha, force: true } });
     return;
   }

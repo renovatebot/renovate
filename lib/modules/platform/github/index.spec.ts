@@ -865,13 +865,19 @@ describe('modules/platform/github/index', () => {
           },
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ days: 6 }).toISO(),
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -957,12 +963,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              repo: { full_name: 'some/repo' },
+              sha: '123',
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -985,12 +997,18 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             number: 91,
-            head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
+            head: {
+              ref: 'somebranch',
+              sha: '123',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'old title - autoclosed',
             state: 'closed',
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/commits/123')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
@@ -3291,6 +3309,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(404)
         .post('/repos/some/repo/git/refs')
@@ -3319,6 +3339,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/commits/222')
+        .reply(200)
         .head('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
