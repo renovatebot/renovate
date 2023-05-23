@@ -1,3 +1,4 @@
+import { logger } from '../../../../../test/util';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getLockedVersions } from './locked-versions';
@@ -534,6 +535,35 @@ describe('modules/manager/npm/extract/locked-versions', () => {
         packageFile: 'some-file',
       },
     ]);
+  });
+
+  it('should log warning if unsupported lockfileVersion is found', async () => {
+    npm.getNpmLock.mockReturnValue({
+      lockedVersions: {},
+      lockfileVersion: 99,
+    });
+    const packageFiles = [
+      {
+        managerData: {
+          npmLock: 'package-lock.json',
+        },
+        extractedConstraints: {},
+        deps: [
+          { depName: 'a', currentValue: '1.0.0' },
+          { depName: 'b', currentValue: '2.0.0' },
+        ],
+        packageFile: 'some-file',
+      },
+    ];
+    await getLockedVersions(packageFiles);
+    expect(packageFiles).toEqual(packageFiles);
+    expect(logger.logger.warn).toHaveBeenCalledWith(
+      {
+        lockfileVersion: 99,
+        npmLock: 'package-lock.json',
+      },
+      'Found unsupported npm lockfile version'
+    );
   });
 
   describe('lockfileVersion 3', () => {
