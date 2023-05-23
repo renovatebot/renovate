@@ -11,7 +11,6 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../../util/fs';
-import { regEx } from '../../../../util/regex';
 import type { PackageFile } from '../../types';
 import type { PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
@@ -161,29 +160,26 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);
 
-    const lockedVersions: Record<string, string> = {};
-    const packagePathRegex = regEx(
-      /^\/(?<packageName>.+)(?:@|\/)(?<version>[^/@]+)$/
-    ); // eg. "/<packageName>(@|/)<version>"
+    const lockedVersions: Record<
+      string,
+      Record<string, Record<string, string>>
+    > = {};
 
-    for (const packagePath of Object.keys(lockParsed.packages ?? {})) {
-      const result = packagePath.match(packagePathRegex);
-      if (!result?.groups) {
-        logger.trace(`Invalid package path ${packagePath}`);
-        continue;
+    for (const [importer, imports] of Object.entries(
+      lockParsed.importers ?? {}
+    )) {
+      lockedVersions[importer] = {};
+      for (const [depType, deps] of Object.entries(imports)) {
+        lockedVersions[importer][depType] = {};
+        for (const [pkgName, { version }] of Object.entries(deps)) {
+          const pkgVersion = version.split('(')[0].trim();
+          lockedVersions[importer][depType][pkgName] = pkgVersion;
+        }
       }
-
-      const packageName = result.groups.packageName;
-      const version = result.groups.version;
-      logger.trace({
-        packagePath,
-        packageName,
-        version,
-      });
-      lockedVersions[packageName] = version;
     }
+
     return {
-      lockedVersions,
+      lockedVersionsWithPath: lockedVersions,
       lockfileVersion,
     };
   } catch (err) {
