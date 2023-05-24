@@ -87,15 +87,14 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   }
 );
 
-const UnsupportedOverrideSchema = RecordFragmentSchema.extend({
+const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
   children: z.object({
     rule: StringFragmentSchema.extend({
       value: z.enum(['archive_override', 'local_path_override']),
     }),
     module_name: StringFragmentSchema,
   }),
-});
-const UnsupportedOverrideToPackageDep = UnsupportedOverrideSchema.transform(
+}).transform(
   ({ children: { rule, module_name: moduleName } }): OverridePackageDep => {
     let bazelDepSkipReason: SkipReason = 'unsupported';
     switch (rule.value) {
