@@ -71,42 +71,18 @@ describe('util/schema-utils', () => {
 
       s.parse({ foo: 'foo', bar: 'bar' });
 
-      expect(errorData).toMatchInlineSnapshot(
-        {
-          error: {
-            issues: [
-              {
-                code: 'custom',
-                message: 'Invalid input',
-                path: ['foo'],
-              },
-            ],
-          },
-          input: { bar: 'bar', foo: 'foo' },
+      expect(errorData).toMatchObject({
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'Invalid input',
+              path: ['foo'],
+            },
+          ],
         },
-        `
-        {
-          "error": {
-            "addIssue": [Function],
-            "addIssues": [Function],
-            "issues": [
-              {
-                "code": "custom",
-                "message": "Invalid input",
-                "path": [
-                  "foo",
-                ],
-              },
-            ],
-            "name": "ZodError",
-          },
-          "input": {
-            "bar": "bar",
-            "foo": "foo",
-          },
-        }
-      `
-      );
+        input: { bar: 'bar', foo: 'foo' },
+      });
     });
 
     it('runs callback for wrong elements', () => {
