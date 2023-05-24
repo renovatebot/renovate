@@ -16,15 +16,30 @@ export interface BasePackageDep extends PackageDependency {
   depName: string;
 }
 
+type BasePackageDepMergeKeys = Extract<keyof BasePackageDep, 'registryUrls'>;
+
+export interface MergePackageDep extends BasePackageDep {
+  // The fields that should be copied from this struct to the bazel_dep
+  // PackageDependency.
+  bazelDepMergeFields: BasePackageDepMergeKeys[];
+}
+
 export interface OverridePackageDep extends BasePackageDep {
   // This value is set as the skipReason on the bazel_dep PackageDependency.
   bazelDepSkipReason: SkipReason;
 }
 
-export type BazelModulePackageDep = BasePackageDep | OverridePackageDep;
+export type BazelModulePackageDep =
+  | BasePackageDep
+  | OverridePackageDep
+  | MergePackageDep;
 
 function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
   return 'bazelDepSkipReason' in value;
+}
+
+function isMerge(value: BazelModulePackageDep): value is MergePackageDep {
+  return (value as MergePackageDep).bazelDepMergeFields !== undefined;
 }
 
 // This function exists to remove properties that are specific to
@@ -87,6 +102,40 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   }
 );
 
+const SingleVersionOverrideToPackageDep = RecordFragmentSchema.extend({
+  children: z.object({
+    rule: StringFragmentSchema.extend({
+      value: z.literal('single_version_override'),
+    }),
+    module_name: StringFragmentSchema,
+    version: StringFragmentSchema.optional(),
+    registry: StringFragmentSchema.optional(),
+  }),
+}).transform(
+  ({
+    children: { rule, module_name: moduleName, version, registry },
+  }): BasePackageDep => {
+    const base: BasePackageDep = {
+      depType: rule.value,
+      depName: moduleName.value,
+      skipReason: 'ignored',
+    };
+    // If a version is specified, then add a skipReason to bazel_dep
+    if (version) {
+      const override = base as OverridePackageDep;
+      override.bazelDepSkipReason = 'is-pinned';
+      override.currentValue = version.value;
+    }
+    // If a registry is specified, then merge it into the bazel_dep
+    if (registry) {
+      const merge = base as MergePackageDep;
+      merge.bazelDepMergeFields = ['registryUrls'];
+      merge.registryUrls = [registry.value];
+    }
+    return base;
+  }
+);
+
 const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
   children: z.object({
     rule: StringFragmentSchema.extend({
@@ -117,6 +166,7 @@ const UnsupportedOverrideToPackageDep = RecordFragmentSchema.extend({
 export const RuleToBazelModulePackageDep = z.union([
   BazelDepToPackageDep,
   GitOverrideToPackageDep,
+  SingleVersionOverrideToPackageDep,
   UnsupportedOverrideToPackageDep,
 ]);
 
