@@ -40,7 +40,7 @@ export function overrideToPackageDependency(
   return copy;
 }
 
-const BazelDepSchema = RecordFragmentSchema.extend({
+const BazelDepToPackageDep = RecordFragmentSchema.extend({
   children: z.object({
     rule: StringFragmentSchema.extend({
       value: z.literal('bazel_dep'),
@@ -48,9 +48,7 @@ const BazelDepSchema = RecordFragmentSchema.extend({
     name: StringFragmentSchema,
     version: StringFragmentSchema,
   }),
-});
-
-const BazelDepToPackageDep = BazelDepSchema.transform(
+}).transform(
   ({ children: { rule, name, version } }): BasePackageDep => ({
     datasource: BazelDatasource.id,
     depType: rule.value,
@@ -59,7 +57,7 @@ const BazelDepToPackageDep = BazelDepSchema.transform(
   })
 );
 
-const GitOverrideSchema = RecordFragmentSchema.extend({
+const GitOverrideToPackageDep = RecordFragmentSchema.extend({
   children: z.object({
     rule: StringFragmentSchema.extend({
       value: z.literal('git_override'),
@@ -68,8 +66,7 @@ const GitOverrideSchema = RecordFragmentSchema.extend({
     remote: StringFragmentSchema,
     commit: StringFragmentSchema,
   }),
-});
-const GitOverrideToPackageDep = GitOverrideSchema.transform(
+}).transform(
   ({
     children: { rule, module_name: moduleName, remote, commit },
   }): OverridePackageDep => {
