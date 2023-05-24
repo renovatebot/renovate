@@ -142,7 +142,7 @@ export async function extractPackageFile(
     constraints.pipenv = pipfile['dev-packages']!.pipenv;
   }
 
-  const lockFileName = packageFile + '.lock';
+  const lockFileName = `${packageFile}.lock`;
   if (await localPathExists(lockFileName)) {
     res.lockFiles = [lockFileName];
   }
