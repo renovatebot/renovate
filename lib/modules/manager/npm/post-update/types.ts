@@ -36,6 +36,9 @@ export interface PnpmLockFile {
     string,
     Record<string, Record<string, { version: string }>>
   >;
+  dependencies: Record<string, { version: string }>;
+  devDependencies: Record<string, { version: string }>;
+  optionalDependencies: Record<string, { version: string }>;
 }
 
 export interface YarnRcYmlFile {

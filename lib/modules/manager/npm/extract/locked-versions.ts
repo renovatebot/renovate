@@ -108,11 +108,12 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
         // TODO: types (#7154)
-        dep.lockedVersion = semver.valid(
-          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
-            depType!
-          ]?.[depName!]
-        );
+        dep.lockedVersion =
+          semver.valid(
+            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
+              depType!
+            ]?.[depName!]
+          ) ?? undefined; // for testing only
       }
     }
     if (lockFiles.length) {
