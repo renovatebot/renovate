@@ -185,17 +185,13 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       const importer = '.';
       lockedVersions[importer] = {};
 
-      type dependencyType =
-        | 'dependencies'
-        | 'devDependencies'
-        | 'optionalDependencies';
-      const dependencyTypeArray: dependencyType[] = [
+      const dependencyTypes = [
         'dependencies',
         'devDependencies',
         'optionalDependencies',
-      ];
+      ] as const;
 
-      for (const depType of dependencyTypeArray) {
+      for (const depType of dependencyTypes) {
         lockedVersions[importer][depType] = {};
         for (const [pkgName, { version }] of Object.entries(
           lockParsed[depType] ?? {}
