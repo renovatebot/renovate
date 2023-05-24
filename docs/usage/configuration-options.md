@@ -2175,7 +2175,7 @@ Use the syntax `!/ /` like this:
 
 Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
 
-The following example would match `package.json` but not `package/frontend/package.json`:
+The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
 ```json
 {
