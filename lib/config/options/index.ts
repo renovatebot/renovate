@@ -1334,7 +1334,7 @@ const options: RenovateOptions[] = [
   {
     name: 'matchPaths',
     description:
-      'List of strings or glob patterns to match against package files. Only works inside a `packageRules` object.',
+      'List of glob patterns to match against package files. Only works inside a `packageRules` object.',
     type: 'array',
     subType: 'string',
     stage: 'repository',
