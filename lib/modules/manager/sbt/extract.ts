@@ -123,7 +123,7 @@ const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
     ctx.localVars[ctx.currentVarName!] = {
       val: value,
       sourceFile: ctx.packageFile,
-      lineIndex: line - 1,
+      lineNumber: line,
     };
   }
   delete ctx.currentVarName;
@@ -242,7 +242,7 @@ function depHandler(ctx: Ctx): Ctx {
   if (variableName) {
     dep.groupName = variableName;
     if (currentValueInfo) {
-      dep.fileReplacePosition = currentValueInfo.lineIndex;
+      dep.fileReplacePosition = currentValueInfo.lineNumber;
       dep.editFile = currentValueInfo.sourceFile;
     }
   }

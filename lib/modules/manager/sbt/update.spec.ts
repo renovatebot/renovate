@@ -65,7 +65,7 @@ describe('modules/manager/sbt/update', () => {
       const bumpedContent = sbtUpdater.updateDependency({
         fileContent: versionFile,
         upgrade: {
-          fileReplacePosition: 2,
+          fileReplacePosition: 3,
           currentValue: '0.2.1',
           newValue: '0.2.2',
           newVersion: '0.2.2',

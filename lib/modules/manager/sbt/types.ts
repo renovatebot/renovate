@@ -1,7 +1,7 @@
 export type VariableContext = {
   val: string;
   sourceFile: string;
-  lineIndex: number;
+  lineNumber: number;
 };
 export type Variables = Record<string, VariableContext>;
 

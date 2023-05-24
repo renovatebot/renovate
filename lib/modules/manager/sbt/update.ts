@@ -42,12 +42,12 @@ export function updateDependency({
   const { fileReplacePosition, currentValue, newValue } = upgrade;
   if (currentValue && newValue) {
     if (fileReplacePosition) {
-      const lineNumber = upgrade.fileReplacePosition!;
+      const lineIndex = upgrade.fileReplacePosition! - 1;
       const offset = fileContent
-        .split(newlineRegex, lineNumber)
+        .split(newlineRegex, lineIndex)
         .join('\n').length;
       const offsetEndOfLine = fileContent
-        .split(newlineRegex, lineNumber + 1)
+        .split(newlineRegex, lineIndex + 1)
         .join('\n').length;
 
       const [header, updateLine, footer] = [
