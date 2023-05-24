@@ -25,7 +25,7 @@ export type SkipReason =
   | 'no-repository'
   | 'no-source-match'
   | 'no-source'
-  | 'no-version'
+  | 'unspecified-version'
   | 'non-hex-dep-types'
   | 'not-a-version'
   | 'path-dependency'

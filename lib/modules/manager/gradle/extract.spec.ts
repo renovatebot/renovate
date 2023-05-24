@@ -667,21 +667,21 @@ describe('modules/manager/gradle/extract', () => {
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-crashlytics',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-messaging',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'org.jetbrains.kotlin.jvm',
