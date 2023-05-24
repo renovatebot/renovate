@@ -105,11 +105,12 @@ function githubPackageName(remote: string): string | undefined {
 function collectByModule(
   packageDeps: BazelModulePackageDep[]
 ): BazelModulePackageDep[][] {
-  const rulesByModule = packageDeps.reduce((map, pkgDep) => {
-    const bmi = map.get(pkgDep.depName) ?? [];
+  const rulesByModule = new Map<string, BasePackageDep[]>();
+  for (const pkgDep of packageDeps) {
+    const bmi = rulesByModule.get(pkgDep.depName) ?? [];
     bmi.push(pkgDep);
-    return map.set(pkgDep.depName, bmi);
-  }, new Map<string, BasePackageDep[]>());
+    rulesByModule.set(pkgDep.depName, bmi);
+  }
   return Array.from(rulesByModule.values());
 }
 
