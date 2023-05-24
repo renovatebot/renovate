@@ -57,7 +57,10 @@ function findDependencies(
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
     // a parser that allows extracting line numbers would be preferable, with
@@ -65,7 +68,7 @@ export function extractPackageFile(content: string): PackageFileContent | null {
     // TODO: fix me (#9610)
     parsedContent = load(content, { json: true }) as any;
   } catch (err) {
-    logger.debug({ err }, 'Failed to parse helm-values YAML');
+    logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
     return null;
   }
   try {
@@ -74,7 +77,10 @@ export function extractPackageFile(content: string): PackageFileContent | null {
       return { deps };
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error parsing helm-values parsed content');
+    logger.debug(
+      { err, packageFile },
+      'Error parsing helm-values parsed content'
+    );
   }
   return null;
 }

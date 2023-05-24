@@ -33,7 +33,7 @@ function isLocalPath(possiblePath: string): boolean {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
@@ -44,7 +44,10 @@ export async function extractPackageFile(
   try {
     docs = loadAll(extractYaml(content), null, { json: true }) as Doc[];
   } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse helmfile helmfile.yaml');
+    logger.debug(
+      { err, packageFile },
+      'Failed to parse helmfile helmfile.yaml'
+    );
     return null;
   }
   for (const doc of docs) {
@@ -75,7 +78,7 @@ export async function extractPackageFile(
       if (isLocalPath(dep.chart)) {
         if (
           kustomizationsKeysUsed(dep) ||
-          (await localChartHasKustomizationsYaml(dep, fileName))
+          (await localChartHasKustomizationsYaml(dep, packageFile))
         ) {
           needKustomize = true;
         }

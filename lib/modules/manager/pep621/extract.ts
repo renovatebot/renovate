@@ -11,10 +11,10 @@ import { parseDependencyGroupRecord, parseDependencyList } from './utils';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config?: ExtractConfig
+  packageFile: string,
+  _config?: ExtractConfig
 ): PackageFileContent | null {
-  logger.trace({ fileName }, 'pep621.extractPackageFile');
+  logger.trace(`pep621.extractPackageFile(${packageFile})`);
 
   const deps: PackageDependency[] = [];
 
@@ -23,8 +23,8 @@ export function extractPackageFile(
     const jsonMap = toml.parse(content);
     def = PyProjectSchema.parse(jsonMap);
   } catch (err) {
-    logger.warn(
-      { fileName, err },
+    logger.debug(
+      {  packageFile, err },
       `Failed to parse and validate pyproject file`
     );
     return null;

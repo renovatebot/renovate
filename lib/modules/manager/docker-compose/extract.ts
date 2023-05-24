@@ -30,31 +30,33 @@ class LineMapper {
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   extractConfig: ExtractConfig
 ): PackageFileContent | null {
-  logger.debug('docker-compose.extractPackageFile()');
+  logger.debug(`docker-compose.extractPackageFile(${packageFile})`);
   let config: DockerComposeConfig;
   try {
     // TODO: fix me (#9610)
     config = load(content, { json: true }) as DockerComposeConfig;
     if (!config) {
       logger.debug(
-        { fileName },
+        { packageFile },
         'Null config when parsing Docker Compose content'
       );
       return null;
     }
     if (typeof config !== 'object') {
       logger.debug(
-        { fileName, type: typeof config },
+        { packageFile, type: typeof config },
         'Unexpected type for Docker Compose content'
       );
       return null;
     }
   } catch (err) {
-    logger.debug({ err }, 'err');
-    logger.debug(`Parsing Docker Compose config YAML in ${fileName}`);
+    logger.debug(
+      { err, packageFile },
+      `Parsing Docker Compose config YAML failed`
+    );
     return null;
   }
   try {
@@ -85,10 +87,7 @@ export function extractPackageFile(
     logger.trace({ deps }, 'Docker Compose image');
     return { deps };
   } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { fileName, content, err },
-      'Error extracting Docker Compose file'
-    );
+    logger.debug({ packageFile, err }, 'Error extracting Docker Compose file');
     return null;
   }
 }
