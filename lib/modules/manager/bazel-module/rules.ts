@@ -24,7 +24,7 @@ export interface OverridePackageDep extends BasePackageDep {
 type BazelModulePackageDep = BasePackageDep | OverridePackageDep;
 
 function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
-  return (value as OverridePackageDep).bazelDepSkipReason !== undefined;
+  return 'bazelDepSkipReason' in value;
 }
 
 // This function exists to remove properties that are specific to
