@@ -32,5 +32,5 @@ export const PackageLockPreV3Schema = z.object({
   lockfileVersion: z.union([z.literal(2), z.literal(1)]),
   dependencies: z
     .record(z.string(), z.object({ version: z.string() }))
-    .optional(),
+    .catch({}),
 });
