@@ -1855,7 +1855,7 @@ Example:
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns.
+File name matches are convenient to use if you wish to apply configuration rules to certain package or lock files using patterns.
 For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
