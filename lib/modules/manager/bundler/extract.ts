@@ -210,7 +210,7 @@ export async function extractPackageFile(
   }
 
   if (packageFile) {
-    const gemfileLock = packageFile + '.lock';
+    const gemfileLock = `${packageFile}.lock`;
     const lockContent = await readLocalFile(gemfileLock, 'utf8');
     if (lockContent) {
       logger.debug(`Found Gemfile.lock file packageFile: ${packageFile}`);
