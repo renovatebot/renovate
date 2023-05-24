@@ -1,5 +1,4 @@
 export type SkipReason =
-  | 'any-version'
   | 'contains-variable'
   | 'disabled'
   | 'empty'

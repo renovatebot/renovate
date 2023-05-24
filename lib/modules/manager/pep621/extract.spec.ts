@@ -35,7 +35,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'packaging',
@@ -63,7 +63,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'pyproject-hooks',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'unearth',
@@ -105,7 +105,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'typing-extensions',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
         },
         {
           packageName: 'importlib-metadata',
@@ -131,7 +131,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pytest-mock',
           datasource: 'pypi',
           depType: 'project.optional-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'pytest/pytest-mock',
         },
       ]);
@@ -144,7 +144,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'pdm',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'test/pdm',
         },
         {
@@ -158,7 +158,7 @@ describe('modules/manager/pep621/extract', () => {
           packageName: 'tox',
           datasource: 'pypi',
           depType: 'tool.pdm.dev-dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           depName: 'tox/tox',
         },
         {
@@ -180,7 +180,7 @@ describe('modules/manager/pep621/extract', () => {
           depName: 'blinker',
           datasource: 'pypi',
           depType: 'project.dependencies',
-          skipReason: 'any-version',
+          skipReason: 'unspecified-version',
           registryUrls: [
             'https://private-site.org/pypi/simple',
             'https://private.pypi.org/simple',
