@@ -66,7 +66,6 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
   },
   docker: {
     'amd64/registry': 'https://github.com/distribution/distribution',
-    'amd64/traefik': 'https://github.com/containous/traefik',
     'coredns/coredns': 'https://github.com/coredns/coredns',
     'docker/compose': 'https://github.com/docker/compose',
     'drone/drone': 'https://github.com/drone/drone',
@@ -91,10 +90,13 @@ export const manualSourceUrls: Record<string, Record<string, string>> = {
     'mcr.microsoft.com/dotnet/sdk': 'https://github.com/dotnet/sdk',
     node: 'https://github.com/nodejs/node',
     registry: 'https://github.com/distribution/distribution',
-    traefik: 'https://github.com/containous/traefik',
   },
   kubernetes: {
     node: 'https://github.com/nodejs/node',
+  },
+  maven: {
+    'com.figure.gradle.semver-plugin:com.figure.gradle.semver-plugin.gradle.plugin':
+      'https://github.com/FigureTechnologies/gradle-semver-plugin',
   },
   npm: {
     node: 'https://github.com/nodejs/node',

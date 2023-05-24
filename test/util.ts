@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { expect, jest } from '@jest/globals';
 import type { Plugin } from 'pretty-format';
 import upath from 'upath';
@@ -72,7 +72,7 @@ function getCallerFileName(): string | null {
 
     let currentFile: string | null = null;
     for (const frame of stack) {
-      const fileName = frame.getFileName();
+      const fileName = frame.getFileName() ?? null;
       if (!currentFile) {
         currentFile = fileName;
       } else if (currentFile !== fileName) {

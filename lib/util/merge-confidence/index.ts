@@ -66,7 +66,7 @@ const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence | null> =
  * Retrieves the merge confidence of a package update if the merge confidence API is enabled. Otherwise, undefined is returned.
  *
  * @param datasource
- * @param depName
+ * @param packageName
  * @param currentVersion
  * @param newVersion
  * @param updateType
@@ -76,7 +76,7 @@ const updateTypeConfidenceMapping: Record<UpdateType, MergeConfidence | null> =
  */
 export async function getMergeConfidenceLevel(
   datasource: string,
-  depName: string,
+  packageName: string,
   currentVersion: string,
   newVersion: string,
   updateType: UpdateType
@@ -98,14 +98,14 @@ export async function getMergeConfidenceLevel(
     return mappedConfidence;
   }
 
-  return await queryApi(datasource, depName, currentVersion, newVersion);
+  return await queryApi(datasource, packageName, currentVersion, newVersion);
 }
 
 /**
  * Queries the Merge Confidence API with the given package release information.
  *
  * @param datasource
- * @param depName
+ * @param packageName
  * @param currentVersion
  * @param newVersion
  *
@@ -117,7 +117,7 @@ export async function getMergeConfidenceLevel(
  */
 async function queryApi(
   datasource: string,
-  depName: string,
+  packageName: string,
   currentVersion: string,
   newVersion: string
 ): Promise<MergeConfidence> {
@@ -126,14 +126,21 @@ async function queryApi(
     return 'neutral';
   }
 
-  const url = `${apiBaseUrl}api/mc/json/${datasource}/${depName}/${currentVersion}/${newVersion}`;
+  const escapedPackageName = packageName.replace('/', '%2f');
+  const url = `${apiBaseUrl}api/mc/json/${datasource}/${escapedPackageName}/${currentVersion}/${newVersion}`;
   const cacheKey = `${token}:${url}`;
   const cachedResult = await packageCache.get(hostType, cacheKey);
 
   // istanbul ignore if
   if (cachedResult) {
     logger.debug(
-      { datasource, depName, currentVersion, newVersion, cachedResult },
+      {
+        datasource,
+        packageName,
+        currentVersion,
+        newVersion,
+        cachedResult,
+      },
       'using merge confidence cached result'
     );
     return cachedResult;
@@ -209,7 +216,7 @@ function getApiBaseUrl(): string {
   }
 }
 
-function getApiToken(): string | undefined {
+export function getApiToken(): string | undefined {
   return hostRules.find({
     hostType,
   })?.token;

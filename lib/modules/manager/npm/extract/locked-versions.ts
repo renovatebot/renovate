@@ -3,6 +3,7 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
+import { getConstraints, getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
@@ -19,20 +20,25 @@ export async function getLockedVersions(
       logger.trace('Found yarnLock');
       lockFiles.push(yarnLock);
       if (!lockFileCache[yarnLock]) {
-        logger.trace('Retrieving/parsing ' + yarnLock);
+        logger.trace(`Retrieving/parsing ${yarnLock}`);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
       const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
+      let yarn: string | undefined;
       if (!isYarn1 && !packageFile.extractedConstraints?.yarn) {
         if (lockfileVersion && lockfileVersion >= 8) {
           // https://github.com/yarnpkg/berry/commit/9bcd27ae34aee77a567dd104947407532fa179b3
-          packageFile.extractedConstraints!.yarn = '^3.0.0';
+          yarn = '^3.0.0';
         } else if (lockfileVersion && lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          packageFile.extractedConstraints!.yarn = '^2.2.0';
+          yarn = '^2.2.0';
         } else {
-          packageFile.extractedConstraints!.yarn = '^2.0.0';
+          yarn = '^2.0.0';
         }
+      }
+      if (yarn) {
+        packageFile.extractedConstraints ??= {};
+        packageFile.extractedConstraints.yarn = yarn;
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion =
@@ -56,17 +62,19 @@ export async function getLockedVersions(
         logger.trace('Retrieving/parsing ' + npmLock);
         lockFileCache[npmLock] = await getNpmLock(npmLock);
       }
+
       const { lockfileVersion } = lockFileCache[npmLock];
+      let npm: string | undefined;
       if (lockfileVersion === 1) {
         if (packageFile.extractedConstraints?.npm) {
           // Add a <7 constraint if it's not already a fixed version
           if (
             semver.satisfies('6.14.18', packageFile.extractedConstraints.npm)
           ) {
-            packageFile.extractedConstraints.npm += ' <7';
+            npm = packageFile.extractedConstraints.npm + ' <7';
           }
         } else {
-          packageFile.extractedConstraints!.npm = '<7';
+          npm = '<7';
         }
       } else if (lockfileVersion === 2) {
         if (packageFile.extractedConstraints?.npm) {
@@ -74,12 +82,17 @@ export async function getLockedVersions(
           if (
             semver.satisfies('8.19.3', packageFile.extractedConstraints.npm)
           ) {
-            packageFile.extractedConstraints.npm += ' <9';
+            npm = packageFile.extractedConstraints.npm + ' <9';
           }
         } else {
-          packageFile.extractedConstraints!.npm = '<9';
+          npm = '<9';
         }
       }
+      if (npm) {
+        packageFile.extractedConstraints ??= {};
+        packageFile.extractedConstraints.npm = npm;
+      }
+
       for (const dep of packageFile.deps) {
         // TODO: types (#7154)
         dep.lockedVersion = semver.valid(
@@ -87,8 +100,27 @@ export async function getLockedVersions(
         )!;
       }
     } else if (pnpmShrinkwrap) {
-      logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
+      logger.debug('Found pnpm lock-file');
       lockFiles.push(pnpmShrinkwrap);
+      if (!lockFileCache[pnpmShrinkwrap]) {
+        logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
+        lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
+      }
+      const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];
+      if (lockfileVersion) {
+        packageFile.extractedConstraints ??= {};
+        packageFile.extractedConstraints.pnpm = getConstraints(
+          lockfileVersion,
+          packageFile.extractedConstraints.pnpm
+        );
+      }
+
+      for (const dep of packageFile.deps) {
+        // TODO: types (#7154)
+        dep.lockedVersion = semver.valid(
+          lockFileCache[pnpmShrinkwrap].lockedVersions[dep.depName!]
+        )!;
+      }
     }
     if (lockFiles.length) {
       packageFile.lockFiles = lockFiles;

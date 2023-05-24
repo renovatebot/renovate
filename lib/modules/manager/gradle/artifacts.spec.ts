@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 import { join } from 'upath';
 import {
   envMock,
@@ -12,6 +12,7 @@ import {
   logger,
   mockedFunction,
   partial,
+  scm,
 } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
@@ -61,7 +62,7 @@ describe('modules/manager/gradle/artifacts', () => {
     });
 
     fs.findUpLocal.mockResolvedValue('gradlew');
-    git.getFileList.mockResolvedValue([
+    scm.getFileList.mockResolvedValue([
       'gradlew',
       'build.gradle',
       'gradle.lockfile',
@@ -92,7 +93,7 @@ describe('modules/manager/gradle/artifacts', () => {
 
   it('aborts if no lockfile is found', async () => {
     const execSnapshots = mockExecAll();
-    git.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
+    scm.getFileList.mockResolvedValue(['build.gradle', 'settings.gradle']);
 
     expect(
       await updateArtifacts({

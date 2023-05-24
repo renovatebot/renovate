@@ -1,4 +1,4 @@
-import { git, logger, mocked, scm } from '../../../../test/util';
+import { logger, mocked, scm } from '../../../../test/util';
 import type { PackageFile } from '../../../modules/manager/types';
 import * as _repositoryCache from '../../../util/cache/repository';
 import type { BaseBranchCache } from '../../../util/cache/repository/types';
@@ -50,7 +50,7 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test');
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toEqual({
@@ -81,7 +81,7 @@ describe('workers/repository/process/extract-update', () => {
           addLabels: 'npm',
         },
       };
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test');
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toBeUndefined();
@@ -105,7 +105,7 @@ describe('workers/repository/process/extract-update', () => {
         },
       });
       scm.getBranchCommit.mockResolvedValueOnce('123test');
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test');
       const res = await extract(config);
       expect(res).toEqual(packageFiles);
     });
@@ -116,18 +116,18 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
         osvVulnerabilityAlerts: true,
       };
-      const fetchVulnerabilitiesMock = jest.fn();
+      const appendVulnerabilityPackageRulesMock = jest.fn();
       createVulnerabilitiesMock.mockResolvedValueOnce({
-        fetchVulnerabilities: fetchVulnerabilitiesMock,
+        appendVulnerabilityPackageRules: appendVulnerabilityPackageRulesMock,
       });
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test');
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);
 
       expect(createVulnerabilitiesMock).toHaveBeenCalledOnce();
-      expect(fetchVulnerabilitiesMock).toHaveBeenCalledOnce();
+      expect(appendVulnerabilityPackageRulesMock).toHaveBeenCalledOnce();
     });
 
     it('handles exception when fetching vulnerabilities', async () => {
@@ -138,7 +138,7 @@ describe('workers/repository/process/extract-update', () => {
       };
       createVulnerabilitiesMock.mockRejectedValueOnce(new Error());
       repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
-      git.checkoutBranch.mockResolvedValueOnce('123test');
+      scm.checkoutBranch.mockResolvedValueOnce('123test');
 
       const packageFiles = await extract(config);
       await lookup(config, packageFiles);

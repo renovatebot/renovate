@@ -1,5 +1,5 @@
-import os from 'os';
-import v8 from 'v8';
+import os from 'node:os';
+import v8 from 'node:v8';
 import type { InitialOptionsTsJest } from 'ts-jest/dist/types';
 
 const ci = !!process.env.CI;
@@ -40,7 +40,6 @@ function jestGithubRunnerSpecs(): JestConfig {
 const config: JestConfig = {
   cacheDirectory: '.cache/jest',
   clearMocks: true,
-  coverageDirectory: './coverage',
   collectCoverage: true,
   collectCoverageFrom: [
     'lib/**/*.{js,ts}',
@@ -48,6 +47,7 @@ const config: JestConfig = {
     '!lib/**/{__fixtures__,__mocks__,__testutil__,test}/**/*.{js,ts}',
     '!lib/**/types.ts',
   ],
+  coverageDirectory: './coverage',
   coverageReporters: ci
     ? ['html', 'json', 'text-summary']
     : ['html', 'text-summary'],

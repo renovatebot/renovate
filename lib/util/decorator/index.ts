@@ -23,6 +23,11 @@ export interface DecoratorParameters<T, U extends any[] = any[]> {
    * Current call context.
    */
   instance: T;
+
+  /**
+   * The decorated method name.
+   */
+  methodName?: string;
 }
 
 /**
@@ -48,6 +53,7 @@ export function decorate<T>(fn: Handler<T>): Decorator<T> {
           args,
           instance: this,
           callback: () => value?.apply(this, args),
+          methodName: value?.name,
         });
       },
     });

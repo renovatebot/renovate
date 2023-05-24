@@ -35,7 +35,6 @@ describe('modules/platform/github/index', () => {
 
     setBaseUrl(githubApiHost);
 
-    git.branchExists.mockReturnValue(true);
     git.isBranchBehindBase.mockResolvedValue(true);
     git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
@@ -175,9 +174,15 @@ describe('modules/platform/github/index', () => {
         .reply(200, [
           {
             full_name: 'a/b',
+            archived: false,
           },
           {
             full_name: 'c/d',
+            archived: false,
+          },
+          {
+            full_name: 'e/f',
+            archived: true,
           },
           null,
         ]);
@@ -209,7 +214,7 @@ describe('modules/platform/github/index', () => {
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
 
     it('should return an array of repos when using GitHub App Installation Token', async () => {
@@ -228,16 +233,22 @@ describe('modules/platform/github/index', () => {
           repositories: [
             {
               full_name: 'a/b',
+              archived: false,
             },
             {
               full_name: 'c/d',
+              archived: false,
+            },
+            {
+              full_name: 'e/f',
+              archived: true,
             },
             null,
           ],
         });
 
       const repos = await github.getRepos();
-      expect(repos).toStrictEqual(['a/b', 'c/d']);
+      expect(repos).toEqual(['a/b', 'c/d']);
     });
   });
 
@@ -642,10 +653,10 @@ describe('modules/platform/github/index', () => {
 
   describe('getPrList()', () => {
     const t = DateTime.fromISO('2000-01-01T00:00:00.000+00:00');
-    const t1 = t.plus({ minutes: 1 }).toISO();
-    const t2 = t.plus({ minutes: 2 }).toISO();
-    const t3 = t.plus({ minutes: 3 }).toISO();
-    const t4 = t.plus({ minutes: 4 }).toISO();
+    const t1 = t.plus({ minutes: 1 }).toISO()!;
+    const t2 = t.plus({ minutes: 2 }).toISO()!;
+    const t3 = t.plus({ minutes: 3 }).toISO()!;
+    const t4 = t.plus({ minutes: 4 }).toISO()!;
 
     const pr1: GhRestPr = {
       number: 1,
@@ -861,6 +872,8 @@ describe('modules/platform/github/index', () => {
             updated_at: '01-09-2022',
           },
         ])
+        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -950,6 +963,8 @@ describe('modules/platform/github/index', () => {
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
+        .head('/repos/some/repo/git/refs/heads/somebranch')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(201)
         .patch('/repos/some/repo/pulls/91')
@@ -976,7 +991,7 @@ describe('modules/platform/github/index', () => {
             closed_at: DateTime.now().minus({ minutes: 10 }).toISO(),
           },
         ])
-        .post('/repos/some/repo/git/refs')
+        .head('/repos/some/repo/git/refs/heads/somebranch')
         .reply(422);
 
       await github.initRepo({ repository: 'some/repo' });
@@ -2815,6 +2830,49 @@ describe('modules/platform/github/index', () => {
         })
       ).toBeFalse();
     });
+
+    it('should handle merge block', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .put('/repos/some/repo/pulls/1234/merge')
+        .reply(405, { message: 'Required status check "build" is expected.' });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
+
+    it('should handle approvers required', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
+        message:
+          'At least 1 approving review is required by reviewers with write access.',
+      });
+      await github.initRepo({ repository: 'some/repo' });
+      const pr = {
+        number: 1234,
+        head: {
+          ref: 'someref',
+        },
+      };
+      expect(
+        await github.mergePr({
+          branchName: '',
+          id: pr.number,
+        })
+      ).toBeFalse();
+    });
   });
 
   describe('massageMarkdown(input)', () => {
@@ -3181,7 +3239,7 @@ describe('modules/platform/github/index', () => {
           files,
         })
       );
-      git.fetchCommit.mockImplementation(() => Promise.resolve('0abcdef'));
+      git.fetchBranch.mockImplementation(() => Promise.resolve('0abcdef'));
     });
 
     it('returns null if pre-commit phase has failed', async () => {
@@ -3222,7 +3280,6 @@ describe('modules/platform/github/index', () => {
     it('commits and returns SHA string', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(false);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3234,6 +3291,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404)
         .post('/repos/some/repo/git/refs')
         .reply(200);
 
@@ -3249,7 +3308,6 @@ describe('modules/platform/github/index', () => {
     it('performs rebase', async () => {
       git.pushCommitToRenovateRef.mockResolvedValueOnce();
       git.listCommitTree.mockResolvedValueOnce([]);
-      git.branchExists.mockReturnValueOnce(true);
 
       const scope = httpMock.scope(githubApiHost);
 
@@ -3261,6 +3319,8 @@ describe('modules/platform/github/index', () => {
         .reply(200, { sha: '111' })
         .post('/repos/some/repo/git/commits')
         .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
         .patch('/repos/some/repo/git/refs/heads/foo/bar')
         .reply(200);
 

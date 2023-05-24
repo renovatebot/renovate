@@ -219,6 +219,15 @@ Results which are soft expired are reused in the following manner:
 - The `etag` from the cached results will be reused, and may result in a 304 response, meaning cached results are revalidated
 - If an error occurs when querying the `npmjs` registry, then soft expired results will be reused if they are present
 
+## checkedBranches
+
+This array will allow you to set the names of the branches you want to rebase/create, as if you selected their checkboxes in the Dependency Dashboard issue.
+
+It has been designed with the intention of being run on one repository, in a one-off manner, e.g. to "force" the rebase of a known existing branch.
+It is highly unlikely that you should ever need to add this to your permanent global config.
+
+Example: `renovate --checked-branches=renovate/chalk-4.x renovate-reproductions/checked` will rebase the `renovate/chalk-4.x` branch in the `renovate-reproductions/checked` repository.`
+
 ## containerbaseDir
 
 This directory is used to cache downloads when `binarySource=docker` or `binarySource=install`.
@@ -469,6 +478,12 @@ Unlike the `extends` field, which is passed through unresolved to be part of rep
 Use the `globalExtends` field if your preset has any global-only configuration options, such as the list of repositories to run against.
 
 Use the `extends` field instead of this if, for example, you need the ability for a repository config (e.g. `renovate.json`) to be able to use `ignorePresets` for any preset defined in global config.
+
+<!-- prettier-ignore -->
+!!! warning
+    `globalExtends` presets can't be private.
+    When Renovate resolves `globalExtends` it does not fully process the configuration.
+    This means that Renovate does not have the authentication it needs to fetch private things.
 
 ## logContext
 

@@ -1,5 +1,5 @@
 // TODO #7154
-import URL from 'url';
+import URL from 'node:url';
 import { GlobalConfig } from '../../../../../config/global';
 import { logger } from '../../../../../logger';
 import type { Release } from '../../../../../modules/datasource/types';
@@ -195,9 +195,9 @@ function findTagOfRelease(
   tags: string[]
 ): string | undefined {
   const regex = regEx(`(?:${packageName}|release)[@-]`, undefined, false);
-  const excactReleaseRegex = regEx(`${packageName}[@-_]v?${depNewVersion}`);
+  const exactReleaseRegex = regEx(`${packageName}[@\\-_]v?${depNewVersion}`);
   const exactTagsList = tags.filter((tag) => {
-    return excactReleaseRegex.test(tag);
+    return exactReleaseRegex.test(tag);
   });
   let tagName: string | undefined;
   if (exactTagsList.length) {

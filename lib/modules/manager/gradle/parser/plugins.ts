@@ -14,7 +14,6 @@ const qVersion = qValueMatcher.handler((ctx) =>
   storeInTokenMap(ctx, 'version')
 );
 
-// kotlin("jvm") version "1.3.71"
 export const qPlugins = q
   .sym(regEx(/^(?:id|kotlin)$/), storeVarToken)
   .handler((ctx) => storeInTokenMap(ctx, 'methodName'))
@@ -24,6 +23,7 @@ export const qPlugins = q
       .handler((ctx: Ctx) => storeInTokenMap(ctx, 'pluginName'))
       .sym('version')
       .join(qVersion),
+    // kotlin("jvm") version "1.3.71"
     q
       .tree({
         type: 'wrapped-tree',
@@ -37,8 +37,9 @@ export const qPlugins = q
         // id("foo.bar") version "1.2.3"
         q.sym<Ctx>('version').join(qVersion),
         // id("foo.bar").version("1.2.3")
+        // id("foo.bar") version("1.2.3")
         q
-          .op<Ctx>('.')
+          .opt(q.op<Ctx>('.'))
           .sym('version')
           .tree({
             maxDepth: 1,

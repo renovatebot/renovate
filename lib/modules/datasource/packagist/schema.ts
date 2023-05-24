@@ -1,12 +1,7 @@
 import is from '@sindresorhus/is';
 import { z } from 'zod';
 import { logger } from '../../../logger';
-import {
-  looseArray,
-  looseObject,
-  looseRecord,
-  looseValue,
-} from '../../../util/schema';
+import { LooseArray, LooseRecord } from '../../../util/schema-utils';
 import type { Release, ReleaseResult } from '../types';
 
 export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
@@ -45,27 +40,19 @@ export const MinifiedArray = z.array(z.record(z.unknown())).transform((xs) => {
 });
 export type MinifiedArray = z.infer<typeof MinifiedArray>;
 
-export const ComposerRelease = z
-  .object({
-    version: z.string(),
-  })
-  .merge(
-    looseObject({
-      homepage: z.string(),
-      source: z.object({ url: z.string() }),
-      time: z.string(),
-      require: z.object({ php: z.string() }),
-    })
-  );
+export const ComposerRelease = z.object({
+  version: z.string(),
+  homepage: z.string().nullable().catch(null),
+  source: z.object({ url: z.string() }).nullable().catch(null),
+  time: z.string().nullable().catch(null),
+  require: z.object({ php: z.string() }).nullable().catch(null),
+});
 export type ComposerRelease = z.infer<typeof ComposerRelease>;
-
-const ComposerReleasesLooseArray = looseArray(ComposerRelease);
-type ComposerReleasesLooseArray = z.infer<typeof ComposerReleasesLooseArray>;
 
 export const ComposerReleases = z
   .union([
-    MinifiedArray.transform((xs) => ComposerReleasesLooseArray.parse(xs)),
-    looseRecord(ComposerRelease).transform((map) => Object.values(map)),
+    MinifiedArray.pipe(LooseArray(ComposerRelease)),
+    LooseRecord(ComposerRelease).transform((map) => Object.values(map)),
   ])
   .catch([]);
 export type ComposerReleases = z.infer<typeof ComposerReleases>;
@@ -184,17 +171,19 @@ export const RegistryFile = z.intersection(
 export type RegistryFile = z.infer<typeof RegistryFile>;
 
 export const PackagesResponse = z.object({
-  packages: looseRecord(ComposerReleases),
+  packages: LooseRecord(ComposerReleases).catch({}),
 });
 export type PackagesResponse = z.infer<typeof PackagesResponse>;
 
 export const PackagistFile = PackagesResponse.merge(
   z.object({
-    providers: looseRecord(HashSpec).transform((x) =>
-      Object.fromEntries(
-        Object.entries(x).map(([key, { hash }]) => [key, hash])
+    providers: LooseRecord(HashSpec)
+      .transform((x) =>
+        Object.fromEntries(
+          Object.entries(x).map(([key, { hash }]) => [key, hash])
+        )
       )
-    ),
+      .catch({}),
   })
 );
 export type PackagistFile = z.infer<typeof PackagistFile>;
@@ -204,15 +193,19 @@ export const RegistryMeta = z
     (x) => (is.plainObject(x) ? x : {}),
     PackagistFile.merge(
       z.object({
-        ['includes']: looseRecord(HashSpec).transform((x) =>
-          Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
-        ),
-        ['provider-includes']: looseRecord(HashSpec).transform((x) =>
-          Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
-        ),
-        ['providers-lazy-url']: looseValue(z.string()),
-        ['providers-url']: looseValue(z.string()),
-        ['metadata-url']: looseValue(z.string()),
+        ['includes']: LooseRecord(HashSpec)
+          .transform((x) =>
+            Object.entries(x).map(([name, { hash }]) => ({ key: name, hash }))
+          )
+          .catch([]),
+        ['provider-includes']: LooseRecord(HashSpec)
+          .transform((x) =>
+            Object.entries(x).map(([key, { hash }]) => ({ key, hash }))
+          )
+          .catch([]),
+        ['providers-lazy-url']: z.string().nullable().catch(null),
+        ['providers-url']: z.string().nullable().catch(null),
+        ['metadata-url']: z.string().nullable().catch(null),
       })
     )
   )

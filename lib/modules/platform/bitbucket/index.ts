@@ -1,9 +1,9 @@
-import URL from 'url';
+import URL from 'node:url';
 import is from '@sindresorhus/is';
 import JSON5 from 'json5';
 import { REPOSITORY_NOT_FOUND } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../../util/http/bitbucket';
@@ -46,6 +46,8 @@ import type {
 import * as utils from './utils';
 import { mergeBodyTransformer } from './utils';
 
+export const id = 'bitbucket';
+
 const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
@@ -78,7 +80,7 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   const options: HttpOptions = {
-    useCache: false,
+    memCache: false,
   };
   if (token) {
     options.token = token;
@@ -112,9 +114,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
-    );
+    const repos = (
+      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
+        `/2.0/repositories/?role=contributor`,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
@@ -272,7 +279,12 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    const prs = (
+      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
+        paginate: true,
+        pagelen: 50,
+      })
+    ).body.values;
     config.prList = prs.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
@@ -291,7 +303,7 @@ export async function findPr({
   const pr = prList.find(
     (p) =>
       p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
+      (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
       matchesState(p.state, state)
   );
   if (pr) {
@@ -360,16 +372,18 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<BitbucketStatus>(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
-    'get',
-    { useCache }
-  );
+  return (
+    await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
+      `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
+      {
+        paginate: true,
+        memCache,
+      }
+    )
+  ).body.values;
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(
@@ -516,6 +530,10 @@ export function massageMarkdown(input: string): string {
     .replace(
       'you tick the rebase/retry checkbox',
       'by renaming this PR to start with "rebase!"'
+    )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
     )
     .replace(regEx(/<\/?summary>/g), '**')
     .replace(regEx(/<\/?(details|blockquote)>/g), '')
@@ -796,7 +814,10 @@ export async function createPr({
   if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<PagedResult<EffectiveReviewer>>(
-        `/2.0/repositories/${config.repository}/effective-default-reviewers`
+        `/2.0/repositories/${config.repository}/effective-default-reviewers`,
+        {
+          paginate: true,
+        }
       )
     ).body;
     reviewers = reviewersResponse.values.map((reviewer: EffectiveReviewer) => ({
@@ -946,8 +967,4 @@ export async function mergePr({
     return false;
   }
   return true;
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

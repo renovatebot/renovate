@@ -16,7 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import type { BranchStatus, VulnerabilityAlert } from '../../../types';
+import type { BranchStatus } from '../../../types';
 import * as git from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { regEx } from '../../../util/regex';
@@ -82,6 +82,8 @@ const defaults: {
 } = {
   hostType: 'azure',
 };
+
+export const id = 'azure';
 
 export function initPlatform({
   endpoint,
@@ -305,7 +307,9 @@ export async function findPr({
     );
 
     if (prTitle) {
-      prsFiltered = prsFiltered.filter((item) => item.title === prTitle);
+      prsFiltered = prsFiltered.filter(
+        (item) => item.title.toUpperCase() === prTitle.toUpperCase()
+      );
     }
 
     switch (state) {
@@ -470,7 +474,7 @@ export async function createPr({
       pr.pullRequestId!
     );
   }
-  if (platformOptions?.azureAutoApprove) {
+  if (platformOptions?.autoApprove) {
     await azureApiGit.createPullRequestReviewer(
       {
         reviewerUrl: pr.createdBy!.url,
@@ -504,6 +508,7 @@ export async function updatePr({
   prTitle: title,
   prBody: body,
   state,
+  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
@@ -524,6 +529,21 @@ export async function updatePr({
     );
   } else if (state === 'closed') {
     objToUpdate.status = PullRequestStatus.Abandoned;
+  }
+  if (platformOptions?.autoApprove) {
+    const pr = await azureApiGit.getPullRequestById(prNo, config.project);
+    await azureApiGit.createPullRequestReviewer(
+      {
+        reviewerUrl: pr.createdBy!.url,
+        vote: AzurePrVote.Approved,
+        isFlagged: false,
+        isRequired: false,
+      },
+      config.repoId,
+      // TODO #7154
+      pr.pullRequestId!,
+      pr.createdBy!.id!
+    );
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
@@ -757,6 +777,10 @@ export function massageMarkdown(input: string): string {
       'you tick the rebase/retry checkbox',
       'rename PR to start with "rebase!"'
     )
+    .replace(
+      'checking the rebase/retry box above',
+      'renaming the PR to start with "rebase!"'
+    )
     .replace(regEx(`\n---\n\n.*?<!-- rebase-check -->.*?\n`), '')
     .replace(regEx(/<!--renovate-(?:debug|config-hash):.*?-->/g), '');
 }
@@ -906,8 +930,4 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${prNumber}`);
   const azureApiGit = await azureApi.gitApi();
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
-}
-
-export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  return Promise.resolve([]);
 }

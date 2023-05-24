@@ -55,7 +55,7 @@ jobs:
       NODE_VERSION: ${{ matrix.node-version }}
 
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 2
 
@@ -77,7 +77,11 @@ jobs:
           echo "Yarn $(yarn --version)"
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        uses: nick-fields/retry@943e742917ac94714d2f408a0e8320f2d1fcafcd # v2.8.3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: yarn install --frozen-lockfile
 
       # build before tests to for static file check
       - name: Build
@@ -93,7 +97,7 @@ jobs:
         run: yarn jest --ci --coverage ${{ env.coverage }}
 
       - name: Codecov
-        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70 # tag=v3.1.1
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
         if: always() && env.coverage == 'true'
 
       - name: E2E Test
@@ -106,7 +110,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 2
 
@@ -131,12 +135,14 @@ jobs:
       - name: Type check
         run: yarn type-check
 
+      - name: markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@bb4bb94c73936643d73d345b48fead3e96f90a5e # v10.0.1
+
       - name: Lint
         run: |
           yarn ls-lint
           yarn eslint -f gha
           yarn prettier
-          yarn markdown-lint
           yarn git-check
           yarn doc-fence-check
 
@@ -156,7 +162,7 @@ jobs:
 
     steps:
       # full checkout for semantic-release
-      - uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f # v3.4.0
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
         with:
           fetch-depth: 0
 

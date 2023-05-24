@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { streamToString } from '../../../util/streams';
 import {
   getBranchNameWithoutRefsheadsPrefix,

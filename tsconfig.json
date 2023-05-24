@@ -20,7 +20,8 @@
     "types": ["node", "jest-extended", "expect-more-jest"],
     "allowJs": true,
     "checkJs": true,
-    "importsNotUsedAsValues": "error"
+    "importsNotUsedAsValues": "error",
+    "ignoreDeprecations": "5.0"
   },
   "include": ["**/*.ts", "**/*.js", "**/*.mjs", "**/*.cjs"],
   "exclude": [
@@ -31,5 +32,6 @@
     "coverage",
     "config.js",
     "tmp"
-  ]
+  ],
+  "ts-node": { "transpileOnly": true, "esm": true }
 }

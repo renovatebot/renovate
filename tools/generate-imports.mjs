@@ -1,24 +1,20 @@
-import util from 'util';
 import fs from 'fs-extra';
-import _glob from 'glob';
+import { glob } from 'glob';
 import hasha from 'hasha';
-import minimatch from 'minimatch';
-import shell from 'shelljs';
+import { minimatch } from 'minimatch';
 import upath from 'upath';
 
-const glob = util.promisify(_glob);
-
-shell.echo('generating imports');
+console.log('generating imports');
 const newFiles = new Set();
 
 if (!fs.existsSync('lib')) {
-  shell.echo('> missing sources');
-  shell.exit(0);
+  console.log('> missing sources');
+  process.exit(0);
 }
 
 if (!fs.existsSync('data')) {
-  shell.echo('> missing data folder');
-  shell.exit(0);
+  console.log('> missing data folder');
+  process.exit(0);
 }
 
 /**
@@ -97,6 +93,9 @@ export async function getManagerHash(managerName) {
     (fileName) => minimatch(fileName, '*.+(snap|spec.ts)', { matchBase: true })
   );
 
+  // sort files in case glob order changes
+  files.sort();
+
   for (const fileAddr of files) {
     const hash = await getFileHash(fileAddr);
     hashes.push(hash);
@@ -124,7 +123,7 @@ async function generateData() {
     const rawFileContent = await fs.readFile(file, 'utf8');
     const value = JSON.stringify(rawFileContent);
 
-    shell.echo(`> ${key}`);
+    console.log(`> ${key}`);
     contentMapAssignments.push(`data.set('${key}', ${value});`);
   }
 
@@ -140,7 +139,7 @@ async function generateData() {
 }
 
 async function generateHash() {
-  shell.echo('generating hashes');
+  console.log('generating hashes');
   try {
     const hashMap = `export const hashMap = new Map<string, string>();`;
     /** @type {string[]} */
@@ -168,7 +167,7 @@ async function generateHash() {
       [hashMap, hashes.join('\n')].join('\n\n')
     );
   } catch (err) {
-    shell.echo('ERROR:', err.message);
+    console.log('ERROR:', err.message);
     process.exit(1);
   }
 }
@@ -179,13 +178,17 @@ await (async () => {
     await generateData();
     await generateHash();
     await Promise.all(
-      shell
-        .find('lib/**/*.generated.ts')
+      (
+        await glob('lib/**/*.generated.ts')
+      )
+        .map((f) => upath.join(f))
         .filter((f) => !newFiles.has(f))
-        .map((file) => fs.remove(file))
+        .map(async (file) => {
+          await fs.remove(file);
+        })
     );
   } catch (e) {
-    shell.echo(e.toString());
-    shell.exit(1);
+    console.log(e.toString());
+    process.exit(1);
   }
 })();

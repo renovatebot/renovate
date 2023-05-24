@@ -58,11 +58,12 @@ describe('workers/repository/process/fetch', () => {
 
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';
+      config.constraints = { some: 'different' };
       const packageFiles: any = {
         maven: [
           {
             packageFile: 'pom.xml',
-            extractedConstraints: { some: 'constraint' },
+            extractedConstraints: { some: 'constraint', other: 'constraint' },
             deps: [{ datasource: MavenDatasource.id, depName: 'bbb' }],
           },
         ],
