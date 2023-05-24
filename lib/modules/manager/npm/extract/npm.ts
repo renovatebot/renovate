@@ -21,7 +21,7 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
   }
 }
 
-export function extractPackages(lockParsed: any): {
+export function extractPackages(lockParsed: unknown): {
   packages: LockFileEntry;
   lockfileVersion: number;
 } {
