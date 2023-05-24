@@ -33,7 +33,7 @@ function isOverride(value: BazelModulePackageDep): value is OverridePackageDep {
 // be surprising to someone outside the bazel-module code to see the extra
 // properties.
 export function overrideToPackageDependency(
-  override: Partial<OverridePackageDep>
+  override: OverridePackageDep
 ): PackageDependency {
   const copy: Partial<OverridePackageDep> = structuredClone(override);
   delete copy.bazelDepSkipReason;
