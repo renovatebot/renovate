@@ -989,7 +989,7 @@ describe('util/package-rules/index', () => {
       ...config,
       depName: 'test',
     });
-    expect(res3.x).toBeDefined();
+    expect(res3.x).toBeUndefined();
   });
 
   it('empty rules', () => {
