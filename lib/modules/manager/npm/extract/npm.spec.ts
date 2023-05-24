@@ -50,7 +50,7 @@ describe('modules/manager/npm/extract/npm', () => {
 
     it('extracts npm 9 lockfile', async () => {
       const npm9Lock = Fixtures.get('npm9/package-lock.json', '..');
-      fs.readLocalFile.mockResolvedValueOnce(npm9Lock as never);
+      fs.readLocalFile.mockResolvedValueOnce(npm9Lock);
       const res = await getNpmLock('package.json');
       expect(res).toEqual({
         lockedVersions: {
