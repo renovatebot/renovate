@@ -30,7 +30,6 @@ export type SkipReason =
   | 'placeholder-url'
   | 'unknown-engines'
   | 'unknown-registry'
-  | 'unknown-version'
   | 'unknown-volta'
   | 'unspecified-version'
   | 'unsupported-chart-type'

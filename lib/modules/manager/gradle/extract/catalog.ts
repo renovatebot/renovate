@@ -151,7 +151,7 @@ function extractLiteralVersion({
     }
   }
 
-  return { skipReason: 'unknown-version' };
+  return { skipReason: 'unspecified-version' };
 }
 
 function extractDependency({

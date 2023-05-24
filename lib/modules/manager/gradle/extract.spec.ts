@@ -604,7 +604,7 @@ describe('modules/manager/gradle/extract', () => {
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
-              skipReason: 'unknown-version',
+              skipReason: 'unspecified-version',
             },
           ],
         },
