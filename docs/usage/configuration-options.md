@@ -2287,11 +2287,6 @@ The following matches any file in directories starting with `app/`:
 }
 ```
 
-<!-- prettier-ignore -->
-!!! warning
-    Partial matches for `matchPaths` are deprecated.
-    Please use a `minimatch` glob pattern or switch to [`matchFiles`](#matchfiles) if you need exact matching.
-
 ### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the `renovatebot` GitHub org:
