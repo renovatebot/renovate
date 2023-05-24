@@ -227,7 +227,10 @@ export async function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  const lockFileName = await findLocalSiblingOrParent(packageFile, 'Cargo.lock');
+  const lockFileName = await findLocalSiblingOrParent(
+    packageFile,
+    'Cargo.lock'
+  );
   const res: PackageFileContent = { deps };
   // istanbul ignore if
   if (lockFileName) {

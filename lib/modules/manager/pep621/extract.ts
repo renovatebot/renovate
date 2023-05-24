@@ -24,7 +24,7 @@ export function extractPackageFile(
     def = PyProjectSchema.parse(jsonMap);
   } catch (err) {
     logger.debug(
-      {  packageFile, err },
+      { packageFile, err },
       `Failed to parse and validate pyproject file`
     );
     return null;

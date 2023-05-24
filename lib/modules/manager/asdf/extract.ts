@@ -5,9 +5,7 @@ import { regEx } from '../../../util/regex';
 import type { PackageDependency, PackageFileContent } from '../types';
 import { upgradeableTooling } from './upgradeable-tooling';
 
-export function extractPackageFile(
-  content: string,
-): PackageFileContent | null {
+export function extractPackageFile(content: string): PackageFileContent | null {
   logger.trace(`asdf.extractPackageFile()`);
 
   const regex = regEx(

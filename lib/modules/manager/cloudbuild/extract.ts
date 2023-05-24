@@ -4,7 +4,10 @@ import { logger } from '../../../logger';
 import { getDep } from '../dockerfile/extract';
 import type { PackageDependency, PackageFileContent } from '../types';
 
-export function extractPackageFile(content: string, packageFile?: string): PackageFileContent | null {
+export function extractPackageFile(
+  content: string,
+  packageFile?: string
+): PackageFileContent | null {
   const deps: PackageDependency[] = [];
   try {
     // TODO: fix types

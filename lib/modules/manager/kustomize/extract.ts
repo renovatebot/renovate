@@ -148,7 +148,7 @@ export function extractHelmChart(
 
 export function parseKustomize(
   content: string,
-  packageFile?:  string
+  packageFile?: string
 ): Kustomize | null {
   let pkg: Kustomize | null = null;
   try {

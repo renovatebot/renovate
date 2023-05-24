@@ -6,7 +6,10 @@ export async function extractPackageFile(
   content: string,
   packageFile: string
 ): Promise<PackageFileContent | null> {
-  const res = await ComposerExtract.safeParseAsync({ content, fileName: packageFile });
+  const res = await ComposerExtract.safeParseAsync({
+    content,
+    fileName: packageFile,
+  });
   if (!res.success) {
     logger.debug({ packageFile, err: res.error }, 'Composer: extract failed');
     return null;

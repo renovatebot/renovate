@@ -26,7 +26,10 @@ import type {
   SystemFluxManifest,
 } from './types';
 
-function readManifest(content: string, packageFile: string): FluxManifest | null {
+function readManifest(
+  content: string,
+  packageFile: string
+): FluxManifest | null {
   if (isSystemManifest(packageFile)) {
     const versionMatch = regEx(
       /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
