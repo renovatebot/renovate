@@ -146,11 +146,11 @@ export function LooseRecord<
     // Avoid error-related computations inside the loop
     return z.record(z.any()).transform((input) => {
       const output: Record<string, z.infer<ValueSchema>> = {};
-      for (const [key, val] of Object.entries(input)) {
-        const parsedKey = Key.safeParse(key);
-        const parsedValue = Value.safeParse(val);
+      for (const [inputKey, inputVal] of Object.entries(input)) {
+        const parsedKey = Key.safeParse(inputKey);
+        const parsedValue = Value.safeParse(inputVal);
         if (parsedKey.success && parsedValue.success) {
-          output[key] = parsedValue.data;
+          output[parsedKey.data] = parsedValue.data;
         }
       }
       return output;
@@ -161,26 +161,26 @@ export function LooseRecord<
     const output: Record<string, z.infer<ValueSchema>> = {};
     const issues: z.ZodIssue[] = [];
 
-    for (const [key, val] of Object.entries(input)) {
-      const parsedKey = Key.safeParse(key);
+    for (const [inputKey, inputVal] of Object.entries(input)) {
+      const parsedKey = Key.safeParse(inputKey);
       if (!parsedKey.success) {
         for (const issue of parsedKey.error.issues) {
-          issue.path.unshift(key);
+          issue.path.unshift(inputKey);
           issues.push(issue);
         }
         continue;
       }
 
-      const parsedValue = Value.safeParse(val);
+      const parsedValue = Value.safeParse(inputVal);
       if (!parsedValue.success) {
         for (const issue of parsedValue.error.issues) {
-          issue.path.unshift(key);
+          issue.path.unshift(inputKey);
           issues.push(issue);
         }
         continue;
       }
 
-      output[key] = parsedValue.data;
+      output[parsedKey.data] = parsedValue.data;
       continue;
     }
 
