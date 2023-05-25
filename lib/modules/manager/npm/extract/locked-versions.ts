@@ -89,7 +89,7 @@ export async function getLockedVersions(
         }
       } else if (lockfileVersion === 3) {
         if (!packageFile.extractedConstraints?.npm) {
-          packageFile.extractedConstraints!.npm = '>=7';
+          npm = '>=7';
         }
       } else {
         logger.warn(
