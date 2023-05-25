@@ -123,8 +123,7 @@ export function processModulePkgDeps(
     logger.debug(`A 'bazel_dep' was not found for '${moduleName}'.`);
     return [];
   }
-  const bazelDepOut: PackageDependency = { ...bazelDep };
-  const deps: PackageDependency[] = [bazelDepOut];
+  const deps: PackageDependency[] = [bazelDep];
   const overrides = packageDeps.filter(isOverride);
   // It is an error for more than one override to exist for a module. We will
   // ignore the overrides if there is more than one.
@@ -133,7 +132,7 @@ export function processModulePkgDeps(
   }
   const override = overrides[0];
   deps.push(overrideToPackageDependency(override));
-  bazelDepOut.skipReason = override.bazelDepSkipReason;
+  bazelDep.skipReason = override.bazelDepSkipReason;
   return deps;
 }
 
