@@ -51,10 +51,13 @@ describe('util/schema-utils', () => {
 
     it('supports key schema', () => {
       const s = LooseRecord(
-        z.string().refine((x) => x === 'bar'),
-        z.string()
+        z
+          .string()
+          .refine((x) => x === 'bar')
+          .transform((x) => x.toUpperCase()),
+        z.string().transform((x) => x.toUpperCase())
       );
-      expect(s.parse({ foo: 'foo', bar: 'bar' })).toEqual({ bar: 'bar' });
+      expect(s.parse({ foo: 'foo', bar: 'bar' })).toEqual({ BAR: 'BAR' });
     });
 
     it('reports key schema errors', () => {
