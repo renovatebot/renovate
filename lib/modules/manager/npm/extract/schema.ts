@@ -1,22 +1,5 @@
 import { z } from 'zod';
-
-/**
- * Removes the entry with an empty key which is used
- * in packagelock v3 to indicate a root package.
- */
-const removeRecordsWithEmptyKeys = (value: any): any =>
-  Object.fromEntries(
-    Object.entries(value).filter(([key]) => {
-      return key.trim() !== '';
-    })
-  );
-
-/**
- * Package names in package-lock v3 are prefixed with `node_modules/`.
- * This function removes that prefix to extract only the package name.
- */
-const removeNodeModulesPrefix = (packageName: string): string =>
-  packageName.replace(/^node_modules\//, '');
+import { LooseRecord } from '../../../../util/schema-utils';
 
 export const PackageLockV3Schema = z.object({
   lockfileVersion: z.literal(3),
