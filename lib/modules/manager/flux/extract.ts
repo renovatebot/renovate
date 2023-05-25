@@ -1,8 +1,10 @@
+import is from '@sindresorhus/is';
 import { loadAll } from 'js-yaml';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { regEx } from '../../../util/regex';
 import { BitbucketTagsDatasource } from '../../datasource/bitbucket-tags';
+import { DockerDatasource } from '../../datasource/docker';
 import { GitRefsDatasource } from '../../datasource/git-refs';
 import { GitTagsDatasource } from '../../datasource/git-tags';
 import { GithubReleasesDatasource } from '../../datasource/github-releases';
@@ -181,7 +183,29 @@ function resolveResourceManifest(
                 resource.metadata?.namespace)
         );
         if (matchingRepositories.length) {
-          dep.registryUrls = matchingRepositories.map((repo) => repo.spec.url);
+          dep.registryUrls = matchingRepositories
+            .map((repo) => {
+              if (
+                repo.spec.type === 'oci' ||
+                repo.spec.url.startsWith('oci://')
+              ) {
+                // Change datasource to Docker
+                dep.datasource = DockerDatasource.id;
+                // Ensure the URL is a valid OCI path
+                dep.packageName = `${repo.spec.url.replace('oci://', '')}/${
+                  resource.spec.chart.spec.chart
+                }`;
+                return null;
+              } else {
+                return repo.spec.url;
+              }
+            })
+            .filter(is.string);
+
+          // if registryUrls is empty, delete it from dep
+          if (!dep.registryUrls?.length) {
+            delete dep.registryUrls;
+          }
         } else {
           dep.skipReason = 'unknown-registry';
         }
