@@ -313,8 +313,7 @@ export interface PackageRule
     Record<string, unknown> {
   description?: string | string[];
   isVulnerabilityAlert?: boolean;
-  matchFiles?: string[];
-  matchPaths?: string[];
+  matchFileNames?: string[];
   matchLanguages?: string[];
   matchBaseBranches?: string[];
   matchManagers?: string | string[];
@@ -459,6 +458,7 @@ export type RenovateOptions =
 export interface PackageRuleInputConfig extends Record<string, unknown> {
   versioning?: string;
   packageFile?: string;
+  lockFiles?: string[];
   depType?: string;
   depTypes?: string[];
   depName?: string;
