@@ -192,10 +192,9 @@ function resolveResourceManifest(
                 // Change datasource to Docker
                 dep.datasource = DockerDatasource.id;
                 // Ensure the URL is a valid OCI path
-                dep.packageName = `${repo.spec.url.replace(
-                  'oci://',
-                  ''
-                )}/${resource.spec.chart.spec.chart}`;
+                dep.packageName = `${repo.spec.url.replace('oci://', '')}/${
+                  resource.spec.chart.spec.chart
+                }`;
                 return null;
               } else {
                 return repo.spec.url;
