@@ -28,8 +28,11 @@ import type {
   SystemFluxManifest,
 } from './types';
 
-function readManifest(content: string, file: string): FluxManifest | null {
-  if (isSystemManifest(file)) {
+function readManifest(
+  content: string,
+  packageFile: string
+): FluxManifest | null {
+  if (isSystemManifest(packageFile)) {
     const versionMatch = regEx(
       /#\s*Flux\s+Version:\s*(\S+)(?:\s*#\s*Components:\s*([A-Za-z,-]+))?/
     ).exec(content);
@@ -38,7 +41,7 @@ function readManifest(content: string, file: string): FluxManifest | null {
     }
     return {
       kind: 'system',
-      file,
+      file: packageFile,
       version: versionMatch[1],
       components: versionMatch[2],
     };
@@ -46,14 +49,14 @@ function readManifest(content: string, file: string): FluxManifest | null {
 
   const manifest: FluxManifest = {
     kind: 'resource',
-    file,
+    file: packageFile,
     resources: [],
   };
   let resources: FluxResource[];
   try {
     resources = loadAll(content, null, { json: true }) as FluxResource[];
   } catch (err) {
-    logger.debug({ err }, 'Failed to parse Flux manifest');
+    logger.debug({ err, packageFile }, 'Failed to parse Flux manifest');
     return null;
   }
 

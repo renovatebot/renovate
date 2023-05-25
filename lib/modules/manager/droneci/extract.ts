@@ -9,7 +9,7 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  _filename: string,
+  packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
@@ -73,7 +73,7 @@ export function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting DroneCI images');
+    logger.debug({ err, packageFile }, 'Error extracting DroneCI images');
   }
   if (!deps.length) {
     return null;
