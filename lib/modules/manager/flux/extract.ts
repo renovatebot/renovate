@@ -195,7 +195,7 @@ function resolveResourceManifest(
                 dep.packageName = `${repo.spec.url.replace(
                   'oci://',
                   ''
-                )}/${dep.depName!}`;
+                )}/${resource.spec.chart.spec.chart}`;
                 return null;
               } else {
                 return repo.spec.url;
