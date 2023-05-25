@@ -150,9 +150,7 @@ export function LooseRecord<
         const parsedKey = Key.safeParse(inputKey);
         const parsedValue = Value.safeParse(inputVal);
         if (parsedKey.success && parsedValue.success) {
-          const { data: key } = parsedKey;
-          const { data: val } = parsedValue;
-          output[key] = val;
+          output[parsedKey.data] = parsedValue.data;
         }
       }
       return output;
@@ -182,9 +180,7 @@ export function LooseRecord<
         continue;
       }
 
-      const { data: key } = parsedKey;
-      const { data: val } = parsedValue;
-      output[key] = val;
+      output[parsedKey.data] = parsedValue.data;
       continue;
     }
 
