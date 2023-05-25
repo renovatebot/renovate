@@ -46,8 +46,6 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
     const result = await super.request<T>(resolvedURL.toString(), opts);
 
     if (opts.paginate && isPagedResult(result.body)) {
-      delete opts.etagCache; // Etag cache isn't designed for paginated requests
-
       const resultBody = result.body as PagedResult<T>;
       let page = 1;
       let nextURL = resultBody.next;
