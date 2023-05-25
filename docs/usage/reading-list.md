@@ -51,7 +51,7 @@ Read this list _after_ experiencing Renovate's default behavior, once you really
 - [Noise Reduction](./noise-reduction.md)
 
 Skim the [repository configuration options](./configuration-options.md) to learn about the kind of customizations you can make to Renovate.
-Feel free to read up on anything that looks intersting to you.
+Feel free to read up on anything that looks interesting to you.
 
 ## Advanced
 

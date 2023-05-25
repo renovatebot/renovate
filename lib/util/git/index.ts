@@ -504,13 +504,19 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 }
 
 export async function getCommitMessages(): Promise<string[]> {
-  await syncGit();
   logger.debug('getCommitMessages');
-  const res = await git.log({
-    n: 20,
-    format: { message: '%s' },
-  });
-  return res.all.map((commit) => commit.message);
+  if (GlobalConfig.get('platform') !== 'local') {
+    await syncGit();
+  }
+  try {
+    const res = await git.log({
+      n: 20,
+      format: { message: '%s' },
+    });
+    return res.all.map((commit) => commit.message);
+  } catch (err) /* istanbul ignore next */ {
+    return [];
+  }
 }
 
 export async function checkoutBranch(branchName: string): Promise<CommitSha> {
@@ -781,6 +787,7 @@ export async function mergeBranch(
   let status: StatusResult | undefined;
   try {
     await syncGit();
+    await writeGitAuthor();
     await git.reset(ResetMode.HARD);
     await gitRetry(() =>
       git.checkout(['-B', branchName, 'origin/' + branchName])

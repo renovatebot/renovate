@@ -1675,6 +1675,7 @@ Supported lock files are:
 - `jsonnetfile.lock.json`
 - `package-lock.json`
 - `packages.lock.json`
+- `pdm.lock`
 - `Pipfile.lock`
 - `pnpm-lock.yaml`
 - `poetry.lock`
