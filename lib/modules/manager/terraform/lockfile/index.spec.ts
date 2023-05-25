@@ -238,7 +238,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('update single dependency in subfolder', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('test/.terraform.lock.hcl');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(
+      'test/.terraform.lock.hcl'
+    );
 
     mockHash.mockResolvedValueOnce([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -273,7 +275,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('update multiple dependencies which are not ordered', async () => {
     fs.readLocalFile.mockResolvedValue(validLockfile2);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('test/.terraform.lock.hcl');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(
+      'test/.terraform.lock.hcl'
+    );
 
     mockHash.mockResolvedValue([
       'h1:lDsKRxDRXPEzA4AxkK4t+lJd3IQIP2UoaplJGjQSp2s=',
@@ -402,7 +406,9 @@ describe('modules/manager/terraform/lockfile/index', () => {
 
   it('do full lock file maintenance with lockfile in subfolder', async () => {
     fs.readLocalFile.mockResolvedValueOnce(validLockfile);
-    fs.findLocalSiblingOrParent.mockResolvedValueOnce('subfolder/.terraform.lock.hcl');
+    fs.findLocalSiblingOrParent.mockResolvedValueOnce(
+      'subfolder/.terraform.lock.hcl'
+    );
 
     mockGetPkgReleases
       .mockResolvedValueOnce({
