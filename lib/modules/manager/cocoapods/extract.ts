@@ -112,7 +112,7 @@ export async function extractPackageFile(
       let dep: PackageDependency = {
         depName,
         groupName,
-        skipReason: 'unknown-version',
+        skipReason: 'unspecified-version',
       };
 
       if (currentValue) {

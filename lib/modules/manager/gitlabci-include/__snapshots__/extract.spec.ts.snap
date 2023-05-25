@@ -18,7 +18,7 @@ exports[`modules/manager/gitlabci-include/extract extractPackageFile() extracts 
     "datasource": "gitlab-tags",
     "depName": "mikebryant/include-source-example3",
     "depType": "repository",
-    "skipReason": "unknown-version",
+    "skipReason": "unspecified-version",
   },
 ]
 `;
