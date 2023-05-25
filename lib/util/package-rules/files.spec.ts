@@ -1,7 +1,7 @@
-import { FilesMatcher } from './files';
+import { FileNamesMatcher } from './files';
 
 describe('util/package-rules/files', () => {
-  const fileMatcher = new FilesMatcher();
+  const fileMatcher = new FileNamesMatcher();
 
   describe('match', () => {
     it('should return false if packageFile is not defined', () => {
@@ -10,7 +10,7 @@ describe('util/package-rules/files', () => {
           packageFile: undefined,
         },
         {
-          matchFiles: ['frontend/package.json'],
+          matchFileNames: ['frontend/package.json'],
         }
       );
       expect(result).toBeFalse();

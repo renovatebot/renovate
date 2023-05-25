@@ -302,8 +302,7 @@ export async function validateConfig(
             }
 
             const selectors = [
-              'matchFiles',
-              'matchPaths',
+              'matchFileNames',
               'matchLanguages',
               'matchBaseBranches',
               'matchManagers',
