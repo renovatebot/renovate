@@ -315,7 +315,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'helm',
           depType: 'provider',
           packageName: 'hashicorp/helm',
-          skipReason: 'no-version',
+          skipReason: 'unspecified-version',
         },
         {
           currentValue: 'V1.9',
@@ -655,7 +655,7 @@ describe('modules/manager/terraform/extract', () => {
 
     it('update lockfile constraints with range strategy update-lockfile', async () => {
       fs.readLocalFile.mockResolvedValueOnce(lockedVersionLockfile);
-      fs.getSiblingFileName.mockReturnValueOnce('aLockFile.hcl');
+      fs.findLocalSiblingOrParent.mockResolvedValueOnce('aLockFile.hcl');
 
       const res = await extractPackageFile(
         lockedVersion,
@@ -729,7 +729,7 @@ describe('modules/manager/terraform/extract', () => {
           extractVersion: 'v(?<version>.*)$',
         },
         {
-          skipReason: 'no-version',
+          skipReason: 'unspecified-version',
         },
         {
           currentValue: '1.1.9',

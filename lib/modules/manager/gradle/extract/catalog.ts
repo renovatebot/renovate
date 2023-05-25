@@ -113,7 +113,7 @@ function extractLiteralVersion({
   sectionKey: string;
 }): VersionExtract {
   if (!version) {
-    return { skipReason: 'no-version' };
+    return { skipReason: 'unspecified-version' };
   } else if (is.string(version)) {
     const fileReplacePosition =
       depStartIndex + findVersionIndex(depSubContent, sectionKey, version);
@@ -151,7 +151,7 @@ function extractLiteralVersion({
     }
   }
 
-  return { skipReason: 'unknown-version' };
+  return { skipReason: 'unspecified-version' };
 }
 
 function extractDependency({
@@ -179,7 +179,7 @@ function extractDependency({
     if (!currentValue) {
       return {
         depName,
-        skipReason: 'no-version',
+        skipReason: 'unspecified-version',
       };
     }
     return {
