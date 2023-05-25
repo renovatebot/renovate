@@ -5,6 +5,7 @@ import type { PackageDependency } from '../types';
 import * as fragments from './fragments';
 import {
   BasePackageDep,
+  BazelModulePackageDep,
   OverridePackageDep,
   RuleToBazelModulePackageDep,
   overrideToPackageDependency,
@@ -99,6 +100,26 @@ describe('modules/manager/bazel-module/rules', () => {
   describe('.processModulePkgDeps', () => {
     it('returns an empty array if the input is an empty array', () => {
       expect(processModulePkgDeps([])).toHaveLength(0);
+    });
+
+    it('returns the bazel_dep if more than one override is found', () => {
+      const bazelDep: BasePackageDep = {
+        depType: 'bazel_dep',
+        depName: 'rules_foo',
+        currentValue: '1.2.3',
+      };
+      const override0: OverridePackageDep = {
+        depType: 'git_override',
+        depName: 'rules_foo',
+        bazelDepSkipReason: 'git-dependency',
+      };
+      const override1: OverridePackageDep = {
+        depType: 'bar_override',
+        depName: 'rules_foo',
+        bazelDepSkipReason: 'unsupported-datasource',
+      };
+      const pkgDeps: BazelModulePackageDep[] = [bazelDep, override0, override1];
+      expect(processModulePkgDeps(pkgDeps)).toEqual([bazelDep]);
     });
   });
 });
