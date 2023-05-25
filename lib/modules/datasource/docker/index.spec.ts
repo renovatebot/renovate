@@ -2066,5 +2066,35 @@ describe('modules/datasource/docker/index', () => {
         releases: [{ version: '1.0.0' }],
       });
     });
+
+    it('supports long artifactory url', async () => {
+      httpMock
+        .scope('https://company.jfrog.io/artifactory/api/docker/repo/v2')
+        .get('/')
+        .reply(200, '', {})
+        .get('/node/tags/list?n=10000')
+        .reply(404, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/library/node/tags/list?n=10000')
+        .reply(200, '', { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' })
+        .get('/library/node/tags/list?n=10000')
+        .reply(
+          200,
+          { tags: ['1.0.0'] },
+          { 'x-jfrog-version': 'Artifactory/7.42.2 74202900' }
+        )
+        .get('/package/manifests/1.0.0')
+        .reply(200, '', {});
+
+      const res = await getPkgReleases({
+        datasource: DockerDatasource.id,
+        packageName: 'node',
+        registryUrls: ['https://company.jfrog.io/artifactory/api/docker/repo'],
+      });
+
+      expect(res).toEqual({
+        registryUrl: 'https://company.jfrog.io/artifactory/api/docker/repo',
+        releases: [{ version: '1.0.0' }],
+      });
+    });
   });
 });

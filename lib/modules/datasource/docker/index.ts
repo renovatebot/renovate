@@ -9,9 +9,9 @@ import { hasKey } from '../../../util/object';
 import { regEx } from '../../../util/regex';
 import { isDockerDigest } from '../../../util/string';
 import {
-  ensurePathPrefix,
   joinUrlParts,
   parseLinkHeader,
+  trimTrailingSlash,
 } from '../../../util/url';
 import { id as dockerVersioningId } from '../../versioning/docker';
 import { Datasource } from '../datasource';
@@ -545,10 +545,16 @@ export class DockerDatasource extends Datasource {
       ecrRegex.test(registryHost) || ecrPublicRegex.test(registryHost)
         ? 1000
         : 10000;
+
+    let parsedRegistryHost = trimTrailingSlash(registryHost);
+    if (!parsedRegistryHost.endsWith('/v2')) {
+      parsedRegistryHost += '/v2';
+    }
+
     let url:
       | string
-      | null = `${registryHost}/${dockerRepository}/tags/list?n=${limit}`;
-    url = ensurePathPrefix(url, '/v2');
+      | null = `${parsedRegistryHost}/${dockerRepository}/tags/list?n=${limit}`;
+
     const headers = await getAuthHeaders(
       this.http,
       registryHost,
@@ -575,8 +581,7 @@ export class DockerDatasource extends Datasource {
           isECRMaxResultsError(err)
         ) {
           const maxResults = 1000;
-          url = `${registryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
-          url = ensurePathPrefix(url, '/v2');
+          url = `${parsedRegistryHost}/${dockerRepository}/tags/list?n=${maxResults}`;
           foundMaxResultsError = true;
           continue;
         }
