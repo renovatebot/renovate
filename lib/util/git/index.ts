@@ -774,10 +774,14 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  localOnly = false
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
+    await writeGitAuthor();
     await git.reset(ResetMode.HARD);
     await gitRetry(() =>
       git.checkout(['-B', branchName, 'origin/' + branchName])
@@ -790,8 +794,13 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ])
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
-    await gitRetry(() => git.push('origin', config.currentBranch));
+    if (localOnly) {
+      // merge commit, don't push to origin
+      await gitRetry(() => git.merge([branchName]));
+    } else {
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
+      await gitRetry(() => git.push('origin', config.currentBranch));
+    }
     incLimitedValue('Commits');
   } catch (err) {
     logger.debug(

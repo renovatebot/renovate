@@ -703,6 +703,19 @@ You can configure this to `true` if you prefer Renovate to close an existing Dep
 The labels only get updated when the Dependency Dashboard issue updates its content and/or title.
 It is pointless to edit the labels, as Renovate bot restores the labels on each run.
 
+## dependencyDashboardOSVVulnerabilitySummary
+
+Use this option to control if the Dependency Dashboard lists the OSV-sourced CVEs for your repository.
+You can choose from:
+
+- `none` (default) do not list any CVEs
+- `unresolved` list CVEs that have no fixes
+- `all` list all CVEs
+
+This feature is independent of the `osvVulnerabilityAlerts` option.
+
+The source of these CVEs is [OSV.dev](https://osv.dev/).
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
@@ -1195,6 +1208,23 @@ A preset alternative to the above is:
 }
 ```
 
+To match specific ports you have to add a protocol to `matchHost`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com:9118",
+      "enabled": false
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! warning
+    Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
+
 <!-- prettier-ignore -->
 !!! note
     Disabling a host is only 100% effective if added to self-hosted config.
@@ -1645,6 +1675,7 @@ Supported lock files are:
 - `jsonnetfile.lock.json`
 - `package-lock.json`
 - `packages.lock.json`
+- `pdm.lock`
 - `Pipfile.lock`
 - `pnpm-lock.yaml`
 - `poetry.lock`

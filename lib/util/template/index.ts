@@ -90,6 +90,7 @@ export const allowedFields = {
   displayTo: 'The to value, formatted for display',
   hasReleaseNotes: 'true if the upgrade has release notes',
   indentation: 'The indentation of the dependency being updated',
+  isGroup: 'true if the upgrade is part of a group',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
@@ -145,7 +146,7 @@ export const allowedFields = {
   versioning: 'The versioning scheme in use',
   versions: 'An array of ChangeLogRelease objects in the upgrade',
   vulnerabilitySeverity:
-    'The severity for a vulnerability alert upgrade (eg: LOW, MODERATE, HIGH, CRITICAL)',
+    'The severity for a vulnerability alert upgrade (LOW, MEDIUM, MODERATE, HIGH, CRITICAL, UNKNOWN)',
 };
 
 const prBodyFields = [

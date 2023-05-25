@@ -743,7 +743,7 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
 
   let branchExists = false;
   try {
-    await githubApi.head(refUrl, { useCache: false });
+    await githubApi.head(refUrl, { memCache: false });
     branchExists = true;
   } catch (err) {
     if (err.statusCode !== 404) {
@@ -836,7 +836,9 @@ async function getStatus(
   )}/status`;
 
   return (
-    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, { useCache })
+    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, {
+      memCache: useCache,
+    })
   ).body;
 }
 
@@ -951,7 +953,9 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (await githubApi.getJson<GhBranchStatus[]>(url, { useCache })).body;
+  return (
+    await githubApi.getJson<GhBranchStatus[]>(url, { memCache: useCache })
+  ).body;
 }
 
 interface GithubToRenovateStatusMapping {
@@ -1077,7 +1081,7 @@ export async function getIssue(
     const issueBody = (
       await githubApi.getJson<{ body: string }>(
         `repos/${config.parentRepo ?? config.repository}/issues/${number}`,
-        { useCache }
+        { memCache: useCache }
       )
     ).body.body;
     return {

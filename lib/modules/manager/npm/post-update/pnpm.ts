@@ -16,6 +16,15 @@ import type { NpmPackage } from '../extract/types';
 import { getNodeToolConstraint } from './node-version';
 import type { GenerateLockFileResult, PnpmLockFile } from './types';
 
+function getPnpmConstraintFromUpgrades(upgrades: Upgrade[]): string | null {
+  for (const upgrade of upgrades) {
+    if (upgrade.depName === 'pnpm' && upgrade.newVersion) {
+      return upgrade.newVersion;
+    }
+  }
+  return null;
+}
+
 export async function generateLockFile(
   lockFileDir: string,
   env: NodeJS.ProcessEnv,
@@ -32,7 +41,9 @@ export async function generateLockFile(
     const pnpmToolConstraint: ToolConstraint = {
       toolName: 'pnpm',
       constraint:
-        config.constraints?.pnpm ?? (await getPnpmConstraint(lockFileDir)),
+        getPnpmConstraintFromUpgrades(upgrades) ??
+        config.constraints?.pnpm ??
+        (await getPnpmConstraint(lockFileDir)),
     };
 
     const extraEnv: ExtraEnv = {
