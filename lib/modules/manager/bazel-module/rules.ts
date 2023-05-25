@@ -76,9 +76,10 @@ const GitOverrideToPackageDep = RecordFragmentSchema.extend({
       bazelDepSkipReason: 'git-dependency',
       currentDigest: commit.value,
     };
-    if (isGithubRemote(remote.value)) {
+    const ghPackageName = githubPackageName(remote.value);
+    if (is.nonEmptyString(ghPackageName)) {
       override.datasource = GithubTagsDatasource.id;
-      override.packageName = githubPackageName(remote.value);
+      override.packageName = ghPackageName;
     } else {
       override.skipReason = 'unsupported-datasource';
     }
@@ -90,10 +91,6 @@ export const RuleToBazelModulePackageDep = z.union([
   BazelDepToPackageDep,
   GitOverrideToPackageDep,
 ]);
-
-function isGithubRemote(remote: string): boolean {
-  return is.truthy(parseGithubUrl(remote));
-}
 
 const githubRemoteRegex = regEx(
   /^https:\/\/github\.com\/(?<packageName>[^/]+\/.+)$/
