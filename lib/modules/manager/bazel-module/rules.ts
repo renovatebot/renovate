@@ -128,6 +128,11 @@ export function processModulePkgDeps(
   // It is an error for more than one override to exist for a module. We will
   // ignore the overrides if there is more than one.
   if (overrides.length !== 1) {
+    const depTypes = overrides.map((o) => o.depType);
+    logger.debug(
+      { depName: moduleName, depTypes },
+      'More than one override for a module was found'
+    );
     return deps;
   }
   const override = overrides[0];
