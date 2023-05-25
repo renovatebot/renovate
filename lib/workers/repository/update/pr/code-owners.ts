@@ -62,6 +62,38 @@ const matchFileToOwners = (
   return { file, usernames: usersWithScore };
 };
 
+interface OwnerFileScore {
+  username: string;
+  files: FileScore[];
+}
+
+const getOwnerList = (filesWithOwners: FileOwnersScore[]): OwnerFileScore[] =>
+  filesWithOwners.reduce<OwnerFileScore[]>((acc, fileMatch) => {
+    for (const userScore of fileMatch.usernames) {
+      // Get / create user file score
+      let userAcc = acc.find((u) => u.username === userScore.username);
+      if (!userAcc) {
+        userAcc = {
+          username: userScore.username,
+          files: [],
+        };
+        acc.push(userAcc);
+      }
+
+      // Add file to user
+      let file = userAcc.files.find((f) => f.file === fileMatch.file);
+      if (!file) {
+        file = {
+          file: fileMatch.file,
+          score: 0,
+        };
+        userAcc.files.push(file);
+      }
+      file.score += userScore.score;
+    }
+    return acc;
+  }, []);
+
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
   try {
@@ -126,36 +158,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     );
 
     // Get list of all matched users and the files they own (reverse keys of fileOwners)
-    const usersWithOwnedFiles = fileOwners.reduce<
-      {
-        username: string;
-        files: FileScore[];
-      }[]
-    >((acc, fileMatch) => {
-      for (const userScore of fileMatch.usernames) {
-        // Get / create user file score
-        let userAcc = acc.find((u) => u.username === userScore.username);
-        if (!userAcc) {
-          userAcc = {
-            username: userScore.username,
-            files: [],
-          };
-          acc.push(userAcc);
-        }
-
-        // Add file to user
-        let file = userAcc.files.find((f) => f.file === fileMatch.file);
-        if (!file) {
-          file = {
-            file: fileMatch.file,
-            score: 0,
-          };
-          userAcc.files.push(file);
-        }
-        file.score += userScore.score;
-      }
-      return acc;
-    }, []);
+    const usersWithOwnedFiles = getOwnerList(fileOwners);
 
     // Calculate a match score for each user. This allows sorting of the final user array in a way that guarantees that users matched with more precise patterns are first and users matched with less precise patterns are last (wildcards)
     const userScore = usersWithOwnedFiles
