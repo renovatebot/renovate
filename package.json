@@ -320,7 +320,7 @@
     "mockdate": "3.0.5",
     "nock": "13.3.1",
     "npm-run-all": "4.1.5",
-    "rimraf": "5.0.0",
+    "rimraf": "5.0.1",
     "semantic-release": "21.0.2",
     "strip-ansi": "6.0.1",
     "tar": "6.1.15",
