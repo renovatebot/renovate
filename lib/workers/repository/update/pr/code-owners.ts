@@ -12,7 +12,7 @@ interface FileOwnerRule {
   match: (path: string) => boolean;
 }
 
-const extractOwnersFromLine = (line: string): FileOwnerRule => {
+function extractOwnersFromLine(line: string): FileOwnerRule {
   const [pattern, ...usernames] = line.split(regEx(/\s+/));
   const matchPattern = ignore().add(pattern);
   return {
@@ -21,7 +21,7 @@ const extractOwnersFromLine = (line: string): FileOwnerRule => {
     score: pattern.length,
     match: (path: string) => matchPattern.ignores(path),
   };
-};
+}
 
 interface UserScore {
   username: string;
@@ -38,10 +38,10 @@ interface FileOwnersScore {
   usernames: UserScore[];
 }
 
-const matchFileToOwners = (
+function matchFileToOwners(
   file: string,
   rules: FileOwnerRule[]
-): FileOwnersScore => {
+): FileOwnersScore {
   const usersWithScore = rules
     .map((rule) =>
       rule.match(file) ? { score: rule.score, usernames: rule.usernames } : null
@@ -60,15 +60,15 @@ const matchFileToOwners = (
     }, []);
 
   return { file, usernames: usersWithScore };
-};
+}
 
 interface OwnerFileScore {
   username: string;
   files: FileScore[];
 }
 
-const getOwnerList = (filesWithOwners: FileOwnersScore[]): OwnerFileScore[] =>
-  filesWithOwners.reduce<OwnerFileScore[]>((acc, fileMatch) => {
+function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
+  return filesWithOwners.reduce<OwnerFileScore[]>((acc, fileMatch) => {
     for (const userScore of fileMatch.usernames) {
       // Get / create user file score
       let userAcc = acc.find((u) => u.username === userScore.username);
@@ -93,6 +93,7 @@ const getOwnerList = (filesWithOwners: FileOwnersScore[]): OwnerFileScore[] =>
     }
     return acc;
   }, []);
+}
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
