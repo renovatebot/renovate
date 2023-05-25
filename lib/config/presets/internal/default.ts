@@ -372,7 +372,7 @@ export const presets: Record<string, Preset> = {
       'Use semanticCommitType `{{arg0}}` for all package files matching path `{{arg1}}`.',
     packageRules: [
       {
-        matchPaths: ['{{arg0}}'],
+        matchFileNames: ['{{arg0}}'],
         semanticCommitType: '{{arg1}}',
       },
     ],
