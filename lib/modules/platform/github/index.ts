@@ -739,8 +739,13 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
-  await githubApi.head(commitUrl, { memCache: false });
+  try {
+    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
 
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
   let branchExists = false;
