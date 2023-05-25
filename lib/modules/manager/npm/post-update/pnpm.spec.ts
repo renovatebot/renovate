@@ -98,6 +98,7 @@ describe('modules/manager/npm/post-update/pnpm', () => {
         depType: 'packageManager',
         depName: 'pnpm',
         newValue: '6.16.1',
+        newVersion: '6.16.1',
       },
     ]);
     expect(fs.readLocalFile).toHaveBeenCalledTimes(1);

@@ -9,7 +9,10 @@ import { GlobalConfig } from '../../config/global';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import type { Pr } from '../../modules/platform';
-import { raiseConfigWarningIssue } from './error-config';
+import {
+  raiseConfigWarningIssue,
+  raiseCredentialsWarningIssue,
+} from './error-config';
 
 jest.mock('../../modules/platform');
 
@@ -27,18 +30,27 @@ describe('workers/repository/error-config', () => {
     });
 
     it('creates issues', async () => {
+      const expectedBody = `There are missing credentials for the authentication-required feature. As a precaution, Renovate will pause PRs until it is resolved.
+
+Location: \`package.json\`
+Error type: some-error
+Message: \`some-message\`
+`;
       const error = new Error(CONFIG_VALIDATION);
       error.validationSource = 'package.json';
       error.validationMessage = 'some-message';
       error.validationError = 'some-error';
       platform.ensureIssue.mockResolvedValueOnce('created');
 
-      const res = await raiseConfigWarningIssue(config, error);
+      const res = await raiseCredentialsWarningIssue(config, error);
 
       expect(res).toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         { configError: error, res: 'created' },
         'Configuration Warning'
+      );
+      expect(platform.ensureIssue).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expectedBody })
       );
     });
 

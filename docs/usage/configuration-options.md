@@ -1208,6 +1208,23 @@ A preset alternative to the above is:
 }
 ```
 
+To match specific ports you have to add a protocol to `matchHost`:
+
+```json
+{
+  "hostRules": [
+    {
+      "matchHost": "https://domain.com:9118",
+      "enabled": false
+    }
+  ]
+}
+```
+
+<!-- prettier-ignore -->
+!!! warning
+    Using `matchHost` without a protocol behaves the same as if you had set no `matchHost` configuration.
+
 <!-- prettier-ignore -->
 !!! note
     Disabling a host is only 100% effective if added to self-hosted config.
@@ -1658,6 +1675,7 @@ Supported lock files are:
 - `jsonnetfile.lock.json`
 - `package-lock.json`
 - `packages.lock.json`
+- `pdm.lock`
 - `Pipfile.lock`
 - `pnpm-lock.yaml`
 - `poetry.lock`
