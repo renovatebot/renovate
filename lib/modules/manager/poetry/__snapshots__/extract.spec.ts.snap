@@ -494,7 +494,7 @@ exports[`modules/manager/poetry/extract extractPackageFile() extracts multiple d
       "nestedVersion": false,
     },
     "packageName": "dev-dep2",
-    "skipReason": "unknown-version",
+    "skipReason": "unspecified-version",
   },
   {
     "currentValue": "^0.8.3",

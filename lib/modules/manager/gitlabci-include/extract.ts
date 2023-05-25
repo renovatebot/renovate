@@ -26,7 +26,7 @@ function extractDepFromIncludeFile(
     depType: 'repository',
   };
   if (!includeObj.ref) {
-    dep.skipReason = 'unknown-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = includeObj.ref;

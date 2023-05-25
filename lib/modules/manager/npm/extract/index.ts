@@ -242,7 +242,7 @@ export async function extractPackageFile(
         dep.skipReason = 'unknown-engines';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
       }
       return dep;
     }
@@ -267,7 +267,7 @@ export async function extractPackageFile(
         dep.skipReason = 'unknown-volta';
       }
       if (!isValid(dep.currentValue)) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
       }
       return dep;
     }
@@ -306,7 +306,7 @@ export async function extractPackageFile(
     }
     const hashSplit = dep.currentValue.split('#');
     if (hashSplit.length !== 2) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
       return dep;
     }
     const [depNamePart, depRefPart] = hashSplit;
@@ -323,7 +323,7 @@ export async function extractPackageFile(
         .replace(regEx(/\.git$/), '');
       const githubRepoSplit = githubOwnerRepo.split('/');
       if (githubRepoSplit.length !== 2) {
-        dep.skipReason = 'unknown-version';
+        dep.skipReason = 'unspecified-version';
         return dep;
       }
       [githubOwner, githubRepo] = githubRepoSplit;
@@ -337,7 +337,7 @@ export async function extractPackageFile(
       !githubValidRegex.test(githubOwner) ||
       !githubValidRegex.test(githubRepo)
     ) {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
       return dep;
     }
     if (isVersion(depRefPart)) {
