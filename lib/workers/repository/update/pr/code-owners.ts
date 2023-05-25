@@ -5,6 +5,24 @@ import { readLocalFile } from '../../../../util/fs';
 import { getBranchFiles } from '../../../../util/git';
 import { newlineRegex, regEx } from '../../../../util/regex';
 
+interface FileOwnerRule {
+  usernames: string[];
+  pattern: string;
+  score: number;
+  match: (path: string) => boolean;
+}
+
+const extractOwnersFromLine = (line: string): FileOwnerRule => {
+  const [pattern, ...usernames] = line.split(regEx(/\s+/));
+  const matchPattern = ignore().add(pattern);
+  return {
+    usernames,
+    pattern,
+    score: pattern.length,
+    match: (path: string) => matchPattern.ignores(path),
+  };
+};
+
 interface UserScore {
   username: string;
   score: number;
@@ -14,6 +32,35 @@ interface FileScore {
   file: string;
   score: number;
 }
+
+interface FileOwnersScore {
+  file: string;
+  usernames: UserScore[];
+}
+
+const matchFileToOwners = (
+  file: string,
+  rules: FileOwnerRule[]
+): FileOwnersScore => {
+  const usersWithScore = rules
+    .map((rule) =>
+      rule.match(file) ? { score: rule.score, usernames: rule.usernames } : null
+    )
+    .reduce<UserScore[]>((acc, match) => {
+      if (!match) {
+        return acc;
+      }
+      for (const user of match.usernames) {
+        if (!acc.find((a) => a.username === user)) {
+          acc.push({ score: match.score, username: user });
+        }
+      }
+
+      return acc;
+    }, []);
+
+  return { file, usernames: usersWithScore };
+};
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   logger.debug('Searching for CODEOWNERS file');
@@ -46,18 +93,8 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       // Remove empty and commented lines
       .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
-
       // Extract pattern & usernames
-      .map((line) => {
-        const [pattern, ...usernames] = line.split(regEx(/\s+/));
-        const matchPattern = ignore().add(pattern);
-        return {
-          usernames,
-          pattern,
-          score: pattern.length,
-          match: (path: string) => matchPattern.ignores(path),
-        };
-      });
+      .map(extractOwnersFromLine);
 
     logger.debug(
       { prFiles, fileOwnerRules },
@@ -71,31 +108,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     const fileOwners =
       // Map through all prFiles and match said file(s) with all the rules
       prFiles
-        .map<{
-          file: string;
-          usernames: UserScore[];
-        }>((file) => {
-          const usersWithScore = fileOwnerRules
-            .map((rule) =>
-              rule.match(file)
-                ? { score: rule.score, usernames: rule.usernames }
-                : null
-            )
-            .reduce<UserScore[]>((acc, match) => {
-              if (!match) {
-                return acc;
-              }
-              for (const user of match.usernames) {
-                if (!acc.find((a) => a.username === user)) {
-                  acc.push({ score: match.score, username: user });
-                }
-              }
-
-              return acc;
-            }, []);
-
-          return { file, usernames: usersWithScore };
-        })
+        .map((file) => matchFileToOwners(file, fileOwnerRules))
 
         // Match file again but this time only with emptyRules, to ensure that files which have no owner set remain owner-less
         .map((fileMatch) => {
