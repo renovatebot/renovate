@@ -315,7 +315,7 @@ describe('modules/manager/terraform/extract', () => {
           depName: 'helm',
           depType: 'provider',
           packageName: 'hashicorp/helm',
-          skipReason: 'no-version',
+          skipReason: 'unspecified-version',
         },
         {
           currentValue: 'V1.9',
@@ -729,7 +729,7 @@ describe('modules/manager/terraform/extract', () => {
           extractVersion: 'v(?<version>.*)$',
         },
         {
-          skipReason: 'no-version',
+          skipReason: 'unspecified-version',
         },
         {
           currentValue: '1.1.9',

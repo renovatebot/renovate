@@ -62,7 +62,7 @@ export abstract class TerraformProviderExtractor extends DependencyExtractor {
     dep.lockedVersion = getLockedVersion(dep, locks);
 
     if (!dep.currentValue) {
-      dep.skipReason = 'no-version';
+      dep.skipReason = 'unspecified-version';
     }
 
     return dep;
