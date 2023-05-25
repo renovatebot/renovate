@@ -44,12 +44,12 @@ function extractFromSection(
         currentValue = requirements.version;
         nestedVersion = true;
       } else if (is.object(requirements)) {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       } else {
         currentValue = requirements;
       }
       if (currentValue === '*') {
-        skipReason = 'any-version';
+        skipReason = 'unspecified-version';
       }
       if (!skipReason) {
         const packageMatches = packageRegex.exec(depName);

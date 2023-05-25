@@ -119,7 +119,7 @@ function extractFromSection(
     } else if (poetryVersioning.isValid(currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
     }
     deps.push(dep);
   }
