@@ -24,7 +24,7 @@ describe('workers/repository/updates/flatten', () => {
           automerge: true,
         },
         {
-          matchPaths: ['frontend/package.json'],
+          matchFileNames: ['frontend/package.json'],
           lockFileMaintenance: {
             enabled: false,
           },

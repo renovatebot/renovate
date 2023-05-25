@@ -1855,28 +1855,28 @@ Example:
 
 The above rule will group together the `neutrino` package and any package matching `@neutrino/*`.
 
-Path rules are convenient to use if you wish to apply configuration rules to certain package files using patterns.
+File name matches are convenient to use if you wish to apply configuration rules to certain package or lock files using patterns.
 For example, if you have an `examples` directory and you want all updates to those examples to use the `chore` prefix instead of `fix`, then you could add this configuration:
 
 ```json
 {
   "packageRules": [
     {
-      "matchPaths": ["examples/**"],
+      "matchFileNames": ["examples/**"],
       "extends": [":semanticCommitTypeAll(chore)"]
     }
   ]
 }
 ```
 
-If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchPaths` with a `minimatch` pattern or use [`matchFiles`](#matchfiles) with an exact match.
+If you wish to limit Renovate to apply configuration rules to certain files in the root repository directory, you have to use `matchFileNames` with a `minimatch` pattern (which can include an exact file name match).
 For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"],
+      "matchFileNames": ["package.json"],
       "dependencyDashboardApproval": true
     }
   ]
@@ -2171,23 +2171,50 @@ Use the syntax `!/ /` like this:
 }
 ```
 
-### matchFiles
+### matchFileNames
 
-Renovate will compare `matchFiles` for an exact match against the dependency's package file or lock file.
+Renovate will compare `matchFileNames` glob matching against the dependency's package file or lock file.
 
-For example the following would match `package.json` but not `package/frontend/package.json`:
+The following example matches `package.json` but _not_ `package/frontend/package.json`:
 
 ```json
 {
   "packageRules": [
     {
-      "matchFiles": ["package.json"]
+      "matchFileNames": ["package.json"],
+      "labels": ["npm"]
     }
   ]
 }
 ```
 
-Use [`matchPaths`](#matchpaths) instead if you need more flexible matching.
+The following example matches any `package.json`, including files like `backend/package.json`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group dependencies from package.json files",
+      "matchFileNames": ["**/package.json"],
+      "groupName": "All package.json changes"
+    }
+  ]
+}
+```
+
+The following example matches any file in directories starting with `app/`:
+
+```json
+{
+  "packageRules": [
+    {
+      "description": "Group all dependencies from the app directory",
+      "matchFileNames": ["app/**"],
+      "groupName": "App dependencies"
+    }
+  ]
+}
+```
 
 ### matchDepNames
 
@@ -2246,38 +2273,6 @@ See also `excludePackagePrefixes`.
 ```
 
 Just like the earlier `matchPackagePatterns` example, the above will configure `rangeStrategy` to `replace` for any package starting with `angular`.
-
-### matchPaths
-
-Renovate finds the file(s) listed in `matchPaths` with a `minimatch` glob pattern.
-
-For example the following matches any `package.json`, including files like `backend/package.json`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group dependencies from package.json files",
-      "matchPaths": ["**/package.json"],
-      "groupName": "All package.json changes"
-    }
-  ]
-}
-```
-
-The following matches any file in directories starting with `app/`:
-
-```json
-{
-  "packageRules": [
-    {
-      "description": "Group all dependencies from the app directory",
-      "matchPaths": ["app/**"],
-      "groupName": "App dependencies"
-    }
-  ]
-}
-```
 
 ### matchSourceUrlPrefixes
 
