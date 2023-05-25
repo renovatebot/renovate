@@ -813,7 +813,9 @@ describe('modules/platform/bitbucket/index', () => {
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [projectReviewer, repoReviewer],
         })
@@ -855,7 +857,9 @@ describe('modules/platform/bitbucket/index', () => {
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [
             activeReviewerWithinWorkspace,
@@ -924,7 +928,9 @@ describe('modules/platform/bitbucket/index', () => {
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [memberReviewer, notMemberReviewer],
         })
@@ -973,7 +979,9 @@ describe('modules/platform/bitbucket/index', () => {
       };
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [reviewer],
         })
@@ -1017,7 +1025,9 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [reviewer],
         })
@@ -1054,7 +1064,9 @@ describe('modules/platform/bitbucket/index', () => {
 
       const scope = await initRepoMock();
       scope
-        .get('/2.0/repositories/some/repo/effective-default-reviewers')
+        .get(
+          '/2.0/repositories/some/repo/effective-default-reviewers?pagelen=100'
+        )
         .reply(200, {
           values: [reviewer],
         })

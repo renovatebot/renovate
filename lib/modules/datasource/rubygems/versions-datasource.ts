@@ -6,6 +6,7 @@ import { getElapsedMinutes } from '../../../util/date';
 import { HttpError } from '../../../util/http';
 import { newlineRegex } from '../../../util/regex';
 import { LooseArray } from '../../../util/schema-utils';
+import { copystr } from '../../../util/string';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
 
@@ -51,8 +52,6 @@ const Lines = z
 type Lines = z.infer<typeof Lines>;
 
 export class VersionsDatasource extends Datasource {
-  private isInitialFetch = true;
-
   constructor(override readonly id: string) {
     super(id);
   }
@@ -97,31 +96,12 @@ export class VersionsDatasource extends Datasource {
     return { releases };
   }
 
-  /**
-   * Since each `/versions` reponse exceed 10MB,
-   * there is potential for a memory leak if we construct slices
-   * of the response body and cache them long-term:
-   *
-   *   https://bugs.chromium.org/p/v8/issues/detail?id=2869
-   *
-   * This method meant to be called for `version` and `packageName`
-   * before storing them in the cache.
-   */
-  private copystr(x: string): string {
-    const len = Buffer.byteLength(x, 'utf8');
-    const buf = this.isInitialFetch
-      ? Buffer.allocUnsafe(len) // allocate from pre-allocated buffer
-      : Buffer.allocUnsafeSlow(len); // allocate standalone buffer
-    buf.write(x, 'utf8');
-    return buf.toString('utf8');
-  }
-
   private updatePackageReleases(
     packageReleases: PackageReleases,
     lines: Lines
   ): void {
     for (const line of lines) {
-      const packageName = this.copystr(line.packageName);
+      const packageName = copystr(line.packageName);
       let versions = packageReleases.get(packageName) ?? [];
 
       const { deletedVersions, addedVersions } = line;
@@ -134,7 +114,7 @@ export class VersionsDatasource extends Datasource {
         const existingVersions = new Set(versions);
         for (const addedVersion of addedVersions) {
           if (!existingVersions.has(addedVersion)) {
-            const version = this.copystr(addedVersion);
+            const version = copystr(addedVersion);
             versions.push(version);
           }
         }
@@ -183,7 +163,6 @@ export class VersionsDatasource extends Datasource {
 
     const lines = Lines.parse(newLines);
     this.updatePackageReleases(regCache.packageReleases, lines);
-    this.isInitialFetch = false;
   }
 
   private updateRubyGemsVersionsPromise: Promise<void> | null = null;
