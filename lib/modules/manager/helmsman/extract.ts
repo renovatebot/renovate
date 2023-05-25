@@ -26,7 +26,7 @@ function createDep(
   }
 
   if (!anApp.version) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = anApp.version;

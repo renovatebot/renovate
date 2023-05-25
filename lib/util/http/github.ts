@@ -19,6 +19,7 @@ import type { GotLegacyError } from './legacy';
 import type {
   GraphqlOptions,
   HttpOptions,
+  HttpRequestOptions,
   HttpResponse,
   InternalHttpOptions,
 } from './types';
@@ -271,7 +272,7 @@ export class GithubHttp extends Http<GithubHttpOptions> {
 
   protected override async request<T>(
     url: string | URL,
-    options?: InternalHttpOptions & GithubHttpOptions,
+    options?: InternalHttpOptions & GithubHttpOptions & HttpRequestOptions<T>,
     okToRetry = true
   ): Promise<HttpResponse<T>> {
     const opts: GithubHttpOptions = {

@@ -28,7 +28,7 @@ function extractGitRepo(doc: GitRepo): PackageDependency {
   if (!currentValue) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 
@@ -71,7 +71,7 @@ function extractFleetHelmBlock(doc: FleetHelmBlock): PackageDependency {
   if (!doc.version) {
     return {
       ...dep,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
 

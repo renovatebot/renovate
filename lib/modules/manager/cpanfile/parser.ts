@@ -89,7 +89,7 @@ const moduleMatch = q
       if (currentValue) {
         dep.currentValue = currentValue;
       } else {
-        dep.skipReason = 'no-version';
+        dep.skipReason = 'unspecified-version';
       }
       if (phase) {
         dep.depType = phase;
