@@ -20,12 +20,13 @@ const removeNodeModulesPrefix = (packageName: string): string =>
 
 export const PackageLockV3Schema = z.object({
   lockfileVersion: z.literal(3),
-  packages: z
-    .record(
-      z.string().transform(removeNodeModulesPrefix),
-      z.object({ version: z.string() })
-    )
-    .transform(removeRecordsWithEmptyKeys),
+  packages: LooseRecord(
+    z
+      .string()
+      .transform((x) => x.replace(/^node_modules\//, ''))
+      .refine((x) => x.trim() !== ''),
+    z.object({ version: z.string() })
+  ),
 });
 
 export const PackageLockPreV3Schema = z.object({
