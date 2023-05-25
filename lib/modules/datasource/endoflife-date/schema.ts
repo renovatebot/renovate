@@ -5,11 +5,12 @@ import type { Release } from '../types';
 const EndoflifeDateVersionScheme = z
   .object({
     cycle: z.string(),
+    latest: z.string(),
     releaseDate: z.optional(z.string()),
     eol: z.optional(z.union([z.string(), z.boolean()])),
     discontinued: z.optional(z.union([z.string(), z.boolean()])),
   })
-  .transform(({ cycle, releaseDate, eol, discontinued }): Release => {
+  .transform(({ cycle, latest, releaseDate, eol, discontinued }): Release => {
     let isDeprecated = false;
 
     // If "eol" date or "discontinued" date has passed or any of the values is explicitly true, set to deprecated
@@ -25,8 +26,13 @@ const EndoflifeDateVersionScheme = z
       isDeprecated = true;
     }
 
+    let version = cycle;
+    if (latest !== null) {
+      version = latest;
+    }
+
     return {
-      version: cycle,
+      version,
       releaseTimestamp: releaseDate,
       isDeprecated,
     };
