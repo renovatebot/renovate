@@ -27,7 +27,7 @@ function getDependency(plugin: JenkinsPlugin): PackageDependency {
       );
     }
   } else {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
   }
 
   if (
