@@ -123,7 +123,7 @@ export function processModulePkgDeps(
     logger.debug(`A 'bazel_dep' was not found for '${moduleName}'.`);
     return [];
   }
-  const bazelDepOut = { ...bazelDep };
+  const bazelDepOut: PackageDependency = { ...bazelDep };
   const deps: PackageDependency[] = [bazelDepOut];
   const overrides = packageDeps.filter(isOverride);
   // It is an error for more than one override to exist for a module. We will
