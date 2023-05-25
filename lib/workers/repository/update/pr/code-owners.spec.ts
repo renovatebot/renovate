@@ -36,7 +36,7 @@ describe('workers/repository/update/pr/code-owners', () => {
     });
 
     it('does not return any owners if PR has no changes', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
+      fs.readLocalFile.mockResolvedValueOnce('* @jimmy');
       git.getBranchFiles.mockResolvedValueOnce([]);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
