@@ -4,7 +4,7 @@ import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
 import type { NpmManagerData } from '../types';
 import { getNpmLock } from './npm';
-import { getConstraints, getPnpmLock } from './pnpm';
+import { getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
 
@@ -106,14 +106,6 @@ export async function getLockedVersions(
       if (!lockFileCache[pnpmShrinkwrap]) {
         logger.trace(`Retrieving/parsing ${pnpmShrinkwrap}`);
         lockFileCache[pnpmShrinkwrap] = await getPnpmLock(pnpmShrinkwrap);
-      }
-      const { lockfileVersion } = lockFileCache[pnpmShrinkwrap];
-      if (lockfileVersion) {
-        packageFile.extractedConstraints ??= {};
-        packageFile.extractedConstraints.pnpm = getConstraints(
-          lockfileVersion,
-          packageFile.extractedConstraints.pnpm
-        );
       }
 
       const parentDir = packageFile.packageFile
