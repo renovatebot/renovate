@@ -60,6 +60,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'golang',
     versioning: npmVersioningId,
   },
+  hashin: {
+    datasource: 'pypi',
+    packageName: 'hashin',
+    versioning: pep440VersioningId,
+  },
   helm: {
     datasource: 'github-releases',
     packageName: 'helm/helm',

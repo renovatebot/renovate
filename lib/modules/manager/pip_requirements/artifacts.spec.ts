@@ -1,10 +1,13 @@
 import { join } from 'upath';
 import { mockExecAll } from '../../../../test/exec-util';
-import { fs } from '../../../../test/util';
+import { fs, mocked } from '../../../../test/util';
 import { GlobalConfig } from '../../../config/global';
 import type { RepoGlobalConfig } from '../../../config/types';
+import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import { updateArtifacts } from '.';
+
+const datasource = mocked(_datasource);
 
 jest.mock('../../../util/exec/common');
 jest.mock('../../../util/fs');
@@ -187,6 +190,10 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'docker' });
     fs.readLocalFile.mockResolvedValueOnce('new content');
     fs.ensureCacheDir.mockResolvedValueOnce('/tmp/cache');
+    // hashin
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.1.7' }],
+    });
     const execSnapshots = mockExecAll();
 
     expect(
@@ -222,7 +229,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
           'bash -l -c "' +
           'install-tool python 3.10.2 ' +
           '&& ' +
-          'pip install --user hashin ' +
+          'install-tool hashin 0.1.7 ' +
           '&& ' +
           'hashin atomicwrites==1.4.0 -r requirements.txt' +
           '"',
@@ -233,6 +240,10 @@ describe('modules/manager/pip_requirements/artifacts', () => {
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
     fs.readLocalFile.mockResolvedValueOnce('new content');
+    // hashin
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '0.1.7' }],
+    });
     const execSnapshots = mockExecAll();
 
     expect(
@@ -253,7 +264,7 @@ describe('modules/manager/pip_requirements/artifacts', () => {
     ]);
     expect(execSnapshots).toMatchObject([
       { cmd: 'install-tool python 3.10.2' },
-      { cmd: 'pip install --user hashin' },
+      { cmd: 'install-tool hashin 0.1.7' },
       {
         cmd: 'hashin atomicwrites==1.4.0 -r requirements.txt',
         options: { cwd: '/tmp/github/some/repo' },
