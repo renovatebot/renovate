@@ -5,6 +5,8 @@ import { logger } from '../../logger';
 import { getPkgReleases } from '../../modules/datasource';
 import * as allVersioning from '../../modules/versioning';
 import { id as composerVersioningId } from '../../modules/versioning/composer';
+import { id as gradleVersioningId } from '../../modules/versioning/gradle';
+import { id as mavenVersioningId } from '../../modules/versioning/maven';
 import { id as nodeVersioningId } from '../../modules/versioning/node';
 import { id as npmVersioningId } from '../../modules/versioning/npm';
 import { id as pep440VersioningId } from '../../modules/versioning/pep440';
@@ -60,6 +62,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'golang',
     versioning: npmVersioningId,
   },
+  gradle: {
+    datasource: 'gradle-version',
+    packageName: 'gradle',
+    versioning: gradleVersioningId,
+  },
   hashin: {
     datasource: 'pypi',
     packageName: 'hashin',
@@ -95,6 +102,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     datasource: 'npm',
     packageName: 'lerna',
     versioning: npmVersioningId,
+  },
+  maven: {
+    datasource: 'maven',
+    packageName: 'org.apache.maven:maven',
+    versioning: mavenVersioningId,
   },
   nix: {
     datasource: 'github-tags',
@@ -234,7 +246,10 @@ export async function resolveConstraint(
         return constraint;
       }
     } else {
-      logger.warn({ toolName, constraint }, 'Invalid tool constraint');
+      logger.warn(
+        { toolName, constraint, versioning: toolConfig.versioning },
+        'Invalid tool constraint'
+      );
       constraint = undefined;
     }
   }
