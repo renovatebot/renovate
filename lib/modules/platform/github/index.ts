@@ -1652,7 +1652,8 @@ export async function mergePr({
         }
         if (
           is.nonEmptyString(body?.message) &&
-          body.message.includes('approving review')
+          (body.message.includes('approving review') ||
+            body.message.includes('code owner review'))
         ) {
           logger.debug(
             { response: body },
