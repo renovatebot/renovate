@@ -532,12 +532,22 @@ describe('modules/manager/npm/extract/locked-versions', () => {
       {
         extractedConstraints: { pnpm: '>=6.0.0 >=8' },
         deps: [
-          { currentValue: '1.0.0', depName: 'a', lockedVersion: '1.0.0' },
-          { currentValue: '2.0.0', depName: 'b', lockedVersion: '2.0.0' },
+          {
+            currentValue: '1.0.0',
+            depName: 'a',
+            lockedVersion: '1.0.0',
+            depType: 'dependencies',
+          },
+          {
+            currentValue: '2.0.0',
+            depName: 'b',
+            lockedVersion: '2.0.0',
+            depType: 'dependencies',
+          },
         ],
         lockFiles: ['pnpm-lock.yaml'],
         managerData: { pnpmShrinkwrap: 'pnpm-lock.yaml' },
-        packageFile: 'some-file',
+        packageFile: 'package.json',
       },
     ]);
   });

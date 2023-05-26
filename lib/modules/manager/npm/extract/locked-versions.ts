@@ -6,6 +6,7 @@ import { getNpmLock } from './npm';
 import { getConstraints, getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
+import is from '@sindresorhus/is';
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[]
@@ -108,12 +109,14 @@ export async function getLockedVersions(
       for (const dep of packageFile.deps) {
         const { depName, depType } = dep;
         // TODO: types (#7154)
-        dep.lockedVersion =
-          semver.valid(
-            lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
-              depType!
-            ]?.[depName!]
-          ) ?? undefined; // for testing only
+        const lockedVersion = semver.valid(
+          lockFileCache[pnpmShrinkwrap].lockedVersionsWithPath?.[parentDir]?.[
+            depType!
+          ]?.[depName!]
+        );
+        if (is.string(lockedVersion)) {
+          dep.lockedVersion = lockedVersion;
+        }
       }
     }
     if (lockFiles.length) {

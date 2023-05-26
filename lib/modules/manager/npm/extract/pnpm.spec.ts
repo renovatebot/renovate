@@ -284,33 +284,30 @@ describe('modules/manager/npm/extract/pnpm', () => {
     it('returns empty if failed to parse', async () => {
       readLocalFile.mockResolvedValueOnce(undefined as never);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(0);
     });
 
-    it('extracts', async () => {
+    it('extracts version from monorepo', async () => {
       const plocktest1Lock = Fixtures.get('pnpm-monorepo/pnpm-lock.yaml', '..');
       readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(11);
     });
 
-    it('logs when packagePath is invalid', async () => {
+    it('extracts version from normal repo', async () => {
       const plocktest1Lock = Fixtures.get(
         'lockfile-parsing/pnpm-lock.yaml',
         '..'
       );
       readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(2);
-      expect(logger.logger.trace).toHaveBeenLastCalledWith(
-        'Invalid package path /sux-1.2.4'
-      );
+      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(1);
     });
 
     it('returns empty if no deps', async () => {
       readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(0);
     });
   });
 });

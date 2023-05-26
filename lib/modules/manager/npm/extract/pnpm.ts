@@ -12,7 +12,7 @@ import {
   readLocalFile,
 } from '../../../../util/fs';
 import type { PackageFile } from '../../types';
-import type { PnpmLockFile } from '../post-update/types';
+import type { PnpmDependencySchema, PnpmLockFile } from '../post-update/types';
 import type { NpmManagerData } from '../types';
 import type { LockFile, PnpmWorkspaceFile } from './types';
 
@@ -150,8 +150,6 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     }
 
     const lockParsed = load(pnpmLockRaw);
-    // eslint-disable-next-line
-    console.log(lockParsed);
     if (!isPnpmLockfile(lockParsed)) {
       throw new Error('Invalid or empty lockfile');
     }
@@ -162,45 +160,7 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
       ? lockParsed.lockfileVersion
       : parseFloat(lockParsed.lockfileVersion);
 
-    const lockedVersions: Record<
-      string,
-      Record<string, Record<string, string>>
-    > = {};
-
-    // monorepo
-    if (is.nonEmptyObject(lockParsed.importers)) {
-      for (const [importer, imports] of Object.entries(lockParsed.importers)) {
-        lockedVersions[importer] = {};
-        for (const [depType, deps] of Object.entries(imports)) {
-          lockedVersions[importer][depType] = {};
-          for (const [pkgName, { version }] of Object.entries(deps)) {
-            const pkgVersion = version.split('(')[0].trim();
-            lockedVersions[importer][depType][pkgName] = pkgVersion;
-          }
-        }
-      }
-    }
-    // normal repo
-    else {
-      const importer = '.';
-      lockedVersions[importer] = {};
-
-      const dependencyTypes = [
-        'dependencies',
-        'devDependencies',
-        'optionalDependencies',
-      ] as const;
-
-      for (const depType of dependencyTypes) {
-        lockedVersions[importer][depType] = {};
-        for (const [pkgName, { version }] of Object.entries(
-          lockParsed[depType] ?? {}
-        )) {
-          const pkgVersion = version.split('(')[0].trim();
-          lockedVersions[importer][depType][pkgName] = pkgVersion;
-        }
-      }
-    }
+    const lockedVersions = getLockedVersions(lockParsed);
 
     return {
       lockedVersionsWithPath: lockedVersions,
@@ -210,6 +170,61 @@ export async function getPnpmLock(filePath: string): Promise<LockFile> {
     logger.debug({ filePath, err }, 'Warning: Exception parsing pnpm lockfile');
     return { lockedVersions: {} };
   }
+}
+
+function getLockedVersions(
+  lockParsed: PnpmLockFile
+): Record<string, Record<string, Record<string, string>>> {
+  const lockedVersions: Record<
+    string,
+    Record<string, Record<string, string>>
+  > = {};
+
+  // monorepo
+  if (is.nonEmptyObject(lockParsed.importers)) {
+    for (const [importer, imports] of Object.entries(lockParsed.importers)) {
+      // eslint-disable-next-line
+      console.log(imports);
+      lockedVersions[importer] = extractLockVersions(imports);
+    }
+  }
+  // normal repo
+  else {
+    lockedVersions['.'] = extractLockVersions(lockParsed);
+  }
+  // eslint-disable-next-line
+  console.log(lockedVersions);
+  return lockedVersions;
+}
+
+function extractLockVersions(
+  obj: PnpmLockFile | Record<string, PnpmDependencySchema>
+): Record<string, Record<string, string>> {
+  const dependencyTypes = [
+    'dependencies',
+    'devDependencies',
+    'optionalDependencies',
+  ] as const;
+
+  const res: Record<string, Record<string, string>> = {};
+  for (const depType of dependencyTypes) {
+    res[depType] = {};
+    for (const [pkgName, versionCarrier] of Object.entries(
+      obj[depType] ?? {}
+    )) {
+      let version: string;
+      if (is.object(versionCarrier)) {
+        version = versionCarrier['version'];
+      } else {
+        version = versionCarrier;
+      }
+
+      const pkgVersion = version.split('(')[0].trim();
+      res[depType][pkgName] = pkgVersion;
+    }
+  }
+
+  return res;
 }
 
 export function getConstraints(
