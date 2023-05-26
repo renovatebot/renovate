@@ -4,7 +4,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
   it('should migrate true', () => {
     expect(RecreateClosedMigration).toMigrate(
       {
-        recreateClosed: true as never,
+        recreateClosed: true,
       },
       {
         recreateWhen: 'always',
@@ -15,7 +15,7 @@ describe('config/migrations/custom/recreate-closed-migration', () => {
   it('should migrate false', () => {
     expect(RecreateClosedMigration).toMigrate(
       {
-        recreateClosed: false as never,
+        recreateClosed: false,
       },
       {
         recreateWhen: 'auto',
