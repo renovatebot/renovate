@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import semver from 'semver';
 import { logger } from '../../../../logger';
 import type { PackageFile } from '../../types';
@@ -6,7 +7,6 @@ import { getNpmLock } from './npm';
 import { getConstraints, getPnpmLock } from './pnpm';
 import type { LockFile } from './types';
 import { getYarnLock } from './yarn';
-import is from '@sindresorhus/is';
 
 export async function getLockedVersions(
   packageFiles: PackageFile<NpmManagerData>[]
