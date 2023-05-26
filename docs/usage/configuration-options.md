@@ -2874,10 +2874,10 @@ Avoid setting `rebaseWhen=never` and then also setting `prCreation=not-pending` 
 
 ## recreateWhen
 
-By default, Renovate detects if it proposed an update to a project before, and not propose the same one again.
+By default, Renovate detects if it proposed an update to a project before, and will not propose the same update again.
 For example the Webpack 3.x case described in the `separateMajorMinor` documentation.
 You can use `recreateWhen` to customize this behavior down to a per-package level.
-For example we override it to `always` in the following cases where branch names and PR titles need to be reused:
+For example we override it to `always` in the following cases where branch names and PR titles must be reused:
 
 - Package groups
 - When pinning versions
