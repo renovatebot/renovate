@@ -184,18 +184,18 @@ function getLockedVersions(
     for (const [importer, imports] of Object.entries(lockParsed.importers)) {
       // eslint-disable-next-line
       console.log(imports);
-      lockedVersions[importer] = extractLockVersions(imports);
+      lockedVersions[importer] = getLockedDependencyVersions(imports);
     }
   }
   // normal repo
   else {
-    lockedVersions['.'] = extractLockVersions(lockParsed);
+    lockedVersions['.'] = getLockedDependencyVersions(lockParsed);
   }
 
   return lockedVersions;
 }
 
-function extractLockVersions(
+function getLockedDependencyVersions(
   obj: PnpmLockFile | Record<string, PnpmDependencySchema>
 ): Record<string, Record<string, string>> {
   const dependencyTypes = [
