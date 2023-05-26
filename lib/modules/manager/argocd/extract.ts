@@ -20,7 +20,7 @@ import { fileTestRegex } from './util';
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   _config?: ExtractConfig
 ): PackageFileContent | null {
   // check for argo reference. API version for the kind attribute is used
@@ -32,7 +32,7 @@ export function extractPackageFile(
   try {
     definitions = loadAll(content) as ApplicationDefinition[];
   } catch (err) {
-    logger.debug({ err, fileName }, 'Failed to parse ArgoCD definition.');
+    logger.debug({ err, packageFile }, 'Failed to parse ArgoCD definition.');
     return null;
   }
 

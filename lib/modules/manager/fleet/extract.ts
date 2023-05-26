@@ -135,7 +135,7 @@ export function extractPackageFile(
       deps.push(...gitRepoDeps);
     }
   } catch (err) {
-    logger.warn({ error: err, packageFile }, 'Failed to parse fleet YAML');
+    logger.debug({ error: err, packageFile }, 'Failed to parse fleet YAML');
   }
 
   return deps.length ? { deps } : null;

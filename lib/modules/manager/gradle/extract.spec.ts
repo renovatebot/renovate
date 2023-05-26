@@ -60,7 +60,7 @@ describe('modules/manager/gradle/extract', () => {
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
       `Failed to process Gradle file`
     );
