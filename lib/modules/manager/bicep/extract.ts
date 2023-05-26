@@ -12,8 +12,8 @@ const RESOURCE_REGEX = regEx(
 
 export function extractPackageFile(
   content: string,
-  packageFile: string,
-  config: ExtractConfig
+  _packageFile: string,
+  _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
   const deps: PackageDependency[] = [];
 

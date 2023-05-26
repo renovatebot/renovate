@@ -739,11 +739,19 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
-
-  let branchExists = false;
   try {
-    await githubApi.head(refUrl, { memCache: false });
+    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
+
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  let branchExists = false;
+  let branchResult: undefined | HttpResponse<string>;
+  try {
+    branchResult = await githubApi.head(refUrl, { memCache: false });
     branchExists = true;
   } catch (err) {
     if (err.statusCode !== 404) {
@@ -752,8 +760,20 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   if (branchExists) {
-    await githubApi.patchJson(refUrl, { body: { sha, force: true } });
-    return;
+    try {
+      await githubApi.patchJson(refUrl, { body: { sha, force: true } });
+      return;
+    } catch (err) {
+      if (err.err?.response?.statusCode === 422) {
+        logger.debug(
+          { branchResult, err },
+          'Branch update failed due to reference not existing - will try to create'
+        );
+      } else {
+        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        throw err;
+      }
+    }
   }
 
   await githubApi.postJson(`/repos/${config.repository}/git/refs`, {
@@ -798,7 +818,10 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      logger.debug(
+        { err, branchName, sha, autoclosedPr },
+        'Could not recreate autoclosed branch - skipping reopen'
+      );
       return null;
     }
     try {
@@ -1639,7 +1662,8 @@ export async function mergePr({
         }
         if (
           is.nonEmptyString(body?.message) &&
-          body.message.includes('approving review')
+          (body.message.includes('approving review') ||
+            body.message.includes('code owner review'))
         ) {
           logger.debug(
             { response: body },
