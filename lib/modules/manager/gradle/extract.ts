@@ -116,7 +116,7 @@ async function parsePackageFiles(
         extractedDeps.push(...deps);
       }
     } catch (err) {
-      logger.warn(
+      logger.debug(
         { err, config, packageFile },
         `Failed to process Gradle file`
       );
@@ -193,7 +193,7 @@ export async function extractAllPackageFiles(
 
       packageFilesByName[key] = pkgFile;
     } else {
-      logger.warn({ dep }, `Failed to process Gradle dependency`);
+      logger.debug({ dep }, `Failed to process Gradle dependency`);
     }
   }
 

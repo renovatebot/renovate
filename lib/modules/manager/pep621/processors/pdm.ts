@@ -64,15 +64,18 @@ export class PdmProcessor implements PyProjectProcessor {
         logger.debug('No pdm.lock found');
         return null;
       }
-
-      const toolConstraint: ToolConstraint = {
+      const pythonConstraint: ToolConstraint = {
+        toolName: 'python',
+        constraint: config.constraints?.python,
+      };
+      const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
         constraint: config.constraints?.pdm,
       };
 
       const execOptions: ExecOptions = {
         docker: {},
-        toolConstraints: [toolConstraint],
+        toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
       // on lockFileMaintenance do not specify any packages and update the complete lock file
