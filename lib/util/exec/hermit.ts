@@ -36,7 +36,7 @@ export async function getHermitEnvs(
 
   const lines = hermitEnvResp.stdout.split(os.EOL);
 
-  const out = {} as Record<string, string>;
+  const out:Record<string, string> = {};
 
   for (const line of lines) {
     const trimmedLine = line.trim();
