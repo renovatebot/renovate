@@ -739,8 +739,15 @@ export async function findPr({
 const REOPEN_THRESHOLD_MILLIS = 1000 * 60 * 60 * 24 * 7;
 
 async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
-  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
+  try {
+    const commitUrl = `/repos/${config.repository}/git/commits/${sha}`;
+    await githubApi.head(commitUrl, { memCache: false });
+  } catch (err) {
+    logger.error({ err, sha, branchName }, 'Commit not found');
+    throw err;
+  }
 
+  const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
   let branchExists = false;
   let branchResult: undefined | HttpResponse<string>;
   try {
@@ -811,7 +818,10 @@ export async function getBranchPr(branchName: string): Promise<GhPr | null> {
       await ensureBranchSha(branchName, sha!);
       logger.debug(`Recreated autoclosed branch ${branchName} with sha ${sha}`);
     } catch (err) {
-      logger.debug('Could not recreate autoclosed branch - skipping reopen');
+      logger.debug(
+        { err, branchName, sha, autoclosedPr },
+        'Could not recreate autoclosed branch - skipping reopen'
+      );
       return null;
     }
     try {
