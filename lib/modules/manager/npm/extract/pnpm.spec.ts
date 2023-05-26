@@ -236,7 +236,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     it('returns empty if failed to parse', async () => {
       readLocalFile.mockResolvedValueOnce(undefined as never);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(0);
+      expect(res.lockedVersionsWithPath).toBeUndefined();
     });
 
     it('extracts version from monorepo', async () => {
@@ -259,7 +259,7 @@ describe('modules/manager/npm/extract/pnpm', () => {
     it('returns empty if no deps', async () => {
       readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(0);
+      expect(res.lockedVersionsWithPath).toBeUndefined();
     });
   });
 });
