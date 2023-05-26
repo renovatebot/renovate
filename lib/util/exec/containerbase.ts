@@ -112,6 +112,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'containerbase/php-prebuild',
     versioning: composerVersioningId,
   },
+  pipenv: {
+    datasource: 'pypi',
+    packageName: 'pipenv',
+    versioning: pep440VersioningId,
+  },
   pnpm: {
     datasource: 'npm',
     packageName: 'pnpm',
