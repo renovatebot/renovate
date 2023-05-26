@@ -126,13 +126,14 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       cwdFile: inputFileName,
       docker: {},
-      preCommands: [
-        `pip install --user ${quote(`pip-tools${pipToolsConstraint}`)}`,
-      ],
       toolConstraints: [
         {
           toolName: 'python',
           constraint,
+        },
+        {
+          toolName: 'pip-tools',
+          constraint: pipToolsConstraint,
         },
       ],
       extraEnv: {
