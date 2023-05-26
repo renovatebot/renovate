@@ -284,14 +284,14 @@ describe('modules/manager/npm/extract/pnpm', () => {
     it('returns empty if failed to parse', async () => {
       readLocalFile.mockResolvedValueOnce(undefined as never);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(0);
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(0);
     });
 
     it('extracts version from monorepo', async () => {
       const plocktest1Lock = Fixtures.get('pnpm-monorepo/pnpm-lock.yaml', '..');
       readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(11);
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(11);
     });
 
     it('extracts version from normal repo', async () => {
@@ -301,13 +301,13 @@ describe('modules/manager/npm/extract/pnpm', () => {
       );
       readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(1);
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(1);
     });
 
     it('returns empty if no deps', async () => {
       readLocalFile.mockResolvedValueOnce('{}');
       const res = await getPnpmLock('package.json');
-      expect(Object.keys(res.lockedVersionsWithPath ?? {})).toHaveLength(0);
+      expect(Object.keys(res.lockedVersionsWithPath!)).toHaveLength(0);
     });
   });
 });

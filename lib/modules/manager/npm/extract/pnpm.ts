@@ -192,8 +192,7 @@ function getLockedVersions(
   else {
     lockedVersions['.'] = extractLockVersions(lockParsed);
   }
-  // eslint-disable-next-line
-  console.log(lockedVersions);
+
   return lockedVersions;
 }
 
