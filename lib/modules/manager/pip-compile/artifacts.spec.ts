@@ -147,7 +147,10 @@ describe('modules/manager/pip-compile/artifacts', () => {
 
   it('supports install mode', async () => {
     GlobalConfig.set({ ...adminConfig, binarySource: 'install' });
-
+    // pip-tools
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [{ version: '6.13.0' }],
+    });
     const execSnapshots = mockExecAll();
     git.getRepoStatus.mockResolvedValue(
       partial<StatusResult>({
@@ -238,7 +241,7 @@ describe('modules/manager/pip-compile/artifacts', () => {
         newPackageFileContent: 'some new content',
         config: {
           ...config,
-          constraints: { python: '3.10.2', pipTools: '==6.13.0' },
+          constraints: { python: '3.10.2', pipTools: '6.13.0' },
         },
       })
     ).not.toBeNull();
