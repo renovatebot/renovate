@@ -6,7 +6,7 @@ import { parse } from './parser';
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
   try {
     const records = parse(content);
@@ -14,7 +14,7 @@ export function extractPackageFile(
       .transform((deps) => (deps.length ? { deps } : null))
       .parse(records);
   } catch (err) {
-    logger.debug({ err, filename }, 'Failed to parse bazel module file.');
+    logger.debug({ err, packageFile }, 'Failed to parse bazel module file.');
     return null;
   }
 }

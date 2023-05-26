@@ -49,6 +49,45 @@ describe('util/schema-utils', () => {
       expect(s.parse({ foo: 'foo', bar: 123 })).toEqual({ foo: 'foo' });
     });
 
+    it('supports key schema', () => {
+      const s = LooseRecord(
+        z
+          .string()
+          .refine((x) => x === 'bar')
+          .transform((x) => x.toUpperCase()),
+        z.string().transform((x) => x.toUpperCase())
+      );
+      expect(s.parse({ foo: 'foo', bar: 'bar' })).toEqual({ BAR: 'BAR' });
+    });
+
+    it('reports key schema errors', () => {
+      let errorData: unknown = null;
+      const s = LooseRecord(
+        z.string().refine((x) => x === 'bar'),
+        z.string(),
+        {
+          onError: (x) => {
+            errorData = x;
+          },
+        }
+      );
+
+      s.parse({ foo: 'foo', bar: 'bar' });
+
+      expect(errorData).toMatchObject({
+        error: {
+          issues: [
+            {
+              code: 'custom',
+              message: 'Invalid input',
+              path: ['foo'],
+            },
+          ],
+        },
+        input: { bar: 'bar', foo: 'foo' },
+      });
+    });
+
     it('runs callback for wrong elements', () => {
       let err: z.ZodError | undefined = undefined;
       const Schema = LooseRecord(

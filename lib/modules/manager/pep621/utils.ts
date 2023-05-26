@@ -58,7 +58,7 @@ export function pep508ToPackageDependency(
   };
 
   if (is.nullOrUndefined(parsed.currentValue)) {
-    dep.skipReason = 'any-version';
+    dep.skipReason = 'unspecified-version';
   } else {
     dep.currentValue = parsed.currentValue;
   }

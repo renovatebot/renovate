@@ -742,8 +742,9 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   const refUrl = `/repos/${config.repository}/git/refs/heads/${branchName}`;
 
   let branchExists = false;
+  let branchResult: undefined | HttpResponse<string>;
   try {
-    await githubApi.head(refUrl, { memCache: false });
+    branchResult = await githubApi.head(refUrl, { memCache: false });
     branchExists = true;
   } catch (err) {
     if (err.statusCode !== 404) {
@@ -752,8 +753,20 @@ async function ensureBranchSha(branchName: string, sha: string): Promise<void> {
   }
 
   if (branchExists) {
-    await githubApi.patchJson(refUrl, { body: { sha, force: true } });
-    return;
+    try {
+      await githubApi.patchJson(refUrl, { body: { sha, force: true } });
+      return;
+    } catch (err) {
+      if (err.err?.response?.statusCode === 422) {
+        logger.debug(
+          { branchResult, err },
+          'Branch update failed due to reference not existing - will try to create'
+        );
+      } else {
+        logger.warn({ refUrl, err, branchResult }, 'Error updating branch');
+        throw err;
+      }
+    }
   }
 
   await githubApi.postJson(`/repos/${config.repository}/git/refs`, {

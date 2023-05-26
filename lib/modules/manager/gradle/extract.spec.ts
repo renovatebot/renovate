@@ -60,7 +60,7 @@ describe('modules/manager/gradle/extract', () => {
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
       `Failed to process Gradle file`
     );
@@ -604,7 +604,7 @@ describe('modules/manager/gradle/extract', () => {
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
-              skipReason: 'unknown-version',
+              skipReason: 'unspecified-version',
             },
           ],
         },
@@ -667,21 +667,21 @@ describe('modules/manager/gradle/extract', () => {
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-crashlytics',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'google-firebase-messaging',
               managerData: {
                 packageFile: 'gradle/libs.versions.toml',
               },
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               depName: 'org.jetbrains.kotlin.jvm',
