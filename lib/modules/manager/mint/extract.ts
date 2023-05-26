@@ -31,7 +31,7 @@ function handleDepInMintfile(line: string): PackageDependency {
   if (!line.includes('@')) {
     return {
       depName: line,
-      skipReason: 'no-version',
+      skipReason: 'unspecified-version',
     };
   }
   const [depName, currentVersion] = line.split('@').map((s) => s.trim());

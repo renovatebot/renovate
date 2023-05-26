@@ -2856,8 +2856,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message:
-          'At least 1 approving review is required by reviewers with write access.',
+        message: 'Waiting on code owner review from org/team.',
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
@@ -3331,6 +3330,64 @@ describe('modules/platform/github/index', () => {
       });
 
       expect(res).toBe('0abcdef');
+    });
+
+    it('continues if rebase fails due to 422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(422)
+        .post('/repos/some/repo/git/refs')
+        .reply(200);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBe('0abcdef');
+    });
+
+    it('aborts if rebase fails due to non-422', async () => {
+      git.pushCommitToRenovateRef.mockResolvedValueOnce();
+      git.listCommitTree.mockResolvedValueOnce([]);
+
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo' });
+
+      scope
+        .post('/repos/some/repo/git/trees')
+        .reply(200, { sha: '111' })
+        .post('/repos/some/repo/git/commits')
+        .reply(200, { sha: '222' })
+        .head('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(200)
+        .patch('/repos/some/repo/git/refs/heads/foo/bar')
+        .reply(404);
+
+      const res = await github.commitFiles({
+        branchName: 'foo/bar',
+        files: [{ type: 'addition', path: 'foo.bar', contents: 'foobar' }],
+        message: 'Foobar',
+      });
+
+      expect(res).toBeNull();
     });
   });
 });
