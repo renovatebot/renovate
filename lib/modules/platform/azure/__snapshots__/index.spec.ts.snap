@@ -30,7 +30,26 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
 }
 `;
 
-exports[`modules/platform/azure/index createPr() should create and return a PR object with auto-complete set 1`] = `
+exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
+{
+  "bodyStruct": {
+    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  },
+  "createdAt": undefined,
+  "createdBy": {
+    "id": 123,
+    "url": "user-url",
+  },
+  "number": 456,
+  "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
+}
+`;
+
+exports[`modules/platform/azure/index createPr() when usePlatformAutomerge is set should create and return a PR object with auto-complete set 1`] = `
 {
   "autoCompleteSetBy": {
     "id": 123,
@@ -54,25 +73,6 @@ exports[`modules/platform/azure/index createPr() should create and return a PR o
   "state": "open",
   "targetBranch": undefined,
   "title": "The Title",
-}
-`;
-
-exports[`modules/platform/azure/index createPr() should create and return an approved PR object 1`] = `
-{
-  "bodyStruct": {
-    "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  },
-  "createdAt": undefined,
-  "createdBy": {
-    "id": 123,
-    "url": "user-url",
-  },
-  "number": 456,
-  "pullRequestId": 456,
-  "sourceBranch": undefined,
-  "sourceRefName": undefined,
-  "state": "open",
-  "targetBranch": undefined,
 }
 `;
 

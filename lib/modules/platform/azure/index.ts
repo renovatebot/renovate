@@ -48,7 +48,6 @@ import {
   getBranchNameWithoutRefsheadsPrefix,
   getGitStatusContextCombinedName,
   getGitStatusContextFromCombinedName,
-  getProjectAndRepo,
   getRenovatePRFormat,
   getRepoByName,
   getStorageExtraCloneOpts,
@@ -57,7 +56,6 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  defaultMergeMethod: GitPullRequestMergeStrategy;
   mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
@@ -202,14 +200,6 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  const names = getProjectAndRepo(repository);
-  config.defaultMergeMethod = await azureHelper.getMergeMethod(
-    // TODO #7154
-    repo.id!,
-    names.project,
-    null,
-    defaultBranch
-  );
   config.mergeMethods = {};
   config.repoForceRebase = false;
 
@@ -457,6 +447,15 @@ export async function createPr({
     config.repoId
   );
   if (platformOptions?.usePlatformAutomerge) {
+    const mergeStrategy =
+      config.mergeMethods[pr.targetRefName!] ??
+      (config.mergeMethods[pr.targetRefName!] =
+        await azureHelper.getMergeMethod(
+          config.repoId,
+          config.project,
+          pr.targetRefName,
+          config.defaultBranch
+        ));
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -464,7 +463,7 @@ export async function createPr({
           id: pr.createdBy!.id,
         },
         completionOptions: {
-          mergeStrategy: config.defaultMergeMethod,
+          mergeStrategy,
           deleteSourceBranch: true,
           mergeCommitMessage: title,
         },
