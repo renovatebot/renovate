@@ -2856,8 +2856,7 @@ describe('modules/platform/github/index', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope.put('/repos/some/repo/pulls/1234/merge').reply(405, {
-        message:
-          'At least 1 approving review is required by reviewers with write access.',
+        message: 'Waiting on code owner review from org/team.',
       });
       await github.initRepo({ repository: 'some/repo' });
       const pr = {
