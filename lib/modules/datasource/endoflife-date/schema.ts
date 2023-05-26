@@ -5,7 +5,7 @@ import type { Release } from '../types';
 const EndoflifeDateVersionScheme = z
   .object({
     cycle: z.string(),
-    latest: z.string(),
+    latest: z.optional(z.string()),
     releaseDate: z.optional(z.string()),
     eol: z.optional(z.union([z.string(), z.boolean()])),
     discontinued: z.optional(z.union([z.string(), z.boolean()])),
@@ -27,7 +27,7 @@ const EndoflifeDateVersionScheme = z
     }
 
     let version = cycle;
-    if (latest !== null) {
+    if (latest !== undefined) {
       version = latest;
     }
 

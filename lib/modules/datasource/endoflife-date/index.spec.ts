@@ -11,13 +11,13 @@ const datasource = EndoflifeDatePackagesource.id;
 const packageName = 'amazon-eks';
 const eksMockPath = `/${packageName}.json`;
 
-const fixtureAmazonEks = Fixtures.getJson(`eks.json`);
-const fixtureApacheCassandra = Fixtures.getJson(`apache-cassandra.json`);
-
 describe('modules/datasource/endoflife-date/index', () => {
   describe('getReleases', () => {
     it('processes real data', async () => {
-      httpMock.scope(registryUrl).get(eksMockPath).reply(200, fixtureAmazonEks);
+      httpMock
+        .scope(registryUrl)
+        .get(eksMockPath)
+        .reply(200, Fixtures.getJson(`eks.json`));
       const res = await getPkgReleases({
         datasource,
         packageName,
@@ -113,11 +113,11 @@ describe('modules/datasource/endoflife-date/index', () => {
       ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
-    it('detects discontinuation', async () => {
+    it('detects boolean discontinuation', async () => {
       httpMock
         .scope(registryUrl)
         .get('/apache-cassandra.json')
-        .reply(200, fixtureApacheCassandra);
+        .reply(200, Fixtures.getJson(`apache-cassandra.json`));
       const res = await getPkgReleases({
         datasource,
         packageName: 'apache-cassandra',
@@ -144,6 +144,47 @@ describe('modules/datasource/endoflife-date/index', () => {
             isDeprecated: false,
             releaseTimestamp: '2022-12-13T00:00:00.000Z',
             version: '4.1.1',
+          },
+        ],
+      });
+    });
+
+    it('detects date discontinuation', async () => {
+      httpMock
+        .scope(registryUrl)
+        .get('/fairphone.json')
+        .reply(200, Fixtures.getJson(`fairphone.json`));
+      const res = await getPkgReleases({
+        datasource,
+        packageName: 'fairphone',
+      });
+      expect(res).toEqual({
+        registryUrl: 'https://endoflife.date/api',
+        releases: [
+          {
+            isDeprecated: true,
+            releaseTimestamp: '2013-12-01T00:00:00.000Z',
+            version: '1',
+          },
+          {
+            isDeprecated: true,
+            releaseTimestamp: '2015-12-21T00:00:00.000Z',
+            version: '2',
+          },
+          {
+            isDeprecated: true,
+            releaseTimestamp: '2020-09-30T00:00:00.000Z',
+            version: '3+',
+          },
+          {
+            isDeprecated: true,
+            releaseTimestamp: '2019-09-30T00:00:00.000Z',
+            version: '3',
+          },
+          {
+            isDeprecated: false,
+            releaseTimestamp: '2021-09-30T00:00:00.000Z',
+            version: '4',
           },
         ],
       });
