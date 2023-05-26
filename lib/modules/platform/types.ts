@@ -48,6 +48,7 @@ export interface RepoParams {
 export interface PrDebugData {
   createdInVer: string;
   updatedInVer: string;
+  targetBranch: string;
 }
 
 export interface PrBodyStruct {
@@ -88,7 +89,7 @@ export interface Issue {
   title?: string;
 }
 export type PlatformPrOptions = {
-  azureAutoApprove?: boolean;
+  autoApprove?: boolean;
   azureWorkItemId?: number;
   bbUseDefaultReviewers?: boolean;
   gitLabIgnoreApprovals?: boolean;
@@ -164,7 +165,7 @@ export type EnsureIssueResult = 'updated' | 'created';
 export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
-  getIssue?(number: number, useCache?: boolean): Promise<Issue | null>;
+  getIssue?(number: number, memCache?: boolean): Promise<Issue | null>;
   getVulnerabilityAlerts?(): Promise<VulnerabilityAlert[]>;
   getRawFile(
     fileName: string,
@@ -218,10 +219,12 @@ export interface Platform {
 
 export interface PlatformScm {
   isBranchBehindBase(branchName: string, baseBranch: string): Promise<boolean>;
-  isBranchModified(branchName: string, baseBranch?: string): Promise<boolean>;
+  isBranchModified(branchName: string): Promise<boolean>;
   isBranchConflicted(baseBranch: string, branch: string): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   getBranchCommit(branchName: string): Promise<CommitSha | null>;
   deleteBranch(branchName: string): Promise<void>;
   commitAndPush(commitConfig: CommitFilesConfig): Promise<CommitSha | null>;
+  getFileList(): Promise<string[]>;
+  checkoutBranch(branchName: string): Promise<CommitSha>;
 }

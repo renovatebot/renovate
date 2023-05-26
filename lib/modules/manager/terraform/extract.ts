@@ -10,10 +10,10 @@ import {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  logger.trace({ content }, 'terraform.extractPackageFile()');
+  logger.trace({ content }, `terraform.extractPackageFile(${packageFile})`);
 
   const passedExtractors = [];
   for (const extractor of resourceExtractors) {
@@ -23,30 +23,30 @@ export async function extractPackageFile(
   }
 
   if (!passedExtractors.length) {
-    logger.trace(
-      { fileName },
+    logger.debug(
+      { packageFile },
       'preflight content check has not found any relevant content'
     );
     return null;
   }
   logger.trace(
-    { fileName },
+    { packageFile },
     `preflight content check passed for extractors: [${passedExtractors
       .map((value) => value.constructor.name)
       .toString()}]`
   );
 
   const dependencies = [];
-  const hclMap = hcl.parseHCL(content);
+  const hclMap = await hcl.parseHCL(content, packageFile);
   if (is.nullOrUndefined(hclMap)) {
-    logger.trace({ fileName }, 'failed to parse HCL file');
+    logger.debug({ packageFile }, 'failed to parse HCL file');
     return null;
   }
 
-  const locks = await extractLocksForPackageFile(fileName);
+  const locks = await extractLocksForPackageFile(packageFile);
 
   for (const extractor of passedExtractors) {
-    const deps = extractor.extract(hclMap, locks);
+    const deps = extractor.extract(hclMap, locks, config);
     dependencies.push(...deps);
   }
 

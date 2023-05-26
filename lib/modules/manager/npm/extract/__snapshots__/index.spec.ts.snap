@@ -73,7 +73,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depName": "other",
       "depType": "devDependencies",
       "prettyDepType": "devDependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">=1.7.0 <2.0.0",
@@ -115,7 +115,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
       "depName": "yarn",
       "depType": "engines",
       "prettyDepType": "engine",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": ">=1.49.3",
@@ -129,6 +129,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts engine
   "extractedConstraints": {
     "node": ">= 8.9.2",
     "npm": "^8.0.0",
+    "pnpm": "^1.2.0",
     "vscode": ">=1.49.3",
     "yarn": "disabled",
   },
@@ -158,7 +159,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "depName": "a",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:owner/b#master",
@@ -215,28 +216,28 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts non-np
       "depName": "g",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:-hello/world#v1.0.0",
       "depName": "h",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "@foo/bar#v2.0.0",
       "depName": "i",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentValue": "github:frank#v0.0.1",
       "depName": "j",
       "depType": "dependencies",
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
     {
       "currentDigest": "49b5aca",
@@ -357,7 +358,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts npm pa
       "depType": "dependencies",
       "npmPackageAlias": true,
       "prettyDepType": "dependency",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
   ],
   "extractedConstraints": {},
@@ -480,7 +481,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
 }
 `;
 
-exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unknown-version 1`] = `
+exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta yarn unspecified-version 1`] = `
 {
   "deps": [
     {
@@ -510,7 +511,7 @@ exports[`modules/manager/npm/extract/index .extractPackageFile() extracts volta 
       "depName": "yarn",
       "depType": "volta",
       "prettyDepType": "volta",
-      "skipReason": "unknown-version",
+      "skipReason": "unspecified-version",
     },
   ],
   "extractedConstraints": {

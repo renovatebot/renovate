@@ -25,7 +25,6 @@ import { scm } from '../../../../modules/platform/scm';
 import { ExternalHostError } from '../../../../types/errors/external-host-error';
 import { getElapsedMs } from '../../../../util/date';
 import { emojify } from '../../../../util/emoji';
-import { checkoutBranch } from '../../../../util/git';
 import {
   getMergeConfidenceLevel,
   isActiveConfidenceLevel,
@@ -49,12 +48,43 @@ import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setConfidence, setStability } from './status-checks';
 
-function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
+async function rebaseCheck(
+  config: RenovateConfig,
+  branchPr: Pr
+): Promise<boolean> {
   const titleRebase = branchPr.title?.startsWith('rebase!');
+  if (titleRebase) {
+    logger.debug(
+      `Manual rebase requested via PR title for #${branchPr.number}`
+    );
+    return true;
+  }
   const labelRebase = !!branchPr.labels?.includes(config.rebaseLabel!);
+  if (labelRebase) {
+    logger.debug(
+      `Manual rebase requested via PR labels for #${branchPr.number}`
+    );
+    // istanbul ignore if
+    if (GlobalConfig.get('dryRun')) {
+      logger.info(
+        `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
+          branchPr.number
+        }`
+      );
+    } else {
+      await platform.deleteLabel(branchPr.number, config.rebaseLabel!);
+    }
+    return true;
+  }
   const prRebaseChecked = !!branchPr.bodyStruct?.rebaseRequested;
+  if (prRebaseChecked) {
+    logger.debug(
+      `Manual rebase requested via PR checkbox for #${branchPr.number}`
+    );
+    return true;
+  }
 
-  return titleRebase || labelRebase || prRebaseChecked;
+  return false;
 }
 
 async function deleteBranchSilently(branchName: string): Promise<void> {
@@ -63,6 +93,14 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
+}
+
+function userChangedTargetBranch(pr: Pr): boolean {
+  const oldTargetBranch = pr.bodyStruct?.debugData?.targetBranch;
+  if (oldTargetBranch && pr.targetBranch) {
+    return pr.targetBranch !== oldTargetBranch;
+  }
+  return false;
 }
 
 export interface ProcessBranchResult {
@@ -100,14 +138,25 @@ export async function processBranch(
     config.dependencyDashboardChecks?.[config.branchName];
   logger.debug(`dependencyDashboardCheck=${dependencyDashboardCheck!}`);
   if (branchPr) {
-    config.rebaseRequested = rebaseCheck(config, branchPr);
+    config.rebaseRequested = await rebaseCheck(config, branchPr);
     logger.debug(`PR rebase requested=${config.rebaseRequested}`);
   }
   const artifactErrorTopic = emojify(':warning: Artifact update problem');
   try {
     // Check if branch already existed
-    const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
-    if (existingPr && !dependencyDashboardCheck) {
+    const existingPr =
+      !branchPr || config.automerge
+        ? await prAlreadyExisted(config)
+        : undefined;
+    if (existingPr?.state === 'merged') {
+      logger.debug(`Matching PR #${existingPr.number} was merged previously`);
+      if (config.automerge) {
+        logger.debug('Disabling automerge because PR was merged previously');
+        config.automerge = false;
+        config.automergedPreviously = true;
+      }
+    }
+    if (!branchPr && existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
@@ -190,10 +239,7 @@ export async function processBranch(
       }
 
       logger.debug('Checking if PR has been edited');
-      const branchIsModified = await scm.isBranchModified(
-        config.branchName,
-        config.baseBranch
-      );
+      const branchIsModified = await scm.isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== 'open') {
@@ -202,11 +248,7 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        if (
-          branchIsModified ||
-          (branchPr.targetBranch &&
-            branchPr.targetBranch !== branchConfig.baseBranch)
-        ) {
+        if (branchIsModified || userChangedTargetBranch(branchPr)) {
           logger.debug(`PR has been edited, PrNo:${branchPr.number}`);
           await handleModifiedPr(config, branchPr);
           if (!(dependencyDashboardCheck || config.rebaseRequested)) {
@@ -364,7 +406,10 @@ export async function processBranch(
     const userApproveAllPendingPR = !!config.dependencyDashboardAllPending;
     const userOpenAllRateLimtedPR = !!config.dependencyDashboardAllRateLimited;
     if (userRebaseRequested) {
-      logger.debug('Manual rebase requested via Dependency Dashboard');
+      logger.debug('User has requested rebase');
+      config.reuseExistingBranch = false;
+    } else if (dependencyDashboardCheck === 'global-config') {
+      logger.debug(`Manual create/rebase requested via checkedBranches`);
       config.reuseExistingBranch = false;
     } else if (userApproveAllPendingPR) {
       logger.debug(
@@ -385,13 +430,24 @@ export async function processBranch(
         prNo: branchPr?.number,
         result: 'no-work',
       };
+    }
+    // if the base branch has been changed by user in renovate config, rebase onto the new baseBranch
+    // we have already confirmed earlier that branch isn't modified, so its safe to use targetBranch here
+    else if (
+      branchPr?.targetBranch &&
+      branchPr.targetBranch !== config.baseBranch
+    ) {
+      logger.debug(
+        'Base branch changed by user, rebasing the branch onto new base'
+      );
+      config.reuseExistingBranch = false;
     } else {
       config = { ...config, ...(await shouldReuseExistingBranch(config)) };
     }
     // TODO: types (#7154)
     logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch!}`);
     if (!(config.reuseExistingBranch && config.skipBranchUpdate)) {
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       const res = await getUpdatedPackageFiles(config);
       // istanbul ignore if
       if (res.artifactErrors && config.artifactErrors) {
@@ -509,7 +565,7 @@ export async function processBranch(
       commitSha = await commitFilesToBranch(config);
       // Checkout to base branch to ensure that the next branch processing always starts with git being on the baseBranch
       // baseBranch is not checked out at the start of processBranch() due to pull/16246
-      await checkoutBranch(config.baseBranch);
+      await scm.checkoutBranch(config.baseBranch);
       updatesVerified = true;
     }
     // istanbul ignore if

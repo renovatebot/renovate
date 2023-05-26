@@ -73,10 +73,14 @@ const repoGroups = {
     'https://github.com/dotnet/aspnetcore',
     'https://github.com/dotnet/efcore',
     'https://github.com/dotnet/extensions',
+    'https://github.com/dotnet/maui',
     'https://github.com/dotnet/runtime',
+    'https://github.com/dotnet/sdk',
   ],
   'dotnet-azure-ad-identitymodel-extensions':
     'https://github.com/AzureAD/azure-activedirectory-identitymodel-extensions-for-dotnet',
+  'dotnet-azure-ad-microsoft-identity-web':
+    'https://github.com/AzureAD/microsoft-identity-web',
   'dotnet-wcf': 'https://github.com/dotnet/wcf',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   'elastic-apm-agent-rum-js': 'https://github.com/elastic/apm-agent-rum-js',
@@ -145,6 +149,8 @@ const repoGroups = {
   'mikro-orm': 'https://github.com/mikro-orm/mikro-orm',
   mockito: 'https://github.com/mockito/mockito',
   mstest: 'https://github.com/microsoft/testfx',
+  'mutation-testing-elements':
+    'https://github.com/stryker-mutator/mutation-testing-elements',
   nest: [
     'https://github.com/nestjs/nest',
     'https://github.com/nestjs/passport',
@@ -202,6 +208,7 @@ const repoGroups = {
   'reg-suit': 'https://github.com/reg-viz/reg-suit',
   remark: 'https://github.com/remarkjs/remark',
   remix: 'https://github.com/remix-run/remix',
+  rjsf: 'https://github.com/rjsf-team/react-jsonschema-form',
   router5: 'https://github.com/router5/router5',
   'rust-futures': 'https://github.com/rust-lang/futures-rs',
   'rust-wasm-bindgen': 'https://github.com/rustwasm/wasm-bindgen',
@@ -237,6 +244,7 @@ const repoGroups = {
   treat: 'https://github.com/seek-oss/treat',
   trpc: 'https://github.com/trpc/trpc',
   tsoa: 'https://github.com/lukeautry/tsoa',
+  turbo: 'https://github.com/vercel/turbo',
   typefaces: 'https://github.com/KyleAMathews/typefaces',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
   'typography-js': 'https://github.com/KyleAMathews/typography.js',
@@ -263,6 +271,7 @@ const orgGroups = {
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   'semantic-release': 'https://github.com/semantic-release/',
+  swc: 'https://github.com/swc-project/',
 };
 
 /* eslint sort-keys: ["error", "asc", {caseSensitive: false, natural: true}] */

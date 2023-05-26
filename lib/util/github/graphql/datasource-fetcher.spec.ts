@@ -382,7 +382,7 @@ describe('util/github/graphql/datasource-fetcher', () => {
         { version: v1, releaseTimestamp: t1, foo: '1' },
       ];
 
-      test.each`
+      it.each`
         isPrivate    | isCacheable
         ${undefined} | ${false}
         ${true}      | ${false}

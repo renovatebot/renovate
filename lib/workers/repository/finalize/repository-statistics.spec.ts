@@ -11,6 +11,7 @@ import * as cache from '../../../util/cache/repository';
 import type {
   BaseBranchCache,
   BranchCache,
+  BranchUpgradeCache,
   RepoCacheData,
 } from '../../../util/cache/repository/types';
 import {
@@ -38,6 +39,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
 
     it('Calls runRenovateRepoStats', () => {
       runRenovateRepoStats(config, result);
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           stats: {
@@ -55,6 +57,7 @@ describe('workers/repository/finalize/repository-statistics', () => {
   describe('runBranchSummary', () => {
     const getCacheSpy = jest.spyOn(cache, 'getCache');
     const isCacheModifiedSpy = jest.spyOn(cache, 'isCacheModified');
+    const config: RenovateConfig = {};
 
     it('processes cache with baseBranches only', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
@@ -64,7 +67,9 @@ describe('workers/repository/finalize/repository-statistics', () => {
       });
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(true);
-      runBranchSummary();
+
+      runBranchSummary(config);
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
           cacheModified: true,
@@ -89,6 +94,8 @@ describe('workers/repository/finalize/repository-statistics', () => {
       const sha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranchSha = '793221454914cdc422e1a8f0ca27b96fe39ff9ad';
       const baseBranch = 'base-branch';
+      const defaultBranch = 'main';
+      const config: RenovateConfig = { defaultBranch };
       const baseCache = partial<BaseBranchCache>({ sha });
       const branchCache = partial<BranchCache>({
         sha,
@@ -97,14 +104,15 @@ describe('workers/repository/finalize/repository-statistics', () => {
         isModified: false,
         automerge: false,
         pristine: false,
+        upgrades: [],
       });
       const expectedMeta = {
         automerge: branchCache.automerge,
-        isModified: branchCache.isModified,
-        isPristine: branchCache.pristine,
         baseBranch,
         baseBranchSha,
         branchSha: sha,
+        isModified: branchCache.isModified,
+        isPristine: branchCache.pristine,
       };
       const branches: BranchCache[] = [
         { ...branchCache, branchName: 'b1' },
@@ -118,13 +126,13 @@ describe('workers/repository/finalize/repository-statistics', () => {
         scan: { main: baseCache, dev: baseCache },
         branches,
       });
-
       getCacheSpy.mockReturnValueOnce(cache);
       isCacheModifiedSpy.mockReturnValueOnce(false);
-      runBranchSummary();
+
+      runBranchSummary(config);
+
       expect(logger.debug).toHaveBeenCalledWith(
         {
-          cacheModified: false,
           baseBranches: [
             {
               branchName: 'main',
@@ -139,10 +147,44 @@ describe('workers/repository/finalize/repository-statistics', () => {
             { ...expectedMeta, branchName: 'b1' },
             { ...expectedMeta, branchName: 'b2' },
           ],
+          cacheModified: false,
+          defaultBranch,
           inactiveBranches: ['b3'],
         },
         `Branch summary`
       );
+    });
+
+    it('logs extended branch info if branchSummaryExtended', () => {
+      const defaultBranch = 'main';
+      const config: RenovateConfig = {
+        defaultBranch,
+        branchSummaryExtended: true,
+      };
+      const branchCache = partial<BranchCache>({
+        result: 'done',
+        upgrades: partial<BranchUpgradeCache[]>([
+          {
+            datasource: 'npm',
+            depName: 'minimist',
+            currentValue: '1.2.3',
+            sourceUrl: 'someUrl',
+            depType: 'dependencies',
+          },
+        ]),
+      });
+
+      const branches: BranchCache[] = [{ ...branchCache, branchName: 'b1' }];
+      const cache = partial<RepoCacheData>({
+        scan: {},
+        branches,
+      });
+      getCacheSpy.mockReturnValueOnce(cache);
+      isCacheModifiedSpy.mockReturnValueOnce(false);
+
+      runBranchSummary(config);
+
+      expect(logger.debug).toHaveBeenCalledTimes(2);
     });
   });
 });

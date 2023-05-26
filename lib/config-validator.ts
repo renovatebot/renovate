@@ -16,8 +16,6 @@ import {
 
 let returnVal = 0;
 
-/* eslint-disable no-console */
-
 async function validate(
   desc: string,
   config: RenovateConfig,
@@ -131,6 +129,7 @@ type PackageJson = {
   }
   logger.info('Config validated successfully');
 })().catch((e) => {
+  // eslint-disable-next-line no-console
   console.error(e);
   process.exit(99);
 });

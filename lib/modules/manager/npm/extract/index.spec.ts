@@ -418,6 +418,7 @@ describe('modules/manager/npm/extract/index', () => {
         extractedConstraints: {
           node: '>= 8.9.2',
           npm: '^8.0.0',
+          pnpm: '^1.2.0',
           vscode: '>=1.49.3',
           yarn: 'disabled',
         },
@@ -434,7 +435,7 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'other',
             currentValue: 'latest',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'atom',
@@ -466,7 +467,7 @@ describe('modules/manager/npm/extract/index', () => {
             currentValue: 'disabled',
             datasource: 'npm',
             depType: 'engines',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'vscode',
@@ -511,7 +512,7 @@ describe('modules/manager/npm/extract/index', () => {
       });
     });
 
-    it('extracts volta yarn unknown-version', async () => {
+    it('extracts volta yarn unspecified-version', async () => {
       const pJson = {
         main: 'index.js',
         engines: {
@@ -548,7 +549,7 @@ describe('modules/manager/npm/extract/index', () => {
             depName: 'yarn',
             depType: 'volta',
             prettyDepType: 'volta',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -627,7 +628,7 @@ describe('modules/manager/npm/extract/index', () => {
       );
       expect(res).toMatchSnapshot({
         deps: [
-          { depName: 'a', skipReason: 'unknown-version' },
+          { depName: 'a', skipReason: 'unspecified-version' },
           { depName: 'b', skipReason: 'unversioned-reference' },
           {
             depName: 'c',
@@ -656,22 +657,22 @@ describe('modules/manager/npm/extract/index', () => {
           {
             depName: 'g',
             currentValue: 'gitlab:owner/g#v1.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'h',
             currentValue: 'github:-hello/world#v1.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'i',
             currentValue: '@foo/bar#v2.0.0',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'j',
             currentValue: 'github:frank#v0.0.1',
-            skipReason: 'unknown-version',
+            skipReason: 'unspecified-version',
           },
           {
             depName: 'k',

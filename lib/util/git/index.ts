@@ -377,7 +377,15 @@ export function isCloned(): boolean {
 
 export async function syncGit(): Promise<void> {
   if (gitInitialized) {
+    // istanbul ignore if
+    if (process.env.RENOVATE_X_CLEAR_HOOKS) {
+      await git.raw(['config', 'core.hooksPath', '/dev/null']);
+    }
     return;
+  }
+  // istanbul ignore if: failsafe
+  if (GlobalConfig.get('platform') === 'local') {
+    throw new Error('Cannot sync git when platform=local');
   }
   gitInitialized = true;
   const localDir = GlobalConfig.get('localDir')!;
@@ -496,13 +504,19 @@ export function getBranchCommit(branchName: string): CommitSha | null {
 }
 
 export async function getCommitMessages(): Promise<string[]> {
-  await syncGit();
   logger.debug('getCommitMessages');
-  const res = await git.log({
-    n: 20,
-    format: { message: '%s' },
-  });
-  return res.all.map((commit) => commit.message);
+  if (GlobalConfig.get('platform') !== 'local') {
+    await syncGit();
+  }
+  try {
+    const res = await git.log({
+      n: 20,
+      format: { message: '%s' },
+    });
+    return res.all.map((commit) => commit.message);
+  } catch (err) /* istanbul ignore next */ {
+    return [];
+  }
 }
 
 export async function checkoutBranch(branchName: string): Promise<CommitSha> {
@@ -603,10 +617,7 @@ export async function isBranchBehindBase(
   }
 }
 
-export async function isBranchModified(
-  branchName: string,
-  baseBranch?: string
-): Promise<boolean> {
+export async function isBranchModified(branchName: string): Promise<boolean> {
   if (!branchExists(branchName)) {
     logger.debug('branch.isModified(): no cache');
     return false;
@@ -626,48 +637,21 @@ export async function isBranchModified(
     return isModified;
   }
 
+  logger.debug('branch.isModified(): using git to calculate');
+
   await syncGit();
-  // Retrieve the commit authors
-  let branchAuthors: string[] = [];
+  // Retrieve the author of the most recent commit
+  let lastAuthor: string | undefined;
   try {
-    if (baseBranch) {
-      logger.debug(
-        `branch.isModified(): using git to calculate authors between ${branchName} and ${baseBranch}`
-      );
-      branchAuthors = [
-        ...new Set(
-          (
-            await git.raw([
-              'log',
-              '--pretty=format:%ae',
-              `origin/${branchName}...origin/${baseBranch}`,
-              '--',
-            ])
-          )
-            .trim()
-            .split('\n')
-        ),
-      ];
-    } else {
-      logger.debug(
-        `branch.isModified(): checking last author of ${branchName}`
-      );
-      branchAuthors = [
-        ...new Set(
-          (
-            await git.raw([
-              'log',
-              '-1',
-              '--pretty=format:%ae',
-              `origin/${branchName}`,
-              '--',
-            ])
-          )
-            .trim()
-            .split('\n')
-        ),
-      ];
-    }
+    lastAuthor = (
+      await git.raw([
+        'log',
+        '-1',
+        '--pretty=format:%ae',
+        `origin/${branchName}`,
+        '--',
+      ])
+    ).trim();
   } catch (err) /* istanbul ignore next */ {
     if (err.message?.includes('fatal: bad revision')) {
       logger.debug(
@@ -676,19 +660,26 @@ export async function isBranchModified(
       );
       throw new Error(REPOSITORY_CHANGED);
     }
-    logger.warn({ err }, 'Error retrieving git authors for isBranchModified');
+    logger.warn({ err }, 'Error checking last author for isBranchModified');
   }
   const { gitAuthorEmail } = config;
-  let branchIsModified = false;
-  for (const author of branchAuthors) {
-    if (author !== gitAuthorEmail && !config.ignoredAuthors.includes(author)) {
-      branchIsModified = true;
-    }
+  if (
+    lastAuthor === gitAuthorEmail ||
+    config.ignoredAuthors.some((ignoredAuthor) => lastAuthor === ignoredAuthor)
+  ) {
+    // author matches - branch has not been modified
+    logger.debug('branch.isModified() = false');
+    config.branchIsModified[branchName] = false;
+    setCachedModifiedResult(branchName, false);
+    return false;
   }
-  logger.debug(`branch.isModified() = ${branchIsModified}`);
-  config.branchIsModified[branchName] = branchIsModified;
-  setCachedModifiedResult(branchName, branchIsModified);
-  return branchIsModified;
+  logger.debug(
+    { branchName, lastAuthor, gitAuthorEmail },
+    'branch.isModified() = true'
+  );
+  config.branchIsModified[branchName] = true;
+  setCachedModifiedResult(branchName, true);
+  return true;
 }
 
 export async function isBranchConflicted(
@@ -789,10 +780,14 @@ export async function deleteBranch(branchName: string): Promise<void> {
   delete config.branchCommits[branchName];
 }
 
-export async function mergeBranch(branchName: string): Promise<void> {
+export async function mergeBranch(
+  branchName: string,
+  localOnly = false
+): Promise<void> {
   let status: StatusResult | undefined;
   try {
     await syncGit();
+    await writeGitAuthor();
     await git.reset(ResetMode.HARD);
     await gitRetry(() =>
       git.checkout(['-B', branchName, 'origin/' + branchName])
@@ -805,8 +800,13 @@ export async function mergeBranch(branchName: string): Promise<void> {
       ])
     );
     status = await git.status();
-    await gitRetry(() => git.merge(['--ff-only', branchName]));
-    await gitRetry(() => git.push('origin', config.currentBranch));
+    if (localOnly) {
+      // merge commit, don't push to origin
+      await gitRetry(() => git.merge([branchName]));
+    } else {
+      await gitRetry(() => git.merge(['--ff-only', branchName]));
+      await gitRetry(() => git.push('origin', config.currentBranch));
+    }
     incLimitedValue('Commits');
   } catch (err) {
     logger.debug(
@@ -1047,7 +1047,7 @@ export async function prepareCommit({
 
     return result;
   } catch (err) /* istanbul ignore next */ {
-    return handleCommitError(files, branchName, err);
+    return handleCommitError(err, branchName, files);
   }
 }
 
@@ -1076,15 +1076,14 @@ export async function pushCommit({
     incLimitedValue('Commits');
     result = true;
   } catch (err) /* istanbul ignore next */ {
-    handleCommitError(files, sourceRef, err);
+    handleCommitError(err, sourceRef, files);
   }
   return result;
 }
 
-export async function fetchCommit({
-  branchName,
-  files,
-}: CommitFilesConfig): Promise<CommitSha | null> {
+export async function fetchBranch(
+  branchName: string
+): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Fetching branch ${branchName}`);
   try {
@@ -1095,7 +1094,7 @@ export async function fetchCommit({
     config.branchIsModified[branchName] = false;
     return commit;
   } catch (err) /* istanbul ignore next */ {
-    return handleCommitError(files, branchName, err);
+    return handleCommitError(err, branchName);
   }
 }
 

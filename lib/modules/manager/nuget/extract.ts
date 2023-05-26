@@ -74,9 +74,9 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
 export async function extractPackageFile(
   content: string,
   packageFile: string,
-  config: ExtractConfig
+  _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  logger.trace({ packageFile }, 'nuget.extractPackageFile()');
+  logger.trace(`nuget.extractPackageFile(${packageFile})`);
 
   const registries = await getConfiguredRegistries(packageFile);
   const registryUrls = registries
@@ -90,16 +90,16 @@ export async function extractPackageFile(
     try {
       manifest = JSON.parse(content);
     } catch (err) {
-      logger.debug(`Invalid JSON in ${packageFile}`);
+      logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }
 
     if (manifest.version !== 1) {
-      logger.debug({ contents: manifest }, 'Unsupported dotnet tools version');
+      logger.debug({ packageFile }, 'Unsupported dotnet tools version');
       return null;
     }
 
-    for (const depName of Object.keys(manifest.tools)) {
+    for (const depName of Object.keys(manifest.tools ?? {})) {
       const tool = manifest.tools[depName];
       const currentValue = tool.version;
       const dep: PackageDependency = {
@@ -115,7 +115,7 @@ export async function extractPackageFile(
       deps.push(dep);
     }
 
-    return { deps };
+    return deps.length ? { deps } : null;
   }
 
   if (packageFile.endsWith('global.json')) {
@@ -132,8 +132,13 @@ export async function extractPackageFile(
     }));
     packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
   } catch (err) {
-    logger.debug({ err }, `Failed to parse ${packageFile}`);
+    logger.debug({ err, packageFile }, `Failed to parse XML`);
   }
+
+  if (!deps.length) {
+    return null;
+  }
+
   const res: PackageFileContent = { deps, packageFileVersion };
   const lockFileName = getSiblingFileName(packageFile, 'packages.lock.json');
   // istanbul ignore if

@@ -7,7 +7,9 @@ import {
   localPathExists,
   readLocalFile,
 } from '../../../util/fs';
+import { parseGitUrl } from '../../../util/git/url';
 import { regEx } from '../../../util/regex';
+import { GithubTagsDatasource } from '../../datasource/github-tags';
 import { PypiDatasource } from '../../datasource/pypi';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
@@ -56,12 +58,15 @@ function extractFromSection(
     }
 
     const pep503NormalizeRegex = regEx(/[-_.]+/g);
-    const packageName = depName
-      .toLowerCase()
-      .replace(pep503NormalizeRegex, '-');
+    let packageName = depName.toLowerCase().replace(pep503NormalizeRegex, '-');
     let skipReason: SkipReason | null = null;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
+    let datasource = PypiDatasource.id;
+    let lockedVersion: string | null = null;
+    if (packageName in poetryLockfile) {
+      lockedVersion = poetryLockfile[packageName];
+    }
     if (!is.string(currentValue)) {
       const version = currentValue.version;
       const path = currentValue.path;
@@ -76,8 +81,19 @@ function extractFromSection(
         currentValue = '';
         skipReason = 'path-dependency';
       } else if (git) {
-        currentValue = '';
-        skipReason = 'git-dependency';
+        if (currentValue.tag) {
+          currentValue = currentValue.tag;
+          datasource = GithubTagsDatasource.id;
+          const githubPackageName = extractGithubPackageName(git);
+          if (githubPackageName) {
+            packageName = githubPackageName;
+          } else {
+            skipReason = 'git-dependency';
+          }
+        } else {
+          currentValue = '';
+          skipReason = 'git-dependency';
+        }
       } else {
         currentValue = '';
         skipReason = 'multiple-constraint-dep';
@@ -88,10 +104,10 @@ function extractFromSection(
       depType,
       currentValue,
       managerData: { nestedVersion },
-      datasource: PypiDatasource.id,
+      datasource,
     };
-    if (packageName in poetryLockfile) {
-      dep.lockedVersion = poetryLockfile[packageName];
+    if (lockedVersion) {
+      dep.lockedVersion = lockedVersion;
     }
     if (depName !== packageName) {
       dep.packageName = packageName;
@@ -103,7 +119,7 @@ function extractFromSection(
     } else if (poetryVersioning.isValid(currentValue)) {
       dep.versioning = poetryVersioning.id;
     } else {
-      dep.skipReason = 'unknown-version';
+      dep.skipReason = 'unspecified-version';
     }
     deps.push(dep);
   }
@@ -130,23 +146,23 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] | undefined {
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): Promise<PackageFileContent | null> {
-  logger.trace(`poetry.extractPackageFile(${fileName})`);
+  logger.trace(`poetry.extractPackageFile(${packageFile})`);
   let pyprojectfile: PoetryFile;
   try {
     pyprojectfile = parse(content);
   } catch (err) {
-    logger.debug({ err }, 'Error parsing pyproject.toml file');
+    logger.debug({ err, packageFile }, 'Error parsing pyproject.toml file');
     return null;
   }
   if (!pyprojectfile.tool?.poetry) {
-    logger.debug(`${fileName} contains no poetry section`);
+    logger.debug({ packageFile }, `contains no poetry section`);
     return null;
   }
 
   // handle the lockfile
-  const lockfileName = getSiblingFileName(fileName, 'poetry.lock');
+  const lockfileName = getSiblingFileName(packageFile, 'poetry.lock');
   // TODO #7154
   const lockContents = (await readLocalFile(lockfileName, 'utf8'))!;
 
@@ -186,16 +202,24 @@ export async function extractPackageFile(
     extractedConstraints,
   };
   // Try poetry.lock first
-  let lockFile = getSiblingFileName(fileName, 'poetry.lock');
+  let lockFile = getSiblingFileName(packageFile, 'poetry.lock');
   // istanbul ignore next
   if (await localPathExists(lockFile)) {
     res.lockFiles = [lockFile];
   } else {
     // Try pyproject.lock next
-    lockFile = getSiblingFileName(fileName, 'pyproject.lock');
+    lockFile = getSiblingFileName(packageFile, 'pyproject.lock');
     if (await localPathExists(lockFile)) {
       res.lockFiles = [lockFile];
     }
   }
   return res;
+}
+
+function extractGithubPackageName(url: string): string | null {
+  const parsedUrl = parseGitUrl(url);
+  if (parsedUrl.source !== 'github.com') {
+    return null;
+  }
+  return `${parsedUrl.owner}/${parsedUrl.name}`;
 }

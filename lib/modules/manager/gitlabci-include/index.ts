@@ -4,7 +4,7 @@ import { extractPackageFile } from './extract';
 export { extractPackageFile };
 
 export const defaultConfig = {
-  fileMatch: ['\\.gitlab-ci\\.yml$'],
+  fileMatch: ['\\.gitlab-ci\\.ya?ml$'],
 };
 
 export const supportedDatasources = [GitlabTagsDatasource.id];

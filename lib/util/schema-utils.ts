@@ -1,116 +1,213 @@
+import JSON5 from 'json5';
+import type { JsonValue } from 'type-fest';
 import { z } from 'zod';
 
-export function looseArray<T extends z.ZodTypeAny>(
-  schema: T,
-  catchCallback?: () => void
-): z.ZodEffects<
-  z.ZodCatch<z.ZodArray<z.ZodCatch<z.ZodNullable<T>>, 'many'>>,
-  z.TypeOf<T>[],
-  unknown
-> {
-  type Elem = z.infer<T>;
-
-  const nullableSchema = schema.nullable().catch(
-    catchCallback
-      ? () => {
-          catchCallback();
-          return null;
-        }
-      : null
-  );
-
-  const arrayOfNullables = z.array(nullableSchema);
-
-  const arrayWithFallback = catchCallback
-    ? arrayOfNullables.catch(() => {
-        catchCallback();
-        return [];
-      })
-    : arrayOfNullables.catch([]);
-
-  const filteredArray = arrayWithFallback.transform((xs) =>
-    xs.filter((x): x is Elem => x !== null)
-  );
-
-  return filteredArray;
+interface ErrorContext<T> {
+  error: z.ZodError;
+  input: T;
 }
 
-export function looseRecord<T extends z.ZodTypeAny>(
-  schema: T,
-  catchCallback?: () => void
-): z.ZodEffects<
-  z.ZodCatch<z.ZodRecord<z.ZodString, z.ZodCatch<z.ZodNullable<T>>>>,
-  Record<string, z.TypeOf<T>>,
-  unknown
-> {
-  type Elem = z.infer<T>;
+interface LooseOpts<T> {
+  onError?: (err: ErrorContext<T>) => void;
+}
 
-  const nullableSchema = schema.nullable().catch(
-    catchCallback
-      ? () => {
-          catchCallback();
-          return null;
-        }
-      : null
-  );
-
-  const recordOfNullables = z.record(nullableSchema);
-
-  const recordWithFallback = catchCallback
-    ? recordOfNullables.catch(() => {
-        catchCallback();
-        return {};
-      })
-    : recordOfNullables.catch({});
-
-  const filteredRecord = recordWithFallback.transform(
-    (rec): Record<string, Elem> => {
-      for (const key of Object.keys(rec)) {
-        if (rec[key] === null) {
-          delete rec[key];
+/**
+ * Works like `z.array()`, but drops wrong elements instead of invalidating the whole array.
+ *
+ * **Important**: non-array inputs are still invalid.
+ * Use `LooseArray(...).catch([])` to handle it.
+ *
+ * @param Elem Schema for array elements
+ * @param onError Callback for errors
+ * @returns Schema for array
+ */
+export function LooseArray<Schema extends z.ZodTypeAny>(
+  Elem: Schema,
+  { onError }: LooseOpts<unknown[]> = {}
+): z.ZodEffects<z.ZodArray<z.ZodAny, 'many'>, z.TypeOf<Schema>[], any[]> {
+  if (!onError) {
+    // Avoid error-related computations inside the loop
+    return z.array(z.any()).transform((input) => {
+      const output: z.infer<Schema>[] = [];
+      for (const x of input) {
+        const parsed = Elem.safeParse(x);
+        if (parsed.success) {
+          output.push(parsed.data);
         }
       }
-      return rec;
-    }
-  );
-
-  return filteredRecord;
-}
-
-export function looseValue<T, U extends z.ZodTypeDef, V>(
-  schema: z.ZodType<T, U, V>,
-  catchCallback?: () => void
-): z.ZodCatch<z.ZodNullable<z.ZodType<T, U, V>>> {
-  const nullableSchema = schema.nullable();
-  const schemaWithFallback = catchCallback
-    ? nullableSchema.catch(() => {
-        catchCallback();
-        return null;
-      })
-    : nullableSchema.catch(null);
-  return schemaWithFallback;
-}
-
-export function parseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(input: string, schema: Schema): z.infer<Schema> {
-  const parsed = JSON.parse(input);
-  return schema.parse(parsed);
-}
-
-export function safeParseJson<
-  T = unknown,
-  Schema extends z.ZodType<T> = z.ZodType<T>
->(
-  input: string,
-  schema: Schema,
-  catchCallback?: (e: SyntaxError | z.ZodError) => void
-): z.infer<Schema> | null {
-  try {
-    return parseJson(input, schema);
-  } catch (err) {
-    catchCallback?.(err);
-    return null;
+      return output;
+    });
   }
+
+  return z.array(z.any()).transform((input) => {
+    const output: z.infer<Schema>[] = [];
+    const issues: z.ZodIssue[] = [];
+
+    for (let idx = 0; idx < input.length; idx += 1) {
+      const x = input[idx];
+      const parsed = Elem.safeParse(x);
+
+      if (parsed.success) {
+        output.push(parsed.data);
+        continue;
+      }
+
+      for (const issue of parsed.error.issues) {
+        issue.path.unshift(idx);
+        issues.push(issue);
+      }
+    }
+
+    if (issues.length) {
+      const error = new z.ZodError(issues);
+      onError({ error, input });
+    }
+
+    return output;
+  });
 }
+
+type LooseRecordResult<
+  KeySchema extends z.ZodTypeAny,
+  ValueSchema extends z.ZodTypeAny
+> = z.ZodEffects<
+  z.ZodRecord<z.ZodString, z.ZodAny>,
+  Record<z.TypeOf<KeySchema>, z.TypeOf<ValueSchema>>,
+  Record<z.TypeOf<KeySchema>, any>
+>;
+
+type LooseRecordOpts<
+  KeySchema extends z.ZodTypeAny,
+  ValueSchema extends z.ZodTypeAny
+> = LooseOpts<Record<z.TypeOf<KeySchema> | z.TypeOf<ValueSchema>, unknown>>;
+
+/**
+ * Works like `z.record()`, but drops wrong elements instead of invalidating the whole record.
+ *
+ * **Important**: non-record inputs other are still invalid.
+ * Use `LooseRecord(...).catch({})` to handle it.
+ *
+ * @param KeyValue Schema for record keys
+ * @param ValueValue Schema for record values
+ * @param onError Callback for errors
+ * @returns Schema for record
+ */
+export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
+  Value: ValueSchema
+): LooseRecordResult<z.ZodString, ValueSchema>;
+export function LooseRecord<
+  KeySchema extends z.ZodTypeAny,
+  ValueSchema extends z.ZodTypeAny
+>(
+  Key: KeySchema,
+  Value: ValueSchema
+): LooseRecordResult<KeySchema, ValueSchema>;
+export function LooseRecord<ValueSchema extends z.ZodTypeAny>(
+  Value: ValueSchema,
+  { onError }: LooseRecordOpts<z.ZodString, ValueSchema>
+): LooseRecordResult<z.ZodString, ValueSchema>;
+export function LooseRecord<
+  KeySchema extends z.ZodTypeAny,
+  ValueSchema extends z.ZodTypeAny
+>(
+  Key: KeySchema,
+  Value: ValueSchema,
+  { onError }: LooseRecordOpts<KeySchema, ValueSchema>
+): LooseRecordResult<KeySchema, ValueSchema>;
+export function LooseRecord<
+  KeySchema extends z.ZodTypeAny,
+  ValueSchema extends z.ZodTypeAny
+>(
+  arg1: ValueSchema | KeySchema,
+  arg2?: ValueSchema | LooseOpts<Record<string, unknown>>,
+  arg3?: LooseRecordOpts<KeySchema, ValueSchema>
+): LooseRecordResult<KeySchema, ValueSchema> {
+  let Key: z.ZodSchema = z.any();
+  let Value: ValueSchema;
+  let opts: LooseRecordOpts<KeySchema, ValueSchema> = {};
+  if (arg2 && arg3) {
+    Key = arg1 as KeySchema;
+    Value = arg2 as ValueSchema;
+    opts = arg3;
+  } else if (arg2) {
+    if (arg2 instanceof z.ZodType) {
+      Key = arg1 as KeySchema;
+      Value = arg2;
+    } else {
+      Value = arg1 as ValueSchema;
+      opts = arg2;
+    }
+  } else {
+    Value = arg1 as ValueSchema;
+  }
+
+  const { onError } = opts;
+  if (!onError) {
+    // Avoid error-related computations inside the loop
+    return z.record(z.any()).transform((input) => {
+      const output: Record<string, z.infer<ValueSchema>> = {};
+      for (const [inputKey, inputVal] of Object.entries(input)) {
+        const parsedKey = Key.safeParse(inputKey);
+        const parsedValue = Value.safeParse(inputVal);
+        if (parsedKey.success && parsedValue.success) {
+          output[parsedKey.data] = parsedValue.data;
+        }
+      }
+      return output;
+    });
+  }
+
+  return z.record(z.any()).transform((input) => {
+    const output: Record<string, z.infer<ValueSchema>> = {};
+    const issues: z.ZodIssue[] = [];
+
+    for (const [inputKey, inputVal] of Object.entries(input)) {
+      const parsedKey = Key.safeParse(inputKey);
+      if (!parsedKey.success) {
+        for (const issue of parsedKey.error.issues) {
+          issue.path.unshift(inputKey);
+          issues.push(issue);
+        }
+        continue;
+      }
+
+      const parsedValue = Value.safeParse(inputVal);
+      if (!parsedValue.success) {
+        for (const issue of parsedValue.error.issues) {
+          issue.path.unshift(inputKey);
+          issues.push(issue);
+        }
+        continue;
+      }
+
+      output[parsedKey.data] = parsedValue.data;
+      continue;
+    }
+
+    if (issues.length) {
+      const error = new z.ZodError(issues);
+      onError({ error, input });
+    }
+
+    return output;
+  });
+}
+
+export const Json = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON' });
+    return z.NEVER;
+  }
+});
+type Json = z.infer<typeof Json>;
+
+export const Json5 = z.string().transform((str, ctx): JsonValue => {
+  try {
+    return JSON5.parse(str);
+  } catch (e) {
+    ctx.addIssue({ code: 'custom', message: 'Invalid JSON5' });
+    return z.NEVER;
+  }
+});

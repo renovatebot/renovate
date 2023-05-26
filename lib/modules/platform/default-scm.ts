@@ -27,7 +27,15 @@ export class DefaultGitScm implements PlatformScm {
     return git.isBranchConflicted(baseBranch, branch);
   }
 
-  isBranchModified(branchName: string, baseBranch?: string): Promise<boolean> {
-    return git.isBranchModified(branchName, baseBranch);
+  isBranchModified(branchName: string): Promise<boolean> {
+    return git.isBranchModified(branchName);
+  }
+
+  getFileList(): Promise<string[]> {
+    return git.getFileList();
+  }
+
+  checkoutBranch(branchName: string): Promise<CommitSha> {
+    return git.checkoutBranch(branchName);
   }
 }

@@ -1,4 +1,3 @@
-import { GlobalConfig } from '../../../../config/global';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../modules/platform';
 import { scm } from '../../../../modules/platform/scm';
@@ -22,35 +21,6 @@ export async function shouldReuseExistingBranch(
     return result;
   }
   logger.debug(`Branch already exists`);
-
-  // Check for existing PR
-  const pr = await platform.getBranchPr(branchName);
-
-  if (pr) {
-    if (pr.title?.startsWith('rebase!')) {
-      logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
-      return result;
-    }
-    if (pr.bodyStruct?.rebaseRequested) {
-      logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
-      return result;
-    }
-    if (pr.labels?.includes(config.rebaseLabel!)) {
-      logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
-      // istanbul ignore if
-      if (GlobalConfig.get('dryRun')) {
-        logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel!} from #${
-            pr.number
-          }`
-        );
-      } else {
-        await platform.deleteLabel(pr.number, config.rebaseLabel!);
-      }
-      return result;
-    }
-  }
-
   if (
     config.rebaseWhen === 'behind-base-branch' ||
     (config.rebaseWhen === 'auto' &&
@@ -59,7 +29,7 @@ export async function shouldReuseExistingBranch(
     if (await scm.isBranchBehindBase(branchName, baseBranch)) {
       logger.debug(`Branch is behind base branch and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (await scm.isBranchModified(branchName, baseBranch)) {
+      if (await scm.isBranchModified(branchName)) {
         logger.debug('Cannot rebase branch as it has been modified');
         result.reuseExistingBranch = true;
         result.isModified = true;
@@ -80,7 +50,7 @@ export async function shouldReuseExistingBranch(
   if (result.isConflicted) {
     logger.debug('Branch is conflicted');
 
-    if ((await scm.isBranchModified(branchName, baseBranch)) === false) {
+    if ((await scm.isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (config.rebaseWhen === 'never') {
         logger.debug('Rebasing disabled by config');

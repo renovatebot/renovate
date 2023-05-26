@@ -87,6 +87,12 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'java',
     versioning: npmVersioningId,
   },
+  /* not used in Renovate */
+  'java-maven': {
+    datasource: 'java-version',
+    packageName: 'java',
+    versioning: mavenVersioningId,
+  },
   jb: {
     datasource: 'github-releases',
     packageName: 'jsonnet-bundler/jsonnet-bundler',
@@ -123,6 +129,11 @@ const allToolConfig: Record<string, ToolConfig> = {
     packageName: 'npm',
     hash: true,
     versioning: npmVersioningId,
+  },
+  pdm: {
+    datasource: 'github-releases',
+    packageName: 'pdm-project/pdm',
+    versioning: semverVersioningId,
   },
   php: {
     datasource: 'github-releases',

@@ -12,7 +12,7 @@ import {
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
   const deps: PackageDependency[] = [];
 
@@ -60,7 +60,7 @@ export function extractPackageFile(
     }
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
-      { err, filename },
+      { err, packageFile },
       'Error extracting Bitbucket Pipes dependencies'
     );
   }
