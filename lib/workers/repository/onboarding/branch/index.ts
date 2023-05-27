@@ -7,7 +7,7 @@ import {
   REPOSITORY_NO_PACKAGE_FILES,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
-import type { Pr } from '../../../../modules/platform';
+import { Pr, platform } from '../../../../modules/platform';
 import { getCache } from '../../../../util/cache/repository';
 import {
   getBranchCommit,
@@ -27,6 +27,7 @@ import {
   isOnboardingBranchModified,
   setOnboardingCache,
 } from './onboarding-branch-cache';
+import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig
@@ -66,6 +67,21 @@ export async function checkOnboardingBranch(
         config.baseBranch!,
         config.onboardingBranch!
       );
+    }
+    // if onboarding branch is not modified, check if onboarding config has been changed and rebase if true
+    else {
+      const { rawConfigHash } = onboardingPr.bodyStruct ?? {};
+      const commit = await rebaseOnboardingBranch(config, rawConfigHash);
+      if (commit) {
+        logger.info(
+          { branch: config.onboardingBranch, commit, onboarding: true },
+          'Branch updated'
+        );
+      }
+      // istanbul ignore if
+      if (platform.refreshPr) {
+        await platform.refreshPr(onboardingPr.number);
+      }
     }
   } else {
     logger.debug('Onboarding PR does not exist');
