@@ -25,6 +25,10 @@ export function extractPackageFile(
   if (is.nullOrUndefined(def)) {
     return null;
   }
+  const pythonConstraint = def.project?.['requires-python'];
+  const constraints = is.nonEmptyString(pythonConstraint)
+    ? { extractedConstraints: { python: pythonConstraint } }
+    : {};
 
   // pyProject standard definitions
   deps.push(
@@ -43,5 +47,5 @@ export function extractPackageFile(
     processedDeps = processor.process(def, processedDeps);
   }
 
-  return processedDeps.length ? { deps: processedDeps } : null;
+  return processedDeps.length ? { ...constraints, deps: processedDeps } : null;
 }
