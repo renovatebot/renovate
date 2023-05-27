@@ -5,6 +5,10 @@ const helmDefaultChartInitValues = Fixtures.get(
   'default_chart_init_values.yaml'
 );
 
+const helmDefaultChartInitValuesJSON = Fixtures.get(
+  'default_chart_init_values.json'
+);
+
 const helmMultiAndNestedImageValues = Fixtures.get(
   'multi_and_nested_image_values.yaml'
 );
@@ -41,6 +45,18 @@ describe('modules/manager/helm-values/extract', () => {
       const result = extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
       expect(result?.deps).toHaveLength(5);
+    });
+
+    it('extracts from values.json correctly', () => {
+      const result = extractPackageFile(helmDefaultChartInitValuesJSON);
+      expect(result).toMatchSnapshot({
+        deps: [
+          {
+            currentValue: '1.16.1',
+            depName: 'nginx',
+          },
+        ],
+      });
     });
   });
 });

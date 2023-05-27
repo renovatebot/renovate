@@ -51,6 +51,22 @@ exports[`modules/manager/helm-values/extract extractPackageFile() extracts from 
 }
 `;
 
+exports[`modules/manager/helm-values/extract extractPackageFile() extracts from values.json correctly 1`] = `
+{
+  "deps": [
+    {
+      "autoReplaceStringTemplate": "{{newValue}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.16.1",
+      "datasource": "docker",
+      "depName": "nginx",
+      "replaceString": "1.16.1",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
+
 exports[`modules/manager/helm-values/extract extractPackageFile() extracts from values.yaml correctly with same structure as "helm create" 1`] = `
 {
   "deps": [

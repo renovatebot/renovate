@@ -62,14 +62,24 @@ export function extractPackageFile(
   packageFile?: string
 ): PackageFileContent | null {
   let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
-  try {
-    // a parser that allows extracting line numbers would be preferable, with
-    // the current approach we need to match anything we find again during the update
-    // TODO: fix me (#9610)
-    parsedContent = load(content, { json: true }) as any;
-  } catch (err) {
-    logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
-    return null;
+  if (packageFile?.endsWith(".json")) {
+    try {
+      // TODO: fix me (#9610)
+      parsedContent = JSON.parse(content) as any;
+    } catch (err) {
+      logger.debug({ err, packageFile }, 'Failed to parse helm-values JSON');
+      return null;
+    }
+  } else {
+    try {
+      // a parser that allows extracting line numbers would be preferable, with
+      // the current approach we need to match anything we find again during the update
+      // TODO: fix me (#9610)
+      parsedContent = load(content, { json: true }) as any;
+    } catch (err) {
+      logger.debug({ err, packageFile }, 'Failed to parse helm-values YAML');
+      return null;
+    }
   }
   try {
     const deps = findDependencies(parsedContent, []);
