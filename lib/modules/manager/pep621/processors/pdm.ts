@@ -74,6 +74,7 @@ export class PdmProcessor implements PyProjectProcessor {
       };
 
       const execOptions: ExecOptions = {
+        cwdFile: packageFileName,
         docker: {},
         toolConstraints: [pythonConstraint, pdmConstraint],
       };
