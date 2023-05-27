@@ -70,7 +70,7 @@ export class PdmProcessor implements PyProjectProcessor {
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
         constraint:
-          def?.project?.['requires-python'] ?? config.constraints?.python,
+          config.constraints?.python ?? def?.project?.['requires-python'],
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
