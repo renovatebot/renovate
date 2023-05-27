@@ -610,16 +610,15 @@ When `constraintsFiltering=strict`, the following logic applies:
 - Does this package's release declare constraints of its own (e.g. `engines` in Node.js)?
 - If so, filter out this release unless the repository constraint is a _subset_ of the release constraint
 
-Here's some examples of when a release is allowed:
+Here are some examples:
 
-- The `package.json` declares its `engines.node` as `18` which is a subset of the package release `16 || 18`
-- The `package.json` declares its `engines.node` as `^18.10.0` which is a subset of the package release `>=18`
-- The `package.json` declares its `engines.node` as `^16.10.0 || >=18.0.0` which is a subset of the package release `>= 16.0.0`
-
-Here's some examples of when a release is filtered out (disallowed):
-
-- The `package.json` declares its `engines.node` as `>=16` while the package release has a narrower `16 || 18`
-- The `package.json` declares its `engines.node` as `16` while the package release has a narrower `^16.10.0`
+| project                  | dependency   | result   |
+|--------------------------|--------------|----------|
+| `18`                     | `16 \|\| 18` | allowed  |
+| `^18.10.0`               | `>=18`       | allowed  |
+| `^16.10.0 \|\| >=18.0.0` | `>= 16.0.0`  | allowed  |
+| `>=16`                   | `16 \|\| 18` | filtered |
+| `16`                     | `^16.10.0`   | filtered |
 
 When using with `npm`, it's recommended:
 
