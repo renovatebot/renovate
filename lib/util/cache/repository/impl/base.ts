@@ -22,13 +22,24 @@ export abstract class RepoCacheBase implements RepoCache {
 
   protected abstract write(data: RepoCacheRecord): Promise<void>;
 
+  private static parseData(input: string): RepoCacheData {
+    const data: RepoCacheData = JSON.parse(input);
+    if (data.branches) {
+      for (const branch of data.branches) {
+        branch.commitFingerprint = branch.branchFingerprint;
+        delete branch.branchFingerprint;
+      }
+    }
+    return data;
+  }
+
   private async restore(oldCache: RepoCacheRecord): Promise<void> {
     if (oldCache.fingerprint !== this.fingerprint) {
       logger.debug('Repository cache fingerprint is invalid');
       return;
     }
     const jsonStr = await decompress(oldCache.payload);
-    this.data = JSON.parse(jsonStr);
+    this.data = RepoCacheBase.parseData(jsonStr);
     this.oldHash = oldCache.hash;
   }
 
