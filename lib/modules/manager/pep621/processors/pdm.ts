@@ -11,7 +11,7 @@ import type {
   UpdateArtifactsResult,
 } from '../../types';
 import type { PyProject } from '../schema';
-import { parseDependencyGroupRecord, parsePyProject } from '../utils';
+import { parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 export class PdmProcessor implements PyProjectProcessor {
@@ -50,10 +50,10 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
+    project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
-    const { config, updatedDeps, packageFileName, newPackageFileContent } =
-      updateArtifact;
+    const { config, updatedDeps, packageFileName } = updateArtifact;
 
     const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
 
@@ -66,11 +66,10 @@ export class PdmProcessor implements PyProjectProcessor {
         return null;
       }
 
-      const def = parsePyProject(packageFileName, newPackageFileContent);
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
         constraint:
-          config.constraints?.python ?? def?.project?.['requires-python'],
+          config.constraints?.python ?? project.project?.['requires-python'],
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',

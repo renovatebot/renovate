@@ -1,4 +1,3 @@
-import { codeBlock } from 'common-tags';
 import { join } from 'upath';
 import { mockExecAll } from '../../../../../test/exec-util';
 import { fs, mockedFunction } from '../../../../../test/util';
@@ -27,12 +26,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config,
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config,
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
     });
 
@@ -44,11 +46,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
       fs.readLocalFile.mockResolvedValueOnce('test content');
       // python
       getPkgReleases.mockResolvedValueOnce({
-        releases: [
-          { version: '3.7.1' },
-          { version: '3.8.1' },
-          { version: '3.11.2' },
-        ],
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
       });
       // pdm
       getPkgReleases.mockResolvedValueOnce({
@@ -56,17 +54,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: codeBlock`
-[project]
-name = "pdm"
-dynamic = ["version"]
-requires-python = "<3.9"
-        `,
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
@@ -85,7 +81,7 @@ requires-python = "<3.9"
             '-w "/tmp/github/some/repo" ' +
             'containerbase/sidecar ' +
             'bash -l -c "' +
-            'install-tool python 3.8.1 ' +
+            'install-tool python 3.11.2 ' +
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
@@ -104,12 +100,15 @@ requires-python = "<3.9"
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
       ]);
@@ -132,12 +131,15 @@ requires-python = "<3.9"
       });
 
       const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         {
           file: {
@@ -169,14 +171,17 @@ requires-python = "<3.9"
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {
-          updateType: 'lockFileMaintenance',
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            updateType: 'lockFileMaintenance',
+          },
+          updatedDeps: [],
         },
-        updatedDeps: [],
-      });
+        {}
+      );
       expect(result).toEqual([
         {
           file: {
