@@ -21,9 +21,9 @@ import * as _cache from '../../../../util/cache/repository';
 import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
-import * as _rebase from './rebase';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
+import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
 const configModule: any = _config;
