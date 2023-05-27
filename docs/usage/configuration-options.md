@@ -620,7 +620,7 @@ Here are some examples:
 | `>=16`                   | `16 \|\| 18` | filtered |
 | `16`                     | `^16.10.0`   | filtered |
 
-When using with `npm`, it's recommended:
+When using with `npm`, we recommend you:
 
 - Use with `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
 - Do not enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
