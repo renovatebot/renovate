@@ -594,10 +594,37 @@ Renovate supports two options:
 - `none`: No release filtering (all releases allowed)
 - `strict`: If the release's constraints match the package file constraints, then it's included
 
-We are working on adding more advanced filtering options.
+More advanced filtering options may come in future.
 
-Note: There must be a `constraints` object in your Renovate config for this to work.
+Note: There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
 This feature is limited to `packagist`, `npm`, and `pypi` datasources.
+
+<!-- prettier-ignore -->
+!!! warning
+    Enabling this feature may result in many package updates being filtered out silently.
+    See below for a description of how it works.
+
+When `constraintsFiltering=strict`, the following logic applies:
+
+- Are there `constraints` for this repository, either detected from source or from config?
+- Does this package's release declare constraints of its own (e.g. `engines` in Node.js)?
+- If so, filter out this release unless the repository constraint is a _subset_ of the release constraint
+
+Here's some examples of when a release is allowed:
+
+- The `package.json` declares its `engines.node` as `18` which is a subset of the package release `16 || 18`
+- The `package.json` declares its `engines.node` as `^18.10.0` which is a subset of the package release `>=18`
+- The `package.json` declares its `engines.node` as `^16.10.0 || >=18.0.0` which is a subset of the package release `>= 16.0.0`
+
+Here's some examples of when a release is filtered out (disallowed):
+
+- The `package.json` declares its `engines.node` as `>=16` while the package release has a narrower `16 || 18`
+- The `package.json` declares its `engines.node` as `16` while the package release has a narrower `^16.10.0`
+
+When using with `npm`, it's recommended:
+
+- Use with `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
+- Do not enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
 ## defaultRegistryUrls
 
