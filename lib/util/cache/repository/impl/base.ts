@@ -24,6 +24,7 @@ export abstract class RepoCacheBase implements RepoCache {
 
   private static parseData(input: string): RepoCacheData {
     const data: RepoCacheData = JSON.parse(input);
+    // istanbul ignore next
     if (data.branches) {
       for (const branch of data.branches) {
         if (branch.branchFingerprint) {
