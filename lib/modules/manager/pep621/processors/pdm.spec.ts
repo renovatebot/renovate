@@ -173,7 +173,7 @@ describe('modules/manager/pep621/processors/pdm', () => {
 
       const result = await processor.updateArtifacts(
         {
-          packageFileName: 'pyproject.toml',
+          packageFileName: 'folder/pyproject.toml',
           newPackageFileContent: '',
           config: {
             updateType: 'lockFileMaintenance',
@@ -194,6 +194,9 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'pdm update',
+          options: {
+            cwd: '/tmp/github/some/repo/folder',
+          },
         },
       ]);
     });

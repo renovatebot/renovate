@@ -1349,7 +1349,7 @@ describe('workers/repository/update/branch/index', () => {
         branchName: 'new/some-branch',
         branchPrefix: 'new/',
         branchPrefixOld: 'old/',
-        branchFingerprint: '111',
+        commitFingerprint: '111',
         reuseExistingBranch: true,
         skipBranchUpdate: true,
       };
