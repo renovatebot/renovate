@@ -28,12 +28,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       };
     });
 
-    it('does not rebase modified branch', async () => {
-      scm.isBranchModified.mockResolvedValueOnce(true);
-      await rebaseOnboardingBranch(config, hash);
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
-    });
-
     it.each`
       checkboxEnabled
       ${true}
@@ -63,7 +57,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
       async ({ checkboxEnabled, expected }) => {
         config.onboardingRebaseCheckbox = checkboxEnabled;
-        scm.isBranchBehindBase.mockResolvedValueOnce(true);
         await rebaseOnboardingBranch(config, hash);
         expect(scm.commitAndPush).toHaveBeenCalledTimes(1);
         expect(OnboardingState.prUpdateRequested).toBe(expected);
@@ -78,7 +71,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       'uses the onboardingConfigFileName if set ' +
         '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
       async ({ checkboxEnabled, expected }) => {
-        scm.isBranchBehindBase.mockResolvedValueOnce(true);
         await rebaseOnboardingBranch({
           ...config,
           onboardingConfigFileName: '.github/renovate.json',
@@ -103,7 +95,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       'falls back to "renovate.json" if onboardingConfigFileName is not set ' +
         '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
       async ({ checkboxEnabled, expected }) => {
-        scm.isBranchBehindBase.mockResolvedValueOnce(true);
         await rebaseOnboardingBranch({
           ...config,
           onboardingConfigFileName: undefined,
@@ -125,7 +116,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         JSON.stringify(getConfig().onboardingConfig, null, 2) + '\n';
 
       beforeEach(() => {
-        scm.isBranchModified.mockResolvedValueOnce(true);
         git.getFile.mockResolvedValueOnce(contents);
       });
 
@@ -139,7 +129,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         async ({ checkboxEnabled, expected }) => {
           config.onboardingRebaseCheckbox = checkboxEnabled;
           await rebaseOnboardingBranch(config, undefined);
-
           expect(OnboardingState.prUpdateRequested).toBe(expected);
         }
       );
@@ -151,11 +140,10 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       `(
         'does nothing if config hashes match' +
           '(config.onboardingRebaseCheckbox="$checkboxEnabled")',
-        async ({ checkboxEnabled, expected }) => {
+        async ({ checkboxEnabled }) => {
           git.getFile.mockResolvedValueOnce(contents); // package.json
           config.onboardingRebaseCheckbox = checkboxEnabled;
           await rebaseOnboardingBranch(config, toSha256(contents));
-          expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
           expect(OnboardingState.prUpdateRequested).toBeFalse();
         }
       );
@@ -171,7 +159,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
           git.getFile.mockResolvedValueOnce(contents); // package.json
           config.onboardingRebaseCheckbox = checkboxEnabled;
           await rebaseOnboardingBranch(config, hash);
-          expect(scm.commitAndPush).toHaveBeenCalledTimes(0);
           expect(OnboardingState.prUpdateRequested).toBe(expected);
         }
       );
