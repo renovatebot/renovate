@@ -14,6 +14,7 @@ export function getPrCache(branchName: string): PrCache | null {
     return null;
   }
 
+  // istanbul ignore if
   if (prCache.fingerprint) {
     prCache.bodyFingerprint = prCache.fingerprint;
     delete prCache.fingerprint;

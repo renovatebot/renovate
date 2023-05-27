@@ -38,7 +38,10 @@ import { getPrBody } from './body';
 import { prepareLabels } from './labels';
 import { addParticipants } from './participants';
 import { getPrCache, setPrCache } from './pr-cache';
-import { generatePrBodyFingerprintConfig, validatePrCache } from './pr-fingerprint';
+import {
+  generatePrBodyFingerprintConfig,
+  validatePrCache,
+} from './pr-fingerprint';
 
 export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
