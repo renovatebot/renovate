@@ -26,8 +26,10 @@ export abstract class RepoCacheBase implements RepoCache {
     const data: RepoCacheData = JSON.parse(input);
     if (data.branches) {
       for (const branch of data.branches) {
-        branch.commitFingerprint = branch.branchFingerprint;
-        delete branch.branchFingerprint;
+        if (branch.branchFingerprint) {
+          branch.commitFingerprint = branch.branchFingerprint;
+          delete branch.branchFingerprint;
+        }
       }
     }
     return data;
