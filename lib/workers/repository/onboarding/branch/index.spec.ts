@@ -21,6 +21,7 @@ import * as _cache from '../../../../util/cache/repository';
 import type { RepoCacheData } from '../../../../util/cache/repository/types';
 import type { FileAddition } from '../../../../util/git/types';
 import { OnboardingState } from '../common';
+import * as _rebase from './rebase';
 import * as _config from './config';
 import * as _onboardingCache from './onboarding-branch-cache';
 import { checkOnboardingBranch } from '.';
@@ -31,9 +32,11 @@ jest.mock('../../../../util/cache/repository');
 jest.mock('../../../../util/fs');
 jest.mock('../../../../util/git');
 jest.mock('./config');
+jest.mock('./rebase');
 jest.mock('./onboarding-branch-cache');
 
 const cache = mocked(_cache);
+const rebase = mocked(_rebase);
 const onboardingCache = mocked(_onboardingCache);
 
 describe('workers/repository/onboarding/branch/index', () => {
@@ -253,17 +256,6 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('rebases onboarding branch if no config hash found in pr', async () => {
-      scm.getFileList.mockResolvedValue(['package.json']);
-      platform.findPr.mockResolvedValue(null);
-      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      const res = await checkOnboardingBranch(config);
-      expect(res.repoIsOnboarded).toBeFalse();
-      expect(res.branchList).toEqual(['renovate/configure']);
-      expect(git.mergeBranch).toHaveBeenCalledOnce();
-      expect(scm.commitAndPush).toHaveBeenCalledTimes(1); // rebase
-    });
-
-    it('processes modified onboarding branch and invalidates extract cache', async () => {
       const dummyCache = {
         scan: {
           master: {
@@ -275,14 +267,44 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValue(dummyCache);
+      scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
-      git.getBranchCommit
-        .mockReturnValueOnce('default-sha')
-        .mockReturnValueOnce('new-onboarding-sha');
+      rebase.rebaseOnboardingBranch.mockResolvedValueOnce('new-onboarding-sha');
+      const res = await checkOnboardingBranch(config);
+      expect(res.repoIsOnboarded).toBeFalse();
+      expect(res.branchList).toEqual(['renovate/configure']);
+      expect(git.mergeBranch).toHaveBeenCalledOnce();
+      expect(logger.info).toHaveBeenCalledWith(
+        {
+          branch: config.onboardingBranch,
+          commit: 'new-onboarding-sha',
+          onboarding: true,
+        },
+        'Branch updated'
+      );
+    });
+
+    it('processes modified onboarding branch and invalidates extract cache', async () => {
+      const dummyCache = {
+        scan: {
+          master: {
+            sha: 'default-sha',
+            configHash: 'hash',
+            packageFiles: {},
+            extractionFingerprints: {},
+          },
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      platform.findPr.mockResolvedValue(null);
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       onboardingCache.isOnboardingBranchModified.mockResolvedValueOnce(true);
       onboardingCache.hasOnboardingBranchChanged.mockReturnValueOnce(true);
       onboardingCache.isOnboardingBranchConflicted.mockResolvedValueOnce(false);
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('new-onboarding-sha');
       config.baseBranch = 'master';
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).toHaveBeenCalledOnce();
