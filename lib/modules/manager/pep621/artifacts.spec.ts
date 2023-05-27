@@ -42,6 +42,10 @@ describe('modules/manager/pep621/artifacts', () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       fs.readLocalFile.mockResolvedValueOnce('old test content');
       fs.readLocalFile.mockResolvedValueOnce('new test content');
+      // python
+      getPkgReleases.mockResolvedValueOnce({
+        releases: [{ version: '3.11.1' }, { version: '3.11.2' }],
+      });
       // pdm
       getPkgReleases.mockResolvedValueOnce({
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
@@ -86,6 +90,8 @@ describe('modules/manager/pep621/artifacts', () => {
             '-w "/tmp/github/some/repo" ' +
             'containerbase/sidecar ' +
             'bash -l -c "' +
+            'install-tool python 3.11.2 ' +
+            '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
             'pdm update dep1' +

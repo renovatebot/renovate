@@ -2234,7 +2234,7 @@
     "@octokit/plugin-request-log" "^1.0.4"
     "@octokit/plugin-rest-endpoint-methods" "^7.0.0"
 
-"@octokit/rest@^19.0.8":
+"@octokit/rest@^19.0.9":
   version "19.0.11"
   resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-19.0.11.tgz#2ae01634fed4bd1fca5b642767205ed3fd36177c"
   integrity sha512-m2a9VhaP5/tUw8FwfnW2ICXlXpLPIqxtg3XcAiGMLj/Xhw3RSBfZ8le/466ktO1Gcjr8oXudGnHhxV1TXJgFxw==
@@ -2574,12 +2574,12 @@
   dependencies:
     "@seald-io/nedb" "^4.0.2"
 
-"@renovatebot/osv-offline@1.2.9":
-  version "1.2.9"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.9.tgz#17033b0bf83b1db13bf3e2a035e6fa184d678fac"
-  integrity sha512-t9LfxZtdx7wDjoKCoW/KPVU3n9txeDuXvb7GRukNZfwo9t1uzXSjAQSzN4MKqfnv4ionw96QrTPxv4yo08u4ow==
+"@renovatebot/osv-offline@1.2.10":
+  version "1.2.10"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.10.tgz#5684dfe26181b699a2b27fac0b3efedf0aefd7f3"
+  integrity sha512-F/ic228MVQFSqUZuTYyTTFgH3H9cU0+RSiPedndf32jdGlTo0WFgK6T7yEnQg4mc5N7IkQ+mj6JU3y3knidqIw==
   dependencies:
-    "@octokit/rest" "^19.0.8"
+    "@octokit/rest" "^19.0.9"
     "@renovatebot/osv-offline-db" "1.4.0"
     adm-zip "~0.5.10"
     fs-extra "^11.1.1"
@@ -10111,10 +10111,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@3.10.0:
-  version "3.10.0"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.10.0.tgz#d75f17a22be8816aea6315ab2739fe1c0c211863"
-  integrity sha512-hmAPf1datm+gt3c2mvu0sJyhFy6lTkIGf0GzyaZWxRLnabQfPUqg6tF95RPg6sLxKI7nFLGdFxBcf2/7+GXI+A==
+type-fest@3.11.0:
+  version "3.11.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-3.11.0.tgz#e78ea6b50d6a6b1e4609035fb9ea8f1e3c328194"
+  integrity sha512-JaPw5U9ixP0XcpUbQoVSbxSDcK/K4nww20C3kjm9yE6cDRRhptU28AH60VWf9ltXmCrIfIbtt9J+2OUk2Uqiaw==
 
 type-fest@^0.13.1:
   version "0.13.1"
