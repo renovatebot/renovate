@@ -2234,7 +2234,7 @@
     "@octokit/plugin-request-log" "^1.0.4"
     "@octokit/plugin-rest-endpoint-methods" "^7.0.0"
 
-"@octokit/rest@^19.0.9":
+"@octokit/rest@^19.0.10":
   version "19.0.11"
   resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-19.0.11.tgz#2ae01634fed4bd1fca5b642767205ed3fd36177c"
   integrity sha512-m2a9VhaP5/tUw8FwfnW2ICXlXpLPIqxtg3XcAiGMLj/Xhw3RSBfZ8le/466ktO1Gcjr8oXudGnHhxV1TXJgFxw==
@@ -2574,12 +2574,12 @@
   dependencies:
     "@seald-io/nedb" "^4.0.2"
 
-"@renovatebot/osv-offline@1.2.10":
-  version "1.2.10"
-  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.10.tgz#5684dfe26181b699a2b27fac0b3efedf0aefd7f3"
-  integrity sha512-F/ic228MVQFSqUZuTYyTTFgH3H9cU0+RSiPedndf32jdGlTo0WFgK6T7yEnQg4mc5N7IkQ+mj6JU3y3knidqIw==
+"@renovatebot/osv-offline@1.2.11":
+  version "1.2.11"
+  resolved "https://registry.yarnpkg.com/@renovatebot/osv-offline/-/osv-offline-1.2.11.tgz#ab6d74d7192b5d1753f35bdd3fada7b5a40806fb"
+  integrity sha512-F8vNKJFxgpNsO/eVGEgw+2sjWE6fA48rcQ8U5TA9Obd57ke9dzEwiXmwzmx1+DszU0vmZTZVBJN9fThlnO3BIQ==
   dependencies:
-    "@octokit/rest" "^19.0.9"
+    "@octokit/rest" "^19.0.10"
     "@renovatebot/osv-offline-db" "1.4.0"
     adm-zip "~0.5.10"
     fs-extra "^11.1.1"
