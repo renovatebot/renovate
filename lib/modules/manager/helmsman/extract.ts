@@ -26,7 +26,7 @@ function createDep(
   }
 
   if (!anApp.version) {
-    dep.skipReason = 'no-version';
+    dep.skipReason = 'unspecified-version';
     return dep;
   }
   dep.currentValue = anApp.version;
@@ -55,8 +55,8 @@ function createDep(
 
 export function extractPackageFile(
   content: string,
-  fileName: string,
-  config: ExtractConfig
+  packageFile: string,
+  _config: ExtractConfig
 ): PackageFileContent | null {
   try {
     // TODO: fix me (#9610)
@@ -64,7 +64,7 @@ export function extractPackageFile(
       json: true,
     }) as HelmsmanDocument;
     if (!(doc?.helmRepos && doc.apps)) {
-      logger.debug(`Missing helmRepos and/or apps keys in ${fileName}`);
+      logger.debug({ packageFile }, `Missing helmRepos and/or apps keys`);
       return null;
     }
 
@@ -79,9 +79,9 @@ export function extractPackageFile(
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     if (err.stack?.startsWith('YAMLException:')) {
-      logger.debug({ err }, 'YAML exception extracting');
+      logger.debug({ err, packageFile }, 'YAML exception extracting');
     } else {
-      logger.warn({ err }, 'Error extracting');
+      logger.debug({ err, packageFile }, 'Error extracting');
     }
     return null;
   }

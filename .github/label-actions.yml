@@ -23,12 +23,12 @@
 
     The Renovate team
 
-'logs:problem':
+'needs-logs':
   comment: >
     Hi there,
 
 
-    We found a problem with the logs.
+    This issue or discussion is missing some logs, making it difficult or impossible to help you.
     Depending on which situation applies follow one, some or all of these instructions.
 
 
@@ -219,9 +219,9 @@
   lock: true
   lock-reason: 'resolved'
 
-'needs-code-formatting':
+'format-code-comments':
   comment: >
-    Hi, please format your code or logs so they're readable.
+    Hi, please format any copy/pasted code or logs so they're readable.
 
 
     You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).

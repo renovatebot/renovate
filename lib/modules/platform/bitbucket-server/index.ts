@@ -258,7 +258,7 @@ export async function getPr(
 
   const res = await bitbucketServerHttp.getJson<BbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { useCache: !refreshCache }
+    { memCache: !refreshCache }
   );
 
   const pr: BbsPr = {
@@ -289,7 +289,7 @@ const isRelevantPr =
   (branchName: string, prTitle: string | null | undefined, state: string) =>
   (p: Pr): boolean =>
     p.sourceBranch === branchName &&
-    (!prTitle || p.title === prTitle) &&
+    (!prTitle || p.title.toUpperCase() === prTitle.toUpperCase()) &&
     matchesState(p.state, state);
 
 // TODO: coverage (#9624)
@@ -356,7 +356,7 @@ export async function refreshPr(number: number): Promise<void> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<utils.BitbucketCommitStatus> {
   const branchCommit = git.getBranchCommit(branchName);
 
@@ -364,9 +364,7 @@ async function getStatus(
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
       // TODO: types (#7154)
       `./rest/build-status/1.0/commits/stats/${branchCommit!}`,
-      {
-        useCache,
-      }
+      { memCache }
     )
   ).body;
 }
@@ -404,7 +402,7 @@ export async function getBranchStatus(
 
 function getStatusCheck(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<utils.BitbucketStatus[]> {
   const branchCommit = git.getBranchCommit(branchName);
 
@@ -412,7 +410,7 @@ function getStatusCheck(
     // TODO: types (#7154)
     `./rest/build-status/1.0/commits/${branchCommit!}`,
     'get',
-    { useCache }
+    { memCache }
   );
 }
 

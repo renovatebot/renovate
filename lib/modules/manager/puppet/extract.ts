@@ -44,7 +44,7 @@ function parseGitDependency(module: PuppetfileModule): PackageDependency {
   const githubUrl = isGithubUrl(git, parsedUrl);
 
   if (githubUrl && parsedUrl && parsedUrl.protocol !== 'https:') {
-    logger.warn(
+    logger.debug(
       `Access to github is only allowed for https, your url was: ${git}`
     );
     return {
