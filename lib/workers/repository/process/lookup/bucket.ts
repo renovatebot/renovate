@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import type { VersioningApi } from '../../../../modules/versioning/types';
 
 export interface BucketConfig {
