@@ -16,6 +16,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_ONBOARDING_SKIPPED,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
 } from '../../constants/error-messages';
@@ -76,6 +77,10 @@ export function processResult(
     enabled = true;
     onboarded = true;
   } else if (config.repoIsOnboarded === false) {
+    status = 'onboarding';
+    enabled = true;
+    onboarded = false;
+  } else if (res === REPOSITORY_ONBOARDING_SKIPPED) {
     status = 'onboarding';
     enabled = true;
     onboarded = false;

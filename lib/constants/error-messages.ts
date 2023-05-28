@@ -33,6 +33,7 @@ export const REPOSITORY_NOT_FOUND = 'not-found';
 export const REPOSITORY_NO_PACKAGE_FILES = 'no-package-files';
 export const REPOSITORY_RENAMED = 'renamed';
 export const REPOSITORY_UNINITIATED = 'uninitiated';
+export const REPOSITORY_ONBOARDING_SKIPPED = 'repository-onboarding-skipped'; // skip processing of onboarding repos that are up to date
 
 // Temporary Error
 export const REPOSITORY_CHANGED = 'repository-changed';

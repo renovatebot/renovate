@@ -25,6 +25,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_NO_CONFIG,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_ONBOARDING_SKIPPED,
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -51,6 +52,10 @@ export default async function handleError(
   if (err.message === REPOSITORY_EMPTY) {
     logger.info('Repository is empty - skipping');
     delete config.branchList;
+    return err.message;
+  }
+  if (err.message === REPOSITORY_ONBOARDING_SKIPPED) {
+    logger.info('Onboarding branch is up-to-date - skipping');
     return err.message;
   }
   const disabledMessages = [

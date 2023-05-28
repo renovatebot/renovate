@@ -5,6 +5,7 @@ import type { RenovateConfig } from '../../../../config/types';
 import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_ONBOARDING_SKIPPED,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -52,6 +53,22 @@ export async function checkOnboardingBranch(
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
   if (onboardingPr) {
+    const cache = getCache();
+    const onboardingBranchCache = cache?.onboardingBranchCache;
+    if (
+      config.onboarding &&
+      onboardingBranchCache &&
+      onboardingBranchCache.defaultBranchSha ===
+        getBranchCommit(config.defaultBranch!) &&
+      onboardingBranchCache.onboardingBranchSha ===
+        getBranchCommit(config.onboardingBranch!)
+    ) {
+      logger.debug(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+      );
+      throw new Error(REPOSITORY_ONBOARDING_SKIPPED);
+    }
+
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
