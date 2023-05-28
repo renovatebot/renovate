@@ -104,6 +104,7 @@ zig 0.9.1
 maestro 1.24.0
 detekt 1.21.0
 ktlint 0.48.1
+yamlfmt 0.9.0
 dummy 1.2.3
 `
       );
@@ -507,6 +508,13 @@ dummy 1.2.3
             datasource: 'github-releases',
             packageName: 'pinterest/ktlint',
             depName: 'ktlint',
+          },
+          {
+            currentValue: '0.9.0',
+            datasource: 'github-releases',
+            packageName: 'google/yamlfmt',
+            depName: 'yamlfmt',
+            extractVersion: '^v(?<version>\\S+)',
           },
           {
             depName: 'dummy',
