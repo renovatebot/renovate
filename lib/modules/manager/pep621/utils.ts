@@ -1,8 +1,10 @@
+import toml from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import { regEx } from '../../../util/regex';
 import { PypiDatasource } from '../../datasource/pypi';
 import type { PackageDependency } from '../types';
+import { PyProject, PyProjectSchema } from './schema';
 import type { Pep508ParseResult } from './types';
 
 const pep508Regex = regEx(
@@ -98,4 +100,20 @@ export function parseDependencyList(
     }
   }
   return deps;
+}
+
+export function parsePyProject(
+  packageFile: string,
+  content: string
+): PyProject | null {
+  try {
+    const jsonMap = toml.parse(content);
+    return PyProjectSchema.parse(jsonMap);
+  } catch (err) {
+    logger.debug(
+      { packageFile, err },
+      `Failed to parse and validate pyproject file`
+    );
+    return null;
+  }
 }
