@@ -26,12 +26,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
     it('return null if there is no lock file', async () => {
       fs.getSiblingFileName.mockReturnValueOnce('pdm.lock');
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config,
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config,
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
     });
 
@@ -51,12 +54,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toBeNull();
       expect(execSnapshots).toMatchObject([
         {
@@ -94,12 +100,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         { artifactError: { lockFile: 'pdm.lock', stderr: 'test error' } },
       ]);
@@ -122,12 +131,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       });
 
       const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
-      const result = await processor.updateArtifacts({
-        packageFileName: 'pyproject.toml',
-        newPackageFileContent: '',
-        config: {},
-        updatedDeps,
-      });
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'pyproject.toml',
+          newPackageFileContent: '',
+          config: {},
+          updatedDeps,
+        },
+        {}
+      );
       expect(result).toEqual([
         {
           file: {
@@ -159,14 +171,17 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const result = await processor.updateArtifacts({
-        packageFileName: 'folder/pyproject.toml',
-        newPackageFileContent: '',
-        config: {
-          updateType: 'lockFileMaintenance',
+      const result = await processor.updateArtifacts(
+        {
+          packageFileName: 'folder/pyproject.toml',
+          newPackageFileContent: '',
+          config: {
+            updateType: 'lockFileMaintenance',
+          },
+          updatedDeps: [],
         },
-        updatedDeps: [],
-      });
+        {}
+      );
       expect(result).toEqual([
         {
           file: {

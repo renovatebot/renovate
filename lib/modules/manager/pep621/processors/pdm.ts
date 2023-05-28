@@ -50,7 +50,8 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
+    project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
@@ -64,9 +65,11 @@ export class PdmProcessor implements PyProjectProcessor {
         logger.debug('No pdm.lock found');
         return null;
       }
+
       const pythonConstraint: ToolConstraint = {
         toolName: 'python',
-        constraint: config.constraints?.python,
+        constraint:
+          config.constraints?.python ?? project.project?.['requires-python'],
       };
       const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
