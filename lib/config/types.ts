@@ -232,6 +232,7 @@ export interface RenovateConfig
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
   dependencyDashboardLabels?: string[];
+  dependencyDashboardOSVVulnerabilitySummary?: 'none' | 'all' | 'unresolved';
   packageFile?: string;
   packageRules?: PackageRule[];
   postUpdateOptions?: string[];

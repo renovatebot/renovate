@@ -44,6 +44,13 @@ describe('modules/manager/cpanfile/extract', () => {
             requires 'URI', '1.59';
             requires 'HTTP::Tiny', 0.034;
             requires "Capture::Tiny" => "0";
+
+            requires 'A', '== 1.1';
+            requires 'AA', '== v1.1';
+            requires 'B', '>= 1.2';
+            requires 'BB', '>= v1.2';
+            requires 'C', '> 1.3';
+            requires 'CC', '> v1.3';
           `,
           'cpanfile'
         )
@@ -52,7 +59,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Try::Tiny',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             datasource: 'cpan',
@@ -68,6 +75,36 @@ describe('modules/manager/cpanfile/extract', () => {
             datasource: 'cpan',
             depName: 'Capture::Tiny',
             currentValue: '0',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'A',
+            currentValue: '1.1',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'AA',
+            currentValue: '1.1',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'B',
+            currentValue: '1.2',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'BB',
+            currentValue: '1.2',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'C',
+            currentValue: '1.3',
+          },
+          {
+            datasource: 'cpan',
+            depName: 'CC',
+            currentValue: '1.3',
           },
         ],
       });
@@ -87,7 +124,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Crypt::URandom',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
           {
             datasource: 'cpan',
@@ -117,7 +154,7 @@ describe('modules/manager/cpanfile/extract', () => {
           {
             datasource: 'cpan',
             depName: 'Authen::Simple::Passwd',
-            skipReason: 'no-version',
+            skipReason: 'unspecified-version',
           },
         ],
       });
@@ -191,7 +228,7 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'Test::Requires',
               depType: 'test',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
           ],
         });
@@ -214,13 +251,13 @@ describe('modules/manager/cpanfile/extract', () => {
               datasource: 'cpan',
               depName: 'FCGI',
               depType: 'runtime',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
             {
               datasource: 'cpan',
               depName: 'FCGI::ProcManager',
               depType: 'runtime',
-              skipReason: 'no-version',
+              skipReason: 'unspecified-version',
             },
           ],
         });

@@ -1,8 +1,12 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../logger';
 import type { PagedResult } from '../../modules/platform/bitbucket/types';
 import { parseUrl, resolveBaseUrl } from '../url';
-import type { HttpOptions, HttpResponse } from './types';
+import type { HttpOptions, HttpRequestOptions, HttpResponse } from './types';
 import { Http } from '.';
+
+const MAX_PAGES = 100;
+const MAX_PAGELEN = 100;
 
 let baseUrl = 'https://api.bitbucket.org/';
 
@@ -12,6 +16,7 @@ export const setBaseUrl = (url: string): void => {
 
 export interface BitbucketHttpOptions extends HttpOptions {
   paginate?: boolean;
+  pagelen?: number;
 }
 
 export class BitbucketHttp extends Http<BitbucketHttpOptions> {
@@ -21,66 +26,54 @@ export class BitbucketHttp extends Http<BitbucketHttpOptions> {
 
   protected override async request<T>(
     path: string,
-    options?: BitbucketHttpOptions
+    options?: BitbucketHttpOptions & HttpRequestOptions<T>
   ): Promise<HttpResponse<T>> {
     const opts = { baseUrl, ...options };
 
-    const result = await super.request<T>(path, opts);
+    const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
+
+    // istanbul ignore if: this should never happen
+    if (is.nullOrUndefined(resolvedURL)) {
+      logger.error(`Bitbucket: cannot parse path ${path}`);
+      throw new Error(`Bitbucket: cannot parse path ${path}`);
+    }
+
+    if (opts.paginate && !hasPagelen(resolvedURL)) {
+      const pagelen = opts.pagelen ?? MAX_PAGELEN;
+      resolvedURL.searchParams.set('pagelen', pagelen.toString());
+    }
+
+    const result = await super.request<T>(resolvedURL.toString(), opts);
 
     if (opts.paginate && isPagedResult(result.body)) {
       const resultBody = result.body as PagedResult<T>;
+      let page = 1;
+      let nextURL = resultBody.next;
 
-      let nextPage = getPageFromURL(resultBody.next);
-
-      while (is.nonEmptyString(nextPage)) {
-        const nextPath = getNextPagePath(path, nextPage);
-
-        // istanbul ignore if
-        if (is.nullOrUndefined(nextPath)) {
-          break;
-        }
-
+      while (is.nonEmptyString(nextURL) && page <= MAX_PAGES) {
         const nextResult = await super.request<PagedResult<T>>(
-          nextPath,
-          options
+          nextURL,
+          options as BitbucketHttpOptions
         );
 
         resultBody.values.push(...nextResult.body.values);
 
-        nextPage = getPageFromURL(nextResult.body?.next);
+        nextURL = nextResult.body?.next;
+        page += 1;
       }
 
       // Override other page-related attributes
       resultBody.pagelen = resultBody.values.length;
-      resultBody.size = resultBody.values.length;
-      resultBody.next = undefined;
+      resultBody.size = page > MAX_PAGES ? undefined : resultBody.values.length;
+      resultBody.next = page > MAX_PAGES ? undefined : nextURL;
     }
 
     return result;
   }
 }
 
-function getPageFromURL(url: string | undefined): string | null {
-  const resolvedURL = parseUrl(url);
-
-  if (is.nullOrUndefined(resolvedURL)) {
-    return null;
-  }
-
-  return resolvedURL.searchParams.get('page');
-}
-
-function getNextPagePath(path: string, nextPage: string): string | null {
-  const resolvedURL = parseUrl(resolveBaseUrl(baseUrl, path));
-
-  // istanbul ignore if
-  if (is.nullOrUndefined(resolvedURL)) {
-    return null;
-  }
-
-  resolvedURL.searchParams.set('page', nextPage);
-
-  return resolvedURL.toString();
+function hasPagelen(url: URL): boolean {
+  return !is.nullOrUndefined(url.searchParams.get('pagelen'));
 }
 
 function isPagedResult(obj: any): obj is PagedResult {

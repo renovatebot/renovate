@@ -13,16 +13,16 @@ import type {
 
 export function extractPackageFile(
   content: string,
-  fileName: string
+  packageFile: string
 ): PackageFileContent | null {
-  logger.trace('tekton.extractPackageFile()');
+  logger.trace(`tekton.extractPackageFile(${packageFile})`);
   const deps: PackageDependency[] = [];
   let docs: TektonResource[];
   try {
     docs = loadAll(content) as TektonResource[];
   } catch (err) {
     logger.debug(
-      { err, fileName },
+      { err, packageFile },
       'Failed to parse YAML resource as a Tekton resource'
     );
     return null;

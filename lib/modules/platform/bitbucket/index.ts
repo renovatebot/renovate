@@ -80,7 +80,7 @@ export async function initPlatform({
   setBaseUrl(defaults.endpoint);
   renovateUserUuid = null;
   const options: HttpOptions = {
-    useCache: false,
+    memCache: false,
   };
   if (token) {
     options.token = token;
@@ -114,9 +114,14 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering Bitbucket Cloud repositories');
   try {
-    const repos = await utils.accumulateValues<{ full_name: string }>(
-      `/2.0/repositories/?role=contributor`
-    );
+    const repos = (
+      await bitbucketHttp.getJson<PagedResult<RepoInfoBody>>(
+        `/2.0/repositories/?role=contributor`,
+        {
+          paginate: true,
+        }
+      )
+    ).body.values;
     return repos.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `bitbucket getRepos error`);
@@ -274,7 +279,12 @@ export async function getPrList(): Promise<Pr[]> {
     if (renovateUserUuid && !config.ignorePrAuthor) {
       url += `&q=author.uuid="${renovateUserUuid}"`;
     }
-    const prs = await utils.accumulateValues(url, undefined, undefined, 50);
+    const prs = (
+      await bitbucketHttp.getJson<PagedResult<PrResponse>>(url, {
+        paginate: true,
+        pagelen: 50,
+      })
+    ).body.values;
     config.prList = prs.map(utils.prInfo);
     logger.debug(`Retrieved Pull Requests, count: ${config.prList.length}`);
   }
@@ -362,16 +372,18 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
 
 async function getStatus(
   branchName: string,
-  useCache = true
+  memCache = true
 ): Promise<BitbucketStatus[]> {
   const sha = await getBranchCommit(branchName);
-  return utils.accumulateValues<BitbucketStatus>(
-    // TODO: types (#7154)
-    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    `/2.0/repositories/${config.repository}/commit/${sha}/statuses`,
-    'get',
-    { useCache }
-  );
+  return (
+    await bitbucketHttp.getJson<PagedResult<BitbucketStatus>>(
+      `/2.0/repositories/${config.repository}/commit/${sha!}/statuses`,
+      {
+        paginate: true,
+        memCache,
+      }
+    )
+  ).body.values;
 }
 // Returns the combined status for a branch.
 export async function getBranchStatus(

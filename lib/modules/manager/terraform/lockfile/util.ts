@@ -1,4 +1,4 @@
-import { getSiblingFileName, readLocalFile } from '../../../../util/fs';
+import { findLocalSiblingOrParent, readLocalFile } from '../../../../util/fs';
 import { newlineRegex, regEx } from '../../../../util/regex';
 import { get as getVersioning } from '../../../versioning';
 import type { UpdateArtifactsResult } from '../../types';
@@ -22,8 +22,8 @@ const hashLineRegex = regEx(`^(?<prefix>\\s*")(?<hash>[^"]+)(?<suffix>",.*)$`);
 
 const lockFile = '.terraform.lock.hcl';
 
-export function findLockFile(packageFilePath: string): string {
-  return getSiblingFileName(packageFilePath, lockFile);
+export function findLockFile(packageFilePath: string): Promise<string | null> {
+  return findLocalSiblingOrParent(packageFilePath, lockFile);
 }
 
 export function readLockFile(lockFilePath: string): Promise<string | null> {
