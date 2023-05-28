@@ -1695,7 +1695,7 @@ If you wish to enable this feature then you could add this to your configuration
 }
 ```
 
-To reduce "noise" in the repository, it defaults its schedule to `"before 5am on monday"`, i.e. to achieve once-per-week semantics.
+To reduce "noise" in the repository, it defaults its schedule to `"before 4am on monday"`, i.e. to achieve once-per-week semantics.
 Depending on its running schedule, Renovate may run a few times within that time window - even possibly updating the lock file more than once - but it hopefully leaves enough time for tests to run and automerge to apply, if configured.
 
 ## major

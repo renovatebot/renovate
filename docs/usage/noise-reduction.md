@@ -107,7 +107,7 @@ Or perhaps at least weekly:
     {
       "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
-      "schedule": ["before 2am on monday"]
+      "schedule": ["before 4am on monday"]
     }
   ]
 }
@@ -167,7 +167,7 @@ Let's automerge it if all the linting updates pass:
     {
       "matchPackagePatterns": ["eslint"],
       "groupName": "eslint",
-      "schedule": ["before 2am on monday"],
+      "schedule": ["before 4am on monday"],
       "automerge": true,
       "automergeType": "branch"
     }
