@@ -612,13 +612,13 @@ When `constraintsFiltering=strict`, the following logic applies:
 
 Here are some examples:
 
-| Your repo engines.node     | Dependency release engines.node   | Result   |
-|--------------------------|--------------|----------|
-| `18`                     | `16 \|\| 18` | allowed  |
-| `^18.10.0`               | `>=18`       | allowed  |
-| `^16.10.0 \|\| >=18.0.0` | `>= 16.0.0`  | allowed  |
-| `>=16`                   | `16 \|\| 18` | filtered |
-| `16`                     | `^16.10.0`   | filtered |
+| Your repo engines.node   | Dependency release engines.node | Result   |
+| ------------------------ | ------------------------------- | -------- |
+| `18`                     | `16 \|\| 18`                    | allowed  |
+| `^18.10.0`               | `>=18`                          | allowed  |
+| `^16.10.0 \|\| >=18.0.0` | `>= 16.0.0`                     | allowed  |
+| `>=16`                   | `16 \|\| 18`                    | filtered |
+| `16`                     | `^16.10.0`                      | filtered |
 
 When using with `npm`, we recommend you:
 
