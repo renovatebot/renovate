@@ -31,4 +31,8 @@ body:
 
   - type: markdown
     attributes:
-      value: 'Before submitting the issue: add the correct `type:` label, and remove the `needs-discussion` label.'
+      value: '# Reminder for maintainers:'
+
+  - type: markdown
+    attributes:
+      value: '_Before_ submitting the issue: add the correct `type:` label, and remove the `needs-discussion` label.'
