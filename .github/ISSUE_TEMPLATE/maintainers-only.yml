@@ -35,4 +35,4 @@ body:
 
   - type: markdown
     attributes:
-      value: 'Before_ submitting the issue: add the correct **type:** label and remove the **needs-discussion** label.'
+      value: 'Before submitting the issue: add the correct **type:** label and remove the **needs-discussion** label.'
