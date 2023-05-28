@@ -12,6 +12,17 @@ body:
     attributes:
       value: '# This form is for Renovate maintainers only.'
 
+  - type: checkboxes
+    id: are-you-a-maintainer
+    attributes:
+      label: Are you a maintainer?
+      description: |
+        We only accept issues from Renovate maintainers. If you are not a maintainer, please create a Discussion instead.
+      options:
+        - label: I am a maintainer
+    validations:
+      required: true
+
   - type: textarea
     id: what-would-you-like-renovate-to-be-able-to-do
     attributes:
