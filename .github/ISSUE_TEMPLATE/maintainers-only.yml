@@ -38,5 +38,5 @@ body:
       value: |
         '_Before_ submitting the issue:
 
-          1. Add the correct `type:` label
-          2. Remove the `needs-discussion` label'
+            1. Add the correct `type:` label
+            2. Remove the `needs-discussion` label'
