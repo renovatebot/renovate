@@ -20,8 +20,8 @@ body:
         We only accept issues from Renovate maintainers. If you are not a maintainer, please create a Discussion instead.
       options:
         - label: I am a maintainer
-    validations:
-      required: true
+      validations:
+        required: true
 
   - type: textarea
     id: describe-proposed-changes
