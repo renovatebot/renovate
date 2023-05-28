@@ -17,7 +17,7 @@ export interface FilteredBranchUpgradeConfig {
   repoName?: string;
 }
 
-export interface PrFingerprintConfig {
+export interface PrBodyFingerprintConfig {
   // BranchConfig - filtered
   automerge?: boolean;
   automergeSchedule?: string[];
@@ -39,9 +39,9 @@ export interface PrFingerprintConfig {
   filteredUpgrades?: FilteredBranchUpgradeConfig[];
 }
 
-export function generatePrFingerprintConfig(
+export function generatePrBodyFingerprintConfig(
   config: BranchConfig
-): PrFingerprintConfig {
+): PrBodyFingerprintConfig {
   const filteredUpgrades = config.upgrades.map((upgrade) => {
     return {
       depName: upgrade.depName,
@@ -79,9 +79,9 @@ export function generatePrFingerprintConfig(
 
 export function validatePrCache(
   prCache: PrCache,
-  prFingerprint: string
+  bodyFingerprint: string
 ): boolean {
-  if (prCache.fingerprint !== prFingerprint) {
+  if (prCache.bodyFingerprint !== bodyFingerprint) {
     logger.debug('PR fingerprints mismatch, processing PR');
     return false;
   }

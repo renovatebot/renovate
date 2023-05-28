@@ -1,4 +1,4 @@
-import toml from '@iarna/toml';
+import is from '@sindresorhus/is';
 import { logger } from '../../../logger';
 import type {
   ExtractConfig,
@@ -6,8 +6,11 @@ import type {
   PackageFileContent,
 } from '../types';
 import { processors } from './processors';
-import { PyProject, PyProjectSchema } from './schema';
-import { parseDependencyGroupRecord, parseDependencyList } from './utils';
+import {
+  parseDependencyGroupRecord,
+  parseDependencyList,
+  parsePyProject,
+} from './utils';
 
 export function extractPackageFile(
   content: string,
@@ -18,17 +21,14 @@ export function extractPackageFile(
 
   const deps: PackageDependency[] = [];
 
-  let def: PyProject;
-  try {
-    const jsonMap = toml.parse(content);
-    def = PyProjectSchema.parse(jsonMap);
-  } catch (err) {
-    logger.debug(
-      { packageFile, err },
-      `Failed to parse and validate pyproject file`
-    );
+  const def = parsePyProject(packageFile, content);
+  if (is.nullOrUndefined(def)) {
     return null;
   }
+  const pythonConstraint = def.project?.['requires-python'];
+  const constraints = is.nonEmptyString(pythonConstraint)
+    ? { extractedConstraints: { python: pythonConstraint } }
+    : {};
 
   // pyProject standard definitions
   deps.push(
@@ -47,5 +47,5 @@ export function extractPackageFile(
     processedDeps = processor.process(def, processedDeps);
   }
 
-  return processedDeps.length ? { deps: processedDeps } : null;
+  return processedDeps.length ? { ...constraints, deps: processedDeps } : null;
 }
