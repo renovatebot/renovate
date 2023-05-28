@@ -71,7 +71,6 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
   const closedOnboardingPr = await closedPrExists(config);
   const cache = getCache();
   const onboardingBranchCache = cache?.onboardingBranchCache;
-  logger.debug({ onboardingBranchCache }, 'OnboardingBranchCache');
   // if onboarding cache is present and base branch has not been updated branch is not onboarded
   // if closed pr exists then presence of onboarding cache doesn't matter as we need to skip onboarding
   if (
