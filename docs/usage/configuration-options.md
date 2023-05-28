@@ -2765,11 +2765,11 @@ This is why we configured an upper limit for how long we wait until creating a P
 ## prPriority
 
 Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits.
-In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major).
+In such cases it sorts/prioritizes by default based on the update type (e.g. `patch` raised before `minor`, `minor` before `major`).
 If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting.
 The default value is 0, so setting a negative value will make dependencies sort last, while higher values sort first.
 
-Here's an example of how you would define PR priority so that devDependencies are raised last and `react` is raised first:
+Here's an example of how you would define PR priority so that `devDependencies` are raised last and `react` is raised first:
 
 ```json
 {
