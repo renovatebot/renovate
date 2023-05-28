@@ -596,7 +596,7 @@ Renovate supports two options:
 
 More advanced filtering options may come in future.
 
-Note: There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
+There must be a `constraints` object in your Renovate config, or constraints detected from package files, for this to work.
 This feature is limited to `packagist`, `npm`, and `pypi` datasources.
 
 <!-- prettier-ignore -->
@@ -612,7 +612,7 @@ When `constraintsFiltering=strict`, the following logic applies:
 
 Here are some examples:
 
-| project                  | dependency   | result   |
+| Your repo engines.node     | Dependency release engines.node   | Result   |
 |--------------------------|--------------|----------|
 | `18`                     | `16 \|\| 18` | allowed  |
 | `^18.10.0`               | `>=18`       | allowed  |
@@ -622,8 +622,8 @@ Here are some examples:
 
 When using with `npm`, we recommend you:
 
-- Use with `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
-- Do not enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
+- Use `constraintsFiltering` on `dependencies`, not `devDependencies` (usually you do not need to be strict about development dependencies)
+- Do _not_ enable `rollbackPrs` at the same time (otherwise your _current_ version may be rolled back if it's incompatible)
 
 ## defaultRegistryUrls
 
