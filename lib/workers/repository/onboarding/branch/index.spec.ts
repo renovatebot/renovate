@@ -13,6 +13,7 @@ import { GlobalConfig } from '../../../../config/global';
 import {
   REPOSITORY_FORKED,
   REPOSITORY_NO_PACKAGE_FILES,
+  REPOSITORY_ONBOARDING_SKIPPED,
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import type { Pr } from '../../../../modules/platform';
@@ -250,6 +251,28 @@ describe('workers/repository/onboarding/branch/index', () => {
         },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
+    });
+
+    it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
+      const dummyCache = {
+        onboardingBranchCache: {
+          defaultBranchSha: 'default-sha',
+          onboardingBranchSha: 'onboarding-sha',
+          isConflicted: false,
+          isModified: false,
+        },
+      } satisfies RepoCacheData;
+      cache.getCache.mockReturnValue(dummyCache);
+      scm.getFileList.mockResolvedValue(['package.json']);
+      platform.findPr.mockResolvedValue(null); // finds closed onboarding pr
+      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>()); // finds open onboarding pr
+      git.getBranchCommit
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('default-sha')
+        .mockReturnValueOnce('onboarding-sha');
+      await expect(checkOnboardingBranch(config)).rejects.toThrow(
+        REPOSITORY_ONBOARDING_SKIPPED
+      );
     });
 
     it('processes onboarding branch', async () => {

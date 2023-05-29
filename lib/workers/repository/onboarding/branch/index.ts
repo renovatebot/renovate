@@ -56,7 +56,6 @@ export async function checkOnboardingBranch(
     const cache = getCache();
     const onboardingBranchCache = cache?.onboardingBranchCache;
     if (
-      config.onboarding &&
       onboardingBranchCache &&
       onboardingBranchCache.defaultBranchSha ===
         getBranchCommit(config.defaultBranch!) &&
