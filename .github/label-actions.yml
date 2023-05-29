@@ -187,7 +187,7 @@
     This PR will be closed, but you can reopen it after the discussion has been resolved.
 
 
-    Thanks, The Renovate team
+    Thanks, the Renovate team
   close: true
 
 'needs-details':
@@ -214,7 +214,7 @@
     This Issue will now be closed and locked. We may later batch-delete this issue. This way we keep Issues actionable, and free of duplicates or wrong bug reports.
 
 
-    Thanks, The Renovate team
+    Thanks, the Renovate team
   close: true
   lock: true
   lock-reason: 'resolved'
@@ -227,4 +227,4 @@
     You can find a Markdown code formatting guide [here](https://www.markdownguide.org/basic-syntax/#code) as well as some GitHub-specific information formatting code blocks [here](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/creating-and-highlighting-code-blocks).
 
 
-    Thanks, The Renovate team
+    Thanks, the Renovate team
