@@ -67,7 +67,7 @@ const scalaVersionMatch = q
       const scalaVersion =
         ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
       if (scalaVersion) {
-        ctx.scalaVersion = scalaVersion.val;
+        ctx.scalaVersion = scalaVersion.value;
       }
       return ctx;
     })
@@ -106,7 +106,7 @@ const packageFileVersionMatch = q
       const packageFileVersion =
         ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
       if (packageFileVersion) {
-        ctx.packageFileVersion = packageFileVersion.val;
+        ctx.packageFileVersion = packageFileVersion.value;
       }
       return ctx;
     })
@@ -122,7 +122,7 @@ const variableNameMatch = q
 const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
   if (ctx.localVars) {
     ctx.localVars[ctx.currentVarName!] = {
-      val: value,
+      value,
       packageFile: ctx.packageFile,
       lineNumber: line,
     };
@@ -149,7 +149,7 @@ const groupIdMatch = q.alt<Ctx>(
     const currentGroupId =
       ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
     if (currentGroupId) {
-      ctx.groupId = currentGroupId.val;
+      ctx.groupId = currentGroupId.value;
     }
     return ctx;
   }),
@@ -160,7 +160,7 @@ const artifactIdMatch = q.alt<Ctx>(
   nestedVariableLiteral((ctx, { value: varName }) => {
     const artifactId = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
     if (artifactId) {
-      ctx.artifactId = artifactId.val;
+      ctx.artifactId = artifactId.value;
     }
     return ctx;
   }),
@@ -170,7 +170,7 @@ const artifactIdMatch = q.alt<Ctx>(
 const resolveVariable: q.SymMatcherHandler<Ctx> = (ctx, { value: varName }) => {
   const currentValue = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
   if (currentValue) {
-    ctx.currentValue = currentValue.val;
+    ctx.currentValue = currentValue.value;
     ctx.currentValueInfo = currentValue;
     ctx.variableName = varName;
   }

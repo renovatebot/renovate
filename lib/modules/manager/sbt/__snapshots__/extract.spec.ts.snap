@@ -41,7 +41,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
     "abcVersion": {
       "lineNumber": 8,
       "packageFile": "build.sbt",
-      "val": "1.2.3",
+      "value": "1.2.3",
     },
   },
   "packageFile": "build.sbt",
@@ -135,7 +135,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
     "abcVersion": {
       "lineNumber": 8,
       "packageFile": "build.sbt",
-      "val": "1.2.3",
+      "value": "1.2.3",
     },
   },
   "packageFile": "build.sbt",
@@ -349,17 +349,17 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
     "artifactIdExample": {
       "lineNumber": 17,
       "packageFile": "build.sbt",
-      "val": "corge",
+      "value": "corge",
     },
     "groupIdExample": {
       "lineNumber": 16,
       "packageFile": "build.sbt",
-      "val": "org.example",
+      "value": "org.example",
     },
     "versionExample": {
       "lineNumber": 18,
       "packageFile": "build.sbt",
-      "val": "0.0.8",
+      "value": "0.0.8",
     },
   },
   "packageFile": "build.sbt",
@@ -535,22 +535,22 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     "ScalaVersion": {
       "lineNumber": 1,
       "packageFile": "build.sbt",
-      "val": "2.12.10",
+      "value": "2.12.10",
     },
     "artifactIdExample": {
       "lineNumber": 19,
       "packageFile": "build.sbt",
-      "val": "corge",
+      "value": "corge",
     },
     "groupIdExample": {
       "lineNumber": 18,
       "packageFile": "build.sbt",
-      "val": "org.example",
+      "value": "org.example",
     },
     "versionExample": {
       "lineNumber": 2,
       "packageFile": "build.sbt",
-      "val": "0.0.8",
+      "value": "0.0.8",
     },
   },
   "packageFile": "build.sbt",
@@ -594,7 +594,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     "ScalaVersion": {
       "lineNumber": 2,
       "packageFile": "build.sbt",
-      "val": "2.12.10",
+      "value": "2.12.10",
     },
   },
   "packageFile": "build.sbt",
@@ -632,7 +632,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
     "ScalaVersion": {
       "lineNumber": 2,
       "packageFile": "build.sbt",
-      "val": "2.12.10",
+      "value": "2.12.10",
     },
   },
   "packageFile": "build.sbt",

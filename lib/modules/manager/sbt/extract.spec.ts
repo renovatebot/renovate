@@ -167,7 +167,7 @@ describe('modules/manager/sbt/extract', () => {
           sbtReleaseVersion: {
             lineNumber: 7,
             packageFile: 'build.sbt',
-            val: '1.0.11',
+            value: '1.0.11',
           },
         },
         packageFile: 'build.sbt',

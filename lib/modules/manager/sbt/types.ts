@@ -1,5 +1,5 @@
 export type VariableContext = {
-  val: string;
+  value: string;
   packageFile: string;
   lineNumber: number;
 };
