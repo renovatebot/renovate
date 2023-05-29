@@ -1,6 +1,6 @@
 export type VariableContext = {
   val: string;
-  sourceFile: string;
+  packageFile: string;
   lineNumber: number;
 };
 export type Variables = Record<string, VariableContext>;
@@ -14,4 +14,9 @@ export interface ParseOptions {
   scalaVersion?: string;
   localVars?: Variables;
   globalVars?: Variables;
+}
+
+export interface SbtManagerData {
+  lineNumber?: number;
+  packageFile?: string;
 }

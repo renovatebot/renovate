@@ -20,13 +20,14 @@ import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
   GroupFilenameContent,
   ParseOptions,
+  SbtManagerData,
   VariableContext,
   Variables,
 } from './types';
 import { normalizeScalaVersion } from './util';
 
 interface Ctx extends ParseOptions {
-  deps: PackageDependency[];
+  deps: PackageDependency<SbtManagerData>[];
   registryUrls: string[];
 
   scalaVersion?: string;
@@ -80,7 +81,7 @@ const scalaVersionMatch = q
         packageName = 'org.scala-lang:scala3-library_3';
       }
 
-      const dep: PackageDependency = {
+      const dep: PackageDependency<SbtManagerData> = {
         datasource: MavenDatasource.id,
         depName: 'scala',
         packageName,
@@ -122,7 +123,7 @@ const variableValueMatch = q.str<Ctx>((ctx, { value, line }) => {
   if (ctx.localVars) {
     ctx.localVars[ctx.currentVarName!] = {
       val: value,
-      sourceFile: ctx.packageFile,
+      packageFile: ctx.packageFile,
       lineNumber: line,
     };
   }
@@ -223,7 +224,7 @@ function depHandler(ctx: Ctx): Ctx {
 
   const depName = `${groupId!}:${artifactId!}`;
 
-  const dep: PackageDependency = {
+  const dep: PackageDependency<SbtManagerData> = {
     datasource: SbtPackageDatasource.id,
     depName,
     packageName:
@@ -242,8 +243,9 @@ function depHandler(ctx: Ctx): Ctx {
   if (variableName) {
     dep.groupName = variableName;
     if (currentValueInfo) {
-      dep.fileReplacePosition = currentValueInfo.lineNumber;
-      dep.editFile = currentValueInfo.sourceFile;
+      dep.managerData ??= {};
+      dep.managerData.lineNumber = currentValueInfo.lineNumber;
+      dep.managerData.packageFile = currentValueInfo.packageFile;
     }
   }
 
@@ -342,7 +344,7 @@ export function extractDependency(
     const sbtVersion = regexResult?.groups?.version;
     const matchString = regexResult?.[0];
     if (sbtVersion) {
-      const sbtDependency: PackageDependency = {
+      const sbtDependency: PackageDependency<SbtManagerData> = {
         datasource: GithubReleasesDatasource.id,
         depName: 'sbt/sbt',
         packageName: 'sbt/sbt',
@@ -449,7 +451,10 @@ export async function extractAllPackageFiles(
     ...(groupPackageFileContent['.'] ?? []), // root
   ]);
 
-  const mapDepsToPackageFile: Record<string, PackageDependency[]> = {};
+  const mapDepsToPackageFile: Record<
+    string,
+    PackageDependency<SbtManagerData>[]
+  > = {};
   // Start extract all package files
   for (const packageFileContents of Object.values(groupPackageFileContent)) {
     for (const { packageFile, content } of packageFileContents) {
@@ -461,10 +466,10 @@ export async function extractAllPackageFiles(
         globalVars,
       });
       for (const dep of res?.deps ?? []) {
-        const variableSourceFile = dep?.editFile ?? packageFile;
+        const variableSourceFile = dep?.managerData?.packageFile ?? packageFile;
         delete res?.localVars;
         delete res?.scalaVersion;
-        delete dep.editFile;
+        delete dep.managerData?.packageFile;
         dep.registryUrls = [...new Set(dep.registryUrls)];
         mapDepsToPackageFile[variableSourceFile] ??= [];
         const notFound = !mapDepsToPackageFile[variableSourceFile].find(

@@ -5,6 +5,7 @@ import type {
   BumpPackageVersionResult,
   UpdateDependencyConfig,
 } from '../types';
+import type { SbtManagerData } from './types';
 
 export function bumpPackageVersion(
   content: string,
@@ -38,11 +39,11 @@ export function bumpPackageVersion(
 export function updateDependency({
   fileContent,
   upgrade,
-}: UpdateDependencyConfig): string | null {
-  const { fileReplacePosition, currentValue, newValue } = upgrade;
+}: UpdateDependencyConfig<SbtManagerData>): string | null {
+  const { managerData, currentValue, newValue } = upgrade;
   if (currentValue && newValue) {
-    if (fileReplacePosition) {
-      const lineIndex = upgrade.fileReplacePosition! - 1;
+    if (managerData?.lineNumber) {
+      const lineIndex = managerData.lineNumber - 1;
       const offset = fileContent
         .split(newlineRegex, lineIndex)
         .join('\n').length;

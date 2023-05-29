@@ -26,9 +26,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 8,
       "groupName": "abcVersion",
+      "managerData": {
+        "lineNumber": 8,
+        "packageFile": "build.sbt",
+      },
       "packageName": "com.abc:abc",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -38,7 +40,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
   "localVars": {
     "abcVersion": {
       "lineNumber": 8,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "1.2.3",
     },
   },
@@ -76,9 +78,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 8,
       "groupName": "abcVersion",
+      "managerData": {
+        "lineNumber": 8,
+        "packageFile": "build.sbt",
+      },
       "packageName": "com.abc:abc",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -88,9 +92,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-a",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 8,
       "groupName": "abcVersion",
+      "managerData": {
+        "lineNumber": 8,
+        "packageFile": "build.sbt",
+      },
       "packageName": "com.abc:abc-a",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -100,9 +106,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-b",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 8,
       "groupName": "abcVersion",
+      "managerData": {
+        "lineNumber": 8,
+        "packageFile": "build.sbt",
+      },
       "packageName": "com.abc:abc-b",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -112,9 +120,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc-c",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 8,
       "groupName": "abcVersion",
+      "managerData": {
+        "lineNumber": 8,
+        "packageFile": "build.sbt",
+      },
       "packageName": "com.abc:abc-c",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -124,7 +134,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extract deps from nati
   "localVars": {
     "abcVersion": {
       "lineNumber": 8,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "1.2.3",
     },
   },
@@ -289,9 +299,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 18,
       "groupName": "versionExample",
+      "managerData": {
+        "lineNumber": 18,
+        "packageFile": "build.sbt",
+      },
       "packageName": "org.example:grault",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -336,17 +348,17 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps for gene
   "localVars": {
     "artifactIdExample": {
       "lineNumber": 17,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "corge",
     },
     "groupIdExample": {
       "lineNumber": 16,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "org.example",
     },
     "versionExample": {
       "lineNumber": 18,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "0.0.8",
     },
   },
@@ -487,9 +499,11 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "editFile": "build.sbt",
-      "fileReplacePosition": 2,
       "groupName": "versionExample",
+      "managerData": {
+        "lineNumber": 2,
+        "packageFile": "build.sbt",
+      },
       "packageName": "org.example:grault",
       "registryUrls": [
         "https://repo.maven.apache.org/maven2",
@@ -520,22 +534,22 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
   "localVars": {
     "ScalaVersion": {
       "lineNumber": 1,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "2.12.10",
     },
     "artifactIdExample": {
       "lineNumber": 19,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "corge",
     },
     "groupIdExample": {
       "lineNumber": 18,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "org.example",
     },
     "versionExample": {
       "lineNumber": 2,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "0.0.8",
     },
   },
@@ -579,7 +593,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
   "localVars": {
     "ScalaVersion": {
       "lineNumber": 2,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "2.12.10",
     },
   },
@@ -617,7 +631,7 @@ exports[`modules/manager/sbt/extract extractPackageFile() extracts deps when sca
   "localVars": {
     "ScalaVersion": {
       "lineNumber": 2,
-      "sourceFile": "build.sbt",
+      "packageFile": "build.sbt",
       "val": "2.12.10",
     },
   },

@@ -151,9 +151,11 @@ describe('modules/manager/sbt/extract', () => {
             datasource: 'sbt-plugin',
             depName: 'com.github.gseitz:sbt-release',
             depType: 'plugin',
-            editFile: 'build.sbt',
-            fileReplacePosition: 7,
             groupName: 'sbtReleaseVersion',
+            managerData: {
+              lineNumber: 7,
+              packageFile: 'build.sbt',
+            },
             packageName: 'com.github.gseitz:sbt-release',
             registryUrls: [
               'https://repo.maven.apache.org/maven2',
@@ -164,7 +166,7 @@ describe('modules/manager/sbt/extract', () => {
         localVars: {
           sbtReleaseVersion: {
             lineNumber: 7,
-            sourceFile: 'build.sbt',
+            packageFile: 'build.sbt',
             val: '1.0.11',
           },
         },
@@ -526,8 +528,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '0.13.0',
               datasource: 'sbt-package',
               depName: 'io.circe:circe-generic',
-              fileReplacePosition: 8,
               groupName: 'circe',
+              managerData: {
+                lineNumber: 8,
+              },
               packageName: 'io.circe:circe-generic_2.13',
               registryUrls,
             },
@@ -535,8 +539,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '10.2.6',
               datasource: 'sbt-package',
               depName: 'com.typesafe.akka:akka-http',
-              fileReplacePosition: 4,
               groupName: 'akkaHttp',
+              managerData: {
+                lineNumber: 4,
+              },
               packageName: 'com.typesafe.akka:akka-http_2.13',
               registryUrls,
             },
@@ -544,8 +550,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '2.6.18',
               datasource: 'sbt-package',
               depName: 'com.typesafe.akka:akka-stream',
-              fileReplacePosition: 3,
               groupName: 'akka',
+              managerData: {
+                lineNumber: 3,
+              },
               packageName: 'com.typesafe.akka:akka-stream_2.13',
               registryUrls,
             },
@@ -553,8 +561,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '1.3.1',
               datasource: 'sbt-package',
               depName: 'org.sangria-graphql:sangria-circe',
-              fileReplacePosition: 7,
               groupName: 'sangriacirce',
+              managerData: {
+                lineNumber: 7,
+              },
               packageName: 'org.sangria-graphql:sangria-circe_2.13',
               registryUrls,
             },
@@ -563,8 +573,10 @@ describe('modules/manager/sbt/extract', () => {
               datasource: 'sbt-package',
               depName: 'org.scalatest:scalatest-wordspec',
               depType: 'Test',
-              fileReplacePosition: 14,
               groupName: 'scalaTest',
+              managerData: {
+                lineNumber: 14,
+              },
               packageName: 'org.scalatest:scalatest-wordspec_2.13',
               registryUrls,
             },
@@ -573,8 +585,10 @@ describe('modules/manager/sbt/extract', () => {
               datasource: 'sbt-package',
               depName: 'org.scalatest:scalatest-funsuite',
               depType: 'Test',
-              fileReplacePosition: 14,
               groupName: 'scalaTest',
+              managerData: {
+                lineNumber: 14,
+              },
               packageName: 'org.scalatest:scalatest-funsuite_2.13',
               registryUrls,
             },
@@ -583,8 +597,10 @@ describe('modules/manager/sbt/extract', () => {
               datasource: 'sbt-package',
               depName: 'org.mockito:mockito-scala-scalatest',
               depType: 'Test',
-              fileReplacePosition: 15,
               groupName: 'mockito',
+              managerData: {
+                lineNumber: 15,
+              },
               packageName: 'org.mockito:mockito-scala-scalatest_2.13',
               registryUrls,
             },
@@ -593,8 +609,10 @@ describe('modules/manager/sbt/extract', () => {
               datasource: 'sbt-package',
               depName: 'com.github.tomakehurst:wiremock-jre8',
               depType: 'Test',
-              fileReplacePosition: 13,
               groupName: 'wiremock',
+              managerData: {
+                lineNumber: 13,
+              },
               packageName: 'com.github.tomakehurst:wiremock-jre8',
               registryUrls: [
                 'https://repo.maven.apache.org/maven2',
@@ -608,8 +626,10 @@ describe('modules/manager/sbt/extract', () => {
               depName:
                 'com.softwaremill.sttp.client3:async-http-client-backend-future',
               depType: 'Test',
-              fileReplacePosition: 5,
               groupName: 'sttp',
+              managerData: {
+                lineNumber: 5,
+              },
               packageName:
                 'com.softwaremill.sttp.client3:async-http-client-backend-future_2.13',
               registryUrls,
@@ -702,8 +722,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '0.13.0',
               datasource: 'sbt-package',
               depName: 'io.circe:circe-generic',
-              fileReplacePosition: 6,
               groupName: 'circe',
+              managerData: {
+                lineNumber: 6,
+              },
               packageName: 'io.circe:circe-generic_2.13',
               registryUrls,
             },
@@ -711,8 +733,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '10.2.6',
               datasource: 'sbt-package',
               depName: 'com.typesafe.akka:akka-http',
-              fileReplacePosition: 4,
               groupName: 'akkaHttp',
+              managerData: {
+                lineNumber: 4,
+              },
               packageName: 'com.typesafe.akka:akka-http_2.13',
               registryUrls,
             },
@@ -720,8 +744,10 @@ describe('modules/manager/sbt/extract', () => {
               currentValue: '2.6.18',
               datasource: 'sbt-package',
               depName: 'com.typesafe.akka:akka-stream',
-              fileReplacePosition: 3,
               groupName: 'akka',
+              managerData: {
+                lineNumber: 3,
+              },
               packageName: 'com.typesafe.akka:akka-stream_2.13',
               registryUrls,
             },
