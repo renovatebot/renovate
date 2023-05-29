@@ -93,11 +93,11 @@ If you use the GitHub hosted app, the default is that Renovate will always be al
 Be sure to schedule enough time for Renovate to process your repository.
 Do not set schedules like "Run Renovate for an hour each Sunday" as you _will_ run into problems.
 
-Say you want Renovate bot to run each day before 2 am:
+Say you want Renovate to run each day before 4 am:
 
 ```json
 {
-  "schedule": ["before 2am"]
+  "schedule": ["before 4am"]
 }
 ```
 

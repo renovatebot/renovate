@@ -154,7 +154,7 @@ Set configuration option `rangeStrategy` to `"replace"`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
-By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 5am on monday"]`.
+By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 4am on monday"]`.
 If you want to update the lock file more often, set the `schedule` field inside the `lockFileMaintenance` object.
 
 ### Wait until tests have passed before creating the PR
