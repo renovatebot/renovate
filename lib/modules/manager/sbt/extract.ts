@@ -19,14 +19,15 @@ import { REGISTRY_URLS } from '../gradle/parser/common';
 import type { ExtractConfig, PackageDependency, PackageFile } from '../types';
 import type {
   GroupFilenameContent,
-  ParseOptions,
   SbtManagerData,
   VariableContext,
   Variables,
 } from './types';
 import { normalizeScalaVersion } from './util';
 
-interface Ctx extends ParseOptions {
+interface Ctx {
+  localVars?: Variables;
+  globalVars?: Variables;
   deps: PackageDependency<SbtManagerData>[];
   registryUrls: string[];
 
@@ -338,7 +339,7 @@ export function extractDependency(
     localVars = {},
     globalVars = {},
     scalaVersion,
-  }: PackageFile & ParseOptions
+  }: PackageFile & Pick<Ctx, 'localVars' | 'globalVars' | 'scalaVersion'>
 ): Ctx | null {
   if (
     packageFile === 'project/build.properties' ||
@@ -393,15 +394,11 @@ export function extractDependency(
 
 function prepareLoadPackageFiles(
   packageFilesContent: { packageFile: string; content: string }[]
-): {
-  globalVars: ParseOptions['globalVars'];
-  registryUrls: string[];
-  scalaVersion: ParseOptions['scalaVersion'];
-} {
+): Pick<Ctx, 'globalVars' | 'registryUrls' | 'scalaVersion'> {
   // Return variable
-  let globalVars: Variables = {};
-  let registryUrls: string[] = [REGISTRY_URLS.mavenCentral];
-  let scalaVersion: string | undefined = undefined;
+  let globalVars: Ctx['globalVars'] = {};
+  let registryUrls: Ctx['registryUrls'] = [REGISTRY_URLS.mavenCentral];
+  let scalaVersion: Ctx['scalaVersion'] = undefined;
 
   for (const { packageFile, content } of packageFilesContent) {
     const res = extractDependency(content, {

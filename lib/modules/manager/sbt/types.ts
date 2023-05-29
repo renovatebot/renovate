@@ -10,12 +10,6 @@ export type GroupFilenameContent = Record<
   { packageFile: string; content: string }[]
 >;
 
-export interface ParseOptions {
-  scalaVersion?: string;
-  localVars?: Variables;
-  globalVars?: Variables;
-}
-
 export interface SbtManagerData {
   lineNumber?: number;
   packageFile?: string;
