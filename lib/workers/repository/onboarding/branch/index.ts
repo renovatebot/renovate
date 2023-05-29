@@ -51,7 +51,27 @@ export async function checkOnboardingBranch(
   // global gitAuthor will need to be used
   setGitAuthor(config.gitAuthor);
   const onboardingPr = await getOnboardingPr(config);
+  // TODO #7154
+  const branchList = [onboardingBranch!];
   if (onboardingPr) {
+    const cache = getCache();
+    const onboardingBranchCache = cache?.onboardingBranchCache;
+    if (
+      onboardingBranchCache &&
+      onboardingBranchCache.defaultBranchSha ===
+        getBranchCommit(config.defaultBranch!) &&
+      onboardingBranchCache.onboardingBranchSha ===
+        getBranchCommit(config.onboardingBranch!)
+    ) {
+      logger.debug(
+        'Skip processing since the onboarding branch is up to date and default branch has not changed'
+      );
+      // handle OnboardingState class updation here
+      OnboardingState.onboardingCacheValid = true;
+      return { ...config, repoIsOnboarded, onboardingBranch, branchList };
+    }
+
+    OnboardingState.onboardingCacheValid = false;
     if (config.onboardingRebaseCheckbox) {
       handleOnboardingManualRebase(onboardingPr);
     }
@@ -109,8 +129,6 @@ export async function checkOnboardingBranch(
     isModified
   );
 
-  // TODO #7154
-  const branchList = [onboardingBranch!];
   return { ...config, repoIsOnboarded, onboardingBranch, branchList };
 }
 

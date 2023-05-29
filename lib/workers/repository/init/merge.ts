@@ -25,6 +25,12 @@ import * as hostRules from '../../../util/host-rules';
 import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import type { RepoFileConfig } from './types';
+import { OnboardingState } from '../onboarding/common';
+import {
+  getOnboardingFileNameFromCache,
+  getRawOnboardingFileFromCache,
+  setOnboardingConfigDetails,
+} from '../onboarding/branch/onboarding-branch-cache';
 
 async function detectConfigFile(): Promise<string | null> {
   const fileList = await scm.getFileList();
@@ -74,7 +80,13 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       delete cache.configFileName;
     }
   }
-  configFileName = (await detectConfigFile()) ?? undefined;
+
+  if (OnboardingState.onboardingCacheValid) {
+    configFileName = getOnboardingFileNameFromCache();
+  }
+
+  configFileName = configFileName ?? (await detectConfigFile()) ?? undefined;
+
   if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
@@ -84,11 +96,15 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   // TODO #7154
   let configFileParsed: any;
   let configFileRaw: string | undefined | null;
+  if (OnboardingState.onboardingCacheValid) {
+    configFileRaw = getRawOnboardingFileFromCache();
+  }
+
   if (configFileName === 'package.json') {
     // We already know it parses
     configFileParsed = JSON.parse(
       // TODO #7154
-      (await readLocalFile('package.json', 'utf8'))!
+      configFileRaw ?? (await readLocalFile('package.json', 'utf8'))!
     ).renovate;
     if (is.string(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
@@ -96,7 +112,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    configFileRaw = await readLocalFile(configFileName, 'utf8');
+    configFileRaw =
+      configFileRaw ?? (await readLocalFile(configFileName, 'utf8'));
     // istanbul ignore if
     if (!is.string(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -171,6 +188,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
+  setOnboardingConfigDetails(configFileName, configFileRaw!);
   return { configFileName, configFileRaw, configFileParsed };
 }
 

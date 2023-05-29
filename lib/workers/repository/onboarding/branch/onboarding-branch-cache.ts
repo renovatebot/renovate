@@ -3,6 +3,8 @@ import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { getBranchCommit } from '../../../../util/git';
+import { clone } from '../../../../util/clone';
+import type { OnboardingBranchCache } from '../../../../util/cache/repository/types';
 
 export function setOnboardingCache(
   defaultBranchSha: string,
@@ -78,6 +80,34 @@ export async function isOnboardingBranchModified(
   }
 
   return isModified;
+}
+
+export function getOnboardingFileNameFromCache(): string | undefined {
+  const cache = getCache();
+  const onboardingCache = cache.onboardingBranchCache;
+  return onboardingCache?.configFileName;
+}
+
+export function getRawOnboardingFileFromCache(): string | undefined {
+  const cache = getCache();
+  const onboardingCache = cache.onboardingBranchCache;
+  return onboardingCache?.configFileRaw;
+}
+
+export function setOnboardingConfigDetails(
+  configFileName: string,
+  configFileRaw: string
+): void {
+  const cache = getCache();
+  if (cache.onboardingBranchCache) {
+    let newOnboardingCache: OnboardingBranchCache = structuredClone(
+      cache.onboardingBranchCache ?? {}
+    );
+
+    newOnboardingCache.configFileName = configFileName;
+    newOnboardingCache.configFileRaw = configFileRaw;
+    cache.onboardingBranchCache = newOnboardingCache;
+  }
 }
 
 export async function isOnboardingBranchConflicted(
