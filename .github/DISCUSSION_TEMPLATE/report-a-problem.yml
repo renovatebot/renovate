@@ -51,7 +51,6 @@ body:
     id: describe-problem
     attributes:
       label: Describe the problem
-      description: 'Do not report any security concerns here. Email [renovate-disclosure@mend.io](mailto:renovate-disclosure@mend.io) instead.'
     validations:
       required: true
 
@@ -59,13 +58,6 @@ body:
     id: debug-logs
     attributes:
       label: Relevant debug logs
-      description: |
-        Try not to report a problem unless you've looked at the logs first.
-        If you're running self-hosted, run with `LOG_LEVEL=debug` in your environment variables and search for whatever dependency/branch/PR that is causing the problem.
-        If you are using the Renovate App, log into [Renovate's app dashboard](https://app.renovatebot.com/dashboard) and locate the correct job log for when the problem occurred (e.g. when the PR was created).
-        Try to paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others don't have permissions to view them).
-        If you're not sure about the relevant parts of the log, then feel free to post the full log to a [Github Gist](https://gist.github.com/) and link to it.
-        Try to highlight the important logs into the Discussion itself.
       value: |
         <details><summary>Logs</summary>
 
@@ -81,7 +73,6 @@ body:
     id: minimal-reproduction-repository
     attributes:
       label: Have you created a minimal reproduction repository?
-      description: Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/main/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
       options:
         - 'Placeholder value, please select the correct response from the dropdown'
         - 'I have linked to a minimal reproduction in the description above'
