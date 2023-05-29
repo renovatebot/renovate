@@ -1,6 +1,6 @@
 name: Maintainers only
 description: For maintainers only
-labels: ['status:requirements', 'priority-5-triage', 'needs-discussion']
+labels: ['status:ready', 'priority-3-medium', 'needs-discussion']
 body:
   - type: markdown
     attributes:
@@ -22,7 +22,7 @@ body:
       required: true
 
   - type: textarea
-    id: descibe-why-we-need-want-these-changes
+    id: describe-why-we-need-want-these-changes
     attributes:
       label: Describe why we need/want these change(s).
       description: 'Do not report any security concerns here. Email renovate-disclosure@mend.io instead.'
