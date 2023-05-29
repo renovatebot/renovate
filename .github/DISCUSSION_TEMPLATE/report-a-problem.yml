@@ -22,7 +22,6 @@ body:
     attributes:
       label: If you're self-hosting Renovate, select which platform you are using.
       options:
-        - 'Placeholder value, please select the correct response from the dropdown'
         - 'AWS CodeCommit'
         - 'Azure DevOps (dev.azure.com)'
         - 'Azure DevOps Server'
