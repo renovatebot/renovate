@@ -1905,7 +1905,7 @@ const options: RenovateOptions[] = [
       commitMessageAction: 'Lock file maintenance',
       commitMessageTopic: null,
       commitMessageExtra: null,
-      schedule: ['before 5am on monday'],
+      schedule: ['before 4am on monday'],
       groupName: null,
       prBodyDefinitions: {
         Change: 'All locks refreshed',
