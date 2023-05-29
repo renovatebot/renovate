@@ -78,7 +78,7 @@ export function extractFromJob(
 
 export function extractPackageFile(
   content: string,
-  _fileName: string,
+  packageFile: string,
   config: ExtractConfig
 ): PackageFileContent | null {
   let deps: PackageDependency[] = [];
@@ -115,7 +115,10 @@ export function extractPackageFile(
       deps = deps.filter(is.truthy);
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting GitLab CI dependencies');
+    logger.debug(
+      { err, packageFile },
+      'Error extracting GitLab CI dependencies'
+    );
   }
 
   return deps.length ? { deps } : null;
@@ -135,7 +138,10 @@ export async function extractAllPackageFiles(
 
     const content = await readLocalFile(file, 'utf8');
     if (!content) {
-      logger.debug(`Empty or non existent gitlabci file ${file}`);
+      logger.debug(
+        { packageFile: file },
+        `Empty or non existent gitlabci file`
+      );
       continue;
     }
     let doc: GitlabPipeline;
@@ -144,7 +150,10 @@ export async function extractAllPackageFiles(
         json: true,
       }) as GitlabPipeline;
     } catch (err) {
-      logger.warn({ err, file }, 'Error extracting GitLab CI dependencies');
+      logger.debug(
+        { err, packageFile: file },
+        'Error extracting GitLab CI dependencies'
+      );
       continue;
     }
 

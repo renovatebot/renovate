@@ -57,7 +57,7 @@ When you create a new repository on say GitHub or GitLab, you'll get a `main` br
 
 We replaced `master` with `main` in our documentation where possible.
 
-A branch name has no special meaning within the Git program, it's just a name.
+A branch name has no special meaning within the Git program, it's only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
@@ -154,7 +154,7 @@ Set configuration option `rangeStrategy` to `"replace"`.
 
 ### Keep lock files (including sub-dependencies) up-to-date, even when `package.json` hasn't changed
 
-By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 5am on monday"]`.
+By default, if you enable lock-file maintenance, Renovate will update the lockfile `["before 4am on monday"]`.
 If you want to update the lock file more often, set the `schedule` field inside the `lockFileMaintenance` object.
 
 ### Wait until tests have passed before creating the PR

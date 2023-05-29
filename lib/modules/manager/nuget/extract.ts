@@ -76,7 +76,7 @@ export async function extractPackageFile(
   packageFile: string,
   _config: ExtractConfig
 ): Promise<PackageFileContent | null> {
-  logger.trace({ packageFile }, 'nuget.extractPackageFile()');
+  logger.trace(`nuget.extractPackageFile(${packageFile})`);
 
   const registries = await getConfiguredRegistries(packageFile);
   const registryUrls = registries
@@ -90,12 +90,12 @@ export async function extractPackageFile(
     try {
       manifest = JSON.parse(content);
     } catch (err) {
-      logger.debug(`Invalid JSON in ${packageFile}`);
+      logger.debug({ packageFile }, `Invalid JSON`);
       return null;
     }
 
     if (manifest.version !== 1) {
-      logger.debug({ contents: manifest }, 'Unsupported dotnet tools version');
+      logger.debug({ packageFile }, 'Unsupported dotnet tools version');
       return null;
     }
 
@@ -132,7 +132,7 @@ export async function extractPackageFile(
     }));
     packageFileVersion = parsedXml.valueWithPath('PropertyGroup.Version');
   } catch (err) {
-    logger.debug({ err }, `Failed to parse ${packageFile}`);
+    logger.debug({ err, packageFile }, `Failed to parse XML`);
   }
 
   if (!deps.length) {

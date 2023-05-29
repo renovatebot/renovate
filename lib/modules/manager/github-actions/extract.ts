@@ -88,7 +88,7 @@ function extractContainer(container: unknown): PackageDependency | undefined {
 
 function extractWithYAMLParser(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageDependency[] {
   logger.trace('github-actions.extractWithYAMLParser()');
   const deps: PackageDependency[] = [];
@@ -98,7 +98,7 @@ function extractWithYAMLParser(
     pkg = load(content, { json: true }) as Workflow;
   } catch (err) {
     logger.debug(
-      { filename, err },
+      { packageFile, err },
       'Failed to parse GitHub Actions Workflow YAML'
     );
     return [];
@@ -125,12 +125,12 @@ function extractWithYAMLParser(
 
 export function extractPackageFile(
   content: string,
-  filename: string
+  packageFile: string
 ): PackageFileContent | null {
-  logger.trace('github-actions.extractPackageFile()');
+  logger.trace(`github-actions.extractPackageFile(${packageFile})`);
   const deps = [
     ...extractWithRegex(content),
-    ...extractWithYAMLParser(content, filename),
+    ...extractWithYAMLParser(content, packageFile),
   ];
   if (!deps.length) {
     return null;

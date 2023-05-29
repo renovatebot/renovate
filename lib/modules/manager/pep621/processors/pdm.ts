@@ -50,7 +50,8 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
+    project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
@@ -65,14 +66,20 @@ export class PdmProcessor implements PyProjectProcessor {
         return null;
       }
 
-      const toolConstraint: ToolConstraint = {
+      const pythonConstraint: ToolConstraint = {
+        toolName: 'python',
+        constraint:
+          config.constraints?.python ?? project.project?.['requires-python'],
+      };
+      const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
         constraint: config.constraints?.pdm,
       };
 
       const execOptions: ExecOptions = {
+        cwdFile: packageFileName,
         docker: {},
-        toolConstraints: [toolConstraint],
+        toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
       // on lockFileMaintenance do not specify any packages and update the complete lock file
