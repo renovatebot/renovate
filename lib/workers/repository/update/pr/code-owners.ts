@@ -23,76 +23,55 @@ function extractOwnersFromLine(line: string): FileOwnerRule {
   };
 }
 
-interface UserScore {
-  username: string;
-  score: number;
-}
-
-interface FileScore {
-  file: string;
-  score: number;
-}
-
 interface FileOwnersScore {
   file: string;
-  usernames: UserScore[];
+  userScoreMap: Map<string, number>;
 }
 
 function matchFileToOwners(
   file: string,
   rules: FileOwnerRule[]
 ): FileOwnersScore {
-  const usersWithScore = rules
-    .map((rule) =>
-      rule.match(file) ? { score: rule.score, usernames: rule.usernames } : null
-    )
-    .reduce<UserScore[]>((acc, match) => {
-      if (!match) {
-        return acc;
-      }
-      for (const user of match.usernames) {
-        if (!acc.find((a) => a.username === user)) {
-          acc.push({ score: match.score, username: user });
-        }
-      }
+  const usernames = new Map<string, number>();
 
-      return acc;
-    }, []);
+  for (const rule of rules) {
+    if (!rule.match(file)) {
+      continue;
+    }
 
-  return { file, usernames: usersWithScore };
+    for (const user of rule.usernames) {
+      usernames.set(user, rule.score);
+    }
+  }
+
+  return { file, userScoreMap: usernames };
 }
 
 interface OwnerFileScore {
   username: string;
-  files: FileScore[];
+  fileScoreMap: Map<string, number>;
 }
 
 function getOwnerList(filesWithOwners: FileOwnersScore[]): OwnerFileScore[] {
-  return filesWithOwners.reduce<OwnerFileScore[]>((acc, fileMatch) => {
-    for (const userScore of fileMatch.usernames) {
+  const userFileMap = new Map<string, Map<string, number>>();
+
+  for (const fileMatch of filesWithOwners) {
+    for (const [username, score] of fileMatch.userScoreMap.entries()) {
       // Get / create user file score
-      let userAcc = acc.find((u) => u.username === userScore.username);
-      if (!userAcc) {
-        userAcc = {
-          username: userScore.username,
-          files: [],
-        };
-        acc.push(userAcc);
+      const fileMap = userFileMap.get(username) ?? new Map<string, number>();
+      if (!userFileMap.has(username)) {
+        userFileMap.set(username, fileMap);
       }
 
       // Add file to user
-      let file = userAcc.files.find((f) => f.file === fileMatch.file);
-      if (!file) {
-        file = {
-          file: fileMatch.file,
-          score: 0,
-        };
-        userAcc.files.push(file);
-      }
-      file.score += userScore.score;
+      fileMap.set(fileMatch.file, (fileMap.get(fileMatch.file) ?? 0) + score);
     }
-    return acc;
-  }, []);
+  }
+
+  return Array.from(userFileMap.entries()).map(([key, value]) => ({
+    username: key,
+    fileScoreMap: value,
+  }));
 }
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
@@ -149,7 +128,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
             rule.match(fileMatch.file)
           );
           if (matchEmpty) {
-            return { ...fileMatch, usernames: [] };
+            return { ...fileMatch, userScoreMap: new Map<string, number>() };
           }
           return fileMatch;
         });
@@ -165,7 +144,10 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     const userScore = usersWithOwnedFiles
       .map((userMatch) => ({
         user: userMatch.username,
-        score: userMatch.files.reduce((acc, file) => acc + file.score, 0),
+        score: Array.from(userMatch.fileScoreMap.values()).reduce(
+          (acc, score) => acc + score,
+          0
+        ),
       }))
       .sort((a, b) => b.score - a.score);
 
