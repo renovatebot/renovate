@@ -85,14 +85,14 @@ You probably expect `myimage:1` and `myimage:1.2` to change over time, but you m
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
 By replacing Docker tags with Docker digests as the image's primary identifier you'll get immutable builds.
-It's hard to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
-Luckily Renovate can update the digests for you, so you don't have to.
+Working with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e` is hard.
+Luckily Renovate can update the digests for you.
 
-To keep things simple, Renovate keeps the Docker tag in the `FROM` line, like this: `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+When pinning a digest, Renovate retains the Docker tag in the `FROM` line for readability, like this: `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 
 ## Digest Updating
 
-If you follow our advice to replace a simple tag like `node:14` with a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
+If you follow our advice to replace a tag like `node:14` with a pinned digest like `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will get Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
 Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you pull code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
@@ -106,8 +106,8 @@ This makes sure everyone on your team uses the latest versions.
 Renovate also supports _upgrading_ versions in Docker tags, e.g. from `myimage:1.2.0` to `myimage:1.2.1` or `myimage:1.2` to `myimage:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-We recommend you use the major.minor.patch tagging scheme, e.g. change from `myimage:1` to `myimage:1.1.1`.
-This way it's easy to see what the Renovate PR is going to change.
+We recommend you use the `major.minor.patch` tagging scheme, e.g. change from `myimage:1` to `myimage:1.1.1`.
+This way you can see what the Renovate PR is going to change.
 You can see the difference between a PR that upgrades `myimage` from `1.1.1` to `1.1.2` and a PR that changes the contents of the version you already use (`1.1.1`).
 
 By default, Renovate will upgrade minor/patch versions (like from `1.2.0` to `1.2.1`), but not upgrade major versions.
