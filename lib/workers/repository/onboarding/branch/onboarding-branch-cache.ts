@@ -3,7 +3,6 @@ import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
 import { getBranchCommit } from '../../../../util/git';
-import { clone } from '../../../../util/clone';
 import type { OnboardingBranchCache } from '../../../../util/cache/repository/types';
 
 export function setOnboardingCache(

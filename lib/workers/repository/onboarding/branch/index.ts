@@ -61,7 +61,9 @@ export async function checkOnboardingBranch(
       onboardingBranchCache.defaultBranchSha ===
         getBranchCommit(config.defaultBranch!) &&
       onboardingBranchCache.onboardingBranchSha ===
-        getBranchCommit(config.onboardingBranch!)
+        getBranchCommit(config.onboardingBranch!) &&
+      onboardingBranchCache.configFileName &&
+      onboardingBranchCache.configFileRaw
     ) {
       logger.debug(
         'Skip processing since the onboarding branch is up to date and default branch has not changed'
