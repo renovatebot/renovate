@@ -308,7 +308,7 @@ const addResolverMatch = q.sym<Ctx>('resolvers').alt(
 
 function registryUrlHandler(ctx: Ctx): Ctx {
   for (const dep of ctx.deps) {
-    dep.registryUrls = [...ctx.registryUrls];
+    dep.registryUrls = [...new Set(ctx.registryUrls)];
     if (dep.depType === 'plugin') {
       dep.registryUrls.push(SBT_PLUGINS_REPO);
     }
@@ -334,7 +334,7 @@ export function extractDependency(
   content: string,
   {
     packageFile,
-    registryUrls,
+    registryUrls = [REGISTRY_URLS.mavenCentral],
     localVars = {},
     globalVars = {},
     scalaVersion,
@@ -375,7 +375,7 @@ export function extractDependency(
       globalVars,
       localVars,
       deps: [],
-      registryUrls: [REGISTRY_URLS.mavenCentral, ...(registryUrls ?? [])],
+      registryUrls,
       packageFile,
       scalaVersion,
     });
@@ -471,10 +471,11 @@ export async function extractAllPackageFiles(
       });
       for (const dep of res?.deps ?? []) {
         const variableSourceFile = dep?.managerData?.packageFile ?? packageFile;
+        delete res?.globalVars;
         delete res?.localVars;
         delete res?.scalaVersion;
         delete dep.managerData?.packageFile;
-        dep.registryUrls = [...new Set(dep.registryUrls)];
+
         mapDepsToPackageFile[variableSourceFile] ??= [];
         const notFound = !mapDepsToPackageFile[variableSourceFile].find(
           (d) =>
