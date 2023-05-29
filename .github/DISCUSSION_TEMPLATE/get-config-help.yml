@@ -36,23 +36,6 @@ body:
     validations:
       required: false
 
-  - type: input
-    id: platform-version-if-selfhosting
-    attributes:
-      label: If you're self-hosting Renovate, tell us what version of the platform you run.
-      description: |
-        This field is for the version number of your _platform_, so one of these:
-          - AWS CodeCommit
-          - Azure DevOps
-          - Bitbucket Cloud
-          - Bitbucket Server
-          - Azure DevOps
-          - Gitea
-          - GitHub (.com and Enterprise Server)
-          - GitLab (.com and CE/EE)
-    validations:
-      required: false
-
   - type: dropdown
     id: regression-error
     attributes:
