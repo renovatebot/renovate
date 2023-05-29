@@ -4,6 +4,7 @@ body:
     attributes:
       label: How are you running Renovate?
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'Mend Renovate hosted app on github.com'
         - 'Self-hosted'
     validations:
@@ -21,6 +22,7 @@ body:
     attributes:
       label: If you're self-hosting Renovate, select which platform you are using.
       options:
+        - 'Placeholder value, please select the correct response from the dropdown'
         - 'AWS CodeCommit'
         - 'Azure DevOps (dev.azure.com)'
         - 'Azure DevOps Server'
