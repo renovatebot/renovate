@@ -57,7 +57,7 @@ When you create a new repository on say GitHub or GitLab, you'll get a `main` br
 
 We replaced `master` with `main` in our documentation where possible.
 
-A branch name has no special meaning within the Git program, it's just a name.
+A branch name has no special meaning within the Git program, it's only a name.
 The base branch could be called `trunk` or `mainline` or `prod`, and Git would work just as well.
 
 ## What if I need to .. ?
