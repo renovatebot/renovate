@@ -141,7 +141,7 @@ export async function isOnboarded(config: RenovateConfig): Promise<boolean> {
     await ensureComment({
       number: closedOnboardingPr.number,
       topic: `Renovate is disabled`,
-      content: `Renovate is disabled due to lack of config. If you wish to re-enable it, you can either (a) commit a config file to your base branch, or (b) rename this closed PR to trigger a replacement onboarding PR.`,
+      content: `Renovate is disabled because there is no Renovate configuration file. To enable Renovate, you can either (a) change this PR's title to get a new onboarding PR, and merge the new onboarding PR, or (b) create a Renovate config file, and commit that file to your base branch.`,
     });
   }
   throw new Error(REPOSITORY_CLOSED_ONBOARDING);
