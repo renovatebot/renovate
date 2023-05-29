@@ -52,6 +52,15 @@ const sbtVersionRegex = regEx(
   'sbt\\.version *= *(?<version>\\d+\\.\\d+\\.\\d+)'
 );
 
+const resolveVariable = ({
+  ctx,
+  varName,
+}: {
+  ctx: Ctx;
+  varName: string;
+}): VariableContext | undefined =>
+  ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
+
 // var1 or var1.var2.var3
 const nestedVariableLiteral = (
   handler: q.SymMatcherHandler<Ctx>
@@ -64,8 +73,7 @@ const scalaVersionMatch = q
   .alt(
     q.str<Ctx>((ctx, { value: scalaVersion }) => ({ ...ctx, scalaVersion })),
     nestedVariableLiteral((ctx, { value: varName }) => {
-      const scalaVersion =
-        ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
+      const scalaVersion = resolveVariable({ ctx, varName });
       if (scalaVersion) {
         ctx.scalaVersion = scalaVersion.value;
       }
@@ -103,8 +111,7 @@ const packageFileVersionMatch = q
       packageFileVersion,
     })),
     nestedVariableLiteral((ctx, { value: varName }) => {
-      const packageFileVersion =
-        ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
+      const packageFileVersion = resolveVariable({ ctx, varName });
       if (packageFileVersion) {
         ctx.packageFileVersion = packageFileVersion.value;
       }
@@ -146,8 +153,7 @@ const variableDefinitionMatch = q
 
 const groupIdMatch = q.alt<Ctx>(
   nestedVariableLiteral((ctx, { value: varName }) => {
-    const currentGroupId =
-      ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
+    const currentGroupId = resolveVariable({ ctx, varName });
     if (currentGroupId) {
       ctx.groupId = currentGroupId.value;
     }
@@ -158,7 +164,7 @@ const groupIdMatch = q.alt<Ctx>(
 
 const artifactIdMatch = q.alt<Ctx>(
   nestedVariableLiteral((ctx, { value: varName }) => {
-    const artifactId = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
+    const artifactId = resolveVariable({ ctx, varName });
     if (artifactId) {
       ctx.artifactId = artifactId.value;
     }
@@ -167,18 +173,16 @@ const artifactIdMatch = q.alt<Ctx>(
   q.str<Ctx>((ctx, { value: artifactId }) => ({ ...ctx, artifactId }))
 );
 
-const resolveVariable: q.SymMatcherHandler<Ctx> = (ctx, { value: varName }) => {
-  const currentValue = ctx.localVars?.[varName] ?? ctx.globalVars?.[varName];
-  if (currentValue) {
-    ctx.currentValue = currentValue.value;
-    ctx.currentValueInfo = currentValue;
-    ctx.variableName = varName;
-  }
-  return ctx;
-};
-
 const versionMatch = q.alt<Ctx>(
-  nestedVariableLiteral(resolveVariable), // support var1, var1.var2.var3
+  nestedVariableLiteral((ctx, { value: varName }) => {
+    const currentValue = resolveVariable({ ctx, varName });
+    if (currentValue) {
+      ctx.currentValue = currentValue.value;
+      ctx.currentValueInfo = currentValue;
+      ctx.variableName = varName;
+    }
+    return ctx;
+  }), // support var1, var1.var2.var3
   q.str<Ctx>((ctx, { value: currentValue }) => ({ ...ctx, currentValue })) // String literal "1.23.4"
 );
 
