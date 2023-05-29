@@ -449,7 +449,7 @@ export async function extractAllPackageFiles(
 
   // 1. globalVariables from project/ and root package file
   // 2. registry from all package file
-  // 3. Project's scalaVersion - use in parseDepExpr to add suffix eg. "_2.13"
+  // 3. Project's scalaVersion - to add suffix eg. "_2.13"
   const { globalVars, registryUrls, scalaVersion } = prepareLoadPackageFiles([
     ...(groupPackageFileContent['project'] ?? []), // in project/ folder
     ...(groupPackageFileContent['.'] ?? []), // root
