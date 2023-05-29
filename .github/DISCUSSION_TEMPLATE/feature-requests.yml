@@ -1,16 +1,4 @@
 body:
-  - type: dropdown
-    id: type-of-discussion
-    attributes:
-      label: Type of discussion.
-      description: Are you proposing an idea, or do you just want to chat?
-      options:
-        - 'Placeholder value, please select the correct response from the dropdown'
-        - I'm proposing an idea
-        - I just want to chat
-    validations:
-      required: true
-
   - type: textarea
     id: discussion-field
     attributes:
