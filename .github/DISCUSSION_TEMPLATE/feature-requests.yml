@@ -3,6 +3,6 @@ body:
     id: discussion-field
     attributes:
       label: Tell us more.
-      description: Explain your idea or chat away in this box.
+      description: Explain your feature request in this field.
     validations:
       required: true
