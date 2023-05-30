@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import yaml from 'js-yaml';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { TEMPORARY_ERROR } from '../../../constants/error-messages';
@@ -16,10 +15,11 @@ import { getFile } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import type { Doc, RepositoryRule } from './types';
+import type { RepositoryRule } from './types';
 import {
   getRepositories,
   isOCIRegistry,
+  parseDoc,
 } from './utils';
 
 export async function updateArtifacts({
@@ -71,7 +71,8 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    const doc = yaml.load(newPackageFileContent) as Doc; //TODO #9610
+    const doc = parseDoc(newPackageFileContent)
+
     const ociRepositoryRules: RepositoryRule[] = getRepositories(doc)
       .filter(isOCIRegistry)
       .map((value) => {

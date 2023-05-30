@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
+import yaml from 'js-yaml';
 import upath from 'upath';
 
 import { getParentDir, localPathExists } from '../../../util/fs';
+import { DocSchema } from './schema';
 import type { Doc, Release, Repository } from './types';
 
 /** Returns true if a helmfile release contains kustomize specific keys **/
@@ -23,6 +25,13 @@ export async function localChartHasKustomizationsYaml(
   return localPathExists(
     upath.join(helmfileYamlParentDir, release.chart, 'kustomization.yaml')
   );
+}
+
+export function parseDoc(
+  packageFileContent: string,
+): Doc {
+  const doc = yaml.load(packageFileContent)
+  return DocSchema.parse(doc);
 }
 
 export function getRepositories(
