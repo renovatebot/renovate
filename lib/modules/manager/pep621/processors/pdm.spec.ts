@@ -5,6 +5,7 @@ import { GlobalConfig } from '../../../../config/global';
 import type { RepoGlobalConfig } from '../../../../config/types';
 import { getPkgReleases as _getPkgReleases } from '../../../datasource';
 import type { UpdateArtifactsConfig } from '../../types';
+import { depTypes } from '../utils';
 import { PdmProcessor } from './pdm';
 
 jest.mock('../../../../util/fs');
@@ -130,7 +131,28 @@ describe('modules/manager/pep621/processors/pdm', () => {
         releases: [{ version: 'v2.6.1' }, { version: 'v2.5.0' }],
       });
 
-      const updatedDeps = [{ packageName: 'dep1' }, { packageName: 'dep2' }];
+      const updatedDeps = [
+        {
+          packageName: 'dep1',
+          depType: depTypes.dependencies,
+        },
+        { packageName: 'dep2', depType: depTypes.dependencies },
+        {
+          depName: 'group1/dep3',
+          depType: depTypes.optionalDependencies,
+        },
+        { depName: 'group1/dep4', depType: depTypes.optionalDependencies },
+        {
+          depName: 'group2/dep5',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group2/dep6', depType: depTypes.pdmDevDependencies },
+        {
+          depName: 'group3/dep7',
+          depType: depTypes.pdmDevDependencies,
+        },
+        { depName: 'group3/dep8', depType: depTypes.pdmDevDependencies },
+      ];
       const result = await processor.updateArtifacts(
         {
           packageFileName: 'pyproject.toml',
@@ -152,6 +174,15 @@ describe('modules/manager/pep621/processors/pdm', () => {
       expect(execSnapshots).toMatchObject([
         {
           cmd: 'pdm update dep1 dep2',
+        },
+        {
+          cmd: 'pdm update -G group1 dep3 dep4',
+        },
+        {
+          cmd: 'pdm update -dG group2 dep5 dep6',
+        },
+        {
+          cmd: 'pdm update -dG group3 dep7 dep8',
         },
       ]);
     });
