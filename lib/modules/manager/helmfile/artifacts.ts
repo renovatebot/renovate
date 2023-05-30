@@ -71,12 +71,6 @@ export async function updateArtifacts({
     }
 
     const cmd: string[] = [];
-    // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
-    const helmConfigParameters = [
-      `--registry-config ${upath.join(privateCacheDir(), 'registry.json')}`,
-      `--repository-config ${upath.join(privateCacheDir(), 'repositories.yaml')}`,
-      `--repository-cache ${upath.join(privateCacheDir(), 'repositories')}`,
-    ];
     const doc = yaml.load(newPackageFileContent) as Doc; //TODO #9610
     const ociRepositoryRules: RepositoryRule[] = getRepositories(doc)
       .filter(isOCIRegistry)
@@ -93,14 +87,11 @@ export async function updateArtifacts({
     const regexOfURLPath = /\/.*/;
     ociRepositoryRules.forEach((value) => {
       const { username, password } = value.hostRule;
-      const parameters = [...helmConfigParameters];
       if (username && password) {
-        parameters.push(`--username ${quote(username)}`);
-        parameters.push(`--password ${quote(password)}`);
         const host = value.url.replace(regexOfURLPath, '')
 
         cmd.push(
-          `helm registry login ${parameters.join(' ')} ${host}`
+          `helm registry login --username ${quote(username)} --password ${quote(password)} ${host}`
         );
       }
     });
@@ -108,7 +99,12 @@ export async function updateArtifacts({
     cmd.push(`helmfile deps -f ${quote(packageFileName)}`)
     await exec(cmd, {
       docker: {},
-      extraEnv: {},
+      extraEnv: {
+        // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
+        HELM_REGISTRY_CONFIG: `${upath.join(privateCacheDir(), 'registry.json')}`,
+        HELM_REPOSITORY_CONFIG: `${upath.join(privateCacheDir(), 'repositories.yaml')}`,
+        HELM_REPOSITORY_CACHE: `${upath.join(privateCacheDir(), 'repositories')}`,
+      },
       toolConstraints,
     });
 
