@@ -214,7 +214,7 @@ describe('modules/manager/helmfile/artifacts', () => {
       },
     ]);
     expect(execSnapshots).toMatchObject([
-      { cmd: 'helm registry login --registry-config /tmp/renovate/cache/__renovate-private-cache/registry.json --repository-config /tmp/renovate/cache/__renovate-private-cache/repositories.yaml --repository-cache /tmp/renovate/cache/__renovate-private-cache/repositories --username test --password password ghcr.io' },
+      { cmd: 'helm registry login --username test --password password ghcr.io' },
       { cmd: 'helmfile deps -f helmfile.yaml' },
     ]);
   });
