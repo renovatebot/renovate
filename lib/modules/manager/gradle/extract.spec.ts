@@ -60,7 +60,7 @@ describe('modules/manager/gradle/extract', () => {
     });
     await extractAllPackageFiles(partial<ExtractConfig>(), [filename]);
 
-    expect(logger.logger.warn).toHaveBeenCalledWith(
+    expect(logger.logger.debug).toHaveBeenCalledWith(
       { err, config: {}, packageFile: filename },
       `Failed to process Gradle file`
     );
@@ -606,6 +606,11 @@ describe('modules/manager/gradle/extract', () => {
               registryUrls: ['https://plugins.gradle.org/m2/'],
               skipReason: 'unspecified-version',
             },
+            {
+              depName: 'org.ajoberstar.grgit2',
+              depType: 'plugin',
+              skipReason: 'unspecified-version',
+            },
           ],
         },
       ]);
@@ -631,7 +636,7 @@ describe('modules/manager/gradle/extract', () => {
               groupName: 'com.squareup.okhttp3',
               currentValue: '4.9.0',
               managerData: {
-                fileReplacePosition: 99,
+                fileReplacePosition: 100,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
@@ -640,7 +645,7 @@ describe('modules/manager/gradle/extract', () => {
               groupName: 'com.squareup.okio',
               currentValue: '2.8.0',
               managerData: {
-                fileReplacePosition: 161,
+                fileReplacePosition: 162,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
@@ -649,16 +654,16 @@ describe('modules/manager/gradle/extract', () => {
               groupName: 'com.squareup.picasso',
               currentValue: '2.5.1',
               managerData: {
-                fileReplacePosition: 243,
+                fileReplacePosition: 244,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
             {
               depName: 'com.squareup.retrofit2:retrofit',
-              groupName: 'retrofit',
+              groupName: 'retro.fit',
               currentValue: '2.8.2',
               managerData: {
-                fileReplacePosition: 41,
+                fileReplacePosition: 42,
                 packageFile: 'gradle/libs.versions.toml',
               },
             },
@@ -691,7 +696,7 @@ describe('modules/manager/gradle/extract', () => {
               packageName:
                 'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
               managerData: {
-                fileReplacePosition: 661,
+                fileReplacePosition: 663,
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
@@ -716,7 +721,7 @@ describe('modules/manager/gradle/extract', () => {
               packageName:
                 'org.danilopianini.multi-jvm-test-plugin:org.danilopianini.multi-jvm-test-plugin.gradle.plugin',
               managerData: {
-                fileReplacePosition: 822,
+                fileReplacePosition: 824,
                 packageFile: 'gradle/libs.versions.toml',
               },
               registryUrls: ['https://plugins.gradle.org/m2/'],
@@ -818,7 +823,7 @@ describe('modules/manager/gradle/extract', () => {
             },
             {
               depName: 'mocha-junit:mocha-junit',
-              groupName: 'mocha-junit-reporter',
+              groupName: 'mocha.junit.reporter',
               currentValue: '2.0.2',
               managerData: {
                 fileReplacePosition: 82,

@@ -9,9 +9,10 @@ import type {
   PackageDependency,
   UpdateArtifact,
   UpdateArtifactsResult,
+  Upgrade,
 } from '../../types';
 import type { PyProject } from '../schema';
-import { parseDependencyGroupRecord } from '../utils';
+import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
 export class PdmProcessor implements PyProjectProcessor {
@@ -23,7 +24,7 @@ export class PdmProcessor implements PyProjectProcessor {
 
     deps.push(
       ...parseDependencyGroupRecord(
-        'tool.pdm.dev-dependencies',
+        depTypes.pdmDevDependencies,
         pdm['dev-dependencies']
       )
     );
@@ -50,7 +51,8 @@ export class PdmProcessor implements PyProjectProcessor {
   }
 
   async updateArtifacts(
-    updateArtifact: UpdateArtifact
+    updateArtifact: UpdateArtifact,
+    project: PyProject
   ): Promise<UpdateArtifactsResult[] | null> {
     const { config, updatedDeps, packageFileName } = updateArtifact;
 
@@ -65,25 +67,31 @@ export class PdmProcessor implements PyProjectProcessor {
         return null;
       }
 
-      const toolConstraint: ToolConstraint = {
+      const pythonConstraint: ToolConstraint = {
+        toolName: 'python',
+        constraint:
+          config.constraints?.python ?? project.project?.['requires-python'],
+      };
+      const pdmConstraint: ToolConstraint = {
         toolName: 'pdm',
         constraint: config.constraints?.pdm,
       };
 
       const execOptions: ExecOptions = {
+        cwdFile: packageFileName,
         docker: {},
-        toolConstraints: [toolConstraint],
+        toolConstraints: [pythonConstraint, pdmConstraint],
       };
 
       // on lockFileMaintenance do not specify any packages and update the complete lock file
       // else only update specific packages
-      let packageList = '';
-      if (!isLockFileMaintenance) {
-        packageList = ' ';
-        packageList += updatedDeps.map((value) => value.packageName).join(' ');
+      const cmds: string[] = [];
+      if (isLockFileMaintenance) {
+        cmds.push('pdm update');
+      } else {
+        cmds.push(...generateCMDs(updatedDeps));
       }
-      const cmd = `pdm update${packageList}`;
-      await exec(cmd, execOptions);
+      await exec(cmds, execOptions);
 
       // check for changes
       const fileChanges: UpdateArtifactsResult[] = [];
@@ -118,4 +126,45 @@ export class PdmProcessor implements PyProjectProcessor {
       ];
     }
   }
+}
+
+function generateCMDs(updatedDeps: Upgrade[]): string[] {
+  const cmds: string[] = [];
+  const packagesByCMD: Record<string, string[]> = {};
+  for (const dep of updatedDeps) {
+    switch (dep.depType) {
+      case depTypes.optionalDependencies: {
+        const [group, name] = dep.depName!.split('/');
+        addPackageToCMDRecord(packagesByCMD, `pdm update -G ${group}`, name);
+        break;
+      }
+      case depTypes.pdmDevDependencies: {
+        const [group, name] = dep.depName!.split('/');
+        addPackageToCMDRecord(packagesByCMD, `pdm update -dG ${group}`, name);
+        break;
+      }
+      default: {
+        addPackageToCMDRecord(packagesByCMD, `pdm update`, dep.packageName!);
+      }
+    }
+  }
+
+  for (const commandPrefix in packagesByCMD) {
+    const packageList = packagesByCMD[commandPrefix].join(' ');
+    const cmd = `${commandPrefix} ${packageList}`;
+    cmds.push(cmd);
+  }
+
+  return cmds;
+}
+
+function addPackageToCMDRecord(
+  packagesByCMD: Record<string, string[]>,
+  commandPrefix: string,
+  packageName: string
+): void {
+  if (is.nullOrUndefined(packagesByCMD[commandPrefix])) {
+    packagesByCMD[commandPrefix] = [];
+  }
+  packagesByCMD[commandPrefix].push(packageName);
 }
