@@ -1,7 +1,8 @@
+import is from '@sindresorhus/is';
 import upath from 'upath';
 
 import { getParentDir, localPathExists } from '../../../util/fs';
-import type { Release } from './types';
+import type { Doc, Release, Repository } from './types';
 
 /** Returns true if a helmfile release contains kustomize specific keys **/
 export function kustomizationsKeysUsed(release: Release): boolean {
@@ -22,4 +23,24 @@ export async function localChartHasKustomizationsYaml(
   return localPathExists(
     upath.join(helmfileYamlParentDir, release.chart, 'kustomization.yaml')
   );
+}
+
+export function getRepositories(
+  doc: Doc
+): Repository[] {
+  if (is.nullOrUndefined(doc.repositories)) {
+    return [] as Repository[];
+  }
+
+  return doc.repositories
+}
+
+export function isOCIRegistry(
+  repository: Repository
+): boolean {
+  if (is.nullOrUndefined(repository.oci)) {
+    return false;
+  }
+
+  return repository.oci
 }
