@@ -10,8 +10,6 @@ import * as _datasource from '../../datasource';
 import type { UpdateArtifactsConfig } from '../types';
 import * as helmfile from '.';
 
-
-
 jest.mock('../../datasource');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../util/http');
