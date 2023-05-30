@@ -15,8 +15,8 @@ import {
 import { getFile } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
-import type { Doc, RepositoryRule } from './types';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
+import type { Doc, RepositoryRule } from './types';
 import {
   getRepositories,
   isOCIRegistry,
