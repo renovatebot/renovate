@@ -15,6 +15,8 @@ import type { PyProject } from '../schema';
 import { depTypes, parseDependencyGroupRecord } from '../utils';
 import type { PyProjectProcessor } from './types';
 
+const pdmUpdateCMD = 'pdm update --no-sync';
+
 export class PdmProcessor implements PyProjectProcessor {
   process(project: PyProject, deps: PackageDependency[]): PackageDependency[] {
     const pdm = project.tool?.pdm;
@@ -87,7 +89,7 @@ export class PdmProcessor implements PyProjectProcessor {
       // else only update specific packages
       const cmds: string[] = [];
       if (isLockFileMaintenance) {
-        cmds.push('pdm update');
+        cmds.push(pdmUpdateCMD);
       } else {
         cmds.push(...generateCMDs(updatedDeps));
       }
@@ -135,16 +137,24 @@ function generateCMDs(updatedDeps: Upgrade[]): string[] {
     switch (dep.depType) {
       case depTypes.optionalDependencies: {
         const [group, name] = dep.depName!.split('/');
-        addPackageToCMDRecord(packagesByCMD, `pdm update -G ${group}`, name);
+        addPackageToCMDRecord(
+          packagesByCMD,
+          `${pdmUpdateCMD} -G ${group}`,
+          name
+        );
         break;
       }
       case depTypes.pdmDevDependencies: {
         const [group, name] = dep.depName!.split('/');
-        addPackageToCMDRecord(packagesByCMD, `pdm update -dG ${group}`, name);
+        addPackageToCMDRecord(
+          packagesByCMD,
+          `${pdmUpdateCMD} -dG ${group}`,
+          name
+        );
         break;
       }
       default: {
-        addPackageToCMDRecord(packagesByCMD, `pdm update`, dep.packageName!);
+        addPackageToCMDRecord(packagesByCMD, pdmUpdateCMD, dep.packageName!);
       }
     }
   }
