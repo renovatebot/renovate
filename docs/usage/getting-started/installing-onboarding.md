@@ -13,7 +13,7 @@ Otherwise, the process for adding new repositories to a Renovate installation ca
 
 ### Hosted GitHub.com App
 
-Installing/enabling Mend's Renovate GitHub App is simple.
+Follow these steps to install and enable Mend's Renovate GitHub App:
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and select the Install button:
 

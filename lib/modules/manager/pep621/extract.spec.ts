@@ -26,6 +26,11 @@ describe('modules/manager/pep621/extract', () => {
     it('should return dependencies for valid content', function () {
       const result = extractPackageFile(pdmPyProject, 'pyproject.toml');
 
+      expect(result).toMatchObject({
+        extractedConstraints: {
+          python: '>=3.7',
+        },
+      });
       const dependencies = result?.deps.filter(
         (dep) => dep.depType === 'project.dependencies'
       );
