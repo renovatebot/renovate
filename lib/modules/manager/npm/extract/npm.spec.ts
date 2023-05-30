@@ -1,15 +1,15 @@
 import { Fixtures } from '../../../../../test/fixtures';
 import { fs } from '../../../../../test/util';
-import { extractPackages, getNpmLock } from './npm';
+import { getNpmLock } from './npm';
 
 jest.mock('../../../../util/fs');
 
 describe('modules/manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {
-    it('returns empty if failed to parse', async () => {
+    it('returns null if failed to parse', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getNpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
+      expect(res).toBeNull();
     });
 
     it('extracts', async () => {
@@ -66,62 +66,16 @@ describe('modules/manager/npm/extract/npm', () => {
       });
     });
 
-    it('returns empty if no deps', async () => {
+    it('returns null if no deps', async () => {
       fs.readLocalFile.mockResolvedValueOnce('{}');
       const res = await getNpmLock('package.json');
-      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
-    });
-  });
-
-  describe('.extractPackages', () => {
-    it('should parse lockfileVersion 1 without dependencies', () => {
-      expect(
-        extractPackages({
-          name: 'no_dependencies',
-          version: '1.0.0',
-          lockfileVersion: 1,
-        })
-      ).toEqual({
-        packages: {},
-        lockfileVersion: 1,
-      });
+      expect(res).toBeNull();
     });
 
-    it('should not throw if additional property exists', () => {
-      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
-      expect(() =>
-        extractPackages({ ...npm9Lock, additionalProperty: 'test' })
-      ).not.toThrow();
-    });
-
-    it('should throw if lockfileVersion is invalid', () => {
-      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
-      expect(() => {
-        extractPackages({ ...npm9Lock, lockfileVersion: 4 });
-      }).toThrow(
-        'Invalid package-lock file. Neither v1, v2 nor v3 schema matched'
-      );
-    });
-
-    it('should throw if lock file is empty', () => {
-      expect(() => {
-        extractPackages({});
-      }).toThrow(
-        'Invalid package-lock file. Neither v1, v2 nor v3 schema matched'
-      );
-    });
-
-    it('should throw if lockfileVersion 3 without packages property', () => {
-      const npm9Lock = Fixtures.getJson('npm9/package-lock.json', '..');
-      expect(() => {
-        extractPackages({
-          ...npm9Lock,
-          packages: undefined,
-          lockfileVersion: 3,
-        });
-      }).toThrow(
-        'Invalid package-lock file. Neither v1, v2 nor v3 schema matched'
-      );
+    it('returns null on read error', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(null);
+      const res = await getNpmLock('package.json');
+      expect(res).toBeNull();
     });
   });
 });

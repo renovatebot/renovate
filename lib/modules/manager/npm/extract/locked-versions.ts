@@ -60,7 +60,13 @@ export async function getLockedVersions(
       lockFiles.push(npmLock);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
-        lockFileCache[npmLock] = await getNpmLock(npmLock);
+        const cache = await getNpmLock(npmLock);
+        // istanbul ignore if
+        if (!cache) {
+          logger.warn({ npmLock }, 'Npm: unable to get lockfile');
+          return;
+        }
+        lockFileCache[npmLock] = cache;
       }
 
       const { lockfileVersion } = lockFileCache[npmLock];
