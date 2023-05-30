@@ -10,9 +10,12 @@ import {
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import * as _migrate from '../../../config/migration';
+import * as memCache from '../../../util/cache/memory';
 import * as repoCache from '../../../util/cache/repository';
 import { initRepoCache } from '../../../util/cache/repository/init';
 import type { RepoCacheData } from '../../../util/cache/repository/types';
+import * as _onboardingCache from '../onboarding/branch/onboarding-branch-cache';
+import { OnboardingState } from '../onboarding/common';
 import {
   checkForRepoConfigError,
   detectRepoFileConfig,
@@ -21,13 +24,16 @@ import {
 
 jest.mock('../../../util/fs');
 jest.mock('../../../util/git');
+jest.mock('../onboarding/branch/onboarding-branch-cache');
 
 const migrate = mocked(_migrate);
 const migrateAndValidate = mocked(_migrateAndValidate);
+const onboardingCache = mocked(_onboardingCache);
 
 let config: RenovateConfig;
 
 beforeEach(() => {
+  memCache.init();
   jest.resetAllMocks();
   config = getConfig();
   config.errors = [];
@@ -62,6 +68,37 @@ describe('workers/repository/init/merge', () => {
       expect(logger.logger.debug).toHaveBeenCalledWith(
         'Existing config file no longer exists'
       );
+    });
+
+    it('returns cache config from onboarding cache - package.json', async () => {
+      const pJson = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'package.json'
+      );
+      onboardingCache.getRawOnboardingFileFromCache.mockReturnValueOnce(pJson);
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'package.json',
+        configFileParsed: { schema: 'https://docs.renovate.com' },
+      });
+    });
+
+    it('returns cache config from onboarding cache - renovate.json', async () => {
+      const configRaw = JSON.stringify({ schema: 'https://docs.renovate.com' });
+      OnboardingState.onboardingCacheValid = true;
+      onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
+        'renovate.json'
+      );
+      onboardingCache.getRawOnboardingFileFromCache.mockReturnValueOnce(
+        configRaw
+      );
+      expect(await detectRepoFileConfig()).toEqual({
+        configFileName: 'renovate.json',
+        configFileParsed: { schema: 'https://docs.renovate.com' },
+        configFileRaw: configRaw,
+      });
     });
 
     it('uses package.json config if found', async () => {

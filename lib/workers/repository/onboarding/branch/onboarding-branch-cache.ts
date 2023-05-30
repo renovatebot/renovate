@@ -2,8 +2,8 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
-import { getBranchCommit } from '../../../../util/git';
 import type { OnboardingBranchCache } from '../../../../util/cache/repository/types';
+import { getBranchCommit } from '../../../../util/git';
 
 export function setOnboardingCache(
   defaultBranchSha: string,
@@ -83,14 +83,12 @@ export async function isOnboardingBranchModified(
 
 export function getOnboardingFileNameFromCache(): string | undefined {
   const cache = getCache();
-  const onboardingCache = cache.onboardingBranchCache;
-  return onboardingCache?.configFileName;
+  return cache.onboardingBranchCache?.configFileName;
 }
 
 export function getRawOnboardingFileFromCache(): string | undefined {
   const cache = getCache();
-  const onboardingCache = cache.onboardingBranchCache;
-  return onboardingCache?.configFileRaw;
+  return cache.onboardingBranchCache?.configFileRaw;
 }
 
 export function setOnboardingConfigDetails(
@@ -99,8 +97,8 @@ export function setOnboardingConfigDetails(
 ): void {
   const cache = getCache();
   if (cache.onboardingBranchCache) {
-    let newOnboardingCache: OnboardingBranchCache = structuredClone(
-      cache.onboardingBranchCache ?? {}
+    const newOnboardingCache: OnboardingBranchCache = structuredClone(
+      cache.onboardingBranchCache
     );
 
     newOnboardingCache.configFileName = configFileName;

@@ -265,6 +265,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
       cache.getCache.mockReturnValueOnce(dummyCache);
       expect(getRawOnboardingFileFromCache()).toBe('raw');
     });
+
     it('returns undefined', () => {
       expect(getRawOnboardingFileFromCache()).toBeUndefined();
     });
