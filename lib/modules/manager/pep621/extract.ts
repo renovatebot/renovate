@@ -7,6 +7,7 @@ import type {
 } from '../types';
 import { processors } from './processors';
 import {
+  depTypes,
   parseDependencyGroupRecord,
   parseDependencyList,
   parsePyProject,
@@ -32,11 +33,11 @@ export function extractPackageFile(
 
   // pyProject standard definitions
   deps.push(
-    ...parseDependencyList('project.dependencies', def.project?.dependencies)
+    ...parseDependencyList(depTypes.dependencies, def.project?.dependencies)
   );
   deps.push(
     ...parseDependencyGroupRecord(
-      'project.optional-dependencies',
+      depTypes.optionalDependencies,
       def.project?.['optional-dependencies']
     )
   );
