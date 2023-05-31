@@ -13,14 +13,15 @@ export interface OCIRepositoryRule {
   hostRule: HostRule;
 }
 
-export function getRegistryLoginCmd(
-  ociRepositoryRule: OCIRepositoryRule
-): string {
-  const { username, password } = ociRepositoryRule.hostRule;
+export function generateLoginCmd(
+  repositoryRule: RepositoryRule,
+  loginCMD: string
+): string | null {
+  const { username, password } = RepositoryRule.hostRule;
   if (username && password) {
-    return `helm registry login --username ${quote(username)} --password ${quote(password)} ${ociRepositoryRule.host}`
+    return `${loginCMD} --username ${quote(username)} --password ${quote(password)} ${repositoryRule.host}`
   }
-  return ""
+  return null
 }
 
 export function generateHelmEnvs(): ExtraEnv {
