@@ -282,7 +282,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValueOnce(dummyCache);
-      setOnboardingConfigDetails('renovate.json', 'raw');
+      setOnboardingConfigDetails('renovate.json', 'parsed');
       expect(dummyCache).toEqual({
         onboardingBranchCache: {
           defaultBranchSha: 'default-sha',
@@ -290,7 +290,7 @@ describe('workers/repository/onboarding/branch/onboarding-branch-cache', () => {
           isConflicted: true,
           isModified: true,
           configFileName: 'renovate.json',
-          configFileRaw: 'raw',
+          configFileParsed: 'parsed',
         },
       });
     });

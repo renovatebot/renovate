@@ -78,7 +78,9 @@ describe('workers/repository/init/merge', () => {
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'package.json'
       );
-      onboardingCache.getRawOnboardingFileFromCache.mockReturnValueOnce(pJson);
+      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
+        pJson
+      );
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'package.json',
         configFileParsed: { schema: 'https://docs.renovate.com' },
@@ -86,18 +88,22 @@ describe('workers/repository/init/merge', () => {
     });
 
     it('returns cache config from onboarding cache - renovate.json', async () => {
-      const configRaw = JSON.stringify({ schema: 'https://docs.renovate.com' });
+      const configParsed = JSON.stringify({
+        schema: 'https://docs.renovate.com',
+      });
       OnboardingState.onboardingCacheValid = true;
       onboardingCache.getOnboardingFileNameFromCache.mockReturnValueOnce(
         'renovate.json'
       );
-      onboardingCache.getRawOnboardingFileFromCache.mockReturnValueOnce(
-        configRaw
+      onboardingCache.getParsedOnboardingFileFromCache.mockReturnValueOnce(
+        configParsed
       );
       expect(await detectRepoFileConfig()).toEqual({
         configFileName: 'renovate.json',
-        configFileParsed: { schema: 'https://docs.renovate.com' },
-        configFileRaw: configRaw,
+        configFileParsed: {
+          schema: 'https://docs.renovate.com',
+        },
+        configFileRaw: undefined,
       });
     });
 
