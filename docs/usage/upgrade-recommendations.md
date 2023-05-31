@@ -49,12 +49,12 @@ This is because you already:
 Thirdly, you'll be ready when a upstream package releases a patch for a critical CVE.
 If you're current, you can review and merge Renovate's PR quickly.
 
-If you're badly behind on updates you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
+If you're behind on updates you'll have a bad time, because you must read _more_ changelogs and make _more_ changes before you can merge the critical patch.
 
 ## Starting from a new project
 
 Let's assume you start a new project.
-You've created a new Git repository, installed the latest frameworks, libraries and development tools.
+You created a new Git repository, installed the latest frameworks, libraries and development tools.
 After pushing the initial commit, you should enable and onboard Renovate.
 
 Now you'll have to stay on the "update often" train.
@@ -62,17 +62,17 @@ Now you'll have to stay on the "update often" train.
 ## Project with one year old dependencies
 
 If you have a project that's a year behind on dependencies, you'll need to do some work.
-Let's assume that most dependencies need some `minor` or `patch` level updates, and at _least_ one dependency needs a `major` update.
+Let's assume that most dependencies need a `patch` or `minor` update, and at _least_ one dependency needs a `major` update.
 
-We recommend that you start with the easy stuff first, to get back in the groove.
-So update your dependencies to the latest `minor` or `patch` versions, and read their changelogs.
-You may need to make minor changes before merging some updates.
+We recommend that you start by merging `patch` and `minor` updates.
+Make sure to read the changelogs for your updates.
+You may need to make minor changes before you can merge some updates.
 
-Once you've updated your old `major` versions, it's time to tackle the new `major` updates.
+After updating to the latest `patch` and `minor` versions, you can start getting `major` updates.
 Again, start with the easy `major` version updates, like a Prettier or ESLint major update.
 
-Now it's time to work on the `major` update for your framework or library.
-Take your time, carefully read the changelogs, and make the necessary changes.
+Now it's time to work on any `major` updates for your framework or library.
+Take your time, read the changelogs, and make the necessary changes.
 Let multiple team members review your work before you merge it, it's easy to miss something.
 
 Finally, update your development tools.
