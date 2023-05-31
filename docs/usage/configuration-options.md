@@ -1706,6 +1706,8 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 ## minimumReleaseAge
 
+This feature was formally known as `stabilityDays`.
+
 If this is set _and_ an update has a release timestamp header, then Renovate will check if the set duration has passed.
 
 Note: Renovate will wait for the set duration to pass for each **separate** version.
