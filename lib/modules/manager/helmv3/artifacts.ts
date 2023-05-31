@@ -40,7 +40,8 @@ async function helmCommands(
     .filter(isOCIRegistry)
     .map((value) => {
       return {
-        host: value.repository.replace('oci://', ''),
+        ...value,
+        repository: value.repository.replace('oci://', ''),
         hostRule: hostRules.find({
           url: value.repository.replace('oci://', 'https://'), //TODO we need to replace this, as oci:// will not be accepted as protocol
           hostType: DockerDatasource.id,
