@@ -23,7 +23,7 @@ export function getRegistryLoginCmd(
   return ""
 }
 
-export function getExtraEnv(): ExtraEnv {
+export function generateHelmEnvs(): ExtraEnv {
   return {
     HELM_EXPERIMENTAL_OCI: '1',
     // set cache and config files to a path in privateCacheDir to prevent file and credential leakage
