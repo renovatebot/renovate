@@ -117,7 +117,7 @@ For example:
 }
 ```
 
-For more information read [`platformAutomerge`](https://docs.renovatebot.com/configuration-options/#platformautomerge).
+For more information read [`platformAutomerge`](../configuration-options.md#platformautomerge).
 
 ### GitHub Merge Queue
 

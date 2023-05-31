@@ -64,7 +64,7 @@ The base branch could be called `trunk` or `mainline` or `prod`, and Git would w
 
 ### Troubleshoot Renovate
 
-If you have problems with Renovate, or want to know where Renovate keeps the logging output then read our [troubleshooting documentation](https://docs.renovatebot.com/troubleshooting/).
+If you have problems with Renovate, or want to know where Renovate keeps the logging output then read our [troubleshooting documentation](../usage/troubleshooting.md).
 
 ### Tell Renovate to ask for approval before creating a Pull Request
 
@@ -111,7 +111,7 @@ The `dependencyDashboardApproval` config option is outside of a `packageRules` a
 }
 ```
 
-Read our documentation on the [dependencyDashboardApproval](https://docs.renovatebot.com/configuration-options/#dependencydashboardapproval) config option.
+Read our documentation on the [dependencyDashboardApproval](../usage/configuration-options.md#dependencydashboardapproval) config option.
 
 ### Use an alternative branch as my Pull Request target
 
@@ -134,7 +134,7 @@ See the dedicated [Private npm module support](./getting-started/private-package
 
 ### Control Renovate's schedule
 
-To learn about controlling Renovate schedule, read the [key concepts, scheduling](https://docs.renovatebot.com/key-concepts/scheduling/) docs.
+To learn about controlling Renovate schedule, read the [key concepts, scheduling](../usage/key-concepts/scheduling.md) docs.
 
 ### Disable Renovate for certain dependency types
 
