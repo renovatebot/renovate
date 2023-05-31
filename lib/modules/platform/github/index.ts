@@ -9,7 +9,8 @@ import semver from 'semver';
 import { GlobalConfig } from '../../../config/global';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
-  PLATFORM_UNKOWN_ERROR,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+  PLATFORM_UNKNOWN_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
@@ -397,8 +398,12 @@ export async function initRepo({
     });
 
     if (res?.errors) {
+      if (res.errors.find((err) => err.type === 'RATE_LIMITED')) {
+        logger.debug({ res }, 'Graph QL rate limit exceeded.');
+        throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
+      }
       logger.debug({ res }, 'Unexpected Graph QL errors');
-      throw new Error(PLATFORM_UNKOWN_ERROR);
+      throw new Error(PLATFORM_UNKNOWN_ERROR);
     }
 
     repo = res?.data?.repository;
