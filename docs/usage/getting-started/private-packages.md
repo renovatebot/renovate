@@ -497,7 +497,7 @@ The preferred approach to secrets is that the bot administrator configures them 
 If you need to provide credentials to the hosted Renovate App, please do this:
 
 - Encrypt each secret string using <https://app.renovatebot.com/encrypt>. Note: this encrypts using the app's public key fully in the browser and does not send the original secret to any server. You can download this file and perform the encryption fully offline if you like.
-- Wrap each secret field in an [encrypted](https://docs.renovatebot.com/configuration-options/#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
+- Wrap each secret field in an [encrypted](../configuration-options.md#encrypted) object and paste in the encrypted secret value instead. An example is shown below:
 
 ```json
 {
@@ -537,7 +537,7 @@ If per-repository config must be done within the repository, it is still recomme
 For instructions on this, see the above section on encrypting secrets for the Mend Renovate App but instead:
 
 - Save a copy of the <https://app.renovatebot.com/encrypt> HTML file locally, or host it locally
-- Generate a public/private key pair for the app using the instructions in [privateKey](https://docs.renovatebot.com/self-hosted-configuration/#privatekey)
+- Generate a public/private key pair for the app using the instructions in [privateKey](../self-hosted-configuration.md#privatekey)
 - Replace the existing public key in the HTML with the public key you generated in the step prior
 - Use the resulting HTML encrypt page to encrypt secrets for your app before adding them to user/repository config
 - Configure the app to run with `privateKey` set to the private key you generated above
