@@ -2,7 +2,6 @@ import is from '@sindresorhus/is';
 import { logger } from '../../../../logger';
 import { scm } from '../../../../modules/platform/scm';
 import { getCache } from '../../../../util/cache/repository';
-import type { OnboardingBranchCache } from '../../../../util/cache/repository/types';
 import { getBranchCommit } from '../../../../util/git';
 
 export function setOnboardingCache(
