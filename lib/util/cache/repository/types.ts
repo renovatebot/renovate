@@ -39,7 +39,7 @@ export interface OnboardingBranchCache {
   isConflicted: boolean;
   isModified: boolean;
   configFileName?: string;
-  configFileRaw?: string;
+  configFileParsed?: string;
 }
 
 export interface PrCache {

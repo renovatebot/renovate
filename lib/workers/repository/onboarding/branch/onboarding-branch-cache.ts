@@ -86,23 +86,21 @@ export function getOnboardingFileNameFromCache(): string | undefined {
   return cache.onboardingBranchCache?.configFileName;
 }
 
-export function getRawOnboardingFileFromCache(): string | undefined {
+export function getParsedOnboardingFileFromCache(): string | undefined {
   const cache = getCache();
-  return cache.onboardingBranchCache?.configFileRaw;
+  return cache.onboardingBranchCache?.configFileParsed;
 }
 
 export function setOnboardingConfigDetails(
   configFileName: string,
-  configFileRaw: string
+  configFileParsed: string
 ): void {
   const cache = getCache();
   if (cache.onboardingBranchCache) {
-    const newOnboardingCache: OnboardingBranchCache = structuredClone(
-      cache.onboardingBranchCache
-    );
+    const newOnboardingCache = structuredClone(cache.onboardingBranchCache);
 
     newOnboardingCache.configFileName = configFileName;
-    newOnboardingCache.configFileRaw = configFileRaw;
+    newOnboardingCache.configFileParsed = configFileParsed;
     cache.onboardingBranchCache = newOnboardingCache;
   }
 }

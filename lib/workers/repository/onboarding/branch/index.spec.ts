@@ -264,24 +264,28 @@ describe('workers/repository/onboarding/branch/index', () => {
     });
 
     it('skips processing onboarding branch when main/onboarding SHAs have not changed', async () => {
+      GlobalConfig.set({ platform: 'github' });
       const dummyCache = {
         onboardingBranchCache: {
           defaultBranchSha: 'default-sha',
           onboardingBranchSha: 'onboarding-sha',
           isConflicted: false,
           isModified: false,
-          configFileRaw: 'raw',
+          configFileParsed: 'raw',
           configFileName: 'renovate.json',
         },
       } satisfies RepoCacheData;
       cache.getCache.mockReturnValue(dummyCache);
       scm.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null); // finds closed onboarding pr
-      platform.getBranchPr.mockResolvedValueOnce(mock<Pr>()); // finds open onboarding pr
+      platform.getBranchPr.mockResolvedValueOnce(
+        mock<Pr>({ bodyStruct: { rebaseRequested: false } })
+      ); // finds open onboarding pr
       git.getBranchCommit
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('default-sha')
         .mockReturnValueOnce('onboarding-sha');
+      config.onboardingRebaseCheckbox = true;
       await checkOnboardingBranch(config);
       expect(git.mergeBranch).not.toHaveBeenCalled();
     });

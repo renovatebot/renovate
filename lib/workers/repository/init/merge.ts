@@ -26,7 +26,7 @@ import * as queue from '../../../util/http/queue';
 import * as throttle from '../../../util/http/throttle';
 import {
   getOnboardingFileNameFromCache,
-  getRawOnboardingFileFromCache,
+  getParsedOnboardingFileFromCache,
   setOnboardingConfigDetails,
 } from '../onboarding/branch/onboarding-branch-cache';
 import { OnboardingState } from '../onboarding/common';
@@ -96,32 +96,28 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   // TODO #7154
   let configFileParsed: any;
   let configFileRaw: string | undefined | null;
-  let cachedPackageJsonRenovateRaw: string | undefined | null;
+
   if (OnboardingState.onboardingCacheValid) {
-    const rawFile = getRawOnboardingFileFromCache();
-    if (configFileName === 'package.json') {
-      cachedPackageJsonRenovateRaw = rawFile;
-    } else {
-      configFileRaw = rawFile;
+    const parsedConfig = JSON.parse(getParsedOnboardingFileFromCache() ?? '');
+    if (parsedConfig) {
+      setOnboardingConfigDetails(configFileName, JSON.stringify(parsedConfig));
+      return { configFileName, configFileRaw, configFileParsed: parsedConfig };
     }
   }
 
   if (configFileName === 'package.json') {
     // We already know it parses
-    configFileParsed = cachedPackageJsonRenovateRaw
-      ? JSON.parse(cachedPackageJsonRenovateRaw)
-      : JSON.parse(
-          // TODO #7154
-          (await readLocalFile('package.json', 'utf8'))!
-        ).renovate;
+    configFileParsed = JSON.parse(
+      // TODO #7154
+      (await readLocalFile('package.json', 'utf8'))!
+    ).renovate;
     if (is.string(configFileParsed)) {
       logger.debug('Massaging string renovate config to extends array');
       configFileParsed = { extends: [configFileParsed] };
     }
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    configFileRaw =
-      configFileRaw ?? (await readLocalFile(configFileName, 'utf8'));
+    configFileRaw = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!is.string(configFileRaw)) {
       logger.warn({ configFileName }, 'Null contents when reading config file');
@@ -196,7 +192,8 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       'Repository config'
     );
   }
-  setOnboardingConfigDetails(configFileName, configFileRaw!);
+
+  setOnboardingConfigDetails(configFileName, JSON.stringify(configFileParsed));
   return { configFileName, configFileRaw, configFileParsed };
 }
 
