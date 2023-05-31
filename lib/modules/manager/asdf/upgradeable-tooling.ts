@@ -526,4 +526,12 @@ export const upgradeableTooling: Record<string, ToolingDefinition> = {
       packageName: 'pinterest/ktlint',
     },
   },
+  yamlfmt: {
+    asdfPluginUrl: 'https://github.com/kachick/asdf-yamlfmt',
+    config: {
+      datasource: GithubReleasesDatasource.id,
+      packageName: 'google/yamlfmt',
+      extractVersion: '^v(?<version>\\S+)',
+    },
+  },
 };
