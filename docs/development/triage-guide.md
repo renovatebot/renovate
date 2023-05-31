@@ -38,7 +38,7 @@ Take the following steps on an incoming feature request:
 
 If you've been given triage rights, you are allowed to do the following things:
 
-- Apply labels to issues
+- Apply labels to issues/discussions
 - Close, reopen, and assign all issues and pull requests
 - Mark duplicate issues and pull requests
 - Request pull request reviews
