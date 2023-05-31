@@ -129,7 +129,7 @@ We use these Renovate features to automerge an internal dependency:
 
 - [Git submodule support](https://docs.renovatebot.com/modules/manager/git-submodules/)
 - [`automerge`](../configuration-options.md#automerge) set to `true`
-- [`automergeType`](../configuration-options/#automergetype) set to `branch`
+- [`automergeType`](../configuration-options.md#automergetype) set to `branch`
 
 ##### Background information
 
