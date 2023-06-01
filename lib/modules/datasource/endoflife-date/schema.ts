@@ -21,7 +21,8 @@ const EndoflifeDateVersionScheme = z
       (typeof eol === 'string' &&
         DateTime.fromISO(eol, { zone: 'utc' }) <= DateTime.now().toUTC()) ||
       (typeof discontinued === 'string' &&
-        DateTime.fromISO(discontinued, { zone: 'utc' }) <= DateTime.now().toUTC())
+        DateTime.fromISO(discontinued, { zone: 'utc' }) <=
+          DateTime.now().toUTC())
     ) {
       isDeprecated = true;
     }
