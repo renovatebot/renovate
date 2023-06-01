@@ -17,9 +17,8 @@ import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
 import {
-  OCIRepositoryRule,
-  getExtraEnv,
-  getRegistryLoginCmd,
+  generateHelmEnvs,
+  generateLoginCmd,
 } from './common'
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
@@ -36,7 +35,7 @@ async function helmCommands(
 ): Promise<void> {
   const cmd: string[] = [];
   // get OCI registries and detect host rules
-  const ociRepositoryRules: OCIRepositoryRule[] = repositories
+  const registries: RepositoryRule[] = repositories
     .filter(isOCIRegistry)
     .map((value) => {
       return {
@@ -50,8 +49,8 @@ async function helmCommands(
     });
 
   // if credentials for the registry have been found, log into it
-  ociRepositoryRules.forEach((value) => {
-    const loginCmd = getRegistryLoginCmd(value)
+  registries.forEach((value) => {
+    const loginCmd = generateLoginCmd(value, "helm registry login")
     if (loginCmd) {
       cmd.push(loginCmd)
     }
@@ -148,7 +147,7 @@ export async function updateArtifacts({
 
     const execOptions: ExecOptions = {
       docker: {},
-      extraEnv: getExtraEnv(),
+      extraEnv: generateHelmEnvs(),
       toolConstraints: [helmToolConstraint],
     };
     await helmCommands(execOptions, packageFileName, repositories);

@@ -1,25 +1,19 @@
 import { quote } from 'shlex';
 import upath from 'upath';
 
-import type { HostRule } from '../../../types';
 import type { ExtraEnv } from '../../../util/exec/types';
 import {
   privateCacheDir,
 } from '../../../util/fs';
-
-
-export interface OCIRepositoryRule {
-  host: string;
-  hostRule: HostRule;
-}
+import type { RepositoryRule } from './types'
 
 export function generateLoginCmd(
   repositoryRule: RepositoryRule,
   loginCMD: string
 ): string | null {
-  const { username, password } = RepositoryRule.hostRule;
+  const { username, password } = repositoryRule.hostRule;
   if (username && password) {
-    return `${loginCMD} --username ${quote(username)} --password ${quote(password)} ${repositoryRule.host}`
+    return `${loginCMD} --username ${quote(username)} --password ${quote(password)} ${repositoryRule.repository}`
   }
   return null
 }
