@@ -322,22 +322,28 @@ describe('modules/manager/helmv3/artifacts', () => {
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
         cmd: "helm dependency update ''",
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -384,22 +390,28 @@ describe('modules/manager/helmv3/artifacts', () => {
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
         cmd: "helm dependency update ''",
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -453,22 +465,28 @@ describe('modules/manager/helmv3/artifacts', () => {
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
         cmd: "helm dependency update ''",
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });
@@ -507,22 +525,28 @@ describe('modules/manager/helmv3/artifacts', () => {
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
       {
         cmd: "helm dependency update ''",
         options: {
           env: {
             HELM_EXPERIMENTAL_OCI: '1',
-            HELM_REGISTRY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/registry.json',
-            HELM_REPOSITORY_CONFIG: '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
-            HELM_REPOSITORY_CACHE: '/tmp/renovate/cache/__renovate-private-cache/repositories',
-          }
-        }
+            HELM_REGISTRY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/registry.json',
+            HELM_REPOSITORY_CONFIG:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories.yaml',
+            HELM_REPOSITORY_CACHE:
+              '/tmp/renovate/cache/__renovate-private-cache/repositories',
+          },
+        },
       },
     ]);
   });

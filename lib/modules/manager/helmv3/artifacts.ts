@@ -16,10 +16,7 @@ import * as hostRules from '../../../util/host-rules';
 import { DockerDatasource } from '../../datasource/docker';
 import { HelmDatasource } from '../../datasource/helm';
 import type { UpdateArtifact, UpdateArtifactsResult } from '../types';
-import {
-  generateHelmEnvs,
-  generateLoginCmd,
-} from './common'
+import { generateHelmEnvs, generateLoginCmd } from './common';
 import type { ChartDefinition, Repository, RepositoryRule } from './types';
 import {
   aliasRecordToRepositories,
@@ -50,9 +47,9 @@ async function helmCommands(
 
   // if credentials for the registry have been found, log into it
   registries.forEach((value) => {
-    const loginCmd = generateLoginCmd(value, "helm registry login")
+    const loginCmd = generateLoginCmd(value, 'helm registry login');
     if (loginCmd) {
-      cmd.push(loginCmd)
+      cmd.push(loginCmd);
     }
   });
 
@@ -79,16 +76,10 @@ async function helmCommands(
       parameters.push(`--password ${quote(password)}`);
     }
 
-    cmd.push(
-      `helm repo add ${value.name} ${parameters.join(' ')}`
-    );
+    cmd.push(`helm repo add ${value.name} ${parameters.join(' ')}`);
   });
 
-  cmd.push(
-    `helm dependency update ${quote(
-      getParentDir(manifestPath)
-    )}`
-  );
+  cmd.push(`helm dependency update ${quote(getParentDir(manifestPath))}`);
 
   await exec(cmd, execOptions);
 }
