@@ -1,0 +1,1437 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head> <title>curl - Download</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+<link rel="stylesheet" type="text/css" href="/curl.css">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="icon" href="/logo/curl-symbol.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="cURL Releases" href="https://github.com/curl/curl/releases.atom">
+</head>
+<body>
+<div class="main">
+<div class="menu">
+<div class="dropdown">
+  <a class="dropbtn" href="/download.html">Download</a>
+  <div class="dropdown-content">
+    <a href="https://github.com/curl/curl">Browse source</a>
+    <a href="/changes.html">Changelog</a>
+    <a href="/tiny/">tiny-curl</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="/docs/">Documentation</a>
+  <div class="dropdown-content">
+    <a href="/docs/projdocs.html">Project</a>
+      <small>
+      <a href="/docs/bugbounty.html">&nbsp; Bug Bounty</a>
+      <a href="/docs/faq.html">FAQ</a>
+      <a href="/docs/help-us.html">&nbsp; Help us</a>
+      <a href="/docs/knownbugs.html">&nbsp; Known bugs</a>
+      <a href="/docs/todo.html">&nbsp; TODO</a>
+      </small>
+    <a href="/docs/protdocs.html">Protocols</a>
+      <small>
+      <a href="/docs/caextract.html">&nbsp; CA bundle</a>
+      <a href="/docs/http-cookies.html">&nbsp; HTTP Cookies</a>
+      <a href="/docs/http2.html">&nbsp; HTTP/2</a>
+      <a href="/docs/sslcerts.html">&nbsp; SSL Certs</a>
+      </small>
+    <a href="/docs/reldocs.html">Releases</a>
+      <small>
+      <a href="/docs/security.html">&nbsp; Security</a>
+      <a href="/docs/versions.html">&nbsp; Version numbers</a>
+      <a href="/docs/vulnerabilities.html">&nbsp; Vulnerabilities</a>
+      </small>
+    <a href="/docs/tooldocs.html">curl tool</a>
+      <small>
+      <a href="/docs/manpage.html">&nbsp; man page</a>
+      <a href="/docs/manual.html">&nbsp; Tutorial</a>
+      <a href="/docs/httpscripting.html">&nbsp; HTTP scripting</a>
+      </small>
+    <a href="/docs/videos/">Videos</a>
+    <a href="/docs/whodocs.html">Who and Why</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="/libcurl/">libcurl</a>
+  <div class="dropdown-content">
+    <a href="/libcurl/abi.html">ABI</a>
+    <a href="/libcurl/c/">API</a>
+    <a href="/libcurl/competitors.html">Competitors</a>
+    <a href="/libcurl/c/example.html">Examples</a>
+    <a href="/libcurl/features.html">Features</a>
+    <a href="/mail/list.cgi?list=curl-library">Mailing list</a>
+    <a href="/libcurl/relatedlibs.html">Related libs</a>
+    <a href="/libcurl/using/">Using libcurl</a>
+    <a href="/libcurl/c/libcurl-tutorial.html">Tutorial</a>
+    <a href="/libcurl/theysay.html">Testimonials</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="/gethelp.html">Get Help</a>
+  <div class="dropdown-content">
+    <a href="https://lists.haxx.se/listinfo/curl-library">curl-library</a>
+    <a href="https://lists.haxx.se/listinfo/curl-users">curl-users</a>
+    <a href="/docs/irc.html">IRC / chat</a>
+    <a href="/mail/">Mailing lists</a>
+    <a href="/book.html">Everything curl [book]</a>
+    <a href="/docs/videos/">Video presentations</a>
+    <a href="https://github.com/curl/curl/issues">Report a bug</a>
+    <a href="/support.html">Paid support</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="/dev/">Development</a>
+  <div class="dropdown-content">
+    <a href="/dev/builds.html">Autobuilds</a>
+    <a href="/dev/code-review.html">Code review</a>
+    <a href="/dev/code-style.html">Code style</a>
+    <a href="/dev/contribute.html">Contribute</a>
+    <a href="/dashboard.html">Dashboard</a>
+    <a href="/dev/deprecate.html">Deprecate</a>
+    <a href="/dev/internals.html">Internals</a>
+    <a href="/dev/release-notes.html">Release Notes</a>
+    <a href="/dev/release-procedure.html">Release Procedure</a>
+    <a href="/dev/roadmap.html">Roadmap</a>
+    <a href="/dev/runtests.html">Run Tests</a>
+    <a href="/dev/secprocess.html">Security Process</a>
+    <a href="/rfc/">Specifications</a>
+    <a href="/dev/testcurl.html">Test curl</a>
+    <a href="/dev/tests-overview.html">Tests Overview</a>
+  </div>
+</div>
+<div class="dropdown">
+  <a class="dropbtn" href="/news.html">News</a>
+  <div class="dropdown-content">
+    <a href="/changes.html">Changelog</a>
+    <a href="/docs/releases.html">Release table</a>
+  </div>
+</div>
+</div>
+<div class="contents">
+<div class="where"><a href="/">curl</a> / <b>Download</b></div>
+<h1> Releases and Downloads </h1>
+<div class="relatedbox">
+<b>Related:</b>
+<br><a href="/changes.html">Changelog</a>
+<br><a href="/download/">Old Releases</a>
+<br><a href="/dev/source.html">Source code repo</a>
+<br><a href="https://curl.se/snapshots/">Daily Snapshots</a>
+<br><a href="https://daniel.haxx.se/address.html">GPG Key</a>
+<br><a href="/docs/releases.html">Release log</a>
+</div>
+<p>
+ The curl project mostly provides source packages. Other packages are kindly
+ provided by external persons and organizations.
+<h2> Source Archives </h2>
+<p>
+ <b>curl 8.3.0</b>, Released on the <b>2023-09-13</b>. <a href="changes.html#8_3_0">Changelog for 8.3.0</a>.
+<table class="download">
+  <tr>
+    <td class="download"><a href="/download/curl-8.3.0.tar.gz" type="application/x-gzip">curl-8.3.0.tar.gz</a></td>
+    <td class="download"><a href="/download/curl-8.3.0.tar.gz.asc" type="application/pgp-signature">gpg</a></td>
+  </tr>
+  <tr>
+    <td class="download"><a href="/download/curl-8.3.0.tar.bz2" type="application/x-bzip2">curl-8.3.0.tar.bz2</a></td>
+    <td class="download"><a href="/download/curl-8.3.0.tar.bz2.asc" type="application/pgp-signature">gpg</a></td>
+  </tr>
+  <tr>
+    <td class="download"><a href="/download/curl-8.3.0.zip" type="application/zip">curl-8.3.0.zip</a></td>
+    <td class="download"><a href="/download/curl-8.3.0.zip.asc" type="application/pgp-signature">gpg</a></td>
+  </tr>
+  <tr>
+    <td class="download"><a href="/download/curl-8.3.0.tar.xz" type="application/x-xz">curl-8.3.0.tar.xz</a></td>
+    <td class="download"><a href="/download/curl-8.3.0.tar.xz.asc" type="application/pgp-signature">gpg</a></td>
+  </tr>
+</table>
+<h2> Download Wizard </h2>
+<p>
+ Need help to select what to download? Use the <a href="//curl.se/dlwiz/">curl Download Wizard</a>!
+<h2> Packages </h2>
+<p>
+<div class="oslinks">
+<a href="#AIX">AIX</a><br>
+<a href="#AmigaOS">AmigaOS</a><br>
+<a href="#BeOS">BeOS</a><br>
+<a href="#ChromeNaCl">Chrome NaCl</a><br>
+<a href="#DOS">DOS</a><br>
+<a href="#DragonflyBSD">Dragonfly BSD</a><br>
+<a href="#FreeBSD">FreeBSD</a><br>
+<a href="#HPENonStop">HPE NonStop</a><br>
+<a href="#HPUX">HPUX</a><br>
+<a href="#Haiku">Haiku</a><br>
+<a href="#Hurd">Hurd</a><br>
+<a href="#IRIX">IRIX</a><br>
+<a href="#Linux">Linux</a><br>
+<a href="#MacOSX">Mac OS X</a><br>
+<a href="#MiNT">MiNT</a><br>
+<a href="#MidnightBSD">Midnight BSD</a><br>
+<a href="#Minix">Minix</a><br>
+<a href="#NetBSD">NetBSD</a><br>
+<a href="#OS2">OS/2</a><br>
+<a href="#OpenServer">Open Server</a><br>
+<a href="#OpenBSD">OpenBSD</a><br>
+<a href="#Plan9">Plan9</a><br>
+<a href="#QNX">QNX</a><br>
+<a href="#RISCOS">RISC OS</a><br>
+<a href="#SailfishOS">SailfishOS</a><br>
+<a href="#SerenityOS">SerenityOS</a><br>
+<a href="#Solaris">Solaris</a><br>
+<a href="#Syllable">Syllable</a><br>
+<a href="#Tru64UNIX">Tru64 UNIX</a><br>
+<a href="#UnixWare">UnixWare</a><br>
+<a href="#VMS">VMS</a><br>
+<a href="#Win32">Win32</a><br>
+<a href="#Win64">Win64</a></div>
+<p><table class="download2" cellpadding="0" cellspacing="0">
+<tr>
+<th>Package</th>
+<th>Version</th>
+<th>Type</th>
+<th>Provider</th>
+</tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="AIX"></a>AIX</td><td class="oslogo"><img alt="AIX" src="pix/aix.svg"></td></tr>
+<tr class="older2">
+<td class="col1">AIX  5.1 </td>
+<td class="col2"><a href="http://www.oss4aix.org/download/RPMS/curl/curl-7.72.0-1.aix5.1.ppc.rpm" type="application/x-rpm">7.72.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://www.perzl.org/aix/index.php?n=Main.Curl">perzl.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">AIX  5.1 </td>
+<td class="col2"><a href="http://www.oss4aix.org/download/RPMS/curl/curl-devel-7.72.0-1.aix5.1.ppc.rpm" type="application/x-rpm">7.72.0</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="http://www.perzl.org/aix/index.php?n=Main.Curl">perzl.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">AIX  5.3 </td>
+<td class="col2"><a href="http://www.aixtools.net/index.php/curl">7.75.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://www.aixtools.net/index.php/curl">Michael Felt</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">AIX  6.1 </td>
+<td class="col2"><a href="https://www.ibm.com/developerworks/aix/library/aix-toolbox/alpha.html#C">8.1.2</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.ibm.com/developerworks/aix/library/aix-toolbox/alpha.html">AIX Toolbox</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">AIX  6.1 </td>
+<td class="col2"><a href="https://www.ibm.com/developerworks/aix/library/aix-toolbox/alpha.html#C">8.1.2</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="https://www.ibm.com/developerworks/aix/library/aix-toolbox/alpha.html">AIX Toolbox</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="AmigaOS"></a>AmigaOS</td><td class="oslogo"><img alt="AmigaOS" src="pix/amigaos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">AmigaOS   m68k</td>
+<td class="col2"><a href="https://sourceforge.net/projects/amiga/files/cURL/7.14.0/curl-7.14.0.lha/download">7.14.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Diego Casorran</td>
+</tr>
+<tr class="older2">
+<td class="col1">AmigaOS  4 PPC</td>
+<td class="col2"><a href="http://os4depot.net/index.php?function=showfile&amp;file=network/misc/curl.lha">8.2.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://os4depot.net/index.php?function=modules/sql/filesbyuploader&amp;submitter=Michael%20Trebilcock">Michael Trebilcock</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">AmigaOS  4 PPC</td>
+<td class="col2"><a href="http://os4depot.net/index.php?function=showfile&amp;file=development/library/misc/libcurl.lha">8.2.0</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="http://os4depot.net/index.php?function=modules/sql/filesbyuploader&amp;submitter=Michael%20Trebilcock">Michael Trebilcock</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="BeOS"></a>BeOS</td><td class="oslogo"><img alt="BeOS" src="pix/beos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">BeOS   </td>
+<td class="col2"><a href="https://libpak.neoni.net/packages/">7.12.3</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Marcin Konicki</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="ChromeNaCl"></a>Chrome NaCl</td><td class="oslogo"><img alt="Chrome NaCl" src="pix/chromenacl.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Chrome NaCl   </td>
+<td class="col2"><a href="https://gsdview.appspot.com/webports/builds/">7.44.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://chromium.googlesource.com/webports/">webports</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="DOS"></a>DOS</td><td class="oslogo"><img alt="DOS" src="pix/dos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">DOS   </td>
+<td class="col2"><a href="http://mik.dyndns.pro/dos-stuff/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://mik.dyndns.pro/dos-stuff/bin/">Michael Kostylev</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="DragonflyBSD"></a>Dragonfly BSD</td><td class="oslogo"><img alt="Dragonfly BSD" src="pix/dragonfly.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Dragonfly BSD   </td>
+<td class="col2"><a href="https://github.com/DragonFlyBSD/DPorts/tree/master/ftp/curl">8.1.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.dragonflybsd.org/">Dragonfly BSD</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="FreeBSD"></a>FreeBSD</td><td class="oslogo"><img alt="FreeBSD" src="pix/freebsd.svg"></td></tr>
+<tr class="older2">
+<td class="col1">FreeBSD   </td>
+<td class="col2"><a href="https://ports.freebsd.org/cgi/ports.cgi?query=^curl-&amp;stype=name">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="mailto:sunpoet%20at%20FreeBSD%20dot%20org"></a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Haiku"></a>Haiku</td><td class="oslogo"><img alt="Haiku" src="pix/haiku.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Haiku   </td>
+<td class="col2"><a href="https://raw.githubusercontent.com/haikuports/haikuports/master/net-misc/curl/curl-8.1.2.recipe">8.1.2</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="HPENonStop"></a>HPE NonStop</td><td class="oslogo"><img alt="HPE NonStop" src="pix/hpenonstop.svg"></td></tr>
+<tr class="older2">
+<td class="col1">HPE NonStop   i386</td>
+<td class="col2"><a href="https://ituglib.connect-community.org/apps/Ituglib/SrchOpenSrcLib.xhtml">8.2.1</a></td>
+<td class="col3"></td>
+<td class="col6">ITUGLIB</td>
+</tr>
+<tr class="older2">
+<td class="col1">HPE NonStop   ia64</td>
+<td class="col2"><a href="https://ituglib.connect-community.org/apps/Ituglib/SrchOpenSrcLib.xhtml">8.2.1</a></td>
+<td class="col3"></td>
+<td class="col6">ITUGLIB</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="HPUX"></a>HPUX</td><td class="oslogo"><img alt="HPUX" src="pix/hpux.svg"></td></tr>
+<tr class="older2">
+<td class="col1">HPUX  11.00 HPPA</td>
+<td class="col2"><a href="http://hpux.connect.org.uk/hppd/hpux/Networking/WWW/curl-8.2.1/index.html">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://hpux.connect.org.uk">connect.org.uk</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">HPUX  11.11 HPPA</td>
+<td class="col2"><a href="http://hpux.connect.org.uk/hppd/hpux/Networking/WWW/curl-8.2.1/index.html">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://hpux.connect.org.uk">connect.org.uk</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">HPUX  11.23 ia64</td>
+<td class="col2"><a href="http://hpux.connect.org.uk/hppd/hpux/Networking/WWW/curl-8.2.1/index.html">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://hpux.connect.org.uk">connect.org.uk</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Hurd"></a><a name="HurdArch"></a>Hurd - Arch</td><td class="oslogo"><img alt="Hurd" src="pix/archhurd.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Hurd Arch  </td>
+<td class="col2"><a href="https://files.archhurd.org/staging/os/i686/?C=M;O=D;P=*curl*">7.60.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.archhurd.org/">Arch Hurd</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Hurd Arch  </td>
+<td class="col2"><a href="https://archhurd.org/packages/staging/i686/curl/">7.60.0</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.archhurd.org/">Arch Hurd</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="IRIX"></a>IRIX</td><td class="oslogo"><img alt="IRIX" src="pix/irix.svg"></td></tr>
+<tr class="older2">
+<td class="col1">IRIX  6.5 </td>
+<td class="col2"><a href="ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/mips-sgi-irix6.5/curl-7.15.1.inst.tar.Z" type="application/x-compress">7.15.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:info%20at%20thewrittenword%20dot%20com">The Written Word</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Linux"></a>Linux</td><td class="oslogo"><img alt="Linux" src="pix/linux.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux   </td>
+<td class="col2"><a href="https://conan.io/center/recipes/libcurl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://conan.io/">Conary</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   ARM</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   ARM64</td>
+<td class="col2"><a href="https://github.com/stunnel/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/stunnel/static-curl">Travis Lee</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   ARM64</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   ARM64</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   ARM64</td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   i386</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   i386</td>
+<td class="col2"><a href="https://www.magicermine.com/demos/curl/curl/curl.html">7.30.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.magicermine.com/">Ermine</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   MIPSel</td>
+<td class="col2"><a href="https://www.linux-mips.org/pub/linux/mips/people/macro/RPMS/mipsel/curl-7.10.7-1.mipsel.rpm">7.10.7</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Maciej W. Rozycki</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   PPC64</td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   PPC64</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   x86_64</td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   x86_64</td>
+<td class="col2"><a href="https://github.com/moparisthebest/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/moparisthebest">Travis Burtrum</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux   x86_64</td>
+<td class="col2"><a href="https://github.com/stunnel/static-curl/releases/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/stunnel/static-curl">Travis Lee</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxAlpine"></a>Linux - Alpine</td><td class="oslogo"><img alt="Linux" src="pix/alpine.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Alpine  </td>
+<td class="col2"><a href="https://git.alpinelinux.org/cgit/aports/plain/main/curl/APKBUILD">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://alpinelinux.org/">Alpine Linux</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxAlt"></a>Linux - Alt</td><td class="oslogo"><img alt="Linux" src="pix/alt.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Alt  </td>
+<td class="col2"><a href="http://www.sisyphus.ru/srpm/Sisyphus/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Alt  </td>
+<td class="col2"><a href="http://www.sisyphus.ru/srpm/Sisyphus/curl">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Alt  </td>
+<td class="col2"><a href="http://www.sisyphus.ru/srpm/Sisyphus/curl">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Alt  </td>
+<td class="col2"><a href="http://www.sisyphus.ru/srpm/Sisyphus/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxArch"></a>Linux - Arch</td><td class="oslogo"><img alt="Linux" src="pix/arch.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Arch  StrongARM</td>
+<td class="col2"><a href="https://archlinuxarm.org/packages/?q=curl">8.1.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://archlinuxarm.org/">Arch Linux</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Arch  x86_64</td>
+<td class="col2"><a href="https://www.archlinux.org/packages/core/x86_64/curl/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.archlinux.org/">Arch Linux</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxBuildroot"></a>Linux - Buildroot</td><td class="oslogo"><img alt="Linux" src="pix/buildroot.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Buildroot  </td>
+<td class="col2"><a href="https://git.busybox.net/buildroot/tree/package/libcurl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://buildroot.org/">Buildroot</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxChimera"></a>Linux - Chimera</td><td class="oslogo"><img alt="Linux" src="pix/chimera.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Chimera  </td>
+<td class="col2"><a href="https://github.com/chimera-linux/cports/tree/master/main/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://chimera-linux.org/">Chimera</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxClear"></a>Linux - Clear</td><td class="oslogo"><img alt="Linux" src="pix/clear.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Clear  </td>
+<td class="col2"><a href="https://download.clearlinux.org/current/x86_64/os/Packages/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://clearlinux.org/">Clear Linux</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxCoreOS"></a>Linux - Core OS</td><td class="oslogo"><img alt="Linux" src="pix/coreos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Core OS stable </td>
+<td class="col2"><a href="https://getfedora.org/en/coreos?stream=stable">8.0.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://getfedora.org/coreos">Core OS</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxCRUX"></a>Linux - CRUX</td><td class="oslogo"><img alt="Linux" src="pix/crux.png"></td></tr>
+<tr class="older2">
+<td class="col1">Linux CRUX 3.7 </td>
+<td class="col2"><a href="https://crux.nu/portdb/?q=curl&amp;a=search">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="mailto:jw%20at%20tks6%20dot%20net">Johannes Winkelmann</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxDebian"></a>Linux - Debian</td><td class="oslogo"><img alt="Linux" src="pix/debian.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Debian  </td>
+<td class="col2"><a href="https://packages.debian.org/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:curl%20at%20packages%20dot%20debian%20dot%20org">Debian</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Debian  </td>
+<td class="col2"><a href="https://packages.debian.org/libcurl4-openssl-dev">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="mailto:curl%20at%20packages%20dot%20debian%20dot%20org">Debian</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Debian  </td>
+<td class="col2"><a href="https://packages.debian.org/libcurl4-gnutls-dev">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="mailto:curl%20at%20packages%20dot%20debian%20dot%20org">Debian</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Debian  </td>
+<td class="col2"><a href="https://packages.debian.org/libcurl3-gnutls">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="mailto:curl%20at%20packages%20dot%20debian%20dot%20org">Debian</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxDevuan"></a>Linux - Devuan</td><td class="oslogo"><img alt="Linux" src="pix/devuan.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Devuan  </td>
+<td class="col2"><a href="https://pkginfo.devuan.org/cgi-bin/policy-query.html?c=package&amp;q=%28libcurl%29%7C%28%5Ecurl%29">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Devuan</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxDocker"></a>Linux - Docker</td><td class="oslogo"><img alt="Linux" src="pix/docker.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Docker  </td>
+<td class="col2"><a href="https://hub.docker.com/r/curlimages/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">James Fuller</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Docker  </td>
+<td class="col2"><a href="https://quay.io/repository/curl/curl?tab=info">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">James Fuller</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxFedora"></a>Linux - Fedora</td><td class="oslogo"><img alt="Linux" src="pix/fedora.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Fedora  </td>
+<td class="col2"><a href="https://src.fedoraproject.org/rpms/curl/">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://getfedora.org/">fedoraproject.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora rawhide </td>
+<td class="col2"><a href="https://download.fedoraproject.org/pub/fedora/linux/development/rawhide/Everything/source/tree/Packages/c/">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://getfedora.org/">fedoraproject.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 19 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 20 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 26 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 34 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 35 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 30 PPC64</td>
+<td class="col2"><a href="https://archives.fedoraproject.org/pub/archive/fedora-secondary/releases/30/Everything/ppc64le/os/Packages/c/?P=*curl*">7.64.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://getfedora.org/">fedoraproject.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 20 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 21 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 26 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 32 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 33 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 34 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Fedora 35 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxGentoo"></a>Linux - Gentoo</td><td class="oslogo"><img alt="Linux" src="pix/gentoo.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Gentoo  </td>
+<td class="col2"><a href="https://packages.gentoo.org/package/net-misc/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxGoboLinux"></a>Linux - GoboLinux</td><td class="oslogo"><img alt="Linux" src="pix/gobolinux.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux GoboLinux  </td>
+<td class="col2"><a href="https://raw.githubusercontent.com/gobolinux/Recipes/master/Curl/7.81.0/Recipe">7.81.0</a></td>
+<td class="col3">devel</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxGuix"></a>Linux - Guix</td><td class="oslogo"><img alt="Linux" src="pix/guix.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Guix  ARM</td>
+<td class="col2"><a href="https://ci.guix.gnu.org/search?query=curl-+status:success">7.85.0</a></td>
+<td class="col3"></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Guix  i386</td>
+<td class="col2"><a href="https://ci.guix.gnu.org/search?query=curl-+status:success">7.85.0</a></td>
+<td class="col3"></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Guix  x86_64</td>
+<td class="col2"><a href="https://ci.guix.gnu.org/search?query=curl-+status:success">7.85.0</a></td>
+<td class="col3"></td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxLinuxFromScratch"></a>Linux - Linux From Scratch</td><td class="oslogo"><img alt="Linux" src="pix/linuxfromscratch.png"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Linux From Scratch  </td>
+<td class="col2"><a href="https://www.linuxfromscratch.org/blfs/view/svn/basicnet/netlibs.html">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxMaemo"></a>Linux - Maemo</td><td class="oslogo"><img alt="Linux" src="pix/maemo.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Maemo 3.2 </td>
+<td class="col2"><a href="http://repository.maemo.org/pool/maemo3.2/free/binary/">7.15.5</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Maemo 3.2 </td>
+<td class="col2"><a href="http://repository.maemo.org/pool/maemo3.2/free/binary/">7.15.5</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Maemo 4.0 </td>
+<td class="col2"><a href="http://repository.maemo.org/pool/maemo4.0/free/c/curl/">7.15.5</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Maemo 4.1 </td>
+<td class="col2"><a href="http://repository.maemo.org/pool/maemo4.1/free/c/curl/">7.15.5</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Maemo 5.0 </td>
+<td class="col2"><a href="http://repository.maemo.org/pool/maemo5.0/free/c/curl/">7.18.2</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxMageia"></a>Linux - Mageia</td><td class="oslogo"><img alt="Linux" src="pix/mageia.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Mageia  ARM</td>
+<td class="col2"><a href="https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/armv7hl/media/core/release/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.mageia.org/">Mageia</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Mageia  ARM64</td>
+<td class="col2"><a href="https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/aarch64/media/core/release/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.mageia.org/">Mageia</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Mageia  i386</td>
+<td class="col2"><a href="https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/i586/media/core/release/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.mageia.org/">Mageia</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Mageia  x86_64</td>
+<td class="col2"><a href="https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/x86_64/media/core/release/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.mageia.org/">Mageia</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxNixOS"></a>Linux - NixOS</td><td class="oslogo"><img alt="Linux" src="pix/nixos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux NixOS  </td>
+<td class="col2"><a href="https://github.com/NixOS/nixpkgs/blob/master/pkgs/tools/networking/curl/default.nix">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://nixos.org/">NixOS</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux NixOS  i386</td>
+<td class="col2"><a href="https://hydra.nixos.org/job/nixpkgs/trunk/curl.i686-linux/latest">7.54.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://nixos.org/">NixOS</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux NixOS  x86_64</td>
+<td class="col2"><a href="https://hydra.nixos.org/job/nixpkgs/trunk/curl.x86_64-linux/latest">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://nixos.org/">NixOS</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxOpenEmbedded"></a>Linux - OpenEmbedded</td><td class="oslogo"><img alt="Linux" src="pix/openembedded.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux OpenEmbedded  </td>
+<td class="col2"><a href="https://git.openembedded.org/openembedded-core/tree/meta/recipes-support/curl/curl_8.2.1.bb">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxOpenWRT"></a>Linux - OpenWRT</td><td class="oslogo"><img alt="Linux" src="pix/openwrt.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT 8.09.2 ARM</td>
+<td class="col2"><a href="https://downloads.openwrt.org/kamikaze/8.09.2/ixp4xx/packages/">7.17.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT  ARM64</td>
+<td class="col2"><a href="https://downloads.openwrt.org/snapshots/trunk/arm64/generic/packages/base/">7.50.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT  AT91</td>
+<td class="col2"><a href="https://downloads.openwrt.org/snapshots/trunk/at91/generic/packages/base/curl_7.50.0-1_at91.ipk" type="application/octet-stream">7.50.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT 10.03 AVR32</td>
+<td class="col2"><a href="https://downloads.openwrt.org/backfire/10.03/avr32/packages/">7.19.6</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT 8.09.1 i386</td>
+<td class="col2"><a href="https://downloads.openwrt.org/kamikaze/8.09.1/x86/packages/">7.17.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT  MIPSel</td>
+<td class="col2"><a href="https://archive.openwrt.org/kamikaze/8.09.2/ar7/packages/">7.17.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux OpenWRT 8.09.1 MIPSel</td>
+<td class="col2"><a href="https://downloads.openwrt.org/kamikaze/8.09.1/adm5120/packages/">7.17.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.openwrt.org/">OpenWRT</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxPLD"></a>Linux - PLD</td><td class="oslogo"><img alt="Linux" src="pix/pld.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux PLD  </td>
+<td class="col2"><a href="https://ftp.pld-linux.org/dists/th/PLD/SRPMS/RPMS/">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux PLD  i386</td>
+<td class="col2"><a href="https://ftp.pld-linux.org/dists/th/PLD/i686/RPMS/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux PLD  i386</td>
+<td class="col2"><a href="https://ftp.pld-linux.org/dists/th/PLD/i686/RPMS/">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux PLD  x86_64</td>
+<td class="col2"><a href="https://ftp.pld-linux.org/dists/th/PLD/x86_64/RPMS/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxRedhat"></a>Linux - Redhat</td><td class="oslogo"><img alt="Linux" src="pix/redhat.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL7 </td>
+<td class="col2"><a href="https://git.centos.org/rpms/curl/blob/c7/f/SPECS/curl.spec">7.29.0</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.redhat.com/">CentOS</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL8 </td>
+<td class="col2"><a href="https://git.centos.org/rpms/curl/blob/c8/f/SPECS/curl.spec">7.61.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.redhat.com/">CentOS</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL9 </td>
+<td class="col2"><a href="https://mirror.hostduplex.com/almalinux/9/BaseOS/x86_64/os/Packages/">7.76.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://almalinux.org/">AlmaLinux</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL7 i386</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL7 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL8 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Redhat RHEL9 x86_64</td>
+<td class="col2"><a href="https://mirror.city-fan.org/ftp/contrib/sysutils/Mirroring/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Paul Howarth</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxSlackware"></a>Linux - Slackware</td><td class="oslogo"><img alt="Linux" src="pix/slackware.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Slackware 15.0 ARM</td>
+<td class="col2"><a href="http://ftp.arm.slackware.com/slackwarearm/slackwarearm-15.0/slackware/n/">7.81.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://arm.slackware.com/">ARMedslack</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Slackware  ARM64</td>
+<td class="col2"><a href="http://ftp.arm.slackware.com/slackwarearm/slackwareaarch64-current/slackware/n/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://arm.slackware.com/">ARMedslack</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Slackware  i386</td>
+<td class="col2"><a href="https://mirrors.slackware.com/slackware/slackware-current/slackware/n/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.slackware.com/">Slackware</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Slackware  PPC</td>
+<td class="col2"><a href="https://slackintosh.workaround.ch/pub/slackintosh/current/slackware/n?S=N">7.16.2</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://slackintosh.workaround.ch/">Slackintosh</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Slackware  S390</td>
+<td class="col2"><a href="https://ftp.nluug.nl/os/Linux/distr/slack390/slack390-current/slackware/n/?C=M;O=D;P=*curl*">7.12.2</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">Slack/390 Project</td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Slackware  x86_64</td>
+<td class="col2"><a href="https://mirrors.slackware.com/slackware/slackware64-current/slackware64/n/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.slackware.com/">Slackware</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxSliTaz"></a>Linux - SliTaz</td><td class="oslogo"><img alt="Linux" src="pix/slitaz.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux SliTaz  </td>
+<td class="col2"><a href="https://hg.slitaz.org/wok/file/tip/curl/receipt">7.81.0</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://slitaz.org/">SliTaz</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxSourceMage"></a>Linux - Source Mage</td><td class="oslogo"><img alt="Linux" src="pix/sourcemage.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Source Mage stable </td>
+<td class="col2"><a href="http://codex.sourcemage.org/stable/ftp/curl/">7.54.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.sourcemage.org/">sourcemage.org</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Source Mage test </td>
+<td class="col2"><a href="http://codex.sourcemage.org/test/ftp/curl/">8.2.0</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.sourcemage.org/">sourcemage.org</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxSuse"></a>Linux - Suse</td><td class="oslogo"><img alt="Linux" src="pix/suse.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Suse  i386</td>
+<td class="col2"><a href="https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/i586/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opensuse.org/">openSUSE</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Suse  i386</td>
+<td class="col2"><a href="https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/i586/?P=*curl*">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="https://www.opensuse.org/">openSUSE</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Suse  i386</td>
+<td class="col2"><a href="https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/i586/?P=*curl*">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://www.opensuse.org/">openSUSE</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Suse  x86_64</td>
+<td class="col2"><a href="https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/x86_64/?P=*curl*">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opensuse.org/">openSUSE</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxT2"></a>Linux - T2</td><td class="oslogo"><img alt="Linux" src="pix/t2.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux T2  </td>
+<td class="col2"><a href="https://www.t2-project.org/packages/curl.html">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.t2-project.org/">T2</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxTizen"></a>Linux - Tizen</td><td class="oslogo"><img alt="Linux" src="pix/tizen.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Tizen 2.4 </td>
+<td class="col2"><a href="https://review.tizen.org/git/?p=external/curl.git;a=tree;h=refs/heads/tizen_2.4;hb=refs/heads/tizen_2.4">7.40.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.tizen.org/">Tizen</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Tizen  ARM</td>
+<td class="col2"><a href="https://download.tizen.org/releases/weekly/tizen/base/latest/repos/standard/packages/armv7l/">7.73.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.tizen.org/">Tizen</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxUbuntu"></a>Linux - Ubuntu</td><td class="oslogo"><img alt="Linux" src="pix/ubuntu.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Ubuntu focal </td>
+<td class="col2"><a href="https://packages.ubuntu.com/disco/curl">7.68.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Ubuntu jammy </td>
+<td class="col2"><a href="https://packages.ubuntu.com/jammy/curl">7.81.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Ubuntu kinetic </td>
+<td class="col2"><a href="https://packages.ubuntu.com/kinetic/curl">7.85.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Ubuntu lunar </td>
+<td class="col2"><a href="https://packages.ubuntu.com/lunar/curl">7.88.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr class="older2">
+<td class="col1">Linux Ubuntu mantic </td>
+<td class="col2"><a href="https://packages.ubuntu.com/mantic/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="LinuxUnslung"></a>Linux - Unslung</td><td class="oslogo"><img alt="Linux" src="pix/unslung2.png"></td></tr>
+<tr class="older2">
+<td class="col1">Linux Unslung  </td>
+<td class="col2"><a href="http://www.myslug.de/index.php?title=Downloads#cURL">7.17.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:compile%20at%20myslug%20dot%20de">Pierre Kretschmer</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="MacOSX"></a>macOS</td><td class="oslogo"><img alt="Mac OS X" src="pix/macosx.svg"></td></tr>
+<tr class="older2">
+<td class="col1">macOS   </td>
+<td class="col2"><a href="https://ports.macports.org/port/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.macports.org/">MacPorts</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   </td>
+<td class="col2"><a href="https://conan.io/center/recipes/libcurl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://conan.io/">Conary</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   </td>
+<td class="col2"><a href="https://pdb.finkproject.org/pdb/package.php/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="mailto:daniel%20at%20daniel-johnson%20dot%20org">Daniel Johnson</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   </td>
+<td class="col2"><a href="https://formulae.brew.sh/formula/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://brew.sh/">Homebrew</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   </td>
+<td class="col2"><a href="https://opensource.apple.com/source/curl/">7.64.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://opensource.apple.com">Apple</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   ARM64</td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">macOS   x86_64</td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="MidnightBSD"></a>Midnight BSD</td><td class="oslogo"><img alt="Midnight BSD" src="pix/midnightbsd.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Midnight BSD   </td>
+<td class="col2"><a href="https://pub.allbsd.org/MidnightBSD/distfiles/curl-7.87.0.tar.xz">7.87.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.midnightbsd.org/">Midnight BSD</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Minix"></a>Minix</td><td class="oslogo"><img alt="Minix" src="pix/minix.png"></td></tr>
+<tr class="older2">
+<td class="col1">Minix   </td>
+<td class="col2"><a href="https://git.minix3.org/index.cgi?p=pkgsrc-ng.git;a=blob_plain;f=www/curl/Makefile;hb=refs/heads/upstream">7.50.3</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://www.minix3.org/">Minix</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="MiNT"></a>MiNT</td><td class="oslogo"><img alt="MiNT" src="pix/mint.svg"></td></tr>
+<tr class="older2">
+<td class="col1">MiNT   </td>
+<td class="col2"><a href="http://pmandin.atari.org/en/index.php?post/2010/04/30/257-curl-7021">7.20.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="NetBSD"></a>NetBSD</td><td class="oslogo"><img alt="NetBSD" src="pix/netbsd.svg"></td></tr>
+<tr class="older2">
+<td class="col1">NetBSD   </td>
+<td class="col2"><a href="https://pkgsrc.se/www/curl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="OpenServer"></a>Open Server</td><td class="oslogo"><img alt="Open Server" src="pix/openserver.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Open Server  5 </td>
+<td class="col2"><a href="ftp://ftp.sco.com/pub/updates/UnixWare/SCOSA-2006.16/curl-7.15.1.pkg">7.15.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">sco.com</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="OpenBSD"></a>OpenBSD</td><td class="oslogo"><img alt="OpenBSD" src="pix/openbsd.svg"></td></tr>
+<tr class="older2">
+<td class="col1">OpenBSD   </td>
+<td class="col2"><a href="https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/net/curl/">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6">Christian Weisgerber</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="OS2"></a>OS/2</td><td class="oslogo"><img alt="OS/2" src="pix/os2.svg"></td></tr>
+<tr class="older2">
+<td class="col1">OS/2   </td>
+<td class="col2"><a href="https://smedley.id.au/os2ports_wp/?page_id=12">7.36.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://os2ports.smedley.id.au/">Paul Smedley</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Plan9"></a>Plan9</td><td class="oslogo"><img alt="Plan9" src="pix/plan9.jpg"></td></tr>
+<tr class="older2">
+<td class="col1">Plan9   </td>
+<td class="col2"><a href="https://code.9front.org/hg/ports/file/default/net-misc/curl/mkfile">7.28.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="http://9front.org/">9front</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="QNX"></a>QNX</td><td class="oslogo"><img alt="QNX" src="pix/qnx.svg"></td></tr>
+<tr class="older2">
+<td class="col1">QNX  6.5 </td>
+<td class="col2"><a href="https://archive.netbsd.org/pub/pkgsrc-archive/packages/QNX/i386/6.5.0_head_20110826/www/curl-7.21.7.tgz">7.21.7</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="http://community.qnx.com/sf/sfmain/do/viewProject/projects.pkgsrc">QNX pkgsrc</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="RISCOS"></a>RISC OS</td><td class="oslogo"><img alt="RISC OS" src="pix/riscos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">RISC OS   </td>
+<td class="col2"><a href="http://www.strcprstskrzkrk.co.uk/curl">7.11.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:bursa%20at%20users%20dot%20sourceforge%20dot%20net">James Bursa</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="SerenityOS"></a>SerenityOS</td><td class="oslogo"><img alt="SerenityOS" src="pix/serenityos2.png"></td></tr>
+<tr class="older2">
+<td class="col1">SerenityOS   </td>
+<td class="col2"><a href="https://github.com/SerenityOS/serenity/tree/master/Ports/curl">8.2.0</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://serenityos.org/">SerenityOS</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Solaris"></a>Solaris</td><td class="oslogo"><img alt="Solaris" src="pix/solaris.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Solaris   i386</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/curl/">8.1.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   i386</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/libcurl4_feature/">8.1.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   Sparc</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/curl/">8.1.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   Sparc</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/libcurl4_feature/">8.1.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   Sparc64</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/curl/">8.1.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   Sparc64</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/libcurl4_feature/">8.1.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   x86_64</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/curl/">8.1.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Solaris   x86_64</td>
+<td class="col2"><a href="https://www.opencsw.org/packages/libcurl4_feature/">8.1.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://www.opencsw.org/">OpenCSW</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="SolarisIllumos"></a>Solaris - Illumos</td><td class="oslogo"><img alt="Solaris" src="pix/illumos.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Solaris Illumos  </td>
+<td class="col2"><a href="https://github.com/joyent/pkgsrc/tree/trunk/www/curl">8.1.2</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://www.illumos.org/">Illumos</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="SolarisOpenIndiana"></a>Solaris - OpenIndiana</td><td class="oslogo"><img alt="Solaris" src="pix/openindiana.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Solaris OpenIndiana  </td>
+<td class="col2"><a href="https://pkg.openindiana.org/hipster/en/search.shtml?token=curl&amp;action=Search">8.0.1</a></td>
+<td class="col3"></td>
+<td class="col6"><a href="https://www.openindiana.org/">OpenIndiana</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Tru64UNIX"></a>Tru64 UNIX</td><td class="oslogo"><img alt="Tru64 UNIX" src="pix/tru64unix.png"></td></tr>
+<tr class="older2">
+<td class="col1">Tru64 UNIX  4.0D </td>
+<td class="col2"><a href="ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf4.0d/curl-7.15.1.setld.tar.Z" type="application/x-compress">7.15.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:info%20at%20thewrittenword%20dot%20com">The Written Word</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Tru64 UNIX  5.1 </td>
+<td class="col2"><a href="ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf5.1/curl-7.15.1.setld.tar.Z" type="application/x-compress">7.15.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:info%20at%20thewrittenword%20dot%20com">The Written Word</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="UnixWare"></a>UnixWare</td><td class="oslogo"><img alt="UnixWare" src="pix/unixware.svg"></td></tr>
+<tr class="older2">
+<td class="col1">UnixWare   </td>
+<td class="col2"><a href="ftp://ftp.sco.com/pub/unixware7/713/uw713up/uw713up4scoxCDimage.iso">7.10.3</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">sco.com</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="VMS"></a>VMS</td><td class="oslogo"><img alt="VMS" src="pix/vms.svg"></td></tr>
+<tr class="older2">
+<td class="col1">VMS  8.3 Alpha</td>
+<td class="col2"><a href="https://sourceforge.net/projects/vms-ports/files/axp0830/vmsports-axpvms-83-curl-7.47.0.zip/download">7.47.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:wb8tyw%20at%20qsl%20dot%20net">John E. Malmberg</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">VMS  8.4 Alpha</td>
+<td class="col2"><a href="https://sourceforge.net/projects/vms-ports/files/axp0840/vmsports-axpvms-83-curl-7.47.0.zip">7.47.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:wb8tyw%20at%20qsl%20dot%20net">John E. Malmberg</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">VMS  8.4 ia64</td>
+<td class="col2"><a href="https://sourceforge.net/projects/vms-ports/files/i640840/vmsports-i64vms-84-curl-7.47.0.zip">7.47.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:wb8tyw%20at%20qsl%20dot%20net">John E. Malmberg</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">VMS  7.3 VAX</td>
+<td class="col2"><a href="https://sourceforge.net/projects/vms-ports/files/vax0730/vmsports-vaxvms-73-curl-7.47.0.zip">7.47.0</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="mailto:wb8tyw%20at%20qsl%20dot%20net">John E. Malmberg</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Win32"></a>Windows 32-bit</td><td class="oslogo"><img alt="Win32" src="pix/win32-2.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://curl.se/windows/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">the curl project</td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://chocolatey.org/packages/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://chocolatey.org/">Chocolatey</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://scoop.sh/#/apps?q=curl&amp;id=09e3750a1f0a703b6de0f8fa4ca1263ef5d59ad3">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://scoop.sh/">Scoop</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/c/cURL/cURL/8.2.1/cURL.cURL.yaml">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/microsoft/winget-cli">Winget</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://github.com/curl/curl/blob/master/docs/INSTALL.md#building-using-vcpkg">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://github.com/microsoft/vcpkg">Vcpkg</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 32-bit   </td>
+<td class="col2"><a href="https://conan.io/center/recipes/libcurl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://conan.io/">Conary</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Win64"></a>Windows 64-bit</td><td class="oslogo"><img alt="Win64" src="pix/win32-2.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://curl.se/windows/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">the curl project</td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://chocolatey.org/packages/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://chocolatey.org/">Chocolatey</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/c/cURL/cURL/8.2.1/cURL.cURL.yaml">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://github.com/microsoft/winget-cli">Winget</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://scoop.sh/#/apps?q=curl&amp;id=09e3750a1f0a703b6de0f8fa4ca1263ef5d59ad3">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://scoop.sh/">Scoop</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://anaconda.org/conda-forge/curl">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://conda-forge.org/">conda-forge</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://github.com/curl/curl/blob/master/docs/INSTALL.md#building-using-vcpkg">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://github.com/microsoft/vcpkg">Vcpkg</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   </td>
+<td class="col2"><a href="https://conan.io/center/recipes/libcurl">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://conan.io/">Conary</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit   ARM64</td>
+<td class="col2"><a href="https://curl.se/windows/">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6">the curl project</td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+<tr class="os"><td class="ostitle" colspan="3"><a name="Win64cygwin"></a>Windows 64-bit - cygwin</td><td class="oslogo"><img alt="Win64" src="pix/cygwin.svg"></td></tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit cygwin  </td>
+<td class="col2"><a href="https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1.tar.xz">8.2.1</a></td>
+<td class="col3"><b>binary</b></td>
+<td class="col6"><a href="https://cygwin.com/packages/summary/curl.html">Cygwin</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit cygwin  </td>
+<td class="col2"><a href="https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl-devel/libcurl-devel-8.2.1-1.tar.xz">8.2.1</a></td>
+<td class="col3">devel</td>
+<td class="col6"><a href="https://cygwin.com/packages/summary/libcurl-devel.html">Cygwin</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit cygwin  </td>
+<td class="col2"><a href="https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl4/libcurl4-8.2.1-1.tar.xz">8.2.1</a></td>
+<td class="col3">libcurl</td>
+<td class="col6"><a href="https://cygwin.com/packages/summary/libcurl4.html">Cygwin</a></td>
+</tr>
+<tr class="older2">
+<td class="col1">Windows 64-bit cygwin  </td>
+<td class="col2"><a href="https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1-src.tar.xz">8.2.1</a></td>
+<td class="col3">source</td>
+<td class="col6"><a href="https://cygwin.com/packages/summary/curl-src.html">Cygwin</a></td>
+</tr>
+<tr><td class="osend" colspan="8">&nbsp;</td></tr>
+</table>
+<p>
+ <table><tr class="latest2"><td>
+ This colour means the packaged version is the latest stable version available (8.3.0)!
+ </td></tr></table>
+<p>
+ If you have newer archives or archives for platforms not already present in
+ this table, we'd like to add them to this table with a pointer to your
+ location. Mail <a href="mailto:curl-release&#64;haxx.se">curl-release</a> and
+ tell us!
+<h2> Official curl docker images </h2>
+<p>
+    The official curl docker images are available at:
+    <ul>
+        <li><a href="https://quay.io/repository/curl/curl?tab=info">Quay.io</a>: > podman run quay.io/curl/curl:latest</li>
+        <li><a href="https://hub.docker.com/r/curlimages/curl">Docker hub</a>: > podman run curlimages/curl:latest</li>
+    </ul>
+</div>
+</div>
+<script defer src="https://www.fastly-insights.com/insights.js?k=8cb1247c-87c2-4af9-9229-768b1990f90b" type="text/javascript"></script>
+</body>
+</html>

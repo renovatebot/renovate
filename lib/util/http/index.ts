@@ -51,17 +51,19 @@ function copyResponse<T>(
   response: HttpResponse<T>,
   deep: boolean
 ): HttpResponse<T> {
-  const { body, statusCode, headers } = response;
+  const { body, statusCode, headers, url } = response;
   return deep
     ? {
         statusCode,
         body: body instanceof Buffer ? (body.subarray() as T) : clone<T>(body),
         headers: clone(headers),
+        url,
       }
     : {
         statusCode,
         body,
         headers,
+        url,
       };
 }
 

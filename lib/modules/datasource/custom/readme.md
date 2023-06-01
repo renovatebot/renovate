@@ -10,7 +10,7 @@ Options:
 | option                     | default | description                                                                                                                                                              |
 | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | defaultRegistryUrlTemplate | ""      | URL used if no `registryUrl` is provided when looking up new releases                                                                                                    |
-| format                     | "json"  | format used by the API. Available values are: `json`, `plain`                                                                                                            |
+| format                     | "json"  | format used by the API. Available values are: `json`, `plain`, `html`                                                                                                    |
 | transformTemplates         | []      | [JSONata rules](https://docs.jsonata.org/simple) to transform the API output. Each rule will be evaluated after another and the result will be used as input to the next |
 
 Available template variables:
@@ -116,6 +116,43 @@ When Renovate receives this response with the `plain` format, it will convert it
 ```
 
 After the conversion, any `jsonata` rules defined in the `transformTemplates` section will be applied as usual to further process the JSON data.
+
+#### HTML
+
+If the format is set to `html`, Renovate will call the HTTP endpoint with the `Accept` header value `text/html`.
+The body of the response will be treated as a HTML document, and all hyperlinks will be converted to versions.
+
+For the following HTML document:
+
+```html
+<html>
+  <body>
+    <a href="package-1.0.tar.gz">package-1.0.tar.gz</a>
+    <a href="package-2.0.tar.gz">package-2.0.tar.gz</a>
+  </body>
+</html>
+```
+
+The following JSON will be generated:
+
+```json
+{
+  "releases": [
+    {
+      "version": "package-1.0.tar.gz",
+      "sourceUrl": "https://example.com/package-1.0.tar.gz"
+    },
+    {
+      "version": "package-1.0.tar.gz",
+      "sourceUrl": "https://example.com/package-2.0.tar.gz"
+    }
+  ]
+}
+```
+
+`href` attribute value becomes the `version`, and `sourceUrl` is set to the full resolved URL.
+
+To extract the actual version number, you could use `extractVersion` or JSONata rules.
 
 ## Examples
 
@@ -269,6 +306,50 @@ And the following regex manager:
         "#\\s*renovate:\\s*(datasource=(?<datasource>.*?)\\s*)?depName=(?<depName>.*?)(\\s*versioning=(?<versioning>.*?))?\\s*\\w*:\\s*[\"']?(?<currentValue>.+?)[\"']?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
+}
+```
+
+### nginx directory listing
+
+Sometimes all you have is a directory with files, and a HTTP server that can generate directory listings.
+
+Let's use nginx itself as an example:
+
+```json
+{
+  "customDatasources": {
+    "nginx": {
+      "defaultRegistryUrlTemplate": "http://nginx.org/download",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.nginx"],
+      "extractVersion": "^nginx-(?<version>.+)\\.tar\\.gz$"
+    }
+  ]
+}
+```
+
+### HTML page
+
+`html` format can also be used to extract versions from a typical "Downloads" page:
+
+```json
+{
+  "customDatasources": {
+    "curl": {
+      "defaultRegistryUrlTemplate": "https://curl.se/download.html",
+      "format": "html"
+    }
+  },
+  "packageRules": [
+    {
+      "matchDatasources": ["custom.curl"],
+      "extractVersion": "/curl-(?<version>.+)\\.tar\\.gz$"
     }
   ]
 }

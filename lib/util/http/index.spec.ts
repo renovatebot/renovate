@@ -31,6 +31,7 @@ describe('util/http/index', () => {
       body: '',
       headers: {},
       statusCode: 200,
+      url: 'http://renovate.com/test',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -84,6 +85,7 @@ describe('util/http/index', () => {
       },
       headers: {},
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
   });
 
@@ -98,6 +100,7 @@ describe('util/http/index', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -113,6 +116,7 @@ describe('util/http/index', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -128,6 +132,7 @@ describe('util/http/index', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -143,6 +148,7 @@ describe('util/http/index', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -156,6 +162,7 @@ describe('util/http/index', () => {
         'content-type': 'application/json',
       },
       statusCode: 200,
+      url: 'http://renovate.com/',
     });
     expect(httpMock.allUsed()).toBeTrue();
   });
@@ -210,6 +217,7 @@ describe('util/http/index', () => {
           'x-some-header': 'abc',
         },
         statusCode: 200,
+        url: 'http://renovate.com/',
       });
       expect(httpMock.allUsed()).toBeTrue();
     } finally {

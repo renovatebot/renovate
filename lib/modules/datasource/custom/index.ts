@@ -1,6 +1,8 @@
+import url from 'node:url';
 import is from '@sindresorhus/is';
 import jsonata from 'jsonata';
 import { logger } from '../../../logger';
+import { parse as parseHtml } from '../../../util/html';
 import { newlineRegex } from '../../../util/regex';
 import { Datasource } from '../datasource';
 import type { GetReleasesConfig, ReleaseResult } from '../types';
@@ -43,10 +45,16 @@ export class CustomDatasource extends Datasource {
     // TODO add here other format options than JSON and "plain"
     let response: unknown;
     try {
-      if (format === 'plain') {
+      switch (format) {
+      case 'plain':
         response = await this.fetchPlainFormat(defaultRegistryUrlTemplate);
-      } else {
+        break;
+      case 'html':
+        response = await this.fetchHtmlFormat(defaultRegistryUrlTemplate);
+        break;
+      case 'json':
         response = (await this.http.getJson(defaultRegistryUrlTemplate)).body;
+        break;
       }
     } catch (e) {
       this.handleHttpErrors(e);
@@ -88,5 +96,38 @@ export class CustomDatasource extends Datasource {
     return {
       releases: versions,
     };
+  }
+
+  private async fetchHtmlFormat(pageUrl: string): Promise<unknown> {
+    const response = await this.http.get(pageUrl, {
+      headers: {
+        Accept: 'text/html',
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    if (!contentType?.startsWith('text/html')) {
+      return null;
+    }
+
+    const body = parseHtml(response.body);
+
+    // node-html-parser doesn't parse anything inside <pre>
+    // but, for example, nginx wraps directory listings in <pre>
+    const pres = body.getElementsByTagName('pre').map((pre) => parseHtml(pre.textContent));
+
+    const links = [body, ...pres].flatMap((e) => e.getElementsByTagName('a'));
+    const hrefs = links
+      .map((node) => node.getAttribute('href'))
+      .filter(is.truthy);
+
+    const releases = hrefs.map((href) => {
+      return {
+        version: href,
+        sourceUrl: url.resolve(response.url, href),
+      };
+    });
+
+    return { releases };
   }
 }

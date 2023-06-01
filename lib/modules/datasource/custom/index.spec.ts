@@ -1,4 +1,5 @@
 import { getPkgReleases } from '..';
+import { Fixtures } from '../../../../test/fixtures';
 import * as httpMock from '../../../../test/http-mock';
 import { CustomDatasource } from './index';
 
@@ -293,6 +294,86 @@ describe('modules/datasource/custom/index', () => {
         },
       });
       expect(result).toEqual(expected);
+    });
+
+    it('return releases from HTML links', async () => {
+      const expected = {
+        releases: [
+          {
+            version: 'package-1.0.tar.gz',
+            sourceUrl: 'https://example.com/package-1.0.tar.gz',
+          },
+        ],
+      };
+
+      httpMock
+        .scope('https://example.com')
+        .get('/index.html')
+        .reply(200, Fixtures.get('simple.html'), {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://example.com/index.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toEqual(expected);
+    });
+
+
+    it('return releases from HTML links on curl download page', async () => {
+      httpMock
+        .scope('https://curl.se')
+        .get('/download.html')
+        .reply(200, Fixtures.get('curl-download.html'), {
+          'Content-Type': 'text/html',
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'https://curl.se/download.html',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toMatchSnapshot();
+    });
+
+    it('return releases from nginx directory listing', async () => {
+      httpMock
+        .scope('http://nginx.org')
+        .get('/download/')
+        .reply(200, Fixtures.get('nginx-downloads.html'), {
+          'Content-Type': 'text/html',
+        })
+        .get('/download')
+        .reply(301, undefined, {
+            'Location': 'http://nginx.org/download/'
+        });
+
+      const result = await getPkgReleases({
+        datasource: `${CustomDatasource.id}.foo`,
+        packageName: 'myPackage',
+        customDatasources: {
+          foo: {
+            defaultRegistryUrlTemplate: 'http://nginx.org/download',
+            format: 'html',
+          },
+        },
+      });
+
+      expect(result).toMatchSnapshot();
     });
   });
 });

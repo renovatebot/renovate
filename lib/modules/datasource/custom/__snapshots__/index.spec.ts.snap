@@ -1,0 +1,5995 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`modules/datasource/custom/index getReleases return releases from HTML links on curl download page 1`] = `
+{
+  "releases": [
+    {
+      "sourceUrl": "https://curl.se/docs/http2.html",
+      "version": "/docs/http2.html",
+    },
+    {
+      "sourceUrl": "https://curl.se/download.html#OS2",
+      "version": "#OS2",
+    },
+    {
+      "sourceUrl": "https://www.t2-project.org/packages/curl.html",
+      "version": "https://www.t2-project.org/packages/curl.html",
+    },
+    {
+      "sourceUrl": "https://www.t2-project.org/",
+      "version": "https://www.t2-project.org/",
+    },
+    {
+      "sourceUrl": "https://smedley.id.au/os2ports_wp/?page_id=12",
+      "version": "https://smedley.id.au/os2ports_wp/?page_id=12",
+    },
+    {
+      "sourceUrl": "https://os2ports.smedley.id.au/",
+      "version": "https://os2ports.smedley.id.au/",
+    },
+    {
+      "sourceUrl": "https://review.tizen.org/git/?p=external/curl.git;a=tree;h=refs/heads/tizen_2.4;hb=refs/heads/tizen_2.4",
+      "version": "https://review.tizen.org/git/?p=external/curl.git;a=tree;h=refs/heads/tizen_2.4;hb=refs/heads/tizen_2.4",
+    },
+    {
+      "sourceUrl": "https://packages.debian.org/libcurl3-gnutls",
+      "version": "https://packages.debian.org/libcurl3-gnutls",
+    },
+    {
+      "sourceUrl": "https://git.minix3.org/index.cgi?p=pkgsrc-ng.git;a=blob_plain;f=www/curl/Makefile;hb=refs/heads/upstream",
+      "version": "https://git.minix3.org/index.cgi?p=pkgsrc-ng.git;a=blob_plain;f=www/curl/Makefile;hb=refs/heads/upstream",
+    },
+    {
+      "sourceUrl": "https://www.minix3.org/",
+      "version": "https://www.minix3.org/",
+    },
+    {
+      "sourceUrl": "http://repository.maemo.org/pool/maemo3.2/free/binary/",
+      "version": "http://repository.maemo.org/pool/maemo3.2/free/binary/",
+    },
+    {
+      "sourceUrl": "http://www.oss4aix.org/download/RPMS/curl/curl-7.72.0-1.aix5.1.ppc.rpm",
+      "version": "http://www.oss4aix.org/download/RPMS/curl/curl-7.72.0-1.aix5.1.ppc.rpm",
+    },
+    {
+      "sourceUrl": "http://www.oss4aix.org/download/RPMS/curl/curl-devel-7.72.0-1.aix5.1.ppc.rpm",
+      "version": "http://www.oss4aix.org/download/RPMS/curl/curl-devel-7.72.0-1.aix5.1.ppc.rpm",
+    },
+    {
+      "sourceUrl": "http://os4depot.net/index.php?function=showfile&file=network/misc/curl.lha",
+      "version": "http://os4depot.net/index.php?function=showfile&file=network/misc/curl.lha",
+    },
+    {
+      "sourceUrl": "http://os4depot.net/index.php?function=modules/sql/filesbyuploader&submitter=Michael%20Trebilcock",
+      "version": "http://os4depot.net/index.php?function=modules/sql/filesbyuploader&submitter=Michael%20Trebilcock",
+    },
+    {
+      "sourceUrl": "http://os4depot.net/index.php?function=showfile&file=development/library/misc/libcurl.lha",
+      "version": "http://os4depot.net/index.php?function=showfile&file=development/library/misc/libcurl.lha",
+    },
+    {
+      "sourceUrl": "http://os4depot.net/index.php?function=modules/sql/filesbyuploader&submitter=Michael%20Trebilcock",
+      "version": "http://os4depot.net/index.php?function=modules/sql/filesbyuploader&submitter=Michael%20Trebilcock",
+    },
+    {
+      "sourceUrl": "https://packages.debian.org/libcurl4-openssl-dev",
+      "version": "https://packages.debian.org/libcurl4-openssl-dev",
+    },
+    {
+      "sourceUrl": "https://packages.debian.org/libcurl4-gnutls-dev",
+      "version": "https://packages.debian.org/libcurl4-gnutls-dev",
+    },
+    {
+      "sourceUrl": "http://repository.maemo.org/pool/maemo4.0/free/c/curl/",
+      "version": "http://repository.maemo.org/pool/maemo4.0/free/c/curl/",
+    },
+    {
+      "sourceUrl": "https://www.opencsw.org/packages/libcurl4_feature/",
+      "version": "https://www.opencsw.org/packages/libcurl4_feature/",
+    },
+    {
+      "sourceUrl": "https://cygwin.com/packages/summary/libcurl4.html",
+      "version": "https://cygwin.com/packages/summary/libcurl4.html",
+    },
+    {
+      "sourceUrl": "http://repository.maemo.org/pool/maemo4.1/free/c/curl/",
+      "version": "http://repository.maemo.org/pool/maemo4.1/free/c/curl/",
+    },
+    {
+      "sourceUrl": "http://repository.maemo.org/pool/maemo5.0/free/c/curl/",
+      "version": "http://repository.maemo.org/pool/maemo5.0/free/c/curl/",
+    },
+    {
+      "sourceUrl": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/armv7hl/media/core/release/?P=*curl*",
+      "version": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/armv7hl/media/core/release/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://git.centos.org/rpms/curl/blob/c7/f/SPECS/curl.spec",
+      "version": "https://git.centos.org/rpms/curl/blob/c7/f/SPECS/curl.spec",
+    },
+    {
+      "sourceUrl": "https://download.tizen.org/releases/weekly/tizen/base/latest/repos/standard/packages/armv7l/",
+      "version": "https://download.tizen.org/releases/weekly/tizen/base/latest/repos/standard/packages/armv7l/",
+    },
+    {
+      "sourceUrl": "ftp://ftp.sco.com/pub/unixware7/713/uw713up/uw713up4scoxCDimage.iso",
+      "version": "ftp://ftp.sco.com/pub/unixware7/713/uw713up/uw713up4scoxCDimage.iso",
+    },
+    {
+      "sourceUrl": "https://www.linux-mips.org/pub/linux/mips/people/macro/RPMS/mipsel/curl-7.10.7-1.mipsel.rpm",
+      "version": "https://www.linux-mips.org/pub/linux/mips/people/macro/RPMS/mipsel/curl-7.10.7-1.mipsel.rpm",
+    },
+    {
+      "sourceUrl": "https://sourceforge.net/projects/amiga/files/cURL/7.14.0/curl-7.14.0.lha/download",
+      "version": "https://sourceforge.net/projects/amiga/files/cURL/7.14.0/curl-7.14.0.lha/download",
+    },
+    {
+      "sourceUrl": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/mips-sgi-irix6.5/curl-7.15.1.inst.tar.Z",
+      "version": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/mips-sgi-irix6.5/curl-7.15.1.inst.tar.Z",
+    },
+    {
+      "sourceUrl": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf4.0d/curl-7.15.1.setld.tar.Z",
+      "version": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf4.0d/curl-7.15.1.setld.tar.Z",
+    },
+    {
+      "sourceUrl": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf5.1/curl-7.15.1.setld.tar.Z",
+      "version": "ftp://ftp.thewrittenword.com/packages/by-name/curl-7.15.1/alpha-dec-osf5.1/curl-7.15.1.setld.tar.Z",
+    },
+    {
+      "sourceUrl": "https://raw.githubusercontent.com/gobolinux/Recipes/master/Curl/7.81.0/Recipe",
+      "version": "https://raw.githubusercontent.com/gobolinux/Recipes/master/Curl/7.81.0/Recipe",
+    },
+    {
+      "sourceUrl": "https://pub.allbsd.org/MidnightBSD/distfiles/curl-7.87.0.tar.xz",
+      "version": "https://pub.allbsd.org/MidnightBSD/distfiles/curl-7.87.0.tar.xz",
+    },
+    {
+      "sourceUrl": "https://curl.se/changes.html#8_3_0",
+      "version": "changes.html#8_3_0",
+    },
+    {
+      "sourceUrl": "https://git.centos.org/rpms/curl/blob/c8/f/SPECS/curl.spec",
+      "version": "https://git.centos.org/rpms/curl/blob/c8/f/SPECS/curl.spec",
+    },
+    {
+      "sourceUrl": "mailto:wb8tyw%20at%20qsl%20dot%20net",
+      "version": "mailto:wb8tyw%20at%20qsl%20dot%20net",
+    },
+    {
+      "sourceUrl": "https://raw.githubusercontent.com/haikuports/haikuports/master/net-misc/curl/curl-8.1.2.recipe",
+      "version": "https://raw.githubusercontent.com/haikuports/haikuports/master/net-misc/curl/curl-8.1.2.recipe",
+    },
+    {
+      "sourceUrl": "http://hpux.connect.org.uk/hppd/hpux/Networking/WWW/curl-8.2.1/index.html",
+      "version": "http://hpux.connect.org.uk/hppd/hpux/Networking/WWW/curl-8.2.1/index.html",
+    },
+    {
+      "sourceUrl": "https://git.openembedded.org/openembedded-core/tree/meta/recipes-support/curl/curl_8.2.1.bb",
+      "version": "https://git.openembedded.org/openembedded-core/tree/meta/recipes-support/curl/curl_8.2.1.bb",
+    },
+    {
+      "sourceUrl": "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/c/cURL/cURL/8.2.1/cURL.cURL.yaml",
+      "version": "https://raw.githubusercontent.com/microsoft/winget-pkgs/master/manifests/c/cURL/cURL/8.2.1/cURL.cURL.yaml",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.gz",
+      "version": "/download/curl-8.3.0.tar.gz",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.gz.asc",
+      "version": "/download/curl-8.3.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.bz2",
+      "version": "/download/curl-8.3.0.tar.bz2",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.bz2.asc",
+      "version": "/download/curl-8.3.0.tar.bz2.asc",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.zip",
+      "version": "/download/curl-8.3.0.zip",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.zip.asc",
+      "version": "/download/curl-8.3.0.zip.asc",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.xz",
+      "version": "/download/curl-8.3.0.tar.xz",
+    },
+    {
+      "sourceUrl": "https://curl.se/download/curl-8.3.0.tar.xz.asc",
+      "version": "/download/curl-8.3.0.tar.xz.asc",
+    },
+    {
+      "sourceUrl": "https://curl.se/download.html#Plan9",
+      "version": "#Plan9",
+    },
+    {
+      "sourceUrl": "https://mirror.hostduplex.com/almalinux/9/BaseOS/x86_64/os/Packages/",
+      "version": "https://mirror.hostduplex.com/almalinux/9/BaseOS/x86_64/os/Packages/",
+    },
+    {
+      "sourceUrl": "https://code.9front.org/hg/ports/file/default/net-misc/curl/mkfile",
+      "version": "https://code.9front.org/hg/ports/file/default/net-misc/curl/mkfile",
+    },
+    {
+      "sourceUrl": "http://9front.org/",
+      "version": "http://9front.org/",
+    },
+    {
+      "sourceUrl": "http://ftp.arm.slackware.com/slackwarearm/slackwarearm-15.0/slackware/n/",
+      "version": "http://ftp.arm.slackware.com/slackwarearm/slackwarearm-15.0/slackware/n/",
+    },
+    {
+      "sourceUrl": "mailto:sunpoet%20at%20FreeBSD%20dot%20org",
+      "version": "mailto:sunpoet%20at%20FreeBSD%20dot%20org",
+    },
+    {
+      "sourceUrl": "mailto:info%20at%20thewrittenword%20dot%20com",
+      "version": "mailto:info%20at%20thewrittenword%20dot%20com",
+    },
+    {
+      "sourceUrl": "mailto:jw%20at%20tks6%20dot%20net",
+      "version": "mailto:jw%20at%20tks6%20dot%20net",
+    },
+    {
+      "sourceUrl": "mailto:curl%20at%20packages%20dot%20debian%20dot%20org",
+      "version": "mailto:curl%20at%20packages%20dot%20debian%20dot%20org",
+    },
+    {
+      "sourceUrl": "mailto:compile%20at%20myslug%20dot%20de",
+      "version": "mailto:compile%20at%20myslug%20dot%20de",
+    },
+    {
+      "sourceUrl": "mailto:daniel%20at%20daniel-johnson%20dot%20org",
+      "version": "mailto:daniel%20at%20daniel-johnson%20dot%20org",
+    },
+    {
+      "sourceUrl": "mailto:bursa%20at%20users%20dot%20sourceforge%20dot%20net",
+      "version": "mailto:bursa%20at%20users%20dot%20sourceforge%20dot%20net",
+    },
+    {
+      "sourceUrl": "mailto:info%20at%20thewrittenword%20dot%20com",
+      "version": "mailto:info%20at%20thewrittenword%20dot%20com",
+    },
+    {
+      "sourceUrl": "https://pkginfo.devuan.org/cgi-bin/policy-query.html?c=package&q=%28libcurl%29%7C%28%5Ecurl%29",
+      "version": "https://pkginfo.devuan.org/cgi-bin/policy-query.html?c=package&q=%28libcurl%29%7C%28%5Ecurl%29",
+    },
+    {
+      "sourceUrl": "https://archives.fedoraproject.org/pub/archive/fedora-secondary/releases/30/Everything/ppc64le/os/Packages/c/?P=*curl*",
+      "version": "https://archives.fedoraproject.org/pub/archive/fedora-secondary/releases/30/Everything/ppc64le/os/Packages/c/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://curl.se/download.html#Win32",
+      "version": "#Win32",
+    },
+    {
+      "sourceUrl": "https://curl.se/download.html#Tru64UNIX",
+      "version": "#Tru64UNIX",
+    },
+    {
+      "sourceUrl": "https://curl.se/download.html#Win64",
+      "version": "#Win64",
+    },
+    {
+      "sourceUrl": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/aarch64/media/core/release/?P=*curl*",
+      "version": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/aarch64/media/core/release/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://downloads.openwrt.org/snapshots/trunk/arm64/generic/packages/base/",
+      "version": "https://downloads.openwrt.org/snapshots/trunk/arm64/generic/packages/base/",
+    },
+    {
+      "sourceUrl": "http://ftp.arm.slackware.com/slackwarearm/slackwareaarch64-current/slackware/n/",
+      "version": "http://ftp.arm.slackware.com/slackwarearm/slackwareaarch64-current/slackware/n/",
+    },
+    {
+      "sourceUrl": "https://mirrors.slackware.com/slackware/slackware64-current/slackware64/n/?P=*curl*",
+      "version": "https://mirrors.slackware.com/slackware/slackware64-current/slackware64/n/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://www.archlinux.org/packages/core/x86_64/curl/",
+      "version": "https://www.archlinux.org/packages/core/x86_64/curl/",
+    },
+    {
+      "sourceUrl": "https://download.clearlinux.org/current/x86_64/os/Packages/",
+      "version": "https://download.clearlinux.org/current/x86_64/os/Packages/",
+    },
+    {
+      "sourceUrl": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/x86_64/media/core/release/?P=*curl*",
+      "version": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/x86_64/media/core/release/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://hydra.nixos.org/job/nixpkgs/trunk/curl.x86_64-linux/latest",
+      "version": "https://hydra.nixos.org/job/nixpkgs/trunk/curl.x86_64-linux/latest",
+    },
+    {
+      "sourceUrl": "https://ftp.pld-linux.org/dists/th/PLD/x86_64/RPMS/",
+      "version": "https://ftp.pld-linux.org/dists/th/PLD/x86_64/RPMS/",
+    },
+    {
+      "sourceUrl": "https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/x86_64/?P=*curl*",
+      "version": "https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/x86_64/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1.tar.xz",
+      "version": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1.tar.xz",
+    },
+    {
+      "sourceUrl": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl-devel/libcurl-devel-8.2.1-1.tar.xz",
+      "version": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl-devel/libcurl-devel-8.2.1-1.tar.xz",
+    },
+    {
+      "sourceUrl": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl4/libcurl4-8.2.1-1.tar.xz",
+      "version": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/libcurl4/libcurl4-8.2.1-1.tar.xz",
+    },
+    {
+      "sourceUrl": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1-src.tar.xz",
+      "version": "https://mirrors.kernel.org/sources.redhat.com/cygwin/x86_64/release/curl/curl-8.2.1-1-src.tar.xz",
+    },
+    {
+      "sourceUrl": "https://downloads.openwrt.org/snapshots/trunk/at91/generic/packages/base/curl_7.50.0-1_at91.ipk",
+      "version": "https://downloads.openwrt.org/snapshots/trunk/at91/generic/packages/base/curl_7.50.0-1_at91.ipk",
+    },
+    {
+      "sourceUrl": "https://archive.netbsd.org/pub/pkgsrc-archive/packages/QNX/i386/6.5.0_head_20110826/www/curl-7.21.7.tgz",
+      "version": "https://archive.netbsd.org/pub/pkgsrc-archive/packages/QNX/i386/6.5.0_head_20110826/www/curl-7.21.7.tgz",
+    },
+    {
+      "sourceUrl": "https://ftp.nluug.nl/os/Linux/distr/slack390/slack390-current/slackware/n/?C=M;O=D;P=*curl*",
+      "version": "https://ftp.nluug.nl/os/Linux/distr/slack390/slack390-current/slackware/n/?C=M;O=D;P=*curl*",
+    },
+    {
+      "sourceUrl": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/i586/media/core/release/?P=*curl*",
+      "version": "https://ftp.acc.umu.se/mirror/mageia/distrib/cauldron/i586/media/core/release/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/i586/?P=*curl*",
+      "version": "https://download.opensuse.org/repositories/devel:/libraries:/c_c++/openSUSE_Factory/i586/?P=*curl*",
+    },
+    {
+      "sourceUrl": "https://files.archhurd.org/staging/os/i686/?C=M;O=D;P=*curl*",
+      "version": "https://files.archhurd.org/staging/os/i686/?C=M;O=D;P=*curl*",
+    },
+    {
+      "sourceUrl": "https://archhurd.org/packages/staging/i686/curl/",
+      "version": "https://archhurd.org/packages/staging/i686/curl/",
+    },
+    {
+      "sourceUrl": "https://hydra.nixos.org/job/nixpkgs/trunk/curl.i686-linux/latest",
+      "version": "https://hydra.nixos.org/job/nixpkgs/trunk/curl.i686-linux/latest",
+    },
+    {
+      "sourceUrl": "https://ftp.pld-linux.org/dists/th/PLD/i686/RPMS/",
+      "version": "https://ftp.pld-linux.org/dists/th/PLD/i686/RPMS/",
+    },
+    {
+      "sourceUrl": "ftp://ftp.sco.com/pub/updates/UnixWare/SCOSA-2006.16/curl-7.15.1.pkg",
+      "version": "ftp://ftp.sco.com/pub/updates/UnixWare/SCOSA-2006.16/curl-7.15.1.pkg",
+    },
+    {
+      "sourceUrl": "http://pmandin.atari.org/en/index.php?post/2010/04/30/257-curl-7021",
+      "version": "http://pmandin.atari.org/en/index.php?post/2010/04/30/257-curl-7021",
+    },
+    {
+      "sourceUrl": "https://sourceforge.net/projects/vms-ports/files/i640840/vmsports-i64vms-84-curl-7.47.0.zip",
+      "version": "https://sourceforge.net/projects/vms-ports/files/i640840/vmsports-i64vms-84-curl-7.47.0.zip",
+    },
+  ],
+}
+`;
+
+exports[`modules/datasource/custom/index getReleases return releases from nginx directory listing 1`] = `
+{
+  "releases": [
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.0.tar.gz",
+      "version": "nginx-0.1.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.1.tar.gz",
+      "version": "nginx-0.1.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.2.tar.gz",
+      "version": "nginx-0.1.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.3.tar.gz",
+      "version": "nginx-0.1.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.4.tar.gz",
+      "version": "nginx-0.1.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.5.tar.gz",
+      "version": "nginx-0.1.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.6.tar.gz",
+      "version": "nginx-0.1.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.7.tar.gz",
+      "version": "nginx-0.1.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.8.tar.gz",
+      "version": "nginx-0.1.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.9.tar.gz",
+      "version": "nginx-0.1.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.10.tar.gz",
+      "version": "nginx-0.1.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.11.tar.gz",
+      "version": "nginx-0.1.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.12.tar.gz",
+      "version": "nginx-0.1.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.13.tar.gz",
+      "version": "nginx-0.1.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.14.tar.gz",
+      "version": "nginx-0.1.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.15.tar.gz",
+      "version": "nginx-0.1.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.16.tar.gz",
+      "version": "nginx-0.1.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.17.tar.gz",
+      "version": "nginx-0.1.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.18.tar.gz",
+      "version": "nginx-0.1.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.19.tar.gz",
+      "version": "nginx-0.1.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.20.tar.gz",
+      "version": "nginx-0.1.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.21.tar.gz",
+      "version": "nginx-0.1.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.22.tar.gz",
+      "version": "nginx-0.1.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.23.tar.gz",
+      "version": "nginx-0.1.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.24.tar.gz",
+      "version": "nginx-0.1.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.25.tar.gz",
+      "version": "nginx-0.1.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.26.tar.gz",
+      "version": "nginx-0.1.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.27.tar.gz",
+      "version": "nginx-0.1.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.28.tar.gz",
+      "version": "nginx-0.1.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.29.tar.gz",
+      "version": "nginx-0.1.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.30.tar.gz",
+      "version": "nginx-0.1.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.31.tar.gz",
+      "version": "nginx-0.1.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.32.tar.gz",
+      "version": "nginx-0.1.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.33.tar.gz",
+      "version": "nginx-0.1.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.34.tar.gz",
+      "version": "nginx-0.1.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.35.tar.gz",
+      "version": "nginx-0.1.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.36.tar.gz",
+      "version": "nginx-0.1.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.37.tar.gz",
+      "version": "nginx-0.1.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.38.tar.gz",
+      "version": "nginx-0.1.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.39.tar.gz",
+      "version": "nginx-0.1.39.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.40.tar.gz",
+      "version": "nginx-0.1.40.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.41.tar.gz",
+      "version": "nginx-0.1.41.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.42.tar.gz",
+      "version": "nginx-0.1.42.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.43.tar.gz",
+      "version": "nginx-0.1.43.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.44.tar.gz",
+      "version": "nginx-0.1.44.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.1.45.tar.gz",
+      "version": "nginx-0.1.45.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.0.tar.gz",
+      "version": "nginx-0.2.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.1.tar.gz",
+      "version": "nginx-0.2.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.2.tar.gz",
+      "version": "nginx-0.2.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.3.tar.gz",
+      "version": "nginx-0.2.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.4.tar.gz",
+      "version": "nginx-0.2.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.5.tar.gz",
+      "version": "nginx-0.2.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.2.6.tar.gz",
+      "version": "nginx-0.2.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.0.tar.gz",
+      "version": "nginx-0.3.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.1.tar.gz",
+      "version": "nginx-0.3.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.2.tar.gz",
+      "version": "nginx-0.3.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.3.tar.gz",
+      "version": "nginx-0.3.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.4.tar.gz",
+      "version": "nginx-0.3.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.5.tar.gz",
+      "version": "nginx-0.3.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.6.tar.gz",
+      "version": "nginx-0.3.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.7.tar.gz",
+      "version": "nginx-0.3.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.8.tar.gz",
+      "version": "nginx-0.3.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.9.tar.gz",
+      "version": "nginx-0.3.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.10.tar.gz",
+      "version": "nginx-0.3.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.11.tar.gz",
+      "version": "nginx-0.3.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.12.tar.gz",
+      "version": "nginx-0.3.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.13.tar.gz",
+      "version": "nginx-0.3.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.14.tar.gz",
+      "version": "nginx-0.3.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.15.tar.gz",
+      "version": "nginx-0.3.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.16.tar.gz",
+      "version": "nginx-0.3.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.17.tar.gz",
+      "version": "nginx-0.3.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.18.tar.gz",
+      "version": "nginx-0.3.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.19.tar.gz",
+      "version": "nginx-0.3.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.20.tar.gz",
+      "version": "nginx-0.3.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.21.tar.gz",
+      "version": "nginx-0.3.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.22.tar.gz",
+      "version": "nginx-0.3.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.23.tar.gz",
+      "version": "nginx-0.3.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.24.tar.gz",
+      "version": "nginx-0.3.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.25.tar.gz",
+      "version": "nginx-0.3.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.26.tar.gz",
+      "version": "nginx-0.3.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.27.tar.gz",
+      "version": "nginx-0.3.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.28.tar.gz",
+      "version": "nginx-0.3.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.29.tar.gz",
+      "version": "nginx-0.3.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.30.tar.gz",
+      "version": "nginx-0.3.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.31.tar.gz",
+      "version": "nginx-0.3.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.32.tar.gz",
+      "version": "nginx-0.3.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.33.tar.gz",
+      "version": "nginx-0.3.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.34.tar.gz",
+      "version": "nginx-0.3.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.35.tar.gz",
+      "version": "nginx-0.3.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.36.tar.gz",
+      "version": "nginx-0.3.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.37.tar.gz",
+      "version": "nginx-0.3.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.38.tar.gz",
+      "version": "nginx-0.3.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.39.tar.gz",
+      "version": "nginx-0.3.39.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.40.tar.gz",
+      "version": "nginx-0.3.40.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.41.tar.gz",
+      "version": "nginx-0.3.41.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.42.tar.gz",
+      "version": "nginx-0.3.42.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.43.tar.gz",
+      "version": "nginx-0.3.43.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.44.tar.gz",
+      "version": "nginx-0.3.44.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.45.tar.gz",
+      "version": "nginx-0.3.45.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.46.tar.gz",
+      "version": "nginx-0.3.46.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.47.tar.gz",
+      "version": "nginx-0.3.47.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.48.tar.gz",
+      "version": "nginx-0.3.48.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.49.tar.gz",
+      "version": "nginx-0.3.49.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.50.tar.gz",
+      "version": "nginx-0.3.50.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.51.tar.gz",
+      "version": "nginx-0.3.51.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.52.tar.gz",
+      "version": "nginx-0.3.52.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.53.tar.gz",
+      "version": "nginx-0.3.53.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.54.tar.gz",
+      "version": "nginx-0.3.54.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.55.tar.gz",
+      "version": "nginx-0.3.55.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.56.tar.gz",
+      "version": "nginx-0.3.56.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.57.tar.gz",
+      "version": "nginx-0.3.57.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.58.tar.gz",
+      "version": "nginx-0.3.58.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.59.tar.gz",
+      "version": "nginx-0.3.59.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.60.tar.gz",
+      "version": "nginx-0.3.60.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.3.61.tar.gz",
+      "version": "nginx-0.3.61.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.0.tar.gz",
+      "version": "nginx-0.4.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.1.tar.gz",
+      "version": "nginx-0.4.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.2.tar.gz",
+      "version": "nginx-0.4.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.3.tar.gz",
+      "version": "nginx-0.4.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.4.tar.gz",
+      "version": "nginx-0.4.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.5.tar.gz",
+      "version": "nginx-0.4.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.6.tar.gz",
+      "version": "nginx-0.4.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.7.tar.gz",
+      "version": "nginx-0.4.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.8.tar.gz",
+      "version": "nginx-0.4.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.9.tar.gz",
+      "version": "nginx-0.4.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.10.tar.gz",
+      "version": "nginx-0.4.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.11.tar.gz",
+      "version": "nginx-0.4.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.12.tar.gz",
+      "version": "nginx-0.4.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.13.tar.gz",
+      "version": "nginx-0.4.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.4.14.tar.gz",
+      "version": "nginx-0.4.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.0.tar.gz",
+      "version": "nginx-0.5.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.1.tar.gz",
+      "version": "nginx-0.5.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.2.tar.gz",
+      "version": "nginx-0.5.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.3.tar.gz",
+      "version": "nginx-0.5.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.4.tar.gz",
+      "version": "nginx-0.5.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.5.tar.gz",
+      "version": "nginx-0.5.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.6.tar.gz",
+      "version": "nginx-0.5.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.7.tar.gz",
+      "version": "nginx-0.5.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.8.tar.gz",
+      "version": "nginx-0.5.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.9.tar.gz",
+      "version": "nginx-0.5.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.10.tar.gz",
+      "version": "nginx-0.5.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.11.tar.gz",
+      "version": "nginx-0.5.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.12.tar.gz",
+      "version": "nginx-0.5.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.13.tar.gz",
+      "version": "nginx-0.5.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.14.tar.gz",
+      "version": "nginx-0.5.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.15.tar.gz",
+      "version": "nginx-0.5.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.16.tar.gz",
+      "version": "nginx-0.5.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.17.tar.gz",
+      "version": "nginx-0.5.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.18.tar.gz",
+      "version": "nginx-0.5.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.19.tar.gz",
+      "version": "nginx-0.5.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.20.tar.gz",
+      "version": "nginx-0.5.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.21.tar.gz",
+      "version": "nginx-0.5.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.22.tar.gz",
+      "version": "nginx-0.5.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.23.tar.gz",
+      "version": "nginx-0.5.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.24.tar.gz",
+      "version": "nginx-0.5.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.25.tar.gz",
+      "version": "nginx-0.5.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.26.tar.gz",
+      "version": "nginx-0.5.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.27.tar.gz",
+      "version": "nginx-0.5.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.28.tar.gz",
+      "version": "nginx-0.5.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.29.tar.gz",
+      "version": "nginx-0.5.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.30.tar.gz",
+      "version": "nginx-0.5.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.31.tar.gz",
+      "version": "nginx-0.5.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.32.tar.gz",
+      "version": "nginx-0.5.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.33.tar.gz",
+      "version": "nginx-0.5.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.34.tar.gz",
+      "version": "nginx-0.5.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.35.tar.gz",
+      "version": "nginx-0.5.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.36.tar.gz",
+      "version": "nginx-0.5.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.37.tar.gz",
+      "version": "nginx-0.5.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.38.tar.gz",
+      "version": "nginx-0.5.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.5.38.tar.gz.asc",
+      "version": "nginx-0.5.38.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.0.tar.gz",
+      "version": "nginx-0.6.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.1.tar.gz",
+      "version": "nginx-0.6.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.2.tar.gz",
+      "version": "nginx-0.6.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.3.tar.gz",
+      "version": "nginx-0.6.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.4.tar.gz",
+      "version": "nginx-0.6.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.5.tar.gz",
+      "version": "nginx-0.6.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.6.tar.gz",
+      "version": "nginx-0.6.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.7.tar.gz",
+      "version": "nginx-0.6.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.8.tar.gz",
+      "version": "nginx-0.6.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.9.tar.gz",
+      "version": "nginx-0.6.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.10.tar.gz",
+      "version": "nginx-0.6.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.11.tar.gz",
+      "version": "nginx-0.6.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.12.tar.gz",
+      "version": "nginx-0.6.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.13.tar.gz",
+      "version": "nginx-0.6.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.14.tar.gz",
+      "version": "nginx-0.6.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.15.tar.gz",
+      "version": "nginx-0.6.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.16.tar.gz",
+      "version": "nginx-0.6.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.17.tar.gz",
+      "version": "nginx-0.6.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.18.tar.gz",
+      "version": "nginx-0.6.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.19.tar.gz",
+      "version": "nginx-0.6.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.20.tar.gz",
+      "version": "nginx-0.6.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.21.tar.gz",
+      "version": "nginx-0.6.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.22.tar.gz",
+      "version": "nginx-0.6.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.23.tar.gz",
+      "version": "nginx-0.6.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.24.tar.gz",
+      "version": "nginx-0.6.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.25.tar.gz",
+      "version": "nginx-0.6.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.26.tar.gz",
+      "version": "nginx-0.6.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.27.tar.gz",
+      "version": "nginx-0.6.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.28.tar.gz",
+      "version": "nginx-0.6.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.29.tar.gz",
+      "version": "nginx-0.6.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.30.tar.gz",
+      "version": "nginx-0.6.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.31.tar.gz",
+      "version": "nginx-0.6.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.32.tar.gz",
+      "version": "nginx-0.6.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.33.tar.gz",
+      "version": "nginx-0.6.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.34.tar.gz",
+      "version": "nginx-0.6.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.35.tar.gz",
+      "version": "nginx-0.6.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.36.tar.gz",
+      "version": "nginx-0.6.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.37.tar.gz",
+      "version": "nginx-0.6.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.38.tar.gz",
+      "version": "nginx-0.6.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.39.tar.gz",
+      "version": "nginx-0.6.39.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.6.39.tar.gz.asc",
+      "version": "nginx-0.6.39.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.0.tar.gz",
+      "version": "nginx-0.7.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.1.tar.gz",
+      "version": "nginx-0.7.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.2.tar.gz",
+      "version": "nginx-0.7.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.3.tar.gz",
+      "version": "nginx-0.7.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.4.tar.gz",
+      "version": "nginx-0.7.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.5.tar.gz",
+      "version": "nginx-0.7.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.6.tar.gz",
+      "version": "nginx-0.7.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.7.tar.gz",
+      "version": "nginx-0.7.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.8.tar.gz",
+      "version": "nginx-0.7.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.9.tar.gz",
+      "version": "nginx-0.7.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.10.tar.gz",
+      "version": "nginx-0.7.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.11.tar.gz",
+      "version": "nginx-0.7.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.12.tar.gz",
+      "version": "nginx-0.7.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.13.tar.gz",
+      "version": "nginx-0.7.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.14.tar.gz",
+      "version": "nginx-0.7.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.15.tar.gz",
+      "version": "nginx-0.7.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.16.tar.gz",
+      "version": "nginx-0.7.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.17.tar.gz",
+      "version": "nginx-0.7.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.18.tar.gz",
+      "version": "nginx-0.7.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.19.tar.gz",
+      "version": "nginx-0.7.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.20.tar.gz",
+      "version": "nginx-0.7.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.21.tar.gz",
+      "version": "nginx-0.7.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.22.tar.gz",
+      "version": "nginx-0.7.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.23.tar.gz",
+      "version": "nginx-0.7.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.24.tar.gz",
+      "version": "nginx-0.7.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.25.tar.gz",
+      "version": "nginx-0.7.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.26.tar.gz",
+      "version": "nginx-0.7.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.27.tar.gz",
+      "version": "nginx-0.7.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.28.tar.gz",
+      "version": "nginx-0.7.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.29.tar.gz",
+      "version": "nginx-0.7.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.30.tar.gz",
+      "version": "nginx-0.7.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.31.tar.gz",
+      "version": "nginx-0.7.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.32.tar.gz",
+      "version": "nginx-0.7.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.33.tar.gz",
+      "version": "nginx-0.7.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.34.tar.gz",
+      "version": "nginx-0.7.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.35.tar.gz",
+      "version": "nginx-0.7.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.36.tar.gz",
+      "version": "nginx-0.7.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.37.tar.gz",
+      "version": "nginx-0.7.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.38.tar.gz",
+      "version": "nginx-0.7.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.39.tar.gz",
+      "version": "nginx-0.7.39.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.40.tar.gz",
+      "version": "nginx-0.7.40.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.41.tar.gz",
+      "version": "nginx-0.7.41.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.42.tar.gz",
+      "version": "nginx-0.7.42.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.43.tar.gz",
+      "version": "nginx-0.7.43.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.44.tar.gz",
+      "version": "nginx-0.7.44.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.45.tar.gz",
+      "version": "nginx-0.7.45.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.46.tar.gz",
+      "version": "nginx-0.7.46.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.47.tar.gz",
+      "version": "nginx-0.7.47.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.48.tar.gz",
+      "version": "nginx-0.7.48.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.49.tar.gz",
+      "version": "nginx-0.7.49.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.50.tar.gz",
+      "version": "nginx-0.7.50.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.51.tar.gz",
+      "version": "nginx-0.7.51.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.52.tar.gz",
+      "version": "nginx-0.7.52.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.52.zip",
+      "version": "nginx-0.7.52.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.53.tar.gz",
+      "version": "nginx-0.7.53.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.53.zip",
+      "version": "nginx-0.7.53.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.54.tar.gz",
+      "version": "nginx-0.7.54.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.54.zip",
+      "version": "nginx-0.7.54.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.55.tar.gz",
+      "version": "nginx-0.7.55.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.55.zip",
+      "version": "nginx-0.7.55.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.56.tar.gz",
+      "version": "nginx-0.7.56.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.56.zip",
+      "version": "nginx-0.7.56.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.57.tar.gz",
+      "version": "nginx-0.7.57.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.58.tar.gz",
+      "version": "nginx-0.7.58.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.58.zip",
+      "version": "nginx-0.7.58.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.59.tar.gz",
+      "version": "nginx-0.7.59.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.59.zip",
+      "version": "nginx-0.7.59.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.60.tar.gz",
+      "version": "nginx-0.7.60.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.60.zip",
+      "version": "nginx-0.7.60.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.61.tar.gz",
+      "version": "nginx-0.7.61.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.61.zip",
+      "version": "nginx-0.7.61.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.62.tar.gz",
+      "version": "nginx-0.7.62.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.62.zip",
+      "version": "nginx-0.7.62.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.63.tar.gz",
+      "version": "nginx-0.7.63.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.63.zip",
+      "version": "nginx-0.7.63.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.64.tar.gz",
+      "version": "nginx-0.7.64.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.64.tar.gz.asc",
+      "version": "nginx-0.7.64.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.64.zip",
+      "version": "nginx-0.7.64.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.64.zip.asc",
+      "version": "nginx-0.7.64.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.65.tar.gz",
+      "version": "nginx-0.7.65.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.65.tar.gz.asc",
+      "version": "nginx-0.7.65.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.65.zip",
+      "version": "nginx-0.7.65.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.65.zip.asc",
+      "version": "nginx-0.7.65.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.66.tar.gz",
+      "version": "nginx-0.7.66.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.66.tar.gz.asc",
+      "version": "nginx-0.7.66.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.66.zip",
+      "version": "nginx-0.7.66.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.66.zip.asc",
+      "version": "nginx-0.7.66.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.67.tar.gz",
+      "version": "nginx-0.7.67.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.67.tar.gz.asc",
+      "version": "nginx-0.7.67.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.67.zip",
+      "version": "nginx-0.7.67.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.67.zip.asc",
+      "version": "nginx-0.7.67.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.68.tar.gz",
+      "version": "nginx-0.7.68.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.68.tar.gz.asc",
+      "version": "nginx-0.7.68.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.68.zip",
+      "version": "nginx-0.7.68.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.68.zip.asc",
+      "version": "nginx-0.7.68.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.69.tar.gz",
+      "version": "nginx-0.7.69.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.69.tar.gz.asc",
+      "version": "nginx-0.7.69.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.69.zip",
+      "version": "nginx-0.7.69.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.7.69.zip.asc",
+      "version": "nginx-0.7.69.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.0.tar.gz",
+      "version": "nginx-0.8.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.0.zip",
+      "version": "nginx-0.8.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.1.tar.gz",
+      "version": "nginx-0.8.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.1.zip",
+      "version": "nginx-0.8.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.2.tar.gz",
+      "version": "nginx-0.8.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.2.zip",
+      "version": "nginx-0.8.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.3.tar.gz",
+      "version": "nginx-0.8.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.3.zip",
+      "version": "nginx-0.8.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.4.tar.gz",
+      "version": "nginx-0.8.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.4.zip",
+      "version": "nginx-0.8.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.5.tar.gz",
+      "version": "nginx-0.8.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.5.zip",
+      "version": "nginx-0.8.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.6.tar.gz",
+      "version": "nginx-0.8.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.6.zip",
+      "version": "nginx-0.8.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.7.tar.gz",
+      "version": "nginx-0.8.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.7.zip",
+      "version": "nginx-0.8.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.8.tar.gz",
+      "version": "nginx-0.8.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.8.zip",
+      "version": "nginx-0.8.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.9.tar.gz",
+      "version": "nginx-0.8.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.9.zip",
+      "version": "nginx-0.8.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.10.tar.gz",
+      "version": "nginx-0.8.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.10.zip",
+      "version": "nginx-0.8.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.11.tar.gz",
+      "version": "nginx-0.8.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.11.zip",
+      "version": "nginx-0.8.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.12.tar.gz",
+      "version": "nginx-0.8.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.12.zip",
+      "version": "nginx-0.8.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.13.tar.gz",
+      "version": "nginx-0.8.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.14.tar.gz",
+      "version": "nginx-0.8.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.14.zip",
+      "version": "nginx-0.8.14.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.15.tar.gz",
+      "version": "nginx-0.8.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.15.zip",
+      "version": "nginx-0.8.15.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.16.tar.gz",
+      "version": "nginx-0.8.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.16.zip",
+      "version": "nginx-0.8.16.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.17.tar.gz",
+      "version": "nginx-0.8.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.17.zip",
+      "version": "nginx-0.8.17.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.18.tar.gz",
+      "version": "nginx-0.8.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.18.zip",
+      "version": "nginx-0.8.18.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.19.tar.gz",
+      "version": "nginx-0.8.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.19.zip",
+      "version": "nginx-0.8.19.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.20.tar.gz",
+      "version": "nginx-0.8.20.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.20.zip",
+      "version": "nginx-0.8.20.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.21.tar.gz",
+      "version": "nginx-0.8.21.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.21.zip",
+      "version": "nginx-0.8.21.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.22.tar.gz",
+      "version": "nginx-0.8.22.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.22.zip",
+      "version": "nginx-0.8.22.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.23.tar.gz",
+      "version": "nginx-0.8.23.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.23.zip",
+      "version": "nginx-0.8.23.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.24.tar.gz",
+      "version": "nginx-0.8.24.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.24.zip",
+      "version": "nginx-0.8.24.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.25.tar.gz",
+      "version": "nginx-0.8.25.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.25.zip",
+      "version": "nginx-0.8.25.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.26.tar.gz",
+      "version": "nginx-0.8.26.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.26.zip",
+      "version": "nginx-0.8.26.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.27.tar.gz",
+      "version": "nginx-0.8.27.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.27.zip",
+      "version": "nginx-0.8.27.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.28.tar.gz",
+      "version": "nginx-0.8.28.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.28.tar.gz.asc",
+      "version": "nginx-0.8.28.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.28.zip",
+      "version": "nginx-0.8.28.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.28.zip.asc",
+      "version": "nginx-0.8.28.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.29.tar.gz",
+      "version": "nginx-0.8.29.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.29.tar.gz.asc",
+      "version": "nginx-0.8.29.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.29.zip",
+      "version": "nginx-0.8.29.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.29.zip.asc",
+      "version": "nginx-0.8.29.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.30.tar.gz",
+      "version": "nginx-0.8.30.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.30.tar.gz.asc",
+      "version": "nginx-0.8.30.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.30.zip",
+      "version": "nginx-0.8.30.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.30.zip.asc",
+      "version": "nginx-0.8.30.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.31.tar.gz",
+      "version": "nginx-0.8.31.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.31.tar.gz.asc",
+      "version": "nginx-0.8.31.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.31.zip",
+      "version": "nginx-0.8.31.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.31.zip.asc",
+      "version": "nginx-0.8.31.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.32.tar.gz",
+      "version": "nginx-0.8.32.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.32.tar.gz.asc",
+      "version": "nginx-0.8.32.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.32.zip",
+      "version": "nginx-0.8.32.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.32.zip.asc",
+      "version": "nginx-0.8.32.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.33.tar.gz",
+      "version": "nginx-0.8.33.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.33.tar.gz.asc",
+      "version": "nginx-0.8.33.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.33.zip",
+      "version": "nginx-0.8.33.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.33.zip.asc",
+      "version": "nginx-0.8.33.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.34.tar.gz",
+      "version": "nginx-0.8.34.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.34.tar.gz.asc",
+      "version": "nginx-0.8.34.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.34.zip",
+      "version": "nginx-0.8.34.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.34.zip.asc",
+      "version": "nginx-0.8.34.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.35.tar.gz",
+      "version": "nginx-0.8.35.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.35.tar.gz.asc",
+      "version": "nginx-0.8.35.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.35.zip",
+      "version": "nginx-0.8.35.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.35.zip.asc",
+      "version": "nginx-0.8.35.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.36.tar.gz",
+      "version": "nginx-0.8.36.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.36.tar.gz.asc",
+      "version": "nginx-0.8.36.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.36.zip",
+      "version": "nginx-0.8.36.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.36.zip.asc",
+      "version": "nginx-0.8.36.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.37.tar.gz",
+      "version": "nginx-0.8.37.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.37.tar.gz.asc",
+      "version": "nginx-0.8.37.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.37.zip",
+      "version": "nginx-0.8.37.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.37.zip.asc",
+      "version": "nginx-0.8.37.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.38.tar.gz",
+      "version": "nginx-0.8.38.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.38.tar.gz.asc",
+      "version": "nginx-0.8.38.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.38.zip",
+      "version": "nginx-0.8.38.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.38.zip.asc",
+      "version": "nginx-0.8.38.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.39.tar.gz",
+      "version": "nginx-0.8.39.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.39.tar.gz.asc",
+      "version": "nginx-0.8.39.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.39.zip",
+      "version": "nginx-0.8.39.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.39.zip.asc",
+      "version": "nginx-0.8.39.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.40.tar.gz",
+      "version": "nginx-0.8.40.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.40.tar.gz.asc",
+      "version": "nginx-0.8.40.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.40.zip",
+      "version": "nginx-0.8.40.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.40.zip.asc",
+      "version": "nginx-0.8.40.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.41.tar.gz",
+      "version": "nginx-0.8.41.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.41.tar.gz.asc",
+      "version": "nginx-0.8.41.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.41.zip",
+      "version": "nginx-0.8.41.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.41.zip.asc",
+      "version": "nginx-0.8.41.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.42.tar.gz",
+      "version": "nginx-0.8.42.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.42.tar.gz.asc",
+      "version": "nginx-0.8.42.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.42.zip",
+      "version": "nginx-0.8.42.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.42.zip.asc",
+      "version": "nginx-0.8.42.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.43.tar.gz",
+      "version": "nginx-0.8.43.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.43.tar.gz.asc",
+      "version": "nginx-0.8.43.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.43.zip",
+      "version": "nginx-0.8.43.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.43.zip.asc",
+      "version": "nginx-0.8.43.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.44.tar.gz",
+      "version": "nginx-0.8.44.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.44.tar.gz.asc",
+      "version": "nginx-0.8.44.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.44.zip",
+      "version": "nginx-0.8.44.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.44.zip.asc",
+      "version": "nginx-0.8.44.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.45.tar.gz",
+      "version": "nginx-0.8.45.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.45.tar.gz.asc",
+      "version": "nginx-0.8.45.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.45.zip",
+      "version": "nginx-0.8.45.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.45.zip.asc",
+      "version": "nginx-0.8.45.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.46.tar.gz",
+      "version": "nginx-0.8.46.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.46.tar.gz.asc",
+      "version": "nginx-0.8.46.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.46.zip",
+      "version": "nginx-0.8.46.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.46.zip.asc",
+      "version": "nginx-0.8.46.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.47.tar.gz",
+      "version": "nginx-0.8.47.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.47.tar.gz.asc",
+      "version": "nginx-0.8.47.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.47.zip",
+      "version": "nginx-0.8.47.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.47.zip.asc",
+      "version": "nginx-0.8.47.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.48.tar.gz",
+      "version": "nginx-0.8.48.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.48.tar.gz.asc",
+      "version": "nginx-0.8.48.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.48.zip",
+      "version": "nginx-0.8.48.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.48.zip.asc",
+      "version": "nginx-0.8.48.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.49.tar.gz",
+      "version": "nginx-0.8.49.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.49.tar.gz.asc",
+      "version": "nginx-0.8.49.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.49.zip",
+      "version": "nginx-0.8.49.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.49.zip.asc",
+      "version": "nginx-0.8.49.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.50.tar.gz",
+      "version": "nginx-0.8.50.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.50.tar.gz.asc",
+      "version": "nginx-0.8.50.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.50.zip",
+      "version": "nginx-0.8.50.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.50.zip.asc",
+      "version": "nginx-0.8.50.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.51.tar.gz",
+      "version": "nginx-0.8.51.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.51.tar.gz.asc",
+      "version": "nginx-0.8.51.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.51.zip",
+      "version": "nginx-0.8.51.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.51.zip.asc",
+      "version": "nginx-0.8.51.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.52.tar.gz",
+      "version": "nginx-0.8.52.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.52.tar.gz.asc",
+      "version": "nginx-0.8.52.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.52.zip",
+      "version": "nginx-0.8.52.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.52.zip.asc",
+      "version": "nginx-0.8.52.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.53.tar.gz",
+      "version": "nginx-0.8.53.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.53.tar.gz.asc",
+      "version": "nginx-0.8.53.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.53.zip",
+      "version": "nginx-0.8.53.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.53.zip.asc",
+      "version": "nginx-0.8.53.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.54.tar.gz",
+      "version": "nginx-0.8.54.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.54.tar.gz.asc",
+      "version": "nginx-0.8.54.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.54.zip",
+      "version": "nginx-0.8.54.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.54.zip.asc",
+      "version": "nginx-0.8.54.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.55.tar.gz",
+      "version": "nginx-0.8.55.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.55.tar.gz.asc",
+      "version": "nginx-0.8.55.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.55.zip",
+      "version": "nginx-0.8.55.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.8.55.zip.asc",
+      "version": "nginx-0.8.55.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.0.tar.gz",
+      "version": "nginx-0.9.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.0.tar.gz.asc",
+      "version": "nginx-0.9.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.0.zip",
+      "version": "nginx-0.9.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.0.zip.asc",
+      "version": "nginx-0.9.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.1.tar.gz",
+      "version": "nginx-0.9.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.1.tar.gz.asc",
+      "version": "nginx-0.9.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.1.zip",
+      "version": "nginx-0.9.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.1.zip.asc",
+      "version": "nginx-0.9.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.2.tar.gz",
+      "version": "nginx-0.9.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.2.tar.gz.asc",
+      "version": "nginx-0.9.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.2.zip",
+      "version": "nginx-0.9.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.2.zip.asc",
+      "version": "nginx-0.9.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.3.tar.gz",
+      "version": "nginx-0.9.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.3.tar.gz.asc",
+      "version": "nginx-0.9.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.3.zip",
+      "version": "nginx-0.9.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.3.zip.asc",
+      "version": "nginx-0.9.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.4.tar.gz",
+      "version": "nginx-0.9.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.4.tar.gz.asc",
+      "version": "nginx-0.9.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.4.zip",
+      "version": "nginx-0.9.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.4.zip.asc",
+      "version": "nginx-0.9.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.5.tar.gz",
+      "version": "nginx-0.9.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.5.tar.gz.asc",
+      "version": "nginx-0.9.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.5.zip",
+      "version": "nginx-0.9.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.5.zip.asc",
+      "version": "nginx-0.9.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.6.tar.gz",
+      "version": "nginx-0.9.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.6.tar.gz.asc",
+      "version": "nginx-0.9.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.6.zip",
+      "version": "nginx-0.9.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.6.zip.asc",
+      "version": "nginx-0.9.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.7.tar.gz",
+      "version": "nginx-0.9.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.7.tar.gz.asc",
+      "version": "nginx-0.9.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.7.zip",
+      "version": "nginx-0.9.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-0.9.7.zip.asc",
+      "version": "nginx-0.9.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.0.tar.gz",
+      "version": "nginx-1.0.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.0.tar.gz.asc",
+      "version": "nginx-1.0.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.0.zip",
+      "version": "nginx-1.0.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.0.zip.asc",
+      "version": "nginx-1.0.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.1.tar.gz",
+      "version": "nginx-1.0.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.1.tar.gz.asc",
+      "version": "nginx-1.0.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.1.zip",
+      "version": "nginx-1.0.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.1.zip.asc",
+      "version": "nginx-1.0.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.2.tar.gz",
+      "version": "nginx-1.0.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.2.tar.gz.asc",
+      "version": "nginx-1.0.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.2.zip",
+      "version": "nginx-1.0.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.2.zip.asc",
+      "version": "nginx-1.0.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.3.tar.gz",
+      "version": "nginx-1.0.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.3.tar.gz.asc",
+      "version": "nginx-1.0.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.3.zip",
+      "version": "nginx-1.0.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.3.zip.asc",
+      "version": "nginx-1.0.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.4.tar.gz",
+      "version": "nginx-1.0.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.4.tar.gz.asc",
+      "version": "nginx-1.0.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.4.zip",
+      "version": "nginx-1.0.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.4.zip.asc",
+      "version": "nginx-1.0.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.5.tar.gz",
+      "version": "nginx-1.0.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.5.tar.gz.asc",
+      "version": "nginx-1.0.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.5.zip",
+      "version": "nginx-1.0.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.5.zip.asc",
+      "version": "nginx-1.0.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.6.tar.gz",
+      "version": "nginx-1.0.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.6.tar.gz.asc",
+      "version": "nginx-1.0.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.6.zip",
+      "version": "nginx-1.0.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.6.zip.asc",
+      "version": "nginx-1.0.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.7.tar.gz",
+      "version": "nginx-1.0.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.7.tar.gz.asc",
+      "version": "nginx-1.0.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.7.zip",
+      "version": "nginx-1.0.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.7.zip.asc",
+      "version": "nginx-1.0.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.8.tar.gz",
+      "version": "nginx-1.0.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.8.tar.gz.asc",
+      "version": "nginx-1.0.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.8.zip",
+      "version": "nginx-1.0.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.8.zip.asc",
+      "version": "nginx-1.0.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.9.tar.gz",
+      "version": "nginx-1.0.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.9.tar.gz.asc",
+      "version": "nginx-1.0.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.9.zip",
+      "version": "nginx-1.0.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.9.zip.asc",
+      "version": "nginx-1.0.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.10.tar.gz",
+      "version": "nginx-1.0.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.10.tar.gz.asc",
+      "version": "nginx-1.0.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.10.zip",
+      "version": "nginx-1.0.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.10.zip.asc",
+      "version": "nginx-1.0.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.11.tar.gz",
+      "version": "nginx-1.0.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.11.tar.gz.asc",
+      "version": "nginx-1.0.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.11.zip",
+      "version": "nginx-1.0.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.11.zip.asc",
+      "version": "nginx-1.0.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.12.tar.gz",
+      "version": "nginx-1.0.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.12.tar.gz.asc",
+      "version": "nginx-1.0.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.12.zip",
+      "version": "nginx-1.0.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.12.zip.asc",
+      "version": "nginx-1.0.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.13.tar.gz",
+      "version": "nginx-1.0.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.13.tar.gz.asc",
+      "version": "nginx-1.0.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.13.zip",
+      "version": "nginx-1.0.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.13.zip.asc",
+      "version": "nginx-1.0.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.14.tar.gz",
+      "version": "nginx-1.0.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.14.tar.gz.asc",
+      "version": "nginx-1.0.14.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.14.zip",
+      "version": "nginx-1.0.14.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.14.zip.asc",
+      "version": "nginx-1.0.14.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.15.tar.gz",
+      "version": "nginx-1.0.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.15.tar.gz.asc",
+      "version": "nginx-1.0.15.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.15.zip",
+      "version": "nginx-1.0.15.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.0.15.zip.asc",
+      "version": "nginx-1.0.15.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.0.tar.gz",
+      "version": "nginx-1.1.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.0.tar.gz.asc",
+      "version": "nginx-1.1.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.0.zip",
+      "version": "nginx-1.1.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.0.zip.asc",
+      "version": "nginx-1.1.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.1.tar.gz",
+      "version": "nginx-1.1.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.1.tar.gz.asc",
+      "version": "nginx-1.1.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.1.zip",
+      "version": "nginx-1.1.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.1.zip.asc",
+      "version": "nginx-1.1.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.2.tar.gz",
+      "version": "nginx-1.1.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.2.tar.gz.asc",
+      "version": "nginx-1.1.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.2.zip",
+      "version": "nginx-1.1.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.2.zip.asc",
+      "version": "nginx-1.1.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.3.tar.gz",
+      "version": "nginx-1.1.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.3.tar.gz.asc",
+      "version": "nginx-1.1.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.3.zip",
+      "version": "nginx-1.1.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.3.zip.asc",
+      "version": "nginx-1.1.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.4.tar.gz",
+      "version": "nginx-1.1.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.4.tar.gz.asc",
+      "version": "nginx-1.1.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.4.zip",
+      "version": "nginx-1.1.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.4.zip.asc",
+      "version": "nginx-1.1.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.5.tar.gz",
+      "version": "nginx-1.1.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.5.tar.gz.asc",
+      "version": "nginx-1.1.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.5.zip",
+      "version": "nginx-1.1.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.5.zip.asc",
+      "version": "nginx-1.1.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.6.tar.gz",
+      "version": "nginx-1.1.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.6.tar.gz.asc",
+      "version": "nginx-1.1.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.6.zip",
+      "version": "nginx-1.1.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.6.zip.asc",
+      "version": "nginx-1.1.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.7.tar.gz",
+      "version": "nginx-1.1.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.7.tar.gz.asc",
+      "version": "nginx-1.1.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.7.zip",
+      "version": "nginx-1.1.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.7.zip.asc",
+      "version": "nginx-1.1.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.8.tar.gz",
+      "version": "nginx-1.1.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.8.tar.gz.asc",
+      "version": "nginx-1.1.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.8.zip",
+      "version": "nginx-1.1.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.8.zip.asc",
+      "version": "nginx-1.1.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.9.tar.gz",
+      "version": "nginx-1.1.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.9.tar.gz.asc",
+      "version": "nginx-1.1.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.9.zip",
+      "version": "nginx-1.1.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.9.zip.asc",
+      "version": "nginx-1.1.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.10.tar.gz",
+      "version": "nginx-1.1.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.10.tar.gz.asc",
+      "version": "nginx-1.1.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.10.zip",
+      "version": "nginx-1.1.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.10.zip.asc",
+      "version": "nginx-1.1.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.11.tar.gz",
+      "version": "nginx-1.1.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.11.tar.gz.asc",
+      "version": "nginx-1.1.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.11.zip",
+      "version": "nginx-1.1.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.11.zip.asc",
+      "version": "nginx-1.1.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.12.tar.gz",
+      "version": "nginx-1.1.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.12.tar.gz.asc",
+      "version": "nginx-1.1.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.12.zip",
+      "version": "nginx-1.1.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.12.zip.asc",
+      "version": "nginx-1.1.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.13.tar.gz",
+      "version": "nginx-1.1.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.13.tar.gz.asc",
+      "version": "nginx-1.1.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.13.zip",
+      "version": "nginx-1.1.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.13.zip.asc",
+      "version": "nginx-1.1.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.14.tar.gz",
+      "version": "nginx-1.1.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.14.tar.gz.asc",
+      "version": "nginx-1.1.14.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.14.zip",
+      "version": "nginx-1.1.14.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.14.zip.asc",
+      "version": "nginx-1.1.14.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.15.tar.gz",
+      "version": "nginx-1.1.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.15.tar.gz.asc",
+      "version": "nginx-1.1.15.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.15.zip",
+      "version": "nginx-1.1.15.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.15.zip.asc",
+      "version": "nginx-1.1.15.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.16.tar.gz",
+      "version": "nginx-1.1.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.16.tar.gz.asc",
+      "version": "nginx-1.1.16.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.16.zip",
+      "version": "nginx-1.1.16.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.16.zip.asc",
+      "version": "nginx-1.1.16.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.17.tar.gz",
+      "version": "nginx-1.1.17.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.17.tar.gz.asc",
+      "version": "nginx-1.1.17.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.17.zip",
+      "version": "nginx-1.1.17.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.17.zip.asc",
+      "version": "nginx-1.1.17.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.18.tar.gz",
+      "version": "nginx-1.1.18.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.18.tar.gz.asc",
+      "version": "nginx-1.1.18.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.18.zip",
+      "version": "nginx-1.1.18.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.18.zip.asc",
+      "version": "nginx-1.1.18.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.19.tar.gz",
+      "version": "nginx-1.1.19.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.19.tar.gz.asc",
+      "version": "nginx-1.1.19.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.19.zip",
+      "version": "nginx-1.1.19.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.1.19.zip.asc",
+      "version": "nginx-1.1.19.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.0.tar.gz",
+      "version": "nginx-1.2.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.0.tar.gz.asc",
+      "version": "nginx-1.2.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.0.zip",
+      "version": "nginx-1.2.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.0.zip.asc",
+      "version": "nginx-1.2.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.1.tar.gz",
+      "version": "nginx-1.2.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.1.tar.gz.asc",
+      "version": "nginx-1.2.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.1.zip",
+      "version": "nginx-1.2.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.1.zip.asc",
+      "version": "nginx-1.2.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.2.tar.gz",
+      "version": "nginx-1.2.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.2.tar.gz.asc",
+      "version": "nginx-1.2.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.2.zip",
+      "version": "nginx-1.2.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.2.zip.asc",
+      "version": "nginx-1.2.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.3.tar.gz",
+      "version": "nginx-1.2.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.3.tar.gz.asc",
+      "version": "nginx-1.2.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.3.zip",
+      "version": "nginx-1.2.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.3.zip.asc",
+      "version": "nginx-1.2.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.4.tar.gz",
+      "version": "nginx-1.2.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.4.tar.gz.asc",
+      "version": "nginx-1.2.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.4.zip",
+      "version": "nginx-1.2.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.4.zip.asc",
+      "version": "nginx-1.2.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.5.tar.gz",
+      "version": "nginx-1.2.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.5.tar.gz.asc",
+      "version": "nginx-1.2.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.5.zip",
+      "version": "nginx-1.2.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.5.zip.asc",
+      "version": "nginx-1.2.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.6.tar.gz",
+      "version": "nginx-1.2.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.6.tar.gz.asc",
+      "version": "nginx-1.2.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.6.zip",
+      "version": "nginx-1.2.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.6.zip.asc",
+      "version": "nginx-1.2.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.7.tar.gz",
+      "version": "nginx-1.2.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.7.tar.gz.asc",
+      "version": "nginx-1.2.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.7.zip",
+      "version": "nginx-1.2.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.7.zip.asc",
+      "version": "nginx-1.2.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.8.tar.gz",
+      "version": "nginx-1.2.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.8.tar.gz.asc",
+      "version": "nginx-1.2.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.8.zip",
+      "version": "nginx-1.2.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.8.zip.asc",
+      "version": "nginx-1.2.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.9.tar.gz",
+      "version": "nginx-1.2.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.9.tar.gz.asc",
+      "version": "nginx-1.2.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.9.zip",
+      "version": "nginx-1.2.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.2.9.zip.asc",
+      "version": "nginx-1.2.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.0.tar.gz",
+      "version": "nginx-1.3.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.0.tar.gz.asc",
+      "version": "nginx-1.3.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.0.zip",
+      "version": "nginx-1.3.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.0.zip.asc",
+      "version": "nginx-1.3.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.1.tar.gz",
+      "version": "nginx-1.3.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.1.tar.gz.asc",
+      "version": "nginx-1.3.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.1.zip",
+      "version": "nginx-1.3.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.1.zip.asc",
+      "version": "nginx-1.3.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.2.tar.gz",
+      "version": "nginx-1.3.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.2.tar.gz.asc",
+      "version": "nginx-1.3.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.2.zip",
+      "version": "nginx-1.3.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.2.zip.asc",
+      "version": "nginx-1.3.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.3.tar.gz",
+      "version": "nginx-1.3.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.3.tar.gz.asc",
+      "version": "nginx-1.3.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.3.zip",
+      "version": "nginx-1.3.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.3.zip.asc",
+      "version": "nginx-1.3.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.4.tar.gz",
+      "version": "nginx-1.3.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.4.tar.gz.asc",
+      "version": "nginx-1.3.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.4.zip",
+      "version": "nginx-1.3.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.4.zip.asc",
+      "version": "nginx-1.3.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.5.tar.gz",
+      "version": "nginx-1.3.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.5.tar.gz.asc",
+      "version": "nginx-1.3.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.5.zip",
+      "version": "nginx-1.3.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.5.zip.asc",
+      "version": "nginx-1.3.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.6.tar.gz",
+      "version": "nginx-1.3.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.6.tar.gz.asc",
+      "version": "nginx-1.3.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.6.zip",
+      "version": "nginx-1.3.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.6.zip.asc",
+      "version": "nginx-1.3.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.7.tar.gz",
+      "version": "nginx-1.3.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.7.tar.gz.asc",
+      "version": "nginx-1.3.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.7.zip",
+      "version": "nginx-1.3.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.7.zip.asc",
+      "version": "nginx-1.3.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.8.tar.gz",
+      "version": "nginx-1.3.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.8.tar.gz.asc",
+      "version": "nginx-1.3.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.8.zip",
+      "version": "nginx-1.3.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.8.zip.asc",
+      "version": "nginx-1.3.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.9.tar.gz",
+      "version": "nginx-1.3.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.9.tar.gz.asc",
+      "version": "nginx-1.3.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.9.zip",
+      "version": "nginx-1.3.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.9.zip.asc",
+      "version": "nginx-1.3.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.10.tar.gz",
+      "version": "nginx-1.3.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.10.tar.gz.asc",
+      "version": "nginx-1.3.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.10.zip",
+      "version": "nginx-1.3.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.10.zip.asc",
+      "version": "nginx-1.3.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.11.tar.gz",
+      "version": "nginx-1.3.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.11.tar.gz.asc",
+      "version": "nginx-1.3.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.11.zip",
+      "version": "nginx-1.3.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.11.zip.asc",
+      "version": "nginx-1.3.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.12.tar.gz",
+      "version": "nginx-1.3.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.12.tar.gz.asc",
+      "version": "nginx-1.3.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.12.zip",
+      "version": "nginx-1.3.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.12.zip.asc",
+      "version": "nginx-1.3.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.13.tar.gz",
+      "version": "nginx-1.3.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.13.tar.gz.asc",
+      "version": "nginx-1.3.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.13.zip",
+      "version": "nginx-1.3.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.13.zip.asc",
+      "version": "nginx-1.3.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.14.tar.gz",
+      "version": "nginx-1.3.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.14.tar.gz.asc",
+      "version": "nginx-1.3.14.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.14.zip",
+      "version": "nginx-1.3.14.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.14.zip.asc",
+      "version": "nginx-1.3.14.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.15.tar.gz",
+      "version": "nginx-1.3.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.15.tar.gz.asc",
+      "version": "nginx-1.3.15.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.15.zip",
+      "version": "nginx-1.3.15.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.15.zip.asc",
+      "version": "nginx-1.3.15.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.16.tar.gz",
+      "version": "nginx-1.3.16.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.16.tar.gz.asc",
+      "version": "nginx-1.3.16.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.16.zip",
+      "version": "nginx-1.3.16.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.3.16.zip.asc",
+      "version": "nginx-1.3.16.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.0.tar.gz",
+      "version": "nginx-1.4.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.0.tar.gz.asc",
+      "version": "nginx-1.4.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.0.zip",
+      "version": "nginx-1.4.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.0.zip.asc",
+      "version": "nginx-1.4.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.1.tar.gz",
+      "version": "nginx-1.4.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.1.tar.gz.asc",
+      "version": "nginx-1.4.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.1.zip",
+      "version": "nginx-1.4.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.1.zip.asc",
+      "version": "nginx-1.4.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.2.tar.gz",
+      "version": "nginx-1.4.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.2.tar.gz.asc",
+      "version": "nginx-1.4.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.2.zip",
+      "version": "nginx-1.4.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.2.zip.asc",
+      "version": "nginx-1.4.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.3.tar.gz",
+      "version": "nginx-1.4.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.3.tar.gz.asc",
+      "version": "nginx-1.4.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.3.zip",
+      "version": "nginx-1.4.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.3.zip.asc",
+      "version": "nginx-1.4.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.4.tar.gz",
+      "version": "nginx-1.4.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.4.tar.gz.asc",
+      "version": "nginx-1.4.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.4.zip",
+      "version": "nginx-1.4.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.4.zip.asc",
+      "version": "nginx-1.4.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.5.tar.gz",
+      "version": "nginx-1.4.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.5.tar.gz.asc",
+      "version": "nginx-1.4.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.5.zip",
+      "version": "nginx-1.4.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.5.zip.asc",
+      "version": "nginx-1.4.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.6.tar.gz",
+      "version": "nginx-1.4.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.6.tar.gz.asc",
+      "version": "nginx-1.4.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.6.zip",
+      "version": "nginx-1.4.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.6.zip.asc",
+      "version": "nginx-1.4.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.7.tar.gz",
+      "version": "nginx-1.4.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.7.tar.gz.asc",
+      "version": "nginx-1.4.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.7.zip",
+      "version": "nginx-1.4.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.4.7.zip.asc",
+      "version": "nginx-1.4.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.0.tar.gz",
+      "version": "nginx-1.5.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.0.tar.gz.asc",
+      "version": "nginx-1.5.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.0.zip",
+      "version": "nginx-1.5.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.0.zip.asc",
+      "version": "nginx-1.5.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.1.tar.gz",
+      "version": "nginx-1.5.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.1.tar.gz.asc",
+      "version": "nginx-1.5.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.1.zip",
+      "version": "nginx-1.5.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.1.zip.asc",
+      "version": "nginx-1.5.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.2.tar.gz",
+      "version": "nginx-1.5.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.2.tar.gz.asc",
+      "version": "nginx-1.5.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.2.zip",
+      "version": "nginx-1.5.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.2.zip.asc",
+      "version": "nginx-1.5.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.3.tar.gz",
+      "version": "nginx-1.5.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.3.tar.gz.asc",
+      "version": "nginx-1.5.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.3.zip",
+      "version": "nginx-1.5.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.3.zip.asc",
+      "version": "nginx-1.5.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.4.tar.gz",
+      "version": "nginx-1.5.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.4.tar.gz.asc",
+      "version": "nginx-1.5.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.4.zip",
+      "version": "nginx-1.5.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.4.zip.asc",
+      "version": "nginx-1.5.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.5.tar.gz",
+      "version": "nginx-1.5.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.5.tar.gz.asc",
+      "version": "nginx-1.5.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.5.zip",
+      "version": "nginx-1.5.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.5.zip.asc",
+      "version": "nginx-1.5.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.6.tar.gz",
+      "version": "nginx-1.5.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.6.tar.gz.asc",
+      "version": "nginx-1.5.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.6.zip",
+      "version": "nginx-1.5.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.6.zip.asc",
+      "version": "nginx-1.5.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.7.tar.gz",
+      "version": "nginx-1.5.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.7.tar.gz.asc",
+      "version": "nginx-1.5.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.7.zip",
+      "version": "nginx-1.5.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.7.zip.asc",
+      "version": "nginx-1.5.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.8.tar.gz",
+      "version": "nginx-1.5.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.8.tar.gz.asc",
+      "version": "nginx-1.5.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.8.zip",
+      "version": "nginx-1.5.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.8.zip.asc",
+      "version": "nginx-1.5.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.9.tar.gz",
+      "version": "nginx-1.5.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.9.tar.gz.asc",
+      "version": "nginx-1.5.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.9.zip",
+      "version": "nginx-1.5.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.9.zip.asc",
+      "version": "nginx-1.5.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.10.tar.gz",
+      "version": "nginx-1.5.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.10.tar.gz.asc",
+      "version": "nginx-1.5.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.10.zip",
+      "version": "nginx-1.5.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.10.zip.asc",
+      "version": "nginx-1.5.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.11.tar.gz",
+      "version": "nginx-1.5.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.11.tar.gz.asc",
+      "version": "nginx-1.5.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.11.zip",
+      "version": "nginx-1.5.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.11.zip.asc",
+      "version": "nginx-1.5.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.12.tar.gz",
+      "version": "nginx-1.5.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.12.tar.gz.asc",
+      "version": "nginx-1.5.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.12.zip",
+      "version": "nginx-1.5.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.12.zip.asc",
+      "version": "nginx-1.5.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.13.tar.gz",
+      "version": "nginx-1.5.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.13.tar.gz.asc",
+      "version": "nginx-1.5.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.13.zip",
+      "version": "nginx-1.5.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.5.13.zip.asc",
+      "version": "nginx-1.5.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.0.tar.gz",
+      "version": "nginx-1.6.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.0.tar.gz.asc",
+      "version": "nginx-1.6.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.0.zip",
+      "version": "nginx-1.6.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.0.zip.asc",
+      "version": "nginx-1.6.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.1.tar.gz",
+      "version": "nginx-1.6.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.1.tar.gz.asc",
+      "version": "nginx-1.6.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.1.zip",
+      "version": "nginx-1.6.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.1.zip.asc",
+      "version": "nginx-1.6.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.2.tar.gz",
+      "version": "nginx-1.6.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.2.tar.gz.asc",
+      "version": "nginx-1.6.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.2.zip",
+      "version": "nginx-1.6.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.2.zip.asc",
+      "version": "nginx-1.6.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.3.tar.gz",
+      "version": "nginx-1.6.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.3.tar.gz.asc",
+      "version": "nginx-1.6.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.3.zip",
+      "version": "nginx-1.6.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.6.3.zip.asc",
+      "version": "nginx-1.6.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.0.tar.gz",
+      "version": "nginx-1.7.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.0.tar.gz.asc",
+      "version": "nginx-1.7.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.0.zip",
+      "version": "nginx-1.7.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.0.zip.asc",
+      "version": "nginx-1.7.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.1.tar.gz",
+      "version": "nginx-1.7.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.1.tar.gz.asc",
+      "version": "nginx-1.7.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.1.zip",
+      "version": "nginx-1.7.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.1.zip.asc",
+      "version": "nginx-1.7.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.2.tar.gz",
+      "version": "nginx-1.7.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.2.tar.gz.asc",
+      "version": "nginx-1.7.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.2.zip",
+      "version": "nginx-1.7.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.2.zip.asc",
+      "version": "nginx-1.7.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.3.tar.gz",
+      "version": "nginx-1.7.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.3.tar.gz.asc",
+      "version": "nginx-1.7.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.3.zip",
+      "version": "nginx-1.7.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.3.zip.asc",
+      "version": "nginx-1.7.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.4.tar.gz",
+      "version": "nginx-1.7.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.4.tar.gz.asc",
+      "version": "nginx-1.7.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.4.zip",
+      "version": "nginx-1.7.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.4.zip.asc",
+      "version": "nginx-1.7.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.5.tar.gz",
+      "version": "nginx-1.7.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.5.tar.gz.asc",
+      "version": "nginx-1.7.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.5.zip",
+      "version": "nginx-1.7.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.5.zip.asc",
+      "version": "nginx-1.7.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.6.tar.gz",
+      "version": "nginx-1.7.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.6.tar.gz.asc",
+      "version": "nginx-1.7.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.6.zip",
+      "version": "nginx-1.7.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.6.zip.asc",
+      "version": "nginx-1.7.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.7.tar.gz",
+      "version": "nginx-1.7.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.7.tar.gz.asc",
+      "version": "nginx-1.7.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.7.zip",
+      "version": "nginx-1.7.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.7.zip.asc",
+      "version": "nginx-1.7.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.8.tar.gz",
+      "version": "nginx-1.7.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.8.tar.gz.asc",
+      "version": "nginx-1.7.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.8.zip",
+      "version": "nginx-1.7.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.8.zip.asc",
+      "version": "nginx-1.7.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.9.tar.gz",
+      "version": "nginx-1.7.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.9.tar.gz.asc",
+      "version": "nginx-1.7.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.9.zip",
+      "version": "nginx-1.7.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.9.zip.asc",
+      "version": "nginx-1.7.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.10.tar.gz",
+      "version": "nginx-1.7.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.10.tar.gz.asc",
+      "version": "nginx-1.7.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.10.zip",
+      "version": "nginx-1.7.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.10.zip.asc",
+      "version": "nginx-1.7.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.11.tar.gz",
+      "version": "nginx-1.7.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.11.tar.gz.asc",
+      "version": "nginx-1.7.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.11.zip",
+      "version": "nginx-1.7.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.11.zip.asc",
+      "version": "nginx-1.7.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.12.tar.gz",
+      "version": "nginx-1.7.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.12.tar.gz.asc",
+      "version": "nginx-1.7.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.12.zip",
+      "version": "nginx-1.7.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.7.12.zip.asc",
+      "version": "nginx-1.7.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.0.tar.gz",
+      "version": "nginx-1.8.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.0.tar.gz.asc",
+      "version": "nginx-1.8.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.0.zip",
+      "version": "nginx-1.8.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.0.zip.asc",
+      "version": "nginx-1.8.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.1.tar.gz",
+      "version": "nginx-1.8.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.1.tar.gz.asc",
+      "version": "nginx-1.8.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.1.zip",
+      "version": "nginx-1.8.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.8.1.zip.asc",
+      "version": "nginx-1.8.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.0.tar.gz",
+      "version": "nginx-1.9.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.0.tar.gz.asc",
+      "version": "nginx-1.9.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.0.zip",
+      "version": "nginx-1.9.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.0.zip.asc",
+      "version": "nginx-1.9.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.1.tar.gz",
+      "version": "nginx-1.9.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.1.tar.gz.asc",
+      "version": "nginx-1.9.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.1.zip",
+      "version": "nginx-1.9.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.1.zip.asc",
+      "version": "nginx-1.9.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.2.tar.gz",
+      "version": "nginx-1.9.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.2.tar.gz.asc",
+      "version": "nginx-1.9.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.2.zip",
+      "version": "nginx-1.9.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.2.zip.asc",
+      "version": "nginx-1.9.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.3.tar.gz",
+      "version": "nginx-1.9.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.3.tar.gz.asc",
+      "version": "nginx-1.9.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.3.zip",
+      "version": "nginx-1.9.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.3.zip.asc",
+      "version": "nginx-1.9.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.4.tar.gz",
+      "version": "nginx-1.9.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.4.tar.gz.asc",
+      "version": "nginx-1.9.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.4.zip",
+      "version": "nginx-1.9.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.4.zip.asc",
+      "version": "nginx-1.9.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.5.tar.gz",
+      "version": "nginx-1.9.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.5.tar.gz.asc",
+      "version": "nginx-1.9.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.5.zip",
+      "version": "nginx-1.9.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.5.zip.asc",
+      "version": "nginx-1.9.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.6.tar.gz",
+      "version": "nginx-1.9.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.6.tar.gz.asc",
+      "version": "nginx-1.9.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.6.zip",
+      "version": "nginx-1.9.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.6.zip.asc",
+      "version": "nginx-1.9.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.7.tar.gz",
+      "version": "nginx-1.9.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.7.tar.gz.asc",
+      "version": "nginx-1.9.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.7.zip",
+      "version": "nginx-1.9.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.7.zip.asc",
+      "version": "nginx-1.9.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.8.tar.gz",
+      "version": "nginx-1.9.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.8.tar.gz.asc",
+      "version": "nginx-1.9.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.8.zip",
+      "version": "nginx-1.9.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.8.zip.asc",
+      "version": "nginx-1.9.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.9.tar.gz",
+      "version": "nginx-1.9.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.9.tar.gz.asc",
+      "version": "nginx-1.9.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.9.zip",
+      "version": "nginx-1.9.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.9.zip.asc",
+      "version": "nginx-1.9.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.10.tar.gz",
+      "version": "nginx-1.9.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.10.tar.gz.asc",
+      "version": "nginx-1.9.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.10.zip",
+      "version": "nginx-1.9.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.10.zip.asc",
+      "version": "nginx-1.9.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.11.tar.gz",
+      "version": "nginx-1.9.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.11.tar.gz.asc",
+      "version": "nginx-1.9.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.11.zip",
+      "version": "nginx-1.9.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.11.zip.asc",
+      "version": "nginx-1.9.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.12.tar.gz",
+      "version": "nginx-1.9.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.12.tar.gz.asc",
+      "version": "nginx-1.9.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.12.zip",
+      "version": "nginx-1.9.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.12.zip.asc",
+      "version": "nginx-1.9.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.13.tar.gz",
+      "version": "nginx-1.9.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.13.tar.gz.asc",
+      "version": "nginx-1.9.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.13.zip",
+      "version": "nginx-1.9.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.13.zip.asc",
+      "version": "nginx-1.9.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.14.tar.gz",
+      "version": "nginx-1.9.14.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.14.tar.gz.asc",
+      "version": "nginx-1.9.14.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.14.zip",
+      "version": "nginx-1.9.14.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.14.zip.asc",
+      "version": "nginx-1.9.14.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.15.tar.gz",
+      "version": "nginx-1.9.15.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.15.tar.gz.asc",
+      "version": "nginx-1.9.15.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.15.zip",
+      "version": "nginx-1.9.15.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.9.15.zip.asc",
+      "version": "nginx-1.9.15.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.0.tar.gz",
+      "version": "nginx-1.10.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.0.tar.gz.asc",
+      "version": "nginx-1.10.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.0.zip",
+      "version": "nginx-1.10.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.0.zip.asc",
+      "version": "nginx-1.10.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.1.tar.gz",
+      "version": "nginx-1.10.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.1.tar.gz.asc",
+      "version": "nginx-1.10.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.1.zip",
+      "version": "nginx-1.10.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.1.zip.asc",
+      "version": "nginx-1.10.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.2.tar.gz",
+      "version": "nginx-1.10.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.2.tar.gz.asc",
+      "version": "nginx-1.10.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.2.zip",
+      "version": "nginx-1.10.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.2.zip.asc",
+      "version": "nginx-1.10.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.3.tar.gz",
+      "version": "nginx-1.10.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.3.tar.gz.asc",
+      "version": "nginx-1.10.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.3.zip",
+      "version": "nginx-1.10.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.10.3.zip.asc",
+      "version": "nginx-1.10.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.0.tar.gz",
+      "version": "nginx-1.11.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.0.tar.gz.asc",
+      "version": "nginx-1.11.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.0.zip",
+      "version": "nginx-1.11.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.0.zip.asc",
+      "version": "nginx-1.11.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.1.tar.gz",
+      "version": "nginx-1.11.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.1.tar.gz.asc",
+      "version": "nginx-1.11.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.1.zip",
+      "version": "nginx-1.11.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.1.zip.asc",
+      "version": "nginx-1.11.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.2.tar.gz",
+      "version": "nginx-1.11.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.2.tar.gz.asc",
+      "version": "nginx-1.11.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.2.zip",
+      "version": "nginx-1.11.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.2.zip.asc",
+      "version": "nginx-1.11.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.3.tar.gz",
+      "version": "nginx-1.11.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.3.tar.gz.asc",
+      "version": "nginx-1.11.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.3.zip",
+      "version": "nginx-1.11.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.3.zip.asc",
+      "version": "nginx-1.11.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.4.tar.gz",
+      "version": "nginx-1.11.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.4.tar.gz.asc",
+      "version": "nginx-1.11.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.4.zip",
+      "version": "nginx-1.11.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.4.zip.asc",
+      "version": "nginx-1.11.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.5.tar.gz",
+      "version": "nginx-1.11.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.5.tar.gz.asc",
+      "version": "nginx-1.11.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.5.zip",
+      "version": "nginx-1.11.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.5.zip.asc",
+      "version": "nginx-1.11.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.6.tar.gz",
+      "version": "nginx-1.11.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.6.tar.gz.asc",
+      "version": "nginx-1.11.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.6.zip",
+      "version": "nginx-1.11.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.6.zip.asc",
+      "version": "nginx-1.11.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.7.tar.gz",
+      "version": "nginx-1.11.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.7.tar.gz.asc",
+      "version": "nginx-1.11.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.7.zip",
+      "version": "nginx-1.11.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.7.zip.asc",
+      "version": "nginx-1.11.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.8.tar.gz",
+      "version": "nginx-1.11.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.8.tar.gz.asc",
+      "version": "nginx-1.11.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.8.zip",
+      "version": "nginx-1.11.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.8.zip.asc",
+      "version": "nginx-1.11.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.9.tar.gz",
+      "version": "nginx-1.11.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.9.tar.gz.asc",
+      "version": "nginx-1.11.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.9.zip",
+      "version": "nginx-1.11.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.9.zip.asc",
+      "version": "nginx-1.11.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.10.tar.gz",
+      "version": "nginx-1.11.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.10.tar.gz.asc",
+      "version": "nginx-1.11.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.10.zip",
+      "version": "nginx-1.11.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.10.zip.asc",
+      "version": "nginx-1.11.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.11.tar.gz",
+      "version": "nginx-1.11.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.11.tar.gz.asc",
+      "version": "nginx-1.11.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.11.zip",
+      "version": "nginx-1.11.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.11.zip.asc",
+      "version": "nginx-1.11.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.12.tar.gz",
+      "version": "nginx-1.11.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.12.tar.gz.asc",
+      "version": "nginx-1.11.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.12.zip",
+      "version": "nginx-1.11.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.12.zip.asc",
+      "version": "nginx-1.11.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.13.tar.gz",
+      "version": "nginx-1.11.13.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.13.tar.gz.asc",
+      "version": "nginx-1.11.13.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.13.zip",
+      "version": "nginx-1.11.13.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.11.13.zip.asc",
+      "version": "nginx-1.11.13.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.0.tar.gz",
+      "version": "nginx-1.12.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.0.tar.gz.asc",
+      "version": "nginx-1.12.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.0.zip",
+      "version": "nginx-1.12.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.0.zip.asc",
+      "version": "nginx-1.12.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.1.tar.gz",
+      "version": "nginx-1.12.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.1.tar.gz.asc",
+      "version": "nginx-1.12.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.1.zip",
+      "version": "nginx-1.12.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.1.zip.asc",
+      "version": "nginx-1.12.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.2.tar.gz",
+      "version": "nginx-1.12.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.2.tar.gz.asc",
+      "version": "nginx-1.12.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.2.zip",
+      "version": "nginx-1.12.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.12.2.zip.asc",
+      "version": "nginx-1.12.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.0.tar.gz",
+      "version": "nginx-1.13.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.0.tar.gz.asc",
+      "version": "nginx-1.13.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.0.zip",
+      "version": "nginx-1.13.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.0.zip.asc",
+      "version": "nginx-1.13.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.1.tar.gz",
+      "version": "nginx-1.13.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.1.tar.gz.asc",
+      "version": "nginx-1.13.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.1.zip",
+      "version": "nginx-1.13.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.1.zip.asc",
+      "version": "nginx-1.13.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.2.tar.gz",
+      "version": "nginx-1.13.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.2.tar.gz.asc",
+      "version": "nginx-1.13.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.2.zip",
+      "version": "nginx-1.13.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.2.zip.asc",
+      "version": "nginx-1.13.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.3.tar.gz",
+      "version": "nginx-1.13.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.3.tar.gz.asc",
+      "version": "nginx-1.13.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.3.zip",
+      "version": "nginx-1.13.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.3.zip.asc",
+      "version": "nginx-1.13.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.4.tar.gz",
+      "version": "nginx-1.13.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.4.tar.gz.asc",
+      "version": "nginx-1.13.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.4.zip",
+      "version": "nginx-1.13.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.4.zip.asc",
+      "version": "nginx-1.13.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.5.tar.gz",
+      "version": "nginx-1.13.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.5.tar.gz.asc",
+      "version": "nginx-1.13.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.5.zip",
+      "version": "nginx-1.13.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.5.zip.asc",
+      "version": "nginx-1.13.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.6.tar.gz",
+      "version": "nginx-1.13.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.6.tar.gz.asc",
+      "version": "nginx-1.13.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.6.zip",
+      "version": "nginx-1.13.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.6.zip.asc",
+      "version": "nginx-1.13.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.7.tar.gz",
+      "version": "nginx-1.13.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.7.tar.gz.asc",
+      "version": "nginx-1.13.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.7.zip",
+      "version": "nginx-1.13.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.7.zip.asc",
+      "version": "nginx-1.13.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.8.tar.gz",
+      "version": "nginx-1.13.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.8.tar.gz.asc",
+      "version": "nginx-1.13.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.8.zip",
+      "version": "nginx-1.13.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.8.zip.asc",
+      "version": "nginx-1.13.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.9.tar.gz",
+      "version": "nginx-1.13.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.9.tar.gz.asc",
+      "version": "nginx-1.13.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.9.zip",
+      "version": "nginx-1.13.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.9.zip.asc",
+      "version": "nginx-1.13.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.10.tar.gz",
+      "version": "nginx-1.13.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.10.tar.gz.asc",
+      "version": "nginx-1.13.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.10.zip",
+      "version": "nginx-1.13.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.10.zip.asc",
+      "version": "nginx-1.13.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.11.tar.gz",
+      "version": "nginx-1.13.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.11.tar.gz.asc",
+      "version": "nginx-1.13.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.11.zip",
+      "version": "nginx-1.13.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.11.zip.asc",
+      "version": "nginx-1.13.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.12.tar.gz",
+      "version": "nginx-1.13.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.12.tar.gz.asc",
+      "version": "nginx-1.13.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.12.zip",
+      "version": "nginx-1.13.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.13.12.zip.asc",
+      "version": "nginx-1.13.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.0.tar.gz",
+      "version": "nginx-1.14.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.0.tar.gz.asc",
+      "version": "nginx-1.14.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.0.zip",
+      "version": "nginx-1.14.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.0.zip.asc",
+      "version": "nginx-1.14.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.1.tar.gz",
+      "version": "nginx-1.14.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.1.tar.gz.asc",
+      "version": "nginx-1.14.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.1.zip",
+      "version": "nginx-1.14.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.1.zip.asc",
+      "version": "nginx-1.14.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.2.tar.gz",
+      "version": "nginx-1.14.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.2.tar.gz.asc",
+      "version": "nginx-1.14.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.2.zip",
+      "version": "nginx-1.14.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.14.2.zip.asc",
+      "version": "nginx-1.14.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.0.tar.gz",
+      "version": "nginx-1.15.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.0.tar.gz.asc",
+      "version": "nginx-1.15.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.0.zip",
+      "version": "nginx-1.15.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.0.zip.asc",
+      "version": "nginx-1.15.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.1.tar.gz",
+      "version": "nginx-1.15.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.1.tar.gz.asc",
+      "version": "nginx-1.15.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.1.zip",
+      "version": "nginx-1.15.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.1.zip.asc",
+      "version": "nginx-1.15.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.2.tar.gz",
+      "version": "nginx-1.15.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.2.tar.gz.asc",
+      "version": "nginx-1.15.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.2.zip",
+      "version": "nginx-1.15.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.2.zip.asc",
+      "version": "nginx-1.15.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.3.tar.gz",
+      "version": "nginx-1.15.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.3.tar.gz.asc",
+      "version": "nginx-1.15.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.3.zip",
+      "version": "nginx-1.15.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.3.zip.asc",
+      "version": "nginx-1.15.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.4.tar.gz",
+      "version": "nginx-1.15.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.4.tar.gz.asc",
+      "version": "nginx-1.15.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.4.zip",
+      "version": "nginx-1.15.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.4.zip.asc",
+      "version": "nginx-1.15.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.5.tar.gz",
+      "version": "nginx-1.15.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.5.tar.gz.asc",
+      "version": "nginx-1.15.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.5.zip",
+      "version": "nginx-1.15.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.5.zip.asc",
+      "version": "nginx-1.15.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.6.tar.gz",
+      "version": "nginx-1.15.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.6.tar.gz.asc",
+      "version": "nginx-1.15.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.6.zip",
+      "version": "nginx-1.15.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.6.zip.asc",
+      "version": "nginx-1.15.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.7.tar.gz",
+      "version": "nginx-1.15.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.7.tar.gz.asc",
+      "version": "nginx-1.15.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.7.zip",
+      "version": "nginx-1.15.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.7.zip.asc",
+      "version": "nginx-1.15.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.8.tar.gz",
+      "version": "nginx-1.15.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.8.tar.gz.asc",
+      "version": "nginx-1.15.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.8.zip",
+      "version": "nginx-1.15.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.8.zip.asc",
+      "version": "nginx-1.15.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.9.tar.gz",
+      "version": "nginx-1.15.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.9.tar.gz.asc",
+      "version": "nginx-1.15.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.9.zip",
+      "version": "nginx-1.15.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.9.zip.asc",
+      "version": "nginx-1.15.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.10.tar.gz",
+      "version": "nginx-1.15.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.10.tar.gz.asc",
+      "version": "nginx-1.15.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.10.zip",
+      "version": "nginx-1.15.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.10.zip.asc",
+      "version": "nginx-1.15.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.11.tar.gz",
+      "version": "nginx-1.15.11.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.11.tar.gz.asc",
+      "version": "nginx-1.15.11.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.11.zip",
+      "version": "nginx-1.15.11.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.11.zip.asc",
+      "version": "nginx-1.15.11.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.12.tar.gz",
+      "version": "nginx-1.15.12.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.12.tar.gz.asc",
+      "version": "nginx-1.15.12.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.12.zip",
+      "version": "nginx-1.15.12.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.15.12.zip.asc",
+      "version": "nginx-1.15.12.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.0.tar.gz",
+      "version": "nginx-1.16.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.0.tar.gz.asc",
+      "version": "nginx-1.16.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.0.zip",
+      "version": "nginx-1.16.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.0.zip.asc",
+      "version": "nginx-1.16.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.1.tar.gz",
+      "version": "nginx-1.16.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.1.tar.gz.asc",
+      "version": "nginx-1.16.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.1.zip",
+      "version": "nginx-1.16.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.16.1.zip.asc",
+      "version": "nginx-1.16.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.0.tar.gz",
+      "version": "nginx-1.17.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.0.tar.gz.asc",
+      "version": "nginx-1.17.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.0.zip",
+      "version": "nginx-1.17.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.0.zip.asc",
+      "version": "nginx-1.17.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.1.tar.gz",
+      "version": "nginx-1.17.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.1.tar.gz.asc",
+      "version": "nginx-1.17.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.1.zip",
+      "version": "nginx-1.17.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.1.zip.asc",
+      "version": "nginx-1.17.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.2.tar.gz",
+      "version": "nginx-1.17.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.2.tar.gz.asc",
+      "version": "nginx-1.17.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.2.zip",
+      "version": "nginx-1.17.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.2.zip.asc",
+      "version": "nginx-1.17.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.3.tar.gz",
+      "version": "nginx-1.17.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.3.tar.gz.asc",
+      "version": "nginx-1.17.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.3.zip",
+      "version": "nginx-1.17.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.3.zip.asc",
+      "version": "nginx-1.17.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.4.tar.gz",
+      "version": "nginx-1.17.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.4.tar.gz.asc",
+      "version": "nginx-1.17.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.4.zip",
+      "version": "nginx-1.17.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.4.zip.asc",
+      "version": "nginx-1.17.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.5.tar.gz",
+      "version": "nginx-1.17.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.5.tar.gz.asc",
+      "version": "nginx-1.17.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.5.zip",
+      "version": "nginx-1.17.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.5.zip.asc",
+      "version": "nginx-1.17.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.6.tar.gz",
+      "version": "nginx-1.17.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.6.tar.gz.asc",
+      "version": "nginx-1.17.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.6.zip",
+      "version": "nginx-1.17.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.6.zip.asc",
+      "version": "nginx-1.17.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.7.tar.gz",
+      "version": "nginx-1.17.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.7.tar.gz.asc",
+      "version": "nginx-1.17.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.7.zip",
+      "version": "nginx-1.17.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.7.zip.asc",
+      "version": "nginx-1.17.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.8.tar.gz",
+      "version": "nginx-1.17.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.8.tar.gz.asc",
+      "version": "nginx-1.17.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.8.zip",
+      "version": "nginx-1.17.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.8.zip.asc",
+      "version": "nginx-1.17.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.9.tar.gz",
+      "version": "nginx-1.17.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.9.tar.gz.asc",
+      "version": "nginx-1.17.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.9.zip",
+      "version": "nginx-1.17.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.9.zip.asc",
+      "version": "nginx-1.17.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.10.tar.gz",
+      "version": "nginx-1.17.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.10.tar.gz.asc",
+      "version": "nginx-1.17.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.10.zip",
+      "version": "nginx-1.17.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.17.10.zip.asc",
+      "version": "nginx-1.17.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.18.0.tar.gz",
+      "version": "nginx-1.18.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.18.0.tar.gz.asc",
+      "version": "nginx-1.18.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.18.0.zip",
+      "version": "nginx-1.18.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.18.0.zip.asc",
+      "version": "nginx-1.18.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.0.tar.gz",
+      "version": "nginx-1.19.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.0.tar.gz.asc",
+      "version": "nginx-1.19.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.0.zip",
+      "version": "nginx-1.19.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.0.zip.asc",
+      "version": "nginx-1.19.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.1.tar.gz",
+      "version": "nginx-1.19.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.1.tar.gz.asc",
+      "version": "nginx-1.19.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.1.zip",
+      "version": "nginx-1.19.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.1.zip.asc",
+      "version": "nginx-1.19.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.2.tar.gz",
+      "version": "nginx-1.19.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.2.tar.gz.asc",
+      "version": "nginx-1.19.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.2.zip",
+      "version": "nginx-1.19.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.2.zip.asc",
+      "version": "nginx-1.19.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.3.tar.gz",
+      "version": "nginx-1.19.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.3.tar.gz.asc",
+      "version": "nginx-1.19.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.3.zip",
+      "version": "nginx-1.19.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.3.zip.asc",
+      "version": "nginx-1.19.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.4.tar.gz",
+      "version": "nginx-1.19.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.4.tar.gz.asc",
+      "version": "nginx-1.19.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.4.zip",
+      "version": "nginx-1.19.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.4.zip.asc",
+      "version": "nginx-1.19.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.5.tar.gz",
+      "version": "nginx-1.19.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.5.tar.gz.asc",
+      "version": "nginx-1.19.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.5.zip",
+      "version": "nginx-1.19.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.5.zip.asc",
+      "version": "nginx-1.19.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.6.tar.gz",
+      "version": "nginx-1.19.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.6.tar.gz.asc",
+      "version": "nginx-1.19.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.6.zip",
+      "version": "nginx-1.19.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.6.zip.asc",
+      "version": "nginx-1.19.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.7.tar.gz",
+      "version": "nginx-1.19.7.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.7.tar.gz.asc",
+      "version": "nginx-1.19.7.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.7.zip",
+      "version": "nginx-1.19.7.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.7.zip.asc",
+      "version": "nginx-1.19.7.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.8.tar.gz",
+      "version": "nginx-1.19.8.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.8.tar.gz.asc",
+      "version": "nginx-1.19.8.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.8.zip",
+      "version": "nginx-1.19.8.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.8.zip.asc",
+      "version": "nginx-1.19.8.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.9.tar.gz",
+      "version": "nginx-1.19.9.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.9.tar.gz.asc",
+      "version": "nginx-1.19.9.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.9.zip",
+      "version": "nginx-1.19.9.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.9.zip.asc",
+      "version": "nginx-1.19.9.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.10.tar.gz",
+      "version": "nginx-1.19.10.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.10.tar.gz.asc",
+      "version": "nginx-1.19.10.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.10.zip",
+      "version": "nginx-1.19.10.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.19.10.zip.asc",
+      "version": "nginx-1.19.10.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.0.tar.gz",
+      "version": "nginx-1.20.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.0.tar.gz.asc",
+      "version": "nginx-1.20.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.0.zip",
+      "version": "nginx-1.20.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.0.zip.asc",
+      "version": "nginx-1.20.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.1.tar.gz",
+      "version": "nginx-1.20.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.1.tar.gz.asc",
+      "version": "nginx-1.20.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.1.zip",
+      "version": "nginx-1.20.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.1.zip.asc",
+      "version": "nginx-1.20.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.2.tar.gz",
+      "version": "nginx-1.20.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.2.tar.gz.asc",
+      "version": "nginx-1.20.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.2.zip",
+      "version": "nginx-1.20.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.20.2.zip.asc",
+      "version": "nginx-1.20.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.0.tar.gz",
+      "version": "nginx-1.21.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.0.tar.gz.asc",
+      "version": "nginx-1.21.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.0.zip",
+      "version": "nginx-1.21.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.0.zip.asc",
+      "version": "nginx-1.21.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.1.tar.gz",
+      "version": "nginx-1.21.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.1.tar.gz.asc",
+      "version": "nginx-1.21.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.1.zip",
+      "version": "nginx-1.21.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.1.zip.asc",
+      "version": "nginx-1.21.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.2.tar.gz",
+      "version": "nginx-1.21.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.2.tar.gz.asc",
+      "version": "nginx-1.21.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.2.zip",
+      "version": "nginx-1.21.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.2.zip.asc",
+      "version": "nginx-1.21.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.3.tar.gz",
+      "version": "nginx-1.21.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.3.tar.gz.asc",
+      "version": "nginx-1.21.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.3.zip",
+      "version": "nginx-1.21.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.3.zip.asc",
+      "version": "nginx-1.21.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.4.tar.gz",
+      "version": "nginx-1.21.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.4.tar.gz.asc",
+      "version": "nginx-1.21.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.4.zip",
+      "version": "nginx-1.21.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.4.zip.asc",
+      "version": "nginx-1.21.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.5.tar.gz",
+      "version": "nginx-1.21.5.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.5.tar.gz.asc",
+      "version": "nginx-1.21.5.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.5.zip",
+      "version": "nginx-1.21.5.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.5.zip.asc",
+      "version": "nginx-1.21.5.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.6.tar.gz",
+      "version": "nginx-1.21.6.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.6.tar.gz.asc",
+      "version": "nginx-1.21.6.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.6.zip",
+      "version": "nginx-1.21.6.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.21.6.zip.asc",
+      "version": "nginx-1.21.6.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.0.tar.gz",
+      "version": "nginx-1.22.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.0.tar.gz.asc",
+      "version": "nginx-1.22.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.0.zip",
+      "version": "nginx-1.22.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.0.zip.asc",
+      "version": "nginx-1.22.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.1.tar.gz",
+      "version": "nginx-1.22.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.1.tar.gz.asc",
+      "version": "nginx-1.22.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.1.zip",
+      "version": "nginx-1.22.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.22.1.zip.asc",
+      "version": "nginx-1.22.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.0.tar.gz",
+      "version": "nginx-1.23.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.0.tar.gz.asc",
+      "version": "nginx-1.23.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.0.zip",
+      "version": "nginx-1.23.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.0.zip.asc",
+      "version": "nginx-1.23.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.1.tar.gz",
+      "version": "nginx-1.23.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.1.tar.gz.asc",
+      "version": "nginx-1.23.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.1.zip",
+      "version": "nginx-1.23.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.1.zip.asc",
+      "version": "nginx-1.23.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.2.tar.gz",
+      "version": "nginx-1.23.2.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.2.tar.gz.asc",
+      "version": "nginx-1.23.2.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.2.zip",
+      "version": "nginx-1.23.2.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.2.zip.asc",
+      "version": "nginx-1.23.2.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.3.tar.gz",
+      "version": "nginx-1.23.3.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.3.tar.gz.asc",
+      "version": "nginx-1.23.3.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.3.zip",
+      "version": "nginx-1.23.3.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.3.zip.asc",
+      "version": "nginx-1.23.3.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.4.tar.gz",
+      "version": "nginx-1.23.4.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.4.tar.gz.asc",
+      "version": "nginx-1.23.4.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.4.zip",
+      "version": "nginx-1.23.4.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.23.4.zip.asc",
+      "version": "nginx-1.23.4.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.24.0.tar.gz",
+      "version": "nginx-1.24.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.24.0.tar.gz.asc",
+      "version": "nginx-1.24.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.24.0.zip",
+      "version": "nginx-1.24.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.24.0.zip.asc",
+      "version": "nginx-1.24.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.0.tar.gz",
+      "version": "nginx-1.25.0.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.0.tar.gz.asc",
+      "version": "nginx-1.25.0.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.0.zip",
+      "version": "nginx-1.25.0.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.0.zip.asc",
+      "version": "nginx-1.25.0.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.1.tar.gz",
+      "version": "nginx-1.25.1.tar.gz",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.1.tar.gz.asc",
+      "version": "nginx-1.25.1.tar.gz.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.1.zip",
+      "version": "nginx-1.25.1.zip",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/nginx-1.25.1.zip.asc",
+      "version": "nginx-1.25.1.zip.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.cve-2009-3555.txt",
+      "version": "patch.cve-2009-3555.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.cve-2009-3555.txt.asc",
+      "version": "patch.cve-2009-3555.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2012.memory.txt",
+      "version": "patch.2012.memory.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2012.memory.txt.asc",
+      "version": "patch.2012.memory.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2012.mp4.txt",
+      "version": "patch.2012.mp4.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2012.mp4.txt.asc",
+      "version": "patch.2012.mp4.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.chunked.txt",
+      "version": "patch.2013.chunked.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.chunked.txt.asc",
+      "version": "patch.2013.chunked.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.proxy.txt",
+      "version": "patch.2013.proxy.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.proxy.txt.asc",
+      "version": "patch.2013.proxy.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.space.txt",
+      "version": "patch.2013.space.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2013.space.txt.asc",
+      "version": "patch.2013.space.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.spdy.txt",
+      "version": "patch.2014.spdy.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.spdy.txt.asc",
+      "version": "patch.2014.spdy.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.spdy2.txt",
+      "version": "patch.2014.spdy2.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.spdy2.txt.asc",
+      "version": "patch.2014.spdy2.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.starttls.txt",
+      "version": "patch.2014.starttls.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2014.starttls.txt.asc",
+      "version": "patch.2014.starttls.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2016.write.txt",
+      "version": "patch.2016.write.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2016.write.txt.asc",
+      "version": "patch.2016.write.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2016.write2.txt",
+      "version": "patch.2016.write2.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2016.write2.txt.asc",
+      "version": "patch.2016.write2.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2017.ranges.txt",
+      "version": "patch.2017.ranges.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2017.ranges.txt.asc",
+      "version": "patch.2017.ranges.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2018.mp4.txt",
+      "version": "patch.2018.mp4.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2018.mp4.txt.asc",
+      "version": "patch.2018.mp4.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2021.resolver.txt",
+      "version": "patch.2021.resolver.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2021.resolver.txt.asc",
+      "version": "patch.2021.resolver.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2022.mp4.txt",
+      "version": "patch.2022.mp4.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.2022.mp4.txt.asc",
+      "version": "patch.2022.mp4.txt.asc",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.180065.txt",
+      "version": "patch.180065.txt",
+    },
+    {
+      "sourceUrl": "http://nginx.org/download/patch.180065.txt.asc",
+      "version": "patch.180065.txt.asc",
+    },
+  ],
+}
+`;
