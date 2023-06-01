@@ -123,7 +123,7 @@ requires-python = "<3.9"
             '&& ' +
             'install-tool pdm v2.5.0 ' +
             '&& ' +
-            'pdm update dep1' +
+            'pdm update --no-sync dep1' +
             '"',
           options: {
             cwd: '/tmp/github/some/repo',

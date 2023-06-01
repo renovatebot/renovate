@@ -172,6 +172,7 @@ async function fetchVulnerabilities(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   if (config.osvVulnerabilityAlerts) {
+    logger.debug('fetchVulnerabilities() - osvVulnerabilityAlerts=true');
     try {
       const vulnerabilities = await Vulnerabilities.create();
       await vulnerabilities.appendVulnerabilityPackageRules(
