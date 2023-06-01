@@ -19,7 +19,7 @@ const EndoflifeDateVersionScheme = z
       eol === true ||
       discontinued === true ||
       (typeof eol === 'string' &&
-        DateTime.fromISO(eol, { zone: 'UTC' }) <= DateTime.now()) ||
+        DateTime.fromISO(eol, { zone: 'utc' }) <= DateTime.now().toUTC()) ||
       (typeof discontinued === 'string' &&
         DateTime.fromISO(discontinued, { zone: 'utc' }) <= DateTime.now().toUTC())
     ) {
