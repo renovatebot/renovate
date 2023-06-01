@@ -70,7 +70,7 @@ export async function checkOnboardingBranch(
       return { ...config, repoIsOnboarded, onboardingBranch, branchList };
     }
     OnboardingState.onboardingCacheValid = false;
-    
+
     isModified = await isOnboardingBranchModified(config.onboardingBranch!);
     if (isModified) {
       if (hasOnboardingBranchChanged(config.onboardingBranch!)) {
