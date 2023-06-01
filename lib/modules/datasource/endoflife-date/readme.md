@@ -40,6 +40,7 @@ Given the above `.tfvars` file, you put this in your `renovate.json`:
 }
 ```
 
-With this configuration, renovate will parse all `*.tfvars` files in the repository. It will then update variables that end with `_version` and have the `# renovate: datasource=endoflife-date depName=dependency-name versioning=versioning` comment set in the line above when any new versions are available.
+With this configuration, Renovate will parse all `*.tfvars` files in the repository.
+It will then update variables that end with `_version` and have the `# renovate: datasource=endoflife-date depName=dependency-name versioning=versioning` comment set in the line above when any new versions are available.
 
 For `amazon-eks`, the defined `packageRule` above will also strip the `-eks-${eks-release-version}` suffix to only set the Kubernetes minor version.
